@@ -513,13 +513,13 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		phpdbg_list_file(filename, count, offset TSRMLS_CC);
 	} else {
 		zend_function* fbc;
-
+        
 		if (!EG(function_table)) {
 			printf("[No function table loaded]\n");
 			return SUCCESS;
 		}
 
-		if (zend_hash_find(EG(function_table), expr, strlen(expr)+1,
+		if (zend_hash_find(EG(function_table), expr, expr_len,
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		}
