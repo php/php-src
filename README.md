@@ -22,7 +22,7 @@ Features
 Planned
 =======
 
- - Mocking API for Server/Request Environments
+ - Pass JIT Super Globals to Userland (Mocking, Testing etc)
  - Improve Everything :)
  
 Installation
