@@ -16,6 +16,7 @@ Features
  - SAPI Agnostic - Easily Integrated
  - PHP Configuration File Support
  - JIT Super Globals - Set Your Own !!
+ - Optional readline Support - Comfortable Terminal Operation
  - Easy Operation - See Help :)
 
 Planned
@@ -38,6 +39,8 @@ cd ../
 make -j8
 make install-phpdbg
 ```
+
+*Note: php must be configured with the switch --with-readline for phpdbg to support history, autocompletion, tab-listing etc*
 
 Command Line Options
 ====================
