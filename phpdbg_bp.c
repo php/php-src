@@ -194,10 +194,18 @@ int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
 	const char *fname;
+	zend_op_array *ops;
 	phpdbg_breaksymbol_t *bp;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
 		return FAILURE;
+	}
+	
+	ops = (zend_op_array*)fbc;
+	
+	if (ops->scope) {
+	    /* do not check class methods */
+	    return FAILURE;
 	}
 
 	fname = ((zend_op_array*)fbc)->function_name;
