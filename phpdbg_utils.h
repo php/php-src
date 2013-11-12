@@ -20,6 +20,7 @@
 #ifndef PHPDBG_UTILS_H
 #define PHPDBG_UTILS_H
 
-int phpdbg_is_numeric(const char *);
+int phpdbg_is_numeric(const char*);
+int phpdbg_is_empty(const char*);
 
 #endif /* PHPDBG_UTILS_H */

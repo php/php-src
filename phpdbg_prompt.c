@@ -498,7 +498,7 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
 
 static PHPDBG_COMMAND(list) /* {{{ */
 {
-	if (phpdbg_is_numeric(expr)) {
+	if (phpdbg_is_empty(expr) || phpdbg_is_numeric(expr)) {
 		long offset = 0, count = strtol(expr, NULL, 0);
 		const char *filename = PHPDBG_G(exec);
 
