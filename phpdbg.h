@@ -63,6 +63,10 @@
 #define PHPDBG_IS_QUIET         0x00100000
 #define PHPDBG_IS_QUITTING      0x01000000 /* }}} */
 
+/* {{{ strings */
+#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
+#define PHPDBG_VERSION "0.0.0" /* }}} */
+
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)

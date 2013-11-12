@@ -453,7 +453,7 @@ static PHPDBG_COMMAND(clear) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-	printf("[Welcome to phpdbg, the interactive PHP debugger.]\n");
+	printf("[Welcome to phpdbg, the interactive PHP debugger, v%s]\n", PHPDBG_VERSION);
 
 	if (!expr_len) {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
@@ -477,7 +477,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			printf("failed to find help command: %s\n", expr);
 		}
 	}
-	printf("[Please report bugs to <https://github.com/krakjoe/phpdbg/issues>]\n");
+	printf("[Please report bugs to <%s>]\n", PHPDBG_ISSUES);
 
 	return SUCCESS;
 } /* }}} */

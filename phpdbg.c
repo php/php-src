@@ -379,6 +379,10 @@ int main(int argc, char *argv[]) /* {{{ */
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
     
     phpdbg->ini_entries = ini_entries;
+    
+    printf("[Welcome to phpdbg, the interactive PHP debugger, v%s]\n", PHPDBG_VERSION);
+    printf("To get help using phpdbg type \"help\" and press enter\n");
+    printf("[Please report bugs to <%s>]\n", PHPDBG_ISSUES);
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
