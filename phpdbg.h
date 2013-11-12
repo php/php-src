@@ -30,7 +30,17 @@
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
 #include "SAPI.h"
-#include <php_config.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#if defined(_WIN32) && !defined(__MINGW32__)
+# include <windows.h>
+# include "config.w32.h"
+#else
+# include "php_config.h"
+#endif
+#ifndef O_BINARY
+#	define O_BINARY 0
+#endif
 #include "php_main.h"
 
 #ifdef ZTS
