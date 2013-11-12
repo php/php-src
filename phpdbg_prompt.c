@@ -522,6 +522,8 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		if (zend_hash_find(EG(function_table), expr, expr_len,
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
+		} else {
+		    printf("[Function %s not found]\n", expr);
 		}
 	}
 
