@@ -3,23 +3,26 @@ The interactive PHP debugger
 
 Implemented as a SAPI module, phpdbg can excerpt complete control over the environment without impacting the functionality or performance of your code.
 
-phpdbg aims to be a lightweight, easy to use debugging platform for PHP5.5+
+phpdbg aims to be a lightweight, powerful, easy to use debugging platform for PHP5.5+
 
 Features
 ========
 
- - step through debugging
- - break at method/function entry, file:line or address
- - showing debug backtraces
- - easy manipulation of the environment with built-in eval()
- - userland API
- - sapi agnositicism, easy integration
+ - Stepthrough Debugging
+ - Flexible Breakpoints (Class Method, Function, File:Line, internally Opline)
+ - Easy Access to PHP with built-in eval()
+ - Easy Access to Currently Executing Code
+ - Userland API
+ - SAPI Agnostic - Easily Integrated
+ - PHP Configuration File Support
+ - JIT Super Globals - Set Your Own !!
+ - Easy Operation - See Help :)
 
 Planned
 =======
 
- - mocking server environments/requests
- - improve everything
+ - Mocking API for Server/Request Environments
+ - Improve Everything :)
  
 Installation
 ============
