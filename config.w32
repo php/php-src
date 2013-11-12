@@ -1,0 +1,5 @@
+ARG_ENABLE('phpdbg', 'Build phpdbg', 'yes');
+
+if (PHP_PHPDBG == "yes") {
+    SAPI('phpdbg', 'phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c', 'phpdbg.exe');
+}
