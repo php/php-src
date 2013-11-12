@@ -307,7 +307,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	char *line_pos = NULL;
     char *func_pos = NULL;
 
-    if (!expr_len) {
+    if (expr_len <= 0L) {
         printf(
             "[No expression found]\n");
         return FAILURE;
@@ -456,7 +456,11 @@ static PHPDBG_COMMAND(help) /* {{{ */
 {
 	printf("[Welcome to phpdbg, the interactive PHP debugger, v%s]\n", PHPDBG_VERSION);
 
-	if (!expr_len) {
+	if (expr_len > 0L) {
+		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
+			printf("failed to find help command: %s/%d\n", expr, expr_len);
+		}
+	} else {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
 		const phpdbg_command_t *help_command = phpdbg_help_commands;
 
@@ -473,11 +477,8 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			printf("\t%s\t%s\n", help_command->name, help_command->tip);
 			++help_command;
 		}
-	} else {
-		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			printf("failed to find help command: %s\n", expr);
-		}
 	}
+	
 	printf("[Please report bugs to <%s>]\n", PHPDBG_ISSUES);
 
 	return SUCCESS;
@@ -571,19 +572,39 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
-	char cmd[PHPDBG_MAX_CMD];
-
-	printf("phpdbg> ");
-
+    size_t cmd_len;
+    
+#ifndef HAVE_LIBREADLINE
+    char cmd[PHPDBG_MAX_CMD];
+        
+phpdbg_interactive_enter:
+    printf("phpdbg> ");
+	
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
-		size_t cmd_len = strlen(cmd) - 1;
+	    cmd_len = strlen(cmd) - 1;
+#else
+    char *cmd = NULL;
 
-		if (cmd[cmd_len] == '\n') {
-			cmd[cmd_len] = 0;
-		}
+phpdbg_interactive_enter:
+    while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+        cmd = readline("phpdbg> ");
+        
+        cmd_len = strlen(cmd);
+#endif
 
-		if (cmd_len) {
+		/* trim space from end of input */
+		while (isspace(cmd[cmd_len-1]))
+		    cmd_len--;
+		
+		/* ensure string is null terminated */
+		cmd[cmd_len] = '\0';
+
+		if (cmd && cmd_len > 0L) {
+#ifdef HAVE_LIBREADLINE
+            add_history(cmd);
+#endif
+            
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
 		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -598,8 +619,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		            }
 		            return PHPDBG_NEXT;
 		        }
-
-
 		    }
 		} else if (PHPDBG_G(last)) {
 		    PHPDBG_G(last)->handler(
@@ -607,9 +626,8 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		}
 
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		    printf("phpdbg> ");
+            goto phpdbg_interactive_enter;
 		}
-
 	}
 
 	return SUCCESS;

@@ -37,6 +37,11 @@
 # include "TSRM.h"
 #endif
 
+#ifdef HAVE_LIBREADLINE
+#   include <readline/readline.h>
+#   include <readline/history.h>
+#endif
+
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
