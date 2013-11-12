@@ -22,7 +22,6 @@ Features
 Planned
 =======
 
- - Pass JIT Super Globals to Userland (Mocking, Testing etc)
  - Improve Everything :)
  
 Installation
