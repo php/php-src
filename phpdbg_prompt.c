@@ -220,7 +220,8 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
 	printf("Stepping\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-
+    printf("Quietness\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+    	
 	if (PHPDBG_G(ops)) {
 		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
 
