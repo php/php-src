@@ -547,22 +547,40 @@ static PHPDBG_COMMAND(list) /* {{{ */
 
 		phpdbg_list_file(filename, count, offset TSRMLS_CC);
 	} else {
+	    HashTable *func_table = EG(function_table);
 		zend_function* fbc;
+        const char *func_name = expr;
+        size_t func_name_len = expr_len;
         
-		if (!EG(function_table)) {
+        /* search active scope if begins with period */
+        if (func_name[0] == '.') {
+           if (EG(scope)) {
+               func_name++;
+               func_name_len--;
+               
+               func_table = &EG(scope)->function_table;
+           } else {
+               printf(
+                   "%sNo active class%s\n",
+                   PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+               return FAILURE;
+           }
+        } else if (!EG(function_table)) {
 			printf(
 			    "%sNo function table loaded%s\n",
 			    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 			return SUCCESS;
+		} else {
+		    func_table = EG(function_table);
 		}
-
-		if (zend_hash_find(EG(function_table), expr, expr_len,
+        
+		if (zend_hash_find(func_table, func_name, func_name_len,
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		} else {
 		    printf(
 		        "%sFunction %s not found%s\n", 
-		        PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
+		        PHPDBG_RED_LINE(TSRMLS_C), func_name, PHPDBG_END_LINE(TSRMLS_C));
 		}
 	}
 

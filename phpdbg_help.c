@@ -141,7 +141,9 @@ PHPDBG_HELP(list) /* {{{ */
 	printf("\tphpdbg> list 2\n");
 	printf("Will print next 2 lines from the current file\n");
 	printf("\tphpdbg> list func\n");
-	printf("Will print func source code\n");
+	printf("Will print the source of the global function \"func\"\n");
+	printf("\tphpdbg> list .mine\n");
+	printf("Will print the source of the class method \"mine\"\n");
 	printf("Note: before listing functions you must have a populated function table, try compile !!\n");
 	return SUCCESS;
 } /* }}} */
