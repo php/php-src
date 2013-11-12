@@ -45,34 +45,42 @@
 
 #define PHPDBG_NEXT 2
 
+/* {{{ tables */
+#define PHPDBG_BREAK_FILE       0
+#define PHPDBG_BREAK_SYM        1
+#define PHPDBG_BREAK_OPLINE     2
+#define PHPDBG_BREAK_METHOD     3 
+#define PHPDBG_BREAK_TABLES     4 /* }}} */
+
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP      0x00000001
 #define PHPDBG_HAS_SYM_BP       0x00000010
 #define PHPDBG_HAS_OPLINE_BP    0x00000100
 #define PHPDBG_HAS_METHOD_BP    0x00001000
-#define PHPDBG_BP_MASK (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP)
+#define PHPDBG_BP_MASK          (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP)
 
 #define PHPDBG_IS_STEPPING      0x00010000
 #define PHPDBG_IS_QUIET         0x00100000
 #define PHPDBG_IS_QUITTING      0x01000000 /* }}} */
 
+/* {{{ strings */
+#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
+#define PHPDBG_VERSION "0.0.0" /* }}} */
+
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-	HashTable bp_files;         /* file breakpoints */
-	HashTable bp_symbols;       /* symbol breakpoints */
-	HashTable bp_oplines;       /* opline breakpoints */
-	HashTable bp_methods;       /* method breakpoints */
-	char *exec;                 /* file to execute */
-	size_t exec_len;            /* size of exec */
-	zend_op_array *ops;         /* op_array */
-	zval *retval;               /* return value */
-	int bp_count;               /* breakpoint count */
-	int vmret;                  /* return from last opcode handler execution */
-	phpdbg_command_t *last;     /* last command */
-	const char *last_params;    /* last expression */
-	size_t last_params_len;     /* last expression length */
-	zend_ulong flags;           /* phpdbg flags */
+    HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
+	char *exec;                         /* file to execute */
+	size_t exec_len;                    /* size of exec */
+	zend_op_array *ops;                 /* op_array */
+	zval *retval;                       /* return value */
+	int bp_count;                       /* breakpoint count */
+	int vmret;                          /* return from last opcode handler execution */
+	phpdbg_command_t *last;             /* last command */
+	const char *last_params;            /* last expression */
+	size_t last_params_len;             /* last expression length */
+	zend_ulong flags;                   /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

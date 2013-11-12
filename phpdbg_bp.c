@@ -52,14 +52,14 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 
 	PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
 
-	if (zend_hash_find(&PHPDBG_G(bp_files),
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
 		new_break.filename, path_len, (void**)&break_files_ptr) == FAILURE) {
 		zend_llist break_files;
 
 		zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t),
 			phpdbg_llist_breakfile_dtor, 0);
 
-		zend_hash_update(&PHPDBG_G(bp_files),
+		zend_hash_update(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
 			new_break.filename, path_len, &break_files, sizeof(zend_llist),
 			(void**)&break_files_ptr);
 	}
@@ -75,7 +75,7 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 {
 	size_t name_len = strlen(name);
 
-	if (!zend_hash_exists(&PHPDBG_G(bp_symbols), name, name_len)) {
+	if (!zend_hash_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], name, name_len)) {
 		phpdbg_breaksymbol_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_SYM_BP;
@@ -83,7 +83,7 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 		new_break.symbol = estrndup(name, name_len + 1);
 		new_break.id = PHPDBG_G(bp_count)++;
 
-		zend_hash_update(&PHPDBG_G(bp_symbols), new_break.symbol,
+		zend_hash_update(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], new_break.symbol,
 			name_len, &new_break, sizeof(phpdbg_breaksymbol_t), NULL);
 
 	    printf("[Breakpoint #%d added at %s]\n", new_break.id, new_break.symbol);
@@ -99,12 +99,12 @@ void phpdbg_set_breakpoint_method(const char* class_name,
 {
     HashTable class_breaks, *class_table;
 
-    if (zend_hash_find(&PHPDBG_G(bp_methods), class_name, class_len, (void**)&class_table) != SUCCESS) {
+    if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_name, class_len, (void**)&class_table) != SUCCESS) {
         zend_hash_init(
             &class_breaks, 8, NULL, phpdbg_class_breaks_dtor, 0);
         zend_hash_update(
-            &PHPDBG_G(bp_methods),
-            class_name, class_len,
+            &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 
+            class_name, class_len, 
             (void**)&class_breaks, sizeof(HashTable), (void**)&class_table);
     }
 
@@ -132,7 +132,7 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 {
 	zend_ulong opline = strtoul(name, 0, 16);
 
-	if (!zend_hash_index_exists(&PHPDBG_G(bp_oplines), opline)) {
+	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
@@ -141,7 +141,7 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 		new_break.opline = opline;
 		new_break.id = PHPDBG_G(bp_count)++;
 
-		zend_hash_index_update(&PHPDBG_G(bp_oplines), opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
+		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 
 	    printf("[Breakpoint #%d added at %s]\n", new_break.id, new_break.name);
 	} else {
@@ -151,7 +151,7 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 
 void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
 {
-	if (!zend_hash_index_exists(&PHPDBG_G(bp_oplines), (zend_ulong) opline)) {
+	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
@@ -162,7 +162,7 @@ void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{
 		new_break.opline = (zend_ulong) opline;
 		new_break.id = PHPDBG_G(bp_count)++;
 
-		zend_hash_index_update(&PHPDBG_G(bp_oplines), (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
+		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 
 	    printf("[Breakpoint #%d added at %p]\n", new_break.id, (zend_op*) new_break.opline);
 	}
@@ -174,7 +174,7 @@ int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	zend_llist *break_list;
 	zend_llist_element *le;
 
-	if (zend_hash_find(&PHPDBG_G(bp_files), op_array->filename, name_len,
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], op_array->filename, name_len,
 		(void**)&break_list) == FAILURE) {
 		return FAILURE;
 	}
@@ -215,7 +215,7 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 		fname = "main";
 	}
 
-	if (zend_hash_find(&PHPDBG_G(bp_symbols), fname, strlen(fname),
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], fname, strlen(fname),
 		(void**)&bp) == SUCCESS) {
 		printf("[Breakpoint #%d in %s() at %s:%u]\n", bp->id, bp->symbol,
 			zend_get_executed_filename(TSRMLS_C),
@@ -231,7 +231,7 @@ int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 	HashTable *class_table;
 	phpdbg_breakmethod_t *bp;
 
-	if (zend_hash_find(&PHPDBG_G(bp_methods), ops->scope->name, ops->scope->name_length,
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name, ops->scope->name_length, 
 	        (void**)&class_table) == SUCCESS) {
 		if (zend_hash_find(
 		        class_table,
@@ -253,7 +253,7 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 {
 	phpdbg_breakline_t *bp;
 
-	if (zend_hash_index_find(&PHPDBG_G(bp_oplines), (zend_ulong) opline,
+	if (zend_hash_index_find(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline,
 	        (void**)&bp) == SUCCESS) {
 		printf("[Breakpoint #%d in %s at %s:%u]\n", bp->id, bp->name,
 			zend_get_executed_filename(TSRMLS_C),
@@ -267,12 +267,13 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 
 void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
 {
-    zend_hash_clean(&PHPDBG_G(bp_files));
-    zend_hash_clean(&PHPDBG_G(bp_symbols));
-    zend_hash_clean(&PHPDBG_G(bp_oplines));
-    zend_hash_clean(&PHPDBG_G(bp_methods));
-
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
+    
     PHPDBG_G(flags) &= ~PHPDBG_BP_MASK;
+
     PHPDBG_G(bp_count) = 0;
 } /* }}} */
 
