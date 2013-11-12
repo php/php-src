@@ -41,12 +41,12 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 	unsigned int line = 0, displayed = 0;
 
     if (VCWD_STAT(filename, &st) == -1) {
-		printf("[Failed to stat file %s]\n", filename);
+		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
 #ifndef _WIN32
 	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
-		printf("[Failed to open file %s to list]\n", filename);
+		phpdbg_error("Failed to open file %s to list", filename);
 		return;
 	}
 
@@ -55,20 +55,20 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 #else
 	fd = CreateFile(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (fd == INVALID_HANDLE_VALUE) {
-		printf("[Failed to open file!]\n");
+		phpdbg_error("Failed to open file!");
 		return;
 	}
 
 	map = CreateFileMapping(fd, NULL, PAGE_EXECUTE_READ, 0, 0, 0);
 	if (map == NULL) {
-		printf("[Failed to map file!]\n");
+		phpdbg_error("Failed to map file!");
 		CloseHandle(fd);
 		return;
 	}
 
 	last_pos = mem = (char*) MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
 	if (mem == NULL) {
-		printf("[Failed to map file in memory]\n");
+		phpdbg_error("Failed to map file in memory");
 		CloseHandle(map);
 		CloseHandle(fd);
 		return;
@@ -87,7 +87,7 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 
 		if (!offset || offset <= line) {
 			/* Without offset, or offset reached */
-			printf("%05u: %.*s\n", line, (int)(pos - last_pos), last_pos);
+			phpdbg_writeln("%05u: %.*s", line, (int)(pos - last_pos), last_pos);
 			++displayed;
 		}
 

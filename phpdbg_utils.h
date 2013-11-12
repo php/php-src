@@ -36,6 +36,7 @@ int phpdbg_is_class_method(const char*, size_t, char**, char**);
 enum {
 	ERROR  = 1,
 	NOTICE,
+	WRITELN,
 	WRITE
 };
 
@@ -43,9 +44,13 @@ void phpdbg_print(int TSRMLS_DC, const char*, ...);
 
 #define phpdbg_error(fmt, ...)  phpdbg_print(ERROR  TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_notice(fmt, ...) phpdbg_print(NOTICE TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_writeln(fmt, ...) phpdbg_print(WRITELN TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_write(fmt, ...) phpdbg_print(WRITE TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 /* {{{ For writing blank lines */
 #define EMPTY "" /* }}} */
+
+/* {{{ For prompt lines */
+#define PROMPT ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ") /* }}} */
 
 #endif /* PHPDBG_UTILS_H */

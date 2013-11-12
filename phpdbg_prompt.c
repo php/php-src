@@ -162,7 +162,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			zval_dtor(&retval);
-			printf("\n");
+			phpdbg_writeln(EMPTY);
 		}
 
 		/* switch stepping back on */
@@ -194,12 +194,12 @@ static PHPDBG_COMMAND(back) /* {{{ */
 		zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
 		if (i++) {
-			phpdbg_write(",");
+			phpdbg_writeln(",");
 		}
 		zend_print_flat_zval_r(*tmp TSRMLS_CC);
 	}
 
-	phpdbg_write(EMPTY);
+	phpdbg_writeln(EMPTY);
 	zval_dtor(&zbacktrace);
 
 	return SUCCESS;
@@ -217,32 +217,32 @@ static PHPDBG_COMMAND(print) /* {{{ */
     PHPDBG_SEP_LINE(TSRMLS_C);
 	phpdbg_notice("Execution Context Information:");
 #ifdef HAVE_LIBREADLINE
-    phpdbg_write("Readline\tyes");
+    phpdbg_writeln("Readline\tyes");
 #else
-    phpdbg_write("Readline\tno");
+    phpdbg_writeln("Readline\tno");
 #endif
-	phpdbg_write("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-	phpdbg_write("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
-	phpdbg_write("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-    phpdbg_write("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+	phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+	phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
+	phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+    phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
-		phpdbg_write("Opcodes\t\t%d", PHPDBG_G(ops)->last);
+		phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
 
 		if (PHPDBG_G(ops)->last_var) {
-			phpdbg_write("Variables\t%d", PHPDBG_G(ops)->last_var-1);
+			phpdbg_writeln("Variables\t%d", PHPDBG_G(ops)->last_var-1);
 		} else {
-			phpdbg_write("Variables\tNone");
+			phpdbg_writeln("Variables\tNone");
 		}
 	}
-	phpdbg_write("Executing\t%s", EG(in_execution) ? "yes" : "no");
+	phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
 	if (EG(in_execution)) {
-		phpdbg_write("VM Return\t%d", PHPDBG_G(vmret));
+		phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
 	}
-	phpdbg_write("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
-    phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
-    phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
-    phpdbg_write("Included\t%d", zend_hash_num_elements(&EG(included_files)));
+	phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
+    phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+    phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+    phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
 
     phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
     phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
@@ -359,19 +359,19 @@ static PHPDBG_COMMAND(clean) /* {{{ */
     if (!EG(in_execution)) {
         phpdbg_notice("Cleaning Execution Environment");
         
-        phpdbg_write("Classes\t%d", zend_hash_num_elements(EG(class_table)));
-        phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
-        phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
-        phpdbg_write("Includes\t%d", zend_hash_num_elements(&EG(included_files)));   
+        phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+        phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+        phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+        phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));   
 
         phpdbg_clean(1 TSRMLS_CC);
 
         phpdbg_notice("Clean Execution Environment");
         
-        phpdbg_write("Classes\t%d", zend_hash_num_elements(EG(class_table)));
-        phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
-        phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
-        phpdbg_write("Includes\t%d", zend_hash_num_elements(&EG(included_files))); 
+        phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+        phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+        phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+        phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files))); 
     } else {
         phpdbg_error("Cannot clean environment while executing");
         return FAILURE;
@@ -384,10 +384,10 @@ static PHPDBG_COMMAND(clear) /* {{{ */
 {
     phpdbg_notice("Clearing Breakpoints");
     
-    phpdbg_write("File\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
-    phpdbg_write("Functions\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
-    phpdbg_write("Methods\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
-    phpdbg_write("Oplines\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
+    phpdbg_writeln("File\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
+    phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
+    phpdbg_writeln("Methods\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
+    phpdbg_writeln("Oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
     
     phpdbg_clear_breakpoints(TSRMLS_C);
 
@@ -407,19 +407,19 @@ static PHPDBG_COMMAND(help) /* {{{ */
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
 		const phpdbg_command_t *help_command = phpdbg_help_commands;
 
-		phpdbg_write("To get help regarding a specific command type \"help command\"");
+		phpdbg_writeln("To get help regarding a specific command type \"help command\"");
 
 		phpdbg_notice("Commands");
 
 		while (prompt_command && prompt_command->name) {
-			phpdbg_write("\t%s\t%s", prompt_command->name, prompt_command->tip);
+			phpdbg_writeln("\t%s\t%s", prompt_command->name, prompt_command->tip);
 			++prompt_command;
 		}
 
 		phpdbg_notice("Helpers Loaded");
 
 		while (help_command && help_command->name) {
-			phpdbg_write("\t%s\t%s", help_command->name, help_command->tip);
+			phpdbg_writeln("\t%s\t%s", help_command->name, help_command->tip);
 			++help_command;
 		}
 	}
@@ -543,7 +543,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
     char cmd[PHPDBG_MAX_CMD];
 
 phpdbg_interactive_enter:
-    printf(PHPDBG_PROMPT_LINE(TSRMLS_C));
+    phpdbg_write(PROMPT);
 
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {

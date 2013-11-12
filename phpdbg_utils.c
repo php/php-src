@@ -96,12 +96,23 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 		
-		case WRITE:
-			printf("%s%s%s\n",
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
-				buffer,
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
-		break;
+		case WRITELN: {
+		    if (buffer) {
+			    printf("%s%s%s\n",
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+				    buffer,
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+			} else {
+			    printf("\n");
+			}
+		} break;
+		
+		case WRITE: if (buffer) {
+		    printf("%s%s%s",
+		        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+		        buffer,
+		        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+		} break;
 	}
 
 	if (buffer) {
