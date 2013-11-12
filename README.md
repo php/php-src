@@ -57,6 +57,7 @@ The following switches changes the default behaviour of phpdbg:
  - -v disables quietness
  - -s enabled stepping
  - -e sets execution context
+ - -b boring - disables use of colour on the console
 
 Screeny
 =======
