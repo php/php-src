@@ -8,9 +8,13 @@
  * break ...
  * run
  */
-define("PHPDBG_BOOTPATH", "/opt/php-zts/htdocs");
-define("PHPDBG_BOOTSTRAP", "index.php");
-define("PHPDBG_BOOTSTRAPPED", sprintf("/%s", PHPDBG_BOOTSTRAP));
+if (!defined('PHPDBG_BOOTSTRAPPED')) 
+{
+    /* define these once */
+    define("PHPDBG_BOOTPATH", "/opt/php-zts/htdocs");
+    define("PHPDBG_BOOTSTRAP", "index.php");
+    define("PHPDBG_BOOTSTRAPPED", sprintf("/%s", PHPDBG_BOOTSTRAP)); 
+}
 
 /*
  * Superglobals are JIT, phpdbg will not over-write whatever you set during bootstrap
