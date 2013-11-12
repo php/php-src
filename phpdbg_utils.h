@@ -23,5 +23,6 @@
 int phpdbg_is_numeric(const char*);
 int phpdbg_is_empty(const char*);
 int phpdbg_is_addr(const char*);
+int phpdbg_is_class_method(const char*, size_t, char**, char**);
 
 #endif /* PHPDBG_UTILS_H */

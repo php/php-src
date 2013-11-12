@@ -17,7 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
+#include <stdio.h>
 #include <ctype.h>
+#include "zend_alloc.h"
 #include "phpdbg_utils.h"
 
 int phpdbg_is_numeric(const char *str) /* {{{ */
@@ -45,4 +47,24 @@ int phpdbg_is_empty(const char *str) /* {{{ */
 int phpdbg_is_addr(const char *str) /* {{{ */
 {
 	return str[0] && str[1] && memcmp(str, "0x", 2) == 0;
+} /* }}} */
+
+int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
+{
+	const char *sep = strstr(str, "::");
+	size_t class_len, method_len;
+
+	if (!sep) {
+		return 0;
+	}
+
+	class_len = sep - str;
+	method_len = len - ((sep+2) - str);
+
+	*class = estrndup(str, class_len);
+	class[class_len] = 0;
+
+	*method = estrndup(sep+2, method_len+1);
+
+	return 1;
 } /* }}} */

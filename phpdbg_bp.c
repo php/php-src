@@ -101,16 +101,15 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-void phpdbg_set_breakpoint_method(const char* class_name,
-                                  size_t class_len,
-                                  const char* func_name,
-                                  size_t func_len TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name TSRMLS_DC) /* {{{ */
 {
     HashTable class_breaks, *class_table;
+    size_t class_len = strlen(class_name);
+    size_t func_len = strlen(func_name);
 
-    if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_name, class_len, (void**)&class_table) != SUCCESS) {
-        zend_hash_init(
-            &class_breaks, 8, NULL, phpdbg_class_breaks_dtor, 0);
+    if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_name,
+		class_len, (void**)&class_table) != SUCCESS) {
+        zend_hash_init(&class_breaks, 8, NULL, phpdbg_class_breaks_dtor, 0);
         zend_hash_update(
             &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD],
             class_name, class_len,
@@ -128,7 +127,9 @@ void phpdbg_set_breakpoint_method(const char* class_name,
         new_break.func_len = func_len;
         new_break.id = PHPDBG_G(bp_count)++;
 
-        zend_hash_update(class_table, func_name, func_len, &new_break, sizeof(phpdbg_breakmethod_t), NULL);
+        zend_hash_update(class_table, func_name, func_len,
+			&new_break, sizeof(phpdbg_breakmethod_t), NULL);
+
         printf(
             "%sBreakpoint #%d added at %s::%s%s\n",
             PHPDBG_BOLD_LINE(TSRMLS_C),

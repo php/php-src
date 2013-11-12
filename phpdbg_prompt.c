@@ -329,8 +329,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 
 static PHPDBG_COMMAND(break) /* {{{ */
 {
-	char *line_pos = NULL;
-    char *func_pos = NULL;
+	char *line_pos;
 
     if (expr_len <= 0L) {
         printf(
@@ -338,10 +337,17 @@ static PHPDBG_COMMAND(break) /* {{{ */
         return FAILURE;
     }
 
-    line_pos  = strchr(expr, ':');
+    line_pos = strchr(expr, ':');
 
 	if (line_pos) {
-	    if (!(func_pos=strchr(line_pos+1, ':'))) {
+		char *class;
+		char *func;
+
+		/* break class::method */
+		if (phpdbg_is_class_method(expr, expr_len, &class, &func)) {
+			phpdbg_set_breakpoint_method(class, func TSRMLS_CC);
+		} else {
+			/* break file:line */
 	        char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
 		    long line_num = strtol(line_pos+1, NULL, 0);
 
@@ -350,43 +356,26 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		        path[line_pos - expr] = 0;
 
 		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			        printf("%sFailed to expand path %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), path, PHPDBG_END_LINE(TSRMLS_C));
+			        printf("%sFailed to expand path %s%s\n",
+						PHPDBG_RED_LINE(TSRMLS_C), path, PHPDBG_END_LINE(TSRMLS_C));
 			        return FAILURE;
 		        }
 
 		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 		    } else {
-		        printf("%sNo line specified in expression %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
+		        printf("%sNo line specified in expression %s%s\n",
+					PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
 		        return FAILURE;
 		    }
-	    } else {
-		    char *class;
-		    char *func;
-
-		    size_t func_len = strlen(func_pos+1),
-		           class_len = (line_pos - expr);
-
-		    if (func_len) {
-		        class = emalloc(class_len+1);
-		        func = emalloc(func_len+1);
-
-		        memcpy(class, expr, class_len);
-		        class[class_len]='\0';
-		        memcpy(func, func_pos+1, func_len);
-		        func[func_len]='\0';
-
-		        phpdbg_set_breakpoint_method(class, class_len, func, func_len TSRMLS_CC);
-		    } else {
-		        printf("%sNo function found in method expression %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
-		        return FAILURE;
-		    }
-		}
+	    }
 	} else {
+		/* break 0xc0ffee */
 		if (phpdbg_is_addr(expr)) {
 			zend_ulong opline = strtoul(expr, 0, 16);
 
 			phpdbg_set_breakpoint_opline(opline TSRMLS_CC);
 		} else if (phpdbg_is_numeric(expr)) {
+			/* break 1337 */
 			const char *filename = zend_get_executed_filename(TSRMLS_C);
 			long line_num = strtol(expr, NULL, 0);
 
@@ -398,6 +387,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 			phpdbg_set_breakpoint_file(filename, line_num TSRMLS_CC);
 		} else {
+			/* break symbol */
 			char name[200];
 			size_t name_len = strlen(expr);
 
