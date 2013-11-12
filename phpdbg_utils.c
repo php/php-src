@@ -70,7 +70,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	return 1;
 } /* }}} */
 
-int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
+void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	char *buffer = NULL;
 	va_list args;
@@ -93,5 +93,9 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 				buffer,
 				PHPDBG_END_LINE(TSRMLS_D));
 		break;
+	}
+
+	if (buffer) {
+		efree(buffer);
 	}
 } /* }}} */

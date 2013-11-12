@@ -38,7 +38,7 @@ enum {
 	NOTICE
 };
 
-int phpdbg_print(int TSRMLS_DC, const char*, ...);
+void phpdbg_print(int TSRMLS_DC, const char*, ...);
 
 #define phpdbg_error(fmt, ...)  phpdbg_print(ERROR  TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_notice(fmt, ...) phpdbg_print(NOTICE TSRMLS_CC, fmt, ##__VA_ARGS__)
