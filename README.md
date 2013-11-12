@@ -11,7 +11,7 @@ Features
 ========
 
  - step through debugging
- - break at function entry, file:line or address
+ - break at method/function entry, file:line or address
  - showing debug backtraces
  - easy manipulation of the environment with built-in eval()
  - userland API

@@ -45,6 +45,16 @@
 
 #define PHPDBG_NEXT 2
 
+/* {{{ flags */
+#define PHPDBG_HAS_FILE_BP      0x00000001
+#define PHPDBG_HAS_SYM_BP       0x00000010
+#define PHPDBG_HAS_OPLINE_BP    0x00000100
+#define PHPDBG_HAS_METHOD_BP    0x00001000
+
+#define PHPDBG_IS_STEPPING      0x00010000
+#define PHPDBG_IS_QUIET         0x00100000
+#define PHPDBG_IS_QUITTING      0x01000000 /* }}} */
+
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
@@ -57,17 +67,11 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_op_array *ops;         /* op_array */
 	zval *retval;               /* return value */
 	int bp_count;               /* breakpoint count */
-	int stepping;               /* stepping */
 	int vmret;                  /* return from last opcode handler execution */
-	zend_bool has_file_bp;      /* file-based breakpoint has been set */
-	zend_bool has_sym_bp;       /* symbol-based breakpoint has been set */
-	zend_bool has_opline_bp;    /* opline-based breakpoint has been set */
-	zend_bool has_method_bp;    /* method-based breakpoint has been set */
-	zend_bool quitting;         /* quitting flag */
-	int quiet;                  /* quiet */
 	phpdbg_command_t *last;     /* last command */
 	const char *last_params;    /* last expression */
 	size_t last_params_len;     /* last expression length */
+	zend_ulong flags;           /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

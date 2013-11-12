@@ -98,9 +98,14 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 
 static PHPDBG_COMMAND(step) /* {{{ */
 {
-	PHPDBG_G(stepping) = atoi(expr);
+	if (atoi(expr)) {
+	    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	} else {
+	    PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
+	}
+	
 	printf(
-	    "[Stepping %s]\n", PHPDBG_G(stepping) ? "on" : "off");
+	    "[Stepping %s]\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 	return SUCCESS;
 } /* }}} */
 
@@ -130,7 +135,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 		zend_try {
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 		} zend_catch {
-			if (!PHPDBG_G(quitting)) {
+			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				printf("[Caught excetion in VM]\n");
 				return FAILURE;
 			} else return SUCCESS;
@@ -146,13 +151,23 @@ static PHPDBG_COMMAND(run) /* {{{ */
 static PHPDBG_COMMAND(eval) /* {{{ */
 {
 	zval retval;
-
+    
 	if (expr_len) {
+	    zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+	    
+	    /* disable stepping while eval() in progress */
+	    PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+	    
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(
 			    &retval, 0 TSRMLS_CC);
 			printf("\n");
+		}
+		
+		/* switch stepping back on */
+		if (stepping) {
+		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 	} else {
 		printf("[No expression provided !]\n");
@@ -204,8 +219,9 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	printf("Execution Context Information:\n");
 	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
-	printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
-
+	printf("Stepping\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+    printf("Quietness\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+    	
 	if (PHPDBG_G(ops)) {
 		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
 
@@ -224,7 +240,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
     printf("Constants\t%d\n", zend_hash_num_elements(EG(zend_constants)));
     printf("Included\t%d\n", zend_hash_num_elements(&EG(included_files)));
 
-    if (PHPDBG_G(has_file_bp)) {
+    if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)) {
         HashPosition position;
         zend_llist *points;
 
@@ -268,7 +284,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
     }
 #endif
 
-    if (PHPDBG_G(has_opline_bp)) {
+    if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)) {
         HashPosition position;
         phpdbg_breakline_t *brake;
 
@@ -364,7 +380,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
-    PHPDBG_G(quitting)=1;
+    PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 
 	zend_bailout();
 
@@ -459,10 +475,14 @@ static PHPDBG_COMMAND(help) /* {{{ */
 } /* }}} */
 
 static PHPDBG_COMMAND(quiet) { /* {{{ */
-    PHPDBG_G(quiet) = atoi(expr);
+    if (atoi(expr)) {
+        PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
+    } else {
+        PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+    }
 
     printf(
-        "[Quietness %s]\n", PHPDBG_G(quiet) ? "enabled" : "disabled");
+        "[Quietness %s]\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
 
     return SUCCESS;
 } /* }}} */
@@ -530,7 +550,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 	printf("phpdbg> ");
 
-	while (!PHPDBG_G(quitting) &&
+	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
@@ -541,7 +561,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		if (cmd_len) {
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
-		            if (!PHPDBG_G(quitting)) {
+		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		                printf(
 		                    "[Failed to execute %s !]\n", cmd);
 		            }
@@ -556,7 +576,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}
 
-		if (!PHPDBG_G(quitting)) {
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		    printf("phpdbg> ");
 		}
 
@@ -567,10 +587,12 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-    if (!PHPDBG_G(quiet)) {
+    /* force out a line while stepping so the user knows what is happening */
+    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
         zend_op *opline = execute_data->opline;
 
-        printf("[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
+        printf(
+            "[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
     }
 } /* }}} */
 
@@ -595,16 +617,16 @@ zend_vm_enter:
         phpdbg_print_opline(
 		    execute_data TSRMLS_CC);
 
-        if (PHPDBG_G(has_file_bp)
+        if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)
             && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
             while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!PHPDBG_G(quitting)) {
+                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
                     continue;
                 }
             }
         }
 
-        if ((PHPDBG_G(has_sym_bp)||PHPDBG_G(has_method_bp))) {
+        if ((PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP))) {
             zend_execute_data *previous = execute_data->prev_execute_data;
             if (previous && previous != execute_data && previous->opline) {
                 /* check we are the beginning of a function entry */
@@ -613,10 +635,9 @@ zend_vm_enter:
                         case ZEND_DO_FCALL:
                         case ZEND_DO_FCALL_BY_NAME:
                         case ZEND_INIT_STATIC_METHOD_CALL: {
-                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS ||
-                                phpdbg_find_breakpoint_method(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
                                 while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                                    if (!PHPDBG_G(quitting)) {
+                                    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
                                         continue;
                                     }
                                 }
@@ -627,10 +648,10 @@ zend_vm_enter:
             }
         }
         
-        if (PHPDBG_G(has_opline_bp)
+        if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
             && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
             while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!PHPDBG_G(quitting)) {
+                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
                     continue;
                 }
             }
@@ -638,9 +659,9 @@ zend_vm_enter:
 
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
-        if (PHPDBG_G(stepping)) {
+        if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
             while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!PHPDBG_G(quitting)) {
+                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
                     continue;
                 }
             }
