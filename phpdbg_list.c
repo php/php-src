@@ -23,23 +23,24 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include "phpdbg.h"
 #include "phpdbg_list.h"
 
-void phpdbg_list_file(const char *filename, long count, long offset) /* {{{ */
+void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
 	struct stat st;
 	int fd, all_content = (count == 0);
 	unsigned int line = 0, displayed = 0;
 
-	if ((fd = open(filename, O_RDONLY)) == -1) {
-		printf("[Failed to open file %s to list]\n", filename);
-		return;
-	}
-
-	if (fstat(fd, &st) == -1) {
+    if (VCWD_STAT(filename, &st) == -1) {
 		printf("[Failed to stat file %s]\n", filename);
 		goto out;
+	}
+
+	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
+		printf("[Failed to open file %s to list]\n", filename);
+		return;
 	}
 
 	last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);

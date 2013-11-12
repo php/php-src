@@ -508,7 +508,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		return SUCCESS;
 	}
 
-	phpdbg_list_file(filename, count, offset);
+	phpdbg_list_file(filename, count, offset TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

@@ -20,6 +20,6 @@
 #ifndef PHPDBG_LIST_H
 #define PHPDBG_LIST_H
 
-void phpdbg_list_file(const char*, long, long);
+void phpdbg_list_file(const char*, long, long TSRMLS_DC);
 
 #endif /* PHPDBG_LIST_H */
