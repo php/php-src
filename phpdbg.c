@@ -443,7 +443,7 @@ int main(int argc, char **argv) /* {{{ */
 		/* print blurb */
         phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
             PHPDBG_VERSION);
-        printf("[To get help using phpdbg type \"help\" and press enter\n");
+        phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
         phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
 
         do {

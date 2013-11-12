@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include "phpdbg.h"
 #include "phpdbg_list.h"
+#include "phpdbg_utils.h"
 
 void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
 {

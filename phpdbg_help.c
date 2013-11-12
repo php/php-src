@@ -20,52 +20,53 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
+#include "phpdbg_utils.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_HELP(exec) /* {{{ */
 {
-	printf("Will attempt execution, if compilation has not yet taken place, it occurs now.\n");
-	printf("The execution context must be set before execution can take place\n");
+	phpdbg_writeln("Will attempt execution, if compilation has not yet taken place, it occurs now.");
+	phpdbg_writeln("The execution context must be set before execution can take place");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(step) /* {{{ */
 {
-    printf("You can enable and disable stepping at any phpdbg prompt during execution\n");
-    printf("For example:\n");
-    printf("\t%sstepping 1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-    printf("Will enable stepping\n");
-    printf("While stepping is enabled you are presented with a prompt after the execution of each opcode\n");
+    phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
+    phpdbg_writeln("For example:");
+    phpdbg_writeln("\t%sstepping 1", PROMPT);
+    phpdbg_writeln("Will enable stepping");
+    phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(next) /* {{{ */
 {
-	printf("While stepping through execution, or after a breakpoint, use the next command to step back into the vm and execute the next opcode\n");
+	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the next command to step back into the vm and execute the next opcode");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(compile) /* {{{ */
 {
-	printf("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed\n");
-	printf("The execution context must be set for compilation to succeed\n");
-	printf("If errors occur during compilation they must be resolved before execution can take place.\n");
-	printf("It is a good idea to clean the environment between each compilation with the clean command\n");
-	printf("You do not need to exit phpdbg to retry compilation\n");
+	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed");
+	phpdbg_writeln("The execution context must be set for compilation to succeed");
+	phpdbg_writeln("If errors occur during compilation they must be resolved before execution can take place.");
+	phpdbg_writeln("It is a good idea to clean the environment between each compilation with the clean command");
+	phpdbg_writeln("You do not need to exit phpdbg to retry compilation");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(print) /* {{{ */
 {
-	printf("By default, print will show information about the current execution environment\n");
-	printf("Specific printers loaded are show below:\n");
-	printf("%sCommands%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+	phpdbg_writeln("By default, print will show information about the current execution environment");
+	phpdbg_writeln("Specific printers loaded are show below:");
+	phpdbg_notice("Commands");
 	{
-	    phpdbg_command_t *print_command = phpdbg_print_commands;
+	    const phpdbg_command_t *print_command = phpdbg_print_commands;
 	    
 	    while (print_command && print_command->name) {
-			printf("\t%s\t%s\n", print_command->name, print_command->tip);
+			phpdbg_writeln("\t%s\t%s", print_command->name, print_command->tip);
 			++print_command;
 		}
 	}
@@ -74,80 +75,82 @@ PHPDBG_HELP(print) /* {{{ */
 
 PHPDBG_HELP(run) /* {{{ */
 {
-	printf("Run the code inside the debug vm, you should have break points and variables set before running\n");
-	printf("The execution context must not be set, but not necessarily compiled before execution occurs\n");
+	phpdbg_writeln("Run the code inside the debug vm, you should have break points and variables set before running");
+	phpdbg_writeln("The execution context must not be set, but not necessarily compiled before execution occurs");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(eval) /* {{{ */
 {
-	printf("Access to eval() allows you to change the environment during execution, careful though !!\n");
-	printf("Note: When using eval in phpdbg do not prefix the code with return.\n");
+	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
+	phpdbg_writeln("Note: When using eval in phpdbg do not prefix the code with return.");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(break) /* {{{ */
 {
-	printf("Setting a breakpoint stops execution at a specific stage.\n");
-	printf("For example:\n");
-	printf("\t%sbreak test.php:1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will break execution on line 1 of test.php\n");
-	printf("\t%sbreak my_function\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will break execution on entry to my_function\n");
-	printf("\t%sbreak \\my\\class::method\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will break execution on entry to \\my\\class::method\n");
-	printf("\t%sbreak 0x7ff68f570e08\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
-	printf("\t%sbreak 200\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will break at line 200 of the currently executing file\n");
-	printf("It is important to note, an address is only valid for the current compiled representation of the script\n");
-	printf("If you have to clean the environment and recompile then your opline break points will be invalid\n");
+	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage.");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("For example:");
+	phpdbg_writeln("\t%sbreak test.php:1", PROMPT);
+	phpdbg_writeln("Will break execution on line 1 of test.php");
+	phpdbg_writeln("\t%sbreak my_function", PROMPT);
+	phpdbg_writeln("Will break execution on entry to my_function");
+	phpdbg_writeln("\t%sbreak \\my\\class::method", PROMPT);
+	phpdbg_writeln("Will break execution on entry to \\my\\class::method");
+	phpdbg_writeln("\t%sbreak 0x7ff68f570e08", PROMPT);
+	phpdbg_writeln("Will break at the opline with the address provided (addresses are shown during execution)");
+	phpdbg_writeln("\t%sbreak 200", PROMPT);
+	phpdbg_writeln("Will break at line 200 of the currently executing file");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("It is important to note, an address is only valid for the current compiled representation of the script");
+	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(clean) /* {{{ */
 {
-    printf("While debugging you may experience errors because of attempts to redeclare classes, constants or functions.\n");
-    printf("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg.\n");
+    phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions.");
+    phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg.");
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(clear) /* {{{ */
 {
-    printf("Clearing breakpoints means you can once again run code without interruption\n");
-    printf("Careful though, all breakpoints are lost; be sure debugging is complete before clearing\n");
+    phpdbg_writeln("Clearing breakpoints means you can once again run code without interruption");
+    phpdbg_writeln("Careful though, all breakpoints are lost; be sure debugging is complete before clearing");
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(quiet) /* {{{ */
 {
-    printf("Setting quietness on will stop the OPLINE output during execution\n");
-    printf("For example:\n");
-    printf("\t%squiet 1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-    printf("Will silence OPLINE output, while\n");
-    printf("\t%squiet 0\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-    printf("Will enable OPLINE output again\n");
+    phpdbg_writeln("Setting quietness on will stop the OPLINE output during execution");
+    phpdbg_writeln("For example:");
+    phpdbg_writeln("\t%squiet 1", PROMPT);
+    phpdbg_writeln("Will silence OPLINE output, while");
+    phpdbg_writeln("\t%squiet 0", PROMPT);
+    phpdbg_writeln("Will enable OPLINE output again");
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(back) /* {{{ */
 {
-	printf("The backtrace is gathered with the default debug_backtrace functionality.\n");
-	printf("You can set the limit on the trace, for example:\n");
-	printf("\t%sback 5\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will limit the number of frames to 5, the default is no limit\n");
+	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality.");
+	phpdbg_writeln("You can set the limit on the trace, for example:");
+	phpdbg_writeln("\t%sback 5", PROMPT);
+	phpdbg_writeln("Will limit the number of frames to 5, the default is no limit");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(list) /* {{{ */
 {
-	printf("The list command displays N line from current context file.\n");
-	printf("\t%slist 2\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will print next 2 lines from the current file\n");
-	printf("\t%slist func\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will print the source of the global function \"func\"\n");
-	printf("\t%slist .mine\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
-	printf("Will print the source of the class method \"mine\"\n");
-	printf("Note: before listing functions you must have a populated function table, try compile !!\n");
+	phpdbg_writeln("The list command displays N line from current context file.");
+	phpdbg_writeln("\t%slist 2", PROMPT);
+	phpdbg_writeln("Will print next 2 lines from the current file");
+	phpdbg_writeln("\t%slist func", PROMPT);
+	phpdbg_writeln("Will print the source of the global function \"func\"");
+	phpdbg_writeln("\t%slist .mine", PROMPT);
+	phpdbg_writeln("Will print the source of the class method \"mine\"");
+	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
 	return SUCCESS;
 } /* }}} */
