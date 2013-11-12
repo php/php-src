@@ -64,7 +64,7 @@
 #define PHPDBG_BREAK_FILE       0
 #define PHPDBG_BREAK_SYM        1
 #define PHPDBG_BREAK_OPLINE     2
-#define PHPDBG_BREAK_METHOD     3 
+#define PHPDBG_BREAK_METHOD     3
 #define PHPDBG_BREAK_TABLES     4 /* }}} */
 
 /* {{{ flags */
@@ -77,7 +77,7 @@
 #define PHPDBG_IS_STEPPING      0x00010000
 #define PHPDBG_IS_QUIET         0x00100000
 #define PHPDBG_IS_QUITTING      0x01000000
-#define PHPDBG_IS_COLOURED      0x10000000 
+#define PHPDBG_IS_COLOURED      0x10000000
 
 #define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED) /* }}} */
 
@@ -107,7 +107,7 @@ ZEND_END_MODULE_GLOBALS(phpdbg)
 #define PHPDBG_BOLD_LINE(TSRMLS_D)       \
     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "[")
 #define PHPDBG_END_LINE(TSRMLS_D)         \
-     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]")  
+     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]")
 #define PHPDBG_PROMPT_LINE(TSRMLS_D)      \
     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ")
 #define PHPDBG_SEP_LINE(TSRMLS_D) do {\

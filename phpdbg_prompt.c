@@ -36,26 +36,20 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
-		printf(
-		    "%sUnsetting old execution context: %s%s\n",
-		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(NOTICE TSRMLS_CC,
+			"Unsetting old execution context: %s", PHPDBG_G(exec));
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
 	}
 
 	if (PHPDBG_G(ops)) {
-		printf(
-		    "%sDestroying compiled opcodes%s\n",
-		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
-
+		phpdbg_print(NOTICE TSRMLS_CC, "Destroying compiled opcodes");
    		phpdbg_clean(0 TSRMLS_CC);
 	}
 
 	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
 
-	printf(
-	    "%sSet execution context: %s%s\n",
-	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
+	phpdbg_print(NOTICE TSRMLS_CC, "Set execution context: %s", PHPDBG_G(exec));
 
 	return SUCCESS;
 } /* }}} */
@@ -65,26 +59,22 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 	zend_file_handle fh;
 
 	if (!EG(in_execution)) {
-	    printf("%sAttempting compilation of %s%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(NOTICE TSRMLS_CC,
+			"Attempting compilation of %s", PHPDBG_G(exec));
 
 	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
 		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
-		    PHPDBG_G(ops) = zend_compile_file(
-		        &fh, ZEND_INCLUDE TSRMLS_CC);
+
+		    PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
 		    zend_destroy_file_handle(&fh TSRMLS_CC);
-		    printf(
-		        "%sSuccess%s\n",
-		        PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+
+		    phpdbg_print(NOTICE TSRMLS_CC, "Success");
 		    return SUCCESS;
         } else {
-            printf(
-                "%sCould not open file %s%s\n",
-                PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_print(ERROR TSRMLS_CC, "Could not open file %s", PHPDBG_G(exec));
         }
 	} else {
-	    printf(
-	        "%sCannot compile while in execution%s\n",
-	        PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(ERROR TSRMLS_CC, "Cannot compile while in execution");
 	}
 
 	return FAILURE;
@@ -95,18 +85,15 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 	if (PHPDBG_G(exec)) {
 		if (!EG(in_execution)) {
 		    if (PHPDBG_G(ops)) {
-			    printf(
-			        "%sDestroying previously compiled opcodes%s\n",
-			        PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+				phpdbg_print(ERROR TSRMLS_CC,
+					"Destroying previously compiled opcodes");
 			    phpdbg_clean(0 TSRMLS_CC);
 		    }
 		}
 
 		return phpdbg_compile(TSRMLS_C);
 	} else {
-		printf(
-		    "%sNo execution context%s\n",
-		    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(ERROR TSRMLS_CC, "No execution context");
 		return FAILURE;
 	}
 } /* }}} */
@@ -119,11 +106,8 @@ static PHPDBG_COMMAND(step) /* {{{ */
 	    PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
 	}
 
-	printf(
-	    "%sStepping %s%s\n",
-	    PHPDBG_BOLD_LINE(TSRMLS_C),
-	    (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off",
-	    PHPDBG_END_LINE(TSRMLS_C));
+	phpdbg_print(NOTICE TSRMLS_CC, "Stepping %s",
+	    (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 
 	return SUCCESS;
 } /* }}} */
@@ -136,14 +120,14 @@ static PHPDBG_COMMAND(next) /* {{{ */
 static PHPDBG_COMMAND(run) /* {{{ */
 {
     if (EG(in_execution)) {
-        printf("%sCannot start another execution while one is in progress%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_error("Cannot start another execution while one is in progress");
         return FAILURE;
     }
 
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-				printf("%sFailed to compile %s, cannot run%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
+				phpdbg_error("Failed to compile %s, cannot run", PHPDBG_G(exec));
 				return FAILURE;
 			}
 		}
@@ -155,14 +139,14 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 		} zend_catch {
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-				printf("%sCaught excetion in VM%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+				phpdbg_error("Caught excetion in VM");
 				return FAILURE;
 			} else return SUCCESS;
 		} zend_end_try();
 
 		return SUCCESS;
 	} else {
-		printf("%sNothing to execute !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_error("Nothing to execute!");
 		return FAILURE;
 	}
 } /* }}} */
@@ -179,8 +163,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			zend_print_zval_r(
-			    &retval, 0 TSRMLS_CC);
+			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			zval_dtor(&retval);
 			printf("\n");
 		}
@@ -190,7 +173,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 	} else {
-		printf("%sNo expression provided !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_error("No expression provided!");
 		return FAILURE;
 	}
 
@@ -200,7 +183,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 static PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		printf("%sNot executing !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_error("Not executing!");
 		return FAILURE;
 	}
 	zval zbacktrace;
@@ -229,9 +212,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 {
 	if (expr_len > 0L) {
 		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			printf(
-			    "%sFailed to find print command: %s/%lu%s\n",
-			    PHPDBG_RED_LINE(TSRMLS_C), expr, expr_len, PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_error("Failed to find print command: %s/%u", expr, expr_len);
 		}
 		return SUCCESS;
 	}
@@ -272,7 +253,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
     phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
 
     PHPDBG_SEP_LINE(TSRMLS_C);
-    
+
 	return SUCCESS;
 } /* }}} */
 
@@ -281,8 +262,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	char *line_pos;
 
     if (expr_len <= 0L) {
-        printf(
-            "%sNo expression found%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+        phpdbg_error("No expression found");
         return FAILURE;
     }
 
@@ -305,15 +285,13 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		        path[line_pos - expr] = 0;
 
 		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			        printf("%sFailed to expand path %s%s\n",
-						PHPDBG_RED_LINE(TSRMLS_C), path, PHPDBG_END_LINE(TSRMLS_C));
+			        phpdbg_error("Failed to expand path %s", path);
 			        return FAILURE;
 		        }
 
 		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 		    } else {
-		        printf("%sNo line specified in expression %s%s\n",
-					PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
+		        phpdbg_error("No line specified in expression %s", expr);
 		        return FAILURE;
 		    }
 	    }
@@ -329,8 +307,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 			long line_num = strtol(expr, NULL, 0);
 
 			if (!filename) {
-				printf("%sNo file context found%s\n",
-					PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+				phpdbg_error("No file context found");
 				return FAILURE;
 			}
 
@@ -347,8 +324,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 				phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
 			} else {
-				printf("%sMalformed break command found%s\n",
-					PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+				phpdbg_error("Malformed break command found");
 				return FAILURE;
 			}
 		}
@@ -398,8 +374,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
         printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
         printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
     } else {
-        printf(
-            "%sCannot clean environment while executing%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+        phpdbg_error("Cannot clean environment while executing");
         return FAILURE;
     }
 
@@ -421,15 +396,13 @@ static PHPDBG_COMMAND(clear) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-	printf(
+	phpdbg_print(NOTICE TSRMLS_CC,
 	    "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n",
-	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_VERSION, PHPDBG_END_LINE(TSRMLS_C));
+	    PHPDBG_VERSION);
 
 	if (expr_len > 0L) {
 		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			printf(
-			    "%sFailed to find help command: %s/%lu%s\n",
-			    PHPDBG_RED_LINE(TSRMLS_C), expr, expr_len, PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_error("Failed to find help command: %s/%lu", expr, expr_len);
 		}
 	} else {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
@@ -437,18 +410,14 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 		printf("To get help regarding a specific command type \"help command\"\n");
 
-		printf(
-		    "%sCommands%s\n",
-		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(NOTICE TSRMLS_CC, "Commands");
 
 		while (prompt_command && prompt_command->name) {
 			printf("\t%s\t%s\n", prompt_command->name, prompt_command->tip);
 			++prompt_command;
 		}
 
-		printf(
-		    "%sHelpers Loaded%s\n",
-		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(NOTICE TSRMLS_CC, "Helpers Loaded");
 
 		while (help_command && help_command->name) {
 			printf("\t%s\t%s\n", help_command->name, help_command->tip);
@@ -456,9 +425,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 		}
 	}
 
-	printf(
-	    "%sPlease report bugs to <%s>%s\n",
-	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_ISSUES, PHPDBG_END_LINE(TSRMLS_C));
+	phpdbg_print(NOTICE TSRMLS_CC, "Please report bugs to <%s>\n", PHPDBG_ISSUES);
 
 	return SUCCESS;
 } /* }}} */
@@ -470,8 +437,8 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
         PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
     }
 
-    printf(
-        "%sQuietness %s%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled", PHPDBG_END_LINE(TSRMLS_C));
+	phpdbg_print(NOTICE TSRMLS_CC, "Quietness %s",
+        (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
 
     return SUCCESS;
 } /* }}} */
@@ -486,9 +453,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 			filename = zend_get_executed_filename(TSRMLS_C);
 			offset = zend_get_executed_lineno(TSRMLS_C);
 		} else if (!filename) {
-			printf(
-			    "%sNo file to list%s\n",
-			    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_print(ERROR TSRMLS_CC, "No file to list");
 			return SUCCESS;
 		}
 
@@ -507,15 +472,11 @@ static PHPDBG_COMMAND(list) /* {{{ */
 
                func_table = &EG(scope)->function_table;
            } else {
-               printf(
-                   "%sNo active class%s\n",
-                   PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+               phpdbg_print(ERROR TSRMLS_CC, "No active class");
                return FAILURE;
            }
         } else if (!EG(function_table)) {
-			printf(
-			    "%sNo function table loaded%s\n",
-			    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_print(ERROR TSRMLS_CC, "No function table loaded");
 			return SUCCESS;
 		} else {
 		    func_table = EG(function_table);
@@ -525,9 +486,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		} else {
-		    printf(
-		        "%sFunction %s not found%s\n",
-		        PHPDBG_RED_LINE(TSRMLS_C), func_name, PHPDBG_END_LINE(TSRMLS_C));
+			phpdbg_print(ERROR TSRMLS_CC, "Function %s not found", func_name);
 		}
 	}
 
@@ -556,7 +515,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
 	char *params = NULL;
-#ifndef _WIN32	
+#ifndef _WIN32
 	const char *cmd = strtok_r(cmd_line, " ", &params);
 #else
 	const char *cmd = strtok_s(cmd_line, " ", &params);
@@ -615,17 +574,13 @@ phpdbg_interactive_enter:
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
 		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		                printf(
-		                    "%sFailed to execute %s !%s\n",
-		                    PHPDBG_RED_LINE(TSRMLS_C), cmd, PHPDBG_END_LINE(TSRMLS_C));
+						phpdbg_error("Failed to execute %s!", cmd);
 		            }
 		        break;
 
 		        case PHPDBG_NEXT: {
 		            if (!EG(in_execution)) {
-		                printf(
-		                    "%sNot running%s\n",
-		                    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+						phpdbg_error("Not running");
 		            }
 		            return PHPDBG_NEXT;
 		        }
@@ -652,12 +607,8 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 
         zend_op *opline = execute_data->opline;
 
-        printf(
-            "%sOPLINE: %p:%s%s\n",
-            PHPDBG_BOLD_LINE(TSRMLS_C),
-            opline,
-            phpdbg_decode_opcode(opline->opcode),
-            PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_print(NOTICE TSRMLS_CC, "OPLINE: %p:%s",
+            opline, phpdbg_decode_opcode(opline->opcode));
     }
 } /* }}} */
 
@@ -667,16 +618,18 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 
     /* this is implicitly required */
     if (PHPDBG_G(ops)) {
-        destroy_op_array(
-            PHPDBG_G(ops) TSRMLS_CC);
+        destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
         efree(PHPDBG_G(ops));
         PHPDBG_G(ops) = NULL;
     }
 
     if (full) {
-        zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(function_table),
+			(apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(class_table),
+			(apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(zend_constants),
+			(apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
         zend_hash_clean(&EG(included_files));
     }
 } /* }}} */

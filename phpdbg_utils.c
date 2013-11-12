@@ -20,7 +20,12 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "zend.h"
+#include "php.h"
+#include "spprintf.h"
+#include "phpdbg.h"
 #include "phpdbg_utils.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 int phpdbg_is_numeric(const char *str) /* {{{ */
 {
@@ -63,4 +68,30 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	*method = estrndup(sep+2, str + len - (sep + 2));
 
 	return 1;
+} /* }}} */
+
+int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
+{
+	char *buffer = NULL;
+	va_list args;
+
+	va_start(args, format);
+	vspprintf(&buffer, 0, format, args);
+	va_end(args);
+
+	switch (type) {
+		case ERROR:
+			printf("%s%s%s\n",
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
+				buffer,
+				PHPDBG_END_LINE(TSRMLS_D));
+		break;
+
+		case NOTICE:
+			printf("%s%s%s\n",
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
+				buffer,
+				PHPDBG_END_LINE(TSRMLS_D));
+		break;
+	}
 } /* }}} */

@@ -19,6 +19,7 @@
 
 #include "phpdbg.h"
 #include "phpdbg_print.h"
+#include "phpdbg_utils.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -28,10 +29,8 @@ PHPDBG_PRINT(opline) /* {{{ */
 	    phpdbg_print_opline(
 	        EG(current_execute_data), 1 TSRMLS_CC);
 	} else {
-	    printf( 
-	        "%sNot Executing!%s\n", 
-	        PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		phpdbg_error("Not Executing!");
 	}
-	    
+
 	return SUCCESS;
 } /* }}} */

@@ -19,6 +19,7 @@
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_utils.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -440,14 +441,10 @@ int main(int argc, char **argv) /* {{{ */
 		} zend_end_try();
 
 		/* print blurb */
-        printf(
-            "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n",
-            PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_VERSION, PHPDBG_END_LINE(TSRMLS_C));
-        printf(
-            "[To get help using phpdbg type \"help\" and press enter\n");
-        printf(
-            "%sPlease report bugs to <%s>%s\n",
-            PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_ISSUES, PHPDBG_END_LINE(TSRMLS_C));
+        phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
+            PHPDBG_VERSION);
+        printf("[To get help using phpdbg type \"help\" and press enter\n");
+        phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
 
         do {
 		    zend_try {
