@@ -607,7 +607,11 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
 	char *params = NULL;
+#ifndef _WIN32	
 	const char *cmd = strtok_r(cmd_line, " ", &params);
+#else
+	const char *cmd = strtok_s(cmd_line, " ", &params);
+#endif
 	size_t expr_len = cmd != NULL ? strlen(cmd) : 0;
 
 	while (command && command->name) {
