@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
-#include "zend_alloc.h"
+#include "zend.h"
 #include "phpdbg_utils.h"
 
 int phpdbg_is_numeric(const char *str) /* {{{ */
@@ -60,7 +60,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	*class = estrndup(str, sep - str);
 	class[sep - str] = 0;
 
-	*method = estrndup(sep+2, str + len - sep);
+	*method = estrndup(sep+2, str + len - (sep + 2));
 
 	return 1;
 } /* }}} */
