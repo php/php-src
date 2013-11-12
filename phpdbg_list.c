@@ -35,7 +35,7 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 
     if (VCWD_STAT(filename, &st) == -1) {
 		printf("[Failed to stat file %s]\n", filename);
-		goto out;
+		return;
 	}
 
 	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
