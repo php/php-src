@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include <stdio.h>
-#include "zend.h"
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 
