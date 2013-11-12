@@ -491,7 +491,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 		printf("To get help regarding a specific command type \"help command\"\n");
 
 		printf(
-		    "%sCommands:%s\n", 
+		    "%sCommands%s\n", 
 		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		    
 		while (prompt_command && prompt_command->name) {
