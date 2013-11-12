@@ -88,11 +88,8 @@ PHPDBG_HELP(eval) /* {{{ */
 
 PHPDBG_HELP(break) /* {{{ */
 {
-	printf("Setting a breakpoint stops execution at a specific stage, the syntax is:\n");
-	printf("\tfile:line\n");
-	printf("\tfunction\n");
-	printf("\t\\my\\class::method\n");
-	printf("\t0x16\n");
+	printf("Setting a breakpoint stops execution at a specific stage.\n");
+    printf("\n");
 	printf("For example:\n");
 	printf("\t%sbreak test.php:1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break execution on line 1 of test.php\n");
@@ -102,6 +99,8 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("Will break execution on entry to \\my\\class::method\n");
 	printf("\t%sbreak 0x7ff68f570e08\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
+	printf("\t%sbreak 200\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
+	printf("Will break at line 200 of the currently executing file\n");
 	printf("It is important to note, an address is only valid for the current compiled representation of the script\n");
 	printf("If you have to clean the environment and recompile then your opline break points will be invalid\n");
 	return SUCCESS;
