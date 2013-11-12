@@ -31,14 +31,14 @@ $_SERVER = array
   'SERVER_NAME' => 'localhost',
   'SERVER_ADDR' => '127.0.0.1',
   'SERVER_PORT' => '80',
-  'REMOTE_ADDR' => '128.0.0.1',
-  'DOCUMENT_ROOT' => dirname(__FILE__),
+  'REMOTE_ADDR' => '127.0.0.1',
+  'DOCUMENT_ROOT' => PHPDBG_BOOTPATH,
   'REQUEST_SCHEME' => 'http',
   'CONTEXT_PREFIX' => '',
-  'CONTEXT_DOCUMENT_ROOT' => dirname(__FILE__),
+  'CONTEXT_DOCUMENT_ROOT' => PHPDBG_BOOTPATH,
   'SERVER_ADMIN' => '[no address given]',
   'SCRIPT_FILENAME' => sprintf(
-    '%s/%s', dirname(__FILE__), PHPDBG_BOOTSTRAP
+    '%s/%s', PHPDBG_BOOTPATH, PHPDBG_BOOTSTRAP
   ),
   'REMOTE_PORT' => '47931',
   'GATEWAY_INTERFACE' => 'CGI/1.1',
