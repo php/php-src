@@ -33,11 +33,14 @@ void phpdbg_list_file(const char *filename, long count, long offset) /* {{{ */
 	unsigned int line = 0, displayed = 0;
 
 	if ((fd = open(filename, O_RDONLY)) == -1) {
-		printf("[Failed to open file to list]\n");
+		printf("[Failed to open file %s to list]\n", filename);
 		return;
 	}
 
-	fstat(fd, &st);
+	if (fstat(fd, &st) == -1) {
+		printf("[Failed to stat file %s]\n", filename);
+		goto out;
+	}
 
 	last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	end_pos = mem + st.st_size;
@@ -67,6 +70,6 @@ void phpdbg_list_file(const char *filename, long count, long offset) /* {{{ */
 	}
 
 	munmap(mem, st.st_size);
+out:
 	close(fd);
-
 } /* }}} */
