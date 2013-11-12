@@ -309,3 +309,85 @@ void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
     PHPDBG_G(bp_count) = 0;
 } /* }}} */
 
+void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
+{
+    switch (type) {
+        case PHPDBG_BREAK_SYM: if ((PHPDBG_G(flags) & PHPDBG_HAS_SYM_BP)) {
+            HashPosition position;
+            phpdbg_breaksymbol_t *brake;
+
+            PHPDBG_SEP_LINE(TSRMLS_C);
+            printf("Function Breakpoints:\n");
+            for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], &position);
+                 zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], (void**) &brake, &position) == SUCCESS;
+                 zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], &position)) {
+                 printf(
+                    "#%d\t\t%s\n", brake->id, brake->symbol);
+            }
+        } break;
+        
+        case PHPDBG_BREAK_METHOD: if ((PHPDBG_G(flags) & PHPDBG_HAS_METHOD_BP)) {
+            HashPosition position[2];
+            HashTable *class_table;
+            char *class_name = NULL;
+            zend_uint class_len = 0;
+            zend_ulong class_idx = 0L;
+            
+            PHPDBG_SEP_LINE(TSRMLS_C);
+            printf("Method Breakpoints:\n");
+            for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], &position[0]);
+                 zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], (void**) &class_table, &position[0]) == SUCCESS;
+                 zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], &position[0])) {
+                 
+                 if (zend_hash_get_current_key_ex(
+                    &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 
+                    &class_name, &class_len, &class_idx, 0, &position[0]) == HASH_KEY_IS_STRING) {
+                    
+                     phpdbg_breakmethod_t *brake;
+                    
+                     for (zend_hash_internal_pointer_reset_ex(class_table, &position[1]);
+                          zend_hash_get_current_data_ex(class_table, (void**)&brake, &position[1]) == SUCCESS;
+                          zend_hash_move_forward_ex(class_table, &position[1])) {
+                          printf(
+                            "#%d\t\t%s::%s\n", brake->id, brake->class_name, brake->func_name);
+                     }
+                 }
+                 
+            }
+        } break;
+        
+        case PHPDBG_BREAK_FILE: if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)) {
+            HashPosition position;
+            zend_llist *points;
+
+            PHPDBG_SEP_LINE(TSRMLS_C);
+            printf("File Breakpoints:\n");
+            for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], &position);
+                 zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], (void**) &points, &position) == SUCCESS;
+                 zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], &position)) {
+                 zend_llist_position lposition;
+                 phpdbg_breakfile_t *brake;
+
+                 if ((brake = zend_llist_get_first_ex(points, &lposition))) {
+                    do {
+                        printf("#%d\t\t%s:%lu\n", brake->id, brake->filename, brake->line);
+                    } while ((brake = zend_llist_get_next_ex(points, &lposition)));
+                 }
+            }
+        } break;
+        
+        case PHPDBG_BREAK_OPLINE: if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)) {
+            HashPosition position;
+            phpdbg_breakline_t *brake;
+
+            PHPDBG_SEP_LINE(TSRMLS_C);
+            printf("Opline Breakpoints:\n");
+            for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], &position);
+                 zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (void**) &brake, &position) == SUCCESS;
+                 zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], &position)) {
+                 printf("#%d\t\t%p\n", brake->id, brake->opline);
+            }
+        } break;
+    }
+} /* }}} */
+
