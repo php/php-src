@@ -68,8 +68,8 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	zend_llist_add_element(break_files_ptr, &new_break);
 
 	printf(
-	    "%sBreakpoint #%d added at %s:%ld%s\n", 
-	    PHPDBG_BOLD_LINE(TSRMLS_C), 
+	    "%sBreakpoint #%d added at %s:%ld%s\n",
+	    PHPDBG_BOLD_LINE(TSRMLS_C),
 	    new_break.id, new_break.filename, new_break.line,
 	    PHPDBG_END_LINE(TSRMLS_C));
 } /* }}} */
@@ -90,13 +90,13 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 			name_len, &new_break, sizeof(phpdbg_breaksymbol_t), NULL);
 
 	    printf(
-	        "%sBreakpoint #%d added at %s%s\n", 
-	        PHPDBG_BOLD_LINE(TSRMLS_C), 
+	        "%sBreakpoint #%d added at %s%s\n",
+	        PHPDBG_BOLD_LINE(TSRMLS_C),
 	        new_break.id, new_break.symbol,
 	        PHPDBG_END_LINE(TSRMLS_C));
 	} else {
 	    printf(
-	        "%sBreakpoint exists at %s%s\n", 
+	        "%sBreakpoint exists at %s%s\n",
 	        PHPDBG_BOLD_LINE(TSRMLS_C), name, PHPDBG_END_LINE(TSRMLS_C));
 	}
 } /* }}} */
@@ -112,8 +112,8 @@ void phpdbg_set_breakpoint_method(const char* class_name,
         zend_hash_init(
             &class_breaks, 8, NULL, phpdbg_class_breaks_dtor, 0);
         zend_hash_update(
-            &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 
-            class_name, class_len, 
+            &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD],
+            class_name, class_len,
             (void**)&class_breaks, sizeof(HashTable), (void**)&class_table);
     }
 
@@ -130,42 +130,40 @@ void phpdbg_set_breakpoint_method(const char* class_name,
 
         zend_hash_update(class_table, func_name, func_len, &new_break, sizeof(phpdbg_breakmethod_t), NULL);
         printf(
-            "%sBreakpoint #%d added at %s::%s%s\n", 
+            "%sBreakpoint #%d added at %s::%s%s\n",
             PHPDBG_BOLD_LINE(TSRMLS_C),
             new_break.id, class_name, func_name,
             PHPDBG_END_LINE(TSRMLS_C));
     } else {
         printf(
-            "%sBreakpoint exists at %s::%s%s\n", 
-             PHPDBG_BOLD_LINE(TSRMLS_C), 
-             class_name, func_name, 
+            "%sBreakpoint exists at %s::%s%s\n",
+             PHPDBG_BOLD_LINE(TSRMLS_C),
+             class_name, func_name,
              PHPDBG_END_LINE(TSRMLS_C));
     }
 } /* }}} */
 
-void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
 {
-	zend_ulong opline = strtoul(name, 0, 16);
-
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline)) {
 		phpdbg_breakline_t new_break;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
-        new_break.name = strdup(name);
+        new_break.name = NULL;
 		new_break.opline = opline;
 		new_break.id = PHPDBG_G(bp_count)++;
 
 		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 
-	    printf("%sBreakpoint #%d added at %s%s\n", 
-	        PHPDBG_BOLD_LINE(TSRMLS_C), 
-	        new_break.id, new_break.name,
+	    printf("%sBreakpoint #%d added at %#lx%s\n",
+	        PHPDBG_BOLD_LINE(TSRMLS_C),
+	        new_break.id, new_break.opline,
 	        PHPDBG_END_LINE(TSRMLS_C));
 	} else {
 	    printf(
-	        "%sBreakpoint exists at %s%s\n", 
-	        PHPDBG_BOLD_LINE(TSRMLS_C), name, PHPDBG_END_LINE(TSRMLS_C));
+	        "%sBreakpoint exists at %#lx%s\n",
+	        PHPDBG_BOLD_LINE(TSRMLS_C), opline, PHPDBG_END_LINE(TSRMLS_C));
 	}
 } /* }}} */
 
@@ -176,18 +174,15 @@ void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
-        asprintf(
-            (char**)&new_break.name, "%p", (zend_op*) opline);
-
 		new_break.opline = (zend_ulong) opline;
 		new_break.id = PHPDBG_G(bp_count)++;
 
 		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 
 	    printf(
-	        "%sBreakpoint #%d added at %p%s\n", 
-	        PHPDBG_BOLD_LINE(TSRMLS_C), 
-	        new_break.id, (zend_op*) new_break.opline,
+	        "%sBreakpoint #%d added at %#lx%s\n",
+	        PHPDBG_BOLD_LINE(TSRMLS_C),
+	        new_break.id, new_break.opline,
 	        PHPDBG_END_LINE(TSRMLS_C));
 	}
 } /* }}} */
@@ -207,8 +202,8 @@ int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 		const phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*)le->data;
 
 		if (bp->line == (*EG(opline_ptr))->lineno) {
-			printf("%sBreakpoint #%d at %s:%ld%s\n", 
-			PHPDBG_BOLD_LINE(TSRMLS_C), 
+			printf("%sBreakpoint #%d at %s:%ld%s\n",
+			PHPDBG_BOLD_LINE(TSRMLS_C),
 			bp->id, bp->filename, bp->line,
 			PHPDBG_END_LINE(TSRMLS_C));
 			return SUCCESS;
@@ -244,7 +239,7 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 
 	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], fname, strlen(fname),
 		(void**)&bp) == SUCCESS) {
-		printf("%sBreakpoint #%d in %s() at %s:%u%s\n", 
+		printf("%sBreakpoint #%d in %s() at %s:%u%s\n",
 		    PHPDBG_BOLD_LINE(TSRMLS_C),
 		    bp->id, bp->symbol,
 			zend_get_executed_filename(TSRMLS_C),
@@ -261,7 +256,7 @@ int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 	HashTable *class_table;
 	phpdbg_breakmethod_t *bp;
 
-	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name, ops->scope->name_length, 
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name, ops->scope->name_length,
 	        (void**)&class_table) == SUCCESS) {
 		if (zend_hash_find(
 		        class_table,
@@ -269,7 +264,7 @@ int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 		        strlen(ops->function_name), (void**)&bp) == SUCCESS) {
 
 		    printf(
-		        "%sBreakpoint #%d in %s::%s() at %s:%u%s\n", 
+		        "%sBreakpoint #%d in %s::%s() at %s:%u%s\n",
 		        PHPDBG_BOLD_LINE(TSRMLS_C),
 		        bp->id, bp->class_name, bp->func_name,
 			    zend_get_executed_filename(TSRMLS_C),
@@ -288,9 +283,9 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 
 	if (zend_hash_index_find(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline,
 	        (void**)&bp) == SUCCESS) {
-		printf("%sBreakpoint #%d in %s at %s:%u%s\n", 
+		printf("%sBreakpoint #%d in %#lx at %s:%u%s\n",
 		    PHPDBG_BOLD_LINE(TSRMLS_C),
-		    bp->id, bp->name,
+		    bp->id, bp->opline,
 			zend_get_executed_filename(TSRMLS_C),
 			zend_get_executed_lineno(TSRMLS_C),
 			PHPDBG_END_LINE(TSRMLS_C));
@@ -307,7 +302,7 @@ void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
-    
+
     PHPDBG_G(flags) &= ~PHPDBG_BP_MASK;
 
     PHPDBG_G(bp_count) = 0;

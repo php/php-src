@@ -58,11 +58,6 @@ static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
 	efree((char*)((phpdbg_breaksymbol_t*)brake)->symbol);
 } /* }}} */
 
-static void php_phpdbg_destroy_bp_opline(void *brake) /* {{{ */
-{
-	free((char*)((phpdbg_breakline_t*)brake)->name);
-} /* }}} */
-
 static void php_phpdbg_destroy_bp_methods(void *brake) /* {{{ */
 {
     zend_hash_destroy((HashTable*)brake);
@@ -72,9 +67,9 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
-    zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
+    zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
-    
+
 	return SUCCESS;
 } /* }}} */
 
@@ -84,7 +79,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
-    
+
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
     }
@@ -97,12 +92,12 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 } /* }}} */
 
 /* {{{ proto void phpdbg_break(void)
-    instructs phpdbg to insert a breakpoint at the next opcode */ 
+    instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break)
 {
     if (EG(current_execute_data) && EG(active_op_array)) {
         zend_ulong opline_num = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
-        
+
         phpdbg_set_breakpoint_opline_ex(
             &EG(active_op_array)->opcodes[opline_num+1] TSRMLS_CC);
     }
@@ -206,7 +201,7 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
         if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
 	        php_register_variable("SCRIPT_NAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
         }
-        
+
         if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
 	        php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
         }
@@ -214,7 +209,7 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 	        php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
         }
     }
-    
+
     /* any old docroot will doo */
     len = 0U;
     if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
@@ -302,7 +297,7 @@ int main(int argc, char *argv[]) /* {{{ */
 	char *php_optarg = NULL;
     int php_optind = 1;
     int opt;
-    
+
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -319,7 +314,7 @@ int main(int argc, char *argv[]) /* {{{ */
 
 	tsrm_ls = ts_resource(0);
 #endif
-    
+
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
         switch (opt) {
             case 'n':
@@ -363,7 +358,7 @@ int main(int argc, char *argv[]) /* {{{ */
             case 'z':
                 zend_load_extension(php_optarg);
             break;
-            
+
             case 'e': /* set execution context */
                 exec_len = strlen(php_optarg);
                 if (exec_len) {
@@ -374,11 +369,11 @@ int main(int argc, char *argv[]) /* {{{ */
             case 'v': /* set quietness off */
                 flags &= ~PHPDBG_IS_QUIET;
             break;
-            
+
             case 's': /* set stepping on */
                 flags |= PHPDBG_IS_STEPPING;
             break;
-            
+
             case 'b': /* set colours off */
                 flags &= ~PHPDBG_IS_COLOURED;
             break;
@@ -394,7 +389,7 @@ int main(int argc, char *argv[]) /* {{{ */
     phpdbg->executable_location = argv[0];
     phpdbg->phpinfo_as_text = 1;
     phpdbg->php_ini_ignore = 0;
-    
+
     if (ini_entries) {
 		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
 		memmove(ini_entries + sizeof(phpdbg_ini_hardcoded) - 2, ini_entries, ini_entries_len + 1);
@@ -404,9 +399,9 @@ int main(int argc, char *argv[]) /* {{{ */
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
 	}
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
-    
+
     phpdbg->ini_entries = ini_entries;
-    
+
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
 
@@ -421,35 +416,35 @@ int main(int argc, char *argv[]) /* {{{ */
         if (exec) { /* set execution context */
             PHPDBG_G(exec) = estrndup(exec, exec_len);
             PHPDBG_G(exec_len) = exec_len;
-            
+
             free(exec);
         }
-        
+
         /* set flags from command line */
         PHPDBG_G(flags) = flags;
-        
+
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
-		
+
 		/* print blurb */
         printf(
-            "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n", 
+            "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n",
             PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_VERSION, PHPDBG_END_LINE(TSRMLS_C));
         printf(
             "[To get help using phpdbg type \"help\" and press enter\n");
         printf(
-            "%sPlease report bugs to <%s>%s\n", 
+            "%sPlease report bugs to <%s>%s\n",
             PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_ISSUES, PHPDBG_END_LINE(TSRMLS_C));
 
         do {
 		    zend_try {
 		        phpdbg_interactive(TSRMLS_C);
 		    } zend_catch {
-                
+
 		    } zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
-		
+
 		if (ini_entries) {
 		    free(ini_entries);
 		}
