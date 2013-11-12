@@ -567,8 +567,13 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		            }
 		        break;
 
-		        case PHPDBG_NEXT:
+		        case PHPDBG_NEXT: {
+		            if (!EG(in_execution)) {
+		                printf("[Not running]\n");
+		            }
 		            return PHPDBG_NEXT;
+		        }
+		            
 
 		    }
 		} else if (PHPDBG_G(last)) {

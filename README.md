@@ -1,8 +1,6 @@
 The interactive PHP debugger
 ============================
 
-phpdbg is an interactive debugger for PHP.
-
 Implemented as a SAPI module, phpdbg can excerpt complete control over the environment without impacting the functionality or performance of your code.
 
 phpdbg aims to be a lightweight, easy to use debugging platform for PHP5.5+
