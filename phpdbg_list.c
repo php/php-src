@@ -20,8 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/mman.h>
-#include <unistd.h>
+#ifndef _WIN32
+#	include <sys/mman.h>
+#	include <unistd.h>
+#endif
 #include <fcntl.h>
 #include "phpdbg.h"
 #include "phpdbg_list.h"
@@ -30,14 +32,19 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
 	struct stat st;
-	int fd, all_content = (count == 0);
+#ifndef _WIN32
+	int fd;
+#else
+	HANDLE fd, map;
+#endif
+	int all_content = (count == 0);
 	unsigned int line = 0, displayed = 0;
 
     if (VCWD_STAT(filename, &st) == -1) {
 		printf("[Failed to stat file %s]\n", filename);
 		return;
 	}
-
+#ifndef _WIN32
 	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
 		printf("[Failed to open file %s to list]\n", filename);
 		return;
@@ -45,7 +52,29 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 
 	last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	end_pos = mem + st.st_size;
+#else
+	fd = CreateFile(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+	if (fd == INVALID_HANDLE_VALUE) {
+		printf("[Failed to open file!]\n");
+		return;
+	}
 
+	map = CreateFileMapping(fd, NULL, PAGE_EXECUTE_READ, 0, 0, 0);
+	if (map == NULL) {
+		printf("[Failed to map file!]\n");
+		CloseHandle(fd);
+		return;
+	}
+
+	last_pos = mem = (char*) MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
+	if (mem == NULL) {
+		printf("[Failed to map file in memory]\n");
+		CloseHandle(map);
+		CloseHandle(fd);
+		return;
+	}
+	end_pos = mem + st.st_size;
+#endif
 	while (1) {
 		pos = memchr(last_pos, '\n', end_pos - last_pos);
 
@@ -70,9 +99,14 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 		}
 	}
 
+#ifndef _WIN32
 	munmap(mem, st.st_size);
-out:
 	close(fd);
+#else
+	UnmapViewOfFile(mem);
+	CloseHandle(map);
+	CloseHandle(fd);
+#endif
 } /* }}} */
 
 void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
@@ -88,3 +122,4 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	phpdbg_list_file(ops->filename,
 		ops->line_end - ops->line_start + 1, ops->line_start TSRMLS_CC);
 } /* }}} */
+
