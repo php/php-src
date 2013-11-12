@@ -20,6 +20,9 @@
 #ifndef PHPDBG_UTILS_H
 #define PHPDBG_UTILS_H
 
+/**
+ * Input scan functions
+ */
 int phpdbg_is_numeric(const char*);
 int phpdbg_is_empty(const char*);
 int phpdbg_is_addr(const char*);
