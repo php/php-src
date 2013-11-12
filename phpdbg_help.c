@@ -140,5 +140,7 @@ PHPDBG_HELP(list) /* {{{ */
 	printf("The list command displays N line from current context file.\n");
 	printf("\tphpdbg> list 2\n");
 	printf("Will print next 2 lines from the current file\n");
+	printf("\tphpdbg> list func\n");
+	printf("Will print func source code\n");
 	return SUCCESS;
 } /* }}} */

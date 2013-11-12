@@ -17,12 +17,15 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#include <ctype.h>
+#include "phpdbg_utils.h"
 
-#include "zend_compile.h"
-
-void phpdbg_list_file(const char*, long, long);
-void phpdbg_list_function(const zend_function*);
-
-#endif /* PHPDBG_LIST_H */
+int phpdbg_is_numeric(const char *str) /* {{{ */
+{
+	for (; *str; str++) {
+		if (isspace(*str)) {
+			continue;
+		}
+		return isdigit(*str);
+	}
+} /* }}} */

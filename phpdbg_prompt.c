@@ -26,6 +26,7 @@
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
+#include "phpdbg_utils.h"
 
 static const phpdbg_command_t phpdbg_prompt_commands[];
 
@@ -103,7 +104,7 @@ static PHPDBG_COMMAND(step) /* {{{ */
 	} else {
 	    PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
 	}
-	
+
 	printf(
 	    "[Stepping %s]\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 	return SUCCESS;
@@ -151,20 +152,20 @@ static PHPDBG_COMMAND(run) /* {{{ */
 static PHPDBG_COMMAND(eval) /* {{{ */
 {
 	zval retval;
-    
+
 	if (expr_len) {
 	    zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
-	    
+
 	    /* disable stepping while eval() in progress */
 	    PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-	    
+
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(
 			    &retval, 0 TSRMLS_CC);
 			printf("\n");
 		}
-		
+
 		/* switch stepping back on */
 		if (stepping) {
 		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
@@ -221,7 +222,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
 	printf("Stepping\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
     printf("Quietness\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-    	
+
 	if (PHPDBG_G(ops)) {
 		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
 
@@ -305,15 +306,15 @@ static PHPDBG_COMMAND(break) /* {{{ */
 {
 	char *line_pos = NULL;
     char *func_pos = NULL;
-    
+
     if (!expr_len) {
         printf(
             "[No expression found]\n");
         return FAILURE;
     }
-    
+
     line_pos  = strchr(expr, ':');
-    
+
 	if (line_pos) {
 	    if (!(func_pos=strchr(line_pos+1, ':'))) {
 	        char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
@@ -336,19 +337,19 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	    } else {
 		    char *class;
 		    char *func;
-		    
+
 		    size_t func_len = strlen(func_pos+1),
 		           class_len = (line_pos - expr);
-		    
+
 		    if (func_len) {
 		        class = emalloc(class_len+1);
 		        func = emalloc(func_len+1);
-		        
+
 		        memcpy(class, expr, class_len);
 		        class[class_len]='\0';
 		        memcpy(func, func_pos+1, func_len);
 		        func[func_len]='\0';
-		        
+
 		        phpdbg_set_breakpoint_method(class, class_len, func, func_len TSRMLS_CC);
 		    } else {
 		        printf("[No function found in method expression %s]\n", expr);
@@ -437,7 +438,7 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     printf("[\tSymbols\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_symbols)));
     printf("[\tOplines\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_oplines)));
     printf("[\tMethods\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_methods)));
-    
+
     phpdbg_clear_breakpoints(TSRMLS_C);
 
     return SUCCESS;
@@ -489,18 +490,32 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
 
 static PHPDBG_COMMAND(list) /* {{{ */
 {
-	long offset = 0, count = strtol(expr, NULL, 0);
-	const char *filename = PHPDBG_G(exec);
+	if (phpdbg_is_numeric(expr)) {
+		long offset = 0, count = strtol(expr, NULL, 0);
+		const char *filename = PHPDBG_G(exec);
 
-	if (zend_is_executing(TSRMLS_C)) {
-		filename = zend_get_executed_filename(TSRMLS_C);
-		offset = zend_get_executed_lineno(TSRMLS_C);
-	} else if (!filename) {
-		printf("[No file to list]\n");
-		return SUCCESS;
+		if (zend_is_executing(TSRMLS_C)) {
+			filename = zend_get_executed_filename(TSRMLS_C);
+			offset = zend_get_executed_lineno(TSRMLS_C);
+		} else if (!filename) {
+			printf("[No file to list]\n");
+			return SUCCESS;
+		}
+
+		phpdbg_list_file(filename, count, offset);
+	} else {
+		zend_function* fbc;
+
+		if (!EG(function_table)) {
+			printf("[No function table loaded]\n");
+			return SUCCESS;
+		}
+
+		if (zend_hash_find(EG(function_table), expr, strlen(expr)+1,
+			(void**)&fbc) == SUCCESS) {
+			phpdbg_list_function(fbc);
+		}
 	}
-
-	phpdbg_list_file(filename, count, offset);
 
 	return SUCCESS;
 } /* }}} */
@@ -573,7 +588,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		            }
 		            return PHPDBG_NEXT;
 		        }
-		            
+
 
 		    }
 		} else if (PHPDBG_G(last)) {
@@ -652,7 +667,7 @@ zend_vm_enter:
                 }
             }
         }
-        
+
         if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
             && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
             while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
