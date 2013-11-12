@@ -809,7 +809,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *pentry, *pmembers, *pcount = NULL, *pinf;
-	long count;
+	php_int_t count;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buf, &buf_len) == FAILURE) {
 		return;
@@ -924,7 +924,7 @@ outexcept:
 		zval_ptr_dtor(&pcount);
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset " ZEND_INT_FMT " of " ZEND_UINT_FMT " bytes", (php_int_t)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -1133,7 +1133,7 @@ SPL_METHOD(MultipleIterator, valid)
 	spl_SplObjectStorage        *intern;
 	spl_SplObjectStorageElement *element;
 	zval                        *it, *retval = NULL;
-	long                         expect, valid;
+	php_int_t                         expect, valid;
 
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	

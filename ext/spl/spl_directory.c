@@ -676,7 +676,7 @@ zend_function *spl_filesystem_object_get_method_check(zval **object_ptr, char *m
 #define DIT_CTOR_FLAGS  0x00000001
 #define DIT_CTOR_GLOB   0x00000002
 
-void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_flags) /* {{{ */
+void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, php_int_t ctor_flags) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	char *path;
@@ -2052,7 +2052,7 @@ static int spl_filesystem_file_read(spl_filesystem_object *intern, int silent TS
 {
 	char *buf;
 	size_t line_len = 0;
-	long line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
+	php_int_t line_add = (intern->u.file.current_line || intern->u.file.current_zval) ? 1 : 0;
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
 	
@@ -2541,7 +2541,7 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 		return;
 	}
 
-	RETURN_LONG((long)intern->u.file.max_line_len);
+	RETURN_LONG((php_int_t)intern->u.file.max_line_len);
 } /* }}} */
 
 /* {{{ proto bool SplFileObject::hasChildren()
@@ -2734,7 +2734,7 @@ SPL_METHOD(SplFileObject, fflush)
 SPL_METHOD(SplFileObject, ftell)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);	
-	long ret = php_stream_tell(intern->u.file.stream);
+	php_int_t ret = php_stream_tell(intern->u.file.stream);
 
 	if (ret == -1) {
 		RETURN_FALSE;

@@ -69,7 +69,7 @@ struct _spl_filesystem_object {
 	char               *file_name;
 	zend_str_size_int  file_name_len;
 	SPL_FS_OBJ_TYPE    type;
-	long               flags;
+	php_int_t               flags;
 	zend_class_entry   *file_class;
 	zend_class_entry   *info_class;
 	union {
@@ -94,7 +94,7 @@ struct _spl_filesystem_object {
 			char               *current_line;
 			size_t             current_line_len;
 			size_t             max_line_len;
-			long               current_line_num;
+			php_int_t               current_line_num;
 			zval               zresource;
 			zend_function      *func_getCurr;
 			char               delimiter;

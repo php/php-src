@@ -9,7 +9,7 @@ var_dump(new SplFileObject(__FILE__, "r", false, null));
 --EXPECTF--
 object(SplFileObject)#1 (%d) {
   ["pathName":"SplFileInfo":private]=>
-  string(%d) "%s/bug64782.php"
+  string(%d) "%sbug64782.php"
   ["fileName":"SplFileInfo":private]=>
   string(12) "bug64782.php"
   ["openMode":"SplFileObject":private]=>
