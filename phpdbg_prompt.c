@@ -36,20 +36,24 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
-	if (PHPDBG_G(exec)) {
-		phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
-		efree(PHPDBG_G(exec));
-		PHPDBG_G(exec) = NULL;
+	if (expr && expr_len > 0L) {
+	    if (PHPDBG_G(exec)) {
+		    phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
+		    efree(PHPDBG_G(exec));
+		    PHPDBG_G(exec) = NULL;
+	    }
+
+	    if (PHPDBG_G(ops)) {
+		    phpdbg_notice("Destroying compiled opcodes");
+       		phpdbg_clean(0 TSRMLS_CC);
+	    }
+
+	    PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
+
+	    phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+	} else {
+	    phpdbg_error("No expression provided");
 	}
-
-	if (PHPDBG_G(ops)) {
-		phpdbg_notice("Destroying compiled opcodes");
-   		phpdbg_clean(0 TSRMLS_CC);
-	}
-
-	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
-
-	phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 
 	return SUCCESS;
 } /* }}} */
@@ -420,6 +424,28 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(aliases) /* {{{ */
+{
+    phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
+		PHPDBG_VERSION);
+
+    phpdbg_notice("Aliases");
+	{
+	    const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
+
+	    while (prompt_command && prompt_command->name) {
+		    if (prompt_command->alias) {
+		        phpdbg_writeln(
+		            "\t%c -> %s", prompt_command->alias, prompt_command->name);
+		    }
+		    ++prompt_command;
+	    }
+	}
+	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+	
+	return SUCCESS;
+} /* }}} */
+
 static PHPDBG_COMMAND(help) /* {{{ */
 {
 	phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
@@ -438,10 +464,11 @@ static PHPDBG_COMMAND(help) /* {{{ */
 		phpdbg_notice("Commands");
 
 		while (prompt_command && prompt_command->name) {
-			phpdbg_writeln("\t%s\t%s", prompt_command->name, prompt_command->tip);
+			phpdbg_writeln(
+			    "\t%s\t%s", prompt_command->name, prompt_command->tip);
 			++prompt_command;
 		}
-
+		
 		phpdbg_notice("Helpers Loaded");
 
 		while (help_command && help_command->name) {
@@ -519,21 +546,22 @@ static PHPDBG_COMMAND(list) /* {{{ */
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_D(exec,      "set execution context"),
-	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
-	PHPDBG_COMMAND_D(step,      "step through execution"),
-	PHPDBG_COMMAND_D(next,      "continue execution"),
-	PHPDBG_COMMAND_D(run,       "attempt execution"),
-	PHPDBG_COMMAND_D(eval,      "evaluate some code"),
-	PHPDBG_COMMAND_D(print,     "print something"),
-	PHPDBG_COMMAND_D(break,     "set breakpoint"),
-	PHPDBG_COMMAND_D(back,      "show backtrace"),
-	PHPDBG_COMMAND_D(list,      "list specified line or function"),
-	PHPDBG_COMMAND_D(clean,     "clean the execution environment"),
-	PHPDBG_COMMAND_D(clear,     "clear breakpoints"),
-	PHPDBG_COMMAND_D(help,      "show help menu"),
-	PHPDBG_COMMAND_D(quiet,     "silence some output"),
-	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
+	PHPDBG_COMMAND_EX_D(exec,       "set execution context", 'e'),
+	PHPDBG_COMMAND_EX_D(compile,    "attempt to pre-compile execution context", 'c'),
+	PHPDBG_COMMAND_EX_D(step,       "step through execution", 's'),
+	PHPDBG_COMMAND_EX_D(next,       "continue execution", 'n'),
+	PHPDBG_COMMAND_EX_D(run,        "attempt execution", 'r'),
+	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code", 'E'),
+	PHPDBG_COMMAND_EX_D(print,      "print something", 'p'),
+	PHPDBG_COMMAND_EX_D(break,      "set breakpoint", 'b'),
+	PHPDBG_COMMAND_EX_D(back,       "show trace", 't'),
+	PHPDBG_COMMAND_EX_D(list,       "list specified line or function", 'l'),
+	PHPDBG_COMMAND_D(clean,         "clean the execution environment"),
+	PHPDBG_COMMAND_D(clear,         "clear breakpoints"),
+	PHPDBG_COMMAND_EX_D(help,       "show help menu", 'h'),
+	PHPDBG_COMMAND_D(quiet,         "silence some output"),
+	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
+	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
 	{NULL, 0, 0}
 };
 
@@ -548,8 +576,9 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
     
 	while (command && command->name && command->handler) {
-		if (command->name_len == expr_len
-			    && memcmp(cmd, command->name, expr_len) == 0) {
+		if ((command->name_len == expr_len
+			    && memcmp(cmd, command->name, expr_len) == 0)
+		   ||(command->alias && command->alias == cmd_line[0])) {
 			
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
 			PHPDBG_G(last_params) = expr;

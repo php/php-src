@@ -42,6 +42,7 @@ struct _phpdbg_command_t {
 	size_t name_len;                    /* Command name length */
 	const char *tip;                    /* Menu tip */
 	size_t tip_len;                     /* Menu tip length */
+	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 } ;
 
@@ -54,7 +55,9 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
  * Command Declarators
  */
 #define PHPDBG_COMMAND_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_##name}
+#define PHPDBG_COMMAND_EX_D(name, tip, alias) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name}
 #define PHPDBG_COMMAND(name) \
 	int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
 

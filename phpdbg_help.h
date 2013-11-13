@@ -27,7 +27,7 @@
  * Command Declarators
  */
 #define PHPDBG_HELP_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_help_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_help_##name}
 #define PHPDBG_HELP(name) \
 	int phpdbg_do_help_##name(const char *expr, size_t expr_len TSRMLS_DC)
 

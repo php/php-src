@@ -27,7 +27,7 @@
  * Command Declarators
  */
 #define PHPDBG_PRINT_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_print_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_print_##name}
 #define PHPDBG_PRINT(name) \
 	int phpdbg_do_print_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
