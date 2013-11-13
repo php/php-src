@@ -439,12 +439,17 @@ int main(int argc, char **argv) /* {{{ */
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
+		
+		zend_try {
+		    zend_activate_auto_globals(TSRMLS_C);
+		} zend_end_try();
 
 		/* print blurb */
         phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
             PHPDBG_VERSION);
         phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
         phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+
 
         do {
 		    zend_try {
