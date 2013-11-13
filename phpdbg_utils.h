@@ -29,12 +29,6 @@ int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
 
 /**
- * Input trim function
- * NOTE: efree all the things
- */
-char *phpdbg_trim(const char*, size_t*);
-
-/**
  * Error/notice/formatting helper
  */
 enum {

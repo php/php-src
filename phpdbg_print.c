@@ -124,6 +124,41 @@ PHPDBG_PRINT(class) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_PRINT(method) /* {{{ */
+{
+    if (expr && expr_len > 0L) {
+        char *class_name = NULL;
+        char *func_name = NULL;
+        
+        if (phpdbg_is_class_method(expr, expr_len, &class_name, &func_name)) {
+            zend_class_entry **ce;
+            
+            if (zend_lookup_class(class_name, strlen(class_name), &ce TSRMLS_CC) == SUCCESS) {
+                zend_function *fbc;
+                
+                if (zend_hash_find(&(*ce)->function_table, func_name, strlen(func_name), (void**)&fbc) == SUCCESS) {
+                    phpdbg_notice(
+	                    "%s Method %s", 
+	                    (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+	                    fbc->common.function_name);
+	                    
+			        phpdbg_print_function_helper(fbc TSRMLS_CC);
+                } else {
+                    phpdbg_error("The method %s could not be found", func_name);
+                }
+            }
+            
+            efree(class_name);
+            efree(func_name);
+        } else {
+            phpdbg_error("The expression provided is not a valid method %s", expr);
+        }
+    } else {
+        phpdbg_error("No expression provided");
+    }
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_PRINT(func) /* {{{ */
 {
     if (expr && expr_len > 0L) {
@@ -152,8 +187,9 @@ PHPDBG_PRINT(func) /* {{{ */
 
 		if (zend_hash_find(func_table, func_name, func_name_len+1, (void**)&fbc) == SUCCESS) {
 		    phpdbg_notice(
-	            "%s Function %s", 
+	            "%s %s %s",
 	            (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+	            (fbc->common.scope) ? "Method" : "Function",
 	            fbc->common.function_name);
 	            
 			phpdbg_print_function_helper(fbc TSRMLS_CC);

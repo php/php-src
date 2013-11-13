@@ -74,7 +74,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	char *buffer = NULL;
-	va_list args = {0};
+	va_list args;
 
 	if (format != NULL && strlen(format) > 0L) {
 	    va_start(args, format);
@@ -121,20 +121,4 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 	if (buffer) {
 		efree(buffer);
 	}
-} /* }}} */
-
-char *phpdbg_trim(const char *expr, size_t *expr_len) /* {{{ */
-{
-    char *pointer = expr;
-    
-    while (*pointer && isspace(*pointer)) {
-        pointer++;
-        (*expr_len)--;
-    }
-    
-    while (expr_len > 0L && isspace(pointer[(*expr_len)-1])) {
-        pointer[--(*expr_len)]='\0';
-    }
-    
-    return pointer;
 } /* }}} */

@@ -208,7 +208,8 @@ static PHPDBG_COMMAND(back) /* {{{ */
 static PHPDBG_COMMAND(print) /* {{{ */
 {
 	if (expr && expr_len > 0L) {
-		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
+		if (phpdbg_print_commands &&
+		    phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
 			phpdbg_error("Failed to find print command %s", expr);
 		}
 		return SUCCESS;
@@ -521,7 +522,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 #endif
 	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
     
-	while (command && command->name) {
+	while (command && command->name && command->handler) {
 		if (command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0) {
 			
@@ -546,20 +547,19 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 #ifndef HAVE_LIBREADLINE
     char cmd[PHPDBG_MAX_CMD];
 
-phpdbg_interactive_enter:
-    phpdbg_write(PROMPT);
-    
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
-	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
+	        phpdbg_write(PROMPT) &&
+	       (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL)) {
 	    cmd_len = strlen(cmd) - 1;
 #else
     char *cmd = NULL;
 
-phpdbg_interactive_enter:
     while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
         cmd = readline(PROMPT);
 
-        cmd_len = strlen(cmd);
+        if (cmd) {
+            cmd_len = strlen(cmd);
+        } else cmd_len = 0L;
 #endif
 
 		/* trim space from end of input */
@@ -595,14 +595,9 @@ phpdbg_interactive_enter:
                 cmd = NULL;
             }
 #endif
-
 		} else if (PHPDBG_G(last)) {
 		    PHPDBG_G(last)->handler(
 		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
-		}
-
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-            goto phpdbg_interactive_enter;
 		}
 	}
 	
