@@ -594,6 +594,12 @@ phpdbg_interactive_enter:
 		}
 
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+#ifdef HAVE_LIBREADLINE
+            if (cmd) {
+                free(cmd);
+                cmd = NULL;
+            }
+#endif
             goto phpdbg_interactive_enter;
 		}
 	}
