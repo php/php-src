@@ -28,6 +28,31 @@ int phpdbg_is_empty(const char*);
 int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
 
+enum {
+	EMPTY_PARAM = 0,
+	ADDR_PARAM,
+	FILE_PARAM,
+	METHOD_PARAM,
+	STR_PARAM,
+	NUMERIC_PARAM
+};
+
+typedef union _phpdbg_param {
+	long num;
+	zend_ulong addr;
+	struct {
+		char *name;
+		long line;
+	} file;
+	struct {
+		char *class;
+		char *name;
+	} method;
+	char *str;
+} phpdbg_param_t;
+
+const char *phpdbg_current_file(TSRMLS_D);
+
 /**
  * Error/notice/formatting helper
  */

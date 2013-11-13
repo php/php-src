@@ -316,6 +316,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 
 static PHPDBG_COMMAND(break) /* {{{ */
 {
+	phpdbg_param_t param;
 	char *line_pos;
 
 	if (expr_len == 0) {
@@ -328,69 +329,25 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		return SUCCESS;
 	}
 
-    line_pos = strchr(expr, ':');
-
-	if (line_pos) {
-		char *class;
-		char *func;
-
-		/* break class::method */
-		if (phpdbg_is_class_method(expr, expr_len, &class, &func)) {
-			phpdbg_set_breakpoint_method(class, func TSRMLS_CC);
-		} else {
-			/* break file:line */
-	        char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
-		    long line_num = strtol(line_pos+1, NULL, 0);
-
-		    if (line_num) {
-		        memcpy(path, expr, line_pos - expr);
-		        path[line_pos - expr] = 0;
-
-		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			        phpdbg_error("Failed to expand path %s", path);
-			        return FAILURE;
-		        }
-
-		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
-		    } else {
-		        phpdbg_error("No line specified in expression %s", expr);
-		        return FAILURE;
-		    }
-	    }
-	} else {
-		/* break 0xc0ffee */
-		if (phpdbg_is_addr(expr)) {
-			zend_ulong opline = strtoul(expr, 0, 16);
-
-			phpdbg_set_breakpoint_opline(opline TSRMLS_CC);
-		} else if (phpdbg_is_numeric(expr)) {
-			/* break 1337 */
-			const char *filename = zend_get_executed_filename(TSRMLS_C);
-			long line_num = strtol(expr, NULL, 0);
-
-			if (!filename) {
-				phpdbg_error("No file context found");
-				return FAILURE;
-			}
-
-			phpdbg_set_breakpoint_file(filename, line_num TSRMLS_CC);
-		} else {
-			/* break symbol */
-			char name[200];
-			size_t name_len = strlen(expr);
-
-			if (name_len) {
-				name_len = MIN(name_len, 200);
-				memcpy(name, expr, name_len);
-				name[name_len] = 0;
-
-				phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
-			} else {
-				phpdbg_error("Malformed break command found");
-				return FAILURE;
-			}
-		}
+	switch (phpdbg_parse_param(expr, expr_len, &param)) {
+		case ADDR_PARAM:
+			phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
+			break;
+		case NUMERIC_PARAM:
+			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param.num TSRMLS_CC);
+			break;
+		case METHOD_PARAM:
+			phpdbg_set_breakpoint_method(param.method.class, param.method.name TSRMLS_CC);
+			break;
+		case FILE_PARAM:
+			phpdbg_set_breakpoint_file(param.file.name, param.file.line TSRMLS_CC);
+		case STR_PARAM:
+			phpdbg_set_breakpoint_symbol(param.str TSRMLS_CC);
+			break;
+		default:
+			break;
 	}
+	phpdbg_clear_param(&param);
 
 	return SUCCESS;
 } /* }}} */

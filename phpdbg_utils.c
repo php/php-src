@@ -67,13 +67,82 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	    *class = estrndup(str, sep - str);
 	    (*class)[sep - str] = 0;
 	}
-	
+
 	if (method != NULL) {
 	    *method = estrndup(
 	        sep+2, str + len - (sep + 2));
 	}
 
 	return 1;
+} /* }}} */
+
+const char *phpdbg_current_file(TSRMLS_D)
+{
+	const char *file = PHPDBG_G(exec);
+
+	if (!file) {
+		file = zend_get_executed_filename(TSRMLS_C);
+	}
+	return file;
+}
+
+int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+{
+	char *class_name, *func_name;
+
+	if (len == 0) {
+		return EMPTY_PARAM;
+	}
+
+	if (phpdbg_is_addr(str)) {
+		param->addr = strtoul(str, 0, 16);
+		return ADDR_PARAM;
+	} else if (phpdbg_is_numeric(str)) {
+		param->num = strtol(str, NULL, 0);
+		return NUMERIC_PARAM;
+	} else if (phpdbg_is_class_method(str, len+1, &class_name, &func_name)) {
+		param->method.class = class_name;
+		param->method.name = func_name;
+		return METHOD_PARAM;
+	} else {
+		const char *line_pos = strchr(str, ':');
+
+		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
+			char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
+
+			memcpy(path, str, line_pos - str);
+			path[line_pos - str] = 0;
+
+			if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+				goto out;
+			}
+
+			param->file.name = estrndup(resolved_name, line_pos - str);
+			param->file.line = strtol(line_pos+1, NULL, 0);
+			return FILE_PARAM;
+		}
+	}
+out:
+	param->str = estrndup(str, len);
+	return STR_PARAM;
+} /* }}} */
+
+void phpdbg_clear_param(int type, phpdbg_param_t *param) /* {{{ */
+{
+	switch (type) {
+		case FILE_PARAM:
+			efree(param->file.name);
+			break;
+		case METHOD_PARAM:
+			efree(param->method.class);
+			efree(param->method.name);
+			break;
+		case STR_PARAM:
+			efree(param->str);
+			break;
+		default:
+			break;
+	}
 } /* }}} */
 
 int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
@@ -104,7 +173,7 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 				    buffer,
 				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
-		
+
 		case P_WRITELN: {
 		    if (buffer) {
 			    rc = printf("%s%s%s\n",
@@ -115,7 +184,7 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 			    rc = printf("\n");
 			}
 		} break;
-		
+
 		case P_WRITE: if (buffer) {
 		    rc = printf("%s%s%s",
 		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
@@ -127,6 +196,6 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 	if (buffer) {
 		efree(buffer);
 	}
-	
+
 	return rc;
 } /* }}} */
