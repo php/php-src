@@ -35,7 +35,7 @@ PHPDBG_HELP(step) /* {{{ */
 {
     phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
     phpdbg_writeln(EMPTY);
-    phpdbg_writeln("For example:");
+    phpdbg_writeln("Examples:");
     phpdbg_writeln("\t%sstepping 1", PROMPT);
     phpdbg_writeln("Will enable stepping");
     phpdbg_writeln(EMPTY);
@@ -62,6 +62,16 @@ PHPDBG_HELP(compile) /* {{{ */
 PHPDBG_HELP(print) /* {{{ */
 {
 	phpdbg_writeln("By default, print will show information about the current execution environment");
+	phpdbg_writeln("Other printing commands give access to address, file and line information");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%sprint class \\my\\class", PROMPT);
+	phpdbg_writeln("Will print information about \\my\\class, including the instructions for every method and their address");
+	phpdbg_writeln("\t%sprint func .getSomething", PROMPT);
+	phpdbg_writeln("Will print the instructions for the method getSomething in the currently active scope");
+	phpdbg_writeln("\t%sprint opline", PROMPT);
+	phpdbg_writeln("Will print the instruction for the current opline");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Specific printers loaded are show below:");
 	phpdbg_notice("Commands");
 	{
@@ -93,7 +103,7 @@ PHPDBG_HELP(break) /* {{{ */
 {
 	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage.");
 	phpdbg_writeln(EMPTY);
-	phpdbg_writeln("For example:");
+	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%sbreak test.php:1", PROMPT);
 	phpdbg_writeln("Will break execution on line 1 of test.php");
 	phpdbg_writeln("\t%sbreak my_function", PROMPT);
@@ -128,11 +138,13 @@ PHPDBG_HELP(quiet) /* {{{ */
 {
     phpdbg_writeln("Setting quietness on will stop the OPLINE output during execution");
     phpdbg_writeln(EMPTY);
-    phpdbg_writeln("For example:");
+    phpdbg_writeln("Examples:");
     phpdbg_writeln("\t%squiet 1", PROMPT);
     phpdbg_writeln("Will silence OPLINE output, while");
     phpdbg_writeln("\t%squiet 0", PROMPT);
     phpdbg_writeln("Will enable OPLINE output again");
+    phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Quietness is disabled while stepping through execution automatically");
     return SUCCESS;
 } /* }}} */
 
@@ -140,7 +152,8 @@ PHPDBG_HELP(back) /* {{{ */
 {
 	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality.");
     phpdbg_writeln(EMPTY);
-	phpdbg_writeln("You can set the limit on the trace, for example:");
+    phpdbg_writeln("Examples:");
+	phpdbg_writeln("You can set the limit on the trace");
 	phpdbg_writeln("\t%sback 5", PROMPT);
 	phpdbg_writeln("Will limit the number of frames to 5, the default is no limit");
 	return SUCCESS;
@@ -150,6 +163,7 @@ PHPDBG_HELP(list) /* {{{ */
 {
 	phpdbg_writeln("The list command displays N line from current context file.");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%slist 2", PROMPT);
 	phpdbg_writeln("Will print next 2 lines from the current file");
 	phpdbg_writeln("\t%slist func", PROMPT);
