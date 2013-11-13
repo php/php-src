@@ -436,7 +436,7 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 	    while (prompt_command && prompt_command->name) {
 		    if (prompt_command->alias) {
 		        phpdbg_writeln(
-		            "\t%c -> %s", prompt_command->alias, prompt_command->name);
+		            "\t%c -> %s\t%s", prompt_command->alias, prompt_command->name, prompt_command->tip);
 		    }
 		    ++prompt_command;
 	    }
@@ -556,10 +556,10 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_EX_D(break,      "set breakpoint", 'b'),
 	PHPDBG_COMMAND_EX_D(back,       "show trace", 't'),
 	PHPDBG_COMMAND_EX_D(list,       "list specified line or function", 'l'),
-	PHPDBG_COMMAND_D(clean,         "clean the execution environment"),
-	PHPDBG_COMMAND_D(clear,         "clear breakpoints"),
+	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment", 'X'),
+	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints", 'C'),
 	PHPDBG_COMMAND_EX_D(help,       "show help menu", 'h'),
-	PHPDBG_COMMAND_D(quiet,         "silence some output"),
+	PHPDBG_COMMAND_EX_D(quiet,      "silence some output", 'Q'),
 	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
 	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
 	{NULL, 0, 0}
