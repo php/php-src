@@ -623,9 +623,11 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
         (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 
         zend_op *opline = execute_data->opline;
-
-		phpdbg_notice("OPLINE: %p:%s",
-            opline, phpdbg_decode_opcode(opline->opcode));
+        /* output line info */
+		phpdbg_notice("#%lu %p %s %s",
+           opline->lineno,
+           opline, phpdbg_decode_opcode(opline->opcode), 
+           execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
     }
 } /* }}} */
 
