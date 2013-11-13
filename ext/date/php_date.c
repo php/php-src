@@ -1397,12 +1397,12 @@ PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 /* }}} */
 
 /* {{{ php_parse_date: Backwards compatibility function */
-PHPAPI signed long php_parse_date(char *string, signed long *now)
+PHPAPI php_int_t php_parse_date(char *string, php_int_t *now)
 {
 	timelib_time *parsed_time;
 	timelib_error_container *error = NULL;
 	int           error2;
-	signed long   retval;
+	php_int_t   retval;
 
 	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (error->error_count) {
@@ -1621,7 +1621,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_tzinfo      *tzi;
 	timelib_time_offset *offset = NULL;
 
-	timestamp = (long) time(NULL);
+	timestamp = (php_int_t) time(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &format, &format_len, &timestamp) == FAILURE) {
 		RETURN_FALSE;
@@ -1723,7 +1723,7 @@ PHP_FUNCTION(gmstrftime)
    Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
-	RETURN_LONG((long)time(NULL));
+	RETURN_LONG((php_int_t)time(NULL));
 }
 /* }}} */
 
@@ -2389,7 +2389,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
 	MAKE_STD_ZVAL(zv); \
-	ZVAL_LONG(zv, (long)intervalobj->diff->f); \
+	ZVAL_LONG(zv, (php_int_t)intervalobj->diff->f); \
 	zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zv), NULL);
 
 	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
@@ -3875,7 +3875,7 @@ PHP_FUNCTION(timezone_transitions_get)
 	zval                *object, *element;
 	php_timezone_obj    *tzobj;
 	unsigned int         i, begin = 0, found;
-	php_int_t                 timestamp_begin = LONG_MIN, timestamp_end = LONG_MAX;
+	php_int_t                 timestamp_begin = PHP_INT_MIN, timestamp_end = PHP_INT_MAX;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ii", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
 		RETURN_FALSE;
@@ -3910,7 +3910,7 @@ PHP_FUNCTION(timezone_transitions_get)
 
 	array_init(return_value);
 
-	if (timestamp_begin == LONG_MIN) {
+	if (timestamp_begin == PHP_INT_MIN) {
 		add_nominal();
 		begin = 0;
 		found = 1;
@@ -4295,8 +4295,8 @@ static char *date_interval_format(char *format, zend_str_size_int format_len, ti
 				case 'I': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 				case 'i': length = slprintf(buffer, 32, "%d", (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, 32, "%02ld", (long) t->s); break;
-				case 's': length = slprintf(buffer, 32, "%ld", (long) t->s); break;
+				case 'S': length = slprintf(buffer, 32, "%02" ZEND_INT_FMT_SPEC, (php_int_t) t->s); break;
+				case 's': length = slprintf(buffer, 32, ZEND_INT_FMT, (php_int_t) t->s); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {

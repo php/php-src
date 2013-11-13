@@ -57,6 +57,8 @@ typedef off_t zend_off_t;
 #  define ZEND_STRTOUL(s0, s1, base) _strtoui64((s0), (s1), (base))
 #  define ZEND_INT_FMT "%I64d"
 #  define ZEND_UINT_FMT "%I64u"
+#  define ZEND_INT_FMT_SPEC "I64d"
+#  define ZEND_UINT_FMT_SPEC "I64u"
 #  define ZEND_STRTOL_PTR _strtoi64
 #  define ZEND_STRTOUL_PTR _strtoui64
 # else
@@ -70,6 +72,8 @@ typedef off_t zend_off_t;
 #  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_INT_FMT "%lld"
 #  define ZEND_UINT_FMT "%llu"
+#  define ZEND_INT_FMT_SPEC "lld"
+#  define ZEND_UINT_FMT_SPEC "llu"
 #  define ZEND_STRTOL_PTR strtoll
 #  define ZEND_STRTOUL_PTR strtoull
 # endif
@@ -89,6 +93,8 @@ typedef off_t zend_off_t;
 # endif
 # define ZEND_INT_FMT "%ld"
 # define ZEND_UINT_FMT "%lu"
+# define ZEND_INT_FMT_SPEC "ld"
+# define ZEND_UINT_FMT_SPEC "lu"
 # define ZEND_STRTOL_PTR strtol
 # define ZEND_STRTOUL_PTR strtoul
 #endif

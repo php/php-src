@@ -176,13 +176,13 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	free(errors);
 }
 
-signed long timelib_date_to_int(timelib_time *d, int *error)
+php_int_t timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
 	ts = d->sse;
 
-	if (ts < LONG_MIN || ts > LONG_MAX) {
+	if (ts < PHP_INT_MIN || ts > PHP_INT_MAX) {
 		if (error) {
 			*error = 1;
 		}
@@ -191,7 +191,7 @@ signed long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (signed long) d->sse;
+	return (php_int_t) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
