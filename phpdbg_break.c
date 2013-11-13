@@ -112,24 +112,28 @@ PHPDBG_BREAK(on) /* {{{ */
 
 PHPDBG_BREAK(lineno) /* {{{ */
 {
-    /* note: this can break on [no active file] */
-    if (expr && expr_len > 0L) {
-	   if (phpdbg_is_numeric(expr)) {
-	        const char *filename = zend_get_executed_filename(TSRMLS_C);
+	if (!PHPDBG_G(exec)) {
+		phpdbg_error("Not file context found!");
+		return SUCCESS;
+	}
 
-		    if (filename) {
-		        phpdbg_set_breakpoint_file(
-		            filename, strtol(expr, NULL, 0) TSRMLS_CC);
-		    } else {
-		        phpdbg_error("No file context found");
-		    }
-	   } else {
-	      phpdbg_error(
-	        "The expression provided is not a valid line number %s", expr);
-	   }
+	if (expr_len == 0) {
+	    phpdbg_error("No expression provided!");
+	    return SUCCESS;
+	}
+
+	if (phpdbg_is_numeric(expr)) {
+		const char *filename = zend_get_executed_filename(TSRMLS_C);
+
+		if (filename &&
+			!memcmp(filename, "[no active file]", sizeof("[no active file]"))) {
+			phpdbg_set_breakpoint_file(filename, strtol(expr, NULL, 0) TSRMLS_CC);
+		} else {
+			phpdbg_error("No file context found");
+		}
 	} else {
-	    phpdbg_error(
-	        "No expression provided!");
+		phpdbg_error(
+			"The expression provided is not a valid line number %s", expr);
 	}
 
 	return SUCCESS;
@@ -137,17 +141,23 @@ PHPDBG_BREAK(lineno) /* {{{ */
 
 PHPDBG_BREAK(func) /* {{{ */
 {
-    if (expr && expr_len > 0L) {
-        char name[200];
-        size_t name_len = expr_len;
+	char name[200];
+	size_t name_len = expr_len;
 
-	    name_len = MIN(name_len, 200);
-	    memcpy(name, expr, name_len);
-	    name[name_len] = 0;
+	if (expr_len == 0) {
+		phpdbg_error("No expression provided");
+		return SUCCESS;
+	}
 
-	    phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
-    } else {
-        phpdbg_error("No expression provided");
-    }
+	if (expr_len >= 200) {
+		phpdbg_error("Name is too long");
+		return SUCCESS;
+	}
+
+	memcpy(name, expr, name_len);
+	name[name_len] = 0;
+
+	phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
+
     return SUCCESS;
 } /* }}} */
