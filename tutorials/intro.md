@@ -82,7 +82,7 @@ Looking up addresses is made easy by the *print* command
 
 ![phpdbg verbose](https://raw.github.com/krakjoe/phpdbg/master/tutorials/show-printing.png)
 
-For simple scripts, like the library code in the last section, and times when you want as much verboseness as possibe, the following might be an option:
+For simple scripts, like the library code in the last section, and times when you want as much verboseness as possible, the following might be an option:
 
 ![phpdbg verbose](https://raw.github.com/krakjoe/phpdbg/master/tutorials/show-verbose.png)
 
