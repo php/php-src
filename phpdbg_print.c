@@ -36,7 +36,7 @@ PHPDBG_PRINT(opline) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline phpdbg_print_function_helper(zend_function *method TSRMLS_DC) {
+static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC) {
     switch (method->type) {
         case ZEND_USER_FUNCTION: {
             zend_op_array* op_array = &method->op_array;
@@ -63,7 +63,7 @@ static inline phpdbg_print_function_helper(zend_function *method TSRMLS_DC) {
                 
                 
                 do {
-                    char *decode = phpdbg_decode_opcode(opline->opcode);
+                    const char *decode = phpdbg_decode_opcode(opline->opcode);
                     if (decode != NULL) {
                         phpdbg_writeln(
                             "\t\t#%lu\t%p %s", opline->lineno, opline, decode); 
