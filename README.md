@@ -61,4 +61,4 @@ The following switches change the default behaviour of phpdbg:
 Screeny
 =======
 
-<img src="https://raw.github.com/krakjoe/phpdbg/master/phpdbg.png" alt="screenshot"/>
+<img src="https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png" alt="screenshot"/>
