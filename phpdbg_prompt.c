@@ -73,25 +73,23 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
-	if (expr && expr_len > 0L) {
-	    if (PHPDBG_G(exec)) {
-		    phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
-		    efree(PHPDBG_G(exec));
-		    PHPDBG_G(exec) = NULL;
-	    }
-
-	    if (PHPDBG_G(ops)) {
-		    phpdbg_notice("Destroying compiled opcodes");
-       		phpdbg_clean(0 TSRMLS_CC);
-	    }
-
-	    PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
-
-	    phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-	} else {
-	    phpdbg_error("No expression provided");
+	if (expr_len == 0) {
+		phpdbg_error("No expression provided");
+		return SUCCESS;
+	}
+	if (PHPDBG_G(exec)) {
+		phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
+		efree(PHPDBG_G(exec));
+		PHPDBG_G(exec) = NULL;
+	}
+	if (PHPDBG_G(ops)) {
+		phpdbg_notice("Destroying compiled opcodes");
+		phpdbg_clean(0 TSRMLS_CC);
 	}
 
+	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
+
+	phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 	return SUCCESS;
 } /* }}} */
 
@@ -99,22 +97,23 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 {
 	zend_file_handle fh;
 
-	if (!EG(in_execution)) {
-		phpdbg_notice("Attempting compilation of %s", PHPDBG_G(exec));
-
-	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
-		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
-
-		    PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
-		    zend_destroy_file_handle(&fh TSRMLS_CC);
-
-		    phpdbg_notice("Success");
-		    return SUCCESS;
-        } else {
-			phpdbg_error("Could not open file %s", PHPDBG_G(exec));
-        }
-	} else {
+	if (EG(in_execution)) {
 		phpdbg_error("Cannot compile while in execution");
+		return FAILURE;
+	}
+
+	phpdbg_notice("Attempting compilation of %s", PHPDBG_G(exec));
+
+	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
+		USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+
+		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
+		zend_destroy_file_handle(&fh TSRMLS_CC);
+
+		phpdbg_notice("Success");
+		return SUCCESS;
+	} else {
+		phpdbg_error("Could not open file %s", PHPDBG_G(exec));
 	}
 
 	return FAILURE;
@@ -122,19 +121,18 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 static PHPDBG_COMMAND(compile) /* {{{ */
 {
-	if (PHPDBG_G(exec)) {
-		if (!EG(in_execution)) {
-		    if (PHPDBG_G(ops)) {
-				phpdbg_error("Destroying previously compiled opcodes");
-			    phpdbg_clean(0 TSRMLS_CC);
-		    }
-		}
-
-		return phpdbg_compile(TSRMLS_C);
-	} else {
+	if (!PHPDBG_G(exec)) {
 		phpdbg_error("No execution context");
 		return FAILURE;
 	}
+	if (!EG(in_execution)) {
+		if (PHPDBG_G(ops)) {
+			phpdbg_error("Destroying previously compiled opcodes");
+			phpdbg_clean(0 TSRMLS_CC);
+		}
+	}
+
+	return phpdbg_compile(TSRMLS_C);
 } /* }}} */
 
 static PHPDBG_COMMAND(step) /* {{{ */
@@ -208,30 +206,29 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 static PHPDBG_COMMAND(eval) /* {{{ */
 {
+	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
 	zval retval;
 
-	if (expr_len) {
-	    zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
-
-	    PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-
-	    /* disable stepping while eval() in progress */
-        PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-		if (zend_eval_stringl((char*)expr, expr_len,
-			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			zend_print_zval_r(&retval, 0 TSRMLS_CC);
-			zval_dtor(&retval);
-			phpdbg_writeln(EMPTY);
-		}
-        PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
-
-		/* switch stepping back on */
-		if (stepping) {
-		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-		}
-	} else {
+	if (expr_len == 0) {
 		phpdbg_error("No expression provided!");
 		return FAILURE;
+	}
+
+	PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+
+	/* disable stepping while eval() in progress */
+	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+	if (zend_eval_stringl((char*)expr, expr_len,
+		&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+		zend_print_zval_r(&retval, 0 TSRMLS_CC);
+		zval_dtor(&retval);
+		phpdbg_writeln(EMPTY);
+	}
+	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+
+	/* switch stepping back on */
+	if (stepping) {
+		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 	}
 
 	return SUCCESS;
@@ -424,26 +421,26 @@ static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC)
 
 static PHPDBG_COMMAND(clean) /* {{{ */
 {
-    if (!EG(in_execution)) {
-        phpdbg_notice("Cleaning Execution Environment");
-
-        phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-        phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-        phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-        phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
-
-        phpdbg_clean(1 TSRMLS_CC);
-
-        phpdbg_notice("Clean Execution Environment");
-
-        phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-        phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-        phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-        phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
-    } else {
+    if (EG(in_execution)) {
         phpdbg_error("Cannot clean environment while executing");
         return FAILURE;
-    }
+	}
+
+	phpdbg_notice("Cleaning Execution Environment");
+
+	phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+	phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+	phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
+
+	phpdbg_clean(1 TSRMLS_CC);
+
+	phpdbg_notice("Clean Execution Environment");
+
+	phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+	phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+	phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+	phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
 
     return SUCCESS;
 } /* }}} */
@@ -464,23 +461,22 @@ static PHPDBG_COMMAND(clear) /* {{{ */
 
 static PHPDBG_COMMAND(aliases) /* {{{ */
 {
+	const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
+
     phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
 		PHPDBG_VERSION);
 
     phpdbg_notice("Aliases");
-	{
-	    const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
 
-	    while (prompt_command && prompt_command->name) {
-		    if (prompt_command->alias) {
-		        phpdbg_writeln(
-		            "\t%c -> %s\t%s", prompt_command->alias, prompt_command->name, prompt_command->tip);
-		    }
-		    ++prompt_command;
-	    }
+	while (prompt_command && prompt_command->name) {
+		if (prompt_command->alias) {
+			phpdbg_writeln("\t%c -> %s\t%s", prompt_command->alias,
+				prompt_command->name, prompt_command->tip);
+		}
+		++prompt_command;
 	}
-	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
 
+	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
 	return SUCCESS;
 } /* }}} */
 
