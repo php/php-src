@@ -379,9 +379,9 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 #if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
 	do {
-		struct stat st;
+		php_stat_t st;
 		memset(&st, 0, sizeof(st));
-		if (fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
+		if (php_fstat(fd, &st) == 0 && (st.st_mode & S_IFMT) == S_IFSOCK) {
 			stream = php_stream_sock_open_from_socket(fd, NULL);
 			if (stream) {
 				stream->ops = &php_stream_socket_ops;

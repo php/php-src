@@ -999,7 +999,7 @@ SAPI_API int sapi_flush(TSRMLS_D)
 	}
 }
 
-SAPI_API struct stat *sapi_get_stat(TSRMLS_D)
+SAPI_API zend_stat_t *sapi_get_stat(TSRMLS_D)
 {
 	if (sapi_module.get_stat) {
 		return sapi_module.get_stat(TSRMLS_C);

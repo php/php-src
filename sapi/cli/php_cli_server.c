@@ -137,7 +137,7 @@ typedef struct php_cli_server_request {
 	size_t content_len;
 	const char *ext;
 	size_t ext_len;
-	struct stat sb;
+	php_stat_t sb;
 } php_cli_server_request;
 
 typedef struct php_cli_server_chunk {
@@ -1332,7 +1332,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 
 static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
-	struct stat sb;
+	php_stat_t sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
@@ -1369,7 +1369,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	*p = '\0';
 	q = p;
 	while (q > buf) {
-		if (!stat(buf, &sb)) {
+		if (!php_stat_fn(buf, &sb)) {
 			if (sb.st_mode & S_IFDIR) {
 				const char **file = index_files;
 				if (q[-1] != DEFAULT_SLASH) {
@@ -1378,7 +1378,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 				while (*file) {
 					size_t l = strlen(*file);
 					memmove(q, *file, l + 1);
-					if (!stat(buf, &sb) && (sb.st_mode & S_IFREG)) {
+					if (!php_stat_fn(buf, &sb) && (sb.st_mode & S_IFREG)) {
 						q += l;
 						break;
 					}
@@ -2411,9 +2411,9 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 
 	if (document_root) {
-		struct stat sb;
+		php_stat_t sb;
 
-		if (stat(document_root, &sb)) {
+		if (php_stat_fn(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
 			return 1;
 		}

@@ -123,7 +123,7 @@ typedef struct _sapi_globals_struct {
 	int64_t read_post_bytes;
 	unsigned char post_read;
 	unsigned char headers_sent;
-	struct stat global_stat;
+	zend_stat_t global_stat;
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
@@ -199,7 +199,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
 
 SAPI_API int sapi_flush(TSRMLS_D);
-SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
+SAPI_API zend_stat_t *sapi_get_stat(TSRMLS_D);
 SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC);
 
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D);
@@ -228,7 +228,7 @@ struct _sapi_module_struct {
 
 	zend_str_size_int (*ub_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
 	void (*flush)(void *server_context);
-	struct stat *(*get_stat)(TSRMLS_D);
+	zend_stat_t *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
 
 	void (*sapi_error)(int type, const char *error_msg, ...);

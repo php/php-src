@@ -184,7 +184,7 @@ PHP_FUNCTION(iptcembed)
 	unsigned int marker, done = 0;
 	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
-	struct stat sb;
+	php_stat_t sb;
 	zend_bool written = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SP|i", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
@@ -201,7 +201,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		fstat(fileno(fp), &sb);
+		php_fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);

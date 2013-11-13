@@ -279,7 +279,7 @@ static void php_binary_init(TSRMLS_D)
 			if ((envpath = getenv("PATH")) != NULL) {
 				char *search_dir, search_path[MAXPATHLEN];
 				char *last = NULL;
-				struct stat s;
+				php_stat_t s;
 
 				path = estrdup(envpath);
 				search_dir = php_strtok_r(path, ":", &last);
@@ -1205,7 +1205,7 @@ static void php_error_cb(int type, const char *error_filename, const zend_str_si
  */
 PHPAPI char *php_get_current_user(TSRMLS_D)
 {
-	struct stat *pstat;
+	php_stat_t *pstat;
 
 	if (SG(request_info).current_user) {
 		return SG(request_info).current_user;

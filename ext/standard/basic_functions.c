@@ -5901,7 +5901,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRSIZE_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1));
+				php_uint_t key = (php_uint_t) zend_atol(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1));
 				if (zend_hash_index_find(Z_ARRVAL_P(arr), key, (void **) &find_hash) == FAILURE) {
 					ALLOC_ZVAL(hash);
 					INIT_PZVAL(hash);
