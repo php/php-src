@@ -36,6 +36,56 @@ PHPDBG_PRINT(opline) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static inline phpdbg_print_function_helper(zend_function *method TSRMLS_DC) {
+    switch (method->type) {
+        case ZEND_USER_FUNCTION: {
+            zend_op_array* op_array = &method->op_array;
+
+            if (op_array) {
+                zend_op     *opline = &op_array->opcodes[0];
+                zend_uint   opcode = 0,
+                            end =  op_array->last-1;
+
+                if (method->common.scope) {
+                    phpdbg_writeln(
+                        "\t#%d-%d %s::%s() %s",
+                        op_array->line_start, op_array->line_end,
+                        method->common.scope->name, 
+                        method->common.function_name,
+                        op_array->filename ? op_array->filename : "unknown");
+                } else {
+                    phpdbg_writeln(
+                        "\t#%d-%d %s() %s",
+                        op_array->line_start, op_array->line_end,
+                        method->common.function_name,
+                        op_array->filename ? op_array->filename : "unknown");
+                }
+                
+                
+                do {
+                    char *decode = phpdbg_decode_opcode(opline->opcode);
+                    if (decode != NULL) {
+                        phpdbg_writeln(
+                            "\t\t#%lu\t%p %s", opline->lineno, opline, decode); 
+                    } else phpdbg_error("\tFailed to decode opline @ %ld", opline);
+                    
+                    opline++;
+                } while (++opcode < end);
+            }
+        } break;
+        
+        default: {
+            if (method->common.scope) {
+                phpdbg_writeln(
+                    "\tInternal %s::%s()", method->common.scope->name, method->common.function_name);
+            } else {
+                phpdbg_writeln(
+                    "\tInternal %s()", method->common.function_name);
+            }
+        }
+     }
+}
+
 PHPDBG_PRINT(class) /* {{{ */
 {
     zend_class_entry **ce;
@@ -61,46 +111,57 @@ PHPDBG_PRINT(class) /* {{{ */
 	            for (zend_hash_internal_pointer_reset_ex(&(*ce)->function_table, &position);
 	                 zend_hash_get_current_data_ex(&(*ce)->function_table, (void**) &method, &position) == SUCCESS;
 	                 zend_hash_move_forward_ex(&(*ce)->function_table, &position)) {
-	                 switch (method->type) {
-	                    case ZEND_USER_FUNCTION: {
-	                        zend_op_array* op_array = &method->op_array;
-   
-                            if (op_array) {
-                                zend_op     *opline = &op_array->opcodes[0];
-                                zend_uint   opcode = 0,
-                                            end =  op_array->last-1;
-
-                                 phpdbg_writeln(
-                                    "\t%s::%s() in %s:%d-%d", 
-                                    (*ce)->name, method->common.function_name,
-                                    op_array->filename ? op_array->filename : "unknown",
-                                    op_array->line_start, op_array->line_end);
-                                
-                                do {
-                                    char *decode = phpdbg_decode_opcode(opline->opcode);
-                                    if (decode != NULL) {
-                                        phpdbg_writeln(
-                                            "\t\t%p:%s", opline, decode); 
-                                    } else phpdbg_error("\tFailed to decode opline @ %ld", opline);
-                                    
-                                    opline++;
-                                } while (++opcode < end);
-                            }	
-	                    } break;
-	                    
-	                    default: {
-	                        phpdbg_writeln(
-	                            "\tInternal %s::%s()", (*ce)->name, method->common.function_name);
-	                    }
-	                 }
+	                 phpdbg_print_function_helper(method TSRMLS_CC);
 	            }
 	        }
 	    } else {
-	        phpdbg_error("Cannot find class %s/%lu", expr, expr_len);
+	        phpdbg_error("Cannot find class %s", expr);
 	    }
 	} else {
 		phpdbg_error("No class name provided!");
 	}
 
 	return SUCCESS;
+} /* }}} */
+
+PHPDBG_PRINT(func) /* {{{ */
+{
+    if (expr && expr_len > 0L) {
+        HashTable *func_table = EG(function_table);
+		zend_function* fbc;
+        const char *func_name = expr;
+        size_t func_name_len = expr_len;
+        
+        /* search active scope if begins with period */
+        if (func_name[0] == '.') {
+           if (EG(scope)) {
+               func_name++;
+               func_name_len--;
+
+               func_table = &EG(scope)->function_table;
+           } else {
+               phpdbg_error("No active class");
+               return FAILURE;
+           }
+        } else if (!EG(function_table)) {
+			phpdbg_error("No function table loaded");
+			return SUCCESS;
+		} else {
+		    func_table = EG(function_table);
+		}
+
+		if (zend_hash_find(func_table, func_name, func_name_len+1, (void**)&fbc) == SUCCESS) {
+		    phpdbg_notice(
+	            "%s Function %s", 
+	            (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+	            fbc->common.function_name);
+	            
+			phpdbg_print_function_helper(fbc TSRMLS_CC);
+		} else {
+			phpdbg_error("Function %s not found", func_name);
+		}
+    } else {
+        phpdbg_error("No function name provided");
+    }
+    return SUCCESS;
 } /* }}} */

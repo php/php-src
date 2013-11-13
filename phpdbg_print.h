@@ -36,6 +36,7 @@
  */
 PHPDBG_PRINT(opline);
 PHPDBG_PRINT(class);
+PHPDBG_PRINT(func);
 
 /**
  * Commands
@@ -43,6 +44,7 @@ PHPDBG_PRINT(class);
 static const phpdbg_command_t phpdbg_print_commands[] = {
 	PHPDBG_PRINT_D(opline,     "print the current opline information"),
 	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class"),
+	PHPDBG_PRINT_D(func,       "print out the instructions in the specified function"),
 	{NULL, 0, 0}
 };
 
