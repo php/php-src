@@ -563,7 +563,7 @@ phpdbg_interactive_enter:
 #endif
 
 		/* trim space from end of input */
-		while (isspace(cmd[cmd_len-1]))
+		while (*cmd && isspace(cmd[cmd_len-1]))
 		    cmd_len--;
 
 		/* ensure string is null terminated */
@@ -588,21 +588,29 @@ phpdbg_interactive_enter:
 		            return PHPDBG_NEXT;
 		        }
 		    }
-		} else if (PHPDBG_G(last)) {
-		    PHPDBG_G(last)->handler(
-		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
-		}
-
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+		    
 #ifdef HAVE_LIBREADLINE
             if (cmd) {
                 free(cmd);
                 cmd = NULL;
             }
 #endif
+
+		} else if (PHPDBG_G(last)) {
+		    PHPDBG_G(last)->handler(
+		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
+		}
+
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
             goto phpdbg_interactive_enter;
 		}
 	}
+	
+#ifdef HAVE_LIBREADLINE
+    if (cmd) {
+        free(cmd);
+    }
+#endif
 
 	return SUCCESS;
 } /* }}} */
