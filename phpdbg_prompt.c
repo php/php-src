@@ -215,7 +215,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	}
 
     phpdbg_writeln(SEPARATE);
-	phpdbg_notice("Execution Context Information:");
+	phpdbg_notice("Execution Context Information");
 #ifdef HAVE_LIBREADLINE
     phpdbg_writeln("Readline\tyes");
 #else
@@ -401,7 +401,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 	if (expr_len > 0L) {
 		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			phpdbg_error("Failed to find help command: %s/%lu", expr, expr_len);
+			phpdbg_error("Failed to find help command: %s", expr);
 		}
 	} else {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
