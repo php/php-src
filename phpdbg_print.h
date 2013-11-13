@@ -35,12 +35,14 @@
  * Printer Forward Declarations
  */
 PHPDBG_PRINT(opline);
+PHPDBG_PRINT(class);
 
 /**
  * Commands
  */
 static const phpdbg_command_t phpdbg_print_commands[] = {
 	PHPDBG_PRINT_D(opline,     "print the current opline information"),
+	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class"),
 	{NULL, 0, 0}
 };
 

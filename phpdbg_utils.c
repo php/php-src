@@ -119,3 +119,19 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 		efree(buffer);
 	}
 } /* }}} */
+
+char *phpdbg_trim(const char *expr, size_t *expr_len) /* {{{ */
+{
+    char *pointer = expr;
+    
+    while (*pointer && isspace(*pointer)) {
+        pointer++;
+        (*expr_len)--;
+    }
+    
+    while (expr_len > 0L && isspace(pointer[(*expr_len)-1])) {
+        pointer[--(*expr_len)]='\0';
+    }
+    
+    return pointer;
+} /* }}} */

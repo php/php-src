@@ -513,21 +513,24 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
-	char *params = NULL;
+	char *expr = NULL;
 #ifndef _WIN32
-	const char *cmd = strtok_r(cmd_line, " ", &params);
+	const char *cmd = strtok_r(cmd_line, " ", &expr);
 #else
-	const char *cmd = strtok_s(cmd_line, " ", &params);
+	const char *cmd = strtok_s(cmd_line, " ", &expr);
 #endif
-	size_t expr_len = cmd != NULL ? strlen(cmd) : 0;
-
+	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
+    
 	while (command && command->name) {
 		if (command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0) {
+			
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
-			PHPDBG_G(last_params) = params;
-			PHPDBG_G(last_params_len) = cmd_len - expr_len;
-			return command->handler(params, cmd_len - expr_len TSRMLS_CC);
+			PHPDBG_G(last_params) = expr;
+			PHPDBG_G(last_params_len) = ((cmd_len - expr_len) - sizeof(" "))+1;
+			
+			return command->handler(
+			    PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}
 		++command;
 	}

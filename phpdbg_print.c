@@ -34,3 +34,20 @@ PHPDBG_PRINT(opline) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+PHPDBG_PRINT(class) /* {{{ */
+{
+    zend_class_entry **ce;
+    
+	if (expr && expr_len > 0L) {
+	    if (zend_lookup_class(expr, strlen(expr), &ce TSRMLS_CC) == SUCCESS) {
+	        
+	    } else {
+	        phpdbg_error("Cannot find class %s/%lu", expr, expr_len);
+	    }
+	} else {
+		phpdbg_error("No class name provided!");
+	}
+
+	return SUCCESS;
+} /* }}} */
