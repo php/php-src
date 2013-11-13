@@ -158,7 +158,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	    /* disable stepping while eval() in progress */
 	    PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
 
-		if (zend_eval_stringl((char*)expr, expr_len-1,
+		if (zend_eval_stringl((char*)expr, expr_len,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			zval_dtor(&retval);
