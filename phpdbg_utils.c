@@ -64,7 +64,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	}
 
 	*class = estrndup(str, sep - str);
-	class[sep - str] = 0;
+	(*class)[sep - str] = 0;
 
 	*method = estrndup(sep+2, str + len - (sep + 2));
 

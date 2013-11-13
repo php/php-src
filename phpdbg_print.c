@@ -136,7 +136,7 @@ PHPDBG_PRINT(method) /* {{{ */
             if (zend_lookup_class(class_name, strlen(class_name), &ce TSRMLS_CC) == SUCCESS) {
                 zend_function *fbc;
                 
-                if (zend_hash_find(&(*ce)->function_table, func_name, strlen(func_name), (void**)&fbc) == SUCCESS) {
+                if (zend_hash_find(&(*ce)->function_table, func_name, strlen(func_name)+1, (void**)&fbc) == SUCCESS) {
                     phpdbg_notice(
 	                    "%s Method %s", 
 	                    (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
