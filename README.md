@@ -62,3 +62,8 @@ Screeny
 =======
 
 <img src="https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png" alt="screenshot"/>
+
+Getting Started
+===============
+
+See the tutorials for help getting started with phpdbg: https://github.com/krakjoe/phpdbg/blob/master/tutorials/intro.md
