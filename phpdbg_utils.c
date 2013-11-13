@@ -91,21 +91,21 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
     /* TODO(anyone) colours */
 
 	switch (type) {
-		case ERROR:
+		case P_ERROR:
 			rc = printf("%s%s%s\n",
 				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
 				    buffer,
 				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 
-		case NOTICE:
+		case P_NOTICE:
 			rc = printf("%s%s%s\n",
 				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
 				    buffer,
 				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 		
-		case WRITELN: {
+		case P_WRITELN: {
 		    if (buffer) {
 			    rc = printf("%s%s%s\n",
 				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
@@ -116,7 +116,7 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 			}
 		} break;
 		
-		case WRITE: if (buffer) {
+		case P_WRITE: if (buffer) {
 		    rc = printf("%s%s%s",
 		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
 		            buffer,
