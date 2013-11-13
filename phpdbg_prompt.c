@@ -172,16 +172,18 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	if (expr_len) {
 	    zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
 
-	    /* disable stepping while eval() in progress */
 	    PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-
+	    
+	    /* disable stepping while eval() in progress */
+        PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
 		if (zend_eval_stringl((char*)expr, expr_len,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			zval_dtor(&retval);
 			phpdbg_writeln(EMPTY);
 		}
-
+        PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+        
 		/* switch stepping back on */
 		if (stepping) {
 		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
@@ -689,30 +691,29 @@ zend_vm_enter:
 		}
 #endif
 
+#define DO_INTERACTIVE() do {\
+    switch (phpdbg_interactive(TSRMLS_C)) {\
+        case PHPDBG_NEXT:\
+            goto next;\
+    }\
+} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING))
+
         phpdbg_print_opline(
 		    execute_data, 0 TSRMLS_CC);
 
         /* allow conditional breakpoints to access the vm uninterrupted */
         if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
             
-            if ((PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
+            /* conditions cannot be executed by eval()'d code */
+            if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL) 
+                && (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
                 && phpdbg_find_conditional_breakpoint(TSRMLS_C) == SUCCESS) {
-                do {
-                    switch (phpdbg_interactive(TSRMLS_C)) {
-                        case PHPDBG_NEXT:
-                            goto next;
-                    }
-                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+                DO_INTERACTIVE();
             }
 
             if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)
                 && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
-                do {
-                    switch (phpdbg_interactive(TSRMLS_C)) {
-                        case PHPDBG_NEXT:
-                            goto next;
-                    }
-                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+                DO_INTERACTIVE();
             }
 
             if ((PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP))) {
@@ -725,12 +726,7 @@ zend_vm_enter:
                             case ZEND_DO_FCALL_BY_NAME:
                             case ZEND_INIT_STATIC_METHOD_CALL: {
                                 if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
-                                    do {
-                                        switch (phpdbg_interactive(TSRMLS_C)) {
-                                            case PHPDBG_NEXT:
-                                                goto next;
-                                        }
-                                    } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+                                    DO_INTERACTIVE();
                                 }
                             } break;
                         }
@@ -740,12 +736,7 @@ zend_vm_enter:
 
             if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
                 && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
-                do {
-                    switch (phpdbg_interactive(TSRMLS_C)) {
-                        case PHPDBG_NEXT:
-                            goto next;
-                    }
-                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+                DO_INTERACTIVE();
             }
         }
 
@@ -754,11 +745,7 @@ next:
 
         if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
             if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
-                while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-                        continue;
-                    }
-                }
+                DO_INTERACTIVE();
             }
         }
 
