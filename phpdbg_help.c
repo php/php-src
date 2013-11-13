@@ -118,9 +118,14 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("Will break at the opline with the address provided (addresses are shown during execution)");
 	phpdbg_writeln("\t%sbreak 200", PROMPT);
 	phpdbg_writeln("Will break at line 200 of the currently executing file");
+	phpdbg_writeln("\t%sbreak on ($expression == true)", PROMPT);
+	phpdbg_writeln("Will break when the condition evaluates to true");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("It is important to note, an address is only valid for the current compiled representation of the script");
 	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
+	
 	return SUCCESS;
 } /* }}} */
 

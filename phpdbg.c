@@ -66,7 +66,7 @@ static void php_phpdbg_destroy_bp_methods(void *brake) /* {{{ */
 
 static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 {
-    phpdbg_breakcond_t *brake = *(phpdbg_breakcond_t**) data;
+    phpdbg_breakcond_t *brake = (phpdbg_breakcond_t*) data;
     
     if (brake) {
         if (brake->ops) {
