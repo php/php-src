@@ -1,19 +1,14 @@
 <?php
-
-class my {
-    public function method() {
-        echo "Hello";
+class phpdbg {
+    public function isGreat($greeting = null) {
+        printf(
+            "%s: %s\n", __METHOD__, $greeting);
         return $this;
     }
 }
 
-function test2() {
-    echo "Hello World 2\n";
-}
+$dbg = new phpdbg();
 
-
-$my = new my();
-var_dump($my->method());
-
-return true;
+var_dump(
+    $dbg->isGreat("PHP Rocks !!"));
 ?>
