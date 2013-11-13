@@ -9,6 +9,8 @@ class phpdbg {
 
 $dbg = new phpdbg();
 
+$test = 1;
+
 var_dump(
     $dbg->isGreat("PHP Rocks !!"));
 ?>

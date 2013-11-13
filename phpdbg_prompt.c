@@ -24,6 +24,7 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
+#include "phpdbg_break.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
@@ -122,6 +123,10 @@ static PHPDBG_COMMAND(run) /* {{{ */
     }
 
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
+		zend_op **orig_opline = EG(opline_ptr);
+		zend_op_array *orig_op_array = EG(active_op_array);
+		zval **orig_retval_ptr = EG(return_value_ptr_ptr);
+		
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
 				phpdbg_error("Failed to compile %s, cannot run", PHPDBG_G(exec));
@@ -131,16 +136,28 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 		EG(active_op_array) = PHPDBG_G(ops);
 		EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
-
+        if (!EG(active_symbol_table)) {
+            zend_rebuild_symbol_table(TSRMLS_C);
+        }
+        
 		zend_try {
-			zend_execute(EG(active_op_array) TSRMLS_CC);
+			zend_execute(
+			    EG(active_op_array) TSRMLS_CC);
 		} zend_catch {
+		    EG(active_op_array) = orig_op_array;
+		    EG(opline_ptr) = orig_opline;
+		    EG(return_value_ptr_ptr) = orig_retval_ptr;
+		    
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				phpdbg_error("Caught excetion in VM");
 				return FAILURE;
 			} else return SUCCESS;
 		} zend_end_try();
 
+        EG(active_op_array) = orig_op_array;
+	    EG(opline_ptr) = orig_opline;
+	    EG(return_value_ptr_ptr) = orig_retval_ptr;
+        
 		return SUCCESS;
 	} else {
 		phpdbg_error("Nothing to execute!");
@@ -257,6 +274,13 @@ static PHPDBG_COMMAND(print) /* {{{ */
 static PHPDBG_COMMAND(break) /* {{{ */
 {
 	char *line_pos;
+	
+	if (expr_len > 0L) {
+	    /* allow advanced breakers to run */
+	    if (phpdbg_do_cmd(phpdbg_break_commands, (char*)expr, expr_len TSRMLS_CC) == SUCCESS) {
+			return SUCCESS;
+		}
+	}
 
     if (expr_len <= 0L) {
         phpdbg_error("No expression found");
@@ -668,52 +692,72 @@ zend_vm_enter:
         phpdbg_print_opline(
 		    execute_data, 0 TSRMLS_CC);
 
-        if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)
-            && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
-            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-                    continue;
-                }
+        /* allow conditional breakpoints to access the vm uninterrupted */
+        if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
+            
+            if ((PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
+                && phpdbg_find_conditional_breakpoint(TSRMLS_C) == SUCCESS) {
+                do {
+                    switch (phpdbg_interactive(TSRMLS_C)) {
+                        case PHPDBG_NEXT:
+                            goto next;
+                    }
+                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
             }
-        }
 
-        if ((PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP))) {
-            zend_execute_data *previous = execute_data->prev_execute_data;
-            if (previous && previous != execute_data && previous->opline) {
-                /* check we are the beginning of a function entry */
-                if (execute_data->opline == EG(active_op_array)->opcodes) {
-                    switch (previous->opline->opcode) {
-                        case ZEND_DO_FCALL:
-                        case ZEND_DO_FCALL_BY_NAME:
-                        case ZEND_INIT_STATIC_METHOD_CALL: {
-                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
-                                while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                                    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-                                        continue;
-                                    }
+            if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)
+                && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+                do {
+                    switch (phpdbg_interactive(TSRMLS_C)) {
+                        case PHPDBG_NEXT:
+                            goto next;
+                    }
+                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+            }
+
+            if ((PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP))) {
+                zend_execute_data *previous = execute_data->prev_execute_data;
+                if (previous && previous != execute_data && previous->opline) {
+                    /* check we are the beginning of a function entry */
+                    if (execute_data->opline == EG(active_op_array)->opcodes) {
+                        switch (previous->opline->opcode) {
+                            case ZEND_DO_FCALL:
+                            case ZEND_DO_FCALL_BY_NAME:
+                            case ZEND_INIT_STATIC_METHOD_CALL: {
+                                if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                                    do {
+                                        switch (phpdbg_interactive(TSRMLS_C)) {
+                                            case PHPDBG_NEXT:
+                                                goto next;
+                                        }
+                                    } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
                                 }
-                            }
-                        } break;
+                            } break;
+                        }
                     }
                 }
             }
-        }
 
-        if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
-            && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
-            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-                    continue;
-                }
+            if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
+                && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
+                do {
+                    switch (phpdbg_interactive(TSRMLS_C)) {
+                        case PHPDBG_NEXT:
+                            goto next;
+                    }
+                } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
             }
         }
 
+next:
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
-        if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
-            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-                    continue;
+        if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
+            if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
+                while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+                        continue;
+                    }
                 }
             }
         }
