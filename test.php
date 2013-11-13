@@ -2,6 +2,7 @@
 
 class my {
     public function method() {
+        echo "Hello";
         return $this;
     }
 }

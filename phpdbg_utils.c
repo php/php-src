@@ -23,6 +23,7 @@
 #include "php.h"
 #include "spprintf.h"
 #include "phpdbg.h"
+#include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);

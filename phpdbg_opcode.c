@@ -191,6 +191,7 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_RECV_VARIADIC);
 #endif
 		CASE(ZEND_OP_DATA);
-		default: return "UNKNOWN";
+		default: 
+		    return "UNKNOWN";
 	}
 } /* }}} */

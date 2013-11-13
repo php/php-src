@@ -547,7 +547,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 phpdbg_interactive_enter:
     phpdbg_write(PROMPT);
-
+    
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 	    cmd_len = strlen(cmd) - 1;
