@@ -24,7 +24,7 @@ phpdbg provides many options for specifying break points, as illustrated by a sc
 
 In those case where you wish to program your break points in userland, phpdbg includes a userland API, in the shape of two simple functions:
 
-```
+```php
 /**
 * Sets a breakpoint at the next opcode address
 * @return void
@@ -33,7 +33,7 @@ proto void phpdbg_break(void);
 ```
 
 
-```
+```php
 /**
 * Clear breakpoints before continuing execution
 * @return void
@@ -55,7 +55,7 @@ Direct access to eval allows you to change _anything_ at _any_ time during execu
 
 Library code for this section:
 
-```
+```php
 <?php
 class phpdbg {
     public function isGreat($greeting = null) {
