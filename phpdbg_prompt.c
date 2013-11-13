@@ -30,7 +30,44 @@
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 
-static const phpdbg_command_t phpdbg_prompt_commands[];
+/* {{{ forward declarations */
+static PHPDBG_COMMAND(exec);
+static PHPDBG_COMMAND(compile);
+static PHPDBG_COMMAND(step);
+static PHPDBG_COMMAND(next);
+static PHPDBG_COMMAND(run);
+static PHPDBG_COMMAND(eval);
+static PHPDBG_COMMAND(print);
+static PHPDBG_COMMAND(break);
+static PHPDBG_COMMAND(back);
+static PHPDBG_COMMAND(list);
+static PHPDBG_COMMAND(clean);
+static PHPDBG_COMMAND(clear);
+static PHPDBG_COMMAND(help);
+static PHPDBG_COMMAND(quiet);
+static PHPDBG_COMMAND(aliases);
+static PHPDBG_COMMAND(quit); /* }}} */
+
+/* {{{ command declarations */
+static const phpdbg_command_t phpdbg_prompt_commands[] = {
+	PHPDBG_COMMAND_EX_D(exec,       "set execution context", 'e'),
+	PHPDBG_COMMAND_EX_D(compile,    "attempt to pre-compile execution context", 'c'),
+	PHPDBG_COMMAND_EX_D(step,       "step through execution", 's'),
+	PHPDBG_COMMAND_EX_D(next,       "continue execution", 'n'),
+	PHPDBG_COMMAND_EX_D(run,        "attempt execution", 'r'),
+	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code", 'E'),
+	PHPDBG_COMMAND_EX_D(print,      "print something", 'p'),
+	PHPDBG_COMMAND_EX_D(break,      "set breakpoint", 'b'),
+	PHPDBG_COMMAND_EX_D(back,       "show trace", 't'),
+	PHPDBG_COMMAND_EX_D(list,       "list specified line or function", 'l'),
+	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment", 'X'),
+	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints", 'C'),
+	PHPDBG_COMMAND_EX_D(help,       "show help menu", 'h'),
+	PHPDBG_COMMAND_EX_D(quiet,      "silence some output", 'Q'),
+	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
+	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
+	{NULL, 0, 0}
+}; /* }}} */
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -202,14 +239,17 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 
 static PHPDBG_COMMAND(back) /* {{{ */
 {
+    zval zbacktrace;
+	zval **tmp;
+	HashPosition position;
+	int i = 0, limit = 0;
+	
 	if (!EG(in_execution)) {
 		phpdbg_error("Not executing!");
 		return FAILURE;
 	}
-	zval zbacktrace;
-	zval **tmp;
-	HashPosition position;
-	int i = 0, limit = (expr != NULL) ? atoi(expr) : 0;
+	
+	limit = (expr != NULL) ? atoi(expr) : 0;
 
 	zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
 
@@ -544,26 +584,6 @@ static PHPDBG_COMMAND(list) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
-
-static const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_EX_D(exec,       "set execution context", 'e'),
-	PHPDBG_COMMAND_EX_D(compile,    "attempt to pre-compile execution context", 'c'),
-	PHPDBG_COMMAND_EX_D(step,       "step through execution", 's'),
-	PHPDBG_COMMAND_EX_D(next,       "continue execution", 'n'),
-	PHPDBG_COMMAND_EX_D(run,        "attempt execution", 'r'),
-	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code", 'E'),
-	PHPDBG_COMMAND_EX_D(print,      "print something", 'p'),
-	PHPDBG_COMMAND_EX_D(break,      "set breakpoint", 'b'),
-	PHPDBG_COMMAND_EX_D(back,       "show trace", 't'),
-	PHPDBG_COMMAND_EX_D(list,       "list specified line or function", 'l'),
-	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment", 'X'),
-	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints", 'C'),
-	PHPDBG_COMMAND_EX_D(help,       "show help menu", 'h'),
-	PHPDBG_COMMAND_EX_D(quiet,      "silence some output", 'Q'),
-	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
-	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
-	{NULL, 0, 0}
-};
 
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
