@@ -207,9 +207,9 @@ static PHPDBG_COMMAND(back) /* {{{ */
 
 static PHPDBG_COMMAND(print) /* {{{ */
 {
-	if (expr_len > 0L) {
+	if (expr && expr_len > 0L) {
 		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			phpdbg_error("Failed to find print command: %s/%u", expr, expr_len);
+			phpdbg_error("Failed to find print command %s", expr);
 		}
 		return SUCCESS;
 	}
@@ -527,7 +527,8 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 			
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
 			PHPDBG_G(last_params) = expr;
-			PHPDBG_G(last_params_len) = ((cmd_len - expr_len) - sizeof(" "))+1;
+			PHPDBG_G(last_params_len) = (cmd_len - expr_len) ?
+			                                (((cmd_len - expr_len) - sizeof(" "))+1) : 0;
 			
 			return command->handler(
 			    PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
