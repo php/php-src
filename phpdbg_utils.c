@@ -76,15 +76,21 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	return 1;
 } /* }}} */
 
-const char *phpdbg_current_file(TSRMLS_D)
+char *phpdbg_resolve_path(const char *path TSRMLS_DC) /* {{{ */
 {
-	const char *file = PHPDBG_G(exec);
+	char resolved_name[MAXPATHLEN];
 
-	if (!file) {
-		file = zend_get_executed_filename(TSRMLS_C);
+	if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+		return NULL;
 	}
-	return file;
-}
+
+	return estrdup(resolved_name);
+} /* }}} */
+
+const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
+{
+	return PHPDBG_G(exec) ? PHPDBG_G(exec) : zend_get_executed_filename(TSRMLS_C);
+} /* }}} */
 
 int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
@@ -108,21 +114,17 @@ int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS
 		const char *line_pos = strchr(str, ':');
 
 		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
-			char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
+			char path[MAXPATHLEN];
 
 			memcpy(path, str, line_pos - str);
 			path[line_pos - str] = 0;
 
-			if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-				goto out;
-			}
-
-			param->file.name = estrndup(resolved_name, line_pos - str);
+			param->file.name = phpdbg_resolve_path(path TSRMLS_CC);
 			param->file.line = strtol(line_pos+1, NULL, 0);
 			return FILE_PARAM;
 		}
 	}
-out:
+
 	param->str = estrndup(str, len);
 	return STR_PARAM;
 } /* }}} */

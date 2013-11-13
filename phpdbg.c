@@ -67,11 +67,11 @@ static void php_phpdbg_destroy_bp_methods(void *brake) /* {{{ */
 static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 {
     phpdbg_breakcond_t *brake = (phpdbg_breakcond_t*) data;
-    
+
     if (brake) {
         if (brake->ops) {
             TSRMLS_FETCH();
-            
+
             destroy_op_array(
                 brake->ops TSRMLS_CC);
             efree(brake->ops);
@@ -87,7 +87,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
-    
+
 	return SUCCESS;
 } /* }}} */
 
@@ -98,7 +98,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
-    
+
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
     }
@@ -393,7 +393,7 @@ int main(int argc, char **argv) /* {{{ */
             case 'e': /* set execution context */
                 exec_len = strlen(php_optarg);
                 if (exec_len) {
-                    exec = strdup(php_optarg);
+                    exec = phpdbg_resolve_path(php_optarg TSRMLS_CC);
                 }
             break;
 
@@ -445,7 +445,7 @@ int main(int argc, char **argv) /* {{{ */
 		PG(modules_activated) = 0;
 
         if (exec) { /* set execution context */
-            PHPDBG_G(exec) = estrndup(exec, exec_len);
+            PHPDBG_G(exec) = exec;
             PHPDBG_G(exec_len) = exec_len;
 
             free(exec);
@@ -457,7 +457,7 @@ int main(int argc, char **argv) /* {{{ */
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
-		
+
 		zend_try {
 		    zend_activate_auto_globals(TSRMLS_C);
 		} zend_end_try();
@@ -473,7 +473,7 @@ int main(int argc, char **argv) /* {{{ */
 		    zend_try {
 		        phpdbg_interactive(TSRMLS_C);
 		    } zend_catch {
-                
+
 		    } zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 

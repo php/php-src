@@ -87,7 +87,14 @@ static PHPDBG_COMMAND(exec) /* {{{ */
 		phpdbg_clean(0 TSRMLS_CC);
 	}
 
-	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
+	PHPDBG_G(exec) = phpdbg_resolve_path(expr TSRMLS_CC);
+
+	if (!PHPDBG_G(exec)) {
+		phpdbg_error("Cannot get real file path");
+		return FAILURE;
+	}
+
+	PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
 	phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 	return SUCCESS;

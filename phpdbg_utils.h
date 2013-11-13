@@ -51,7 +51,9 @@ typedef union _phpdbg_param {
 	char *str;
 } phpdbg_param_t;
 
+int phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 const char *phpdbg_current_file(TSRMLS_D);
+char *phpdbg_resolve_path(const char* TSRMLS_DC);
 
 /**
  * Error/notice/formatting helper
