@@ -90,7 +90,7 @@ PHPDBG_PRINT(class) /* {{{ */
 	                    
 	                    default: {
 	                        phpdbg_writeln(
-	                            "\tInternal Method %s::%s()", (*ce)->name, method->common.function_name);
+	                            "\tInternal %s::%s()", (*ce)->name, method->common.function_name);
 	                    }
 	                 }
 	            }

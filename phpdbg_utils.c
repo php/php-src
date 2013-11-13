@@ -74,11 +74,13 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	char *buffer = NULL;
-	va_list args;
+	va_list args = {0};
 
-	va_start(args, format);
-	vspprintf(&buffer, 0, format, args);
-	va_end(args);
+	if (format != NULL && strlen(format) > 0L) {
+	    va_start(args, format);
+	    vspprintf(&buffer, 0, format, args);
+	    va_end(args);
+	}
 
     /* TODO(anyone) colours */
 

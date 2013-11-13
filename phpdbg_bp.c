@@ -143,7 +143,7 @@ void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
 
 		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 
-	    phpdbg_notice("Breakpoint #%d added at %#lx%s",
+	    phpdbg_notice("Breakpoint #%d added at %#lx",
 			new_break.id, new_break.opline);
 	} else {
 	    phpdbg_notice("Breakpoint exists at %#lx", opline);
