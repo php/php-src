@@ -84,7 +84,11 @@
 #define PHPDBG_IS_QUITTING      0x001000000000
 #define PHPDBG_IS_COLOURED      0x010000000000
 
-#define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED) /* }}} */
+#ifndef _WIN32
+#   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
+#else
+#   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET)
+#endif /* }}} */
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
