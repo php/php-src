@@ -28,39 +28,45 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_BREAK(file) /* {{{ */
 {
-   if (expr && expr_len > 0L) {
-        if (!phpdbg_is_class_method(expr, expr_len, NULL, NULL)) {
-	        char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
-	        const char *line_pos = strchr(expr, ':');
-		    long line_num = strtol(line_pos+1, NULL, 0);
-		    
-		    if (line_num) {
-		        memcpy(path, expr, line_pos - expr);
-		        path[line_pos - expr] = 0;
+	const char *line_pos;
 
-		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			        phpdbg_error("Failed to expand path %s", path);
-			        return SUCCESS;
-		        }
+	if (!expr || expr_len == 0) {
+		phpdbg_error("No expression provided");
+		return SUCCESS;
+	}
 
-		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
-		    } else {
-		        phpdbg_error("No line specified in expression %s", expr);
-		        return SUCCESS;
-		    }
-        }
-   } else {
-        phpdbg_error(
-            "No expression provided");
-   }
-   return SUCCESS;
+	line_pos = strchr(expr, ':');
+
+	if (!line_pos) {
+		phpdbg_error("No line specified in expression %s", expr);
+		return SUCCESS;
+	}
+
+	if (phpdbg_is_class_method(expr, expr_len, NULL, NULL)) {
+		phpdbg_error("Expected file:line format");
+		return SUCCESS;
+	} else {
+		char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
+		long line_num = strtol(line_pos+1, NULL, 0);
+
+		memcpy(path, expr, line_pos - expr);
+		path[line_pos - expr] = 0;
+
+		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+			phpdbg_error("Failed to expand path %s", path);
+			return SUCCESS;
+		}
+
+		phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
+	}
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(method) /* {{{ */
 {
     char *class_name;
     char *func_name;
-    
+
     if (expr && expr_len >0L) {
         if (phpdbg_is_class_method(expr, expr_len+1, &class_name, &func_name)) {
             phpdbg_set_breakpoint_method(
@@ -72,7 +78,7 @@ PHPDBG_BREAK(method) /* {{{ */
     } else {
         phpdbg_error("No expression provided");
     }
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -100,7 +106,7 @@ PHPDBG_BREAK(on) /* {{{ */
 	    phpdbg_error(
 	        "No expression provided!");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -110,7 +116,7 @@ PHPDBG_BREAK(lineno) /* {{{ */
     if (expr && expr_len > 0L) {
 	   if (phpdbg_is_numeric(expr)) {
 	        const char *filename = zend_get_executed_filename(TSRMLS_C);
-		    
+
 		    if (filename) {
 		        phpdbg_set_breakpoint_file(
 		            filename, strtol(expr, NULL, 0) TSRMLS_CC);
@@ -125,7 +131,7 @@ PHPDBG_BREAK(lineno) /* {{{ */
 	    phpdbg_error(
 	        "No expression provided!");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -134,7 +140,7 @@ PHPDBG_BREAK(func) /* {{{ */
     if (expr && expr_len > 0L) {
         char name[200];
         size_t name_len = expr_len;
-        
+
 	    name_len = MIN(name_len, 200);
 	    memcpy(name, expr, name_len);
 	    name[name_len] = 0;
