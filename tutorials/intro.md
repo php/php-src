@@ -18,11 +18,11 @@ Breaking Execution
 
 In order to debug your code, execution must be interrupted at a very specific points during execution, and allow access to, and inspection of, the execution environment. For extreme circumstances, and geeks (me included), phpdbg can step through the execution of your script, showing you information about every opcode the vm executes, including the address (in case you need to break at that specific point on the next execution).
 
-phpdbg provides many options for specifying break points, as illustrated by a screenshot of the help menu for the break command:
+phpdbg provides many options for specifying breakpoints, as illustrated by a screenshot of the help menu for the break command:
 
 ![phpdbg help menu](https://raw.github.com/krakjoe/phpdbg/master/tutorials/help-break.png)
 
-In those case where you wish to program your break points in userland, phpdbg includes a userland API, in the shape of two simple functions:
+In those cases where you wish to program your breakpoints in userland, phpdbg includes a userland API, in the shape of two simple functions:
 
 ```php
 /**
