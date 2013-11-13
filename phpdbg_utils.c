@@ -63,10 +63,15 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 		return 0;
 	}
 
-	*class = estrndup(str, sep - str);
-	(*class)[sep - str] = 0;
-
-	*method = estrndup(sep+2, str + len - (sep + 2));
+	if (class != NULL) {
+	    *class = estrndup(str, sep - str);
+	    (*class)[sep - str] = 0;
+	}
+	
+	if (method != NULL) {
+	    *method = estrndup(
+	        sep+2, str + len - (sep + 2));
+	}
 
 	return 1;
 } /* }}} */
