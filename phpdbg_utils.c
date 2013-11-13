@@ -71,8 +71,9 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	return 1;
 } /* }}} */
 
-void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
+int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 {
+    int rc = 0;
 	char *buffer = NULL;
 	va_list args;
 
@@ -86,39 +87,41 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 
 	switch (type) {
 		case ERROR:
-			printf("%s%s%s\n",
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
-				buffer,
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
+			rc = printf("%s%s%s\n",
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
+				    buffer,
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 
 		case NOTICE:
-			printf("%s%s%s\n",
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
-				buffer,
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
+			rc = printf("%s%s%s\n",
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
+				    buffer,
+				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 		
 		case WRITELN: {
 		    if (buffer) {
-			    printf("%s%s%s\n",
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
-				    buffer,
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+			    rc = printf("%s%s%s\n",
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+				        buffer,
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 			} else {
-			    printf("\n");
+			    rc = printf("\n");
 			}
 		} break;
 		
 		case WRITE: if (buffer) {
-		    printf("%s%s%s",
-		        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
-		        buffer,
-		        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+		    rc = printf("%s%s%s",
+		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+		            buffer,
+		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 		} break;
 	}
 
 	if (buffer) {
 		efree(buffer);
 	}
+	
+	return rc;
 } /* }}} */

@@ -146,6 +146,8 @@ PHPDBG_PRINT(method) /* {{{ */
                 } else {
                     phpdbg_error("The method %s could not be found", func_name);
                 }
+            } else {
+                phpdbg_error("Failed to find the requested class %s", class_name);
             }
             
             efree(class_name);

@@ -208,8 +208,7 @@ static PHPDBG_COMMAND(back) /* {{{ */
 static PHPDBG_COMMAND(print) /* {{{ */
 {
 	if (expr && expr_len > 0L) {
-		if (phpdbg_print_commands &&
-		    phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
+		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
 			phpdbg_error("Failed to find print command %s", expr);
 		}
 		return SUCCESS;
@@ -569,7 +568,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		/* ensure string is null terminated */
 		cmd[cmd_len] = '\0';
 
-		if (cmd && cmd_len > 0L) {
+		if (*cmd && cmd_len > 0L) {
 #ifdef HAVE_LIBREADLINE
             add_history(cmd);
 #endif
