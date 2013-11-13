@@ -698,11 +698,12 @@ zend_vm_enter:
     }\
 } while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING))
 
-        phpdbg_print_opline(
-		    execute_data, 0 TSRMLS_CC);
-
         /* allow conditional breakpoints to access the vm uninterrupted */
         if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
+            
+            /* not while in conditionals */
+            phpdbg_print_opline(
+		        execute_data, 0 TSRMLS_CC);
             
             /* conditions cannot be executed by eval()'d code */
             if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL) 
