@@ -481,7 +481,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		    func_table = EG(function_table);
 		}
 
-		if (zend_hash_find(func_table, func_name, func_name_len,
+		if (zend_hash_find(func_table, func_name, func_name_len+1,
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		} else {
