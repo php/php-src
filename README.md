@@ -9,7 +9,7 @@ Features
 ========
 
  - Stepthrough Debugging
- - Flexible Breakpoints (Class Method, Function, File:Line, internally Opline)
+ - Flexible Breakpoints (Class Method, Function, File:Line, Address)
  - Easy Access to PHP with built-in eval()
  - Easy Access to Currently Executing Code
  - Userland API
