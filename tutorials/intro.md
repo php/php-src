@@ -2,7 +2,7 @@ Getting Started with phpdbg
 ===========================
 *An introduction to debugging PHP code with phpdbg*
 
-phpdbg provides an interactive environment to debug PHP; it id implemented and distributed as a SAPI module - just as the CLI interface.
+phpdbg provides an interactive environment to debug PHP; it is implemented and distributed as a SAPI module - just as the CLI interface.
 
 ![Welcome to phpdbg](https://raw.github.com/krakjoe/phpdbg/master/tutorials/welcome.png)
 
