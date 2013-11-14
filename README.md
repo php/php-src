@@ -59,6 +59,7 @@ The following switches change the default behaviour of phpdbg:
  - -b boring - disables use of colour on the console
  - -I ignore .phpdbginit (default init file)
  - -i override .phpgdbinit location (implies -I)
+ - -O set oplog output file
 
 Screeny
 =======
