@@ -30,6 +30,9 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 int phpdbg_is_numeric(const char *str) /* {{{ */
 {
+    if (!str)
+        return 0;
+
 	for (; *str; str++) {
 		if (isspace(*str)) {
 			continue;
@@ -41,6 +44,9 @@ int phpdbg_is_numeric(const char *str) /* {{{ */
 
 int phpdbg_is_empty(const char *str) /* {{{ */
 {
+    if (!str)
+        return 1;
+    
 	for (; *str; str++) {
 		if (isspace(*str)) {
 			continue;
