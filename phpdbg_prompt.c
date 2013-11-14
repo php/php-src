@@ -595,6 +595,12 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		            if (!EG(in_execution)) {
 						phpdbg_error("Not running");
 		            }
+		            
+#ifdef HAVE_LIBREADLINE
+                    if (cmd) {
+                        free(cmd);
+                    }
+#endif
 		            return PHPDBG_NEXT;
 		        }
 		    }
@@ -720,15 +726,15 @@ zend_vm_enter:
                 DO_INTERACTIVE();
             }
         }
-
-next:
-        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-
+        
         if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
             if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
                 DO_INTERACTIVE();
             }
         }
+
+next:
+        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
         if (PHPDBG_G(vmret) > 0) {
             switch (PHPDBG_G(vmret)) {
