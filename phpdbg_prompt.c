@@ -525,6 +525,19 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_writeln("\t%s\t%s", help_command->name, help_command->tip);
 			++help_command;
 		}
+		
+		phpdbg_notice("Command Line Options and Flags");
+	    phpdbg_writeln("\tOption\tExample\t\t\tPurpose");
+	    phpdbg_writeln(EMPTY);
+	    phpdbg_writeln("\t-c\t-c/my/php.ini\t\tSet php.ini file to load");
+	    phpdbg_writeln("\t-d\t-dmemory_limit=4G\tSet a php.ini directive");
+	    phpdbg_writeln("\t-n\t-N/A\t\t\tDisabled default php.ini");
+	    phpdbg_writeln("\t-e\t-emytest.php\t\tSet execution context");
+	    phpdbg_writeln("\t-v\tN/A\t\t\tEnable opline output while executing");
+	    phpdbg_writeln("\t-s\tN/A\t\t\tEnable stepping");
+	    phpdbg_writeln("\t-b\tN/A\t\t\tDisable the use of colours");
+	    phpdbg_writeln("\t-i\t-imy.init\t\tSet the phpdbginit file");
+	    phpdbg_writeln("\t-I\tN/A\t\t\tDisable loading .phpdbginit");
 	}
 
 	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
