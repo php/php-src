@@ -720,14 +720,12 @@ zend_vm_enter:
                     }
                 }
             }
-
+            
             if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP)
                 && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
                 DO_INTERACTIVE();
             }
-        }
-        
-        if (!(PHPDBG_G(flags) & PHPDBG_IN_COND_BP)) {
+            
             if ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
                 DO_INTERACTIVE();
             }
