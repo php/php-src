@@ -486,10 +486,16 @@ phpdbg_main:
 		    } zend_catch {
                 if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
                     cleaning = 1;
-                    break;
+                    goto phpdbg_out;
                 } else cleaning = 0;
+                
+                if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+                    goto phpdbg_out;
+                }
 		    } zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+
+phpdbg_out:
 
 		if (ini_entries) {
 		    free(ini_entries);
