@@ -8,7 +8,7 @@ phpdbg provides an interactive environment to debug PHP; it is implemented and d
 
 phpdbg integrates with, and initializes, the Zend environment; from the moment the console is open you can start to manipulate the environment in order to prepare your debugging session. If you have used other debuggers, phpdbg should hopefully feel familiar, but you can always ask for `help`:
 
-![phpdbg help menu](https://raw.github.com/krakjoe/phpdbg/master/tutorials/help.png)
+![phpdbg help menu](https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png)
 
 phpdbg provides help for all of the supported commands.
 
