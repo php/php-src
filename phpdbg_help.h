@@ -66,7 +66,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
     PHPDBG_HELP_D(quiet,    "be quiet during execution"),
 	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing"),
-	PHPDBG_HELP_D(oplog,    "sets a file for, or disables oplog"),
+	PHPDBG_HELP_D(oplog,    "keep clutter off the screen by sending oplogs to a file"),
 	{NULL, 0, 0}
 };
 
