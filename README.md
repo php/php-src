@@ -57,6 +57,8 @@ The following switches change the default behaviour of phpdbg:
  - -s enabled stepping
  - -e sets execution context
  - -b boring - disables use of colour on the console
+ - -I ignore .phpdbginit (default init file)
+ - -i override .phpgdbinit location (implies -I)
 
 Screeny
 =======
