@@ -348,6 +348,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 			break;
 		case FILE_PARAM:
 			phpdbg_set_breakpoint_file(param.file.name, param.file.line TSRMLS_CC);
+			break;
 		case STR_PARAM:
 			phpdbg_set_breakpoint_symbol(param.str TSRMLS_CC);
 			break;
