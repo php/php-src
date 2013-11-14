@@ -336,7 +336,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		return SUCCESS;
 	}
 
-	switch (phpdbg_parse_param(expr, expr_len, &param)) {
+	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
 			break;
