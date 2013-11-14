@@ -523,6 +523,9 @@ phpdbg_main:
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
 
+        /* print blurb */
+		phpdbg_welcome(cleaning TSRMLS_CC);
+
         /* initialize from file */
         zend_try {
             phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
@@ -531,9 +534,6 @@ phpdbg_main:
                 goto phpdbg_out;
             }
         } zend_end_try();
-
-        /* print blurb */
-		phpdbg_welcome(cleaning TSRMLS_CC);
 
         /* phpdbg main() */
         do {
