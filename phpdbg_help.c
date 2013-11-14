@@ -66,11 +66,11 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%sprint class \\my\\class", PROMPT);
-	phpdbg_writeln("Will print information about \\my\\class, including the instructions for every method and their address");
+	phpdbg_writeln("Will print the instructions for the methods in \\my\\class");
 	phpdbg_writeln("\t%sprint method \\my\\class::method", PROMPT);
 	phpdbg_writeln("Will print the instructions for \\my\\class::method");
 	phpdbg_writeln("\t%sprint func .getSomething", PROMPT);
-	phpdbg_writeln("Will print the instructions for the method getSomething in the currently active scope");
+	phpdbg_writeln("Will print the instructions for ::getSomething in the currently active scope");
 	phpdbg_writeln("\t%sprint func my_function", PROMPT);
 	phpdbg_writeln("Will print the instructions for the global function my_function");
 	phpdbg_writeln("\t%sprint opline", PROMPT);
