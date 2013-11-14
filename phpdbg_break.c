@@ -29,8 +29,9 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 PHPDBG_BREAK(file) /* {{{ */
 {
 	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+    int type;
+    
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
@@ -42,7 +43,7 @@ PHPDBG_BREAK(file) /* {{{ */
 			break;
 	}
 
-	phpdbg_clear_param(&param);
+	phpdbg_clear_param(type, &param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -50,8 +51,9 @@ PHPDBG_BREAK(file) /* {{{ */
 PHPDBG_BREAK(method) /* {{{ */
 {
 	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+    int type;
+    
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
@@ -63,7 +65,7 @@ PHPDBG_BREAK(method) /* {{{ */
 			break;
     }
 
-    phpdbg_clear_param(&param);
+    phpdbg_clear_param(type, &param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */
@@ -71,8 +73,9 @@ PHPDBG_BREAK(method) /* {{{ */
 PHPDBG_BREAK(address) /* {{{ */
 {
 	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+    int type;
+    
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
@@ -84,7 +87,7 @@ PHPDBG_BREAK(address) /* {{{ */
 			break;
     }
 
-    phpdbg_clear_param(&param);
+    phpdbg_clear_param(type, &param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */
@@ -102,13 +105,14 @@ PHPDBG_BREAK(on) /* {{{ */
 PHPDBG_BREAK(lineno) /* {{{ */
 {
 	phpdbg_param_t param;
-
+    int type;
+    
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("Not file context found!");
 		return SUCCESS;
 	}
 
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided!");
 			break;
@@ -120,7 +124,7 @@ PHPDBG_BREAK(lineno) /* {{{ */
 			break;
 	}
 
-	phpdbg_clear_param(&param);
+	phpdbg_clear_param(type, &param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -128,8 +132,9 @@ PHPDBG_BREAK(lineno) /* {{{ */
 PHPDBG_BREAK(func) /* {{{ */
 {
 	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+    int type;
+    
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided!");
 			break;
@@ -141,7 +146,7 @@ PHPDBG_BREAK(func) /* {{{ */
 			break;
 	}
 
-	phpdbg_clear_param(&param);
+	phpdbg_clear_param(type, &param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */
