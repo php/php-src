@@ -476,10 +476,6 @@ phpdbg_main:
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
 
-		zend_try {
-		    zend_activate_auto_globals(TSRMLS_C);
-		} zend_end_try();
-
         /* print blurb */
 		phpdbg_welcome(cleaning TSRMLS_CC);
 
@@ -517,7 +513,9 @@ phpdbg_main:
 		} zend_end_try();
 #endif
 
-		php_module_shutdown(TSRMLS_C);
+		zend_try {
+		    php_module_shutdown(TSRMLS_C);
+		} zend_end_try();
 
 		sapi_shutdown();
 	}
