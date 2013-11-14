@@ -109,6 +109,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	const char *last_params;            /* last expression */
 	size_t last_params_len;             /* last expression length */
 	zend_ulong flags;                   /* phpdbg flags */
+	FILE *oplog;                        /* opline log */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

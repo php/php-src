@@ -66,15 +66,23 @@ enum {
 	P_ERROR  = 1,
 	P_NOTICE,
 	P_WRITELN,
-	P_WRITE
+	P_WRITE,
+	P_LOG
 };
 
-int phpdbg_print(int TSRMLS_DC, const char*, ...);
+int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...);
 
-#define phpdbg_error(fmt, ...)   phpdbg_print(P_ERROR   TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_notice(fmt, ...)  phpdbg_print(P_NOTICE  TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_writeln(fmt, ...) phpdbg_print(P_WRITELN TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_write(fmt, ...)   phpdbg_print(P_WRITE   TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+#define phpdbg_notice(fmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+#define phpdbg_writeln(fmt, ...)            phpdbg_print(P_WRITELN TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+#define phpdbg_write(fmt, ...)              phpdbg_print(P_WRITE   TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+#define phpdbg_log(fmt, ...)                phpdbg_print(P_LOG     TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+
+#define phpdbg_error_ex(out, fmt, ...)      phpdbg_print(P_ERROR   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_notice_ex(out, fmt, ...)     phpdbg_print(P_NOTICE  TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_writeln_ex(out, fmt, ...)    phpdbg_print(P_WRITELN TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_write_ex(out, fmt, ...)      phpdbg_print(P_WRITE   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_log_ex(out, fmt, ...)        phpdbg_print(P_LOG     TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 
 /* {{{ For writing blank lines */
 #define EMPTY "" /* }}} */

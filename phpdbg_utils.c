@@ -159,7 +159,7 @@ void phpdbg_clear_param(int type, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
+int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
 {
     int rc = 0;
 	char *buffer = NULL;
@@ -175,36 +175,45 @@ int phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 
 	switch (type) {
 		case P_ERROR:
-			rc = printf("%s%s%s\n",
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
-				    buffer,
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
+			rc = fprintf(fp, "%s%s%s\n",
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
+				        buffer,
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 
 		case P_NOTICE:
-			rc = printf("%s%s%s\n",
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
-				    buffer,
-				    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
+			rc = fprintf(fp, "%s%s%s\n",
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
+				        buffer,
+				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 
 		case P_WRITELN: {
 		    if (buffer) {
-			    rc = printf("%s%s%s\n",
-				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
-				        buffer,
-				        ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+			    rc = fprintf(fp, "%s%s%s\n",
+				            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+				            buffer,
+				            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 			} else {
-			    rc = printf("\n");
+			    rc = fprintf(fp, "\n");
 			}
 		} break;
 
 		case P_WRITE: if (buffer) {
-		    rc = printf("%s%s%s",
-		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
-		            buffer,
-		            ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
+		    rc = fprintf(fp, "%s%s%s",
+		                ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
+		                buffer,
+		                ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 		} break;
+		
+		/* no formatting on logging output */
+	    case P_LOG: if (buffer) {
+	        struct timeval tp;
+	        if (gettimeofday(&tp, NULL) == SUCCESS) {
+	            rc = fprintf(
+	                fp, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
+	        } else rc = FAILURE;
+	    } break;
 	}
 
 	if (buffer) {

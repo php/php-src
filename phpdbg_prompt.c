@@ -46,6 +46,7 @@ static PHPDBG_COMMAND(clear);
 static PHPDBG_COMMAND(help);
 static PHPDBG_COMMAND(quiet);
 static PHPDBG_COMMAND(aliases);
+static PHPDBG_COMMAND(oplog);
 static PHPDBG_COMMAND(quit); /* }}} */
 
 /* {{{ command declarations */
@@ -65,6 +66,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_EX_D(help,       "show help menu", 'h'),
 	PHPDBG_COMMAND_EX_D(quiet,      "silence some output", 'Q'),
 	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
+	PHPDBG_COMMAND_EX_D(oplog,      "sets oplog output", 'O'),
 	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
 	{NULL, 0, 0}
 }; /* }}} */
@@ -496,6 +498,45 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(oplog) /* {{{ */
+{
+    if (expr && expr_len > 0L) {
+        /* disable oplog */
+        if (expr[0] == '0' && expr_len == 1) {
+            if (PHPDBG_G(oplog)) {
+                phpdbg_notice("Disabling oplog");
+                fclose(
+                    PHPDBG_G(oplog));
+                return SUCCESS;
+            } else {
+                phpdbg_error("No oplog currently open");
+                return FAILURE;
+            }
+        } else {
+            /* open oplog */
+            FILE *old = PHPDBG_G(oplog);
+
+            PHPDBG_G(oplog) = fopen(expr, "w+");
+            if (!PHPDBG_G(oplog)) {
+                phpdbg_error("Failed to open %s for oplog", expr);
+                PHPDBG_G(oplog) = old;
+                return FAILURE;
+            } else {
+                if (old) {
+                    phpdbg_notice("Closing previously open oplog");
+                    fclose(old);
+                }
+                phpdbg_notice("Successfully opened oplog");
+                
+                return SUCCESS;
+            }
+        }
+    } else {
+        phpdbg_error("No expression provided");
+        return FAILURE;
+    }
+} /* }}} */
+
 static PHPDBG_COMMAND(help) /* {{{ */
 {
 	phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
@@ -538,6 +579,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 	    phpdbg_writeln("\t-b\tN/A\t\t\tDisable the use of colours");
 	    phpdbg_writeln("\t-i\t-imy.init\t\tSet the phpdbginit file");
 	    phpdbg_writeln("\t-I\tN/A\t\t\tDisable loading .phpdbginit");
+	    phpdbg_writeln("\t-O\t-Omy.oplog\t\tSets oplog output file");
 	}
 
 	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
@@ -687,14 +729,27 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
     /* force out a line while stepping so the user knows what is happening */
     if (ignore_flags ||
         (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-        (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+        (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ||
+        (PHPDBG_G(oplog)))) {
 
         zend_op *opline = execute_data->opline;
-        /* output line info */
-		phpdbg_notice("#%lu %p %s %s",
-           opline->lineno,
-           opline, phpdbg_decode_opcode(opline->opcode),
-           execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+
+        if (ignore_flags ||
+            (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
+            (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+             /* output line info */
+		    phpdbg_notice("#%lu %p %s %s",
+               opline->lineno,
+               opline, phpdbg_decode_opcode(opline->opcode),
+               execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+        }
+
+        if (!ignore_flags && PHPDBG_G(oplog)) {
+            phpdbg_log_ex(PHPDBG_G(oplog), "#%lu %p %s %s",
+                opline->lineno,
+                opline, phpdbg_decode_opcode(opline->opcode),
+                execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+        }
     }
 } /* }}} */
 

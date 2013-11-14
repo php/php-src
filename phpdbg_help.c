@@ -26,7 +26,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_HELP(exec) /* {{{ */
 {
-	phpdbg_writeln("Will attempt execution, if compilation has not yet taken place, it occurs now.");
+	phpdbg_writeln("Will attempt execution, if compilation has not yet taken place, it occurs now");
 	phpdbg_writeln("The execution context must be set before execution can take place");
 	return SUCCESS;
 } /* }}} */
@@ -53,7 +53,7 @@ PHPDBG_HELP(compile) /* {{{ */
 {
 	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed");
 	phpdbg_writeln("The execution context must be set for compilation to succeed");
-	phpdbg_writeln("If errors occur during compilation they must be resolved before execution can take place.");
+	phpdbg_writeln("If errors occur during compilation they must be resolved before execution can take place");
 	phpdbg_writeln("It is a good idea to clean the environment between each compilation with the clean command");
 	phpdbg_writeln("You do not need to exit phpdbg to retry compilation");
 	return SUCCESS;
@@ -99,13 +99,13 @@ PHPDBG_HELP(run) /* {{{ */
 PHPDBG_HELP(eval) /* {{{ */
 {
 	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
-	phpdbg_writeln("Note: When using eval in phpdbg do not prefix the code with return.");
+	phpdbg_writeln("Note: When using eval in phpdbg do not prefix the code with return");
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(break) /* {{{ */
 {
-	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage.");
+	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%sbreak test.php:1", PROMPT);
@@ -131,8 +131,8 @@ PHPDBG_HELP(break) /* {{{ */
 
 PHPDBG_HELP(clean) /* {{{ */
 {
-    phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions.");
-    phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg.");
+    phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions");
+    phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg");
     return SUCCESS;
 } /* }}} */
 
@@ -159,7 +159,7 @@ PHPDBG_HELP(quiet) /* {{{ */
 
 PHPDBG_HELP(back) /* {{{ */
 {
-	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality.");
+	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
 	phpdbg_writeln("You can set the limit on the trace");
@@ -170,7 +170,7 @@ PHPDBG_HELP(back) /* {{{ */
 
 PHPDBG_HELP(list) /* {{{ */
 {
-	phpdbg_writeln("The list command displays N line from current context file.");
+	phpdbg_writeln("The list command displays N line from current context file");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%slist 2", PROMPT);
@@ -182,4 +182,21 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
 	return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(oplog) /* {{{ */
+{
+    phpdbg_writeln("Even when quietness is enabled you may wish to save opline logs to a file");
+    phpdbg_writeln("Setting a new oplog closes the previously open log");
+    phpdbg_writeln("The log includes a high resolution timestamp on each entry");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Example:");
+    phpdbg_writeln("\t%soplog /path/to/my.oplog", PROMPT);
+    phpdbg_writeln("Will open the file /path/to/my.oplog for writing, creating it if it does not exist");
+    phpdbg_writeln("Example:");
+    phpdbg_writeln("\t%soplog 0", PROMPT);
+    phpdbg_writeln("Will open the currently open log file, disabling oplog");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
+    return SUCCESS;
 } /* }}} */

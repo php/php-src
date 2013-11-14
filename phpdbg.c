@@ -37,6 +37,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->last_params = NULL;
     pg->last_params_len = 0;
     pg->flags = PHPDBG_DEFAULT_FLAGS;
+    pg->oplog = NULL;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -102,6 +103,12 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
         PHPDBG_G(exec) = NULL;
+    }
+    
+    if (PHPDBG_G(oplog)) {
+        fclose(
+            PHPDBG_G(oplog));
+        PHPDBG_G(oplog) = NULL;
     }
 
     if (PHPDBG_G(ops)) {
@@ -293,11 +300,12 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'z', 1, "load zend_extension"},
 	/* phpdbg options */
 	{'e', 1, "exec"},
-	{'v', 0, "verbose"},
-	{'s', 0, "step"},
+	{'v', 0, "disable quietness"},
+	{'s', 0, "enable stepping"},
 	{'b', 0, "boring colours"},
-	{'i', 1, "init"},
-	{'I', 0, "ignore-init"},
+	{'i', 1, "specify init"},
+	{'I', 0, "ignore init"},
+	{'O', 1, "opline log"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -333,6 +341,8 @@ int main(int argc, char **argv) /* {{{ */
 	char *init_file;
 	size_t init_file_len;
 	zend_bool init_file_default;
+	char *oplog_file;
+	size_t oplog_file_len;
 	zend_ulong flags;
 	char *php_optarg;
     int php_optind;
@@ -364,6 +374,8 @@ phpdbg_main:
     init_file = NULL;
     init_file_len = 0;
     init_file_default = 1;
+    oplog_file = NULL;
+    oplog_file_len = 0;
     flags = PHPDBG_DEFAULT_FLAGS;
     php_optarg = NULL;
     php_optind = 1;
@@ -412,24 +424,33 @@ phpdbg_main:
             case 'z':
                 zend_load_extension(php_optarg);
             break;
+            
+            /* begin phpdbg options */
 
-            case 'e': /* set execution context */
+            case 'e': { /* set execution context */
                 exec_len = strlen(php_optarg);
                 if (exec_len) {
                     exec = strdup(php_optarg);
                 }
-            break;
+            } break;
             
             case 'I': { /* ignore .phpdbginit */
                 init_file_default = 0;
             } break;
             
-            case 'i': /* set init file */
+            case 'i': { /* set init file */
                 init_file_len = strlen(php_optarg);
                 if (init_file_len) {
                     init_file = strdup(php_optarg);
                 }
-            break;
+            } break;
+            
+            case 'O': { /* set oplog output */
+                oplog_file_len = strlen(php_optarg);
+                if (oplog_file_len) {
+                    oplog_file = strdup(php_optarg);
+                }
+            } break;
 
             case 'v': /* set quietness off */
                 flags &= ~PHPDBG_IS_QUIET;
@@ -484,6 +505,15 @@ phpdbg_main:
             PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
             free(exec);
+        }
+        
+        if (oplog_file) { /* open oplog */
+            PHPDBG_G(oplog) = fopen(oplog_file, "w+");
+            if (!PHPDBG_G(oplog)) {
+                phpdbg_error(
+                    "Failed to open oplog %s", oplog_file);
+            }
+            free(oplog_file);
         }
 
         /* set flags from command line */
