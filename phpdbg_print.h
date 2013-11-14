@@ -26,8 +26,8 @@
 /**
  * Command Declarators
  */
-#define PHPDBG_PRINT_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_print_##name}
+#define PHPDBG_PRINT_D(name, tip, alias) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_print_##name}
 #define PHPDBG_PRINT(name) \
 	int phpdbg_do_print_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
@@ -43,10 +43,10 @@ PHPDBG_PRINT(func);
  * Commands
  */
 static const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_D(opline,     "print the current opline information"),
-	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class"),
-	PHPDBG_PRINT_D(method,     "print out the instructions in the specified method"),
-	PHPDBG_PRINT_D(func,       "print out the instructions in the specified function"),
+	PHPDBG_PRINT_D(opline,     "print the current opline information", 'o'),
+	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class", 'c'),
+	PHPDBG_PRINT_D(method,     "print out the instructions in the specified method", 'm'),
+	PHPDBG_PRINT_D(func,       "print out the instructions in the specified function", 'f'),
 	{0, 0, 0, 0}
 };
 
