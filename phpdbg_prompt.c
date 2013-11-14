@@ -71,6 +71,24 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
+{
+    /* print blurb */
+    if (!cleaning) {
+        phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
+            PHPDBG_VERSION);
+        phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
+        phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+    } else {
+        phpdbg_notice("Clean Execution Environment");
+
+        phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+        phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+        phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+        phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
+    }
+} /* }}} */
+
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
 	if (expr_len == 0) {
@@ -362,26 +380,14 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
-    PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-
-	zend_bailout();
+    /* don't allow this to loop, ever ... */
+    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+    
+        PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+	    zend_bailout();
+    }
 
 	return SUCCESS;
-} /* }}} */
-
-static int clean_non_persistent_constant_full(const zend_constant *c TSRMLS_DC) /* {{{ */
-{
-    return (c->flags & CONST_PERSISTENT) ? 0 : 1;
-} /* }}} */
-
-static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
-{
-    return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
-} /* }}} */
-
-static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
-{
-    return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 } /* }}} */
 
 static PHPDBG_COMMAND(clean) /* {{{ */
@@ -399,13 +405,6 @@ static PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
 
 	phpdbg_clean(1 TSRMLS_CC);
-
-	phpdbg_notice("Clean Execution Environment");
-
-	phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-	phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-	phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-	phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
 
     return SUCCESS;
 } /* }}} */
@@ -661,8 +660,6 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 
 void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 {
-    zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
-
     /* this is implicitly required */
     if (PHPDBG_G(ops)) {
         destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
@@ -670,14 +667,11 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
         PHPDBG_G(ops) = NULL;
     }
 
-    if (full) {
-        zend_hash_reverse_apply(EG(function_table),
-			(apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(class_table),
-			(apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(zend_constants),
-			(apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
-        zend_hash_clean(&EG(included_files));
+    if (full) 
+    {
+        PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
+        
+        zend_bailout();
     }
 } /* }}} */
 

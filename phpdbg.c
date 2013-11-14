@@ -101,12 +101,15 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
+        PHPDBG_G(exec) = NULL;
     }
 
     if (PHPDBG_G(ops)) {
         destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
         efree(PHPDBG_G(ops));
+        PHPDBG_G(ops) = NULL;
     }
+    
     return SUCCESS;
 } /* }}} */
 
@@ -318,18 +321,21 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
+static jmp_buf phpdbg_main;
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
-	char *ini_entries = NULL;
-	int   ini_entries_len = 0;
-	char *exec = NULL;
-	size_t exec_len = 0L;
-	zend_ulong flags = PHPDBG_DEFAULT_FLAGS;
-	char *php_optarg = NULL;
-    int php_optind = 1;
+	char *ini_entries;
+	int   ini_entries_len;
+	char *exec;
+	size_t exec_len;
+	zend_ulong flags;
+	char *php_optarg;
+    int php_optind;
     int opt;
-
+    long cleaning = 0;
+    
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -346,6 +352,16 @@ int main(int argc, char **argv) /* {{{ */
 
 	tsrm_ls = ts_resource(0);
 #endif
+
+phpdbg_main:
+    ini_entries = NULL;
+    ini_entries_len = 0;
+    exec = NULL;
+    exec_len = 0;
+    flags = PHPDBG_DEFAULT_FLAGS;
+    php_optarg = NULL;
+    php_optind = 1;
+    opt = 0;
 
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
         switch (opt) {
@@ -394,7 +410,7 @@ int main(int argc, char **argv) /* {{{ */
             case 'e': /* set execution context */
                 exec_len = strlen(php_optarg);
                 if (exec_len) {
-                    exec = phpdbg_resolve_path(php_optarg TSRMLS_CC);
+                    exec = strdup(php_optarg);
                 }
             break;
 
@@ -446,8 +462,9 @@ int main(int argc, char **argv) /* {{{ */
 		PG(modules_activated) = 0;
 
         if (exec) { /* set execution context */
-            PHPDBG_G(exec) = exec;
-            PHPDBG_G(exec_len) = exec_len;
+            PHPDBG_G(exec) = phpdbg_resolve_path(
+                exec TSRMLS_CC);
+            PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
             free(exec);
         }
@@ -463,18 +480,18 @@ int main(int argc, char **argv) /* {{{ */
 		    zend_activate_auto_globals(TSRMLS_C);
 		} zend_end_try();
 
-		/* print blurb */
-        phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
-            PHPDBG_VERSION);
-        phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
-        phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+        /* print blurb */
+		phpdbg_welcome(cleaning TSRMLS_CC);
 
-
+        /* phpdbg main() */
         do {
 		    zend_try {
 		        phpdbg_interactive(TSRMLS_C);
 		    } zend_catch {
-
+                if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
+                    cleaning = 1;
+                    break;
+                } else cleaning = 0;
 		    } zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 
@@ -504,9 +521,14 @@ int main(int argc, char **argv) /* {{{ */
 
 		sapi_shutdown();
 	}
+	
+	if (cleaning) {
+        goto phpdbg_main;
+    }
 
 #ifdef ZTS
-	tsrm_shutdown();
+    /* bugggy */
+	//tsrm_shutdown();
 #endif
 
 	return 0;
