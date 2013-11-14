@@ -104,7 +104,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
         efree(PHPDBG_G(exec));
         PHPDBG_G(exec) = NULL;
     }
-    
+
     if (PHPDBG_G(oplog)) {
         fclose(
             PHPDBG_G(oplog));
@@ -116,7 +116,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
         efree(PHPDBG_G(ops));
         PHPDBG_G(ops) = NULL;
     }
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -348,7 +348,7 @@ int main(int argc, char **argv) /* {{{ */
     int php_optind;
     int opt;
     long cleaning = 0;
-    
+
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -424,7 +424,7 @@ phpdbg_main:
             case 'z':
                 zend_load_extension(php_optarg);
             break;
-            
+
             /* begin phpdbg options */
 
             case 'e': { /* set execution context */
@@ -433,18 +433,18 @@ phpdbg_main:
                     exec = strdup(php_optarg);
                 }
             } break;
-            
+
             case 'I': { /* ignore .phpdbginit */
                 init_file_default = 0;
             } break;
-            
+
             case 'i': { /* set init file */
                 init_file_len = strlen(php_optarg);
                 if (init_file_len) {
                     init_file = strdup(php_optarg);
                 }
             } break;
-            
+
             case 'O': { /* set oplog output */
                 oplog_file_len = strlen(php_optarg);
                 if (oplog_file_len) {
@@ -506,7 +506,7 @@ phpdbg_main:
 
             free(exec);
         }
-        
+
         if (oplog_file) { /* open oplog */
             PHPDBG_G(oplog) = fopen(oplog_file, "w+");
             if (!PHPDBG_G(oplog)) {
@@ -544,7 +544,7 @@ phpdbg_main:
                     cleaning = 1;
                     goto phpdbg_out;
                 } else cleaning = 0;
-                
+
                 if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
                     goto phpdbg_out;
                 }
@@ -581,14 +581,14 @@ phpdbg_out:
 
 		sapi_shutdown();
 	}
-	
+
 	if (cleaning) {
         goto phpdbg_main;
     }
 
 #ifdef ZTS
-    /* bugggy */
-	//tsrm_shutdown();
+	/* bugggy */
+	/* tsrm_shutdown(); */
 #endif
 
 	return 0;
