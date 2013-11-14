@@ -296,6 +296,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'v', 0, "verbose"},
 	{'s', 0, "step"},
 	{'b', 0, "boring colours"},
+	{'i', 1, "init"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -321,8 +322,6 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
-static jmp_buf phpdbg_main;
-
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -330,6 +329,8 @@ int main(int argc, char **argv) /* {{{ */
 	int   ini_entries_len;
 	char *exec;
 	size_t exec_len;
+	char *init_file;
+	size_t init_file_len;
 	zend_ulong flags;
 	char *php_optarg;
     int php_optind;
@@ -358,6 +359,8 @@ phpdbg_main:
     ini_entries_len = 0;
     exec = NULL;
     exec_len = 0;
+    init_file = NULL;
+    init_file_len = 0;
     flags = PHPDBG_DEFAULT_FLAGS;
     php_optarg = NULL;
     php_optind = 1;
@@ -411,6 +414,13 @@ phpdbg_main:
                 exec_len = strlen(php_optarg);
                 if (exec_len) {
                     exec = strdup(php_optarg);
+                }
+            break;
+            
+            case 'i': /* set init file */
+                init_file_len = strlen(php_optarg);
+                if (init_file_len) {
+                    init_file = strdup(php_optarg);
                 }
             break;
 
@@ -475,6 +485,9 @@ phpdbg_main:
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
+
+        /* initialize from file */
+        phpdbg_init(init_file, init_file_len TSRMLS_CC);
 
         /* print blurb */
 		phpdbg_welcome(cleaning TSRMLS_CC);

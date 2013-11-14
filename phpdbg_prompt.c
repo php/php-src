@@ -71,6 +71,14 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+void phpdbg_init(char *init_file, size_t init_file_len TSRMLS_DC) /* {{{ */
+{
+    if (init_file) {
+        
+        free(init_file);
+    }
+} /* }}} */
+
 void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 {
     /* print blurb */
