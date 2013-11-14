@@ -171,7 +171,7 @@ PHPDBG_PRINT(func) /* {{{ */
 		zend_function* fbc;
         const char *func_name = expr;
         size_t func_name_len = expr_len;
-        
+        char *lcname; 
         /* search active scope if begins with period */
         if (func_name[0] == '.') {
            if (EG(scope)) {
@@ -189,8 +189,10 @@ PHPDBG_PRINT(func) /* {{{ */
 		} else {
 		    func_table = EG(function_table);
 		}
-
-		if (zend_hash_find(func_table, func_name, func_name_len+1, (void**)&fbc) == SUCCESS) {
+		
+        lcname  = zend_str_tolower_dup(func_name, func_name_len);
+        
+		if (zend_hash_find(func_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
 		    phpdbg_notice(
 	            "%s %s %s",
 	            (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
@@ -201,6 +203,8 @@ PHPDBG_PRINT(func) /* {{{ */
 		} else {
 			phpdbg_error("Function %s not found", func_name);
 		}
+		
+		efree(lcname);
     } else {
         phpdbg_error("No function name provided");
     }
