@@ -3,7 +3,7 @@
 #######################################################
 # By default phpdbg will look for .phpdbginit
 # in the current working directory.
-# This default can be overridden with the -I option
+# This default can be overridden with the -i option
 # 
 # The commands contained in an init file are executed
 # and when the environment is cleaned (clean|X)
