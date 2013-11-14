@@ -52,9 +52,9 @@ PHPDBG_HELP(list);
  * Commands
  */
 static const phpdbg_command_t phpdbg_help_commands[] = {
-	PHPDBG_HELP_D(exec,     "the execution context should be a valid phpdbg path"),
+	PHPDBG_HELP_D(exec,     "the execution context should be a valid path"),
 	PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution"),
-	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline after every opcode"),
+	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline as it is executed"),
 	PHPDBG_HELP_D(next,     "continue executing while stepping or after breaking"),
 	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging"),
 	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution"),

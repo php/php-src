@@ -131,6 +131,7 @@ static PHP_FUNCTION(phpdbg_clear)
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
 
 zend_function_entry phpdbg_user_functions[] = {
