@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.7
 
-- JSON
-  . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
-    case-sensitivity incorrectly"). (Andrea Faulds)
-
 
 14 Nov 2013, PHP 5.5.6
 
@@ -22,6 +18,10 @@ PHP                                                                        NEWS
 
 - FPM:
   . Changed default listen() backlog to 65535. (Tony)
+
+- JSON
+  . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
+    case-sensitivity incorrectly"). (Andrea Faulds)
 
 - MySQLi:
   . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
