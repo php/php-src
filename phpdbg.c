@@ -494,7 +494,13 @@ phpdbg_main:
 		} zend_end_try();
 
         /* initialize from file */
-        phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+        zend_try {
+            phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+        } zend_catch {
+            if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+                goto phpdbg_out;
+            }
+        } zend_end_try();
 
         /* print blurb */
 		phpdbg_welcome(cleaning TSRMLS_CC);
