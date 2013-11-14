@@ -91,14 +91,11 @@ PHPDBG_BREAK(address) /* {{{ */
 
 PHPDBG_BREAK(on) /* {{{ */
 {
-	if (expr && expr_len > 0L) {
-	    phpdbg_set_breakpoint_expression(
-	        expr, expr_len TSRMLS_CC);
+	if (expr_len == 0) {
+		phpdbg_error("No expression provided!");
 	} else {
-	    phpdbg_error(
-	        "No expression provided!");
+		phpdbg_set_breakpoint_expression(expr, expr_len TSRMLS_CC);
 	}
-
 	return SUCCESS;
 } /* }}} */
 

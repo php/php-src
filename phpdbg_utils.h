@@ -28,6 +28,9 @@ int phpdbg_is_empty(const char*);
 int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
 
+/**
+ * Parameter parsing stuff
+ */
 enum {
 	EMPTY_PARAM = 0,
 	ADDR_PARAM,

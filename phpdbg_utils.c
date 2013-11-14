@@ -89,7 +89,13 @@ char *phpdbg_resolve_path(const char *path TSRMLS_DC) /* {{{ */
 
 const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 {
-	return PHPDBG_G(exec) ? PHPDBG_G(exec) : zend_get_executed_filename(TSRMLS_C);
+	const char *file = zend_get_executed_filename(TSRMLS_C);
+
+	if (memcmp(file, "[no active file]", sizeof("[no active file]")) == 0) {
+		return PHPDBG_G(exec);
+	}
+
+	return file;
 } /* }}} */
 
 int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
