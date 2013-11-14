@@ -71,11 +71,54 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_init(char *init_file, size_t init_file_len TSRMLS_DC) /* {{{ */
+void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC) /* {{{ */
 {
-    if (init_file) {
+    zend_bool init_default = 0;
+    
+    if (!init_file && use_default) {
+        struct stat sb;
         
-        free(init_file);
+        if (VCWD_STAT(".phpdbginit", &sb) != -1) {
+            init_file = ".phpdbginit";
+            init_file_len = strlen(".phpdbginit");
+            init_default = 1;
+        }
+    }
+    
+    if (init_file) {
+        FILE *fp = fopen(init_file, "r");
+        if (fp) {
+            char cmd[PHPDBG_MAX_CMD];
+            size_t cmd_len = 0L;
+            int line = 1;
+            
+            while (fgets(cmd, PHPDBG_MAX_CMD, fp) != NULL) {
+                cmd_len = strlen(cmd)-1;
+                
+		        while (*cmd && isspace(cmd[cmd_len-1]))
+		            cmd_len--;
+
+		        cmd[cmd_len] = '\0';
+
+		        if (*cmd && cmd_len > 0L && cmd[0] != '#') {
+		            switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+		                case FAILURE:
+		                    phpdbg_error(
+		                        "Unrecognized command in %s:%d: %s!", init_file, line, cmd);
+		                break;
+		            }
+		        }
+		        line++;
+            }
+            fclose(fp);
+        } else {
+            phpdbg_error(
+                "Failed to open %s for initialization", init_file);
+        }
+        
+        if (!init_default) {
+            free(init_file);
+        }
     }
 } /* }}} */
 

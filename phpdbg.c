@@ -297,6 +297,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'s', 0, "step"},
 	{'b', 0, "boring colours"},
 	{'i', 1, "init"},
+	{'I', 0, "ignore-init"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -331,6 +332,7 @@ int main(int argc, char **argv) /* {{{ */
 	size_t exec_len;
 	char *init_file;
 	size_t init_file_len;
+	zend_bool init_file_default;
 	zend_ulong flags;
 	char *php_optarg;
     int php_optind;
@@ -361,6 +363,7 @@ phpdbg_main:
     exec_len = 0;
     init_file = NULL;
     init_file_len = 0;
+    init_file_default = 1;
     flags = PHPDBG_DEFAULT_FLAGS;
     php_optarg = NULL;
     php_optind = 1;
@@ -416,6 +419,10 @@ phpdbg_main:
                     exec = strdup(php_optarg);
                 }
             break;
+            
+            case 'I': { /* ignore .phpdbginit */
+                init_file_default = 0;
+            } break;
             
             case 'i': /* set init file */
                 init_file_len = strlen(php_optarg);
@@ -487,7 +494,7 @@ phpdbg_main:
 		} zend_end_try();
 
         /* initialize from file */
-        phpdbg_init(init_file, init_file_len TSRMLS_CC);
+        phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
 
         /* print blurb */
 		phpdbg_welcome(cleaning TSRMLS_CC);
