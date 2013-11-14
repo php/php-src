@@ -67,10 +67,10 @@ enum {
 
 int phpdbg_print(int TSRMLS_DC, const char*, ...);
 
-#define phpdbg_error(fmt, ...)  phpdbg_print(P_ERROR  TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_notice(fmt, ...) phpdbg_print(P_NOTICE TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_error(fmt, ...)   phpdbg_print(P_ERROR   TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_notice(fmt, ...)  phpdbg_print(P_NOTICE  TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_writeln(fmt, ...) phpdbg_print(P_WRITELN TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_write(fmt, ...) phpdbg_print(P_WRITE TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_write(fmt, ...)   phpdbg_print(P_WRITE   TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 /* {{{ For writing blank lines */
 #define EMPTY "" /* }}} */
