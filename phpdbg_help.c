@@ -195,7 +195,7 @@ PHPDBG_HELP(oplog) /* {{{ */
     phpdbg_writeln("Will open the file /path/to/my.oplog for writing, creating it if it does not exist");
     phpdbg_writeln("Example:");
     phpdbg_writeln("\t%soplog 0", PROMPT);
-    phpdbg_writeln("Will open the currently open log file, disabling oplog");
+    phpdbg_writeln("Will close the currently open log file, disabling oplog");
 	phpdbg_writeln(EMPTY);
     phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
     return SUCCESS;
