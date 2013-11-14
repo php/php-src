@@ -178,7 +178,7 @@ PHPDBG_PRINT(func) /* {{{ */
                func_table = &EG(scope)->function_table;
            } else {
                phpdbg_error("No active class");
-               return FAILURE;
+               return SUCCESS;
            }
         } else if (!EG(function_table)) {
 			phpdbg_error("No function table loaded");
