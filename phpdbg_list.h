@@ -20,7 +20,31 @@
 #ifndef PHPDBG_LIST_H
 #define PHPDBG_LIST_H
 
+#include "TSRM.h"
+#include "phpdbg_prompt.h"
+#include "phpdbg_utils.h"
+
+/**
+ * Command Declarators
+ */
+#define PHPDBG_LIST_D(name, tip) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_list_##name}
+#define PHPDBG_LIST_EX_D(name, tip, alias) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_list_##name}
+#define PHPDBG_LIST(name) \
+	int phpdbg_do_list_##name(const char *expr, size_t expr_len TSRMLS_DC)
+
+PHPDBG_LIST(lines);
+PHPDBG_LIST(func);
+
 void phpdbg_list_function(const zend_function* TSRMLS_DC);
 void phpdbg_list_file(const char*, long, long TSRMLS_DC);
+void phpdbg_list_dispatch(int type, phpdbg_param_t *param TSRMLS_DC);
+
+static const phpdbg_command_t phpdbg_list_commands[] = {
+    PHPDBG_LIST_EX_D(lines, "lists the specified lines", 'l'),
+    PHPDBG_LIST_EX_D(func,  "lists the specified function", 'f'),
+    {NULL, 0, 0}
+};
 
 #endif /* PHPDBG_LIST_H */

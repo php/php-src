@@ -350,8 +350,8 @@ static PHPDBG_COMMAND(print) /* {{{ */
 static PHPDBG_COMMAND(break) /* {{{ */
 {
 	phpdbg_param_t param;
-	char *line_pos;
-
+    int type;
+    
 	if (expr_len == 0) {
 		phpdbg_error("No expression found");
 		return FAILURE;
@@ -362,7 +362,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		return SUCCESS;
 	}
 
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
 			break;
@@ -381,7 +381,8 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		default:
 			break;
 	}
-	phpdbg_clear_param(&param);
+	
+	phpdbg_clear_param(type, &param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -503,50 +504,19 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
 
 static PHPDBG_COMMAND(list) /* {{{ */
 {
-	if (phpdbg_is_empty(expr) || phpdbg_is_numeric(expr)) {
-		long offset = 0, count = strtol(expr, NULL, 0);
-		const char *filename = PHPDBG_G(exec);
-
-		if (zend_is_executing(TSRMLS_C)) {
-			filename = zend_get_executed_filename(TSRMLS_C);
-			offset = zend_get_executed_lineno(TSRMLS_C);
-		} else if (!filename) {
-			phpdbg_error("No file to list");
-			return SUCCESS;
-		}
-
-		phpdbg_list_file(filename, count, offset TSRMLS_CC);
-	} else {
-	    HashTable *func_table = EG(function_table);
-		zend_function* fbc;
-        const char *func_name = expr;
-        size_t func_name_len = expr_len;
-
-        /* search active scope if begins with period */
-        if (func_name[0] == '.') {
-           if (EG(scope)) {
-               func_name++;
-               func_name_len--;
-
-               func_table = &EG(scope)->function_table;
-           } else {
-               phpdbg_error("No active class");
-               return FAILURE;
-           }
-        } else if (!EG(function_table)) {
-			phpdbg_error("No function table loaded");
-			return SUCCESS;
-		} else {
-		    func_table = EG(function_table);
-		}
-
-		if (zend_hash_find(func_table, func_name, func_name_len+1,
-			(void**)&fbc) == SUCCESS) {
-			phpdbg_list_function(fbc TSRMLS_CC);
-		} else {
-			phpdbg_error("Function %s not found", func_name);
-		}
+    phpdbg_param_t param;
+    int type = 0;
+    
+    /* allow advanced listers to run */
+    if (phpdbg_do_cmd(phpdbg_list_commands, (char*)expr, expr_len TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
 	}
+
+	phpdbg_list_dispatch(
+	    phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC), 
+	    &param TSRMLS_CC);
+	
+	phpdbg_clear_param(type, &param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

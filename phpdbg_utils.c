@@ -141,7 +141,7 @@ int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS
 	return STR_PARAM;
 } /* }}} */
 
-void phpdbg_clear_param(int type, phpdbg_param_t *param) /* {{{ */
+void phpdbg_clear_param(int type, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	switch (type) {
 		case FILE_PARAM:

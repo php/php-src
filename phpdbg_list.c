@@ -29,6 +29,108 @@
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+static inline void i_phpdbg_list_func(const char *str TSRMLS_DC)
+{
+    HashTable *func_table = EG(function_table);
+    zend_function* fbc;
+    const char *func_name = str;
+    size_t func_name_len = strlen(str);
+
+    /* search active scope if begins with period */
+    if (func_name[0] == '.') {
+       if (EG(scope)) {
+           func_name++;
+           func_name_len--;
+
+           func_table = &EG(scope)->function_table;
+       } else {
+           phpdbg_error("No active class");
+           return;
+       }
+    } else if (!EG(function_table)) {
+        phpdbg_error("No function table loaded");
+        return;
+    } else {
+        func_table = EG(function_table);
+    }
+
+    if (zend_hash_find(func_table, func_name, func_name_len+1,
+        (void**)&fbc) == SUCCESS) {
+        phpdbg_list_function(fbc TSRMLS_CC);
+    } else {
+        phpdbg_error("Function %s not found", func_name);
+    }
+}
+
+PHPDBG_LIST(lines) /* {{{ */
+{
+    phpdbg_param_t param;
+    int type = phpdbg_parse_param(
+        expr, expr_len, &param TSRMLS_CC);
+    
+    switch (type) {
+        case NUMERIC_PARAM:
+	    case EMPTY_PARAM: {
+	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
+	            if (type == EMPTY_PARAM) {
+	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param.num, 0 TSRMLS_CC);
+	        } else phpdbg_error("Not executing, and execution context not set");
+	    } break;
+	    
+	    default:
+	        phpdbg_error("Unsupported parameter type (%d) for command", type);
+    }
+    
+    phpdbg_clear_param(type, &param TSRMLS_CC);
+    
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_LIST(func) /* {{{ */
+{
+    phpdbg_param_t param;
+    int type = phpdbg_parse_param(
+        expr, expr_len, &param TSRMLS_CC);
+    
+    if (type == STR_PARAM) {
+        i_phpdbg_list_func(
+            param.str TSRMLS_CC);
+    }
+    
+    phpdbg_clear_param(type, &param TSRMLS_CC);
+    
+    return SUCCESS;
+} /* }}} */
+
+void phpdbg_list_dispatch(int type, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+{
+    switch (type) {
+        case NUMERIC_PARAM:
+	    case EMPTY_PARAM: {
+	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
+	            if (type == EMPTY_PARAM) {
+	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
+	        } else phpdbg_error("Not executing, and execution context not set");
+	    } break;
+	    
+		case FILE_PARAM:
+			phpdbg_list_file(param->file.name, param->file.line, 0 TSRMLS_CC);
+			break;
+			
+		case STR_PARAM: {
+		    i_phpdbg_list_func(param->str TSRMLS_CC);
+		} break;
+		
+		default:
+		    phpdbg_error("Unsupported input type (%d) for command", type);
+			break;
+    }
+} /* }}} */
+
 void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
