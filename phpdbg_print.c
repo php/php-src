@@ -135,8 +135,9 @@ PHPDBG_PRINT(method) /* {{{ */
             
             if (zend_lookup_class(class_name, strlen(class_name), &ce TSRMLS_CC) == SUCCESS) {
                 zend_function *fbc;
-                
-                if (zend_hash_find(&(*ce)->function_table, func_name, strlen(func_name)+1, (void**)&fbc) == SUCCESS) {
+                char *lcname = zend_str_tolower_dup(func_name, strlen(func_name));
+
+                if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
                     phpdbg_notice(
 	                    "%s Method %s", 
 	                    (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
@@ -146,6 +147,8 @@ PHPDBG_PRINT(method) /* {{{ */
                 } else {
                     phpdbg_error("The method %s could not be found", func_name);
                 }
+                
+                efree(lcname);
             } else {
                 phpdbg_error("Failed to find the requested class %s", class_name);
             }
