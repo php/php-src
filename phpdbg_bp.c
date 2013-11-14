@@ -487,6 +487,19 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
                  phpdbg_writeln("#%d\t\t%#lx", brake->id, brake->opline);
             }
         } break;
+        
+        case PHPDBG_BREAK_COND: if ((PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)) {
+            HashPosition position;
+            phpdbg_breakcond_t *brake;
+
+            phpdbg_writeln(SEPARATE);
+            phpdbg_writeln("Conditional Breakpoints:");
+            for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position);
+                 zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void**) &brake, &position) == SUCCESS;
+                 zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
+                 phpdbg_writeln("#%d\t\t%s", brake->id, Z_STRVAL(brake->code));
+            }
+        } break;
     }
 } /* }}} */
 

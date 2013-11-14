@@ -386,7 +386,8 @@ static PHPDBG_COMMAND(print) /* {{{ */
     phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
     phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
     phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
-
+    phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+    
     phpdbg_writeln(SEPARATE);
 
 	return SUCCESS;
@@ -471,6 +472,7 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
     phpdbg_writeln("Methods\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
     phpdbg_writeln("Oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
+    phpdbg_writeln("Conditionals\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
 
     phpdbg_clear_breakpoints(TSRMLS_C);
 
