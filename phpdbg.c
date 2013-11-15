@@ -132,7 +132,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-/* {{{ proto void phpdbg_break([string expression])
+/* {{{ proto void phpdbg_break([integer type, string expression])
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break)
 {
@@ -189,9 +189,17 @@ static PHP_FUNCTION(phpdbg_clear)
     zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_arginfo, 0, 0, 0)
+    ZEND_ARG_INFO(0, type)
+    ZEND_ARG_INFO(0, expression)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 zend_function_entry phpdbg_user_functions[] = {
-    PHP_FE(phpdbg_clear, NULL)
-    PHP_FE(phpdbg_break, NULL)
+    PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
+    PHP_FE(phpdbg_break, phpdbg_break_arginfo)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else
