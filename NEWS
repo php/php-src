@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.7
 
+- readline
+  . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
 
 14 Nov 2013, PHP 5.5.6
 
