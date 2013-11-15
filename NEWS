@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.7
 
+- CLI server:
+  . Added some MIME types to the CLI web server (Chris Jones)
+
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
 
