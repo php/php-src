@@ -38,7 +38,7 @@ typedef off_t zend_off_t;
 #else
 typedef long zend_int_t;
 typedef unsigned long zend_uint_t;
-typedef off_t zend_off_t;
+typedef long zend_off_t;
 # define ZEND_INT_MAX LONG_MAX
 # define ZEND_INT_MIN LONG_MIN
 # define ZEND_UINT_MAX ULONG_MAX
