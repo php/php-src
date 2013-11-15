@@ -73,71 +73,10 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-int phpdbg_confirm(char *message TSRMLS_DC)
-{
-    char cmd[PHPDBG_MAX_CMD];
-    
-    zend_bool confirmed = 0, 
-              result = 0;
-    
-    phpdbg_writeln(message);
-        
-    do {
-        phpdbg_error("Confirm (y or n) ?");
-
-        if ((fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL)) {
-            switch (cmd[0]) {
-                case 'y':
-                case 'Y': {
-                    result = 1;
-                    confirmed = 1;
-                } break;
-                
-                case 'n':
-                case 'N': {
-                    confirmed = 1;
-                } break;
-            }
-        }
-    } while (!confirmed);
-
-    return result;
-}
-
-void phpdbg_sigint_handler(int signum)
-{
-    TSRMLS_FETCH();
-    
-    phpdbg_writeln(EMPTY);
-    
-    signal(signum, SIG_IGN);
-    
-    if (EG(in_execution)) {
-        if (phpdbg_confirm(
-                "Do you really want to quit while executing ?" TSRMLS_CC)) {
-            PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-            
-            zend_bailout();
-        } else {
-            signal(
-                SIGINT, phpdbg_sigint_handler);
-            phpdbg_interactive(TSRMLS_C);
-        }
-    } else {
-        phpdbg_notice("Interrupted ...");
-        
-        PHPDBG_G(flags) = PHPDBG_IS_QUITTING;
-        
-        zend_bailout();
-    }
-}
-
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC) /* {{{ */
 {
     zend_bool init_default = 0;
-    
-    signal(SIGINT, phpdbg_sigint_handler);
-    
+
     if (!init_file && use_default) {
         struct stat sb;
         
