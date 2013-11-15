@@ -26,10 +26,12 @@ phpdbg also includes a userland API to enable working with breakpoints from with
 
 ```php
 /**
-* Sets a breakpoint at the next opcode address
+* If no parameters are recieved sets a breakpoint at the next opcode address
+* @param type           a constant PHPDBG_ type
+* @param expression     the expression for the break command
 * @return void
 */
-proto void phpdbg_break(void);
+proto void phpdbg_break([integer type, string expression]);
 ```
 
 
