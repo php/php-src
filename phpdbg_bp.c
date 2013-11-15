@@ -170,15 +170,14 @@ void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{
 	}
 } /* }}} */
 
-void phpdbg_set_breakpoint_expression(const char* expr, size_t expr_len TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_len TSRMLS_DC) /* {{{ */
 {
     zend_ulong hash = zend_inline_hash_func(expr, expr_len);
 
     if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
         phpdbg_breakcond_t new_break;
-
-        zend_op_array *ops = NULL;
         zend_uint cops = CG(compiler_options);
+        zval pv;
 
         ZVAL_STRINGL(&new_break.code, expr, expr_len, 1);
 
@@ -187,38 +186,35 @@ void phpdbg_set_breakpoint_expression(const char* expr, size_t expr_len TSRMLS_D
         cops = CG(compiler_options);
 
         CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
-        {
-            zval pv;
 
-            Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
-	        Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
-	        memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
-	        memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
-	        Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-	        Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
-	        Z_TYPE(pv) = IS_STRING;
+		Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
+		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
+		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
+		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
+		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+		Z_TYPE(pv) = IS_STRING;
 
-	        new_break.ops = zend_compile_string(
-		        &pv, "Conditional Breakpoint Code" TSRMLS_CC);
+		new_break.ops = zend_compile_string(
+			&pv, "Conditional Breakpoint Code" TSRMLS_CC);
 
-		    if (new_break.ops) {
-		        phpdbg_breakcond_t *broken;
+		if (new_break.ops) {
+			phpdbg_breakcond_t *broken;
 
-		        zend_hash_index_update(
-	                &PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash, &new_break,
-	                sizeof(phpdbg_breakcond_t), (void**)&broken);
+			zend_hash_index_update(
+				&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash, &new_break,
+				sizeof(phpdbg_breakcond_t), (void**)&broken);
 
-	            phpdbg_notice("Conditional breakpoint #%d added %s/%p",
-					broken->id, Z_STRVAL(broken->code), broken->ops);
+			phpdbg_notice("Conditional breakpoint #%d added %s/%p",
+				broken->id, Z_STRVAL(broken->code), broken->ops);
 
-		        PHPDBG_G(flags) |= PHPDBG_HAS_COND_BP;
-		    } else {
-		         phpdbg_error(
-		            "Failed to compile code for expression %s", expr);
-		         zval_dtor(&new_break.code);
-		         PHPDBG_G(bp_count)--;
-		    }
-        }
+			PHPDBG_G(flags) |= PHPDBG_HAS_COND_BP;
+		} else {
+			 phpdbg_error(
+				"Failed to compile code for expression %s", expr);
+			 zval_dtor(&new_break.code);
+			 PHPDBG_G(bp_count)--;
+		}
 		CG(compiler_options) = cops;
     } else {
         phpdbg_notice("Conditional break %s exists", expr);
@@ -487,7 +483,7 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
                  phpdbg_writeln("#%d\t\t%#lx", brake->id, brake->opline);
             }
         } break;
-        
+
         case PHPDBG_BREAK_COND: if ((PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)) {
             HashPosition position;
             phpdbg_breakcond_t *brake;
