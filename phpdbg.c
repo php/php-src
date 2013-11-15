@@ -19,6 +19,7 @@
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
+#include "phpdbg_break.h"
 #include "phpdbg_utils.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
@@ -55,10 +56,10 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 #endif
 
     REGISTER_LONG_CONSTANT("PHPDBG_FILE",    FILE_PARAM, CONST_CS|CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("PHPDBG_METHOD",  METHOD_PARAM, CONST_CS|CONST_PERSISTENT); 
+    REGISTER_LONG_CONSTANT("PHPDBG_METHOD",  METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -140,34 +141,34 @@ static PHP_FUNCTION(phpdbg_break)
         long type;
         char *expr = NULL;
         zend_uint expr_len = 0;
-        
+
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
             return;
         }
-        
+
         switch (type) {
             case METHOD_PARAM:
                 phpdbg_do_break_method(
                     expr, expr_len TSRMLS_CC);
             break;
-            
+
             case FILE_PARAM:
                 phpdbg_do_break_file(
                     expr, expr_len TSRMLS_CC);
             break;
-            
+
             case NUMERIC_PARAM:
                 phpdbg_do_break_lineno(
                     expr, expr_len TSRMLS_CC);
             break;
-            
+
             case STR_PARAM:
                 phpdbg_do_break_func(
                     expr, expr_len TSRMLS_CC);
             break;
-            
+
             default: zend_error(
-                E_WARNING, "unrecognized parameter type %d", type);
+                E_WARNING, "unrecognized parameter type %ld", type);
         }
     } else if (EG(current_execute_data) && EG(active_op_array)) {
         zend_ulong opline_num = (EG(current_execute_data)->opline -
