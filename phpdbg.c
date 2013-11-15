@@ -54,6 +54,13 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     zend_execute = phpdbg_execute_ex;
 #endif
 
+    REGISTER_LONG_CONSTANT("PHPDBG_EMPTY",   EMPTY_PARAM, CONST_CS|CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PHPDBG_ADDR",    ADDR_PARAM, CONST_CS|CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PHPDBG_FILE",    FILE_PARAM, CONST_CS|CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PHPDBG_METHOD",  METHOD_PARAM, CONST_CS|CONST_PERSISTENT); 
+    REGISTER_LONG_CONSTANT("PHPDBG_NUMERIC", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
+    
     return SUCCESS;
 } /* }}} */
 
@@ -127,11 +134,44 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-/* {{{ proto void phpdbg_break(void)
+/* {{{ proto void phpdbg_break([string expression])
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break)
 {
-    if (EG(current_execute_data) && EG(active_op_array)) {
+    if (ZEND_NUM_ARGS() > 0) {
+        long type;
+        char *expr = NULL;
+        zend_uint expr_len = 0;
+        
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
+            return;
+        }
+        
+        switch (type) {
+            case METHOD_PARAM:
+                phpdbg_do_break_method(
+                    expr, expr_len TSRMLS_CC);
+            break;
+            
+            case FILE_PARAM:
+                phpdbg_do_break_file(
+                    expr, expr_len TSRMLS_CC);
+            break;
+            
+            case NUMERIC_PARAM:
+                phpdbg_do_break_lineno(
+                    expr, expr_len TSRMLS_CC);
+            break;
+            
+            case STR_PARAM:
+                phpdbg_do_break_func(
+                    expr, expr_len TSRMLS_CC);
+            break;
+            
+            default: zend_error(
+                E_WARNING, "unrecognized parameter type %d", type);
+        }
+    } else if (EG(current_execute_data) && EG(active_op_array)) {
         zend_ulong opline_num = (EG(current_execute_data)->opline -
 			EG(active_op_array)->opcodes);
 
