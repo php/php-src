@@ -298,9 +298,10 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
 	if (zend_eval_stringl((char*)expr, expr_len,
 		&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-		zend_print_zval_r(&retval, 0 TSRMLS_CC);
-		zval_dtor(&retval);
+		zend_print_zval_r(
+		    &retval, 0 TSRMLS_CC);
 		phpdbg_writeln(EMPTY);
+		zval_dtor(&retval);
 	}
 	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
@@ -742,14 +743,16 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
              /* output line info */
 		    phpdbg_notice("#%lu %p %s %s",
                opline->lineno,
-               opline, phpdbg_decode_opcode(opline->opcode),
+               opline, 
+               phpdbg_decode_opcode(opline->opcode),
                execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
         }
 
         if (!ignore_flags && PHPDBG_G(oplog)) {
             phpdbg_log_ex(PHPDBG_G(oplog), "#%lu %p %s %s",
                 opline->lineno,
-                opline, phpdbg_decode_opcode(opline->opcode),
+                opline, 
+                phpdbg_decode_opcode(opline->opcode),
                 execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
         }
     }
@@ -772,16 +775,96 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
     }
 } /* }}} */
 
+static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+{
+#if PHP_VERSION_ID >= 50500
+    return zend_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
+#else
+
+#undef EX
+#define EX(element) execute_data->element
+#undef EX_CV
+#define EX_CV(var) EX(CVs)[var]
+#undef EX_CVs
+#define EX_CVs() EX(CVs)
+#undef EX_T
+#define EX_T(offset) (*(temp_variable *)((char *) EX(Ts) + offset))
+#undef EX_Ts
+#define EX_Ts() EX(Ts)
+
+    zend_execute_data *execute_data = (zend_execute_data *)zend_vm_stack_alloc(
+		ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) +
+		ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)) +
+		ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T TSRMLS_CC);
+
+	EX(CVs) = (zval***)((char*)execute_data + ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)));
+	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
+	EX(Ts) = (temp_variable *)(((char*)EX(CVs)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)));
+	EX(fbc) = NULL;
+	EX(called_scope) = NULL;
+	EX(object) = NULL;
+	EX(old_error_reporting) = NULL;
+	EX(op_array) = op_array;
+	EX(symbol_table) = EG(active_symbol_table);
+	EX(prev_execute_data) = EG(current_execute_data);
+	EG(current_execute_data) = execute_data;
+	EX(nested) = nested;
+
+	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+	}
+
+	if (op_array->this_var != -1 && EG(This)) {
+ 		Z_ADDREF_P(EG(This)); /* For $this pointer */
+		if (!EG(active_symbol_table)) {
+			EX_CV(op_array->this_var) = (zval**)EX_CVs() + (op_array->last_var + op_array->this_var);
+			*EX_CV(op_array->this_var) = EG(This);
+		} else {
+			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX_CV(op_array->this_var))==FAILURE) {
+				Z_DELREF_P(EG(This));
+			}
+		}
+	}
+
+	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EG(opline_ptr) = &EX(opline);
+
+	EX(function_state).function = (zend_function *) op_array;
+	EX(function_state).arguments = NULL;
+	
+	return execute_data;
+#endif
+} /* }}} */
+
+#if PHP_VERSION_ID >= 50500
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
+#else
+void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
+    zend_execute_data *execute_data;
+    zend_bool nested = 0;
+#endif
 	zend_bool original_in_execution = EG(in_execution);
+
+#if PHP_VERSION_ID < 50500
+    if (EG(exception)) {
+        return;
+    }
+#endif
 
 	EG(in_execution) = 1;
 
+#if PHP_VERSION_ID >= 50500
 	if (0) {
 zend_vm_enter:
-		execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+		execute_data = phpdbg_create_execute_data(EG(active_op_array), 1 TSRMLS_CC);
 	}
+#else
+zend_vm_enter:
+        execute_data = phpdbg_create_execute_data(op_array, nested TSRMLS_CC);
+        nested = 1;
+#endif
 
 	while (1) {
 #ifdef ZEND_WIN32
@@ -853,6 +936,9 @@ next:
                     EG(in_execution) = original_in_execution;
                     return;
                 case 2:
+#if PHP_VERSION_ID < 50500
+                    op_array = EG(active_op_array);
+#endif
                     goto zend_vm_enter;
                     break;
                 case 3:

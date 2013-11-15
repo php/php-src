@@ -178,9 +178,15 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 #ifdef ZEND_JMP_SET_VAR
 		CASE(ZEND_JMP_SET_VAR);
 #endif
+#ifdef ZEND_DISCARD_EXCEPTION
 		CASE(ZEND_DISCARD_EXCEPTION);
+#endif
+#ifdef ZEND_YIELD
 		CASE(ZEND_YIELD);
-		CASE(ZEND_GENERATOR_RETURN);
+#endif
+#ifdef ZEND_GENERATOR_RETURN
+        CASE(ZEND_GENERATOR_RETURN);
+#endif
 #ifdef ZEND_FAST_CALL
 		CASE(ZEND_FAST_CALL);
 #endif

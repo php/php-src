@@ -23,8 +23,11 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+#if PHP_VERSION_ID >= 50500
 void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
-void (*zend_execute_internal_old)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+#else
+void (*zend_execute_old)(zend_op_array *op_array TSRMLS_DC);
+#endif
 
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
@@ -43,9 +46,13 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 {
     ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
-
+#if PHP_VERSION_ID >= 50500
     zend_execute_old = zend_execute_ex;
     zend_execute_ex = phpdbg_execute_ex;
+#else
+    zend_execute_old = zend_execute;
+    zend_execute = phpdbg_execute_ex;
+#endif
 
     return SUCCESS;
 } /* }}} */
