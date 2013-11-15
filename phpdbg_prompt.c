@@ -402,10 +402,12 @@ static PHPDBG_COMMAND(print) /* {{{ */
 #else
     phpdbg_writeln("Readline\tno");
 #endif
+
 	phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
 	phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
     phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+    phpdbg_writeln("Oplog\t\t%s", PHPDBG_G(oplog) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
 		phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
@@ -416,6 +418,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 			phpdbg_writeln("Variables\tNone");
 		}
 	}
+
 	phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
 	if (EG(in_execution)) {
 		phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
