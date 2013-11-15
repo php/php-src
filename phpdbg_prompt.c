@@ -139,15 +139,12 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 		                goto next_line;
 		            }
 		            
-		            switch (cmd[0]) {
-		                
-		                default: switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
-		                    case FAILURE:
-		                        phpdbg_error(
-		                            "Unrecognized command in %s:%d: %s!", init_file, line, cmd);
-		                    break;
-		                }
-		            }
+		            switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+	                    case FAILURE:
+	                        phpdbg_error(
+	                            "Unrecognized command in %s:%d: %s!", init_file, line, cmd);
+	                    break;
+	                }
 		        }
 next_line:
 		        line++;
