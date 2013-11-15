@@ -93,7 +93,7 @@
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.0.0" /* }}} */
+#define PHPDBG_VERSION "0.0.1" /* }}} */
 
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
