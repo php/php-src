@@ -34,6 +34,12 @@ phpdbg also includes a userland API to enable working with breakpoints from with
 proto void phpdbg_break([integer type, string expression]);
 ```
 
+The following type constants are registered by phpdbg:
+
+ - PHPDBG_FILE
+ - PHPDBG_METHOD
+ - PHPDBG_LINENO
+ - PHPDBG_FUNC
 
 ```php
 /**
