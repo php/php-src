@@ -1,18 +1,26 @@
-#######################################################
+##############################################
 # .phpdbginit
-#######################################################
-# By default phpdbg will look for .phpdbginit
-# in the current working directory.
-# This default can be overridden with the -i option
-# 
-# The commands contained in an init file are executed
-# and when the environment is cleaned (clean|X)
-# 
-# Q
-# b f my_function
-# b m my::method
-# e my.php
-# c
-php:
-    
-end;
+#
+# Lines starting with # are ignored
+# Code must start and end with <: and :> respectively
+##############################################
+# Place initialization commands one per line
+##############################################
+# exec sapi/phpdbg/test.php
+
+##############################################
+# Embedding code in .phpdbginit
+##############################################
+<:
+/*
+* This embedded PHP is executed at init time
+*/
+
+/* phpdbg_break(PHPDBG_METHOD, "phpdbg::method"); */
+/* phpdbg_break(PHPDBG_FUNC, "my_global_function"); */
+/* phpdbg_break(PHPDBG_FILE, "/path/to/file.php:10"); */
+:>
+
+##############################################
+# Now carry on initializing phpdbg ...
+##############################################
