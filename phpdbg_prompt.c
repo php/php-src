@@ -257,7 +257,7 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 
 static PHPDBG_COMMAND(step) /* {{{ */
 {
-	if (atoi(expr)) {
+	if (expr && atoi(expr)) {
 	    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 	} else {
 	    PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
@@ -636,7 +636,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 } /* }}} */
 
 static PHPDBG_COMMAND(quiet) { /* {{{ */
-    if (atoi(expr)) {
+    if (expr && atoi(expr)) {
         PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
     } else {
         PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
