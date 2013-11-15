@@ -13,3 +13,6 @@
 # b m my::method
 # e my.php
 # c
+php:
+    
+end;
