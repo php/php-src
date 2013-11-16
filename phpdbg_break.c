@@ -29,12 +29,10 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 PHPDBG_BREAK(file) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_error("No expression provided");
-			break;
 		case FILE_PARAM:
 			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
 			break;
+			
 		default:
 			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
 			break;
@@ -46,9 +44,6 @@ PHPDBG_BREAK(file) /* {{{ */
 PHPDBG_BREAK(method) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_error("No expression provided");
-			break;
 		case METHOD_PARAM:
             phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
             break;
@@ -64,12 +59,10 @@ PHPDBG_BREAK(method) /* {{{ */
 PHPDBG_BREAK(address) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_error("No expression provided");
-			break;
 		case ADDR_PARAM:
             phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
             break;
+            
 		default:
 			phpdbg_error(
 			    "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
@@ -99,12 +92,10 @@ PHPDBG_BREAK(lineno) /* {{{ */
 	}
 
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_error("No expression provided!");
-			break;
 		case NUMERIC_PARAM:
 			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			break;
+			
 		default:
 			phpdbg_error(
 			    "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
@@ -117,12 +108,10 @@ PHPDBG_BREAK(lineno) /* {{{ */
 PHPDBG_BREAK(func) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_error("No expression provided!");
-			break;
 		case STR_PARAM:
 			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
 			break;
+			
 		default:
 			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
 			break;
