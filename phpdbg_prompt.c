@@ -211,7 +211,7 @@ static PHPDBG_COMMAND(exec) /* {{{ */
 
                     if (!PHPDBG_G(exec)) {
 	                    phpdbg_error("Cannot get real file path");
-	                    return FAILURE;
+	                    return SUCCESS;
                     }
 
                     PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
@@ -262,8 +262,9 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 {
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("No execution context");
-		return FAILURE;
+		return SUCCESS;
 	}
+	
 	if (!EG(in_execution)) {
 		if (PHPDBG_G(ops)) {
 			phpdbg_error("Destroying previously compiled opcodes");
@@ -271,7 +272,9 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 		}
 	}
 
-	return phpdbg_compile(TSRMLS_C);
+	phpdbg_compile(TSRMLS_C);
+	
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(step) /* {{{ */
@@ -309,7 +312,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 {
     if (EG(in_execution)) {
 		phpdbg_error("Cannot start another execution while one is in progress");
-        return FAILURE;
+        return SUCCESS;
     }
 
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
@@ -319,8 +322,9 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-				phpdbg_error("Failed to compile %s, cannot run", PHPDBG_G(exec));
-				return FAILURE;
+				phpdbg_error(
+				    "Failed to compile %s, cannot run", PHPDBG_G(exec));
+				goto out;
 			}
 		}
 
@@ -340,19 +344,20 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				phpdbg_error("Caught excetion in VM");
-				return FAILURE;
-			} else return SUCCESS;
+				goto out;
+			}
 		} zend_end_try();
 
         EG(active_op_array) = orig_op_array;
 	    EG(opline_ptr) = orig_opline;
 	    EG(return_value_ptr_ptr) = orig_retval_ptr;
 
-		return SUCCESS;
 	} else {
 		phpdbg_error("Nothing to execute!");
-		return FAILURE;
 	}
+	
+out:
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(eval) /* {{{ */
@@ -391,7 +396,7 @@ static PHPDBG_COMMAND(back) /* {{{ */
 {
     if (!EG(in_execution)) {
         phpdbg_error("Not executing!");
-        return FAILURE;
+        return SUCCESS;
     }
 
     switch (param->type) {
@@ -518,7 +523,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
 {
     if (EG(in_execution)) {
         phpdbg_error("Cannot clean environment while executing");
-        return FAILURE;
+        return SUCCESS;
 	}
 
 	phpdbg_notice("Cleaning Execution Environment");
@@ -622,64 +627,65 @@ static PHPDBG_COMMAND(oplog) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-	if (param->type == EMPTY_PARAM) {
-		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
-		const phpdbg_command_t *help_command = phpdbg_help_commands;
+    switch (param->type) {
+        case EMPTY_PARAM: {
+            const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
+		    const phpdbg_command_t *help_command = phpdbg_help_commands;
+            
+            phpdbg_help_header();
+		    phpdbg_writeln("To get help regarding a specific command type \"help command\"");
+
+		    phpdbg_notice("Commands");
+
+		    while (prompt_command && prompt_command->name) {
+			    phpdbg_writeln(
+			        "\t%s\t%s", prompt_command->name, prompt_command->tip);
+			    ++prompt_command;
+		    }
+
+		    phpdbg_notice("Helpers Loaded");
+
+		    while (help_command && help_command->name) {
+			    phpdbg_writeln("\t%s\t%s", help_command->name, help_command->tip);
+			    ++help_command;
+		    }
+
+		    phpdbg_notice("Command Line Options and Flags");
+	        phpdbg_writeln("\tOption\tExample\t\t\tPurpose");
+	        phpdbg_writeln(EMPTY);
+	        phpdbg_writeln("\t-c\t-c/my/php.ini\t\tSet php.ini file to load");
+	        phpdbg_writeln("\t-d\t-dmemory_limit=4G\tSet a php.ini directive");
+	        phpdbg_writeln("\t-n\t-N/A\t\t\tDisable default php.ini");
+	        phpdbg_writeln("\t-e\t-emytest.php\t\tSet execution context");
+	        phpdbg_writeln("\t-v\tN/A\t\t\tEnable opline output while executing");
+	        phpdbg_writeln("\t-s\tN/A\t\t\tEnable stepping");
+	        phpdbg_writeln("\t-b\tN/A\t\t\tDisable the use of colours");
+	        phpdbg_writeln("\t-i\t-imy.init\t\tSet the phpdbginit file");
+	        phpdbg_writeln("\t-I\tN/A\t\t\tDisable loading .phpdbginit");
+	        phpdbg_writeln("\t-O\t-Omy.oplog\t\tSets oplog output file");
+	        phpdbg_help_footer();
+        } break;
         
-        phpdbg_help_header();
-		phpdbg_writeln("To get help regarding a specific command type \"help command\"");
-
-		phpdbg_notice("Commands");
-
-		while (prompt_command && prompt_command->name) {
-			phpdbg_writeln(
-			    "\t%s\t%s", prompt_command->name, prompt_command->tip);
-			++prompt_command;
-		}
-
-		phpdbg_notice("Helpers Loaded");
-
-		while (help_command && help_command->name) {
-			phpdbg_writeln("\t%s\t%s", help_command->name, help_command->tip);
-			++help_command;
-		}
-
-		phpdbg_notice("Command Line Options and Flags");
-	    phpdbg_writeln("\tOption\tExample\t\t\tPurpose");
-	    phpdbg_writeln(EMPTY);
-	    phpdbg_writeln("\t-c\t-c/my/php.ini\t\tSet php.ini file to load");
-	    phpdbg_writeln("\t-d\t-dmemory_limit=4G\tSet a php.ini directive");
-	    phpdbg_writeln("\t-n\t-N/A\t\t\tDisable default php.ini");
-	    phpdbg_writeln("\t-e\t-emytest.php\t\tSet execution context");
-	    phpdbg_writeln("\t-v\tN/A\t\t\tEnable opline output while executing");
-	    phpdbg_writeln("\t-s\tN/A\t\t\tEnable stepping");
-	    phpdbg_writeln("\t-b\tN/A\t\t\tDisable the use of colours");
-	    phpdbg_writeln("\t-i\t-imy.init\t\tSet the phpdbginit file");
-	    phpdbg_writeln("\t-I\tN/A\t\t\tDisable loading .phpdbginit");
-	    phpdbg_writeln("\t-O\t-Omy.oplog\t\tSets oplog output file");
-	    phpdbg_help_footer();
-	} else {
-	     phpdbg_error(
-            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-        return FAILURE;
-	}
+        phpdbg_default_switch_case();
+    }
 
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(quiet) { /* {{{ */
-    if (param->type == NUMERIC_PARAM) {
-        if (param->num) {
-            PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
-        } else {
-            PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
-        }
-        phpdbg_notice("Quietness %s",
-            (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
-    } else {
-        phpdbg_error(
-            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-        return FAILURE;
+static PHPDBG_COMMAND(quiet) /* {{{ */
+{
+    switch (param->type) {
+        case NUMERIC_PARAM: {
+            if (param->num) {
+                PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
+            } else {
+                PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+            }
+            phpdbg_notice("Quietness %s",
+                (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
+        } break;
+        
+        phpdbg_default_switch_case();
     }
     
     return SUCCESS;
@@ -764,7 +770,7 @@ int phpdbg_do_cmd(  const phpdbg_command_t *command,
                 }
             }
 
-            *selected = command;
+            *selected = (phpdbg_command_t*) command;
             
 			rc = command->handler(param TSRMLS_CC);
 			

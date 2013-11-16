@@ -227,7 +227,7 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)
 {
     HashTable *func_table = EG(function_table);
     zend_function* fbc;
-    char *func_name = str;
+    char *func_name = (char*) str;
     size_t func_name_len = len;
     
     /* search active scope if begins with period */
