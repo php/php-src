@@ -37,7 +37,7 @@ static inline void i_phpdbg_list_func(const char *str TSRMLS_DC)
     zend_function* fbc;
     const char *func_name = str;
     size_t func_name_len = strlen(str);
-
+    printf("i_phpdbg_list_func(%s)\n", str);
     /* search active scope if begins with period */
     if (func_name[0] == '.') {
        if (EG(scope)) {

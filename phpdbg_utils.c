@@ -63,7 +63,12 @@ int phpdbg_is_addr(const char *str) /* {{{ */
 
 int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
 {
-	const char *sep = strstr(str, "::");
+	char *sep = NULL;
+
+    if (strstr(str, " ") != NULL)
+	    return 0;
+	    
+	sep = strstr(str, "::");
 
 	if (!sep || sep == str || sep+2 == str+len-1) {
 		return 0;

@@ -130,8 +130,6 @@ PHPDBG_PRINT(class) /* {{{ */
 
 PHPDBG_PRINT(method) /* {{{ */
 {
-    int result = SUCCESS;
-    
     if (param->type == METHOD_PARAM) {
         zend_class_entry **ce;
         
@@ -149,28 +147,23 @@ PHPDBG_PRINT(method) /* {{{ */
             } else {
                 phpdbg_error(
                     "The method %s could not be found", param->method.name);
-                result = FAILURE;
             }
             
             efree(lcname);
         } else {
             phpdbg_error(
                 "Failed to find the requested class %s", param->method.class);
-            result = FAILURE;
         }
     } else {
         phpdbg_error(
             "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-        result = FAILURE;
     }
     
-    return result;
+    return SUCCESS;
 } /* }}} */
 
 PHPDBG_PRINT(func) /* {{{ */
 {
-    int result = SUCCESS;
-    
     if (param->type == STR_PARAM) {
         HashTable *func_table = EG(function_table);
 		zend_function* fbc;
@@ -186,12 +179,12 @@ PHPDBG_PRINT(func) /* {{{ */
                func_table = &EG(scope)->function_table;
            } else {
                phpdbg_error("No active class");
-               return FAILURE;
+               return SUCCESS;
            }
         } else if (!EG(function_table)) {
 			phpdbg_error(
 			    "No function table loaded");
-			return FAILURE;
+			return SUCCESS;
 		} else {
 		    func_table = EG(function_table);
 		}
@@ -209,7 +202,6 @@ PHPDBG_PRINT(func) /* {{{ */
 		} else {
 			phpdbg_error(
 			    "Function %s not found", func_name);
-			result = FAILURE;
 		}
 		
 		efree(lcname);
@@ -217,8 +209,7 @@ PHPDBG_PRINT(func) /* {{{ */
     } else {
         phpdbg_error(
             "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-        result = FAILURE;
     }
 
-    return result;
+    return SUCCESS;
 } /* }}} */

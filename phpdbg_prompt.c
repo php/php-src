@@ -711,10 +711,12 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 		    phpdbg_param_t *param = emalloc(sizeof(phpdbg_param_t));
 		    
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
+            
+            /* urm ... */
             if (PHPDBG_G(lparam)) {
-                phpdbg_clear_param(
-                    PHPDBG_G(lparam) TSRMLS_CC);
-                efree(PHPDBG_G(lparam));           
+                //phpdbg_clear_param(
+                //    PHPDBG_G(lparam) TSRMLS_CC);
+                //efree(PHPDBG_G(lparam));           
             }
             
             phpdbg_parse_param(
