@@ -55,9 +55,10 @@ $_SERVER = array
   'REQUEST_TIME' => time(),
 );
 
-$_GET = array
-(
-    "request" => "variables"
-);
+$_GET = array();
+$_REQUEST = array();
+$_POST = array();
+$_COOKIE = array();
+$_FILES = array();
 
 chdir(PHPDBG_BOOTPATH);
