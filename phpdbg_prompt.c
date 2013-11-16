@@ -692,10 +692,10 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 			PHPDBG_G(last_params) = expr;
 			PHPDBG_G(last_params_len) = (cmd_len - expr_len) ?
 			                                (((cmd_len - expr_len) - sizeof(" "))+1) : 0;
-            
+
             phpdbg_debug("phpdbg_do_cmd(%s, \"%s\", %lu)",
                         command->name, PHPDBG_G(last_params), PHPDBG_G(last_params_len));
-            
+
 			return command->handler(
 			    PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}
@@ -721,11 +721,8 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
     char *cmd = NULL;
 
     while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-        cmd = readline(PROMPT);
-
-        if (cmd) {
-            cmd_len = strlen(cmd);
-        } else cmd_len = 0L;
+		cmd = readline(PROMPT);
+		cmd_len = cmd ? strlen(cmd) : 0;
 #endif
 
 		/* trim space from end of input */
@@ -769,7 +766,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
             }
 #endif
 		} else if (PHPDBG_G(last)) {
-		    PHPDBG_G(last)->handler(
+			return PHPDBG_G(last)->handler(
 		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}
 	}
