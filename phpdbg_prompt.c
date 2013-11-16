@@ -190,43 +190,45 @@ void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
-	if (param->type == STR_PARAM) {
-        struct stat sb;
-        
-        if (VCWD_STAT(param->str, &sb) != FAILURE) {
-            if (sb.st_mode & S_IFREG|S_IFLNK) {
-                if (PHPDBG_G(exec)) {
-	                phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
-	                efree(PHPDBG_G(exec));
-	                PHPDBG_G(exec) = NULL;
+    switch (param->type) {
+        case STR_PARAM: {
+            struct stat sb;
+
+            if (VCWD_STAT(param->str, &sb) != FAILURE) {
+                if (sb.st_mode & S_IFREG|S_IFLNK) {
+                    if (PHPDBG_G(exec)) {
+	                    phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
+	                    efree(PHPDBG_G(exec));
+	                    PHPDBG_G(exec) = NULL;
+                    }
+
+                    if (PHPDBG_G(ops)) {
+	                    phpdbg_notice("Destroying compiled opcodes");
+	                    phpdbg_clean(0 TSRMLS_CC);
+                    }
+
+                    PHPDBG_G(exec) = phpdbg_resolve_path(param->str TSRMLS_CC);
+
+                    if (!PHPDBG_G(exec)) {
+	                    phpdbg_error("Cannot get real file path");
+	                    return FAILURE;
+                    }
+
+                    PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
+
+                    phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+                    
+                } else {
+                    phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
                 }
-
-                if (PHPDBG_G(ops)) {
-	                phpdbg_notice("Destroying compiled opcodes");
-	                phpdbg_clean(0 TSRMLS_CC);
-                }
-
-                PHPDBG_G(exec) = phpdbg_resolve_path(param->str TSRMLS_CC);
-
-                if (!PHPDBG_G(exec)) {
-	                phpdbg_error("Cannot get real file path");
-	                return FAILURE;
-                }
-
-                PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
-
-                phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-                
             } else {
-                phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
+                phpdbg_error("Cannot stat %s, ensure the file exists", param->str);
             }
-        } else {
-            phpdbg_error("Cannot stat %s, ensure the file exists", param->str);
-        }
-    } else {
-        phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+        } break;
+        
+        phpdbg_default_switch_case();
     }
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -274,18 +276,21 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 
 static PHPDBG_COMMAND(step) /* {{{ */
 {
-	if (param->type == EMPTY_PARAM || param->type == NUMERIC_PARAM) {
-	    if (param->type == NUMERIC_PARAM && param->num) {
-	        PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-	    } else {
-	        PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
-	    }
+    switch (param->type) {
+        case EMPTY_PARAM:
+        case NUMERIC_PARAM: {
+            if (param->type == NUMERIC_PARAM && param->num) {
+	            PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	        } else {
+	            PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
+	        }
 
-	    phpdbg_notice("Stepping %s",
-	        (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-	} else {
-	    phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-	}
+	        phpdbg_notice("Stepping %s",
+	            (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+        } break;
+        
+        phpdbg_default_switch_case();
+    }
 
 	return SUCCESS;
 } /* }}} */
@@ -352,33 +357,33 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 static PHPDBG_COMMAND(eval) /* {{{ */
 {
-	if (param->type == STR_PARAM) { 
-        zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
-        zval retval;
+    switch (param->type) {
+        case STR_PARAM: {
+            zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+            zval retval;
 
-        PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+            PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
 
-        /* disable stepping while eval() in progress */
-        PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-        if (zend_eval_stringl(param->str, param->len,
-	        &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-	        zend_print_zval_r(
-	            &retval, 0 TSRMLS_CC);
-	        phpdbg_writeln(EMPTY);
-	        zval_dtor(&retval);
-        }
-        PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+            /* disable stepping while eval() in progress */
+            PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+            if (zend_eval_stringl(param->str, param->len,
+	            &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+	            zend_print_zval_r(
+	                &retval, 0 TSRMLS_CC);
+	            phpdbg_writeln(EMPTY);
+	            zval_dtor(&retval);
+            }
+            PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
-        /* switch stepping back on */
-        if (stepping) {
-	        PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-        }
-    } else {
-        phpdbg_error(
-            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-        return FAILURE;
+            /* switch stepping back on */
+            if (stepping) {
+	            PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+            }
+        } break;
+        
+        phpdbg_default_switch_case();
     }
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -412,16 +417,12 @@ static PHPDBG_COMMAND(back) /* {{{ */
 
 	        phpdbg_writeln(EMPTY);
 	        zval_dtor(&zbacktrace);
-	        
-	        return SUCCESS;
         } break;
-        
-        default: {
-            phpdbg_error(
-	            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-	        return FAILURE;
-        }
+
+        phpdbg_default_switch_case();
     }
+    
+    return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(print) /* {{{ */
@@ -493,10 +494,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
 			break;
 			
-		default:
-		    phpdbg_error(
-		        "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-			return FAILURE;
+		phpdbg_default_switch_case();
 	}
 
 	return SUCCESS;
@@ -583,42 +581,41 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 
 static PHPDBG_COMMAND(oplog) /* {{{ */
 {
-    if (param->type == EMPTY_PARAM || 
-        ((param->type == NUMERIC_PARAM) && !param->num)) {
-        if (PHPDBG_G(oplog)) {
-            phpdbg_notice("Disabling oplog");
-            fclose(
-                PHPDBG_G(oplog));
-            return SUCCESS;
-        } else {
-            phpdbg_error("No oplog currently open");
-            return FAILURE;
-        }
-    } else {
-        if (param->type == STR_PARAM) {
-            /* open oplog */
+    switch (param->type) {
+        case EMPTY_PARAM:
+        case NUMERIC_PARAM:
+            if ((param->type != NUMERIC_PARAM) || !param->num) {
+                if (PHPDBG_G(oplog)) {
+                    phpdbg_notice("Disabling oplog");
+                    fclose(
+                        PHPDBG_G(oplog));
+                } else {
+                    phpdbg_error("No oplog currently open");
+                }
+            }
+        break;
+        
+        case STR_PARAM: {
+             /* open oplog */
             FILE *old = PHPDBG_G(oplog);
 
             PHPDBG_G(oplog) = fopen(param->str, "w+");
             if (!PHPDBG_G(oplog)) {
                 phpdbg_error("Failed to open %s for oplog", param->str);
                 PHPDBG_G(oplog) = old;
-                return FAILURE;
             } else {
                 if (old) {
                     phpdbg_notice("Closing previously open oplog");
                     fclose(old);
                 }
                 phpdbg_notice("Successfully opened oplog %s", param->str);
-
-                return SUCCESS;
             }
-        } else {
-            phpdbg_error(
-                "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-            return FAILURE;
-        }
+        } break;
+        
+        phpdbg_default_switch_case();
     }
+    
+    return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(help) /* {{{ */
