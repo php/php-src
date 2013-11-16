@@ -27,7 +27,8 @@
 
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 
-#define PHPDBG_NEXT 2
+#define PHPDBG_NEXT  2
+#define PHPDBG_UNTIL 3
 
 /**
  * Command handler

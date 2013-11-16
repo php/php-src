@@ -49,6 +49,12 @@ PHPDBG_HELP(next) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(until) /* {{{ */
+{
+	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the until command to step back into the vm and reaches the next source line");
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(compile) /* {{{ */
 {
 	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed");
@@ -80,7 +86,7 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_notice("Commands");
 	{
 	    const phpdbg_command_t *print_command = phpdbg_print_commands;
-	    
+
 	    while (print_command && print_command->name) {
 			phpdbg_writeln("\t%s\t%s", print_command->name, print_command->tip);
 			++print_command;
@@ -125,7 +131,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
-	
+
 	return SUCCESS;
 } /* }}} */
 
