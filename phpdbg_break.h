@@ -30,7 +30,7 @@
 #define PHPDBG_BREAK_EX_D(name, tip, alias) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_break_##name}
 #define PHPDBG_BREAK(name) \
-	int phpdbg_do_break_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_break_##name(phpdbg_param_t *param TSRMLS_DC)
 
 /**
  * Printer Forward Declarations

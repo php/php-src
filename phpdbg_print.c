@@ -90,8 +90,8 @@ PHPDBG_PRINT(class) /* {{{ */
 {
     zend_class_entry **ce;
     
-	if (expr && expr_len > 0L) {
-	    if (zend_lookup_class(expr, strlen(expr), &ce TSRMLS_CC) == SUCCESS) {
+	if (param->type == STR_PARAM) {
+	    if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
 	        phpdbg_notice(
 	            "%s %s: %s", 
 	            ((*ce)->type == ZEND_USER_CLASS) ? 
@@ -115,10 +115,14 @@ PHPDBG_PRINT(class) /* {{{ */
 	            }
 	        }
 	    } else {
-	        phpdbg_error("Cannot find class %s", expr);
+	        phpdbg_error(
+	            "Cannot find class %s", param->str);
+	        return FAILURE;
 	    }
 	} else {
-		phpdbg_error("No class name provided!");
+		phpdbg_error(
+		    "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+		return FAILURE;
 	}
 
 	return SUCCESS;
@@ -126,51 +130,52 @@ PHPDBG_PRINT(class) /* {{{ */
 
 PHPDBG_PRINT(method) /* {{{ */
 {
-    if (expr && expr_len > 0L) {
-        char *class_name = NULL;
-        char *func_name = NULL;
+    int result = SUCCESS;
+    
+    if (param->type == METHOD_PARAM) {
+        zend_class_entry **ce;
         
-        if (phpdbg_is_class_method(expr, expr_len, &class_name, &func_name)) {
-            zend_class_entry **ce;
-            
-            if (zend_lookup_class(class_name, strlen(class_name), &ce TSRMLS_CC) == SUCCESS) {
-                zend_function *fbc;
-                char *lcname = zend_str_tolower_dup(func_name, strlen(func_name));
+        if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+            zend_function *fbc;
+            char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
-                if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
-                    phpdbg_notice(
-	                    "%s Method %s", 
-	                    (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
-	                    fbc->common.function_name);
-	                    
-			        phpdbg_print_function_helper(fbc TSRMLS_CC);
-                } else {
-                    phpdbg_error("The method %s could not be found", func_name);
-                }
-                
-                efree(lcname);
+            if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
+                phpdbg_notice(
+                    "%s Method %s", 
+                    (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+                    fbc->common.function_name);
+                    
+		        phpdbg_print_function_helper(fbc TSRMLS_CC);
             } else {
-                phpdbg_error("Failed to find the requested class %s", class_name);
+                phpdbg_error(
+                    "The method %s could not be found", param->method.name);
+                result = FAILURE;
             }
             
-            efree(class_name);
-            efree(func_name);
+            efree(lcname);
         } else {
-            phpdbg_error("The expression provided is not a valid method %s", expr);
+            phpdbg_error(
+                "Failed to find the requested class %s", param->method.class);
+            result = FAILURE;
         }
     } else {
-        phpdbg_error("No expression provided");
+        phpdbg_error(
+            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+        result = FAILURE;
     }
-    return SUCCESS;
+    
+    return result;
 } /* }}} */
 
 PHPDBG_PRINT(func) /* {{{ */
 {
-    if (expr && expr_len > 0L) {
+    int result = SUCCESS;
+    
+    if (param->type == STR_PARAM) {
         HashTable *func_table = EG(function_table);
 		zend_function* fbc;
-        const char *func_name = expr;
-        size_t func_name_len = expr_len;
+        const char *func_name = param->str;
+        size_t func_name_len = param->len;
         char *lcname; 
         /* search active scope if begins with period */
         if (func_name[0] == '.') {
@@ -181,11 +186,12 @@ PHPDBG_PRINT(func) /* {{{ */
                func_table = &EG(scope)->function_table;
            } else {
                phpdbg_error("No active class");
-               return SUCCESS;
+               return FAILURE;
            }
         } else if (!EG(function_table)) {
-			phpdbg_error("No function table loaded");
-			return SUCCESS;
+			phpdbg_error(
+			    "No function table loaded");
+			return FAILURE;
 		} else {
 		    func_table = EG(function_table);
 		}
@@ -201,12 +207,18 @@ PHPDBG_PRINT(func) /* {{{ */
 	            
 			phpdbg_print_function_helper(fbc TSRMLS_CC);
 		} else {
-			phpdbg_error("Function %s not found", func_name);
+			phpdbg_error(
+			    "Function %s not found", func_name);
+			result = FAILURE;
 		}
 		
 		efree(lcname);
+		
     } else {
-        phpdbg_error("No function name provided");
+        phpdbg_error(
+            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+        result = FAILURE;
     }
-    return SUCCESS;
+
+    return result;
 } /* }}} */

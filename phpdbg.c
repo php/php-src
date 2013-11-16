@@ -129,8 +129,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->vmret = 0;
     pg->bp_count = 0;
     pg->last = NULL;
-    pg->last_params = NULL;
-    pg->last_params_len = 0;
+    pg->lparam = NULL;
     pg->flags = PHPDBG_DEFAULT_FLAGS;
     pg->oplog = NULL;
 } /* }}} */
@@ -232,35 +231,37 @@ static PHP_FUNCTION(phpdbg_break)
         long type;
         char *expr = NULL;
         zend_uint expr_len = 0;
+        phpdbg_param_t param;
 
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
             return;
         }
-
+        
+        phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
+        
         switch (type) {
             case METHOD_PARAM:
-                phpdbg_do_break_method(
-                    expr, expr_len TSRMLS_CC);
+                phpdbg_do_break_method(&param TSRMLS_CC);
             break;
 
             case FILE_PARAM:
-                phpdbg_do_break_file(
-                    expr, expr_len TSRMLS_CC);
+                phpdbg_do_break_file(&param TSRMLS_CC);
             break;
 
             case NUMERIC_PARAM:
-                phpdbg_do_break_lineno(
-                    expr, expr_len TSRMLS_CC);
+                phpdbg_do_break_lineno(&param TSRMLS_CC);
             break;
 
             case STR_PARAM:
-                phpdbg_do_break_func(
-                    expr, expr_len TSRMLS_CC);
+                phpdbg_do_break_func(&param TSRMLS_CC);
             break;
 
             default: zend_error(
                 E_WARNING, "unrecognized parameter type %ld", type);
         }
+        
+        phpdbg_clear_param(&param TSRMLS_CC);
+        
     } else if (EG(current_execute_data) && EG(active_op_array)) {
         zend_ulong opline_num = (EG(current_execute_data)->opline -
 			EG(active_op_array)->opcodes);

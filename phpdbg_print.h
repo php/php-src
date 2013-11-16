@@ -29,7 +29,7 @@
 #define PHPDBG_PRINT_D(name, tip, alias) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_print_##name}
 #define PHPDBG_PRINT(name) \
-	int phpdbg_do_print_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_print_##name(phpdbg_param_t *param TSRMLS_DC)
 
 /**
  * Printer Forward Declarations

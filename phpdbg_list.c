@@ -66,40 +66,32 @@ static inline void i_phpdbg_list_func(const char *str TSRMLS_DC)
 
 PHPDBG_LIST(lines) /* {{{ */
 {
-    phpdbg_param_t param;
-    
-    switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+    switch (param->type) {
         case NUMERIC_PARAM:
 	    case EMPTY_PARAM: {
 	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
-	            if (param.type == EMPTY_PARAM) {
+	            if (param->type == EMPTY_PARAM) {
 	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
-	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param.num, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
 	        } else phpdbg_error("Not executing, and execution context not set");
 	    } break;
 	    
 	    default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
+			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
     }
-    
-    phpdbg_clear_param(&param TSRMLS_CC);
     
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_LIST(func) /* {{{ */
 {
-    phpdbg_param_t param;
-
-    if (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC) == STR_PARAM) {
+    if (param->type == STR_PARAM) {
         i_phpdbg_list_func(
-            param.str TSRMLS_CC);
+            param->str TSRMLS_CC);
     } else {
         phpdbg_error(
-            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
+            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
     }
-    
-    phpdbg_clear_param(&param TSRMLS_CC);
     
     return SUCCESS;
 } /* }}} */

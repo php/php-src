@@ -28,121 +28,105 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_BREAK(file) /* {{{ */
 {
-	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
 		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param.file.name, param.file.line TSRMLS_CC);
+			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
 			break;
 		default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
+			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
 			break;
 	}
-
-	phpdbg_clear_param(&param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(method) /* {{{ */
 {
-	phpdbg_param_t param;
-
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
 		case METHOD_PARAM:
-            phpdbg_set_breakpoint_method(param.method.class, param.method.name TSRMLS_CC);
+            phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
             break;
             
 		default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
+			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
 			break;
     }
-
-    phpdbg_clear_param(&param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(address) /* {{{ */
 {
-	phpdbg_param_t param;
-    
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided");
 			break;
 		case ADDR_PARAM:
-            phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
+            phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
             break;
 		default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
-			break;
+			phpdbg_error(
+			    "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+	        return FAILURE;
     }
-
-    phpdbg_clear_param(&param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(on) /* {{{ */
 {
-	if (expr_len == 0) {
-		phpdbg_error("No expression provided!");
+	if (param->type == STR_PARAM) {
+        phpdbg_set_breakpoint_expression(param->str, param->len TSRMLS_CC);
 	} else {
-		phpdbg_set_breakpoint_expression(expr, expr_len TSRMLS_CC);
+	    phpdbg_error(
+	        "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+	    return FAILURE;
 	}
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(lineno) /* {{{ */
 {
-	phpdbg_param_t param;
-
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("Not file context found!");
 		return SUCCESS;
 	}
 
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided!");
 			break;
 		case NUMERIC_PARAM:
-			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param.num TSRMLS_CC);
+			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			break;
 		default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
-			break;
+			phpdbg_error(
+			    "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+			return FAILURE;
 	}
-
-	phpdbg_clear_param(&param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(func) /* {{{ */
 {
-	phpdbg_param_t param;
-    
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case EMPTY_PARAM:
 			phpdbg_error("No expression provided!");
 			break;
 		case STR_PARAM:
-			phpdbg_set_breakpoint_symbol(param.str TSRMLS_CC);
+			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
 			break;
 		default:
-			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(&param TSRMLS_CC));
+			phpdbg_error("Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
 			break;
 	}
-
-	phpdbg_clear_param(&param TSRMLS_CC);
 
     return SUCCESS;
 } /* }}} */

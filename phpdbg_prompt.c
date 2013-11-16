@@ -188,30 +188,38 @@ void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
-	if (expr_len == 0) {
+	if (param->type == EMPTY_PARAM) {
 		phpdbg_error("No expression provided");
 		return SUCCESS;
-	}
-	if (PHPDBG_G(exec)) {
-		phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
-		efree(PHPDBG_G(exec));
-		PHPDBG_G(exec) = NULL;
-	}
-	if (PHPDBG_G(ops)) {
-		phpdbg_notice("Destroying compiled opcodes");
-		phpdbg_clean(0 TSRMLS_CC);
-	}
+	} else {
+	    if (param->type == STR_PARAM) {
+	        if (PHPDBG_G(exec)) {
+		        phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
+		        efree(PHPDBG_G(exec));
+		        PHPDBG_G(exec) = NULL;
+	        }
+	
+	        if (PHPDBG_G(ops)) {
+		        phpdbg_notice("Destroying compiled opcodes");
+		        phpdbg_clean(0 TSRMLS_CC);
+	        }
 
-	PHPDBG_G(exec) = phpdbg_resolve_path(expr TSRMLS_CC);
+	        PHPDBG_G(exec) = phpdbg_resolve_path(param->str TSRMLS_CC);
 
-	if (!PHPDBG_G(exec)) {
-		phpdbg_error("Cannot get real file path");
-		return FAILURE;
+	        if (!PHPDBG_G(exec)) {
+		        phpdbg_error("Cannot get real file path");
+		        return FAILURE;
+	        }
+
+	        PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
+
+	        phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+	    } else {
+	        phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+	    }
 	}
-
-	PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
-
-	phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+	
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -259,14 +267,18 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 
 static PHPDBG_COMMAND(step) /* {{{ */
 {
-	if (expr && atoi(expr)) {
-	    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-	} else {
-	    PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
-	}
+	if (param->type == EMPTY_PARAM || param->type == NUMERIC_PARAM) {
+	    if (param->type == NUMERIC_PARAM && param->num) {
+	        PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	    } else {
+	        PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
+	    }
 
-	phpdbg_notice("Stepping %s",
-	    (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+	    phpdbg_notice("Stepping %s",
+	        (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+	} else {
+	    phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+	}
 
 	return SUCCESS;
 } /* }}} */
@@ -333,32 +345,38 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 static PHPDBG_COMMAND(eval) /* {{{ */
 {
-	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
-	zval retval;
-
-	if (expr_len == 0) {
+	if (param->type == EMPTY_PARAM) {
 		phpdbg_error("No expression provided!");
 		return FAILURE;
+	} else {
+	    if (param->type == STR_PARAM) { 
+	        zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+	        zval retval;
+
+	        PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+
+	        /* disable stepping while eval() in progress */
+	        PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+	        if (zend_eval_stringl(param->str, param->len,
+		        &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+		        zend_print_zval_r(
+		            &retval, 0 TSRMLS_CC);
+		        phpdbg_writeln(EMPTY);
+		        zval_dtor(&retval);
+	        }
+	        PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+
+	        /* switch stepping back on */
+	        if (stepping) {
+		        PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	        }
+	    } else {
+	        phpdbg_error(
+	            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+	        return FAILURE;
+	    }
 	}
-
-	PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-
-	/* disable stepping while eval() in progress */
-	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-	if (zend_eval_stringl((char*)expr, expr_len,
-		&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-		zend_print_zval_r(
-		    &retval, 0 TSRMLS_CC);
-		phpdbg_writeln(EMPTY);
-		zval_dtor(&retval);
-	}
-	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
-
-	/* switch stepping back on */
-	if (stepping) {
-		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-	}
-
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -374,7 +392,7 @@ static PHPDBG_COMMAND(back) /* {{{ */
 		return FAILURE;
 	}
 
-	limit = (expr != NULL) ? atoi(expr) : 0;
+	limit = (param->type == NUMERIC_PARAM) ? param->num : 0;
 
 	zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
 
@@ -395,9 +413,9 @@ static PHPDBG_COMMAND(back) /* {{{ */
 
 static PHPDBG_COMMAND(print) /* {{{ */
 {
-	if (expr && expr_len > 0L) {
-		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			phpdbg_error("Failed to find print command %s", expr);
+	if (param->type == STR_PARAM) {
+		if (phpdbg_do_cmd(phpdbg_print_commands, param->str, param->len TSRMLS_CC) == FAILURE) {
+			phpdbg_error("Failed to find print command %s", param->str);
 		}
 		return SUCCESS;
 	}
@@ -448,39 +466,39 @@ static PHPDBG_COMMAND(print) /* {{{ */
 
 static PHPDBG_COMMAND(break) /* {{{ */
 {
-	phpdbg_param_t param;
-
-	if (expr_len == 0) {
+	if (param->type == EMPTY_PARAM) {
 		phpdbg_error("No expression found");
 		return FAILURE;
 	}
 
     /* allow advanced breakers to run */
-    if (phpdbg_do_cmd(phpdbg_break_commands, (char*)expr, expr_len TSRMLS_CC) == SUCCESS) {
+    if (param->type == STR_PARAM &&
+        phpdbg_do_cmd(phpdbg_break_commands, param->str, param->len TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
 
-	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
+	switch (param->type) {
 		case ADDR_PARAM:
-			phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
+			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
 			break;
 		case NUMERIC_PARAM:
-			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param.num TSRMLS_CC);
+			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			break;
 		case METHOD_PARAM:
-			phpdbg_set_breakpoint_method(param.method.class, param.method.name TSRMLS_CC);
+			phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
 			break;
 		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param.file.name, param.file.line TSRMLS_CC);
+			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
 			break;
 		case STR_PARAM:
-			phpdbg_set_breakpoint_symbol(param.str TSRMLS_CC);
+			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
 			break;
+			
 		default:
-			break;
+		    phpdbg_error(
+		        "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+			return FAILURE;
 	}
-
-	phpdbg_clear_param(&param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -554,25 +572,25 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 
 static PHPDBG_COMMAND(oplog) /* {{{ */
 {
-    if (expr && expr_len > 0L) {
-        /* disable oplog */
-        if (expr[0] == '0' && expr_len == 1) {
-            if (PHPDBG_G(oplog)) {
-                phpdbg_notice("Disabling oplog");
-                fclose(
-                    PHPDBG_G(oplog));
-                return SUCCESS;
-            } else {
-                phpdbg_error("No oplog currently open");
-                return FAILURE;
-            }
+    if (param->type == EMPTY_PARAM || 
+        ((param->type == NUMERIC_PARAM) && !param->num)) {
+        if (PHPDBG_G(oplog)) {
+            phpdbg_notice("Disabling oplog");
+            fclose(
+                PHPDBG_G(oplog));
+            return SUCCESS;
         } else {
+            phpdbg_error("No oplog currently open");
+            return FAILURE;
+        }
+    } else {
+        if (param->type == STR_PARAM) {
             /* open oplog */
             FILE *old = PHPDBG_G(oplog);
 
-            PHPDBG_G(oplog) = fopen(expr, "w+");
+            PHPDBG_G(oplog) = fopen(param->str, "w+");
             if (!PHPDBG_G(oplog)) {
-                phpdbg_error("Failed to open %s for oplog", expr);
+                phpdbg_error("Failed to open %s for oplog", param->str);
                 PHPDBG_G(oplog) = old;
                 return FAILURE;
             } else {
@@ -580,14 +598,15 @@ static PHPDBG_COMMAND(oplog) /* {{{ */
                     phpdbg_notice("Closing previously open oplog");
                     fclose(old);
                 }
-                phpdbg_notice("Successfully opened oplog");
+                phpdbg_notice("Successfully opened oplog %s", param->str);
 
                 return SUCCESS;
             }
+        } else {
+            phpdbg_error(
+                "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+            return FAILURE;
         }
-    } else {
-        phpdbg_error("No expression provided");
-        return FAILURE;
     }
 } /* }}} */
 
@@ -596,9 +615,9 @@ static PHPDBG_COMMAND(help) /* {{{ */
 	phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
 		PHPDBG_VERSION);
 
-	if (expr_len > 0L) {
-		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			phpdbg_error("Failed to find help command: %s", expr);
+	if (param->type == STR_PARAM) {
+		if (phpdbg_do_cmd(phpdbg_help_commands, param->str, param->len TSRMLS_CC) == FAILURE) {
+			phpdbg_error("Failed to find help command: %s", param->str);
 		}
 	} else {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
@@ -642,36 +661,40 @@ static PHPDBG_COMMAND(help) /* {{{ */
 } /* }}} */
 
 static PHPDBG_COMMAND(quiet) { /* {{{ */
-    if (expr && atoi(expr)) {
-        PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
+    if (param->type == NUMERIC_PARAM) {
+        if (param->num) {
+            PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
+        } else {
+            PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+        }
+        phpdbg_notice("Quietness %s",
+            (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
     } else {
-        PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+        phpdbg_error(
+            "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
+        return FAILURE;
     }
-
-	phpdbg_notice("Quietness %s",
-        (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
-
+    
     return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(list) /* {{{ */
 {
-    phpdbg_param_t param;
-
     /* allow advanced listers to run */
-    if (phpdbg_do_cmd(phpdbg_list_commands, (char*)expr, expr_len TSRMLS_CC) == SUCCESS) {
+    if (param->type == STR_PARAM &&
+        phpdbg_do_cmd(phpdbg_list_commands, param->str, param->len TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
-    
-    phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
-	phpdbg_list_dispatch(&param TSRMLS_CC);
-	phpdbg_clear_param(&param TSRMLS_CC);
+   
+	phpdbg_list_dispatch(param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
 
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
+    int rc = FAILURE;
+    
 	char *expr = NULL;
 #ifndef _WIN32
 	const char *cmd = strtok_r(cmd_line, " ", &expr);
@@ -684,21 +707,33 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 		if ((command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0)
 		   || ((expr_len == 1) && (command->alias && command->alias == cmd_line[0]))) {
+		   
+		    phpdbg_param_t *param = emalloc(sizeof(phpdbg_param_t));
+		    
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
-			PHPDBG_G(last_params) = expr;
-			PHPDBG_G(last_params_len) = (cmd_len - expr_len) ?
-			                                (((cmd_len - expr_len) - sizeof(" "))+1) : 0;
+            if (PHPDBG_G(lparam)) {
+                phpdbg_clear_param(
+                    PHPDBG_G(lparam) TSRMLS_CC);
+                efree(PHPDBG_G(lparam));           
+            }
+            
+            phpdbg_parse_param(
+                expr, 
+                (cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0, 
+                param TSRMLS_CC);
 
-            phpdbg_debug("phpdbg_do_cmd(%s, \"%s\", %lu)",
-                        command->name, PHPDBG_G(last_params), PHPDBG_G(last_params_len));
+            PHPDBG_G(lparam) = param;
+            
+            phpdbg_debug("phpdbg_do_cmd(%s, \"%s\")",
+                        command->name, phpdbg_get_param_type(param TSRMLS_CC));
 
-			return command->handler(
-			    PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
+			rc = command->handler(param TSRMLS_CC);
+			break;	
 		}
 		++command;
 	}
 
-	return FAILURE;
+	return rc;
 } /* }}} */
 
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
@@ -756,9 +791,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
             }
 #endif
 		} else if (PHPDBG_G(last)) {
-			ret = PHPDBG_G(last)->handler(
-				PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
-
+			ret = PHPDBG_G(last)->handler(PHPDBG_G(lparam) TSRMLS_CC);
 			goto out;
 		}
 	}

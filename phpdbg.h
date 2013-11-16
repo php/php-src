@@ -97,21 +97,6 @@
 
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
-ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-    HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
-	char *exec;                         /* file to execute */
-	size_t exec_len;                    /* size of exec */
-	zend_op_array *ops;                 /* op_array */
-	zval *retval;                       /* return value */
-	int bp_count;                       /* breakpoint count */
-	int vmret;                          /* return from last opcode handler execution */
-	phpdbg_command_t *last;             /* last command */
-	const char *last_params;            /* last expression */
-	size_t last_params_len;             /* last expression length */
-	zend_ulong flags;                   /* phpdbg flags */
-	FILE *oplog;                        /* opline log */
-ZEND_END_MODULE_GLOBALS(phpdbg)
-
 /* {{{ Command and Parameter */
 typedef enum {
 	EMPTY_PARAM = 0,
@@ -138,7 +123,7 @@ typedef struct _phpdbg_param {
 	size_t len;
 } phpdbg_param_t;
 
-typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS_DC);
+typedef int (*phpdbg_command_handler_t)(phpdbg_param_t *param TSRMLS_DC);
 
 struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
@@ -147,7 +132,21 @@ struct _phpdbg_command_t {
 	size_t tip_len;                     /* Menu tip length */
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
-}; 
+};
+
+ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
+    HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
+	char *exec;                         /* file to execute */
+	size_t exec_len;                    /* size of exec */
+	zend_op_array *ops;                 /* op_array */
+	zval *retval;                       /* return value */
+	int bp_count;                       /* breakpoint count */
+	int vmret;                          /* return from last opcode handler execution */
+	phpdbg_command_t *last;             /* last command */
+	phpdbg_param_t   *lparam;           /* last param */
+	zend_ulong flags;                   /* phpdbg flags */
+	FILE *oplog;                        /* opline log */
+ZEND_END_MODULE_GLOBALS(phpdbg)
 
 phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 void phpdbg_clear_param(phpdbg_param_t * TSRMLS_DC);

@@ -32,7 +32,7 @@
 #define PHPDBG_LIST_EX_D(name, tip, alias) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_list_##name}
 #define PHPDBG_LIST(name) \
-	int phpdbg_do_list_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_list_##name(phpdbg_param_t *param TSRMLS_DC)
 
 PHPDBG_LIST(lines);
 PHPDBG_LIST(func);

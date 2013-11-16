@@ -43,7 +43,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 #define PHPDBG_COMMAND_EX_D(name, tip, alias) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name}
 #define PHPDBG_COMMAND(name) \
-	int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_##name(phpdbg_param_t *param TSRMLS_DC)
 
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 void phpdbg_welcome(zend_bool cleaning TSRMLS_DC);
