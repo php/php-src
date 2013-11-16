@@ -31,23 +31,6 @@
 #define PHPDBG_UNTIL 3
 
 /**
- * Command handler
- */
-typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS_DC);
-
-/**
- * Command representation
- */
-struct _phpdbg_command_t {
-	const char *name;                   /* Command name */
-	size_t name_len;                    /* Command name length */
-	const char *tip;                    /* Menu tip */
-	size_t tip_len;                     /* Menu tip length */
-	char alias;                         /* Alias */
-	phpdbg_command_handler_t handler;   /* Command handler */
-} ;
-
-/**
  * Command Executor
  */
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC);

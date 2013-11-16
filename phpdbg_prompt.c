@@ -449,7 +449,6 @@ static PHPDBG_COMMAND(print) /* {{{ */
 static PHPDBG_COMMAND(break) /* {{{ */
 {
 	phpdbg_param_t param;
-    int type;
 
 	if (expr_len == 0) {
 		phpdbg_error("No expression found");
@@ -461,7 +460,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		return SUCCESS;
 	}
 
-	switch ((type=phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC))) {
+	switch (phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC)) {
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param.addr TSRMLS_CC);
 			break;
@@ -481,7 +480,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 			break;
 	}
 
-	phpdbg_clear_param(type, &param TSRMLS_CC);
+	phpdbg_clear_param(&param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -658,18 +657,15 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
 static PHPDBG_COMMAND(list) /* {{{ */
 {
     phpdbg_param_t param;
-    int type = 0;
 
     /* allow advanced listers to run */
     if (phpdbg_do_cmd(phpdbg_list_commands, (char*)expr, expr_len TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}
-
-	phpdbg_list_dispatch(
-	    phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC),
-	    &param TSRMLS_CC);
-
-	phpdbg_clear_param(type, &param TSRMLS_CC);
+    
+    phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
+	phpdbg_list_dispatch(&param TSRMLS_CC);
+	phpdbg_clear_param(&param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

@@ -112,4 +112,46 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	FILE *oplog;                        /* opline log */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
+/* {{{ Command and Parameter */
+typedef enum {
+	EMPTY_PARAM = 0,
+	ADDR_PARAM,
+	FILE_PARAM,
+	METHOD_PARAM,
+	STR_PARAM,
+	NUMERIC_PARAM
+} phpdbg_param_type;
+
+typedef struct _phpdbg_param {
+    phpdbg_param_type type;
+	long num;
+	zend_ulong addr;
+	struct {
+		char *name;
+		long line;
+	} file;
+	struct {
+		char *class;
+		char *name;
+	} method;
+	char *str;
+	size_t len;
+} phpdbg_param_t;
+
+typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS_DC);
+
+struct _phpdbg_command_t {
+	const char *name;                   /* Command name */
+	size_t name_len;                    /* Command name length */
+	const char *tip;                    /* Menu tip */
+	size_t tip_len;                     /* Menu tip length */
+	char alias;                         /* Alias */
+	phpdbg_command_handler_t handler;   /* Command handler */
+}; 
+
+phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
+void phpdbg_clear_param(phpdbg_param_t * TSRMLS_DC);
+const char* phpdbg_get_param_type(phpdbg_param_t *param TSRMLS_DC);
+/* }}} */
+
 #endif /* PHPDBG_H */

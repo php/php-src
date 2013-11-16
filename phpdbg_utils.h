@@ -27,35 +27,6 @@ int phpdbg_is_numeric(const char*);
 int phpdbg_is_empty(const char*);
 int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
-
-/**
- * Parameter parsing stuff
- */
-enum {
-	EMPTY_PARAM = 0,
-	ADDR_PARAM,
-	FILE_PARAM,
-	METHOD_PARAM,
-	STR_PARAM,
-	NUMERIC_PARAM
-};
-
-typedef union _phpdbg_param {
-	long num;
-	zend_ulong addr;
-	struct {
-		char *name;
-		long line;
-	} file;
-	struct {
-		char *class;
-		char *name;
-	} method;
-	char *str;
-} phpdbg_param_t;
-
-int phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
-void phpdbg_clear_param(int, phpdbg_param_t * TSRMLS_DC);
 const char *phpdbg_current_file(TSRMLS_D);
 char *phpdbg_resolve_path(const char* TSRMLS_DC);
 

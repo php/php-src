@@ -104,61 +104,6 @@ const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 	return file;
 } /* }}} */
 
-int phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
-{
-	char *class_name, *func_name;
-
-	if (len == 0) {
-		return EMPTY_PARAM;
-	}
-
-	if (phpdbg_is_addr(str)) {
-		param->addr = strtoul(str, 0, 16);
-		return ADDR_PARAM;
-	} else if (phpdbg_is_numeric(str)) {
-		param->num = strtol(str, NULL, 0);
-		return NUMERIC_PARAM;
-	} else if (phpdbg_is_class_method(str, len+1, &class_name, &func_name)) {
-		param->method.class = class_name;
-		param->method.name = func_name;
-		return METHOD_PARAM;
-	} else {
-		const char *line_pos = strchr(str, ':');
-
-		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
-			char path[MAXPATHLEN];
-
-			memcpy(path, str, line_pos - str);
-			path[line_pos - str] = 0;
-
-			param->file.name = phpdbg_resolve_path(path TSRMLS_CC);
-			param->file.line = strtol(line_pos+1, NULL, 0);
-			return FILE_PARAM;
-		}
-	}
-
-	param->str = estrndup(str, len);
-	return STR_PARAM;
-} /* }}} */
-
-void phpdbg_clear_param(int type, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
-{
-	switch (type) {
-		case FILE_PARAM:
-			efree(param->file.name);
-			break;
-		case METHOD_PARAM:
-			efree(param->method.class);
-			efree(param->method.name);
-			break;
-		case STR_PARAM:
-			efree(param->str);
-			break;
-		default:
-			break;
-	}
-} /* }}} */
-
 int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
 {
     int rc = 0;
