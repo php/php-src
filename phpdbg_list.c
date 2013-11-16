@@ -203,12 +203,13 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 	int all_content = (count == 0);
 	unsigned int line = 0, displayed = 0;
 
-    if (VCWD_STAT(filename, &st) == -1) {
+    if (VCWD_STAT(filename, &st) == FAILURE) {
 		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
+	
 #ifndef _WIN32
-	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
+	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == FAILURE) {
 		phpdbg_error("Failed to open file %s to list", filename);
 		return;
 	}

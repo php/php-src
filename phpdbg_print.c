@@ -117,12 +117,10 @@ PHPDBG_PRINT(class) /* {{{ */
 	    } else {
 	        phpdbg_error(
 	            "Cannot find class %s", param->str);
-	        return FAILURE;
 	    }
 	} else {
 		phpdbg_error(
 		    "Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC));
-		return FAILURE;
 	}
 
 	return SUCCESS;

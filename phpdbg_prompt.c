@@ -101,6 +101,8 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
             zend_bool in_code = 0;
 
             while (fgets(cmd, PHPDBG_MAX_CMD, fp) != NULL) {
+                phpdbg_command_t *selected = NULL;
+                
                 cmd_len = strlen(cmd)-1;
 
 		        while (*cmd && isspace(cmd[cmd_len-1]))
@@ -141,7 +143,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 		                goto next_line;
 		            }
 
-		            switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+		            switch (phpdbg_do_cmd(phpdbg_prompt_commands, &selected, cmd, cmd_len TSRMLS_CC)) {
 	                    case FAILURE:
 	                        phpdbg_error(
 	                            "Unrecognized command in %s:%d: %s!", init_file, line, cmd);
@@ -691,7 +693,9 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
+int phpdbg_do_cmd(  const phpdbg_command_t *command, 
+                    phpdbg_command_t **selected, 
+                    char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
     int rc = FAILURE;
     
@@ -703,12 +707,14 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 #endif
 	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
 
+    phpdbg_param_t *param = NULL;
+    
 	while (command && command->name && command->handler) {
 		if ((command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0)
 		   || ((expr_len == 1) && (command->alias && command->alias == cmd_line[0]))) {
 
-		    phpdbg_param_t *param = emalloc(sizeof(phpdbg_param_t));
+		    param = emalloc(sizeof(phpdbg_param_t));
 
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
 
@@ -727,20 +733,30 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
             PHPDBG_G(lparam) = param;
 
             if (command->subs && (param->type == STR_PARAM)) {
-                if (phpdbg_do_cmd(command->subs, param->str, param->len TSRMLS_CC) == SUCCESS) {
+                if (phpdbg_do_cmd(command->subs, selected, param->str, param->len TSRMLS_CC) == SUCCESS) {
                     rc = SUCCESS;
-                    break;
+                    /* because we can */
+                    phpdbg_clear_param(param TSRMLS_CC);
+                    efree(param);
+                    goto done;
                 }
             }
 
-            phpdbg_debug("phpdbg_do_cmd(%s, \"%s\")",
-                        command->name, phpdbg_get_param_type(param TSRMLS_CC));
-
+            *selected = command;
+            
 			rc = command->handler(param TSRMLS_CC);
-			break;	
-		}
-		++command;
-	}
+			
+            break;	
+        }
+        ++command;
+    }
+    
+done:
+    if (selected && param) {
+        phpdbg_debug(
+            "phpdbg_do_cmd(%s, \"%s\"): %d",
+            command->name, phpdbg_get_param_type(param TSRMLS_CC), (rc==SUCCESS));
+    }
 
 	return rc;
 } /* }}} */
@@ -773,11 +789,14 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		cmd[cmd_len] = '\0';
 
 		if (*cmd && cmd_len > 0L) {
+		    /* keep a cursor to selected command */
+		    phpdbg_command_t *selected = NULL;
+		    
 #ifdef HAVE_LIBREADLINE
             add_history(cmd);
 #endif
-
-		    switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+            
+		    switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, &selected, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
 		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 						phpdbg_error("Failed to execute %s!", cmd);

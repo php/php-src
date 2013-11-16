@@ -33,7 +33,7 @@
 /**
  * Command Executor
  */
-int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC);
+int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_command_t **selected, char *cmd_line, size_t cmd_len TSRMLS_DC);
 
 /**
  * Command Declarators
@@ -58,5 +58,12 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 #else
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif
+
+#define phpdbg_default_switch_case() \
+    default:\
+        phpdbg_error(\
+            "Unsupported parameter type (%s) for command", \
+                phpdbg_get_param_type(param TSRMLS_CC)); \
+    break
 
 #endif /* PHPDBG_PROMPT_H */
