@@ -681,12 +681,14 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 		if ((command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0)
 		   || ((expr_len == 1) && (command->alias && command->alias == cmd_line[0]))) {
-
 			PHPDBG_G(last) = (phpdbg_command_t*) command;
 			PHPDBG_G(last_params) = expr;
 			PHPDBG_G(last_params_len) = (cmd_len - expr_len) ?
 			                                (((cmd_len - expr_len) - sizeof(" "))+1) : 0;
-
+            
+            phpdbg_debug("phpdbg_do_cmd(%s, \"%s\", %lu)",
+                        command->name, PHPDBG_G(last_params), PHPDBG_G(last_params_len));
+            
 			return command->handler(
 			    PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}

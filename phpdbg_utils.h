@@ -84,6 +84,12 @@ int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...);
 #define phpdbg_write_ex(out, fmt, ...)      phpdbg_print(P_WRITE   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 #define phpdbg_log_ex(out, fmt, ...)        phpdbg_print(P_LOG     TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 
+#if PHPDBG_DEBUG
+#   define phpdbg_debug(fmt, ...)           phpdbg_print(P_LOG   TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
+#else
+#   define phpdbg_debug
+#endif
+
 /* {{{ For writing blank lines */
 #define EMPTY "" /* }}} */
 
