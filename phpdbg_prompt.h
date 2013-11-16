@@ -39,9 +39,11 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
  * Command Declarators
  */
 #define PHPDBG_COMMAND_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_##name, NULL}
 #define PHPDBG_COMMAND_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, NULL}
+#define PHPDBG_COMMANDS_D(name, tip, alias, children) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children}
 #define PHPDBG_COMMAND(name) \
 	int phpdbg_do_##name(phpdbg_param_t *param TSRMLS_DC)
 

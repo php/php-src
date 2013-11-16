@@ -26,8 +26,8 @@
 /**
  * Command Declarators
  */
-#define PHPDBG_HELP_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_help_##name}
+#define PHPDBG_HELP_D(name, tip, alias) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_help_##name, NULL}
 #define PHPDBG_HELP(name) \
 	int phpdbg_do_help_##name(phpdbg_param_t *param TSRMLS_DC)
 
@@ -54,22 +54,27 @@ PHPDBG_HELP(oplog);
  * Commands
  */
 static const phpdbg_command_t phpdbg_help_commands[] = {
-	PHPDBG_HELP_D(exec,     "the execution context should be a valid path"),
-	PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution"),
-	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline as it is executed"),
-	PHPDBG_HELP_D(next,     "continue executing while stepping or after breaking"),
-	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging"),
-	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution"),
-	PHPDBG_HELP_D(until,    "continue until the program reaches a source line different than the current one"),
-	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
-	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
-	PHPDBG_HELP_D(clean,    "resetting the environment is useful while debugging and recompiling"),
-	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption"),
-	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
-    PHPDBG_HELP_D(quiet,    "be quiet during execution"),
-	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing"),
-	PHPDBG_HELP_D(oplog,    "keep clutter off the screen by sending oplogs to a file"),
+	PHPDBG_HELP_D(exec,     "the execution context should be a valid path", 'e'),
+	PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution", 'c'),
+	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline as it is executed", 's'),
+	PHPDBG_HELP_D(next,     "continue executing while stepping or after breaking", 'n'),
+	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging", 'r'),
+	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution", 'E'),
+	PHPDBG_HELP_D(until,    "continue until the program reaches a source line different than the current one", 'u'),
+	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment", 'p'),
+	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption", 'b'),
+	PHPDBG_HELP_D(clean,    "resetting the environment is useful while debugging and recompiling", 'X'),
+	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption", 'c'),
+	PHPDBG_HELP_D(back,     "show debug backtrace information during execution", 't'),
+    PHPDBG_HELP_D(quiet,    "be quiet during execution", 's'),
+	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing", 'l'),
+	PHPDBG_HELP_D(oplog,    "keep clutter off the screen by sending oplogs to a file", 'O'),
 	{NULL, 0, 0}
 };
+
+#define phpdbg_help_header() \
+    phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
+#define phpdbg_help_footer() \
+	phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
 
 #endif /* PHPDBG_HELP_H */

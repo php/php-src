@@ -26,9 +26,9 @@
  * Command Declarators
  */
 #define PHPDBG_BREAK_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_break_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_break_##name, NULL}
 #define PHPDBG_BREAK_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_break_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_break_##name, NULL}
 #define PHPDBG_BREAK(name) \
 	int phpdbg_do_break_##name(phpdbg_param_t *param TSRMLS_DC)
 

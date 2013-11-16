@@ -28,9 +28,9 @@
  * Command Declarators
  */
 #define PHPDBG_LIST_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_list_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_list_##name, NULL}
 #define PHPDBG_LIST_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_list_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_list_##name, NULL}
 #define PHPDBG_LIST(name) \
 	int phpdbg_do_list_##name(phpdbg_param_t *param TSRMLS_DC)
 

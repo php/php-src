@@ -132,6 +132,7 @@ struct _phpdbg_command_t {
 	size_t tip_len;                     /* Menu tip length */
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
+	const phpdbg_command_t *subs;       /* Sub Commands */
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)

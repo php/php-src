@@ -28,13 +28,16 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_HELP(exec) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("Will attempt execution, if compilation has not yet taken place, it occurs now");
 	phpdbg_writeln("The execution context must be set before execution can take place");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(step) /* {{{ */
 {
+    phpdbg_help_header();
     phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
@@ -42,33 +45,41 @@ PHPDBG_HELP(step) /* {{{ */
     phpdbg_writeln("Will enable stepping");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
+    phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(next) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the next command to step back into the vm and execute the next opcode");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(until) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the until command to step back into the vm and reaches the next source line");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(compile) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed");
 	phpdbg_writeln("The execution context must be set for compilation to succeed");
 	phpdbg_writeln("If errors occur during compilation they must be resolved before execution can take place");
 	phpdbg_writeln("It is a good idea to clean the environment between each compilation with the clean command");
 	phpdbg_writeln("You do not need to exit phpdbg to retry compilation");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(print) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("By default, print will show information about the current execution environment");
 	phpdbg_writeln("Other printing commands give access to address, file and line information");
 	phpdbg_writeln(EMPTY);
@@ -97,25 +108,31 @@ PHPDBG_HELP(print) /* {{{ */
 			++print_command;
 		}
 	}
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(run) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("Run the code inside the debug vm, you should have break points and variables set before running");
 	phpdbg_writeln("The execution context must not be set, but not necessarily compiled before execution occurs");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(eval) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
 	phpdbg_writeln("Note: When using eval in phpdbg do not prefix the code with return");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(break) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
@@ -150,26 +167,31 @@ PHPDBG_HELP(break) /* {{{ */
 		}
 	}
 	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
-
+    phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(clean) /* {{{ */
-{
+{   
+    phpdbg_help_header();
     phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions");
     phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg");
+    phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(clear) /* {{{ */
 {
+    phpdbg_help_header();
     phpdbg_writeln("Clearing breakpoints means you can once again run code without interruption");
     phpdbg_writeln("Careful though, all breakpoints are lost; be sure debugging is complete before clearing");
+    phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(quiet) /* {{{ */
 {
+    phpdbg_help_header();
     phpdbg_writeln("Setting quietness on will stop the OPLINE output during execution");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
@@ -179,22 +201,26 @@ PHPDBG_HELP(quiet) /* {{{ */
     phpdbg_writeln("Will enable OPLINE output again");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Quietness is disabled while stepping through execution automatically");
+    phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(back) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
 	phpdbg_writeln("You can set the limit on the trace");
 	phpdbg_writeln("\t%sback 5", PROMPT);
 	phpdbg_writeln("Will limit the number of frames to 5, the default is no limit");
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(list) /* {{{ */
 {
+    phpdbg_help_header();
 	phpdbg_writeln("The list command displays source code for the given argument");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
@@ -225,11 +251,13 @@ PHPDBG_HELP(list) /* {{{ */
 			++list_command;
 		}
 	}
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(oplog) /* {{{ */
 {
+    phpdbg_help_header();
     phpdbg_writeln("Even when quietness is enabled you may wish to save opline logs to a file");
     phpdbg_writeln("Setting a new oplog closes the previously open log");
     phpdbg_writeln("The log includes a high resolution timestamp on each entry");
@@ -242,5 +270,6 @@ PHPDBG_HELP(oplog) /* {{{ */
     phpdbg_writeln("Will close the currently open log file, disabling oplog");
 	phpdbg_writeln(EMPTY);
     phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
+    phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
