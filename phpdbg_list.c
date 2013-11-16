@@ -31,44 +31,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline void i_phpdbg_list_func(const char *str, size_t len TSRMLS_DC)
-{
-    HashTable *func_table = EG(function_table);
-    zend_function* fbc;
-    char *func_name = str;
-    size_t func_name_len = len;
-    
-    /* search active scope if begins with period */
-    if (func_name[0] == '.') {
-       if (EG(scope)) {
-           func_name++;
-           func_name_len--;
-
-           func_table = &EG(scope)->function_table;
-       } else {
-           phpdbg_error("No active class");
-           return;
-       }
-    } else if (!EG(function_table)) {
-        phpdbg_error("No function table loaded");
-        return;
-    } else {
-        func_table = EG(function_table);
-    }
-    
-    /* use lowercase names, case insensitive */
-    func_name = zend_str_tolower_dup(func_name, func_name_len);
-    
-    if (zend_hash_find(func_table, func_name, func_name_len+1,
-        (void**)&fbc) == SUCCESS) {
-        phpdbg_list_function(fbc TSRMLS_CC);
-    } else {
-        phpdbg_error("Function %s not found", func_name);
-    }
-    
-    efree(func_name);
-}
-
 PHPDBG_LIST(lines) /* {{{ */
 {
     switch (param->type) {
@@ -92,7 +54,7 @@ PHPDBG_LIST(func) /* {{{ */
 {
     switch (param->type) {
         case STR_PARAM:
-            i_phpdbg_list_func(
+            phpdbg_list_function_byname(
                 param->str, param->len TSRMLS_CC);
         break;
         
@@ -161,34 +123,6 @@ PHPDBG_LIST(class) /* {{{ */
     }
     
     return SUCCESS;
-} /* }}} */
-
-void phpdbg_list_dispatch(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
-{
-    switch (param->type) {
-        case NUMERIC_PARAM:
-	    case EMPTY_PARAM: {
-	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
-	            if (param->type == EMPTY_PARAM) {
-	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
-	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
-	        } else phpdbg_error("Not executing, and execution context not set");
-	    } break;
-	    
-		case FILE_PARAM:
-			phpdbg_list_file(param->file.name, param->file.line, 0 TSRMLS_CC);
-			break;
-			
-		case STR_PARAM: {
-		    i_phpdbg_list_func(param->str, param->len TSRMLS_CC);
-		} break;
-		
-		case METHOD_PARAM:
-		    phpdbg_do_list_method(param TSRMLS_CC);
-		break;
-		
-		phpdbg_default_switch_case();
-    }
 } /* }}} */
 
 void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
@@ -288,4 +222,42 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	phpdbg_list_file(ops->filename,
 		ops->line_end - ops->line_start + 1, ops->line_start TSRMLS_CC);
 } /* }}} */
+
+void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)
+{
+    HashTable *func_table = EG(function_table);
+    zend_function* fbc;
+    char *func_name = str;
+    size_t func_name_len = len;
+    
+    /* search active scope if begins with period */
+    if (func_name[0] == '.') {
+       if (EG(scope)) {
+           func_name++;
+           func_name_len--;
+
+           func_table = &EG(scope)->function_table;
+       } else {
+           phpdbg_error("No active class");
+           return;
+       }
+    } else if (!EG(function_table)) {
+        phpdbg_error("No function table loaded");
+        return;
+    } else {
+        func_table = EG(function_table);
+    }
+    
+    /* use lowercase names, case insensitive */
+    func_name = zend_str_tolower_dup(func_name, func_name_len);
+    
+    if (zend_hash_find(func_table, func_name, func_name_len+1,
+        (void**)&fbc) == SUCCESS) {
+        phpdbg_list_function(fbc TSRMLS_CC);
+    } else {
+        phpdbg_error("Function %s not found", func_name);
+    }
+    
+    efree(func_name);
+}
 

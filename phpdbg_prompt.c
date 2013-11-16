@@ -685,7 +685,30 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
 
 static PHPDBG_COMMAND(list) /* {{{ */
 {
-	phpdbg_list_dispatch(param TSRMLS_CC);
+	switch (param->type) {
+        case NUMERIC_PARAM:
+	    case EMPTY_PARAM: {
+	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
+	            if (param->type == EMPTY_PARAM) {
+	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
+	        } else phpdbg_error("Not executing, and execution context not set");
+	    } break;
+	    
+		case FILE_PARAM:
+			phpdbg_list_file(param->file.name, param->file.line, 0 TSRMLS_CC);
+			break;
+			
+		case STR_PARAM: {
+		    phpdbg_list_function_byname(param->str, param->len TSRMLS_CC);
+		} break;
+		
+		case METHOD_PARAM:
+		    phpdbg_do_list_method(param TSRMLS_CC);
+		break;
+		
+		phpdbg_default_switch_case();
+    }
 
 	return SUCCESS;
 } /* }}} */
