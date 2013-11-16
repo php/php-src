@@ -21,6 +21,8 @@
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_break.h"
+#include "phpdbg_list.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -86,9 +88,12 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_notice("Commands");
 	{
 	    const phpdbg_command_t *print_command = phpdbg_print_commands;
-
+	    
+        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
 	    while (print_command && print_command->name) {
-			phpdbg_writeln("\t%s\t%s", print_command->name, print_command->tip);
+			if (print_command->alias) {
+			    phpdbg_writeln("\t[%c]\t%s\t\t%s", print_command->alias, print_command->name, print_command->tip);
+			} else phpdbg_writeln("\t[-]\t%s\t\t%s", print_command->name, print_command->tip);
 			++print_command;
 		}
 	}
@@ -126,11 +131,24 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("Will break at line 200 of the currently executing file");
 	phpdbg_writeln("\t%sbreak on ($expression == true)", PROMPT);
 	phpdbg_writeln("Will break when the condition evaluates to true");
+	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("It is important to note, an address is only valid for the current compiled representation of the script");
 	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
-	phpdbg_writeln("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Specific breakers loaded are show below:");
+	phpdbg_notice("Commands");
+	{
+	    const phpdbg_command_t *break_command = phpdbg_break_commands;
+        
+        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+	    while (break_command && break_command->name) {
+			if (break_command->alias) {
+			    phpdbg_writeln("\t[%c]\t%s\t\t%s", break_command->alias, break_command->name, break_command->tip);
+			} else phpdbg_writeln("\t[-]\t%s\t\t%s", break_command->name, break_command->tip);
+			++break_command;
+		}
+	}
 	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
 
 	return SUCCESS;
@@ -190,9 +208,23 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_writeln("Will print the source of \"my::method\"");
 	phpdbg_writeln("\t%slist [class] myClass", PROMPT);
 	phpdbg_writeln("Will print the source of \"myClass\"");
+	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
-	phpdbg_writeln("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Specific listers loaded are show below:");
+	phpdbg_notice("Commands");
+	{
+	    const phpdbg_command_t *list_command = phpdbg_list_commands;
+	    
+        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+	    while (list_command && list_command->name) {
+			if (list_command->alias) {
+			    phpdbg_writeln("\t[%c]\t%s\t\t%s", list_command->alias, list_command->name, list_command->tip);
+			} else phpdbg_writeln("\t[-]\t%s\t\t%s", list_command->name, list_command->tip);
+			++list_command;
+		}
+	}
 	return SUCCESS;
 } /* }}} */
 
