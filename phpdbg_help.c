@@ -114,21 +114,22 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
-	phpdbg_writeln("\t%sbreak test.php:1", PROMPT);
+	phpdbg_writeln("\t%sbreak [file] test.php:1", PROMPT);
 	phpdbg_writeln("Will break execution on line 1 of test.php");
-	phpdbg_writeln("\t%sbreak my_function", PROMPT);
+	phpdbg_writeln("\t%sbreak [func] my_function", PROMPT);
 	phpdbg_writeln("Will break execution on entry to my_function");
-	phpdbg_writeln("\t%sbreak \\my\\class::method", PROMPT);
+	phpdbg_writeln("\t%sbreak [method] \\my\\class::method", PROMPT);
 	phpdbg_writeln("Will break execution on entry to \\my\\class::method");
-	phpdbg_writeln("\t%sbreak 0x7ff68f570e08", PROMPT);
+	phpdbg_writeln("\t%sbreak [address] 0x7ff68f570e08", PROMPT);
 	phpdbg_writeln("Will break at the opline with the address provided (addresses are shown during execution)");
-	phpdbg_writeln("\t%sbreak 200", PROMPT);
+	phpdbg_writeln("\t%sbreak [lineno] 200", PROMPT);
 	phpdbg_writeln("Will break at line 200 of the currently executing file");
 	phpdbg_writeln("\t%sbreak on ($expression == true)", PROMPT);
 	phpdbg_writeln("Will break when the condition evaluates to true");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("It is important to note, an address is only valid for the current compiled representation of the script");
 	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
+	phpdbg_writeln("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
 
@@ -176,17 +177,22 @@ PHPDBG_HELP(back) /* {{{ */
 
 PHPDBG_HELP(list) /* {{{ */
 {
-	phpdbg_writeln("The list command displays N line from current context file");
+	phpdbg_writeln("The list command displays source code for the given argument");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
-	phpdbg_writeln("\t%slist 2", PROMPT);
+	phpdbg_writeln("\t%slist [lines] 2", PROMPT);
 	phpdbg_writeln("Will print next 2 lines from the current file");
-	phpdbg_writeln("\t%slist func", PROMPT);
-	phpdbg_writeln("Will print the source of the global function \"func\"");
-	phpdbg_writeln("\t%slist .mine", PROMPT);
-	phpdbg_writeln("Will print the source of the class method \"mine\"");
+	phpdbg_writeln("\t%slist [func] my_function", PROMPT);
+	phpdbg_writeln("Will print the source of the global function \"my_function\"");
+	phpdbg_writeln("\t%slist [func] .mine", PROMPT);
+	phpdbg_writeln("Will print the source of the method \"mine\" from the currently active scope");
+	phpdbg_writeln("\t%slist [method] my::method", PROMPT);
+	phpdbg_writeln("Will print the source of \"my::method\"");
+	phpdbg_writeln("\t%slist [class] myClass", PROMPT);
+	phpdbg_writeln("Will print the source of \"myClass\"");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
+	phpdbg_writeln("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	return SUCCESS;
 } /* }}} */
 

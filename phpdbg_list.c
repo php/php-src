@@ -31,13 +31,13 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline void i_phpdbg_list_func(const char *str TSRMLS_DC)
+static inline void i_phpdbg_list_func(const char *str, size_t len TSRMLS_DC)
 {
     HashTable *func_table = EG(function_table);
     zend_function* fbc;
-    const char *func_name = str;
-    size_t func_name_len = strlen(str);
-
+    char *func_name = str;
+    size_t func_name_len = len;
+    
     /* search active scope if begins with period */
     if (func_name[0] == '.') {
        if (EG(scope)) {
@@ -55,13 +55,18 @@ static inline void i_phpdbg_list_func(const char *str TSRMLS_DC)
     } else {
         func_table = EG(function_table);
     }
-
+    
+    /* use lowercase names, case insensitive */
+    func_name = zend_str_tolower_dup(func_name, func_name_len);
+    
     if (zend_hash_find(func_table, func_name, func_name_len+1,
         (void**)&fbc) == SUCCESS) {
         phpdbg_list_function(fbc TSRMLS_CC);
     } else {
         phpdbg_error("Function %s not found", func_name);
     }
+    
+    efree(func_name);
 }
 
 PHPDBG_LIST(lines) /* {{{ */
@@ -87,7 +92,66 @@ PHPDBG_LIST(func) /* {{{ */
 {
     if (param->type == STR_PARAM) {
         i_phpdbg_list_func(
-            param->str TSRMLS_CC);
+            param->str, param->len TSRMLS_CC);
+    } else {
+        phpdbg_error(
+            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+    }
+    
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_LIST(method) /* {{{ */
+{
+    if (param->type == METHOD_PARAM) {
+        zend_class_entry **ce;
+        
+        if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+            zend_function *function;
+            char *lcname = zend_str_tolower_dup(
+                param->method.name, strlen(param->method.name));
+            
+            if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
+                phpdbg_list_function(
+                    function TSRMLS_CC);
+            } else {
+                phpdbg_error("Could not find ::%s in %s", param->method.name, param->method.class);
+            }
+            
+            efree(lcname);
+        } else {
+            phpdbg_error("Could not find the class %s", param->method.class);
+        }
+    } else {
+        phpdbg_error(
+            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+    }
+    
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_LIST(class) /* {{{ */
+{
+    if (param->type == STR_PARAM) {
+        zend_class_entry **ce;
+        
+        if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+            if ((*ce)->type == ZEND_USER_CLASS) {
+                if ((*ce)->info.user.filename) {
+                    phpdbg_list_file(
+                        (*ce)->info.user.filename,
+                        (*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
+                        (*ce)->info.user.line_start TSRMLS_CC
+                    );
+                } else {
+                    phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
+                }
+            } else {
+                phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
+            }
+        } else {
+            phpdbg_error("The requested class (%s) could not be found", param->str);
+        }
     } else {
         phpdbg_error(
             "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
@@ -113,8 +177,12 @@ void phpdbg_list_dispatch(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 			break;
 			
 		case STR_PARAM: {
-		    i_phpdbg_list_func(param->str TSRMLS_CC);
+		    i_phpdbg_list_func(param->str, param->len TSRMLS_CC);
 		} break;
+		
+		case METHOD_PARAM:
+		    phpdbg_do_list_method(param TSRMLS_CC);
+		break;
 		
 		default:
             phpdbg_error(
@@ -209,6 +277,8 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	const zend_op_array *ops;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
+	    phpdbg_error(
+	        "The function requested (%s) is not user defined", fbc->common.function_name);
 		return;
 	}
 
