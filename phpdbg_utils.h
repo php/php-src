@@ -87,7 +87,7 @@ int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...);
 #if PHPDBG_DEBUG
 #   define phpdbg_debug(fmt, ...)           phpdbg_print(P_LOG   TSRMLS_CC, stderr, fmt, ##__VA_ARGS__)
 #else
-#   define phpdbg_debug
+#   define phpdbg_debug(fmt, ...)
 #endif
 
 /* {{{ For writing blank lines */
