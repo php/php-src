@@ -427,51 +427,53 @@ static PHPDBG_COMMAND(back) /* {{{ */
 
 static PHPDBG_COMMAND(print) /* {{{ */
 {
-    if (param->type == EMPTY_PARAM) {
-        phpdbg_writeln(SEPARATE);
-        phpdbg_notice("Execution Context Information");
+    switch (param->type) {
+        case EMPTY_PARAM: {
+            phpdbg_writeln(SEPARATE);
+            phpdbg_notice("Execution Context Information");
 #ifdef HAVE_LIBREADLINE
-        phpdbg_writeln("Readline\tyes");
+            phpdbg_writeln("Readline\tyes");
 #else
-        phpdbg_writeln("Readline\tno");
+            phpdbg_writeln("Readline\tno");
 #endif
 
-        phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-        phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
-        phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-        phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-        phpdbg_writeln("Oplog\t\t%s", PHPDBG_G(oplog) ? "on" : "off");
+            phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+            phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
+            phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+            phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+            phpdbg_writeln("Oplog\t\t%s", PHPDBG_G(oplog) ? "on" : "off");
 
-        if (PHPDBG_G(ops)) {
-	        phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
+            if (PHPDBG_G(ops)) {
+	            phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
 
-	        if (PHPDBG_G(ops)->last_var) {
-		        phpdbg_writeln("Variables\t%d", PHPDBG_G(ops)->last_var-1);
-	        } else {
-		        phpdbg_writeln("Variables\tNone");
-	        }
-        }
+	            if (PHPDBG_G(ops)->last_var) {
+		            phpdbg_writeln("Variables\t%d", PHPDBG_G(ops)->last_var-1);
+	            } else {
+		            phpdbg_writeln("Variables\tNone");
+	            }
+            }
 
-        phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
-        if (EG(in_execution)) {
-	        phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
-        }
-        phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
-        phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
-        phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
-        phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
+            phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
+            if (EG(in_execution)) {
+	            phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
+            }
+            phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
+            phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+            phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+            phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
 
-        phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
-        phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
-        phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
-        phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
-        phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+            phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
+            phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
+            phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
+            phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
+            phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+            
+            phpdbg_writeln(SEPARATE);
+        } break;
         
-        phpdbg_writeln(SEPARATE);
-    } else {
-        phpdbg_error("You must use a specific printer");
+        phpdbg_default_switch_case();
     }
-
+    
 	return SUCCESS;
 } /* }}} */
 
