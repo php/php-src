@@ -217,7 +217,7 @@ PHPDBG_HELP(clear) /* {{{ */
 PHPDBG_HELP(info) /* {{{ */
 {
     phpdbg_help_header();
-    phpdbg_writeln("info commands provides quick access to various types of information about the PHP environment");
+    phpdbg_writeln("info commands provide quick access to various types of information about the PHP environment");
     phpdbg_writeln("Specific info commands are show below:");
 	phpdbg_notice("Commands");
 	{
