@@ -24,6 +24,7 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
+#include "phpdbg_info.h"
 #include "phpdbg_break.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
@@ -43,6 +44,7 @@ static PHPDBG_COMMAND(print);
 static PHPDBG_COMMAND(break);
 static PHPDBG_COMMAND(back);
 static PHPDBG_COMMAND(list);
+static PHPDBG_COMMAND(info);
 static PHPDBG_COMMAND(clean);
 static PHPDBG_COMMAND(clear);
 static PHPDBG_COMMAND(help);
@@ -65,6 +67,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMANDS_D(break,        "set breakpoint",                           'b', phpdbg_break_commands),
 	PHPDBG_COMMAND_EX_D(back,       "show trace",                               't'),
 	PHPDBG_COMMANDS_D(list,         "lists some code",                          'l', phpdbg_list_commands),
+	PHPDBG_COMMANDS_D(info,         "displays some informations",               'i', phpdbg_info_commands),
 	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment",          'X'),
 	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints",                        'C'),
 	PHPDBG_COMMANDS_D(help,         "show help menu",                           'h', phpdbg_help_commands),
@@ -486,6 +489,11 @@ static PHPDBG_COMMAND(print) /* {{{ */
 		phpdbg_default_switch_case();
 	}
 
+	return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(info) /* {{{ */
+{
 	return SUCCESS;
 } /* }}} */
 
