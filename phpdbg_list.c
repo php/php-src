@@ -142,7 +142,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	int all_content = (count == 0);
 	unsigned int line = 0, displayed = 0;
 
-    if (VCWD_STAT(filename, &st) == FAILURE) {
+    	if (VCWD_STAT(filename, &st) == FAILURE) {
 		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
@@ -156,13 +156,14 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	end_pos = mem + st.st_size;
 #else
-	fd = CreateFile(filename, GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
+
+	fd = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ,  NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (fd == INVALID_HANDLE_VALUE) {
 		phpdbg_error("Failed to open file!");
 		return;
 	}
 
-	map = CreateFileMapping(fd, NULL, PAGE_EXECUTE_READ, 0, 0, 0);
+	map = CreateFileMapping(fd, NULL, PAGE_READONLY, 0, 0, NULL);
 	if (map == NULL) {
 		phpdbg_error("Failed to map file!");
 		CloseHandle(fd);
