@@ -1,5 +1,4 @@
 <?php
-include 'web-bootstrap.php'; 
 
 class phpdbg {
     public function isGreat($greeting = null) {

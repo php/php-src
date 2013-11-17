@@ -40,7 +40,7 @@ PHPDBG_INFO(files);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
     PHPDBG_INFO_EX_D(files,     "lists included files", 'f'),
-    {NULL, 0, 0}
+    PHPDBG_END_COMAND
 };
 
 #endif /* PHPDBG_INFO_H */

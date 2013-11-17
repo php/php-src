@@ -46,11 +46,11 @@ void phpdbg_list_function(const zend_function* TSRMLS_DC);
 void phpdbg_list_file(const char*, long, long, int TSRMLS_DC);
 
 static const phpdbg_command_t phpdbg_list_commands[] = {
-    PHPDBG_LIST_EX_D(lines,     "lists the specified lines", 'l'),
-    PHPDBG_LIST_EX_D(class,     "lists the specified class", 'c'),
-    PHPDBG_LIST_EX_D(method,    "lists the specified method", 'm'),
+    PHPDBG_LIST_EX_D(lines,     "lists the specified lines",    'l'),
+    PHPDBG_LIST_EX_D(class,     "lists the specified class",    'c'),
+    PHPDBG_LIST_EX_D(method,    "lists the specified method",   'm'),
     PHPDBG_LIST_EX_D(func,      "lists the specified function", 'f'),
-    {NULL, 0, 0}
+    PHPDBG_END_COMAND
 };
 
 #endif /* PHPDBG_LIST_H */

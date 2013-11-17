@@ -44,12 +44,12 @@ PHPDBG_PRINT(func);
  * Commands
  */
 static const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_D(exec,       "print execution context instructions", 'e'),
-	PHPDBG_PRINT_D(opline,     "print the current opline information", 'o'),
-	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class", 'c'),
-	PHPDBG_PRINT_D(method,     "print out the instructions in the specified method", 'm'),
+	PHPDBG_PRINT_D(exec,       "print execution context instructions",                 'e'),
+	PHPDBG_PRINT_D(opline,     "print the current opline information",                 'o'),
+	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class",    'c'),
+	PHPDBG_PRINT_D(method,     "print out the instructions in the specified method",   'm'),
 	PHPDBG_PRINT_D(func,       "print out the instructions in the specified function", 'f'),
-	{0, 0, 0, 0}
+	PHPDBG_END_COMAND
 };
 
 #endif /* PHPDBG_PRINT_H */

@@ -77,7 +77,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_EX_D(aliases,    "show alias list",                          'a'),
 	PHPDBG_COMMAND_EX_D(oplog,      "sets oplog output",                        'O'),
 	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg",                              'q'),
-	{NULL, 0, 0}
+	PHPDBG_END_COMAND
 }; /* }}} */
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -845,7 +845,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 						phpdbg_error("Failed to execute %s!", cmd);
 					}
 				break;
-	
+
 				case PHPDBG_LEAVE:
 				case PHPDBG_FINISH:
 				case PHPDBG_UNTIL:
@@ -1055,7 +1055,7 @@ zend_vm_enter:
 			/* skip possible breakpoints */
 			goto next;
 		}
-		
+
 		/* run to next line */
 		if (last_step == PHPDBG_UNTIL
 			&& last_file == execute_data->op_array->filename
@@ -1063,7 +1063,7 @@ zend_vm_enter:
 			/* skip possible breakpoints */
 			goto next;
 		}
-		
+
 		/* run to finish */
 		if (last_step == PHPDBG_FINISH) {
 			if (execute_data->opline < last_op) {
@@ -1074,7 +1074,7 @@ zend_vm_enter:
 				last_op = NULL;
 			}
 		}
-		
+
 		/* break for leave */
 		if (last_step == PHPDBG_LEAVE) {
 			if (execute_data->opline == last_op) {
@@ -1093,7 +1093,7 @@ zend_vm_enter:
 		/* not while in conditionals */
 		phpdbg_print_opline(
 			execute_data, 0 TSRMLS_CC);
-		
+
 		/* conditions cannot be executed by eval()'d code */
 		if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
 			&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
@@ -1136,17 +1136,17 @@ zend_vm_enter:
 next:
 		last_lineno = execute_data->opline->lineno;
 		last_file   = execute_data->op_array->filename;
-		
+
 		switch (last_step) {
 			case PHPDBG_FINISH:
 				if (!last_op) {
 					last_op = &execute_data->op_array->opcodes[execute_data->op_array->last-1];
 				}
 			break;
-			
+
 			case PHPDBG_LEAVE:
 				if (!last_op) {
-					last_op = &execute_data->op_array->opcodes[execute_data->op_array->last-2];	
+					last_op = &execute_data->op_array->opcodes[execute_data->op_array->last-2];
 				}
 			break;
 		}

@@ -139,6 +139,8 @@ struct _phpdbg_command_t {
 	const phpdbg_command_t *subs;       /* Sub Commands */
 };
 
+#define PHPDBG_END_COMAND {NULL, 0, NULL, 0, '\0', NULL, NULL}
+
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
     HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
 	char *exec;                         /* file to execute */

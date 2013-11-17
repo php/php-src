@@ -52,7 +52,7 @@ static const phpdbg_command_t phpdbg_break_commands[] = {
 	PHPDBG_BREAK_EX_D(on,          "specify breakpoint by expression", 'o'),
 	PHPDBG_BREAK_EX_D(lineno,      "specify breakpoint by line of currently executing file", 'l'),
 	PHPDBG_BREAK_EX_D(func,        "specify breakpoint by global function name", 'f'),
-	{NULL, 0, 0}
+	PHPDBG_END_COMAND
 };
 
 #endif /* PHPDBG_BREAK_H */
