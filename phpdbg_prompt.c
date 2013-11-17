@@ -350,7 +350,12 @@ static PHPDBG_COMMAND(run) /* {{{ */
         if (!EG(active_symbol_table)) {
             zend_rebuild_symbol_table(TSRMLS_C);
         }
-
+        
+        zend_try {
+        	/* last chance ... */
+        	zend_activate_auto_globals(TSRMLS_C);
+        } zend_end_try();
+		
 		zend_try {
 			zend_execute(
 			    EG(active_op_array) TSRMLS_CC);
