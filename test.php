@@ -1,5 +1,8 @@
 <?php
 
+if (isset($include))
+	include (sprintf("%s/web-bootstrap.php", dirname(__FILE__)));
+
 class phpdbg {
     public function isGreat($greeting = null) {
         printf(
@@ -31,4 +34,6 @@ test();
 
 echo "it works!\n";
 
+if (isset($dump))
+	var_dump($_SERVER);
 ?>
