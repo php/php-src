@@ -23,6 +23,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_break.h"
 #include "phpdbg_list.h"
+#include "phpdbg_info.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -209,6 +210,28 @@ PHPDBG_HELP(clear) /* {{{ */
     phpdbg_help_header();
     phpdbg_writeln("Clearing breakpoints means you can once again run code without interruption");
     phpdbg_writeln("Careful though, all breakpoints are lost; be sure debugging is complete before clearing");
+    phpdbg_help_footer();
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(info) /* {{{ */
+{
+    phpdbg_help_header();
+    phpdbg_writeln("info commands provides quick access to various types of information about the PHP environment");
+    phpdbg_writeln("Specific info commands are show below:");
+	phpdbg_notice("Commands");
+	{
+	    const phpdbg_command_t *info_command = phpdbg_info_commands;
+
+        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+	    while (info_command && info_command->name) {
+			if (info_command->alias) {
+			    phpdbg_writeln("\t[%c]\t%s\t\t%s", info_command->alias, info_command->name, info_command->tip);
+			} else phpdbg_writeln("\t[-]\t%s\t\t%s", info_command->name, info_command->tip);
+			++info_command;
+		}
+	}
+	
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */

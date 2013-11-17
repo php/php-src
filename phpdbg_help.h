@@ -47,6 +47,7 @@ PHPDBG_HELP(print);
 PHPDBG_HELP(break);
 PHPDBG_HELP(clean);
 PHPDBG_HELP(clear);
+PHPDBG_HELP(info);
 PHPDBG_HELP(back);
 PHPDBG_HELP(quiet);
 PHPDBG_HELP(list);
@@ -69,6 +70,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption", 'b'),
 	PHPDBG_HELP_D(clean,    "resetting the environment is useful while debugging and recompiling", 'X'),
 	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption", 'c'),
+	PHPDBG_HELP_D(info,		"quick access to useful information on the console", 'i'),
 	PHPDBG_HELP_D(back,     "show debug backtrace information during execution", 't'),
     PHPDBG_HELP_D(quiet,    "be quiet during execution", 's'),
 	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing", 'l'),
