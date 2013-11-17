@@ -38,3 +38,68 @@ PHPDBG_INFO(files) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) { /* {{{ */
+	phpdbg_write(
+		"%s %s %s (%d)",
+		((*ce)->type == ZEND_USER_CLASS) ? 
+			"User" : "Internal",
+        ((*ce)->ce_flags & ZEND_ACC_INTERFACE) ? 
+			"Interface" :
+				((*ce)->ce_flags & ZEND_ACC_ABSTRACT) ?
+				"Abstract Class" :
+					"Class", 
+		(*ce)->name, zend_hash_num_elements(&(*ce)->function_table));
+} /* }}} */
+
+PHPDBG_INFO(classes) /* {{{ */
+{
+    HashPosition position;
+	zend_class_entry **ce;
+	HashTable classes;
+	
+	zend_hash_init(&classes, 8, NULL, NULL, 0);
+
+	for (zend_hash_internal_pointer_reset_ex(EG(class_table), &position);	
+		zend_hash_get_current_data_ex(EG(class_table), (void**)&ce, &position) == SUCCESS;
+		zend_hash_move_forward_ex(EG(class_table), &position)) {
+
+        if ((*ce)->type == ZEND_USER_CLASS) {
+        	zend_hash_next_index_insert(
+        		&classes, ce, sizeof(ce), NULL);
+        }
+	}
+	
+	phpdbg_notice("User Classes (%d)",
+		zend_hash_num_elements(&classes));
+
+	for (zend_hash_internal_pointer_reset_ex(&classes, &position);	
+		zend_hash_get_current_data_ex(&classes, (void**)&ce, &position) == SUCCESS;
+		zend_hash_move_forward_ex(&classes, &position)) {
+
+		phpdbg_print_class_name(ce TSRMLS_CC);
+		phpdbg_writeln(EMPTY);
+		
+		if ((*ce)->parent) {
+			zend_class_entry *pce = (*ce)->parent;
+			do {
+				phpdbg_write("|-------- ");
+				phpdbg_print_class_name(&pce TSRMLS_CC);
+				phpdbg_writeln(EMPTY);
+			} while(pce = pce->parent);
+		}
+		
+        if ((*ce)->info.user.filename) {
+    		phpdbg_writeln(
+    			"|---- in %s on line %lu", 
+    			(*ce)->info.user.filename,
+    			(*ce)->info.user.line_start);
+    	} else phpdbg_writeln("|---- no source code");
+	}
+
+	zend_hash_destroy(&classes);
+	
+	return SUCCESS;
+} /* }}} */
+
+

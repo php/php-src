@@ -37,9 +37,11 @@
 	int PHPDBG_INFO_HANDLER(name)(phpdbg_param_t *param TSRMLS_DC)
 
 PHPDBG_INFO(files);
+PHPDBG_INFO(classes);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
-    PHPDBG_INFO_EX_D(files,     "lists included files", 'f'),
+    PHPDBG_INFO_EX_D(files,     "lists included files", 'F'),
+    PHPDBG_INFO_EX_D(classes,   "lists loaded classes", 'c'),
     PHPDBG_END_COMAND
 };
 
