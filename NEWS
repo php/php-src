@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.23
 
 - Core:
+  . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
+    string). (Laruence)
   . Fixed bug #65947 (basename is no more working after fgetcsv in certain 
     situation). (Laruence)
 
