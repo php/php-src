@@ -45,32 +45,42 @@ static void phpdbg_class_breaks_dtor(void *data) /* {{{ */
 
 void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
-	phpdbg_breakfile_t new_break;
-	zend_llist *break_files_ptr;
-	size_t path_len = strlen(path);
+    struct stat sb;
 
-	new_break.filename = estrndup(path, path_len);
-	new_break.line = line_num;
+    if (VCWD_STAT(path, &sb) != FAILURE) {
+        if (sb.st_mode & S_IFREG|S_IFLNK) {
+            phpdbg_breakfile_t new_break;
+            zend_llist *break_files_ptr;
+            size_t path_len = strlen(path);
 
-	PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
+            new_break.filename = estrndup(path, path_len);
+            new_break.line = line_num;
 
-	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
-		new_break.filename, path_len, (void**)&break_files_ptr) == FAILURE) {
-		zend_llist break_files;
+            PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
 
-		zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t),
-			phpdbg_llist_breakfile_dtor, 0);
+            if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
+    	        new_break.filename, path_len, (void**)&break_files_ptr) == FAILURE) {
+                zend_llist break_files;
 
-		zend_hash_update(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
-			new_break.filename, path_len, &break_files, sizeof(zend_llist),
-			(void**)&break_files_ptr);
-	}
+                zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t),
+                phpdbg_llist_breakfile_dtor, 0);
 
-	new_break.id = PHPDBG_G(bp_count)++;
-	zend_llist_add_element(break_files_ptr, &new_break);
+                zend_hash_update(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
+                    new_break.filename, path_len, &break_files, sizeof(zend_llist),
+                    (void**)&break_files_ptr);
+            }
 
-	phpdbg_notice("Breakpoint #%d added at %s:%ld",
-	    new_break.id, new_break.filename, new_break.line);
+            new_break.id = PHPDBG_G(bp_count)++;
+            zend_llist_add_element(break_files_ptr, &new_break);
+
+            phpdbg_notice("Breakpoint #%d added at %s:%ld",
+                new_break.id, new_break.filename, new_break.line);
+        } else {
+            phpdbg_error("Cannot set breakpoint in %s, it is not a regular file", path);
+        }
+    } else {
+        phpdbg_error("Cannot stat %s, it does not exist", path);
+    }
 } /* }}} */
 
 void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */

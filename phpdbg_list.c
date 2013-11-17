@@ -31,44 +31,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline void i_phpdbg_list_func(const char *str, size_t len TSRMLS_DC)
-{
-    HashTable *func_table = EG(function_table);
-    zend_function* fbc;
-    char *func_name = str;
-    size_t func_name_len = len;
-
-    /* search active scope if begins with period */
-    if (func_name[0] == '.') {
-       if (EG(scope)) {
-           func_name++;
-           func_name_len--;
-
-           func_table = &EG(scope)->function_table;
-       } else {
-           phpdbg_error("No active class");
-           return;
-       }
-    } else if (!EG(function_table)) {
-        phpdbg_error("No function table loaded");
-        return;
-    } else {
-        func_table = EG(function_table);
-    }
-
-    /* use lowercase names, case insensitive */
-    func_name = zend_str_tolower_dup(func_name, func_name_len);
-
-    if (zend_hash_find(func_table, func_name, func_name_len+1,
-        (void**)&fbc) == SUCCESS) {
-        phpdbg_list_function(fbc TSRMLS_CC);
-    } else {
-        phpdbg_error("Function %s not found", func_name);
-    }
-
-    efree(func_name);
-}
-
 PHPDBG_LIST(lines) /* {{{ */
 {
 	if (!PHPDBG_G(exec) || !zend_is_executing(TSRMLS_C)) {
@@ -81,10 +43,10 @@ PHPDBG_LIST(lines) /* {{{ */
 		case EMPTY_PARAM:
 			phpdbg_list_file(phpdbg_current_file(TSRMLS_C),
 				param->type == EMPTY_PARAM ? 0 : param->num,
-				zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+				zend_get_executed_lineno(TSRMLS_C), 0 TSRMLS_CC);
 			break;
 		case FILE_PARAM:
-			phpdbg_list_file(param->file.name, param->file.line, 0 TSRMLS_CC);
+			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
 		default:
 			phpdbg_error("Unsupported parameter type (%s) for function",
@@ -96,12 +58,13 @@ PHPDBG_LIST(lines) /* {{{ */
 
 PHPDBG_LIST(func) /* {{{ */
 {
-    if (param->type == STR_PARAM) {
-        i_phpdbg_list_func(
-            param->str, param->len TSRMLS_CC);
-    } else {
-        phpdbg_error(
-            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+    switch (param->type) {
+        case STR_PARAM:
+            phpdbg_list_function_byname(
+                param->str, param->len TSRMLS_CC);
+        break;
+
+        phpdbg_default_switch_case();
     }
 
     return SUCCESS;
@@ -109,28 +72,29 @@ PHPDBG_LIST(func) /* {{{ */
 
 PHPDBG_LIST(method) /* {{{ */
 {
-    if (param->type == METHOD_PARAM) {
-        zend_class_entry **ce;
+    switch (param->type) {
+        case METHOD_PARAM: {
+            zend_class_entry **ce;
 
-        if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
-            zend_function *function;
-            char *lcname = zend_str_tolower_dup(
-                param->method.name, strlen(param->method.name));
+            if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+                zend_function *function;
+                char *lcname = zend_str_tolower_dup(
+                    param->method.name, strlen(param->method.name));
 
-            if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
-                phpdbg_list_function(
-                    function TSRMLS_CC);
+                if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
+                    phpdbg_list_function(
+                        function TSRMLS_CC);
+                } else {
+                    phpdbg_error("Could not find ::%s in %s", param->method.name, param->method.class);
+                }
+
+                efree(lcname);
             } else {
-                phpdbg_error("Could not find ::%s in %s", param->method.name, param->method.class);
+                phpdbg_error("Could not find the class %s", param->method.class);
             }
+        } break;
 
-            efree(lcname);
-        } else {
-            phpdbg_error("Could not find the class %s", param->method.class);
-        }
-    } else {
-        phpdbg_error(
-            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+        phpdbg_default_switch_case();
     }
 
     return SUCCESS;
@@ -138,59 +102,36 @@ PHPDBG_LIST(method) /* {{{ */
 
 PHPDBG_LIST(class) /* {{{ */
 {
-    if (param->type == STR_PARAM) {
-        zend_class_entry **ce;
+    switch (param->type) {
+        case STR_PARAM: {
+            zend_class_entry **ce;
 
-        if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
-            if ((*ce)->type == ZEND_USER_CLASS) {
-                if ((*ce)->info.user.filename) {
-                    phpdbg_list_file(
-                        (*ce)->info.user.filename,
-                        (*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
-                        (*ce)->info.user.line_start TSRMLS_CC
-                    );
+            if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+                if ((*ce)->type == ZEND_USER_CLASS) {
+                    if ((*ce)->info.user.filename) {
+                        phpdbg_list_file(
+                            (*ce)->info.user.filename,
+                            (*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
+                            (*ce)->info.user.line_start, 0 TSRMLS_CC
+                        );
+                    } else {
+                        phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
+                    }
                 } else {
-                    phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
+                    phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
                 }
             } else {
-                phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
+                phpdbg_error("The requested class (%s) could not be found", param->str);
             }
-        } else {
-            phpdbg_error("The requested class (%s) could not be found", param->str);
-        }
-    } else {
-        phpdbg_error(
-            "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
+        } break;
+
+        phpdbg_default_switch_case();
     }
 
     return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_dispatch(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
-{
-    switch (param->type) {
-        case NUMERIC_PARAM:
-	    case EMPTY_PARAM:
-			return PHPDBG_LIST_HANDLER(lines)(param TSRMLS_CC);
-
-		case FILE_PARAM:
-			return PHPDBG_LIST_HANDLER(lines)(param TSRMLS_CC);
-
-		case STR_PARAM: {
-		    i_phpdbg_list_func(param->str, param->len TSRMLS_CC);
-		} break;
-
-		case METHOD_PARAM:
-			return PHPDBG_LIST_HANDLER(method)(param TSRMLS_CC);
-
-		default:
-            phpdbg_error(
-                "Unsupported parameter type (%s) for function", phpdbg_get_param_type(param TSRMLS_CC));
-			break;
-    }
-} /* }}} */
-
-void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(const char *filename, long count, long offset, int highlight TSRMLS_DC) /* {{{ */
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
 	struct stat st;
@@ -202,12 +143,13 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 	int all_content = (count == 0);
 	unsigned int line = 0, displayed = 0;
 
-    if (VCWD_STAT(filename, &st) == -1) {
+    if (VCWD_STAT(filename, &st) == FAILURE) {
 		phpdbg_error("Failed to stat file %s", filename);
 		return;
 	}
+
 #ifndef _WIN32
-	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == -1) {
+	if ((fd = VCWD_OPEN(filename, O_RDONLY)) == FAILURE) {
 		phpdbg_error("Failed to open file %s to list", filename);
 		return;
 	}
@@ -249,7 +191,13 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 
 		if (!offset || offset <= line) {
 			/* Without offset, or offset reached */
-			phpdbg_writeln("%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			if (!highlight) {
+			    phpdbg_writeln("%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			} else {
+			    if (highlight != line) {
+			        phpdbg_writeln(" %05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			    } else phpdbg_writeln(">%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			}
 			++displayed;
 		}
 
@@ -284,6 +232,44 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	ops = (zend_op_array*)fbc;
 
 	phpdbg_list_file(ops->filename,
-		ops->line_end - ops->line_start + 1, ops->line_start TSRMLS_CC);
+		ops->line_end - ops->line_start + 1, ops->line_start, 0 TSRMLS_CC);
 } /* }}} */
+
+void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)
+{
+    HashTable *func_table = EG(function_table);
+    zend_function* fbc;
+    char *func_name = (char*) str;
+    size_t func_name_len = len;
+
+    /* search active scope if begins with period */
+    if (func_name[0] == '.') {
+       if (EG(scope)) {
+           func_name++;
+           func_name_len--;
+
+           func_table = &EG(scope)->function_table;
+       } else {
+           phpdbg_error("No active class");
+           return;
+       }
+    } else if (!EG(function_table)) {
+        phpdbg_error("No function table loaded");
+        return;
+    } else {
+        func_table = EG(function_table);
+    }
+
+    /* use lowercase names, case insensitive */
+    func_name = zend_str_tolower_dup(func_name, func_name_len);
+
+    if (zend_hash_find(func_table, func_name, func_name_len+1,
+        (void**)&fbc) == SUCCESS) {
+        phpdbg_list_function(fbc TSRMLS_CC);
+    } else {
+        phpdbg_error("Function %s not found", func_name);
+    }
+
+    efree(func_name);
+}
 
