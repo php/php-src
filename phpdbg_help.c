@@ -52,7 +52,8 @@ PHPDBG_HELP(step) /* {{{ */
 PHPDBG_HELP(next) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the next command to step back into the vm and execute the next opcode");
+	phpdbg_write("While stepping through execution, or after a breakpoint, ");
+	phpdbg_writeln("use the next command to step back into the vm and execute the next opcode");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -60,7 +61,8 @@ PHPDBG_HELP(next) /* {{{ */
 PHPDBG_HELP(until) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the until command to step back into the vm and reaches the next source line");
+	phpdbg_write("While stepping through execution, or after a breakpoint, ");
+	phpdbg_writeln("use the until command to step back into the vm and reaches the next source line");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -68,7 +70,19 @@ PHPDBG_HELP(until) /* {{{ */
 PHPDBG_HELP(finish) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the finish command to step back into the vm and continue until the current function has returned");
+	phpdbg_write("While stepping through execution, or after a breakpoint, ");
+	phpdbg_writeln("use the finish command to step back into the vm and continue until the current scope has returned");
+	phpdbg_writeln("Note: this allows all breakpoints that would otherwise break execution in the current scope to be skipped");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(leave) /* {{{ */
+{
+    phpdbg_help_header();
+	phpdbg_write("While stepping through execution, or after a breakpoint, ");
+	phpdbg_writeln("use the finish command to step back into the vm and continue until the current scope is returning");
+	phpdbg_writeln("Note: this allows inspection of the return value from any scope before it is returned");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
