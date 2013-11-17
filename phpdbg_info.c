@@ -38,3 +38,44 @@ PHPDBG_INFO(files) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+PHPDBG_INFO(error) /* {{{ */
+{
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_INFO(vars) /* {{{ */
+{
+	HashPosition pos;
+	char *var;
+	zval **data;
+
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+
+		if (!EG(active_symbol_table)) {
+			phpdbg_error("No active symbol table!");
+			return SUCCESS;
+		}
+	}
+
+	phpdbg_notice("Variables: %d",
+		zend_hash_num_elements(EG(active_symbol_table)));
+
+	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
+	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
+		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+		zend_hash_get_current_data_ex(EG(active_symbol_table), (void **)&data, &pos);
+
+		if (*var != '_') {
+			phpdbg_write("Var: %s = ", var, *data == NULL ? "NULL" : "");
+			if (data) {
+				zend_print_flat_zval_r(*data TSRMLS_CC);
+				phpdbg_writeln(EMPTY);
+			}
+		}
+		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
+	}
+
+	return SUCCESS;
+} /* }}} */
