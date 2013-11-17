@@ -48,7 +48,7 @@ PHPDBG_LIST(lines) /* {{{ */
 		case FILE_PARAM:
 			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
-		
+
 		phpdbg_default_switch_case();
 	}
 
@@ -84,7 +84,7 @@ PHPDBG_LIST(method) /* {{{ */
                     phpdbg_list_function(
                         function TSRMLS_CC);
                 } else {
-                    phpdbg_error("Could not find ::%s in %s", param->method.name, param->method.class);
+                    phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
                 }
 
                 efree(lcname);
