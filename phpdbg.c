@@ -12,6 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
+   | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
    +----------------------------------------------------------------------+
 */
@@ -44,9 +45,9 @@ const char* phpdbg_get_param_type(phpdbg_param_t *param TSRMLS_DC) {
             return "file";
         case STR_PARAM:
             return "string";
-            
+
         default: /* this is bad */
-            return "unknown";    
+            return "unknown";
     }
 }
 
@@ -60,24 +61,24 @@ phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t
 	}
 
 	if (phpdbg_is_addr(str)) {
-	
+
 		param->addr = strtoul(str, 0, 16);
 		param->type = ADDR_PARAM;
 		goto parsed;
-		
+
 	} else if (phpdbg_is_numeric(str)) {
-	
+
 		param->num = strtol(str, NULL, 0);
 		param->type = NUMERIC_PARAM;
         goto parsed;
-        
+
 	} else if (phpdbg_is_class_method(str, len+1, &class_name, &func_name)) {
-	
+
 		param->method.class = class_name;
 		param->method.name = func_name;
 		param->type = METHOD_PARAM;
 		goto parsed;
-		
+
 	} else {
 		const char *line_pos = strchr(str, ':');
 
@@ -97,7 +98,7 @@ phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t
 	param->str = estrndup(str, len);
 	param->len = len;
 	param->type = STR_PARAM;
-	
+
 parsed:
     phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s", str, len, phpdbg_get_param_type(param TSRMLS_CC));
 	return param->type;
@@ -236,9 +237,9 @@ static PHP_FUNCTION(phpdbg_break)
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
             return;
         }
-        
+
         phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
-        
+
         switch (type) {
             case METHOD_PARAM:
                 phpdbg_do_break_method(&param TSRMLS_CC);
@@ -259,9 +260,9 @@ static PHP_FUNCTION(phpdbg_break)
             default: zend_error(
                 E_WARNING, "unrecognized parameter type %ld", type);
         }
-        
+
         phpdbg_clear_param(&param TSRMLS_CC);
-        
+
     } else if (EG(current_execute_data) && EG(active_op_array)) {
         zend_ulong opline_num = (EG(current_execute_data)->opline -
 			EG(active_op_array)->opcodes);
