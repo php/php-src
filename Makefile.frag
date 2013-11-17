@@ -1,4 +1,4 @@
-phpdbg: $(BUILD_BINARY)
+phpdbg: clean-phpdbg $(BUILD_BINARY)
 
 $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
