@@ -48,7 +48,7 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
     struct stat sb;
 
     if (VCWD_STAT(path, &sb) != FAILURE) {
-        if (sb.st_mode & S_IFREG|S_IFLNK) {
+        if (sb.st_mode & (S_IFREG|S_IFLNK)) {
             phpdbg_breakfile_t new_break;
             zend_llist *break_files_ptr;
             size_t path_len = strlen(path);
