@@ -651,12 +651,14 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
 
-void zend_activate(TSRMLS_D);
-void zend_deactivate(TSRMLS_D);
-void zend_call_destructors(TSRMLS_D);
-void zend_activate_modules(TSRMLS_D);
-void zend_deactivate_modules(TSRMLS_D);
-void zend_post_deactivate_modules(TSRMLS_D);
+BEGIN_EXTERN_C()
+ZEND_API void zend_activate(TSRMLS_D);
+ZEND_API void zend_deactivate(TSRMLS_D);
+ZEND_API void zend_call_destructors(TSRMLS_D);
+ZEND_API void zend_activate_modules(TSRMLS_D);
+ZEND_API void zend_deactivate_modules(TSRMLS_D);
+ZEND_API void zend_post_deactivate_modules(TSRMLS_D);
+END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)

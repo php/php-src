@@ -2381,7 +2381,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 }
 /* }}} */
 
-void zend_activate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_activate_modules(TSRMLS_D) /* {{{ */
 {
 	zend_module_entry **p = module_request_startup_handlers;
 
@@ -2410,7 +2410,7 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_deactivate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 {
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
@@ -2457,7 +2457,7 @@ static int exec_done_cb(zend_module_entry *module TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
 		zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
