@@ -155,10 +155,10 @@ PHPDBG_INFO(funcs) /* {{{ */
     HashPosition position;
 	zend_function *zf, **pzf;
 	HashTable functions;
-	
+
 	zend_hash_init(&functions, 8, NULL, NULL, 0);
 
-	for (zend_hash_internal_pointer_reset_ex(EG(function_table), &position);	
+	for (zend_hash_internal_pointer_reset_ex(EG(function_table), &position);
 		zend_hash_get_current_data_ex(EG(function_table), (void**)&zf, &position) == SUCCESS;
 		zend_hash_move_forward_ex(EG(function_table), &position)) {
 
@@ -167,15 +167,15 @@ PHPDBG_INFO(funcs) /* {{{ */
         		&functions, (void**) &zf, sizeof(zend_function), NULL);
         }
 	}
-	
+
 	phpdbg_notice("User Functions (%d)",
 		zend_hash_num_elements(&functions));
 
-	for (zend_hash_internal_pointer_reset_ex(&functions, &position);	
+	for (zend_hash_internal_pointer_reset_ex(&functions, &position);
 		zend_hash_get_current_data_ex(&functions, (void**)&pzf, &position) == SUCCESS;
 		zend_hash_move_forward_ex(&functions, &position)) {
 		zend_op_array *op_array = &((*pzf)->op_array);
-		
+
 		phpdbg_writeln(
 			"|-------- %s in %s on line %d",
 			op_array->function_name ? op_array->function_name : "{main}",
@@ -184,6 +184,6 @@ PHPDBG_INFO(funcs) /* {{{ */
 	}
 
 	zend_hash_destroy(&functions);
-	
+
 	return SUCCESS;
 } /* }}} */
