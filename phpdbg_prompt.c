@@ -38,6 +38,7 @@ static PHPDBG_COMMAND(next);
 static PHPDBG_COMMAND(run);
 static PHPDBG_COMMAND(eval);
 static PHPDBG_COMMAND(until);
+static PHPDBG_COMMAND(finish);
 static PHPDBG_COMMAND(print);
 static PHPDBG_COMMAND(break);
 static PHPDBG_COMMAND(back);
@@ -52,24 +53,25 @@ static PHPDBG_COMMAND(quit); /* }}} */
 
 /* {{{ command declarations */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_EX_D(exec,       "set execution context", 'e'),
+	PHPDBG_COMMAND_EX_D(exec,       "set execution context",                    'e'),
 	PHPDBG_COMMAND_EX_D(compile,    "attempt to pre-compile execution context", 'c'),
-	PHPDBG_COMMAND_EX_D(step,       "step through execution", 's'),
-	PHPDBG_COMMAND_EX_D(next,       "continue execution", 'n'),
-	PHPDBG_COMMAND_EX_D(run,        "attempt execution", 'r'),
-	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code", 'E'),
-	PHPDBG_COMMAND_EX_D(until,      "continue until reaches next line", 'u'),
-	PHPDBG_COMMANDS_D(print,        "print something", 'p', phpdbg_print_commands),
-	PHPDBG_COMMANDS_D(break,        "set breakpoint", 'b', phpdbg_break_commands),
-	PHPDBG_COMMAND_EX_D(back,       "show trace", 't'),
-	PHPDBG_COMMANDS_D(list,         "lists some code", 'l', phpdbg_list_commands),
-	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment", 'X'),
-	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints", 'C'),
-	PHPDBG_COMMANDS_D(help,         "show help menu", 'h', phpdbg_help_commands),
-	PHPDBG_COMMAND_EX_D(quiet,      "silence some output", 'Q'),
-	PHPDBG_COMMAND_EX_D(aliases,    "show alias list", 'a'),
-	PHPDBG_COMMAND_EX_D(oplog,      "sets oplog output", 'O'),
-	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg", 'q'),
+	PHPDBG_COMMAND_EX_D(step,       "step through execution",                   's'),
+	PHPDBG_COMMAND_EX_D(next,       "continue execution",                       'n'),
+	PHPDBG_COMMAND_EX_D(run,        "attempt execution",                        'r'),
+	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code",                       'E'),
+	PHPDBG_COMMAND_EX_D(until,      "continue until reaches next line",         'u'),
+	PHPDBG_COMMAND_EX_D(finish,      "continue until reaches next line",        'f'),
+	PHPDBG_COMMANDS_D(print,        "print something",                          'p', phpdbg_print_commands),
+	PHPDBG_COMMANDS_D(break,        "set breakpoint",                           'b', phpdbg_break_commands),
+	PHPDBG_COMMAND_EX_D(back,       "show trace",                               't'),
+	PHPDBG_COMMANDS_D(list,         "lists some code",                          'l', phpdbg_list_commands),
+	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment",          'X'),
+	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints",                        'C'),
+	PHPDBG_COMMANDS_D(help,         "show help menu",                           'h', phpdbg_help_commands),
+	PHPDBG_COMMAND_EX_D(quiet,      "silence some output",                      'Q'),
+	PHPDBG_COMMAND_EX_D(aliases,    "show alias list",                          'a'),
+	PHPDBG_COMMAND_EX_D(oplog,      "sets oplog output",                        'O'),
+	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg",                              'q'),
 	{NULL, 0, 0}
 }; /* }}} */
 
@@ -306,6 +308,11 @@ static PHPDBG_COMMAND(next) /* {{{ */
 static PHPDBG_COMMAND(until) /* {{{ */
 {
 	return PHPDBG_UNTIL;
+} /* }}} */
+
+static PHPDBG_COMMAND(finish) /* {{{ */
+{
+	return PHPDBG_FINISH;
 } /* }}} */
 
 static PHPDBG_COMMAND(run) /* {{{ */
@@ -824,6 +831,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					}
 				break;
 
+				case PHPDBG_FINISH:
 				case PHPDBG_UNTIL:
 				case PHPDBG_NEXT: {
 					if (!EG(in_execution)) {
@@ -977,6 +985,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	int last_step = 0;
 	uint last_lineno;
 	const char *last_file;
+	const zend_execute_data *last_exec = NULL, *last_prev_exec;
 
 #if PHP_VERSION_ID < 50500
 	if (EG(exception)) {
@@ -1015,6 +1024,7 @@ zend_vm_enter:
 	\
 	do {\
 		switch (last_step = phpdbg_interactive(TSRMLS_C)) {\
+			case PHPDBG_FINISH:\
 			case PHPDBG_UNTIL:\
 			case PHPDBG_NEXT:{\
 		    	goto next;\
@@ -1028,12 +1038,20 @@ zend_vm_enter:
 			/* skip possible breakpoints */
 			goto next;
 		}
-
 		if (last_step == PHPDBG_UNTIL
 			&& last_file == execute_data->op_array->filename
 			&& last_lineno == execute_data->opline->lineno) {
 			/* skip possible breakpoints */
 			goto next;
+		}
+		if (last_step == PHPDBG_FINISH) {
+			if (!(execute_data->prev_execute_data == last_exec
+				&& execute_data == last_prev_exec)) {
+				/* skip possible breakpoints */
+				goto next;
+			}
+			last_exec = NULL;
+			last_prev_exec = NULL;
 		}
 
 		/* not while in conditionals */
@@ -1082,6 +1100,11 @@ zend_vm_enter:
 next:
 		last_lineno = execute_data->opline->lineno;
 		last_file   = execute_data->op_array->filename;
+
+		if (last_step == PHPDBG_FINISH && last_exec == NULL) {
+			last_exec      = execute_data;
+			last_prev_exec = execute_data->prev_execute_data;
+		}
 
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 

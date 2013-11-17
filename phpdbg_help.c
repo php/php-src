@@ -65,6 +65,14 @@ PHPDBG_HELP(until) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(finish) /* {{{ */
+{
+    phpdbg_help_header();
+	phpdbg_writeln("While stepping through execution, or after a breakpoint, use the finish command to step back into the vm and continue until the current function has returned");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(compile) /* {{{ */
 {
     phpdbg_help_header();
@@ -101,7 +109,7 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_notice("Commands");
 	{
 	    const phpdbg_command_t *print_command = phpdbg_print_commands;
-	    
+
         phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
 	    while (print_command && print_command->name) {
 			if (print_command->alias) {
@@ -159,7 +167,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_notice("Commands");
 	{
 	    const phpdbg_command_t *break_command = phpdbg_break_commands;
-        
+
         phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
 	    while (break_command && break_command->name) {
 			if (break_command->alias) {
@@ -174,7 +182,7 @@ PHPDBG_HELP(break) /* {{{ */
 } /* }}} */
 
 PHPDBG_HELP(clean) /* {{{ */
-{   
+{
     phpdbg_help_header();
     phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions");
     phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg");
@@ -244,7 +252,7 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_notice("Commands");
 	{
 	    const phpdbg_command_t *list_command = phpdbg_list_commands;
-	    
+
         phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
 	    while (list_command && list_command->name) {
 			if (list_command->alias) {

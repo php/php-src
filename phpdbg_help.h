@@ -41,6 +41,7 @@ PHPDBG_HELP(next);
 PHPDBG_HELP(run);
 PHPDBG_HELP(eval);
 PHPDBG_HELP(until);
+PHPDBG_HELP(finish);
 PHPDBG_HELP(print);
 PHPDBG_HELP(break);
 PHPDBG_HELP(clean);
@@ -61,6 +62,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging", 'r'),
 	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution", 'E'),
 	PHPDBG_HELP_D(until,    "continue until the program reaches a source line different than the current one", 'u'),
+	PHPDBG_HELP_D(finish,   "continue until the current function has returned", 'f'),
 	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment", 'p'),
 	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption", 'b'),
 	PHPDBG_HELP_D(clean,    "resetting the environment is useful while debugging and recompiling", 'X'),
