@@ -95,6 +95,7 @@ PHPDBG_INFO(classes) /* {{{ */
     			(*ce)->info.user.filename,
     			(*ce)->info.user.line_start);
     	} else phpdbg_writeln("|---- no source code");
+    	phpdbg_writeln(EMPTY);
 	}
 
 	zend_hash_destroy(&classes);
