@@ -95,7 +95,7 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_writeln("\t%sprint opline", PROMPT);
 	phpdbg_writeln("Will print the instruction for the current opline");
 	phpdbg_writeln("\t%sprint exec", PROMPT);
-	phpdbg_writeln("Will print the instruction for the execution context");
+	phpdbg_writeln("Will print the instructions for the execution context");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Specific printers loaded are show below:");
 	phpdbg_notice("Commands");
