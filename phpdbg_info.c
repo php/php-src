@@ -39,16 +39,57 @@ PHPDBG_INFO(files) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_INFO(error) /* {{{ */
+{
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_INFO(vars) /* {{{ */
+{
+	HashPosition pos;
+	char *var;
+	zval **data;
+
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+
+		if (!EG(active_symbol_table)) {
+			phpdbg_error("No active symbol table!");
+			return SUCCESS;
+		}
+	}
+
+	phpdbg_notice("Variables: %d",
+		zend_hash_num_elements(EG(active_symbol_table)));
+
+	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
+	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
+		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+		zend_hash_get_current_data_ex(EG(active_symbol_table), (void **)&data, &pos);
+
+		if (*var != '_') {
+			phpdbg_write("Var: %s = ", var, *data == NULL ? "NULL" : "");
+			if (data) {
+				zend_print_flat_zval_r(*data TSRMLS_CC);
+				phpdbg_writeln(EMPTY);
+			}
+		}
+		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) { /* {{{ */
 	phpdbg_write(
 		"%s %s %s (%d)",
-		((*ce)->type == ZEND_USER_CLASS) ? 
+		((*ce)->type == ZEND_USER_CLASS) ?
 			"User" : "Internal",
-        ((*ce)->ce_flags & ZEND_ACC_INTERFACE) ? 
+        ((*ce)->ce_flags & ZEND_ACC_INTERFACE) ?
 			"Interface" :
 				((*ce)->ce_flags & ZEND_ACC_ABSTRACT) ?
 				"Abstract Class" :
-					"Class", 
+					"Class",
 		(*ce)->name, zend_hash_num_elements(&(*ce)->function_table));
 } /* }}} */
 
@@ -57,10 +98,10 @@ PHPDBG_INFO(classes) /* {{{ */
     HashPosition position;
 	zend_class_entry **ce;
 	HashTable classes;
-	
+
 	zend_hash_init(&classes, 8, NULL, NULL, 0);
 
-	for (zend_hash_internal_pointer_reset_ex(EG(class_table), &position);	
+	for (zend_hash_internal_pointer_reset_ex(EG(class_table), &position);
 		zend_hash_get_current_data_ex(EG(class_table), (void**)&ce, &position) == SUCCESS;
 		zend_hash_move_forward_ex(EG(class_table), &position)) {
 
@@ -69,17 +110,17 @@ PHPDBG_INFO(classes) /* {{{ */
         		&classes, ce, sizeof(ce), NULL);
         }
 	}
-	
+
 	phpdbg_notice("User Classes (%d)",
 		zend_hash_num_elements(&classes));
 
-	for (zend_hash_internal_pointer_reset_ex(&classes, &position);	
+	for (zend_hash_internal_pointer_reset_ex(&classes, &position);
 		zend_hash_get_current_data_ex(&classes, (void**)&ce, &position) == SUCCESS;
 		zend_hash_move_forward_ex(&classes, &position)) {
 
 		phpdbg_print_class_name(ce TSRMLS_CC);
 		phpdbg_writeln(EMPTY);
-		
+
 		if ((*ce)->parent) {
 			zend_class_entry *pce = (*ce)->parent;
 			do {
@@ -88,10 +129,10 @@ PHPDBG_INFO(classes) /* {{{ */
 				phpdbg_writeln(EMPTY);
 			} while(pce = pce->parent);
 		}
-		
+
         if ((*ce)->info.user.filename) {
     		phpdbg_writeln(
-    			"|---- in %s on line %lu", 
+    			"|---- in %s on line %lu",
     			(*ce)->info.user.filename,
     			(*ce)->info.user.line_start);
     	} else phpdbg_writeln("|---- no source code");
@@ -99,7 +140,7 @@ PHPDBG_INFO(classes) /* {{{ */
 	}
 
 	zend_hash_destroy(&classes);
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -140,5 +181,3 @@ PHPDBG_INFO(funcs) /* {{{ */
 	
 	return SUCCESS;
 } /* }}} */
-
-
