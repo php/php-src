@@ -59,7 +59,10 @@
 # define PHPDBG_G(v) (phpdbg_globals.v)
 #endif
 
-#define PHPDBG_NEXT 2
+#define PHPDBG_NEXT   2
+#define PHPDBG_UNTIL  3
+#define PHPDBG_FINISH 4
+#define PHPDBG_LEAVE  5
 
 /* {{{ tables */
 #define PHPDBG_BREAK_FILE       0
