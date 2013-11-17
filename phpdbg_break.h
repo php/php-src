@@ -39,9 +39,9 @@ PHPDBG_BREAK(func);
  * Commands
  */
 static const phpdbg_command_t phpdbg_break_commands[] = {
-    PHPDBG_COMMAND_D_EX(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, 1),
-    PHPDBG_COMMAND_D_EX(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, 1),
-    PHPDBG_COMMAND_D_EX(address,     "specify breakpoint by address",                          'a', break_address, NULL, 1),
+	PHPDBG_COMMAND_D_EX(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, 1),
+	PHPDBG_COMMAND_D_EX(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, 1),
+	PHPDBG_COMMAND_D_EX(address,     "specify breakpoint by address",                          'a', break_address, NULL, 1),
 	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by expression",                       'o', break_on,      NULL, 1),
 	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, 1),
 	PHPDBG_COMMAND_D_EX(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, 1),
