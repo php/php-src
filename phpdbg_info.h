@@ -30,9 +30,9 @@
  */
 #define PHPDBG_INFO_HANDLER(name) phpdbg_do_info_##name
 #define PHPDBG_INFO_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_info_##name, NULL}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, PHPDBG_INFO_HANDLER(name), NULL}
 #define PHPDBG_INFO_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_info_##name, NULL}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, PHPDBG_INFO_HANDLER(name), NULL}
 #define PHPDBG_INFO(name) \
 	int PHPDBG_INFO_HANDLER(name)(phpdbg_param_t *param TSRMLS_DC)
 
