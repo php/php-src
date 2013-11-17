@@ -26,6 +26,10 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_utils.h"
 
+#ifdef _WIN32
+#	include "win32/time.h"
+#endif
+
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 int phpdbg_is_numeric(const char *str) /* {{{ */
