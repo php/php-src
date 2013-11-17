@@ -5779,7 +5779,7 @@ PHP_FUNCTION(unregister_tick_function)
 		return;
 	}
 
-	if (Z_TYPE_P(function) != IS_ARRAY) {
+	if (Z_TYPE_P(function) != IS_ARRAY && Z_TYPE_P(function) != IS_OBJECT) {
 		convert_to_string(function);
 	}
 
