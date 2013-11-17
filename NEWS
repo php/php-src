@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - Hash:
   . Added gost-crypto (CryptoPro S-box) GOST hash algo. (Manuel Mausz)
 
+- JSON:
+  . Fixed case part of bug #64874 ("json_decode handles whitespace and
+    case-sensitivity incorrectly")
+
 - mysqlnd:
   . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
     supported by the overlying APIs. (Andrey)
