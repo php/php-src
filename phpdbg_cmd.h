@@ -66,7 +66,7 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char has_args;                      /* Accept args? */
+	char arg_type;                      /* Accept args? */
 };
 /* }}} */
 

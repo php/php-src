@@ -164,10 +164,10 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command,
 
 			*selected = (phpdbg_command_t*) command;
 
-			if (command->has_args == REQUIRED_ARG && param->type == EMPTY_PARAM) {
+			if (command->arg_type == REQUIRED_ARG && param->type == EMPTY_PARAM) {
 				phpdbg_error("This command requires argument!");
 				rc = FAILURE;
-			} else if (command->has_args == NO_ARG && param->type != EMPTY_PARAM) {
+			} else if (command->arg_type == NO_ARG && param->type != EMPTY_PARAM) {
 				phpdbg_error("This command does not expect argument!");
 				rc = FAILURE;
 			} else {
