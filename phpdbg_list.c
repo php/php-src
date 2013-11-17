@@ -38,8 +38,8 @@ PHPDBG_LIST(lines) /* {{{ */
 	    case EMPTY_PARAM: {
 	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
 	            if (param->type == EMPTY_PARAM) {
-	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
-	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
+	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0, 0 TSRMLS_CC);
 	        } else phpdbg_error("Not executing, and execution context not set");
 	    } break;
 	    
@@ -106,7 +106,7 @@ PHPDBG_LIST(class) /* {{{ */
                         phpdbg_list_file(
                             (*ce)->info.user.filename,
                             (*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
-                            (*ce)->info.user.line_start TSRMLS_CC
+                            (*ce)->info.user.line_start, 0 TSRMLS_CC
                         );
                     } else {
                         phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
@@ -125,7 +125,7 @@ PHPDBG_LIST(class) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(const char *filename, long count, long offset, int highlight TSRMLS_DC) /* {{{ */
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
 	struct stat st;
@@ -185,7 +185,13 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 
 		if (!offset || offset <= line) {
 			/* Without offset, or offset reached */
-			phpdbg_writeln("%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			if (!highlight) {
+			    phpdbg_writeln("%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			} else {
+			    if (highlight != line) {
+			        phpdbg_writeln(" %05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			    } else phpdbg_writeln(">%05u: %.*s", line, (int)(pos - last_pos), last_pos);
+			}
 			++displayed;
 		}
 
@@ -220,7 +226,7 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	ops = (zend_op_array*)fbc;
 
 	phpdbg_list_file(ops->filename,
-		ops->line_end - ops->line_start + 1, ops->line_start TSRMLS_CC);
+		ops->line_end - ops->line_start + 1, ops->line_start, 0 TSRMLS_CC);
 } /* }}} */
 
 void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)

@@ -698,13 +698,13 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	    case EMPTY_PARAM: {
 	        if (PHPDBG_G(exec) || zend_is_executing(TSRMLS_C)) {
 	            if (param->type == EMPTY_PARAM) {
-	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0 TSRMLS_CC);
-	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0 TSRMLS_CC);
+	                phpdbg_list_file(phpdbg_current_file(TSRMLS_C), 0, 0, 0 TSRMLS_CC);
+	            } else phpdbg_list_file(phpdbg_current_file(TSRMLS_C), param->num, 0, 0 TSRMLS_CC);
 	        } else phpdbg_error("Not executing, and execution context not set");
 	    } break;
 	    
 		case FILE_PARAM:
-			phpdbg_list_file(param->file.name, param->file.line, 0 TSRMLS_CC);
+			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
 			
 		case STR_PARAM: {
@@ -1013,7 +1013,8 @@ zend_vm_enter:
 #define DO_INTERACTIVE() do {\
     phpdbg_list_file(\
         zend_get_executed_filename(TSRMLS_C), \
-        2, \
+        3, \
+        zend_get_executed_lineno(TSRMLS_C)-1, \
         zend_get_executed_lineno(TSRMLS_C) \
         TSRMLS_CC\
     );\

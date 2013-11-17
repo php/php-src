@@ -41,7 +41,7 @@ PHPDBG_LIST(func);
 
 void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
 void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, long, long TSRMLS_DC);
+void phpdbg_list_file(const char*, long, long, int TSRMLS_DC);
 
 static const phpdbg_command_t phpdbg_list_commands[] = {
     PHPDBG_LIST_EX_D(lines,     "lists the specified lines", 'l'),
