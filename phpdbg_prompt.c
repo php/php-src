@@ -195,7 +195,7 @@ static PHPDBG_COMMAND(exec) /* {{{ */
             struct stat sb;
 
             if (VCWD_STAT(param->str, &sb) != FAILURE) {
-                if (sb.st_mode & S_IFREG|S_IFLNK) {
+                if (sb.st_mode & (S_IFREG|S_IFLNK)) {
                     if (PHPDBG_G(exec)) {
 	                    phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
 	                    efree(PHPDBG_G(exec));
@@ -734,7 +734,7 @@ int phpdbg_do_cmd(  const phpdbg_command_t *command,
 	while (command && command->name && command->handler) {
 		if ((command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0)
-		   || ((expr_len == 1) && (command->alias && command->alias == cmd_line[0]))) {
+		   || (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
 
 		    param = emalloc(sizeof(phpdbg_param_t));
 
@@ -754,7 +754,7 @@ int phpdbg_do_cmd(  const phpdbg_command_t *command,
 
             PHPDBG_G(lparam) = param;
 
-            if (command->subs && (param->type == STR_PARAM)) {
+            if (command->subs && param->type == STR_PARAM) {
                 if (phpdbg_do_cmd(command->subs, selected, param->str, param->len TSRMLS_CC) == SUCCESS) {
                     rc = SUCCESS;
                     /* because we can */
