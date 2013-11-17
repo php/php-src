@@ -48,9 +48,8 @@ PHPDBG_LIST(lines) /* {{{ */
 		case FILE_PARAM:
 			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
-		default:
-			phpdbg_error("Unsupported parameter type (%s) for function",
-				phpdbg_get_param_type(param TSRMLS_CC));
+		
+		phpdbg_default_switch_case();
 	}
 
     return SUCCESS;
