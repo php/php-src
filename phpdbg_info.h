@@ -38,10 +38,12 @@
 
 PHPDBG_INFO(files);
 PHPDBG_INFO(classes);
+PHPDBG_INFO(funcs);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
     PHPDBG_INFO_EX_D(files,     "lists included files", 'F'),
-    PHPDBG_INFO_EX_D(classes,   "lists loaded classes", 'c'),
+    PHPDBG_INFO_EX_D(classes,   "lists loaded user classes", 'c'),
+    PHPDBG_INFO_EX_D(funcs, 	"lists loaded user functions", 'f'),
     PHPDBG_END_COMAND
 };
 
