@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - CLI server:
   . Added some MIME types to the CLI web server (Chris Jones)
 
+- Core:
+  . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
+    string). (Laruence)
+
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
 
