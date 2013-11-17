@@ -179,11 +179,15 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	end_pos = mem + st.st_size;
 #endif
 	while (1) {
+		if (pos == end_pos) {
+			break;
+		}
+
 		pos = memchr(last_pos, '\n', end_pos - last_pos);
 
 		if (!pos) {
 			/* No more line breaks */
-			break;
+			pos = end_pos;
 		}
 
 		++line;
