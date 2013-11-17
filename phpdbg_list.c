@@ -33,7 +33,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_LIST(lines) /* {{{ */
 {
-	if (!PHPDBG_G(exec) || !zend_is_executing(TSRMLS_C)) {
+	if (!PHPDBG_G(exec) && !zend_is_executing(TSRMLS_C)) {
 		phpdbg_error("Not executing, and execution context not set");
 		return SUCCESS;
 	}
