@@ -74,7 +74,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, 1),
 	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
 	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
-	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 1),
+	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 2),
 	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
