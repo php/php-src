@@ -21,16 +21,9 @@
 #define PHPDBG_BREAK_H
 
 #include "TSRM.h"
+#include "phpdbg_cmd.h"
 
-/**
- * Command Declarators
- */
-#define PHPDBG_BREAK_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_break_##name, NULL}
-#define PHPDBG_BREAK_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_break_##name, NULL}
-#define PHPDBG_BREAK(name) \
-	int phpdbg_do_break_##name(phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_BREAK(name) PHPDBG_COMMAND(break_##name)
 
 /**
  * Printer Forward Declarations
@@ -46,13 +39,13 @@ PHPDBG_BREAK(func);
  * Commands
  */
 static const phpdbg_command_t phpdbg_break_commands[] = {
-    PHPDBG_BREAK_EX_D(file,        "specify breakpoint by file:line", 'F'),
-    PHPDBG_BREAK_EX_D(method,      "specify breakpoint by class::method", 'm'),
-    PHPDBG_BREAK_EX_D(address,     "specify breakpoint by address", 'a'),
-	PHPDBG_BREAK_EX_D(on,          "specify breakpoint by expression", 'o'),
-	PHPDBG_BREAK_EX_D(lineno,      "specify breakpoint by line of currently executing file", 'l'),
-	PHPDBG_BREAK_EX_D(func,        "specify breakpoint by global function name", 'f'),
-	PHPDBG_END_COMAND
+    PHPDBG_COMMAND_D_EX(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, 1),
+    PHPDBG_COMMAND_D_EX(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, 1),
+    PHPDBG_COMMAND_D_EX(address,     "specify breakpoint by address",                          'a', break_address, NULL, 1),
+	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by expression",                       'o', break_on,      NULL, 1),
+	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, 1),
+	PHPDBG_COMMAND_D_EX(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, 1),
+	PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_BREAK_H */

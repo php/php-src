@@ -20,21 +20,9 @@
 #ifndef PHPDBG_INFO_H
 #define PHPDBG_INFO_H
 
-#include "TSRM.h"
-#include "phpdbg.h"
-#include "phpdbg_prompt.h"
-#include "phpdbg_utils.h"
+#include "phpdbg_cmd.h"
 
-/**
- * Command Declarators
- */
-#define PHPDBG_INFO_HANDLER(name) phpdbg_do_info_##name
-#define PHPDBG_INFO_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, PHPDBG_INFO_HANDLER(name), NULL}
-#define PHPDBG_INFO_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, PHPDBG_INFO_HANDLER(name), NULL}
-#define PHPDBG_INFO(name) \
-	int PHPDBG_INFO_HANDLER(name)(phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_INFO(name) PHPDBG_COMMAND(info_##name)
 
 PHPDBG_INFO(files);
 PHPDBG_INFO(classes);
@@ -43,12 +31,12 @@ PHPDBG_INFO(error);
 PHPDBG_INFO(vars);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
-    PHPDBG_INFO_EX_D(files,     "lists included files",  'F'),
-    PHPDBG_INFO_EX_D(classes,   "lists loaded classes",  'c'),
-    PHPDBG_INFO_EX_D(funcs,   	"lists loaded classes",  'f'),
-    PHPDBG_INFO_EX_D(error,     "show the last error",   'e'),
-    PHPDBG_INFO_EX_D(vars,      "show active variables", 'v'),
-    PHPDBG_END_COMAND
+    PHPDBG_COMMAND_D_EX(files,   "lists included files",  'F', info_files,   NULL, 0),
+    PHPDBG_COMMAND_D_EX(classes, "lists loaded classes",  'c', info_classes, NULL, 0),
+    PHPDBG_COMMAND_D_EX(funcs,   "lists loaded classes",  'f', info_funcs,   NULL, 0),
+    PHPDBG_COMMAND_D_EX(error,   "show the last error",   'e', info_error,   NULL, 0),
+    PHPDBG_COMMAND_D_EX(vars,    "show active variables", 'v', info_vars,    NULL, 0),
+    PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_INFO_H */

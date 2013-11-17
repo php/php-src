@@ -53,6 +53,8 @@
 #   include <readline/history.h>
 #endif
 
+#include "phpdbg_cmd.h"
+
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
@@ -99,48 +101,6 @@
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.0.2-dev" /* }}} */
 
-typedef struct _phpdbg_command_t phpdbg_command_t;
-
-/* {{{ Command and Parameter */
-typedef enum {
-	EMPTY_PARAM = 0,
-	ADDR_PARAM,
-	FILE_PARAM,
-	METHOD_PARAM,
-	STR_PARAM,
-	NUMERIC_PARAM
-} phpdbg_param_type;
-
-typedef struct _phpdbg_param {
-    phpdbg_param_type type;
-	long num;
-	zend_ulong addr;
-	struct {
-		char *name;
-		long line;
-	} file;
-	struct {
-		char *class;
-		char *name;
-	} method;
-	char *str;
-	size_t len;
-} phpdbg_param_t;
-
-typedef int (*phpdbg_command_handler_t)(phpdbg_param_t *param TSRMLS_DC);
-
-struct _phpdbg_command_t {
-	const char *name;                   /* Command name */
-	size_t name_len;                    /* Command name length */
-	const char *tip;                    /* Menu tip */
-	size_t tip_len;                     /* Menu tip length */
-	char alias;                         /* Alias */
-	phpdbg_command_handler_t handler;   /* Command handler */
-	const phpdbg_command_t *subs;       /* Sub Commands */
-};
-
-#define PHPDBG_END_COMAND {NULL, 0, NULL, 0, '\0', NULL, NULL}
-
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
     HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
 	char *exec;                         /* file to execute */
@@ -154,10 +114,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_ulong flags;                   /* phpdbg flags */
 	FILE *oplog;                        /* opline log */
 ZEND_END_MODULE_GLOBALS(phpdbg)
-
-phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
-void phpdbg_clear_param(phpdbg_param_t * TSRMLS_DC);
-const char* phpdbg_get_param_type(phpdbg_param_t *param TSRMLS_DC);
 /* }}} */
 
 #endif /* PHPDBG_H */

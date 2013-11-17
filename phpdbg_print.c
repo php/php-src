@@ -21,6 +21,7 @@
 #include "phpdbg_print.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_opcode.h"
+#include "phpdbg_prompt.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -50,7 +51,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                     phpdbg_writeln(
                         "\t#%d-%d %s::%s() %s",
                         op_array->line_start, op_array->line_end,
-                        method->common.scope->name, 
+                        method->common.scope->name,
                         method->common.function_name,
                         op_array->filename ? op_array->filename : "unknown");
                 } else {
@@ -60,20 +61,20 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                         method->common.function_name ? method->common.function_name : "{main}",
                         op_array->filename ? op_array->filename : "unknown");
                 }
-                
-                
+
+
                 do {
                     const char *decode = phpdbg_decode_opcode(opline->opcode);
                     if (decode != NULL) {
                         phpdbg_writeln(
-                            "\t\t#%lu\t%p %s", opline->lineno, opline, decode); 
+                            "\t\t#%lu\t%p %s", opline->lineno, opline, decode);
                     } else phpdbg_error("\tFailed to decode opline @ %ld", opline);
-                    
+
                     opline++;
                 } while (++opcode < end);
             }
         } break;
-        
+
         default: {
             if (method->common.scope) {
                 phpdbg_writeln(
@@ -92,7 +93,7 @@ PHPDBG_PRINT(exec) /* {{{ */
         if (!PHPDBG_G(ops)) {
             phpdbg_compile(TSRMLS_C);
         }
-        
+
         if (PHPDBG_G(ops)) {
             phpdbg_notice(
                 "Context %s", PHPDBG_G(exec));
@@ -102,33 +103,33 @@ PHPDBG_PRINT(exec) /* {{{ */
     } else {
         phpdbg_error("No execution context set");
     }
-    
+
     return SUCCESS;
 } /* }}} */
 
 PHPDBG_PRINT(class) /* {{{ */
 {
     zend_class_entry **ce;
-    
+
 	switch (param->type) {
 	    case STR_PARAM: {
 	        if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
 	            phpdbg_notice(
-	                "%s %s: %s", 
-	                ((*ce)->type == ZEND_USER_CLASS) ? 
+	                "%s %s: %s",
+	                ((*ce)->type == ZEND_USER_CLASS) ?
 	                    "User" : "Internal",
-	                ((*ce)->ce_flags & ZEND_ACC_INTERFACE) ? 
+	                ((*ce)->ce_flags & ZEND_ACC_INTERFACE) ?
 	                    "Interface" :
 	                        ((*ce)->ce_flags & ZEND_ACC_ABSTRACT) ?
 	                            "Abstract Class" :
-	                                "Class", 
+	                                "Class",
 	                (*ce)->name);
-	            
+
 	            phpdbg_writeln("Methods (%d):", zend_hash_num_elements(&(*ce)->function_table));
 	            if (zend_hash_num_elements(&(*ce)->function_table)) {
 	                HashPosition position;
 	                zend_function *method;
-	                
+
 	                for (zend_hash_internal_pointer_reset_ex(&(*ce)->function_table, &position);
 	                     zend_hash_get_current_data_ex(&(*ce)->function_table, (void**) &method, &position) == SUCCESS;
 	                     zend_hash_move_forward_ex(&(*ce)->function_table, &position)) {
@@ -140,7 +141,7 @@ PHPDBG_PRINT(class) /* {{{ */
 	                "The class %s could not be found", param->str);
 	        }
 	    } break;
-	    
+
 	    phpdbg_default_switch_case();
 	}
 
@@ -159,26 +160,26 @@ PHPDBG_PRINT(method) /* {{{ */
 
                 if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
                     phpdbg_notice(
-                        "%s Method %s", 
-                        (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+                        "%s Method %s",
+                        (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
                         fbc->common.function_name);
-                        
+
 		            phpdbg_print_function_helper(fbc TSRMLS_CC);
                 } else {
                     phpdbg_error(
                         "The method %s could not be found", param->method.name);
                 }
-                
+
                 efree(lcname);
             } else {
                 phpdbg_error(
                     "The class %s could not be found", param->method.class);
             }
         } break;
-        
+
         phpdbg_default_switch_case();
     }
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -190,7 +191,7 @@ PHPDBG_PRINT(func) /* {{{ */
 		    zend_function* fbc;
             const char *func_name = param->str;
             size_t func_name_len = param->len;
-            char *lcname; 
+            char *lcname;
             /* search active scope if begins with period */
             if (func_name[0] == '.') {
                if (EG(scope)) {
@@ -209,25 +210,25 @@ PHPDBG_PRINT(func) /* {{{ */
 		    } else {
 		        func_table = EG(function_table);
 		    }
-		
+
             lcname  = zend_str_tolower_dup(func_name, func_name_len);
-            
+
 		    if (zend_hash_find(func_table, lcname, strlen(lcname)+1, (void**)&fbc) == SUCCESS) {
 		        phpdbg_notice(
 	                "%s %s %s",
-	                (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal", 
+	                (fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
 	                (fbc->common.scope) ? "Method" : "Function",
 	                fbc->common.function_name);
-	                
+
 			    phpdbg_print_function_helper(fbc TSRMLS_CC);
 		    } else {
 			    phpdbg_error(
 			        "The function %s could not be found", func_name);
 		    }
-		
+
 		    efree(lcname);
         } break;
-        
+
         phpdbg_default_switch_case();
     }
 

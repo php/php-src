@@ -30,6 +30,8 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_prompt.h"
+#include "phpdbg_cmd.h"
 
 /* {{{ forward declarations */
 static PHPDBG_COMMAND(exec);
@@ -56,28 +58,28 @@ static PHPDBG_COMMAND(quit); /* }}} */
 
 /* {{{ command declarations */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_EX_D(exec,       "set execution context",                    'e'),
-	PHPDBG_COMMAND_EX_D(compile,    "attempt to pre-compile execution context", 'c'),
-	PHPDBG_COMMAND_EX_D(step,       "step through execution",                   's'),
-	PHPDBG_COMMAND_EX_D(next,       "continue execution",                       'n'),
-	PHPDBG_COMMAND_EX_D(run,        "attempt execution",                        'r'),
-	PHPDBG_COMMAND_EX_D(eval,       "evaluate some code",                       'E'),
-	PHPDBG_COMMAND_EX_D(until,      "continue until reaches next line",         'u'),
-	PHPDBG_COMMAND_EX_D(finish,     "continue past the end of the stack",       'f'),
-	PHPDBG_COMMAND_EX_D(leave,      "continue until the end of the stack",      'L'),
-	PHPDBG_COMMANDS_D(print,        "print something",                          'p', phpdbg_print_commands),
-	PHPDBG_COMMANDS_D(break,        "set breakpoint",                           'b', phpdbg_break_commands),
-	PHPDBG_COMMAND_EX_D(back,       "show trace",                               't'),
-	PHPDBG_COMMANDS_D(list,         "lists some code",                          'l', phpdbg_list_commands),
-	PHPDBG_COMMANDS_D(info,         "displays some informations",               'i', phpdbg_info_commands),
-	PHPDBG_COMMAND_EX_D(clean,      "clean the execution environment",          'X'),
-	PHPDBG_COMMAND_EX_D(clear,      "clear breakpoints",                        'C'),
-	PHPDBG_COMMANDS_D(help,         "show help menu",                           'h', phpdbg_help_commands),
-	PHPDBG_COMMAND_EX_D(quiet,      "silence some output",                      'Q'),
-	PHPDBG_COMMAND_EX_D(aliases,    "show alias list",                          'a'),
-	PHPDBG_COMMAND_EX_D(oplog,      "sets oplog output",                        'O'),
-	PHPDBG_COMMAND_EX_D(quit,       "exit phpdbg",                              'q'),
-	PHPDBG_END_COMAND
+	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
+	PHPDBG_COMMAND_D(compile, "attempt to pre-compile execution context", 'c', NULL, 0),
+	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 1),
+	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
+	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
+	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, 1),
+	PHPDBG_COMMAND_D(until,   "continue until reaches next line",         'u', NULL, 0),
+	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'f', NULL, 0),
+	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
+	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 1),
+	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
+	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
+	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, 2),
+	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, 1),
+	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
+	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
+	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 1),
+	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
+	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
+	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
+	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
+	PHPDBG_END_COMMAND
 }; /* }}} */
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -350,12 +352,12 @@ static PHPDBG_COMMAND(run) /* {{{ */
         if (!EG(active_symbol_table)) {
             zend_rebuild_symbol_table(TSRMLS_C);
         }
-        
+
         zend_try {
         	/* last chance ... */
         	zend_activate_auto_globals(TSRMLS_C);
         } zend_end_try();
-		
+
 		zend_try {
 			zend_execute(
 			    EG(active_op_array) TSRMLS_CC);
@@ -740,73 +742,6 @@ static PHPDBG_COMMAND(list) /* {{{ */
     }
 
 	return SUCCESS;
-} /* }}} */
-
-int phpdbg_do_cmd(	const phpdbg_command_t *command,
-					phpdbg_command_t **selected,
-					char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
-{
-	int rc = FAILURE;
-
-	char *expr = NULL;
-#ifndef _WIN32
-	const char *cmd = strtok_r(cmd_line, " ", &expr);
-#else
-	const char *cmd = strtok_s(cmd_line, " ", &expr);
-#endif
-	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
-
-	phpdbg_param_t *param = NULL;
-
-	while (command && command->name && command->handler) {
-		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
-			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
-
-			param = emalloc(sizeof(phpdbg_param_t));
-
-			PHPDBG_G(last) = (phpdbg_command_t*) command;
-
-		    /* urm ... */
-			if (PHPDBG_G(lparam)) {
-		        //phpdbg_clear_param(
-		        //    PHPDBG_G(lparam) TSRMLS_CC);
-		        //efree(PHPDBG_G(lparam));
-			}
-
-			phpdbg_parse_param(
-				expr,
-				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
-				param TSRMLS_CC);
-
-			PHPDBG_G(lparam) = param;
-
-			if (command->subs && param->type == STR_PARAM) {
-				if (phpdbg_do_cmd(command->subs, selected, param->str, param->len TSRMLS_CC) == SUCCESS) {
-					rc = SUCCESS;
-					/* because we can */
-					phpdbg_clear_param(param TSRMLS_CC);
-					efree(param);
-					goto done;
-				}
-			}
-
-			*selected = (phpdbg_command_t*) command;
-
-			rc = command->handler(param TSRMLS_CC);
-
-			break;
-		}
-		++command;
-	}
-
-done:
-	if (selected && param) {
-		phpdbg_debug(
-			"phpdbg_do_cmd(%s, \"%s\"): %d",
-			command->name, phpdbg_get_param_type(param TSRMLS_CC), (rc==SUCCESS));
-	}
-
-	return rc;
 } /* }}} */
 
 int phpdbg_interactive(TSRMLS_D) /* {{{ */

@@ -21,20 +21,10 @@
 #define PHPDBG_LIST_H
 
 #include "TSRM.h"
-#include "phpdbg_prompt.h"
-#include "phpdbg_utils.h"
+#include "phpdbg_cmd.h"
 
-/**
- * Command Declarators
- */
-#define PHPDBG_LIST_HANDLER(name) phpdbg_do_list_##name
-#define PHPDBG_LIST_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_list_##name, NULL}
-#define PHPDBG_LIST_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_list_##name, NULL}
-#define PHPDBG_LIST(name) \
-	int PHPDBG_LIST_HANDLER(name)(phpdbg_param_t *param TSRMLS_DC)
-
+#define PHPDBG_LIST(name)         PHPDBG_COMMAND(list_##name)
+#define PHPDBG_LIST_HANDLER(name) PHPDBG_COMMAND_HANDLER(list_##name)
 
 PHPDBG_LIST(lines);
 PHPDBG_LIST(class);
@@ -46,11 +36,11 @@ void phpdbg_list_function(const zend_function* TSRMLS_DC);
 void phpdbg_list_file(const char*, long, long, int TSRMLS_DC);
 
 static const phpdbg_command_t phpdbg_list_commands[] = {
-    PHPDBG_LIST_EX_D(lines,     "lists the specified lines",    'l'),
-    PHPDBG_LIST_EX_D(class,     "lists the specified class",    'c'),
-    PHPDBG_LIST_EX_D(method,    "lists the specified method",   'm'),
-    PHPDBG_LIST_EX_D(func,      "lists the specified function", 'f'),
-    PHPDBG_END_COMAND
+    PHPDBG_COMMAND_D_EX(lines,     "lists the specified lines",    'l', list_lines,  NULL, 1),
+    PHPDBG_COMMAND_D_EX(class,     "lists the specified class",    'c', list_class,  NULL, 1),
+    PHPDBG_COMMAND_D_EX(method,    "lists the specified method",   'm', list_method, NULL, 1),
+    PHPDBG_COMMAND_D_EX(func,      "lists the specified function", 'f', list_func,   NULL, 1),
+    PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_LIST_H */

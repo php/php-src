@@ -25,25 +25,6 @@
  */
 #define PHPDBG_MAX_CMD 500
 
-#define PHPDBG_STRL(s) s, sizeof(s)-1
-
-/**
- * Command Executor
- */
-int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_command_t **selected, char *cmd_line, size_t cmd_len TSRMLS_DC);
-
-/**
- * Command Declarators
- */
-#define PHPDBG_COMMAND_D(name, tip) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, 0, phpdbg_do_##name, NULL}
-#define PHPDBG_COMMAND_EX_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, NULL}
-#define PHPDBG_COMMANDS_D(name, tip, alias, children) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children}
-#define PHPDBG_COMMAND(name) \
-	int phpdbg_do_##name(phpdbg_param_t *param TSRMLS_DC)
-
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 void phpdbg_welcome(zend_bool cleaning TSRMLS_DC);
 int phpdbg_interactive(TSRMLS_D);
@@ -56,12 +37,5 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 #else
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif
-
-#define phpdbg_default_switch_case() \
-    default:\
-        phpdbg_error(\
-            "Unsupported parameter type (%s) for command", \
-                phpdbg_get_param_type(param TSRMLS_CC)); \
-    break
 
 #endif /* PHPDBG_PROMPT_H */

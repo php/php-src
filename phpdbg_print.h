@@ -20,16 +20,9 @@
 #ifndef PHPDBG_PRINT_H
 #define PHPDBG_PRINT_H
 
-#include "TSRM.h"
-#include "phpdbg_prompt.h"
+#include "phpdbg_cmd.h"
 
-/**
- * Command Declarators
- */
-#define PHPDBG_PRINT_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_print_##name, NULL}
-#define PHPDBG_PRINT(name) \
-	int phpdbg_do_print_##name(phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_PRINT(name) PHPDBG_COMMAND(print_##name)
 
 /**
  * Printer Forward Declarations
@@ -44,12 +37,12 @@ PHPDBG_PRINT(func);
  * Commands
  */
 static const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_D(exec,       "print execution context instructions",                 'e'),
-	PHPDBG_PRINT_D(opline,     "print the current opline information",                 'o'),
-	PHPDBG_PRINT_D(class,      "print out the instructions in the specified class",    'c'),
-	PHPDBG_PRINT_D(method,     "print out the instructions in the specified method",   'm'),
-	PHPDBG_PRINT_D(func,       "print out the instructions in the specified function", 'f'),
-	PHPDBG_END_COMAND
+	PHPDBG_COMMAND_D_EX(exec,       "print execution context instructions",                 'e', print_exec,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(opline,     "print the current opline information",                 'o', print_opline, NULL, 0),
+	PHPDBG_COMMAND_D_EX(class,      "print out the instructions in the specified class",    'c', print_class,  NULL, 1),
+	PHPDBG_COMMAND_D_EX(method,     "print out the instructions in the specified method",   'm', print_method, NULL, 1),
+	PHPDBG_COMMAND_D_EX(func,       "print out the instructions in the specified function", 'f', print_func,   NULL, 1),
+	PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_PRINT_H */

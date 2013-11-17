@@ -21,15 +21,10 @@
 #define PHPDBG_HELP_H
 
 #include "TSRM.h"
-#include "phpdbg_prompt.h"
+#include "phpdbg.h"
+#include "phpdbg_cmd.h"
 
-/**
- * Command Declarators
- */
-#define PHPDBG_HELP_D(name, tip, alias) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_help_##name, NULL}
-#define PHPDBG_HELP(name) \
-	int phpdbg_do_help_##name(phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_HELP(name) PHPDBG_COMMAND(help_##name)
 
 /**
  * Helper Forward Declarations
@@ -57,25 +52,25 @@ PHPDBG_HELP(oplog);
  * Commands
  */
 static const phpdbg_command_t phpdbg_help_commands[] = {
-	PHPDBG_HELP_D(exec,     "the execution context should be a valid path", 'e'),
-	PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution", 'c'),
-	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline as it is executed", 's'),
-	PHPDBG_HELP_D(next,     "continue executing while stepping or after breaking", 'n'),
-	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging", 'r'),
-	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution", 'E'),
-	PHPDBG_HELP_D(until,    "continue until the program reaches a source line different than the current one", 'u'),
-	PHPDBG_HELP_D(finish,   "continue until the current function has returned", 'f'),
-	PHPDBG_HELP_D(leave,    "continue until the current function is returning", 'L'),
-	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment", 'p'),
-	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption", 'b'),
-	PHPDBG_HELP_D(clean,    "resetting the environment is useful while debugging and recompiling", 'X'),
-	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption", 'c'),
-	PHPDBG_HELP_D(info,		"quick access to useful information on the console", 'i'),
-	PHPDBG_HELP_D(back,     "show debug backtrace information during execution", 't'),
-    PHPDBG_HELP_D(quiet,    "be quiet during execution", 's'),
-	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing", 'l'),
-	PHPDBG_HELP_D(oplog,    "keep clutter off the screen by sending oplogs to a file", 'O'),
-	{NULL, 0, 0}
+	PHPDBG_COMMAND_D_EX(exec,     "the execution context should be a valid path",                                    'e', help_exec,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(compile,  "pre-compilation allows inspection of code before execution",                      'c', help_compile, NULL, 0),
+	PHPDBG_COMMAND_D_EX(step,     "stepping through execution allows inspection of the opline as it is executed",    's', help_step,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(next,     "continue executing while stepping or after breaking",                             'n', help_next,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(run,      "execution inside the phpdbg vm allows detailed inspection and debugging",         'r', help_run,     NULL, 0),
+	PHPDBG_COMMAND_D_EX(eval,     "access to eval() allows you to affect the environment during execution",          'E', help_eval,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(until,    "continue until the program reaches a source line different than the current one", 'u', help_until,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(finish,   "continue until the current function has returned",                                'f', help_finish,  NULL, 0),
+	PHPDBG_COMMAND_D_EX(leave,    "continue until the current function is returning",                                'L', help_leave,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(print,    "printing allows inspection of the execution environment",                         'p', help_print,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(break,    "breakpoints allow execution interruption",                                        'b', help_break,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(clean,    "resetting the environment is useful while debugging and recompiling",             'X', help_clean,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(clear,    "clearing breakpoints allows you to run code without interruption",                'c', help_clear,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(info,     "quick access to useful information on the console",                               'i', help_info,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(back,     "show debug backtrace information during execution",                               't', help_back,    NULL, 0),
+    PHPDBG_COMMAND_D_EX(quiet,    "be quiet during execution",                                                       's', help_quiet,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(list,     "listing code gives you quick access to code while executing",                     'l', help_list,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(oplog,    "keep clutter off the screen by sending oplogs to a file",                         'O', help_oplog,   NULL, 0),
+	PHPDBG_END_COMMAND
 };
 
 #define phpdbg_help_header() \

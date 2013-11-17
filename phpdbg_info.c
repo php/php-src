@@ -133,7 +133,7 @@ PHPDBG_INFO(classes) /* {{{ */
 				phpdbg_write("|-------- ");
 				phpdbg_print_class_name(&pce TSRMLS_CC);
 				phpdbg_writeln(EMPTY);
-			} while(pce = pce->parent);
+			} while ((pce = pce->parent));
 		}
 
         if ((*ce)->info.user.filename) {
