@@ -985,7 +985,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	int last_step = 0;
 	uint last_lineno;
 	const char *last_file;
-	const zend_execute_data *last_exec = NULL, *last_prev_exec;
+	zend_op *last_op = NULL;
 
 #if PHP_VERSION_ID < 50500
 	if (EG(exception)) {
@@ -1038,20 +1038,22 @@ zend_vm_enter:
 			/* skip possible breakpoints */
 			goto next;
 		}
+		
 		if (last_step == PHPDBG_UNTIL
 			&& last_file == execute_data->op_array->filename
 			&& last_lineno == execute_data->opline->lineno) {
 			/* skip possible breakpoints */
 			goto next;
 		}
+		
 		if (last_step == PHPDBG_FINISH) {
-			if (!(execute_data->prev_execute_data == last_exec
-				&& execute_data == last_prev_exec)) {
+			if (execute_data->opline < last_op) {
 				/* skip possible breakpoints */
 				goto next;
+			} else {
+				last_step = 0;
+				last_op = NULL;
 			}
-			last_exec = NULL;
-			last_prev_exec = NULL;
 		}
 
 		/* not while in conditionals */
@@ -1101,9 +1103,8 @@ next:
 		last_lineno = execute_data->opline->lineno;
 		last_file   = execute_data->op_array->filename;
 
-		if (last_step == PHPDBG_FINISH && last_exec == NULL) {
-			last_exec      = execute_data;
-			last_prev_exec = execute_data->prev_execute_data;
+		if (last_step == PHPDBG_FINISH && !last_op) {
+			last_op = &execute_data->op_array->opcodes[execute_data->op_array->last-1];
 		}
 
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
