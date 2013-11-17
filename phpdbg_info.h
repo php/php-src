@@ -38,12 +38,14 @@
 
 PHPDBG_INFO(files);
 PHPDBG_INFO(classes);
+PHPDBG_INFO(funcs);
 PHPDBG_INFO(error);
 PHPDBG_INFO(vars);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
     PHPDBG_INFO_EX_D(files,     "lists included files",  'F'),
     PHPDBG_INFO_EX_D(classes,   "lists loaded classes",  'c'),
+    PHPDBG_INFO_EX_D(funcs,   	"lists loaded classes",  'f'),
     PHPDBG_INFO_EX_D(error,     "show the last error",   'e'),
     PHPDBG_INFO_EX_D(vars,      "show active variables", 'v'),
     PHPDBG_END_COMAND
