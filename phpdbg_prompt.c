@@ -232,7 +232,7 @@ static PHPDBG_COMMAND(exec) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
+int phpdbg_compile(TSRMLS_D) /* {{{ */
 {
 	zend_file_handle fh;
 

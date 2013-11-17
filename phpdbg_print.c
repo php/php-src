@@ -57,7 +57,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                     phpdbg_writeln(
                         "\t#%d-%d %s() %s",
                         op_array->line_start, op_array->line_end,
-                        method->common.function_name,
+                        method->common.function_name ? method->common.function_name : "{main}",
                         op_array->filename ? op_array->filename : "unknown");
                 }
                 
@@ -85,6 +85,26 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
         }
      }
 }
+
+PHPDBG_PRINT(exec) /* {{{ */
+{
+    if (PHPDBG_G(exec)) {
+        if (!PHPDBG_G(ops)) {
+            phpdbg_compile(TSRMLS_C);
+        }
+        
+        if (PHPDBG_G(ops)) {
+            phpdbg_notice(
+                "Context %s", PHPDBG_G(exec));
+
+            phpdbg_print_function_helper((zend_function*) PHPDBG_G(ops) TSRMLS_CC);
+        }
+    } else {
+        phpdbg_error("No execution context set");
+    }
+    
+    return SUCCESS;
+} /* }}} */
 
 PHPDBG_PRINT(class) /* {{{ */
 {
