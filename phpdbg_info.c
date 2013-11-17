@@ -41,6 +41,12 @@ PHPDBG_INFO(files) /* {{{ */
 
 PHPDBG_INFO(error) /* {{{ */
 {
+	if (PG(last_error_message)) {
+		phpdbg_writeln("Last error: %s at %s line %d",
+			PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+	} else {
+		phpdbg_notice("No error found!");
+	}
 	return SUCCESS;
 } /* }}} */
 
