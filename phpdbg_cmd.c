@@ -92,7 +92,8 @@ phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t
 	param->type = STR_PARAM;
 
 parsed:
-    phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s", str, len, phpdbg_get_param_type(param TSRMLS_CC));
+    phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s",
+		str, len, phpdbg_get_param_type(param TSRMLS_CC));
 	return param->type;
 } /* }}} */
 
@@ -114,10 +115,9 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
+int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
 	int rc = FAILURE;
-
 	char *expr = NULL;
 #ifndef _WIN32
 	const char *cmd = strtok_r(cmd_line, " ", &expr);
