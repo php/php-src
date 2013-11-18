@@ -65,8 +65,9 @@ PHPDBG_INFO(vars) /* {{{ */
 			return SUCCESS;
 		}
 	}
+
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
-	
+
 	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
 	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
 		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
@@ -80,19 +81,18 @@ PHPDBG_INFO(vars) /* {{{ */
 	
 	phpdbg_notice("Variables: %d",
 		zend_hash_num_elements(&vars));
-	phpdbg_writeln("Refs\tName\t\t");
+	phpdbg_writeln("Refs\tName");
 
 	for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
 		zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(&vars, &pos)) {
 		char *var;
-		zend_uint var_len;
-		zend_ulong var_idx;
-		zend_hash_get_current_key_ex(&vars, &var, &var_len, &var_idx, 0, &pos);
+		
+		zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
 		
 		if (*data) {
 			phpdbg_write(
-			"%d\t%s$%s\t",
+			"%d\t%s$%s\t\t",
 				Z_REFCOUNT_PP(data),
 				Z_ISREF_PP(data) ? "&" : "", var);
 	

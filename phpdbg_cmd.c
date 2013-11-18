@@ -129,12 +129,9 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_l
 #endif
 	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
 
-	phpdbg_param_t *param = NULL;
-
 	while (command && command->name && command->handler) {
 		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
 			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
-
 			phpdbg_param_t param = {0};
 
 			phpdbg_parse_param(

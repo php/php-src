@@ -41,6 +41,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->lcmd = NULL;
     pg->flags = PHPDBG_DEFAULT_FLAGS;
     pg->oplog = NULL;
+    memset(&pg->lparam, 0, sizeof(phpdbg_param_t));
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -94,14 +95,14 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 } /* }}} */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
-{	
+{
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -113,7 +114,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(seek));
-	
+
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
         PHPDBG_G(exec) = NULL;
