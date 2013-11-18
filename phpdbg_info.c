@@ -81,46 +81,48 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	phpdbg_notice("Variables: %d",
 		zend_hash_num_elements(&vars));
-	phpdbg_writeln("Address\t\tRefs\tType\t\tName");
+		
+	if (zend_hash_num_elements(&vars)) {
+		phpdbg_writeln("Address\t\tRefs\tType\t\tVariable");
+		for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
+			zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(&vars, &pos)) {
+			char *var;
 
-	for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
-		zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
-		zend_hash_move_forward_ex(&vars, &pos)) {
-		char *var;
+			zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
 
-		zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
-
-		if (*data) {
-			phpdbg_write(
-			"%p\t%d\t",
-				*data,
-				Z_REFCOUNT_PP(data));
-			
-			switch (Z_TYPE_PP(data)) {
-				case IS_STRING: 	phpdbg_write("(string)\t"); 	break;
-				case IS_LONG: 		phpdbg_write("(integer)\t"); 	break;
-				case IS_DOUBLE: 	phpdbg_write("(float)\t"); 		break;
-				case IS_RESOURCE:	phpdbg_write("(resource)\t"); 	break;
-				case IS_ARRAY:		phpdbg_write("(array)\t"); 		break;
-				case IS_OBJECT:		phpdbg_write("(object)\t"); 	break;
-				case IS_NULL:		phpdbg_write("(null)\t"); 		break;
-			}
-			
-			if (Z_TYPE_PP(data) == IS_OBJECT) {
-				phpdbg_writeln(
-					"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+			if (*data) {
 				phpdbg_write(
-					"|-----(instanceof)----> (%s)", Z_OBJCE_PP(data)->name);
-				phpdbg_writeln(EMPTY);
+				"%p\t%d\t",
+					*data,
+					Z_REFCOUNT_PP(data));
+
+				switch (Z_TYPE_PP(data)) {
+					case IS_STRING: 	phpdbg_write("(string)\t"); 	break;
+					case IS_LONG: 		phpdbg_write("(integer)\t"); 	break;
+					case IS_DOUBLE: 	phpdbg_write("(float)\t"); 		break;
+					case IS_RESOURCE:	phpdbg_write("(resource)\t"); 	break;
+					case IS_ARRAY:		phpdbg_write("(array)\t"); 		break;
+					case IS_OBJECT:		phpdbg_write("(object)\t"); 	break;
+					case IS_NULL:		phpdbg_write("(null)\t"); 		break;
+				}
+			
+				if (Z_TYPE_PP(data) == IS_OBJECT) {
+					phpdbg_writeln(
+						"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+					phpdbg_write(
+						"|-----(instanceof)----> (%s)", Z_OBJCE_PP(data)->name);
+					phpdbg_writeln(EMPTY);
+				} else {
+					phpdbg_write(
+						"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+				}
 			} else {
 				phpdbg_write(
-					"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+					"n/a\tn/a\tn/a\t$%s", var);
 			}
-		} else {
-			phpdbg_write(
-				"n/a\tn/a\tn/a\t$%s", var);
+			phpdbg_writeln(EMPTY);
 		}
-		phpdbg_writeln(EMPTY);
 	}
 
 	zend_hash_destroy(&vars);

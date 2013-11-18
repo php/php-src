@@ -110,7 +110,7 @@ void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name 
     HashTable class_breaks, *class_table;
     size_t class_len = strlen(class_name);
     size_t func_len = strlen(func_name);
-
+	
     if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_name,
 		class_len, (void**)&class_table) != SUCCESS) {
         zend_hash_init(&class_breaks, 8, NULL, phpdbg_class_breaks_dtor, 0);
@@ -291,6 +291,9 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
+/*
+* @TODO(anyone) this is case sensitive
+*/
 int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 {
 	HashTable *class_table;
