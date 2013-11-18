@@ -1,4 +1,15 @@
 <?php
+
+function outer() {
+	mine();
+}
+
+function mine() {
+	throw new Exception();
+}
+
+outer();
+
 if (isset($include))
 	include (sprintf("%s/web-bootstrap.php", dirname(__FILE__)));
 

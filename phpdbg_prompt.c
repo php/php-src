@@ -390,6 +390,56 @@ static PHPDBG_COMMAND(leave) /* {{{ */
 	return PHPDBG_LEAVE;
 } /* }}} */
 
+static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
+{
+	zend_fcall_info fci;
+
+	zval fname, 
+		 *trace, 
+		 exception;
+
+	/* get filename and linenumber before unsetting exception */
+	const char *filename = zend_get_executed_filename(TSRMLS_C);
+	zend_uint lineno = zend_get_executed_lineno(TSRMLS_C);
+
+	/* copy exception */
+	exception = *EG(exception);
+	zval_copy_ctor(&exception);
+	EG(exception) = NULL;
+
+	phpdbg_error(
+		"Uncaught %s !", 
+		Z_OBJCE(exception)->name);
+
+	/* call __toString */
+	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 1);
+	fci.size = sizeof(fci);
+	fci.function_table = &Z_OBJCE(exception)->function_table;
+	fci.function_name = &fname;
+	fci.symbol_table = NULL;
+	fci.object_ptr = &exception;
+	fci.retval_ptr_ptr = &trace;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.no_separation = 1;
+	zend_call_function(&fci, NULL TSRMLS_CC);
+	
+	if (trace) {
+		phpdbg_writeln(
+			"Uncaught %s", Z_STRVAL_P(trace));
+		/* remember to dtor trace */
+		zval_ptr_dtor(&trace);
+	}
+	
+	/* output useful information about address */
+	phpdbg_writeln(
+		"Stacked entered at %p in %s on line %lu",
+		EG(active_op_array)->opcodes, filename, lineno);
+	
+	zval_dtor(&fname);
+	zval_dtor(&exception);
+} /* }}} */
+
 static PHPDBG_COMMAND(run) /* {{{ */
 {
 	if (EG(in_execution)) {
@@ -441,16 +491,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 		} zend_end_try();
 
 		if (EG(exception)) {
-			phpdbg_error("Uncaught Exception !");
-			/*
-			* @TODO(anyone) something better !!
-			*/
-			zend_print_zval_r(
-				EG(exception), 0 TSRMLS_CC);
-
-			/* make sure this is dtor'd and reset */
-			zval_ptr_dtor(&EG(exception));
-			EG(exception) = NULL;
+			phpdbg_handle_exception(TSRMLS_C);
 		}
 
 		EG(active_op_array) = orig_op_array;
