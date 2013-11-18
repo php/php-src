@@ -401,23 +401,32 @@ int main(int argc, char **argv) /* {{{ */
 	size_t oplog_file_len;
 	zend_ulong flags;
 	char *php_optarg;
-    int php_optind;
-    int opt;
-    long cleaning = 0;
+    	int php_optind;
+    	int opt;
+    	long cleaning = 0;
 
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
 
 #ifdef PHP_WIN32
+	HWND console;
+	RECT consoleRect;
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
+	
+	console = GetConsoleWindow();
+	if (console) {
+		GetWindowRect(console, &consoleRect);
+		MoveWindow(
+			console, consoleRect.left, consoleRect.top, 800,600, TRUE);	
+	}
 #endif
 
 #ifdef ZTS
-    tsrm_startup(1, 1, 0, NULL);
+    	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
 #endif

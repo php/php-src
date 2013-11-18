@@ -596,7 +596,7 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 				phpdbg_writeln("\t%c -> %s", prompt_command->alias, prompt_command->name);
 				while (sub_command && sub_command->name) {
 					if (sub_command->alias) {
-						phpdbg_writeln("\t|------- %c -> %s\t%s", sub_command->alias,
+						phpdbg_writeln("\t|--- %c -> %s\t%s", sub_command->alias,
 							sub_command->name, sub_command->tip);
 					}
 					++sub_command;
