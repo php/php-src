@@ -53,6 +53,7 @@ static PHPDBG_COMMAND(clear);
 static PHPDBG_COMMAND(help);
 static PHPDBG_COMMAND(quiet);
 static PHPDBG_COMMAND(aliases);
+static PHPDBG_COMMAND(shell);
 static PHPDBG_COMMAND(oplog);
 static PHPDBG_COMMAND(quit); /* }}} */
 
@@ -78,6 +79,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
+	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
@@ -616,6 +618,26 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+static PHPDBG_COMMAND(shell)
+{
+	/* don't allow this to loop, ever ... */
+	switch (param->type) {
+		case STR_PARAM: {
+			FILE *fd = VCWD_POPEN(param->str, "w");
+			if (fd) {
+				/* do something perhaps ?? do we want input ?? */
+				fclose(fd);
+			} else {
+				phpdbg_error(
+					"Failed to execute %s", param->str);
+			}
+		} break;
+		
+		phpdbg_default_switch_case();
+	}
+	return SUCCESS;
+}
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
