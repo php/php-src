@@ -106,8 +106,22 @@ PHPDBG_INFO(vars) /* {{{ */
 					case IS_OBJECT:		phpdbg_write("(object)\t"); 	break;
 					case IS_NULL:		phpdbg_write("(null)\t"); 		break;
 				}
-			
-				if (Z_TYPE_PP(data) == IS_OBJECT) {
+				
+				if (Z_TYPE_PP(data) == IS_RESOURCE) {
+					int type;
+					
+					phpdbg_writeln(
+						"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+					if (zend_list_find(Z_RESVAL_PP(data), &type)) {
+						phpdbg_write(
+							"|-------(typeof)------> (%s)",
+							zend_rsrc_list_get_rsrc_type(type TSRMLS_CC));
+					} else {
+						phpdbg_write(
+							"|-------(typeof)------> (unknown)");
+					}
+					phpdbg_writeln(EMPTY);
+				} else if (Z_TYPE_PP(data) == IS_OBJECT) {
 					phpdbg_writeln(
 						"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
 					phpdbg_write(

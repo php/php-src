@@ -2,6 +2,8 @@
 if (isset($include))
 	include (sprintf("%s/web-bootstrap.php", dirname(__FILE__)));
 
+$stdout = fopen("php://stdout", "w+");
+
 class phpdbg {
     public function isGreat($greeting = null) {
         printf(
