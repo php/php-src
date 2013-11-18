@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - CLI server:
   . Added some MIME types to the CLI web server (Chris Jones)
+  . Implemented FR #65917 (getallheaders() is not supported by the built-in web
+    server) - also implements apache_response_headers() (Andrea Faulds)
 
 - Core:
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
