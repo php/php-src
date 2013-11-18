@@ -129,7 +129,7 @@ PHPDBG_HELP(print) /* {{{ */
 	    while (print_command && print_command->name) {
 			if (print_command->alias) {
 			    phpdbg_writeln("\t[%c]\t%s\t\t%s", print_command->alias, print_command->name, print_command->tip);
-			} else phpdbg_writeln("\t[-]\t%s\t\t%s", print_command->name, print_command->tip);
+			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", print_command->name, print_command->tip);
 			++print_command;
 		}
 	}
@@ -187,7 +187,7 @@ PHPDBG_HELP(break) /* {{{ */
 	    while (break_command && break_command->name) {
 			if (break_command->alias) {
 			    phpdbg_writeln("\t[%c]\t%s\t\t%s", break_command->alias, break_command->name, break_command->tip);
-			} else phpdbg_writeln("\t[-]\t%s\t\t%s", break_command->name, break_command->tip);
+			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", break_command->name, break_command->tip);
 			++break_command;
 		}
 	}
@@ -227,7 +227,7 @@ PHPDBG_HELP(info) /* {{{ */
 	    while (info_command && info_command->name) {
 			if (info_command->alias) {
 			    phpdbg_writeln("\t[%c]\t%s\t\t%s", info_command->alias, info_command->name, info_command->tip);
-			} else phpdbg_writeln("\t[-]\t%s\t\t%s", info_command->name, info_command->tip);
+			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", info_command->name, info_command->tip);
 			++info_command;
 		}
 	}
@@ -294,7 +294,7 @@ PHPDBG_HELP(list) /* {{{ */
 	    while (list_command && list_command->name) {
 			if (list_command->alias) {
 			    phpdbg_writeln("\t[%c]\t%s\t\t%s", list_command->alias, list_command->name, list_command->tip);
-			} else phpdbg_writeln("\t[-]\t%s\t\t%s", list_command->name, list_command->tip);
+			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", list_command->name, list_command->tip);
 			++list_command;
 		}
 	}
