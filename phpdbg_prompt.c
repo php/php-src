@@ -141,8 +141,8 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 
 					if (in_code) {
 						if (code == NULL) {
-							code = malloc(cmd_len);
-						} else code = realloc(code, code_len + cmd_len);
+							code = malloc(cmd_len + 1);
+						} else code = realloc(code, code_len + cmd_len + 1);
 
 						if (code) {
 							memcpy(
