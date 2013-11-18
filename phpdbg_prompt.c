@@ -302,25 +302,25 @@ static PHPDBG_COMMAND(until) /* {{{ */
 		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
-	
+
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
 	{
 		zend_uint next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 		zend_op  *opline = &EG(active_op_array)->opcodes[self];
-		
+
 		for (next = self; next < EG(active_op_array)->last; next++) {
 			if (EG(active_op_array)->opcodes[next].lineno != opline->lineno) {
 				zend_hash_index_update(
-					&PHPDBG_G(seek), 
-					(zend_ulong) &EG(active_op_array)->opcodes[next], 
+					&PHPDBG_G(seek),
+					(zend_ulong) &EG(active_op_array)->opcodes[next],
 					&EG(active_op_array)->opcodes[next],
 					sizeof(zend_op), NULL);
 				break;
 			}
 		}
 	}
-	
+
 	return PHPDBG_UNTIL;
 } /* }}} */
 
@@ -330,13 +330,12 @@ static PHPDBG_COMMAND(finish) /* {{{ */
 		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
-	
+
 	PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
 	{
 		zend_uint next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
-		zend_op  *opline = &EG(active_op_array)->opcodes[self];
-		
+
 		for (next = self; next < EG(active_op_array)->last; next++) {
 			switch (EG(active_op_array)->opcodes[next].opcode) {
 				case ZEND_RETURN:
@@ -346,15 +345,15 @@ static PHPDBG_COMMAND(finish) /* {{{ */
 				case ZEND_YIELD:
 #endif
 					zend_hash_index_update(
-						&PHPDBG_G(seek), 
-						(zend_ulong) &EG(active_op_array)->opcodes[next], 
+						&PHPDBG_G(seek),
+						(zend_ulong) &EG(active_op_array)->opcodes[next],
 						&EG(active_op_array)->opcodes[next],
 						sizeof(zend_op), NULL);
 				break;
 			}
 		}
 	}
-	
+
 	return PHPDBG_FINISH;
 } /* }}} */
 
@@ -364,13 +363,12 @@ static PHPDBG_COMMAND(leave) /* {{{ */
 		phpdbg_error("Not executing");
 		return SUCCESS;
 	}
-	
+
 	PHPDBG_G(flags) |= PHPDBG_IN_LEAVE;
 	{
 		zend_uint next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
-		zend_op  *opline = &EG(active_op_array)->opcodes[self];
-		
+
 		for (next = self; next < EG(active_op_array)->last; next++) {
 			switch (EG(active_op_array)->opcodes[next].opcode) {
 				case ZEND_RETURN:
@@ -380,15 +378,15 @@ static PHPDBG_COMMAND(leave) /* {{{ */
 				case ZEND_YIELD:
 #endif
 					zend_hash_index_update(
-						&PHPDBG_G(seek), 
-						(zend_ulong) &EG(active_op_array)->opcodes[next], 
+						&PHPDBG_G(seek),
+						(zend_ulong) &EG(active_op_array)->opcodes[next],
 						&EG(active_op_array)->opcodes[next],
 						sizeof(zend_op), NULL);
 				break;
 			}
 		}
 	}
-	
+
 	return PHPDBG_LEAVE;
 } /* }}} */
 
@@ -427,7 +425,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 		PHPDBG_G(flags) &= ~PHPDBG_SEEK_MASK;
 		zend_hash_clean(
 			&PHPDBG_G(seek));
-		
+
 		zend_try {
 			zend_execute(
 			    EG(active_op_array) TSRMLS_CC);
@@ -449,7 +447,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			*/
 			zend_print_zval_r(
 				EG(exception), 0 TSRMLS_CC);
-			
+
 			/* make sure this is dtor'd and reset */
 			zval_ptr_dtor(&EG(exception));
 			EG(exception) = NULL;
@@ -457,8 +455,8 @@ static PHPDBG_COMMAND(run) /* {{{ */
 
 		EG(active_op_array) = orig_op_array;
 	    EG(opline_ptr) = orig_opline;
-	    EG(return_value_ptr_ptr) = orig_retval_ptr;		
-				
+	    EG(return_value_ptr_ptr) = orig_retval_ptr;
+
 	} else {
 		phpdbg_error("Nothing to execute!");
 	}
@@ -633,7 +631,7 @@ static PHPDBG_COMMAND(shell)
 					"Failed to execute %s", param->str);
 			}
 		} break;
-		
+
 		phpdbg_default_switch_case();
 	}
 	return SUCCESS;
@@ -1099,7 +1097,7 @@ zend_vm_enter:
 		if (PHPDBG_G(flags) & PHPDBG_SEEK_MASK) {
 			/* current address */
 			zend_ulong address = (zend_ulong) execute_data->opline;
-								
+
 			/* run to next line */
 			if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
 				if (zend_hash_index_exists(&PHPDBG_G(seek), address)) {
@@ -1122,7 +1120,7 @@ zend_vm_enter:
 				/* skip possible breakpoints */
 				goto next;
 			}
-	
+
 			/* break for leave */
 			if (PHPDBG_G(flags) & PHPDBG_IN_LEAVE) {
 				if (zend_hash_index_exists(&PHPDBG_G(seek), address)) {
