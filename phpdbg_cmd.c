@@ -126,13 +126,11 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_l
 #endif
 	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
 
-	phpdbg_param_t *param = NULL;
-
 	while (command && command->name && command->handler) {
 		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
 			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
 
-			phpdbg_param_t lparam, 
+			phpdbg_param_t lparam,
 						   param;
 
 			phpdbg_parse_param(
@@ -141,7 +139,7 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_l
 				&param TSRMLS_CC);
 
 			lparam = PHPDBG_G(lparam);
-			
+
 			PHPDBG_G(lparam)	= param;
 			PHPDBG_G(lcmd)		= (phpdbg_command_t*) command;
 
@@ -161,7 +159,7 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_l
 			} else {
 				rc = command->handler(&param TSRMLS_CC);
 			}
-			
+
 			phpdbg_clear_param(&lparam TSRMLS_CC);
 			break;
 		}
