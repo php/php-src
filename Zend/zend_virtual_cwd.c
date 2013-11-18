@@ -299,7 +299,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	ALLOCA_FLAG(use_heap_large);
 
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
-		return stat(path, buf);
+		return zend_stat(path, buf);
 	}
 
 	if (path_len >= 1 && path[1] == ':') {
