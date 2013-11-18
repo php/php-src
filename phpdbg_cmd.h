@@ -75,7 +75,7 @@ struct _phpdbg_command_t {
 /**
  * Command Executor
  */
-int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_command_t**, char *, size_t TSRMLS_DC);
+int phpdbg_do_cmd(const phpdbg_command_t*, char *, size_t TSRMLS_DC);
 phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 void phpdbg_clear_param(phpdbg_param_t * TSRMLS_DC);
 const char* phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC);

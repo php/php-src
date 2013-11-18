@@ -114,9 +114,7 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-int phpdbg_do_cmd(	const phpdbg_command_t *command,
-					phpdbg_command_t **selected,
-					char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
+int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
 	int rc = FAILURE;
 
@@ -134,35 +132,26 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command,
 		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
 			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
 
-			param = emalloc(sizeof(phpdbg_param_t));
-
-			PHPDBG_G(last) = (phpdbg_command_t*) command;
-
-		    /* urm ... */
-			if (PHPDBG_G(lparam)) {
-		        //phpdbg_clear_param(
-		        //    PHPDBG_G(lparam) TSRMLS_CC);
-		        //efree(PHPDBG_G(lparam));
-			}
+			param = (phpdbg_param_t*) emalloc(sizeof(phpdbg_param_t));
 
 			phpdbg_parse_param(
 				expr,
 				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
 				param TSRMLS_CC);
 
-			PHPDBG_G(lparam) = param;
+			PHPDBG_G(lparam)	= param;
+			PHPDBG_G(lcmd)		= (phpdbg_command_t*) command;
+
+			/* avoid leaks */
+			zend_hash_next_index_insert(
+				&PHPDBG_G(params), (void**)&param, sizeof(phpdbg_param_t*), NULL);
 
 			if (command->subs && param->type == STR_PARAM) {
-				if (phpdbg_do_cmd(command->subs, selected, param->str, param->len TSRMLS_CC) == SUCCESS) {
+				if (phpdbg_do_cmd(command->subs, param->str, param->len TSRMLS_CC) == SUCCESS) {
 					rc = SUCCESS;
-					/* because we can */
-					phpdbg_clear_param(param TSRMLS_CC);
-					efree(param);
 					goto done;
 				}
 			}
-
-			*selected = (phpdbg_command_t*) command;
 
 			if (command->arg_type == REQUIRED_ARG && param->type == EMPTY_PARAM) {
 				phpdbg_error("This command requires argument!");
@@ -179,11 +168,5 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command,
 	}
 
 done:
-	if (selected && param) {
-		phpdbg_debug(
-			"phpdbg_do_cmd(%s, \"%s\"): %d",
-			command->name, phpdbg_get_param_type(param TSRMLS_CC), (rc==SUCCESS));
-	}
-
 	return rc;
 } /* }}} */
