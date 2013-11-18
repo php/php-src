@@ -60,7 +60,7 @@ static PHPDBG_COMMAND(quit); /* }}} */
 /* {{{ command declarations */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
-	PHPDBG_COMMAND_D(compile, "attempt to pre-compile execution context", 'c', NULL, 0),
+	PHPDBG_COMMAND_D(compile, "attempt compilation", 					  'c', NULL, 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 1),
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
@@ -789,11 +789,11 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_writeln("\t-d\t-dmemory_limit=4G\tSet a php.ini directive");
 			phpdbg_writeln("\t-n\t-N/A\t\t\tDisable default php.ini");
 			phpdbg_writeln("\t-e\t-emytest.php\t\tSet execution context");
-			phpdbg_writeln("\t-v\tN/A\t\t\tEnable opline output while executing");
+			phpdbg_writeln("\t-v\tN/A\t\t\tEnable oplog output");
 			phpdbg_writeln("\t-s\tN/A\t\t\tEnable stepping");
-			phpdbg_writeln("\t-b\tN/A\t\t\tDisable the use of colours");
-			phpdbg_writeln("\t-i\t-imy.init\t\tSet the phpdbginit file");
-			phpdbg_writeln("\t-I\tN/A\t\t\tDisable loading .phpdbginit");
+			phpdbg_writeln("\t-b\tN/A\t\t\tDisable colour");
+			phpdbg_writeln("\t-i\t-imy.init\t\tSet .phpdbginit file");
+			phpdbg_writeln("\t-I\tN/A\t\t\tIgnore default .phpdbginit");
 			phpdbg_writeln("\t-O\t-Omy.oplog\t\tSets oplog output file");
 			phpdbg_help_footer();
 		} break;

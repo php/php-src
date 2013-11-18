@@ -103,8 +103,8 @@ PHPDBG_HELP(compile) /* {{{ */
 PHPDBG_HELP(print) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("By default, print will show information about the current execution environment");
-	phpdbg_writeln("Other printing commands give access to address, file and line information");
+	phpdbg_writeln("By default, print will show information about the current execution context");
+	phpdbg_writeln("Other printing commands give access to instruction information");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%sprint class \\my\\class", PROMPT);
