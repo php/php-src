@@ -91,6 +91,10 @@
 #define PHPDBG_IS_COLOURED      (1<<11)
 #define PHPDBG_IS_CLEANING      (1<<12)
 
+#define PHPDBG_IN_UNTIL			(1<<13)
+#define PHPDBG_IN_FINISH		(1<<14)
+#define PHPDBG_IN_LEAVE			(1<<15)
+
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
 #else
@@ -113,6 +117,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_param_t   *lparam;           /* last param */
 	zend_ulong flags;                   /* phpdbg flags */
 	FILE *oplog;                        /* opline log */
+	zend_ulong seek;					/* seek opline */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 /* }}} */
 
