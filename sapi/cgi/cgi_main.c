@@ -1691,8 +1691,8 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if (!&SG(sapi_headers).headers) {
