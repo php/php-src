@@ -919,7 +919,7 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 }
 /* }}} */
 
-void zend_activate(TSRMLS_D) /* {{{ */
+ZEND_API void zend_activate(TSRMLS_D) /* {{{ */
 {
 #ifdef ZTS
 	virtual_cwd_activate(TSRMLS_C);
@@ -939,7 +939,7 @@ void zend_call_destructors(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_deactivate(TSRMLS_D) /* {{{ */
+ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(opline_ptr) = NULL;
