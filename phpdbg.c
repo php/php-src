@@ -259,7 +259,7 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 
 static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 {
-	fprintf(stderr, "%s\n", message);
+	phpdbg_error(message);
 }
 /* }}} */
 
@@ -368,10 +368,11 @@ const opt_struct OPTIONS[] = { /* {{{ */
 }; /* }}} */
 
 const char phpdbg_ini_hardcoded[] =
-	"html_errors=0\n"
-	"register_argc_argv=1\n"
-	"implicit_flush=1\n"
-	"output_buffering=0\n"
+	"html_errors=Off\n"
+	"register_argc_argv=On\n"
+	"implicit_flush=On\n"
+	"output_buffering=Off\n"
+	"display_errors=Off\n"
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
@@ -386,7 +387,6 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 {
     zval tmp;
 	INI_DEFAULT("report_zend_debug", "0");
-	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
 static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
