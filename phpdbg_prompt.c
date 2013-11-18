@@ -64,7 +64,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
 	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, 1),
-	PHPDBG_COMMAND_D(until,   "continue until reaches next line",         'u', NULL, 0),
+	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'f', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
@@ -593,17 +593,17 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 			if (prompt_command->subs) {
 				const phpdbg_command_t *sub_command = prompt_command->subs;
 				phpdbg_writeln(EMPTY);
-				phpdbg_writeln("\t%c -> %s", prompt_command->alias, prompt_command->name);
+				phpdbg_writeln(" %c -> %s", prompt_command->alias, prompt_command->name);
 				while (sub_command && sub_command->name) {
 					if (sub_command->alias) {
-						phpdbg_writeln("\t|------- %c -> %s\t%s", sub_command->alias,
+						phpdbg_writeln(" |-------- %c -> %s\t%s", sub_command->alias,
 							sub_command->name, sub_command->tip);
 					}
 					++sub_command;
 				}
 				phpdbg_writeln(EMPTY);
 			} else {
-				phpdbg_writeln("\t%c -> %s\t%s", prompt_command->alias,
+				phpdbg_writeln(" %c -> %s\t%s", prompt_command->alias,
 					prompt_command->name, prompt_command->tip);
 			}
 		}
