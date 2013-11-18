@@ -387,6 +387,24 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
+static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
+{
+    /* print blurb */
+	if (!cleaning) {
+		phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
+			PHPDBG_VERSION);
+		phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
+		phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+	} else {
+		phpdbg_notice("Clean Execution Environment");
+
+		phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
+		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
+		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
+		phpdbg_writeln("Includes\t\t%d",  zend_hash_num_elements(&EG(included_files)));
+	}
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -401,10 +419,9 @@ int main(int argc, char **argv) /* {{{ */
 	size_t oplog_file_len;
 	zend_ulong flags;
 	char *php_optarg;
-    	int php_optind;
-    	int opt;
-    	long cleaning = 0;
-
+	int php_optind;
+	int opt;
+	long cleaning = 0;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -416,132 +433,132 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
-	
+
 	console = GetConsoleWindow();
 	if (console) {
 		GetWindowRect(console, &consoleRect);
 		MoveWindow(
-			console, consoleRect.left, consoleRect.top, 800,600, TRUE);	
+			console, consoleRect.left, consoleRect.top, 800,600, TRUE);
 	}
 #endif
 
 #ifdef ZTS
-    	tsrm_startup(1, 1, 0, NULL);
+	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
 #endif
 
 phpdbg_main:
-    ini_entries = NULL;
-    ini_entries_len = 0;
-    exec = NULL;
-    exec_len = 0;
-    init_file = NULL;
-    init_file_len = 0;
-    init_file_default = 1;
-    oplog_file = NULL;
-    oplog_file_len = 0;
-    flags = PHPDBG_DEFAULT_FLAGS;
-    php_optarg = NULL;
-    php_optind = 1;
-    opt = 0;
+	ini_entries = NULL;
+	ini_entries_len = 0;
+	exec = NULL;
+	exec_len = 0;
+	init_file = NULL;
+	init_file_len = 0;
+	init_file_default = 1;
+	oplog_file = NULL;
+	oplog_file_len = 0;
+	flags = PHPDBG_DEFAULT_FLAGS;
+	php_optarg = NULL;
+	php_optind = 1;
+	opt = 0;
 
-    while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
-        switch (opt) {
-            case 'n':
-                phpdbg->php_ini_ignore = 1;
-            break;
-            case 'c':
-                if (phpdbg->php_ini_path_override) {
-                    free(phpdbg->php_ini_path_override);
-                }
-                phpdbg->php_ini_path_override = strdup(php_optarg);
-            break;
-            case 'd': {
-                int len = strlen(php_optarg);
-			    char *val;
+	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
+		switch (opt) {
+			case 'n':
+				phpdbg->php_ini_ignore = 1;
+			break;
+			case 'c':
+				if (phpdbg->php_ini_path_override) {
+					free(phpdbg->php_ini_path_override);
+				}
+				phpdbg->php_ini_path_override = strdup(php_optarg);
+			break;
+			case 'd': {
+				int len = strlen(php_optarg);
+				char *val;
 
-			    if ((val = strchr(php_optarg, '='))) {
-				    val++;
-				    if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-					    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
-					    memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-					    ini_entries_len += (val - php_optarg);
-					    memcpy(ini_entries + ini_entries_len, "\"", 1);
-					    ini_entries_len++;
-					    memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-					    ini_entries_len += len - (val - php_optarg);
-					    memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
-					    ini_entries_len += sizeof("\n\0\"") - 2;
-				    } else {
-					    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
-					    memcpy(ini_entries + ini_entries_len, php_optarg, len);
-					    memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
-					    ini_entries_len += len + sizeof("\n\0") - 2;
-				    }
-			    } else {
-				    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
-				    memcpy(ini_entries + ini_entries_len, php_optarg, len);
-				    memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
-				    ini_entries_len += len + sizeof("=1\n\0") - 2;
-			    }
-            } break;
-            case 'z':
-                zend_load_extension(php_optarg);
-            break;
+				if ((val = strchr(php_optarg, '='))) {
+					val++;
+					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+						memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
+						ini_entries_len += (val - php_optarg);
+						memcpy(ini_entries + ini_entries_len, "\"", 1);
+						ini_entries_len++;
+						memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
+						ini_entries_len += len - (val - php_optarg);
+						memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
+						ini_entries_len += sizeof("\n\0\"") - 2;
+					} else {
+						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+						memcpy(ini_entries + ini_entries_len, php_optarg, len);
+						memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+						ini_entries_len += len + sizeof("\n\0") - 2;
+					}
+				} else {
+					ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+					memcpy(ini_entries + ini_entries_len, php_optarg, len);
+					memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
+					ini_entries_len += len + sizeof("=1\n\0") - 2;
+				}
+			} break;
+			case 'z':
+				zend_load_extension(php_optarg);
+			break;
 
-            /* begin phpdbg options */
+			/* begin phpdbg options */
 
-            case 'e': { /* set execution context */
-                exec_len = strlen(php_optarg);
-                if (exec_len) {
-                    exec = strdup(php_optarg);
-                }
-            } break;
+			case 'e': { /* set execution context */
+				exec_len = strlen(php_optarg);
+				if (exec_len) {
+					exec = strdup(php_optarg);
+				}
+			} break;
 
-            case 'I': { /* ignore .phpdbginit */
-                init_file_default = 0;
-            } break;
+			case 'I': { /* ignore .phpdbginit */
+				init_file_default = 0;
+			} break;
 
-            case 'i': { /* set init file */
-                init_file_len = strlen(php_optarg);
-                if (init_file_len) {
-                    init_file = strdup(php_optarg);
-                }
-            } break;
+			case 'i': { /* set init file */
+				init_file_len = strlen(php_optarg);
+				if (init_file_len) {
+					init_file = strdup(php_optarg);
+				}
+			} break;
 
-            case 'O': { /* set oplog output */
-                oplog_file_len = strlen(php_optarg);
-                if (oplog_file_len) {
-                    oplog_file = strdup(php_optarg);
-                }
-            } break;
+			case 'O': { /* set oplog output */
+				oplog_file_len = strlen(php_optarg);
+				if (oplog_file_len) {
+					oplog_file = strdup(php_optarg);
+				}
+			} break;
 
-            case 'v': /* set quietness off */
-                flags &= ~PHPDBG_IS_QUIET;
-            break;
+			case 'v': /* set quietness off */
+				flags &= ~PHPDBG_IS_QUIET;
+			break;
 
-            case 's': /* set stepping on */
-                flags |= PHPDBG_IS_STEPPING;
-            break;
+			case 's': /* set stepping on */
+				flags |= PHPDBG_IS_STEPPING;
+			break;
 
-            case 'b': /* set colours off */
-                flags &= ~PHPDBG_IS_COLOURED;
-            break;
-        }
-    }
+			case 'b': /* set colours off */
+				flags &= ~PHPDBG_IS_COLOURED;
+			break;
+		}
+	}
 
-    phpdbg->ini_defaults = phpdbg_ini_defaults;
+	phpdbg->ini_defaults = phpdbg_ini_defaults;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
 
 	sapi_startup(phpdbg);
 
-    phpdbg->executable_location = argv[0];
-    phpdbg->phpinfo_as_text = 1;
-    phpdbg->php_ini_ignore = 0;
+	phpdbg->executable_location = argv[0];
+	phpdbg->phpinfo_as_text = 1;
+	phpdbg->php_ini_ignore = 0;
 
-    if (ini_entries) {
+	if (ini_entries) {
 		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
 		memmove(ini_entries + sizeof(phpdbg_ini_hardcoded) - 2, ini_entries, ini_entries_len + 1);
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded) - 2);
@@ -551,7 +568,7 @@ phpdbg_main:
 	}
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
 
-    phpdbg->ini_entries = ini_entries;
+	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
@@ -572,14 +589,14 @@ phpdbg_main:
             free(exec);
         }
 
-        if (oplog_file) { /* open oplog */
-            PHPDBG_G(oplog) = fopen(oplog_file, "w+");
-            if (!PHPDBG_G(oplog)) {
-                phpdbg_error(
-                    "Failed to open oplog %s", oplog_file);
-            }
-            free(oplog_file);
-        }
+		if (oplog_file) { /* open oplog */
+			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
+			if (!PHPDBG_G(oplog)) {
+				phpdbg_error(
+				"Failed to open oplog %s", oplog_file);
+			}
+			free(oplog_file);
+		}
 
         /* set flags from command line */
         PHPDBG_G(flags) = flags;

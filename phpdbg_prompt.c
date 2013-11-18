@@ -67,7 +67,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'f', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
-	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 1),
+	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
 	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, 2),
@@ -176,24 +176,6 @@ next_line:
 		if (!init_default) {
 			free(init_file);
 		}
-	}
-} /* }}} */
-
-void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
-{
-    /* print blurb */
-	if (!cleaning) {
-		phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
-			PHPDBG_VERSION);
-		phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
-		phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
-	} else {
-		phpdbg_notice("Clean Execution Environment");
-
-		phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-		phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
 	}
 } /* }}} */
 
@@ -771,7 +753,6 @@ static PHPDBG_COMMAND(list) /* {{{ */
 
 		case METHOD_PARAM:
 		    return PHPDBG_LIST_HANDLER(method)(param TSRMLS_CC);
-			break;
 
 		phpdbg_default_switch_case();
     }
@@ -894,8 +875,7 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 		PHPDBG_G(ops) = NULL;
 	}
 
-	if (full)
-	{
+	if (full) {
 		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 
 		zend_bailout();
