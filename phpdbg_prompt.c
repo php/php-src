@@ -736,7 +736,6 @@ static PHPDBG_COMMAND(list) /* {{{ */
 
 		case METHOD_PARAM:
 		    return PHPDBG_LIST_HANDLER(method)(param TSRMLS_CC);
-			break;
 
 		phpdbg_default_switch_case();
     }
