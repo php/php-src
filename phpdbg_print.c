@@ -41,10 +41,10 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 {
     switch (method->type) {
         case ZEND_USER_FUNCTION: {
-            zend_op_array* op_array = &method->op_array;
+            zend_op_array* op_array = &(method->op_array);
 
             if (op_array) {
-                zend_op     *opline = &op_array->opcodes[0];
+                zend_op     *opline = &(op_array->opcodes[0]);
                 zend_uint   opcode = 0,
                             end =  op_array->last-1;
 
@@ -58,7 +58,8 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                 } else {
                     phpdbg_writeln(
                         "\t#%d-%d %s() %s",
-                        op_array->line_start, op_array->line_end,
+                        method->common.function_name ? op_array->line_start : 0, 
+                        method->common.function_name ? op_array->line_end : 0,
                         method->common.function_name ? method->common.function_name : "{main}",
                         op_array->filename ? op_array->filename : "unknown");
                 }
