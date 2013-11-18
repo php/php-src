@@ -1,5 +1,7 @@
 --TEST--
 Bug #65768: date_diff accepts only DateTime instance even though docs say about DateTimeInterface
+--INI--
+date.timezone=Europe/London
 --FILE--
 <?php
 
