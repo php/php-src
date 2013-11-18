@@ -508,7 +508,7 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(char *regex, pcre_extra **extra, int *pr
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, zend_str_size_int len, long offset, char *name)
+static inline void add_offset_pair(zval *result, char *str, zend_str_size_int len, php_int_t offset, char *name)
 {
 	zval *match_pair;
 
@@ -557,7 +557,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 
 /* {{{ php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, zend_str_size_int subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC)
+	zval *subpats, int global, int use_flags, php_int_t flags, php_int_t start_offset TSRMLS_DC)
 {
 	zval			*result_set,		/* Holds a set of subpatterns after
 										   a global match */
@@ -577,6 +577,16 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 	int				 i, rc;
 	int				 subpats_order;		/* Order of subpattern matches */
 	int				 offset_capture;    /* Capture match offsets: yes/no */
+
+	if (subject_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
+		RETURN_FALSE;
+	}
+
+	if (start_offset > INT_MAX-1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start offset is too big");
+		RETURN_FALSE;
+	}
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
@@ -656,7 +666,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
+		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -754,8 +764,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				offsets[0] = start_offset;
-				offsets[1] = start_offset + 1;
+				offsets[0] = (int)start_offset;
+				offsets[1] = (int)start_offset + 1;
 			} else
 				break;
 		} else {
@@ -1033,6 +1043,16 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_st
 					 walk_last;			/* Last walked character */
 	int				 rc;
 
+	if (subject_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
+		return NULL;
+	}
+
+	if (Z_STRSIZE_P(replace_val) > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
+		return NULL;
+	}
+
 	if (extra == NULL) {
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
@@ -1088,7 +1108,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_st
 	
 	while (1) {
 		/* Execute the regular expression. */
-		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
+		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -1113,7 +1133,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_st
 			
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
-				eval_result_len = preg_do_eval(replace, replace_len, subject,
+				eval_result_len = preg_do_eval(replace, (int)replace_len, subject,
 											   offsets, count, &eval_result TSRMLS_CC);
 				new_len += eval_result_len;
 			} else if (is_callable_replace) {
@@ -1375,7 +1395,11 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	SEPARATE_ZVAL(subject);
 
 	if (ZEND_NUM_ARGS() > 3) {
-		limit_val = limit;
+		if (limit > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "limit is too big");
+			RETURN_FALSE;
+		}
+		limit_val = (int)limit;
 	}
 		
 	if (Z_TYPE_PP(regex) != IS_ARRAY)
@@ -1483,7 +1507,7 @@ static PHP_FUNCTION(preg_split)
 /* {{{ php_pcre_split
  */
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, zend_str_size_int subject_len, zval *return_value,
-	long limit_val, long flags TSRMLS_DC)
+	php_int_t limit_val, php_int_t flags TSRMLS_DC)
 {
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
@@ -1501,6 +1525,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 	int				 no_empty;			/* If NO_EMPTY flag is set */
 	int				 delim_capture; 	/* If delimiters should be captured */
 	int				 offset_capture;	/* If offsets should be captured */
+
+	if (subject_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
+		RETURN_FALSE;
+	}
 
 	no_empty = flags & PREG_SPLIT_NO_EMPTY;
 	delim_capture = flags & PREG_SPLIT_DELIM_CAPTURE;
@@ -1538,7 +1567,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
 		count = pcre_exec(pce->re, extra, subject,
-						  subject_len, start_offset,
+						  (int)subject_len, start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -1602,7 +1631,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, zend_str_s
 						}
 					}
 					count = pcre_exec(re_bump, extra_bump, subject,
-							  subject_len, start_offset,
+							  (int)subject_len, start_offset,
 							  exoptions, offsets, size_offsets);
 					if (count < 1) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
@@ -1761,7 +1790,7 @@ static PHP_FUNCTION(preg_grep)
 }
 /* }}} */
 
-PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, long flags TSRMLS_DC) /* {{{ */
+PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, php_int_t flags TSRMLS_DC) /* {{{ */
 {
 	zval		   **entry;				/* An entry in the input array */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
@@ -1808,9 +1837,15 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			convert_to_string(&subject);
 		}
 
+		if (Z_STRSIZE(subject) > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
+			zend_hash_move_forward(Z_ARRVAL_P(input));
+			continue;
+		}
+
 		/* Perform the match */
 		count = pcre_exec(pce->re, extra, Z_STRVAL(subject),
-						  Z_STRSIZE(subject), 0,
+						  (int)Z_STRSIZE(subject), 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */

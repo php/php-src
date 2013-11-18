@@ -55,16 +55,16 @@ typedef struct {
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, zend_str_size_int regex_len TSRMLS_DC);
 
 PHPAPI void  php_pcre_match_impl(  pcre_cache_entry *pce, char *subject, zend_str_size_int subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC);
+	zval *subpats, int global, int use_flags, php_int_t flags, php_int_t start_offset TSRMLS_DC);
 
 PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_str_size_int subject_len, zval *return_value, 
 	int is_callable_replace, zend_str_size_int *result_len, int limit, int *replace_count TSRMLS_DC);
 
 PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, char *subject, zend_str_size_int subject_len, zval *return_value,
-	long limit_val, long flags TSRMLS_DC);
+	php_int_t limit_val, php_int_t flags TSRMLS_DC);
 
 PHPAPI void  php_pcre_grep_impl(   pcre_cache_entry *pce, zval *input, zval *return_value,
-	long flags TSRMLS_DC);
+	php_int_t flags TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
