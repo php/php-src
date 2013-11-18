@@ -858,8 +858,7 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 		PHPDBG_G(ops) = NULL;
 	}
 
-	if (full)
-	{
+	if (full) {
 		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 
 		zend_bailout();
