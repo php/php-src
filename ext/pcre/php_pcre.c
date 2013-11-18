@@ -1048,11 +1048,6 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_st
 		return NULL;
 	}
 
-	if (Z_STRSIZE_P(replace_val) > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Subject is too long");
-		return NULL;
-	}
-
 	if (extra == NULL) {
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
@@ -1069,6 +1064,10 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, zend_st
 	} else {
 		replace = Z_STRVAL_P(replace_val);
 		replace_len = Z_STRSIZE_P(replace_val);
+		if (replace_len > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Replacement is too long");
+			return NULL;
+		}
 		replace_end = replace + replace_len;
 	}
 
