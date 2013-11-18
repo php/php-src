@@ -447,6 +447,10 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			*/
 			zend_print_zval_r(
 				EG(exception), 0 TSRMLS_CC);
+			
+			/* make sure this is dtor'd and reset */
+			zval_ptr_dtor(&EG(exception));
+			EG(exception) = NULL;
 		}
 
 		EG(active_op_array) = orig_op_array;
