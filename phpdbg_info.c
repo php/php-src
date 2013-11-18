@@ -81,7 +81,7 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	phpdbg_notice("Variables: %d",
 		zend_hash_num_elements(&vars));
-	phpdbg_writeln("Addr\t\tRefs\tName");
+	phpdbg_writeln("Address\t\tRefs\tType\t\tName");
 
 	for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
 		zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
@@ -91,20 +91,34 @@ PHPDBG_INFO(vars) /* {{{ */
 		zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
 
 		if (*data) {
-			phpdbg_writeln(
-			"%p\t%d\t%s$%s",
+			phpdbg_write(
+			"%p\t%d\t",
 				*data,
-				Z_REFCOUNT_PP(data),
-				Z_ISREF_PP(data) ? "&" : "", var);
+				Z_REFCOUNT_PP(data));
 			
-			phpdbg_write("|---> ");
-			if (Z_TYPE_PP(data) != IS_NULL) {
-				zend_print_flat_zval_r(*data TSRMLS_CC);
-			} else phpdbg_write("(null)");
-			phpdbg_writeln(EMPTY);
+			switch (Z_TYPE_PP(data)) {
+				case IS_STRING: 	phpdbg_write("(string)\t"); 	break;
+				case IS_LONG: 		phpdbg_write("(integer)\t"); 	break;
+				case IS_DOUBLE: 	phpdbg_write("(float)\t"); 		break;
+				case IS_RESOURCE:	phpdbg_write("(resource)\t"); 	break;
+				case IS_ARRAY:		phpdbg_write("(array)\t"); 		break;
+				case IS_OBJECT:		phpdbg_write("(object)\t"); 	break;
+				case IS_NULL:		phpdbg_write("(null)\t"); 		break;
+			}
+			
+			if (Z_TYPE_PP(data) == IS_OBJECT) {
+				phpdbg_writeln(
+					"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+				phpdbg_write(
+					"|-----(instanceof)----> (%s)", Z_OBJCE_PP(data)->name);
+				phpdbg_writeln(EMPTY);
+			} else {
+				phpdbg_write(
+					"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+			}
 		} else {
 			phpdbg_write(
-				"n/a\tn/a\t$%s", var);
+				"n/a\tn/a\tn/a\t$%s", var);
 		}
 		phpdbg_writeln(EMPTY);
 	}
