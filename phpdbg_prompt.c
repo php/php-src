@@ -340,6 +340,9 @@ static PHPDBG_COMMAND(finish) /* {{{ */
 				case ZEND_RETURN:
 				case ZEND_THROW:
 				case ZEND_EXIT:
+#ifdef ZEND_YIELD
+				case ZEND_YIELD:
+#endif
 					zend_hash_index_update(
 						&PHPDBG_G(seek), 
 						(zend_ulong) &EG(active_op_array)->opcodes[next], 
@@ -371,6 +374,9 @@ static PHPDBG_COMMAND(leave) /* {{{ */
 				case ZEND_RETURN:
 				case ZEND_THROW:
 				case ZEND_EXIT:
+#ifdef ZEND_YIELD
+				case ZEND_YIELD:
+#endif
 					zend_hash_index_update(
 						&PHPDBG_G(seek), 
 						(zend_ulong) &EG(active_op_array)->opcodes[next], 

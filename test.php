@@ -30,7 +30,8 @@ $test = 1;
 var_dump(
     $dbg->isGreat("PHP Rocks !!"));
 
-test();
+foreach (test() as $gen)
+	continue;
 
 echo "it works!\n";
 
