@@ -65,8 +65,7 @@ PHPDBG_INFO(vars) /* {{{ */
 		}
 	}
 
-	phpdbg_notice("Variables: %d",
-		zend_hash_num_elements(EG(active_symbol_table)));
+	phpdbg_notice("Variables");
 
 	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
 	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
