@@ -91,12 +91,14 @@ PHPDBG_INFO(vars) /* {{{ */
 		zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
 		
 		if (*data) {
-			phpdbg_write(
-			"%d\t%s$%s\t\t",
+			phpdbg_writeln(
+			"%d\t%s$%s",
 				Z_REFCOUNT_PP(data),
 				Z_ISREF_PP(data) ? "&" : "", var);
-	
+			phpdbg_write(
+			"|-----> ");
 			zend_print_flat_zval_r(*data TSRMLS_CC);
+			phpdbg_writeln(EMPTY);
 		} else {
 			phpdbg_write("0\t$%s", var);
 		}
