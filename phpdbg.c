@@ -419,10 +419,9 @@ int main(int argc, char **argv) /* {{{ */
 	size_t oplog_file_len;
 	zend_ulong flags;
 	char *php_optarg;
-    	int php_optind;
-    	int opt;
-    	long cleaning = 0;
-
+	int php_optind;
+	int opt;
+	long cleaning = 0;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
