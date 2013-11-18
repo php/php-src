@@ -43,6 +43,7 @@ PHPDBG_HELP(step) /* {{{ */
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
     phpdbg_writeln("\t%sstepping 1", PROMPT);
+    phpdbg_writeln("\t%ss 1", PROMPT);
     phpdbg_writeln("Will enable stepping");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
@@ -53,8 +54,14 @@ PHPDBG_HELP(step) /* {{{ */
 PHPDBG_HELP(next) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_write("While stepping through execution, or after a breakpoint, ");
-	phpdbg_writeln("use the next command to step back into the vm and execute the next opcode");
+	phpdbg_write("Step back into the vm and execute the next opcode");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Examples:");
+    phpdbg_writeln("\t%snext", PROMPT);
+    phpdbg_writeln("\t%sn", PROMPT);
+    phpdbg_writeln("Will cause control to be passed back to the vm, continuing execution");
+    phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: is only useful while executing");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -62,8 +69,14 @@ PHPDBG_HELP(next) /* {{{ */
 PHPDBG_HELP(until) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_write("While stepping through execution, or after a breakpoint, ");
-	phpdbg_writeln("use the until command to step back into the vm and reaches the next source line");
+	phpdbg_writeln("Step back into the vm, skipping breakpoints until the next source line");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Examples:");
+    phpdbg_writeln("\t%suntil", PROMPT);
+    phpdbg_writeln("\t%su", PROMPT);
+    phpdbg_writeln("Will cause control to be passed back to the vm, continuing execution");
+    phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: is only useful while executing");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -71,8 +84,13 @@ PHPDBG_HELP(until) /* {{{ */
 PHPDBG_HELP(finish) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_write("While stepping through execution, or after a breakpoint, ");
-	phpdbg_writeln("use the finish command to step back into the vm and continue until the current scope has returned");
+	phpdbg_writeln("Step back into the vm, skipping breakpoints until past the end of the current stack");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Examples:");
+    phpdbg_writeln("\t%sfinish", PROMPT);
+    phpdbg_writeln("\t%sf", PROMPT);
+    phpdbg_writeln("Will cause control to be passed back to the vm, continuing execution");
+    phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: this allows all breakpoints that would otherwise break execution in the current scope to be skipped");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -81,9 +99,14 @@ PHPDBG_HELP(finish) /* {{{ */
 PHPDBG_HELP(leave) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_write("While stepping through execution, or after a breakpoint, ");
-	phpdbg_writeln("use the finish command to step back into the vm and continue until the current scope is returning");
-	phpdbg_writeln("Note: this allows inspection of the return value from any scope before it is returned");
+	phpdbg_writeln("Step back into the vm, skipping breakpoints until the current stack is returning");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%sleave", PROMPT);
+	phpdbg_writeln("\t%sL", PROMPT);
+	phpdbg_writeln("Will cause a break when instructed to leave the current context");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: this allows inspection of the return value before it is returned");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -91,11 +114,15 @@ PHPDBG_HELP(leave) /* {{{ */
 PHPDBG_HELP(compile) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed");
+	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect opcodes before execution");
 	phpdbg_writeln("The execution context must be set for compilation to succeed");
-	phpdbg_writeln("If errors occur during compilation they must be resolved before execution can take place");
-	phpdbg_writeln("It is a good idea to clean the environment between each compilation with the clean command");
-	phpdbg_writeln("You do not need to exit phpdbg to retry compilation");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%scompile", PROMPT);
+	phpdbg_writeln("\t%sc", PROMPT);
+	phpdbg_writeln("Will compile the current execution context, populating class/function/constant/etc tables");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: It is a good idea to clean the environment between each compilation");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -108,17 +135,26 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%sprint class \\my\\class", PROMPT);
+	phpdbg_writeln("\t%sp c \\my\\class", PROMPT);
 	phpdbg_writeln("Will print the instructions for the methods in \\my\\class");
 	phpdbg_writeln("\t%sprint method \\my\\class::method", PROMPT);
+	phpdbg_writeln("\t%sp m \\my\\class::method", PROMPT);
 	phpdbg_writeln("Will print the instructions for \\my\\class::method");
 	phpdbg_writeln("\t%sprint func .getSomething", PROMPT);
-	phpdbg_writeln("Will print the instructions for ::getSomething in the currently active scope");
+	phpdbg_writeln("\t%sp f .getSomething", PROMPT);
+	phpdbg_writeln("Will print the instructions for ::getSomething in the active scope");
 	phpdbg_writeln("\t%sprint func my_function", PROMPT);
+	phpdbg_writeln("\t%sp f my_function", PROMPT);
 	phpdbg_writeln("Will print the instructions for the global function my_function");
 	phpdbg_writeln("\t%sprint opline", PROMPT);
+	phpdbg_writeln("\t%sp o", PROMPT);
 	phpdbg_writeln("Will print the instruction for the current opline");
 	phpdbg_writeln("\t%sprint exec", PROMPT);
+	phpdbg_writeln("\t%sp e", PROMPT);
 	phpdbg_writeln("Will print the instructions for the execution context");
+	phpdbg_writeln("\t%sprint stack", PROMPT);
+	phpdbg_writeln("\t%sp s", PROMPT);
+	phpdbg_writeln("Will print the instructions for the current stack");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Specific printers loaded are show below:");
 	phpdbg_notice("Commands");
@@ -140,8 +176,14 @@ PHPDBG_HELP(print) /* {{{ */
 PHPDBG_HELP(run) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("Run the code inside the debug vm, you should have break points and variables set before running");
-	phpdbg_writeln("The execution context must not be set, but not necessarily compiled before execution occurs");
+	phpdbg_writeln("Execute the current context inside the phpdbg vm");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%srun", PROMPT);
+	phpdbg_writeln("\t%sr", PROMPT);
+	phpdbg_writeln("Will cause execution of the context, if it is set.");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: The execution context must be set, but not necessarily compiled before execution occurs");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -150,7 +192,16 @@ PHPDBG_HELP(eval) /* {{{ */
 {
     phpdbg_help_header();
 	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
-	phpdbg_writeln("Note: When using eval in phpdbg do not prefix the code with return");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%seval $variable", PROMPT);
+	phpdbg_writeln("\t%sE $variable", PROMPT);
+	phpdbg_writeln("Will print_r($variable) on the console, if it is defined");
+	phpdbg_writeln("\t%seval $variable = \"Hello phpdbg :)\"", PROMPT);
+	phpdbg_writeln("\t%sE $variable = \"Hello phpdbg :)\"", PROMPT);
+	phpdbg_writeln("Will set $variable in the current scope");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: eval() will always show the result; do not prefix the code with \"return\"");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -175,8 +226,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("Will break when the condition evaluates to true");
 	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
-	phpdbg_writeln("It is important to note, an address is only valid for the current compiled representation of the script");
-	phpdbg_writeln("If you have to clean the environment and recompile then your opline break points will be invalid");
+	phpdbg_writeln("Note: An address is only valid for the current compilation");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Specific breakers loaded are show below:");
 	phpdbg_notice("Commands");
@@ -191,7 +241,7 @@ PHPDBG_HELP(break) /* {{{ */
 			++break_command;
 		}
 	}
-	phpdbg_writeln("Conditional breaks are costly, use them sparingly !!");
+	phpdbg_writeln("Note: Conditional breaks are costly, use them sparingly !");
     phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -200,6 +250,7 @@ PHPDBG_HELP(clean) /* {{{ */
 {
     phpdbg_help_header();
     phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions");
+    
     phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg");
     phpdbg_help_footer();
     return SUCCESS;
@@ -209,7 +260,8 @@ PHPDBG_HELP(clear) /* {{{ */
 {
     phpdbg_help_header();
     phpdbg_writeln("Clearing breakpoints means you can once again run code without interruption");
-    phpdbg_writeln("Careful though, all breakpoints are lost; be sure debugging is complete before clearing");
+    
+    phpdbg_writeln("Note: all breakpoints are lost; be sure debugging is complete before clearing");
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
@@ -243,11 +295,13 @@ PHPDBG_HELP(quiet) /* {{{ */
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
     phpdbg_writeln("\t%squiet 1", PROMPT);
+    phpdbg_writeln("\t%sQ 1", PROMPT);
     phpdbg_writeln("Will silence OPLINE output, while");
     phpdbg_writeln("\t%squiet 0", PROMPT);
+    phpdbg_writeln("\t%sQ 0", PROMPT);
     phpdbg_writeln("Will enable OPLINE output again");
     phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Quietness is disabled while stepping through execution automatically");
+    phpdbg_writeln("Note: Quietness is disabled automatically while stepping");
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
@@ -255,12 +309,15 @@ PHPDBG_HELP(quiet) /* {{{ */
 PHPDBG_HELP(back) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality");
+	phpdbg_writeln("The backtrace is gathered with the default debug backtrace functionality");
     phpdbg_writeln(EMPTY);
     phpdbg_writeln("Examples:");
 	phpdbg_writeln("You can set the limit on the trace");
 	phpdbg_writeln("\t%sback 5", PROMPT);
+	phpdbg_writeln("\t%st 5", PROMPT);
 	phpdbg_writeln("Will limit the number of frames to 5, the default is no limit");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: it is not necessary for an exception to be thrown to show a backtrace");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -272,14 +329,19 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Examples:");
 	phpdbg_writeln("\t%slist [lines] 2", PROMPT);
+	phpdbg_writeln("\t%sl [l] 2", PROMPT);
 	phpdbg_writeln("Will print next 2 lines from the current file");
 	phpdbg_writeln("\t%slist [func] my_function", PROMPT);
+	phpdbg_writeln("\t%sl [f] my_function", PROMPT);
 	phpdbg_writeln("Will print the source of the global function \"my_function\"");
 	phpdbg_writeln("\t%slist [func] .mine", PROMPT);
-	phpdbg_writeln("Will print the source of the method \"mine\" from the currently active scope");
+	phpdbg_writeln("\t%sl [f] .mine", PROMPT);
+	phpdbg_writeln("Will print the source of the method \"mine\" from the active scope");
 	phpdbg_writeln("\t%slist [method] my::method", PROMPT);
+	phpdbg_writeln("\t%sl [m] my::method", PROMPT);
 	phpdbg_writeln("Will print the source of \"my::method\"");
-	phpdbg_writeln("\t%slist [class] myClass", PROMPT);
+	phpdbg_writeln("\t%slist c myClass", PROMPT);
+	phpdbg_writeln("\t%sl c myClass", PROMPT);
 	phpdbg_writeln("Will print the source of \"myClass\"");
 	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
@@ -309,10 +371,12 @@ PHPDBG_HELP(oplog) /* {{{ */
     phpdbg_writeln("Setting a new oplog closes the previously open log");
     phpdbg_writeln("The log includes a high resolution timestamp on each entry");
 	phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Example:");
+    phpdbg_writeln("Examples:");
     phpdbg_writeln("\t%soplog /path/to/my.oplog", PROMPT);
+    phpdbg_writeln("\t%sO /path/to/my.oplog", PROMPT);
     phpdbg_writeln("Will open the file /path/to/my.oplog for writing, creating it if it does not exist");
     phpdbg_writeln("\t%soplog 0", PROMPT);
+    phpdbg_writeln("\t%sO 0", PROMPT);
     phpdbg_writeln("Will close the currently open log file, disabling oplog");
 	phpdbg_writeln(EMPTY);
     phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
@@ -325,7 +389,8 @@ PHPDBG_HELP(shell) /* {{{ */
 	phpdbg_help_header();
     phpdbg_writeln("Direct access to shell commands saves having to switch windows/consoles");
 	phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Example:");
+    phpdbg_writeln("Examples:");
+	phpdbg_writeln("\t%sshell ls /usr/src/php-src", PROMPT);
     phpdbg_writeln("\t%s- ls /usr/src/php-src", PROMPT);
     phpdbg_writeln("Will execute ls /usr/src/php-src, displaying the output in the console");
 	phpdbg_writeln(EMPTY);

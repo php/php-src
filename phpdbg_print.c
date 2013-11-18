@@ -107,6 +107,24 @@ PHPDBG_PRINT(exec) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+PHPDBG_PRINT(stack) /* {{{ */
+{
+    if (EG(in_execution)) {
+        if (PHPDBG_G(ops)) {
+        	/* @TODO(anyone) make this better */
+            phpdbg_notice(
+                "Stack in %s", zend_get_executed_filename(TSRMLS_C));
+
+            phpdbg_print_function_helper(
+            	(zend_function*) EG(active_op_array) TSRMLS_CC);
+        }
+    } else {
+        phpdbg_error("Not Executing!");
+    }
+
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_PRINT(class) /* {{{ */
 {
     zend_class_entry **ce;
