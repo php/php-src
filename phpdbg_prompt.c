@@ -435,7 +435,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
 		    EG(return_value_ptr_ptr) = orig_retval_ptr;
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-				phpdbg_error("Caught excetion in VM");
+				phpdbg_error("Caught exit/error from VM");
 				goto out;
 			}
 		} zend_end_try();
