@@ -179,24 +179,6 @@ next_line:
 	}
 } /* }}} */
 
-void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
-{
-    /* print blurb */
-	if (!cleaning) {
-		phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
-			PHPDBG_VERSION);
-		phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
-		phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
-	} else {
-		phpdbg_notice("Clean Execution Environment");
-
-		phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-		phpdbg_writeln("Includes\t\t%d", zend_hash_num_elements(&EG(included_files)));
-	}
-} /* }}} */
-
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
 	switch (param->type) {
