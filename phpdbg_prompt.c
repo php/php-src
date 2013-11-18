@@ -326,7 +326,18 @@ static PHPDBG_COMMAND(finish) /* {{{ */
 	}
 	
 	PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
-	PHPDBG_G(seek) = (zend_ulong) &(EG(active_op_array)->opcodes[EG(active_op_array)->last-2]);
+	{
+		zend_uint next = 0,
+				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
+		zend_op  *opline = &EG(active_op_array)->opcodes[self];
+		
+		for (next = self; next < EG(active_op_array)->last; next++) {
+			if (EG(active_op_array)->opcodes[next].opcode == ZEND_RETURN) {
+				PHPDBG_G(seek) = (zend_ulong) &EG(active_op_array)->opcodes[next];
+				break;
+			}
+		}
+	}
 	
 	return PHPDBG_FINISH;
 } /* }}} */
@@ -339,7 +350,18 @@ static PHPDBG_COMMAND(leave) /* {{{ */
 	}
 	
 	PHPDBG_G(flags) |= PHPDBG_IN_LEAVE;
-	PHPDBG_G(seek) = (zend_ulong) &(EG(active_op_array)->opcodes[EG(active_op_array)->last-2]);
+	{
+		zend_uint next = 0,
+				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
+		zend_op  *opline = &EG(active_op_array)->opcodes[self];
+		
+		for (next = self; next < EG(active_op_array)->last; next++) {
+			if (EG(active_op_array)->opcodes[next].opcode == ZEND_RETURN) {
+				PHPDBG_G(seek) = (zend_ulong) &EG(active_op_array)->opcodes[next];
+				break;
+			}
+		}
+	}
 	
 	return PHPDBG_LEAVE;
 } /* }}} */
@@ -375,7 +397,8 @@ static PHPDBG_COMMAND(run) /* {{{ */
         	zend_activate_auto_globals(TSRMLS_C);
         } zend_end_try();
 
-		PHPDBG_G(flags) &= ~(PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE);		
+		/* clean flags */
+		PHPDBG_G(flags) &= ~PHPDBG_SEEK_MASK;		
 		
 		zend_try {
 			zend_execute(
@@ -1009,38 +1032,42 @@ zend_vm_enter:
 			goto next;
 		}
 
-		/* run to next line */
-		if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
-			if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
-				PHPDBG_G(flags) &= ~PHPDBG_IN_UNTIL;
-			} else {
+		/* perform seek operation */
+		if (PHPDBG_G(flags) & PHPDBG_SEEK_MASK) {
+
+			/* run to next line */
+			if (PHPDBG_G(flags) & PHPDBG_IN_UNTIL) {
+				if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
+					PHPDBG_G(flags) &= ~PHPDBG_IN_UNTIL;
+				} else {
+					/* skip possible breakpoints */
+					goto next;
+				}
+			}
+
+			/* run to finish */
+			if (PHPDBG_G(flags) & PHPDBG_IN_FINISH) {
+				if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
+					PHPDBG_G(flags) &= ~PHPDBG_IN_FINISH;
+				}
 				/* skip possible breakpoints */
 				goto next;
 			}
-		}
 
-		/* run to finish */
-		if (PHPDBG_G(flags) & PHPDBG_IN_FINISH) {
-			if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
-				PHPDBG_G(flags) &= ~PHPDBG_IN_FINISH;
-			}
-			/* skip possible breakpoints */
-			goto next;
-		}
-
-		/* break for leave */
-		if (PHPDBG_G(flags) & PHPDBG_IN_LEAVE) {
-			if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
-				PHPDBG_G(flags) &= ~PHPDBG_IN_LEAVE;
-				phpdbg_notice(
-					"Breaking for leave at %s:%u",
-					zend_get_executed_filename(TSRMLS_C),
-					zend_get_executed_lineno(TSRMLS_C)
-				);
-				DO_INTERACTIVE();
-			} else {
-				/* skip possible breakpoints */
-				goto next;
+			/* break for leave */
+			if (PHPDBG_G(flags) & PHPDBG_IN_LEAVE) {
+				if (((zend_ulong)execute_data->opline) == PHPDBG_G(seek)) {
+					PHPDBG_G(flags) &= ~PHPDBG_IN_LEAVE;
+					phpdbg_notice(
+						"Breaking for leave at %s:%u",
+						zend_get_executed_filename(TSRMLS_C),
+						zend_get_executed_lineno(TSRMLS_C)
+					);
+					DO_INTERACTIVE();
+				} else {
+					/* skip possible breakpoints */
+					goto next;
+				}
 			}
 		}
 
