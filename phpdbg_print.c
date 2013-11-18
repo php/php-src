@@ -37,7 +37,8 @@ PHPDBG_PRINT(opline) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC) {
+static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC) /* {{{ */
+{
     switch (method->type) {
         case ZEND_USER_FUNCTION: {
             zend_op_array* op_array = &method->op_array;
@@ -85,7 +86,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
             }
         }
      }
-}
+} /* }}} */
 
 PHPDBG_PRINT(exec) /* {{{ */
 {

@@ -153,7 +153,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		return;
 	}
 
-	last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
+	pos = last_pos = mem = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 	end_pos = mem + st.st_size;
 #else
 
@@ -170,7 +170,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		return;
 	}
 
-	last_pos = mem = (char*) MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
+	pos = last_pos = mem = (char*) MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
 	if (mem == NULL) {
 		phpdbg_error("Failed to map file in memory");
 		CloseHandle(map);
