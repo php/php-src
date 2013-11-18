@@ -599,6 +599,11 @@ phpdbg_main:
 
         /* print blurb */
 		phpdbg_welcome((cleaning > 0) TSRMLS_CC);
+		
+		zend_try {
+        	/* activate globals, they can be overwritten */
+        	zend_activate_auto_globals(TSRMLS_C);
+        } zend_end_try();
 
         /* initialize from file */
         zend_try {

@@ -96,6 +96,8 @@
 #define PHPDBG_IN_LEAVE			(1<<15)
 #define PHPDBG_SEEK_MASK		(PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 
+#define PHPDBG_IS_REGISTERED	(1<<16)
+
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
 #else
@@ -115,7 +117,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int bp_count;                       /* breakpoint count */
 	int vmret;                          /* return from last opcode handler execution */
 	phpdbg_command_t *lcmd;				/* last command */
-	phpdbg_param_t   lparam;            /* last param */
+	phpdbg_param_t lparam;              /* last param */
 	FILE *oplog;                        /* opline log */
 	HashTable seek;						/* seek oplines */
 	zend_ulong flags;                   /* phpdbg flags */

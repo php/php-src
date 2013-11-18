@@ -464,11 +464,6 @@ static PHPDBG_COMMAND(run) /* {{{ */
             zend_rebuild_symbol_table(TSRMLS_C);
         }
 
-        zend_try {
-        	/* last chance ... */
-        	zend_activate_auto_globals(TSRMLS_C);
-        } zend_end_try();
-
 		/* clean seek state */
 		PHPDBG_G(flags) &= ~PHPDBG_SEEK_MASK;
 		zend_hash_clean(

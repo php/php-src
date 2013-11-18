@@ -52,9 +52,10 @@ PHPDBG_INFO(error) /* {{{ */
 
 PHPDBG_INFO(vars) /* {{{ */
 {
+	HashTable vars;
 	HashPosition pos;
 	char *var;
-	zval **data;
+	zval **data, *zdata;
 
 	if (!EG(active_symbol_table)) {
 		zend_rebuild_symbol_table(TSRMLS_C);
@@ -64,25 +65,46 @@ PHPDBG_INFO(vars) /* {{{ */
 			return SUCCESS;
 		}
 	}
-
-	phpdbg_notice("Variables: %d",
-		zend_hash_num_elements(EG(active_symbol_table)));
-
+	zend_hash_init(&vars, 8, NULL, NULL, 0);
+	
 	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
 	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var,
 		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
 		zend_hash_get_current_data_ex(EG(active_symbol_table), (void **)&data, &pos);
-
 		if (*var != '_') {
-			phpdbg_write("Var: %s = ", var, *data == NULL ? "NULL" : "");
-			if (data) {
-				zend_print_flat_zval_r(*data TSRMLS_CC);
-				phpdbg_writeln(EMPTY);
-			}
+			zend_hash_update(
+				&vars, var, strlen(var)+1, (void**)data, sizeof(zval*), NULL);
 		}
 		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
 	}
+	
+	phpdbg_notice("Variables: %d",
+		zend_hash_num_elements(&vars));
+	phpdbg_writeln("Refs\tName\t\t");
 
+	for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
+		zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(&vars, &pos)) {
+		char *var;
+		zend_uint var_len;
+		zend_ulong var_idx;
+		zend_hash_get_current_key_ex(&vars, &var, &var_len, &var_idx, 0, &pos);
+		
+		if (*data) {
+			phpdbg_write(
+			"%d\t%s$%s\t",
+				Z_REFCOUNT_PP(data),
+				Z_ISREF_PP(data) ? "&" : "", var);
+	
+			zend_print_flat_zval_r(*data TSRMLS_CC);
+		} else {
+			phpdbg_write("0\t$%s", var);
+		}
+		phpdbg_writeln(EMPTY);
+	}
+	
+	zend_hash_destroy(&vars);
+	
 	return SUCCESS;
 } /* }}} */
 
