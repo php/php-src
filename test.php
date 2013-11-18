@@ -1,5 +1,4 @@
 <?php
-
 if (isset($include))
 	include (sprintf("%s/web-bootstrap.php", dirname(__FILE__)));
 

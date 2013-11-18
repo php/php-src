@@ -440,10 +440,19 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			}
 		} zend_end_try();
 
-        EG(active_op_array) = orig_op_array;
-	    EG(opline_ptr) = orig_opline;
-	    EG(return_value_ptr_ptr) = orig_retval_ptr;
+		if (EG(exception)) {
+			phpdbg_error("Uncaught Exception !");
+			/*
+			* @TODO(anyone) something better !!
+			*/
+			zend_print_zval_r(
+				EG(exception), 0 TSRMLS_CC);
+		}
 
+		EG(active_op_array) = orig_op_array;
+	    EG(opline_ptr) = orig_opline;
+	    EG(return_value_ptr_ptr) = orig_retval_ptr;		
+				
 	} else {
 		phpdbg_error("Nothing to execute!");
 	}
