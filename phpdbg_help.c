@@ -312,11 +312,24 @@ PHPDBG_HELP(oplog) /* {{{ */
     phpdbg_writeln("Example:");
     phpdbg_writeln("\t%soplog /path/to/my.oplog", PROMPT);
     phpdbg_writeln("Will open the file /path/to/my.oplog for writing, creating it if it does not exist");
-    phpdbg_writeln("Example:");
     phpdbg_writeln("\t%soplog 0", PROMPT);
     phpdbg_writeln("Will close the currently open log file, disabling oplog");
 	phpdbg_writeln(EMPTY);
     phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
+    phpdbg_help_footer();
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(shell) /* {{{ */
+{
+	phpdbg_help_header();
+    phpdbg_writeln("Direct access to shell commands saves having to switch windows/consoles");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Example:");
+    phpdbg_writeln("\t%s- ls /usr/src/php-src", PROMPT);
+    phpdbg_writeln("Will execute ls /usr/src/php-src, displaying the output in the console");
+	phpdbg_writeln(EMPTY);
+    phpdbg_writeln("Note: read only commands please !");
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
