@@ -118,7 +118,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_param_t   *lparam;           /* last param */
 	zend_ulong flags;                   /* phpdbg flags */
 	FILE *oplog;                        /* opline log */
-	zend_ulong seek;					/* seek opline */
+	HashTable seek;						/* seek oplines */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 /* }}} */
 
