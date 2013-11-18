@@ -1124,19 +1124,11 @@ zend_vm_enter:
 		}
 
 		if ((PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP))) {
-			zend_execute_data *previous = execute_data->prev_execute_data;
-			if (previous && previous != execute_data && previous->opline) {
-				/* check we are the beginning of a function entry */
-				if (execute_data->opline == EG(active_op_array)->opcodes) {
-					switch (previous->opline->opcode) {
-						case ZEND_DO_FCALL:
-						case ZEND_DO_FCALL_BY_NAME:
-						case ZEND_INIT_STATIC_METHOD_CALL: {
-							if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
-								DO_INTERACTIVE();
-							}
-						} break;
-					}
+			/* check we are at the beginning of the stack */
+			if (execute_data->opline == EG(active_op_array)->opcodes) {
+				if (phpdbg_find_breakpoint_symbol(
+						execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
+					DO_INTERACTIVE();
 				}
 			}
 		}

@@ -20,7 +20,7 @@ function test() {
 
 	$foo();
 
-	return $var;
+	yield $var;
 }
 
 $dbg = new phpdbg();
