@@ -375,6 +375,8 @@ static PHPDBG_COMMAND(run) /* {{{ */
         	zend_activate_auto_globals(TSRMLS_C);
         } zend_end_try();
 
+		PHPDBG_G(flags) &= ~(PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE);		
+		
 		zend_try {
 			zend_execute(
 			    EG(active_op_array) TSRMLS_CC);
