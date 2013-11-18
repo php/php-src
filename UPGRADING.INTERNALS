@@ -17,6 +17,8 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
 ========================
 
+  a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
+
 
 ========================
 2. Build system changes
