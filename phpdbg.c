@@ -428,19 +428,10 @@ int main(int argc, char **argv) /* {{{ */
 #endif
 
 #ifdef PHP_WIN32
-	HWND console;
-	RECT consoleRect;
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
-
-	console = GetConsoleWindow();
-	if (console) {
-		GetWindowRect(console, &consoleRect);
-		MoveWindow(
-			console, consoleRect.left, consoleRect.top, 800,600, TRUE);
-	}
 #endif
 
 #ifdef ZTS
@@ -607,7 +598,7 @@ phpdbg_main:
 		} zend_end_try();
 
         /* print blurb */
-		phpdbg_welcome(cleaning TSRMLS_CC);
+		phpdbg_welcome((cleaning > 0) TSRMLS_CC);
 
         /* initialize from file */
         zend_try {
