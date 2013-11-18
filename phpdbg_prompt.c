@@ -942,7 +942,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		} else {
 			if (PHPDBG_G(lcmd)) {
 				ret = PHPDBG_G(lcmd)->handler(
-						PHPDBG_G(lparam) TSRMLS_CC);
+						&PHPDBG_G(lparam) TSRMLS_CC);
 				goto out;
 			}
 		}

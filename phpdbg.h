@@ -115,10 +115,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int bp_count;                       /* breakpoint count */
 	int vmret;                          /* return from last opcode handler execution */
 	phpdbg_command_t *lcmd;				/* last command */
-	phpdbg_param_t   *lparam;           /* last param */
+	phpdbg_param_t   lparam;            /* last param */
 	FILE *oplog;                        /* opline log */
 	HashTable seek;						/* seek oplines */
-	HashTable params;					/* parameters */
 	zend_ulong flags;                   /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 /* }}} */

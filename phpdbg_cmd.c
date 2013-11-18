@@ -132,36 +132,37 @@ int phpdbg_do_cmd(	const phpdbg_command_t *command, char *cmd_line, size_t cmd_l
 		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
 			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
 
-			param = (phpdbg_param_t*) emalloc(sizeof(phpdbg_param_t));
+			phpdbg_param_t lparam, 
+						   param;
 
 			phpdbg_parse_param(
 				expr,
 				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
-				param TSRMLS_CC);
+				&param TSRMLS_CC);
 
+			lparam = PHPDBG_G(lparam);
+			
 			PHPDBG_G(lparam)	= param;
 			PHPDBG_G(lcmd)		= (phpdbg_command_t*) command;
 
-			/* avoid leaks */
-			zend_hash_next_index_insert(
-				&PHPDBG_G(params), (void**)&param, sizeof(phpdbg_param_t*), NULL);
-
-			if (command->subs && param->type == STR_PARAM) {
-				if (phpdbg_do_cmd(command->subs, param->str, param->len TSRMLS_CC) == SUCCESS) {
+			if (command->subs && param.type == STR_PARAM) {
+				if (phpdbg_do_cmd(command->subs, param.str, param.len TSRMLS_CC) == SUCCESS) {
 					rc = SUCCESS;
 					goto done;
 				}
 			}
 
-			if (command->arg_type == REQUIRED_ARG && param->type == EMPTY_PARAM) {
+			if (command->arg_type == REQUIRED_ARG && param.type == EMPTY_PARAM) {
 				phpdbg_error("This command requires argument!");
 				rc = FAILURE;
-			} else if (command->arg_type == NO_ARG && param->type != EMPTY_PARAM) {
+			} else if (command->arg_type == NO_ARG && param.type != EMPTY_PARAM) {
 				phpdbg_error("This command does not expect argument!");
 				rc = FAILURE;
 			} else {
-				rc = command->handler(param TSRMLS_CC);
+				rc = command->handler(&param TSRMLS_CC);
 			}
+			
+			phpdbg_clear_param(&lparam TSRMLS_CC);
 			break;
 		}
 		++command;
