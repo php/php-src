@@ -64,7 +64,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
 	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, 1),
-	PHPDBG_COMMAND_D(until,   "continue until reaches next line",         'u', NULL, 0),
+	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'f', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 1),
