@@ -55,7 +55,7 @@ PHPDBG_INFO(vars) /* {{{ */
 	HashTable vars;
 	HashPosition pos;
 	char *var;
-	zval **data, *zdata;
+	zval **data;
 
 	if (!EG(active_symbol_table)) {
 		zend_rebuild_symbol_table(TSRMLS_C);
@@ -78,35 +78,39 @@ PHPDBG_INFO(vars) /* {{{ */
 		}
 		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
 	}
-	
+
 	phpdbg_notice("Variables: %d",
 		zend_hash_num_elements(&vars));
-	phpdbg_writeln("Refs\tName");
+	phpdbg_writeln("Addr\t\tRefs\tName");
 
 	for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
 		zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(&vars, &pos)) {
 		char *var;
-		
+
 		zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
-		
+
 		if (*data) {
 			phpdbg_writeln(
-			"%d\t%s$%s",
+			"%p\t%d\t%s$%s",
+				*data,
 				Z_REFCOUNT_PP(data),
 				Z_ISREF_PP(data) ? "&" : "", var);
-			phpdbg_write(
-			"|-----> ");
-			zend_print_flat_zval_r(*data TSRMLS_CC);
+			
+			phpdbg_write("|---> ");
+			if (Z_TYPE_PP(data) != IS_NULL) {
+				zend_print_flat_zval_r(*data TSRMLS_CC);
+			} else phpdbg_write("(null)");
 			phpdbg_writeln(EMPTY);
 		} else {
-			phpdbg_write("0\t$%s", var);
+			phpdbg_write(
+				"n/a\tn/a\t$%s", var);
 		}
 		phpdbg_writeln(EMPTY);
 	}
-	
+
 	zend_hash_destroy(&vars);
-	
+
 	return SUCCESS;
 } /* }}} */
 
