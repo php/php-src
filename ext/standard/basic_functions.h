@@ -180,9 +180,9 @@ typedef struct _php_basic_globals {
 	zval *active_ini_file_section;
 	
 	/* pageinfo.c */
-	long page_uid;
-	long page_gid;
-	long page_inode;
+	php_int_t page_uid;
+	php_int_t page_gid;
+	php_int_t page_inode;
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */

@@ -28,8 +28,8 @@ PHP_FUNCTION(getmyinode);
 PHP_FUNCTION(getlastmod);
 
 PHPAPI void php_statpage(TSRMLS_D);
-PHPAPI long php_getlastmod(TSRMLS_D);
-extern long php_getuid(TSRMLS_D);
-extern long php_getgid(TSRMLS_D);
+PHPAPI time_t php_getlastmod(TSRMLS_D);
+extern php_int_t php_getuid(TSRMLS_D);
+extern php_int_t php_getgid(TSRMLS_D);
 
 #endif
