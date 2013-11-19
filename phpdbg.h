@@ -121,6 +121,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	FILE *oplog;                        /* opline log */
 	HashTable seek;						/* seek oplines */
 	zend_ulong flags;                   /* phpdbg flags */
+	HashTable registered;				/* registered */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 /* }}} */
 

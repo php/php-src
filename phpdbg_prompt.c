@@ -55,6 +55,7 @@ static PHPDBG_COMMAND(quiet);
 static PHPDBG_COMMAND(aliases);
 static PHPDBG_COMMAND(shell);
 static PHPDBG_COMMAND(oplog);
+static PHPDBG_COMMAND(register);
 static PHPDBG_COMMAND(quit); /* }}} */
 
 /* {{{ command declarations */
@@ -80,6 +81,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
 	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
+	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
@@ -651,7 +653,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(shell)
+static PHPDBG_COMMAND(shell) /* {{{ */
 {
 	/* don't allow this to loop, ever ... */
 	switch (param->type) {
@@ -669,7 +671,37 @@ static PHPDBG_COMMAND(shell)
 		phpdbg_default_switch_case();
 	}
 	return SUCCESS;
-}
+} /* }}} */
+
+static PHPDBG_COMMAND(register) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM: {
+			zend_function *function;
+			char *lcname = zend_str_tolower_dup(param->str, param->len);
+			size_t lcname_len = strlen(lcname);
+			
+			if (!zend_hash_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
+				if (zend_hash_find(EG(function_table), lcname, lcname_len+1, (void**) &function) == SUCCESS) {
+					zend_hash_update(
+						&PHPDBG_G(registered), lcname, lcname_len, (void*)&function, sizeof(zend_function), NULL);
+					function_add_ref(function);
+					
+					phpdbg_notice(
+						"Registered %s", lcname);
+				} else {
+					phpdbg_error("Failed to find function %s", param->str);
+				}
+			} else {
+				phpdbg_error(
+					"The requested name (%s) is already in use", lcname);
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+	return SUCCESS;
+} /* }}} */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
@@ -892,12 +924,13 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		cmd_len = strlen(cmd) - 1;
 #else
 	char *cmd = NULL;
-
+	const char *start = NULL;
+	
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		cmd = readline(PROMPT);
 		cmd_len = cmd ? strlen(cmd) : 0;
-#endif
-
+		start = estrndup(cmd, cmd_len);
+#endif		
 		/* trim space from end of input */
 		while (*cmd && isspace(cmd[cmd_len-1]))
 			cmd_len--;
@@ -913,7 +946,49 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-						phpdbg_error("Failed to execute %s!", cmd);
+						size_t offset = strlen(cmd)+(sizeof(" ")-1);
+						
+						if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
+							zval fname, *fretval, *farg = NULL;
+							zend_fcall_info fci;
+							zend_fcall_info_cache fcic;
+							
+							zval **params[1];
+							
+							if (offset < cmd_len) {
+								ALLOC_INIT_ZVAL(farg);
+								ZVAL_STRING(farg, &start[offset], 1);
+								params[0] = &farg;
+							}
+							
+							ZVAL_STRINGL(&fname, cmd, strlen(cmd), 1);
+							
+							
+							fci.size = sizeof(fci);
+							fci.function_table = &PHPDBG_G(registered);
+							fci.function_name = &fname;
+							fci.symbol_table = EG(active_symbol_table);
+							fci.object_ptr = NULL;
+							fci.retval_ptr_ptr = &fretval;
+							
+							/* todo parse parameters better */
+							fci.param_count = (offset < cmd_len) ? 1 : 0;
+							fci.params = (offset < cmd_len) ? params : NULL;
+							fci.no_separation = 1;
+							
+							zend_call_function(
+								&fci, NULL TSRMLS_CC);
+							
+							zval_dtor(&fname);
+							zval_ptr_dtor(&farg);
+							if (fretval) {
+								zend_print_zval_r(
+									fretval, 0 TSRMLS_CC);
+								phpdbg_writeln(EMPTY);
+							}
+						} else {
+							phpdbg_error("Failed to execute %s!", cmd);
+						}
 					}
 				break;
 
