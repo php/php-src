@@ -60,8 +60,17 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
 
+	php_output_startup();
+	
     return SUCCESS;
 } /* }}} */
+
+static PHP_MSHUTDOWN_FUNCTION(phpdbg)
+{
+	php_output_shutdown();
+	
+	return SUCCESS;
+}
 
 static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
 {
@@ -105,7 +114,7 @@ static void php_phpdbg_destroy_registered(void *data)
 }
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
-{
+{	
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
@@ -383,7 +392,6 @@ const char phpdbg_ini_hardcoded[] =
 	"html_errors=Off\n"
 	"register_argc_argv=On\n"
 	"implicit_flush=On\n"
-	"output_buffering=Off\n"
 	"display_errors=Off\n"
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";

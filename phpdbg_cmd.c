@@ -198,13 +198,14 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	while (command && command->name && command->handler) {
 		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
 			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
-			phpdbg_param_t param = {0};
-
+			
+			phpdbg_param_t param;
+			
 			phpdbg_parse_param(
 				expr,
 				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
 				&param TSRMLS_CC);
-
+			
 			if (command->subs && param.type == STR_PARAM) {
 				if (phpdbg_do_cmd(command->subs, param.str, param.len TSRMLS_CC) == SUCCESS) {
 					rc = SUCCESS;
@@ -219,11 +220,11 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 				phpdbg_error("This command does not expect argument!");
 				rc = FAILURE;
 			} else {
-				rc = command->handler(
-					&param TSRMLS_CC);
-				
 				PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
+				phpdbg_clear_param(
+					&PHPDBG_G(lparam) TSRMLS_CC);
 				PHPDBG_G(lparam) = param;
+				rc = command->handler(&param TSRMLS_CC);
 			}
 			break;
 		}

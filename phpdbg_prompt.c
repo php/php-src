@@ -969,7 +969,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
 	
-	if (input) {
+	if (input && input->length > 0L) {
 		do {
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
 				case FAILURE:
@@ -995,9 +995,14 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 				efree(input->string);
 			}
 			efree(input);
-						
-		} while ((input = phpdbg_read_input(TSRMLS_C)));
+			
+		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
+		
+		if (!input->length)
+			goto last;
+
 	} else {
+last:
 		if (PHPDBG_G(lcmd)) {
 			ret = PHPDBG_G(lcmd)->handler(
 					&PHPDBG_G(lparam) TSRMLS_CC);
