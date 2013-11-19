@@ -201,6 +201,9 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 	if ((*argc) == 0) {
 		/* not needed */
 		efree(argv);
+		
+		/* to be sure */
+		return NULL;
 	}
 	
 	return argv;
