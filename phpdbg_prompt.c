@@ -80,8 +80,8 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
-	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
+	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
