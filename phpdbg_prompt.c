@@ -910,8 +910,12 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline int phpdbg_call_register(const char *cmd, size_t cmd_len, const char * start TSRMLS_DC) /* {{{ */
+static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
+	/* temporary, until we can handle arrays of strings */
+	const char *cmd = input->string;
+	size_t cmd_len = input->length;
+	const char *start = (const char*) input->start;
 	size_t offset = strlen(cmd)+(sizeof(" ")-1);
 
 	if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
@@ -966,12 +970,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
 	
 	if (input) {
-		char* const* saved = (char* const*) input->string;
-		
 		switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
 			case FAILURE:
 				if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-					if (phpdbg_call_register(input->string, input->length, (const char*) saved TSRMLS_CC) == FAILURE) {
+					if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
 						phpdbg_error("Failed to execute %s!", input->string);
 					}
 				}

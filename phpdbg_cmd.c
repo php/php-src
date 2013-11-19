@@ -159,6 +159,8 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 				memcpy(
 					buffer->string, cmd, buffer->length);
 				buffer->string[buffer->length] = '\0';
+				/* store constant pointer to start of buffer */
+				buffer->start = (char* const*) buffer->string;
 			}
 		}
 
