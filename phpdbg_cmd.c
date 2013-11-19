@@ -193,8 +193,14 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 		
 		case IN_STRING:
 			phpdbg_error(
-				"Malformed command line @ %d!", l);
+				"Malformed command line (unclosed quote) @ %d: %s!", 
+				(p - buffer)-1, &buffer[(p - buffer)-1]);
 		break;
+	}
+	
+	if ((*argc) == 0) {
+		/* not needed */
+		efree(argv);
 	}
 	
 	return argv;
