@@ -319,7 +319,7 @@ END_EXTERN_C()
 		if ((*end != '\0') /* not a null terminated string */				\
 		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
 		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
-		 || (SIZEOF_LONG == 4 &&											\
+		 || (SIZEOF_ZEND_INT == 4 &&											\
 		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
 		     *tmp > '2')) { /* overflow */									\
 			break;															\
