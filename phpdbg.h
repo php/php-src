@@ -108,6 +108,7 @@
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.0.2-dev" /* }}} */
 
+/* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
     HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
 	char *exec;                         /* file to execute */
@@ -122,7 +123,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable seek;						/* seek oplines */
 	zend_ulong flags;                   /* phpdbg flags */
 	HashTable registered;				/* registered */
-ZEND_END_MODULE_GLOBALS(phpdbg)
-/* }}} */
+ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif /* PHPDBG_H */

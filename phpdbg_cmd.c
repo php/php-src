@@ -118,6 +118,62 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	
 } /* }}} */
 
+phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
+{
+	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+		phpdbg_input_t *buffer = NULL;
+		size_t cmd_len = 0L;
+
+#ifndef HAVE_LIBREADLINE
+		char *cmd = NULL;
+		char buf[PHPDBG_MAX_CMD];		
+		if (!phpdbg_write(PROMPT) ||
+			!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
+			return NULL;
+		}
+		
+		cmd = buf;
+#else
+		char *cmd = readline(PROMPT);
+		if (!cmd) {
+			return NULL;
+		}
+
+		add_history(cmd);
+#endif
+
+		/* strip whitespace */
+		while (cmd && isspace(*cmd))
+			cmd++;
+		cmd_len = strlen(cmd);
+		while (*cmd && isspace(cmd[cmd_len-1]))
+			cmd_len--;
+		cmd[cmd_len] = '\0';
+		
+		/* allocate and sanitize buffer */
+		buffer = (phpdbg_input_t*) emalloc(sizeof(phpdbg_input_t));
+		if (buffer) {
+			buffer->length = strlen(cmd);
+			buffer->string = emalloc(buffer->length+1);
+			if (buffer->string) {
+				memcpy(
+					buffer->string, cmd, buffer->length);
+				buffer->string[buffer->length] = '\0';
+			}
+		}
+
+#ifdef HAVE_LIBREADLINE
+		if (cmd) {
+			free(cmd);
+		}
+#endif
+
+		return buffer;
+	}
+	
+	return NULL;
+} /* }}} */
+
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
 	int rc = FAILURE;

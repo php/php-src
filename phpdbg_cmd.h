@@ -40,6 +40,11 @@ typedef enum {
 	NUMERIC_PARAM
 } phpdbg_param_type;
 
+typedef struct {
+	char 		*string;
+	size_t		length;
+} phpdbg_input_t;
+
 typedef struct _phpdbg_param {
     phpdbg_param_type type;
 	long num;
@@ -71,10 +76,12 @@ struct _phpdbg_command_t {
 /* }}} */
 
 #define PHPDBG_STRL(s) s, sizeof(s)-1
+#define PHPDBG_MAX_CMD 500
 
 /**
  * Command Executor
  */
+phpdbg_input_t* phpdbg_read_input(TSRMLS_D);
 int phpdbg_do_cmd(const phpdbg_command_t*, char*, size_t TSRMLS_DC);
 phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
@@ -95,6 +102,9 @@ const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 
 #define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
 
+/*
+* Default Switch Case
+*/
 #define phpdbg_default_switch_case() \
     default:\
         phpdbg_error(\

@@ -23,8 +23,6 @@
 /**
  * Maximum command length
  */
-#define PHPDBG_MAX_CMD 500
-
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 int phpdbg_interactive(TSRMLS_D);
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);

@@ -910,7 +910,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline int phpdbg_call_register(const char *cmd, size_t cmd_len, const char * start TSRMLS_DC)
+static inline int phpdbg_call_register(const char *cmd, size_t cmd_len, const char * start TSRMLS_DC) /* {{{ */
 {
 	size_t offset = strlen(cmd)+(sizeof(" ")-1);
 
@@ -957,84 +957,51 @@ static inline int phpdbg_call_register(const char *cmd, size_t cmd_len, const ch
 	}
 	
 	return FAILURE;
-}
+} /* }}} */
 
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
-	size_t cmd_len;
 	int ret = SUCCESS;
-	char* const* start;
 
-#ifndef HAVE_LIBREADLINE
-	char cmd[PHPDBG_MAX_CMD];
-
-	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
-			phpdbg_write(PROMPT) &&
-			(fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL)) {
-		cmd_len = strlen(cmd) - 1;
-#else
-	char *cmd = NULL;
-
-	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		cmd = readline(PROMPT);
-		cmd_len = cmd ? strlen(cmd) : 0;
-#endif
-
-		start = (char* const*) cmd;
-
-		/* trim space from end of input */
-		while (*cmd && isspace(cmd[cmd_len-1]))
-			cmd_len--;
-
-		/* ensure string is null terminated */
-		cmd[cmd_len] = '\0';
-
-		if (*cmd && cmd_len > 0L) {
-#ifdef HAVE_LIBREADLINE
-			add_history(cmd);
-#endif
-
-			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
-				case FAILURE:
-					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-						if (phpdbg_call_register(cmd, cmd_len, (const char*) start TSRMLS_CC) == FAILURE) {
-							phpdbg_error("Failed to execute %s!", cmd);
-						}
+	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
+	
+	if (input) {
+		char* const* saved = (char* const*) input->string;
+		
+		switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
+			case FAILURE:
+				if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+					if (phpdbg_call_register(input->string, input->length, (const char*) saved TSRMLS_CC) == FAILURE) {
+						phpdbg_error("Failed to execute %s!", input->string);
 					}
-				break;
-
-				case PHPDBG_LEAVE:
-				case PHPDBG_FINISH:
-				case PHPDBG_UNTIL:
-				case PHPDBG_NEXT: {
-					if (!EG(in_execution)) {
-						phpdbg_error("Not running");
-					}
-					goto out;
 				}
-			}
+			break;
 
-#ifdef HAVE_LIBREADLINE
-		    if (cmd) {
-		        free(cmd);
-		        cmd = NULL;
-		    }
-#endif
-		} else {
-			if (PHPDBG_G(lcmd)) {
-				ret = PHPDBG_G(lcmd)->handler(
-						&PHPDBG_G(lparam) TSRMLS_CC);
+			case PHPDBG_LEAVE:
+			case PHPDBG_FINISH:
+			case PHPDBG_UNTIL:
+			case PHPDBG_NEXT: {
+				if (!EG(in_execution)) {
+					phpdbg_error("Not running");
+				}
 				goto out;
 			}
+		}
+	} else {
+		if (PHPDBG_G(lcmd)) {
+			ret = PHPDBG_G(lcmd)->handler(
+					&PHPDBG_G(lparam) TSRMLS_CC);
+			goto out;
 		}
 	}
 
 out:
-#ifdef HAVE_LIBREADLINE
-	if (cmd) {
-		free(cmd);
+	if (input) {
+		if (input->string) {
+			efree(input->string);
+		}
+		efree(input);
 	}
-#endif
 
 	return ret;
 } /* }}} */
