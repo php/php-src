@@ -910,11 +910,60 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static inline int phpdbg_call_register(const char *cmd, size_t cmd_len, const char * start TSRMLS_DC)
+{
+	size_t offset = strlen(cmd)+(sizeof(" ")-1);
+
+	if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
+		zval fname, *fretval, *farg = NULL;
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcic;
+
+		zval **params[1];
+
+		if (offset < cmd_len) {
+			ALLOC_INIT_ZVAL(farg);
+			ZVAL_STRING(farg, &start[offset], 1);
+			params[0] = &farg;
+		}
+
+		ZVAL_STRINGL(&fname, cmd, strlen(cmd), 1);
+
+		fci.size = sizeof(fci);
+		fci.function_table = &PHPDBG_G(registered);
+		fci.function_name = &fname;
+		fci.symbol_table = EG(active_symbol_table);
+		fci.object_ptr = NULL;
+		fci.retval_ptr_ptr = &fretval;
+
+		/* todo parse parameters better */
+		fci.param_count = (offset < cmd_len) ? 1 : 0;
+		fci.params = (offset < cmd_len) ? params : NULL;
+		fci.no_separation = 1;
+
+		zend_call_function(
+			&fci, NULL TSRMLS_CC);
+
+		zval_dtor(&fname);
+		if (offset < cmd_len) {
+			zval_ptr_dtor(&farg);
+		}
+		if (fretval) {
+			zend_print_zval_r(
+				fretval, 0 TSRMLS_CC);
+			phpdbg_writeln(EMPTY);
+		}
+		return SUCCESS;
+	}
+	
+	return FAILURE;
+}
+
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	size_t cmd_len;
 	int ret = SUCCESS;
-	char  *start = NULL;
+	char* const* start;
 
 #ifndef HAVE_LIBREADLINE
 	char cmd[PHPDBG_MAX_CMD];
@@ -930,7 +979,8 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		cmd = readline(PROMPT);
 		cmd_len = cmd ? strlen(cmd) : 0;
 #endif
-		start = estrndup(cmd, cmd_len);
+
+		start = (char* const*) cmd;
 
 		/* trim space from end of input */
 		while (*cmd && isspace(cmd[cmd_len-1]))
@@ -947,48 +997,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-						size_t offset = strlen(cmd)+(sizeof(" ")-1);
-
-						if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
-							zval fname, *fretval, *farg = NULL;
-							zend_fcall_info fci;
-							zend_fcall_info_cache fcic;
-
-							zval **params[1];
-
-							if (offset < cmd_len) {
-								ALLOC_INIT_ZVAL(farg);
-								ZVAL_STRING(farg, &start[offset], 1);
-								params[0] = &farg;
-							}
-
-							ZVAL_STRINGL(&fname, cmd, strlen(cmd), 1);
-
-							fci.size = sizeof(fci);
-							fci.function_table = &PHPDBG_G(registered);
-							fci.function_name = &fname;
-							fci.symbol_table = EG(active_symbol_table);
-							fci.object_ptr = NULL;
-							fci.retval_ptr_ptr = &fretval;
-
-							/* todo parse parameters better */
-							fci.param_count = (offset < cmd_len) ? 1 : 0;
-							fci.params = (offset < cmd_len) ? params : NULL;
-							fci.no_separation = 1;
-
-							zend_call_function(
-								&fci, NULL TSRMLS_CC);
-
-							zval_dtor(&fname);
-							if (offset < cmd_len) {
-								zval_ptr_dtor(&farg);
-							}
-							if (fretval) {
-								zend_print_zval_r(
-									fretval, 0 TSRMLS_CC);
-								phpdbg_writeln(EMPTY);
-							}
-						} else {
+						if (phpdbg_call_register(cmd, cmd_len, (const char*) start TSRMLS_CC) == FAILURE) {
 							phpdbg_error("Failed to execute %s!", cmd);
 						}
 					}
@@ -1001,9 +1010,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					if (!EG(in_execution)) {
 						phpdbg_error("Not running");
 					}
-					if (start) {
-						efree(start);
-					}
 					goto out;
 				}
 			}
@@ -1015,19 +1021,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		    }
 #endif
 		} else {
-			if (start) {
-				efree(start);
-			}
-				
 			if (PHPDBG_G(lcmd)) {
 				ret = PHPDBG_G(lcmd)->handler(
 						&PHPDBG_G(lparam) TSRMLS_CC);
 				goto out;
 			}
-		}
-		
-		if (start) {
-			efree(start);
 		}
 	}
 
