@@ -240,46 +240,36 @@ phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
 		add_history(cmd);
 #endif
 
-		/* strip whitespace */
-		while (cmd && isspace(*cmd))
-			cmd++;
-		cmd_len = strlen(cmd);
-		while (*cmd && isspace(cmd[cmd_len-1]))
-			cmd_len--;
-		cmd[cmd_len] = '\0';
-
 		/* allocate and sanitize buffer */
 		buffer = (phpdbg_input_t*) emalloc(sizeof(phpdbg_input_t));
-		if (buffer) {
-			buffer->length = strlen(cmd);
-			buffer->string = emalloc(buffer->length+1);
-			if (buffer->string) {
-				memcpy(
-					buffer->string, cmd, buffer->length);
-				buffer->string[buffer->length] = '\0';
-				/* store constant pointer to start of buffer */
-				buffer->start = (char* const*) buffer->string;
-				{
-					/* temporary, when we switch to argv/argc handling
-						will be unnecessary */
-					char *store = (char*) estrdup(buffer->string);
+		if (!buffer) {
+			return NULL;
+		}
 
-					buffer->argv = phpdbg_read_argv(
-						store, &buffer->argc TSRMLS_CC);
+		buffer->string = phpdbg_trim(cmd, strlen(cmd), &buffer->length);
 
-					if (buffer->argc) {
-						int arg = 0;
+		if (buffer->string) {
+			/* temporary, when we switch to argv/argc handling
+				will be unnecessary */
+			char *store = (char*) estrdup(buffer->string);
 
-						while (arg < buffer->argc) {
-							phpdbg_debug(
-								"argv %d=%s", arg, buffer->argv[arg]->string);
-							arg++;
-						}
-					}
+			/* store constant pointer to start of buffer */
+			buffer->start = (char* const*) buffer->string;
 
-					efree(store);
+			buffer->argv = phpdbg_read_argv(
+				store, &buffer->argc TSRMLS_CC);
+
+			if (buffer->argc) {
+				int arg = 0;
+
+				while (arg < buffer->argc) {
+					phpdbg_debug(
+						"argv %d=%s", arg, buffer->argv[arg]->string);
+					arg++;
 				}
 			}
+
+			efree(store);
 		}
 
 #ifdef HAVE_LIBREADLINE

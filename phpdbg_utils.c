@@ -50,7 +50,7 @@ int phpdbg_is_empty(const char *str) /* {{{ */
 {
     if (!str)
         return 1;
-    
+
 	for (; *str; str++) {
 		if (isspace(*str)) {
 			continue;
@@ -71,7 +71,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 
     if (strstr(str, " ") != NULL)
 	    return 0;
-	    
+
 	sep = strstr(str, "::");
 
 	if (!sep || sep == str || sep+2 == str+len-1) {
@@ -111,6 +111,36 @@ const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 	}
 
 	return file;
+} /* }}} */
+
+char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
+{
+	const char *p = str;
+	char *new = NULL;
+
+	while (p && isspace(*p)) {
+		++p;
+		--len;
+	}
+
+	while (*p && isspace(*(p + len-1))) {
+		--len;
+	}
+
+	if (len == 0) {
+		*new_len = 0;
+		return estrndup("", sizeof(""));
+	}
+
+	new = estrndup(p, len);
+	*(new + len) = '\0';
+
+	if (new_len) {
+		*new_len = len;
+	}
+
+	return new;
+
 } /* }}} */
 
 int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
@@ -159,7 +189,7 @@ int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ *
 		                buffer,
 		                ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 		} break;
-		
+
 		/* no formatting on logging output */
 	    case P_LOG: if (buffer) {
 	        struct timeval tp;
