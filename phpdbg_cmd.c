@@ -115,24 +115,24 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 				break;
 		}
 	}
-	
+
 } /* }}} */
 
 static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
-	char *p, *s;
+	char *p;
 	char b[PHPDBG_MAX_CMD];
 	int l=0;
 	enum states {
 		IN_BETWEEN,
-		IN_WORD, 
-		IN_STRING 
+		IN_WORD,
+		IN_STRING
 	} state = IN_BETWEEN;
 	phpdbg_input_t **argv = NULL;
-	
+
 	argv = (phpdbg_input_t**) emalloc(sizeof(phpdbg_input_t**));
 	(*argc) = 0;
-	
+
 #define RESET_STATE() do {\
 	phpdbg_input_t *arg = emalloc(sizeof(phpdbg_input_t));\
     if (arg) {\
@@ -157,11 +157,9 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 				}
 				if (c == '"') {
 				    state = IN_STRING;
-				    s = p + 1;
 				    continue;
 				}
 				state = IN_WORD;
-				s = p;
 				b[l++]=c;
 				continue;
 
@@ -186,31 +184,31 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 				continue;
 		}
 	}
-	
+
 	switch (state) {
 		case IN_WORD: {
 			RESET_STATE();
 		} break;
-		
+
 		case IN_STRING:
 			phpdbg_error(
-				"Malformed command line (unclosed quote) @ %d: %s!", 
+				"Malformed command line (unclosed quote) @ %d: %s!",
 				(p - buffer)-1, &buffer[(p - buffer)-1]);
 		break;
 	}
-	
+
 	if ((*argc) == 0) {
 		/* not needed */
 		efree(argv);
-		
+
 		/* to be sure */
 		return NULL;
 	}
-	
+
 	return argv;
 } /* }}} */
 
-phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
+phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
 {
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		phpdbg_input_t *buffer = NULL;
@@ -218,7 +216,7 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 
 #ifndef HAVE_LIBREADLINE
 		char *cmd = NULL;
-		char buf[PHPDBG_MAX_CMD];		
+		char buf[PHPDBG_MAX_CMD];
 		if (!phpdbg_write(PROMPT) ||
 			!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
 			/* the user has gone away */
@@ -227,7 +225,7 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 			zend_bailout();
 			return NULL;
 		}
-		
+
 		cmd = buf;
 #else
 		char *cmd = readline(PROMPT);
@@ -249,7 +247,7 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 		while (*cmd && isspace(cmd[cmd_len-1]))
 			cmd_len--;
 		cmd[cmd_len] = '\0';
-		
+
 		/* allocate and sanitize buffer */
 		buffer = (phpdbg_input_t*) emalloc(sizeof(phpdbg_input_t));
 		if (buffer) {
@@ -261,24 +259,24 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 				buffer->string[buffer->length] = '\0';
 				/* store constant pointer to start of buffer */
 				buffer->start = (char* const*) buffer->string;
-				{	
-					/* temporary, when we switch to argv/argc handling 
+				{
+					/* temporary, when we switch to argv/argc handling
 						will be unnecessary */
 					char *store = (char*) estrdup(buffer->string);
-					
+
 					buffer->argv = phpdbg_read_argv(
 						store, &buffer->argc TSRMLS_CC);
-					
+
 					if (buffer->argc) {
 						int arg = 0;
-						
+
 						while (arg < buffer->argc) {
 							phpdbg_debug(
 								"argv %d=%s", arg, buffer->argv[arg]->string);
 							arg++;
 						}
 					}
-					
+
 					efree(store);
 				}
 			}
@@ -292,18 +290,18 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 
 		return buffer;
 	}
-	
+
 	return NULL;
 } /* }}} */
 
 void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 {
 	if (*input) {
-	
+
 		if ((*input)->string) {
 			efree((*input)->string);
 		}
-		
+
 		if ((*input)->argc > 0) {
 			int arg;
 			for (arg=0; arg<(*input)->argc; arg++) {
@@ -315,7 +313,7 @@ void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 		if ((*input)->argv) {
 			efree((*input)->argv);
 		}
-		
+
 		efree(*input);
 	}
 } /* }}} */
@@ -326,29 +324,29 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 
 	if (input->argc > 0) {
 		while (command && command->name && command->handler) {
-			if (((command->name_len == input->argv[0]->length) && 
+			if (((command->name_len == input->argv[0]->length) &&
 				(memcmp(command->name, input->argv[0]->string, command->name_len) == SUCCESS)) ||
 				(command->alias &&
-				(input->argv[0]->length == 1) && 
+				(input->argv[0]->length == 1) &&
 				(command->alias == *input->argv[0]->string))) {
 				if (command->subs && input->argc > 1) {
 					phpdbg_input_t sub;
-					
+
 					sub.argc = input->argc-1;
 					sub.argv = &input->argv[1];
-					
+
 					return phpdbg_do_cmd_ex(command->subs, &sub TSRMLS_CC);
 				}
-				
+
 				phpdbg_debug(
-					"found command %s for %s with %d arguments", 
+					"found command %s for %s with %d arguments",
 					command->name, input->argv[0]->string, input->argc-1);
 				{
 					int arg;
 					for (arg=1; arg<input->argc; arg++) {
 						phpdbg_debug(
-							"\t#%d: [%s=%d]", 
-							arg, 
+							"\t#%d: [%s=%d]",
+							arg,
 							input->argv[arg]->string,
 							input->argv[arg]->length);
 					}
@@ -362,7 +360,7 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 		phpdbg_error(
 			"No function executed !!");
 	}
-	
+
 	return rc;
 } /* }}} */
 
@@ -385,7 +383,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 				expr,
 				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
 				&param TSRMLS_CC);
-			
+
 			if (command->subs && param.type == STR_PARAM) {
 				if (phpdbg_do_cmd(command->subs, param.str, param.len TSRMLS_CC) == SUCCESS) {
 					rc = SUCCESS;
