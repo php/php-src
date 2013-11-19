@@ -72,7 +72,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
     PHPDBG_COMMAND_D_EX(quiet,    "be quiet during execution",                                                       'Q', help_quiet,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(list,     "list code gives you quick access to code",                     					 'l', help_list,    NULL, 0),
 	PHPDBG_COMMAND_D_EX(oplog,    "keep clutter off the screen by logging oplines",                         		 'O', help_oplog,   NULL, 0),
-	PHPDBG_COMMAND_D_EX(register, "register a php function for use as a command",						 		 	 'R', help_register,NULL, 0),
+	PHPDBG_COMMAND_D_EX(register, "register a function for use as a command",						 		 	 	 'R', help_register,NULL, 0),
 	PHPDBG_COMMAND_D_EX(shell,    "execute system commands with direct shell access",						 		 '-', help_shell,   NULL, 0),
 	PHPDBG_END_COMMAND
 };
