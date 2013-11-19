@@ -129,6 +129,10 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 		char buf[PHPDBG_MAX_CMD];		
 		if (!phpdbg_write(PROMPT) ||
 			!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
+			/* the user has gone away */
+			phpdbg_error("Failed to read console !");
+			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			zend_bailout();
 			return NULL;
 		}
 		
@@ -136,6 +140,10 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 #else
 		char *cmd = readline(PROMPT);
 		if (!cmd) {
+			/* the user has gone away */
+			phpdbg_error("Failed to read console !");
+			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			zend_bailout();
 			return NULL;
 		}
 
