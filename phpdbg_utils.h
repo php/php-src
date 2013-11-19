@@ -29,6 +29,7 @@ int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
 const char *phpdbg_current_file(TSRMLS_D);
 char *phpdbg_resolve_path(const char* TSRMLS_DC);
+char *phpdbg_trim(const char*, size_t, size_t*);
 
 /**
  * Error/notice/formatting helper

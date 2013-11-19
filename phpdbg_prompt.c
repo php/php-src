@@ -696,7 +696,7 @@ static PHPDBG_COMMAND(register) /* {{{ */
 				phpdbg_error(
 					"The requested name (%s) is already in use", lcname);
 			}
-			
+
 			efree(lcname);
 		} break;
 
@@ -969,7 +969,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		}
 		return SUCCESS;
 	}
-	
+
 	return FAILURE;
 } /* }}} */
 
@@ -978,7 +978,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	int ret = SUCCESS;
 
 	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
-	
+
 	if (input && input->length > 0L) {
 		do {
 			switch (ret = phpdbg_do_cmd_ex(phpdbg_prompt_commands, input TSRMLS_CC)) {
@@ -1000,10 +1000,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					goto out;
 				}
 			}
-			
+
 			phpdbg_destroy_input(&input TSRMLS_CC);
 		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
-		
+
 		if (!input->length)
 			goto last;
 
