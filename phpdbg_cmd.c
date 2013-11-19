@@ -189,7 +189,8 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 		} break;
 		
 		case IN_STRING:
-			phpdbg_error("Malformed command line !");
+			phpdbg_error(
+				"Malformed command line @ %d!", l);
 		break;
 	}
 	
