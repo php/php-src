@@ -696,7 +696,7 @@ static PHPDBG_COMMAND(register) /* {{{ */
 				phpdbg_error(
 					"The requested name (%s) is already in use", lcname);
 			}
-			
+
 			efree(lcname);
 		} break;
 
@@ -919,11 +919,10 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 	size_t cmd_len = input->length;
 	const char *start = (const char*) input->start;
 	size_t offset = strlen(cmd)+(sizeof(" ")-1);
-	
+
 	if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd)+1)) {
 		zval fname, *fretval, *farg = NULL;
 		zend_fcall_info fci;
-		zend_fcall_info_cache fcic;
 
 		zval **params[1];
 
@@ -961,7 +960,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		}
 		return SUCCESS;
 	}
-	
+
 	return FAILURE;
 } /* }}} */
 
@@ -970,11 +969,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	int ret = SUCCESS;
 
 	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
-	
+
 	if (input && input->length > 0L) {
 		do {
 			phpdbg_do_cmd_ex(phpdbg_prompt_commands, input TSRMLS_CC);
-			
+
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -994,10 +993,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					goto out;
 				}
 			}
-			
+
 			phpdbg_destroy_input(&input TSRMLS_CC);
 		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
-		
+
 		if (!input->length)
 			goto last;
 

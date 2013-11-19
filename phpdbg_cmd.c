@@ -287,7 +287,6 @@ phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
 void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 {
 	if (*input) {
-
 		if ((*input)->string) {
 			efree((*input)->string);
 		}
