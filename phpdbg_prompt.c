@@ -970,25 +970,33 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
 	
 	if (input) {
-		switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
-			case FAILURE:
-				if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-					if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
-						phpdbg_error("Failed to execute %s!", input->string);
+		do {
+			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
+				case FAILURE:
+					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+						if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
+							phpdbg_error("Failed to execute %s!", input->string);
+						}
 					}
-				}
-			break;
+				break;
 
-			case PHPDBG_LEAVE:
-			case PHPDBG_FINISH:
-			case PHPDBG_UNTIL:
-			case PHPDBG_NEXT: {
-				if (!EG(in_execution)) {
-					phpdbg_error("Not running");
+				case PHPDBG_LEAVE:
+				case PHPDBG_FINISH:
+				case PHPDBG_UNTIL:
+				case PHPDBG_NEXT: {
+					if (!EG(in_execution)) {
+						phpdbg_error("Not running");
+					}
+					goto out;
 				}
-				goto out;
 			}
-		}
+			
+			if (input->string) {
+				efree(input->string);
+			}
+			efree(input);
+						
+		} while ((input = phpdbg_read_input(TSRMLS_C)));
 	} else {
 		if (PHPDBG_G(lcmd)) {
 			ret = PHPDBG_G(lcmd)->handler(
