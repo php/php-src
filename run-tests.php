@@ -1088,6 +1088,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		fwrite($pipes[0], $stdin);
 	}
 	fclose($pipes[0]);
+	unset($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
