@@ -118,29 +118,31 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	
 } /* }}} */
 
-static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *count TSRMLS_DC) /* {{{ */
+static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
 	char *p, *s;
+	char b[PHPDBG_MAX_CMD];
+	int l=0;
 	enum states { 
 		IN_BETWEEN, 
 		IN_WORD, 
 		IN_STRING 
 	} state = IN_BETWEEN;
-	phpdbg_input_t **inputs;
+	phpdbg_input_t **argv = NULL;
 	
-	(*count) = 0;	
-	inputs = (phpdbg_input_t**) emalloc(
-		sizeof(phpdbg_input_t*) * 1);
-
+	argv = (phpdbg_input_t**) emalloc(sizeof(phpdbg_input_t**));
+	(*argc) = 0;
+	
 #define RESET_STATE() do {\
 	phpdbg_input_t *next = emalloc(sizeof(phpdbg_input_t));\
     if (next) {\
-    	next->string = estrndup(\
-    		s, ((p-1) - s)+1);\
-    	inputs[(*count)++] = next;\
+    	b[l]=0;\
+    	next->string = estrndup(b, l);\
+    	argv[(*argc)++] = next;\
+    	l=0;\
     }\
     state = IN_BETWEEN;\
-} while(0);
+} while(0)
 
 	for (p = buffer; *p != '\0'; p++) {
 		int c = (unsigned char) *p;
@@ -156,17 +158,26 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *count TSRMLS_
 				}
 				state = IN_WORD;
 				s = p;
+				b[l++]=c;
 				continue;
 
 			case IN_STRING:
-				if (c == '"') {
+				if ((c == '"')) {
+					if (buffer[(p - buffer)-1] == '\\') {
+						b[l-1]=c;
+						continue;
+					}
 				    RESET_STATE();
+				} else {
+					b[l++]=c;
 				}
 				continue;
 
 			case IN_WORD:
 				if (isspace(c)) {
 				    RESET_STATE();
+				} else {
+					b[l++]=c;
 				}
 				continue;
 		}
@@ -182,7 +193,7 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *count TSRMLS_
 		break;
 	}
 	
-	return inputs;
+	return argv;
 } /* }}} */
 
 phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
