@@ -420,6 +420,20 @@ PHPDBG_HELP(register) /* {{{ */
     phpdbg_writeln("\tWill register the scandir function for use in phpdbg");
 	phpdbg_writeln(EMPTY);
     phpdbg_writeln("Note: argument will be passed as a string to the function and the return printed to the console");
+    if (zend_hash_num_elements(&PHPDBG_G(registered))) {
+   		HashPosition position;
+   		char *name = NULL;
+   		zend_uint name_len = 0;
+   		
+   		phpdbg_notice("Registered Functions (%d)", zend_hash_num_elements(&PHPDBG_G(registered)));
+   		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(registered), &position);
+   			zend_hash_get_current_key_ex(&PHPDBG_G(registered), &name, &name_len, NULL, 1, &position) == HASH_KEY_IS_STRING;
+   			zend_hash_move_forward_ex(&PHPDBG_G(registered), &position)) {
+   			phpdbg_writeln("|-------> %s", name);
+   			efree(name);
+   		}
+    }
+    
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */

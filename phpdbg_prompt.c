@@ -681,10 +681,10 @@ static PHPDBG_COMMAND(register) /* {{{ */
 			char *lcname = zend_str_tolower_dup(param->str, param->len);
 			size_t lcname_len = strlen(lcname);
 
-			if (!zend_hash_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
+			if (!zend_hash_exists(&PHPDBG_G(registered), lcname, lcname_len+1)) {
 				if (zend_hash_find(EG(function_table), lcname, lcname_len+1, (void**) &function) == SUCCESS) {
 					zend_hash_update(
-						&PHPDBG_G(registered), lcname, lcname_len, (void*)&function, sizeof(zend_function), NULL);
+						&PHPDBG_G(registered), lcname, lcname_len+1, (void*)&function, sizeof(zend_function), NULL);
 					function_add_ref(function);
 
 					phpdbg_notice(
@@ -696,6 +696,8 @@ static PHPDBG_COMMAND(register) /* {{{ */
 				phpdbg_error(
 					"The requested name (%s) is already in use", lcname);
 			}
+			
+			efree(lcname);
 		} break;
 
 		phpdbg_default_switch_case();
@@ -917,8 +919,8 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 	size_t cmd_len = input->length;
 	const char *start = (const char*) input->start;
 	size_t offset = strlen(cmd)+(sizeof(" ")-1);
-
-	if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
+	
+	if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd)+1)) {
 		zval fname, *fretval, *farg = NULL;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcic;

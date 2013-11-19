@@ -60,15 +60,11 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
 
-	php_output_startup();
-	
     return SUCCESS;
 } /* }}} */
 
 static PHP_MSHUTDOWN_FUNCTION(phpdbg)
 {
-	php_output_shutdown();
-	
 	return SUCCESS;
 }
 
