@@ -123,20 +123,20 @@ char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
 		--len;
 	}
 
-	while (*p && isspace(*(p + len-1))) {
+	while (*p && isspace(*(p + len -1))) {
 		--len;
 	}
 
 	if (len == 0) {
+		new = estrndup("", sizeof(""));
 		*new_len = 0;
-		return estrndup("", sizeof(""));
-	}
+	} else {
+		new = estrndup(p, len);
+		*(new + len) = '\0';
 
-	new = estrndup(p, len);
-	*(new + len) = '\0';
-
-	if (new_len) {
-		*new_len = len;
+		if (new_len) {
+			*new_len = len;
+		}
 	}
 
 	return new;
