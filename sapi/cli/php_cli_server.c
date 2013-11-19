@@ -477,7 +477,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	php_cli_server_client *client;
 	HashTable *headers;
 	char *key;
-	uint key_len;
+	zend_str_size key_len;
 	char **value_pointer;
 	HashPosition pos;
 
