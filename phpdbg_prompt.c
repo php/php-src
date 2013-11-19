@@ -973,6 +973,8 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	
 	if (input && input->length > 0L) {
 		do {
+			phpdbg_do_cmd_ex(phpdbg_prompt_commands, input TSRMLS_CC);
+			
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input->string, input->length TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {

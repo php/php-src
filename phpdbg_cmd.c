@@ -137,7 +137,8 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 	phpdbg_input_t *arg = emalloc(sizeof(phpdbg_input_t));\
     if (arg) {\
     	b[l]=0;\
-    	arg->string = estrndup(b, l);\
+    	arg->length = l;\
+    	arg->string = estrndup(b, arg->length);\
     	arg->argv=NULL;\
     	arg->argc=0;\
     	argv = (phpdbg_input_t**) erealloc(argv, sizeof(phpdbg_input_t*) * ((*argc)+1));\
@@ -317,6 +318,52 @@ void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 		
 		efree(*input);
 	}
+} /* }}} */
+
+int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+{
+	int rc = FAILURE;
+
+	if (input->argc > 0) {
+		while (command && command->name && command->handler) {
+			if (((command->name_len == input->argv[0]->length) && 
+				(memcmp(command->name, input->argv[0]->string, command->name_len) == SUCCESS)) ||
+				(command->alias &&
+				(input->argv[0]->length == 1) && 
+				(command->alias == *input->argv[0]->string))) {
+				if (command->subs && input->argc > 1) {
+					phpdbg_input_t sub;
+					
+					sub.argc = input->argc-1;
+					sub.argv = &input->argv[1];
+					
+					return phpdbg_do_cmd_ex(command->subs, &sub TSRMLS_CC);
+				}
+				
+				phpdbg_debug(
+					"found command %s for %s with %d arguments", 
+					command->name, input->argv[0]->string, input->argc-1);
+				{
+					int arg;
+					for (arg=1; arg<input->argc; arg++) {
+						phpdbg_debug(
+							"\t#%d: [%s=%d]", 
+							arg, 
+							input->argv[arg]->string,
+							input->argv[arg]->length);
+					}
+				}
+				break;
+			}
+			command++;
+		}
+	} else {
+		/* this should NEVER happen */
+		phpdbg_error(
+			"No function executed !!");
+	}
+	
+	return rc;
 } /* }}} */
 
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
