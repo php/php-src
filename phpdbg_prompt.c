@@ -980,7 +980,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 								&fci, NULL TSRMLS_CC);
 							
 							zval_dtor(&fname);
-							zval_ptr_dtor(&farg);
+							if (offset < cmd_len) {
+								zval_ptr_dtor(&farg);
+							}
 							if (fretval) {
 								zend_print_zval_r(
 									fretval, 0 TSRMLS_CC);
