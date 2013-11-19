@@ -118,6 +118,73 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 	
 } /* }}} */
 
+static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *count TSRMLS_DC) /* {{{ */
+{
+	char *p, *s;
+	enum states { 
+		IN_BETWEEN, 
+		IN_WORD, 
+		IN_STRING 
+	} state = IN_BETWEEN;
+	phpdbg_input_t **inputs;
+	
+	(*count) = 0;	
+	inputs = (phpdbg_input_t**) emalloc(
+		sizeof(phpdbg_input_t*) * 1);
+
+#define RESET_STATE() do {\
+	phpdbg_input_t *next = emalloc(sizeof(phpdbg_input_t));\
+    if (next) {\
+    	next->string = estrndup(\
+    		s, ((p-1) - s)+1);\
+    	inputs[(*count)++] = next;\
+    }\
+    state = IN_BETWEEN;\
+} while(0);
+
+	for (p = buffer; *p != '\0'; p++) {
+		int c = (unsigned char) *p;
+		switch (state) {
+			case IN_BETWEEN:
+				if (isspace(c)) {
+				    continue;
+				}
+				if (c == '"') {
+				    state = IN_STRING;
+				    s = p + 1;
+				    continue;
+				}
+				state = IN_WORD;
+				s = p;
+				continue;
+
+			case IN_STRING:
+				if (c == '"') {
+				    RESET_STATE();
+				}
+				continue;
+
+			case IN_WORD:
+				if (isspace(c)) {
+				    RESET_STATE();
+				}
+				continue;
+		}
+	}
+	
+	switch (state) {
+		case IN_WORD: {
+			RESET_STATE();
+		} break;
+		
+		case IN_STRING:
+			phpdbg_error("Malformed command line !");
+		break;
+	}
+	
+	return inputs;
+} /* }}} */
+
 phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 {
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -169,6 +236,26 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 				buffer->string[buffer->length] = '\0';
 				/* store constant pointer to start of buffer */
 				buffer->start = (char* const*) buffer->string;
+				{	
+					/* temporary, when we switch to argv/argc handling 
+						will be unnecessary */
+					char *store = (char*) estrdup(buffer->string);
+					
+					buffer->argv = phpdbg_read_argv(
+						store, &buffer->argc TSRMLS_CC);
+					
+					if (buffer->argc) {
+						int arg = 0;
+						
+						while (arg < buffer->argc) {
+							phpdbg_debug(
+								"argv %d=%s", arg, buffer->argv[arg]->string);
+							arg++;
+						}
+					}
+					
+					efree(store);
+				}
 			}
 		}
 

@@ -40,11 +40,16 @@ typedef enum {
 	NUMERIC_PARAM
 } phpdbg_param_type;
 
-typedef struct {
-	char* const*  start;
-	char 		*string;
-	size_t		 length;
-} phpdbg_input_t;
+typedef struct _phpdbg_input_t phpdbg_input_t;
+
+struct _phpdbg_input_t {
+	char* const*    start;
+	char 		  *string;
+	size_t		   length;
+	
+	phpdbg_input_t **argv;
+	int				 argc;
+};
 
 typedef struct _phpdbg_param {
     phpdbg_param_type type;

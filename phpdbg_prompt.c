@@ -690,7 +690,7 @@ static PHPDBG_COMMAND(register) /* {{{ */
 					phpdbg_notice(
 						"Registered %s", lcname);
 				} else {
-					phpdbg_error("Failed to find function %s", param->str);
+					phpdbg_error("The requested function (%s) could not be found", param->str);
 				}
 			} else {
 				phpdbg_error(
