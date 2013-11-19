@@ -952,7 +952,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 						if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
 							zval fname, *fretval, *farg = NULL;
 							zend_fcall_info fci;
-							zend_fcall_info_cache fcic;
 
 							zval **params[1];
 
@@ -1018,14 +1017,14 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			if (start) {
 				efree(start);
 			}
-				
+
 			if (PHPDBG_G(lcmd)) {
 				ret = PHPDBG_G(lcmd)->handler(
 						&PHPDBG_G(lparam) TSRMLS_CC);
 				goto out;
 			}
 		}
-		
+
 		if (start) {
 			efree(start);
 		}
