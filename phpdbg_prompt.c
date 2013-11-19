@@ -993,11 +993,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 				}
 			}
 			
-			if (input->string) {
-				efree(input->string);
-			}
-			efree(input);
-			
+			phpdbg_destroy_input(&input TSRMLS_CC);
 		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
 		
 		if (!input->length)
@@ -1013,12 +1009,7 @@ last:
 	}
 
 out:
-	if (input) {
-		if (input->string) {
-			efree(input->string);
-		}
-		efree(input);
-	}
+	phpdbg_destroy_input(&input TSRMLS_CC);
 
 	return ret;
 } /* }}} */

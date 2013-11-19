@@ -123,8 +123,8 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 	char *p, *s;
 	char b[PHPDBG_MAX_CMD];
 	int l=0;
-	enum states { 
-		IN_BETWEEN, 
+	enum states {
+		IN_BETWEEN,
 		IN_WORD, 
 		IN_STRING 
 	} state = IN_BETWEEN;
@@ -134,11 +134,14 @@ static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 	(*argc) = 0;
 	
 #define RESET_STATE() do {\
-	phpdbg_input_t *next = emalloc(sizeof(phpdbg_input_t));\
-    if (next) {\
+	phpdbg_input_t *arg = emalloc(sizeof(phpdbg_input_t));\
+    if (arg) {\
     	b[l]=0;\
-    	next->string = estrndup(b, l);\
-    	argv[(*argc)++] = next;\
+    	arg->string = estrndup(b, l);\
+    	arg->argv=NULL;\
+    	arg->argc=0;\
+    	argv = (phpdbg_input_t**) erealloc(argv, sizeof(phpdbg_input_t*) * ((*argc)+1));\
+    	argv[(*argc)++] = arg;\
     	l=0;\
     }\
     state = IN_BETWEEN;\
@@ -281,6 +284,30 @@ phpdbg_input_t* phpdbg_read_input(TSRMLS_D) /* {{{ */
 	}
 	
 	return NULL;
+} /* }}} */
+
+void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
+{
+	if (*input) {
+	
+		if ((*input)->string) {
+			efree((*input)->string);
+		}
+		
+		if ((*input)->argc > 0) {
+			int arg;
+			for (arg=0; arg<(*input)->argc; arg++) {
+				phpdbg_destroy_input(
+					&(*input)->argv[arg] TSRMLS_CC);
+			}
+		}
+
+		if ((*input)->argv) {
+			efree((*input)->argv);
+		}
+		
+		efree(*input);
+	}
 } /* }}} */
 
 int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
