@@ -326,10 +326,10 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 
 					return phpdbg_do_cmd_ex(command->subs, &sub TSRMLS_CC);
 				}
-
 				phpdbg_debug(
 					"found command %s for %s with %d arguments",
 					command->name, input->argv[0]->string, input->argc-1);
+#ifdef PHPDBG_DEBUG
 				{
 					int arg;
 					for (arg=1; arg<input->argc; arg++) {
@@ -340,6 +340,7 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 							input->argv[arg]->length);
 					}
 				}
+#endif
 				break;
 			}
 			command++;
