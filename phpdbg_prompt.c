@@ -835,30 +835,30 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 			while (prompt_command && prompt_command->name) {
 				phpdbg_writeln(
-					"\t%s\t%s", prompt_command->name, prompt_command->tip);
+					" %10s\t%s", prompt_command->name, prompt_command->tip);
 				++prompt_command;
 			}
 
-			phpdbg_notice("Helpers Loaded");
+			phpdbg_notice("Help Commands");
 
 			while (help_command && help_command->name) {
-				phpdbg_writeln("\t%s\t%s", help_command->name, help_command->tip);
+				phpdbg_writeln(" %10s\t%s", help_command->name, help_command->tip);
 				++help_command;
 			}
 
 			phpdbg_notice("Command Line Options and Flags");
-			phpdbg_writeln("\tOption\tExample\t\t\tPurpose");
+			phpdbg_writeln(" Option\tExample\t\t\tPurpose");
 			phpdbg_writeln(EMPTY);
-			phpdbg_writeln("\t-c\t-c/my/php.ini\t\tSet php.ini file to load");
-			phpdbg_writeln("\t-d\t-dmemory_limit=4G\tSet a php.ini directive");
-			phpdbg_writeln("\t-n\t-N/A\t\t\tDisable default php.ini");
-			phpdbg_writeln("\t-e\t-emytest.php\t\tSet execution context");
-			phpdbg_writeln("\t-v\tN/A\t\t\tEnable oplog output");
-			phpdbg_writeln("\t-s\tN/A\t\t\tEnable stepping");
-			phpdbg_writeln("\t-b\tN/A\t\t\tDisable colour");
-			phpdbg_writeln("\t-i\t-imy.init\t\tSet .phpdbginit file");
-			phpdbg_writeln("\t-I\tN/A\t\t\tIgnore default .phpdbginit");
-			phpdbg_writeln("\t-O\t-Omy.oplog\t\tSets oplog output file");
+			phpdbg_writeln(" -c\t-c/my/php.ini\t\tSet php.ini file to load");
+			phpdbg_writeln(" -d\t-dmemory_limit=4G\tSet a php.ini directive");
+			phpdbg_writeln(" -n\t-N/A\t\t\tDisable default php.ini");
+			phpdbg_writeln(" -e\t-emytest.php\t\tSet execution context");
+			phpdbg_writeln(" -v\tN/A\t\t\tEnable oplog output");
+			phpdbg_writeln(" -s\tN/A\t\t\tEnable stepping");
+			phpdbg_writeln(" -b\tN/A\t\t\tDisable colour");
+			phpdbg_writeln(" -i\t-imy.init\t\tSet .phpdbginit file");
+			phpdbg_writeln(" -I\tN/A\t\t\tIgnore default .phpdbginit");
+			phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 			phpdbg_help_footer();
 		} break;
 
@@ -914,7 +914,8 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	size_t cmd_len;
 	int ret = SUCCESS;
-
+	char  *start = NULL;
+	
 #ifndef HAVE_LIBREADLINE
 	char cmd[PHPDBG_MAX_CMD];
 
@@ -924,13 +925,13 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		cmd_len = strlen(cmd) - 1;
 #else
 	char *cmd = NULL;
-	const char *start = NULL;
-	
+
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		cmd = readline(PROMPT);
 		cmd_len = cmd ? strlen(cmd) : 0;
+#endif	
 		start = estrndup(cmd, cmd_len);
-#endif		
+
 		/* trim space from end of input */
 		while (*cmd && isspace(cmd[cmd_len-1]))
 			cmd_len--;
@@ -962,7 +963,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 							}
 							
 							ZVAL_STRINGL(&fname, cmd, strlen(cmd), 1);
-							
 							
 							fci.size = sizeof(fci);
 							fci.function_table = &PHPDBG_G(registered);
@@ -1001,6 +1001,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					if (!EG(in_execution)) {
 						phpdbg_error("Not running");
 					}
+					if (start) {
+						efree(start);
+					}
 					goto out;
 				}
 			}
@@ -1012,11 +1015,19 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		    }
 #endif
 		} else {
+			if (start) {
+				efree(start);
+			}
+				
 			if (PHPDBG_G(lcmd)) {
 				ret = PHPDBG_G(lcmd)->handler(
 						&PHPDBG_G(lparam) TSRMLS_CC);
 				goto out;
 			}
+		}
+		
+		if (start) {
+			efree(start);
 		}
 	}
 
