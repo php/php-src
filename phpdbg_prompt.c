@@ -394,8 +394,8 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 {
 	zend_fcall_info fci;
 
-	zval fname, 
-		 *trace, 
+	zval fname,
+		 *trace,
 		 exception;
 
 	/* get filename and linenumber before unsetting exception */
@@ -408,7 +408,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	EG(exception) = NULL;
 
 	phpdbg_error(
-		"Uncaught %s !", 
+		"Uncaught %s !",
 		Z_OBJCE(exception)->name);
 
 	/* call __toString */
@@ -423,19 +423,19 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	fci.params = NULL;
 	fci.no_separation = 1;
 	zend_call_function(&fci, NULL TSRMLS_CC);
-	
+
 	if (trace) {
 		phpdbg_writeln(
 			"Uncaught %s", Z_STRVAL_P(trace));
 		/* remember to dtor trace */
 		zval_ptr_dtor(&trace);
 	}
-	
+
 	/* output useful information about address */
 	phpdbg_writeln(
 		"Stacked entered at %p in %s on line %lu",
 		EG(active_op_array)->opcodes, filename, lineno);
-	
+
 	zval_dtor(&fname);
 	zval_dtor(&exception);
 } /* }}} */
@@ -680,13 +680,13 @@ static PHPDBG_COMMAND(register) /* {{{ */
 			zend_function *function;
 			char *lcname = zend_str_tolower_dup(param->str, param->len);
 			size_t lcname_len = strlen(lcname);
-			
+
 			if (!zend_hash_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
 				if (zend_hash_find(EG(function_table), lcname, lcname_len+1, (void**) &function) == SUCCESS) {
 					zend_hash_update(
 						&PHPDBG_G(registered), lcname, lcname_len, (void*)&function, sizeof(zend_function), NULL);
 					function_add_ref(function);
-					
+
 					phpdbg_notice(
 						"Registered %s", lcname);
 				} else {
@@ -914,6 +914,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	size_t cmd_len;
 	int ret = SUCCESS;
+	const char *start = NULL;
 
 #ifndef HAVE_LIBREADLINE
 	char cmd[PHPDBG_MAX_CMD];
@@ -924,13 +925,14 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		cmd_len = strlen(cmd) - 1;
 #else
 	char *cmd = NULL;
-	const char *start = NULL;
-	
+
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		cmd = readline(PROMPT);
 		cmd_len = cmd ? strlen(cmd) : 0;
+
+#endif
 		start = estrndup(cmd, cmd_len);
-#endif		
+
 		/* trim space from end of input */
 		while (*cmd && isspace(cmd[cmd_len-1]))
 			cmd_len--;
@@ -947,38 +949,38 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 						size_t offset = strlen(cmd)+(sizeof(" ")-1);
-						
+
 						if (zend_hash_exists(&PHPDBG_G(registered), cmd, strlen(cmd))) {
 							zval fname, *fretval, *farg = NULL;
 							zend_fcall_info fci;
 							zend_fcall_info_cache fcic;
-							
+
 							zval **params[1];
-							
+
 							if (offset < cmd_len) {
 								ALLOC_INIT_ZVAL(farg);
 								ZVAL_STRING(farg, &start[offset], 1);
 								params[0] = &farg;
 							}
-							
+
 							ZVAL_STRINGL(&fname, cmd, strlen(cmd), 1);
-							
-							
+
+
 							fci.size = sizeof(fci);
 							fci.function_table = &PHPDBG_G(registered);
 							fci.function_name = &fname;
 							fci.symbol_table = EG(active_symbol_table);
 							fci.object_ptr = NULL;
 							fci.retval_ptr_ptr = &fretval;
-							
+
 							/* todo parse parameters better */
 							fci.param_count = (offset < cmd_len) ? 1 : 0;
 							fci.params = (offset < cmd_len) ? params : NULL;
 							fci.no_separation = 1;
-							
+
 							zend_call_function(
 								&fci, NULL TSRMLS_CC);
-							
+
 							zval_dtor(&fname);
 							if (offset < cmd_len) {
 								zval_ptr_dtor(&farg);
