@@ -1016,6 +1016,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 		} else {
 			if (start) {
 				efree(start);
+				start = NULL;
 			}
 
 			if (PHPDBG_G(lcmd)) {
