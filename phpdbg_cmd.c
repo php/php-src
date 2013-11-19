@@ -247,29 +247,23 @@ phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
 
 		buffer->string = phpdbg_trim(cmd, strlen(cmd), &buffer->length);
 
-		if (buffer->string) {
-			/* temporary, when we switch to argv/argc handling
-				will be unnecessary */
-			char *store = (char*) estrdup(buffer->string);
+		/* store constant pointer to start of buffer */
+		buffer->start = (char* const*) buffer->string;
 
-			/* store constant pointer to start of buffer */
-			buffer->start = (char* const*) buffer->string;
+		buffer->argv = phpdbg_read_argv(
+			buffer->string, &buffer->argc TSRMLS_CC);
 
-			buffer->argv = phpdbg_read_argv(
-				store, &buffer->argc TSRMLS_CC);
+#ifdef PHPDBG_DEBUG
+		if (buffer->argc) {
+			int arg = 0;
 
-			if (buffer->argc) {
-				int arg = 0;
-
-				while (arg < buffer->argc) {
-					phpdbg_debug(
-						"argv %d=%s", arg, buffer->argv[arg]->string);
-					arg++;
-				}
+			while (arg < buffer->argc) {
+				phpdbg_debug(
+					"argv %d=%s", arg, buffer->argv[arg]->string);
+				arg++;
 			}
-
-			efree(store);
 		}
+#endif
 
 #ifdef HAVE_LIBREADLINE
 		if (cmd) {
