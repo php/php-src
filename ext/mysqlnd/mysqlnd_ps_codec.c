@@ -584,12 +584,24 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
-				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
-				//convert_to_double_ex(&tmp_data);
-				convert_to_long_ex(&tmp_data);
+				/*
+ 				  Bug #66124.
+				  Copy a new local zval, convert to double on it's own instead of changing copies[i].
+				  Previous version of declaration is commented
+ 				*/
+				// zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+				zval *tmp_data;
+				MAKE_STD_ZVAL(tmp_data);
+				*tmp_data = (copies && copies[i])? *copies[i]: *(stmt->param_bind[i].zv);
+				Z_SET_REFCOUNT_P(tmp_data, 1);
+				zval_copy_ctor(tmp_data);
+
+				convert_to_double_ex(&tmp_data);
+
 				if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
 					stmt->send_types_to_server = resend_types_next_time = 1;
 				}
+				zval_dtor(tmp_data);
 			}
 		}
 	}
@@ -631,11 +643,22 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				*/
 				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
-					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+					/*
+ 					  Bug #66124.
+					  Copy a new local zval, convert to double on it's own instead of changing copies[i].
+					  Previous version of declaration is commented
+ 					*/
+					// zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 
-					//convert_to_double_ex(&tmp_data);
+					zval *tmp_data;
+					MAKE_STD_ZVAL(tmp_data);
+					*tmp_data = (copies && copies[i])? *copies[i]: *(stmt->param_bind[i].zv);
+					Z_SET_REFCOUNT_P(tmp_data, 1);
+					zval_copy_ctor(tmp_data);
+
+					convert_to_double_ex(&tmp_data);
 					if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
-						convert_to_string_ex(&tmp_data);
+						convert_to_string_ex(&(copies[i]));
 						current_type = MYSQL_TYPE_VAR_STRING;
 						/*
 						  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
@@ -644,8 +667,11 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 						  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 						*/
 					} else {
-						convert_to_long_ex(&tmp_data);
+						convert_to_long_ex(&(copies[i]));
 					}
+
+					zval_dtor(tmp_data);
+
 				}
 			}
 			int2store(*p, current_type);
