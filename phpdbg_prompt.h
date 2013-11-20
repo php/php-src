@@ -20,14 +20,12 @@
 #ifndef PHPDBG_PROMPT_H
 #define PHPDBG_PROMPT_H
 
-/**
- * Maximum command length
- */
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 int phpdbg_interactive(TSRMLS_D);
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
 int phpdbg_compile(TSRMLS_D);
 void phpdbg_clean(zend_bool full TSRMLS_DC);
+void phpdbg_sigint_handler(int signo);
 
 #if PHP_VERSION_ID >= 50500
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);

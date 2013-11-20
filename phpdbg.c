@@ -17,6 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef ZEND_SIGNALS
+# include <signal.h>
+#endif
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
@@ -431,13 +434,6 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-void phpdbg_sigint_handler(int signo)
-{
-	TSRMLS_FETCH();
-	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
-	phpdbg_notice("here");
-}
-
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -610,18 +606,15 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
-#ifdef ZEND_SIGNALS
-		zend_signal(SIGINT, phpdbg_sigint_handler);
-#else
-		signal(SIGINT, phpdbg_sigint_handler);
-#endif
-
 		zend_activate(TSRMLS_C);
 
 #ifdef ZEND_SIGNALS
 		zend_try {
-			zend_signals_activate(TSRMLS_C);
+			zend_signal_activate(TSRMLS_C);
+			zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
 		} zend_end_try();
+#else
+		signal(SIGINT, phpdbg_sigint_handler);
 #endif
 
 		PG(modules_activated) = 0;

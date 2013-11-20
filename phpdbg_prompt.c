@@ -1087,6 +1087,12 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
+void phpdbg_sigint_handler(int signo)
+{
+	TSRMLS_FETCH();
+	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+}
+
 static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
 {
 #if PHP_VERSION_ID >= 50500
@@ -1301,6 +1307,13 @@ zend_vm_enter:
 		}
 
 next:
+		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+			phpdbg_writeln(EMPTY);
+			phpdbg_notice("Program received signal SIGINT");
+			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
+			DO_INTERACTIVE();
+		}
+
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
 		if (PHPDBG_G(vmret) > 0) {
