@@ -10,6 +10,7 @@ Version 0.0.2 0000-00-00
 4. Include all alias information and sub-command information in help
 5. Added finish/f command
 6. Added info command
+7. Added signal handling to break execution (ctrl-c)
 
 
 Version 0.0.1 2013-11-15
