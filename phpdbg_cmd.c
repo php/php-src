@@ -321,25 +321,21 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 				
 				if (input->argc > 1) {
 					if (command->subs) {
-						phpdbg_input_t sub;
-						
-						sub.length = input->length;
-						sub.string = input->string;
-						sub.start = input->start;
+						phpdbg_input_t sub = *input;
 						
 						sub.string += input->argv[0]->length;
 						sub.length -= input->argv[0]->length;
-						while (isspace(*sub.string)) {
-							sub.string++;
-							sub.length--;
-						}
-						sub.argc = input->argc-1;
-						sub.argv = &input->argv[1];
-						sub.string = estrndup(sub.string, sub.length);
+						
+						sub.string = phpdbg_trim(
+							sub.string, sub.length, &sub.length);
+
+						sub.argc--;
+						sub.argv++;
 						
 						phpdbg_debug(
 							"trying sub commands in \"%s\" for \"%s\" with %d arguments",
 							command->name, sub.argv[0]->string, sub.argc-1);
+							
 						if (phpdbg_do_cmd(command->subs, &sub TSRMLS_CC) == SUCCESS) {
 							efree(sub.string);
 							return SUCCESS;
@@ -351,11 +347,10 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 						
 						input->string += input->argv[0]->length;
 						input->length -= input->argv[0]->length;
-						while (isspace(*input->string)) {
-							input->string++;
-							input->length--;
-						}
-						input->string = estrndup(input->string, input->length);
+						
+						input->string = phpdbg_trim(
+							input->string, input->length, &input->length);
+						
 						efree(store);
 					}
 					
