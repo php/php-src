@@ -35,4 +35,29 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
 #endif
 
+/* {{{ */
+PHPDBG_COMMAND(exec);
+PHPDBG_COMMAND(compile);
+PHPDBG_COMMAND(step);
+PHPDBG_COMMAND(next);
+PHPDBG_COMMAND(run);
+PHPDBG_COMMAND(eval);
+PHPDBG_COMMAND(until);
+PHPDBG_COMMAND(finish);
+PHPDBG_COMMAND(leave);
+PHPDBG_COMMAND(print);
+PHPDBG_COMMAND(break);
+PHPDBG_COMMAND(back);
+PHPDBG_COMMAND(list);
+PHPDBG_COMMAND(info);
+PHPDBG_COMMAND(clean);
+PHPDBG_COMMAND(clear);
+PHPDBG_COMMAND(help);
+PHPDBG_COMMAND(quiet);
+PHPDBG_COMMAND(aliases);
+PHPDBG_COMMAND(shell);
+PHPDBG_COMMAND(oplog);
+PHPDBG_COMMAND(register);
+PHPDBG_COMMAND(quit); /* }}} */
+
 #endif /* PHPDBG_PROMPT_H */

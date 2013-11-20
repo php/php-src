@@ -392,6 +392,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'i', 1, "specify init"},
 	{'I', 0, "ignore init"},
 	{'O', 1, "opline log"},
+	{'r', 0, "run"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -450,6 +451,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
+	int run = 0;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -481,9 +483,13 @@ phpdbg_main:
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
-
+	run = 0;
+	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
+			case 'r':
+				run++;
+			break;
 			case 'n':
 				phpdbg->php_ini_ignore = 1;
 			break;
@@ -646,6 +652,15 @@ phpdbg_main:
                 goto phpdbg_out;
             }
         } zend_end_try();
+        
+        if (run) {
+        	/* no need to try{}, run does it ... */
+	    	PHPDBG_COMMAND_HANDLER(run)(NULL, NULL TSRMLS_CC);
+	    	if (run > 1) {
+	    		/* if -r is on the command line more than once just quit */
+	    		goto phpdbg_out;
+	    	}
+        }
 
         /* phpdbg main() */
         do {
@@ -664,7 +679,6 @@ phpdbg_main:
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 
 phpdbg_out:
-
 		if (ini_entries) {
 		    free(ini_entries);
 		}

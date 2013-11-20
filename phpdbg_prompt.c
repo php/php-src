@@ -33,31 +33,6 @@
 #include "phpdbg_prompt.h"
 #include "phpdbg_cmd.h"
 
-/* {{{ forward declarations */
-static PHPDBG_COMMAND(exec);
-static PHPDBG_COMMAND(compile);
-static PHPDBG_COMMAND(step);
-static PHPDBG_COMMAND(next);
-static PHPDBG_COMMAND(run);
-static PHPDBG_COMMAND(eval);
-static PHPDBG_COMMAND(until);
-static PHPDBG_COMMAND(finish);
-static PHPDBG_COMMAND(leave);
-static PHPDBG_COMMAND(print);
-static PHPDBG_COMMAND(break);
-static PHPDBG_COMMAND(back);
-static PHPDBG_COMMAND(list);
-static PHPDBG_COMMAND(info);
-static PHPDBG_COMMAND(clean);
-static PHPDBG_COMMAND(clear);
-static PHPDBG_COMMAND(help);
-static PHPDBG_COMMAND(quiet);
-static PHPDBG_COMMAND(aliases);
-static PHPDBG_COMMAND(shell);
-static PHPDBG_COMMAND(oplog);
-static PHPDBG_COMMAND(register);
-static PHPDBG_COMMAND(quit); /* }}} */
-
 /* {{{ command declarations */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
@@ -186,7 +161,7 @@ next_line:
 	}
 } /* }}} */
 
-static PHPDBG_COMMAND(exec) /* {{{ */
+PHPDBG_COMMAND(exec) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM: {
@@ -256,7 +231,7 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-static PHPDBG_COMMAND(compile) /* {{{ */
+PHPDBG_COMMAND(compile) /* {{{ */
 {
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("No execution context");
@@ -275,7 +250,7 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(step) /* {{{ */
+PHPDBG_COMMAND(step) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM:
@@ -296,12 +271,12 @@ static PHPDBG_COMMAND(step) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(next) /* {{{ */
+PHPDBG_COMMAND(next) /* {{{ */
 {
 	return PHPDBG_NEXT;
 } /* }}} */
 
-static PHPDBG_COMMAND(until) /* {{{ */
+PHPDBG_COMMAND(until) /* {{{ */
 {
 	if (!EG(in_execution)) {
 		phpdbg_error("Not executing");
@@ -329,7 +304,7 @@ static PHPDBG_COMMAND(until) /* {{{ */
 	return PHPDBG_UNTIL;
 } /* }}} */
 
-static PHPDBG_COMMAND(finish) /* {{{ */
+PHPDBG_COMMAND(finish) /* {{{ */
 {
 	if (!EG(in_execution)) {
 		phpdbg_error("Not executing");
@@ -362,7 +337,7 @@ static PHPDBG_COMMAND(finish) /* {{{ */
 	return PHPDBG_FINISH;
 } /* }}} */
 
-static PHPDBG_COMMAND(leave) /* {{{ */
+PHPDBG_COMMAND(leave) /* {{{ */
 {
 	if (!EG(in_execution)) {
 		phpdbg_error("Not executing");
@@ -445,7 +420,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	zval_dtor(&exception);
 } /* }}} */
 
-static PHPDBG_COMMAND(run) /* {{{ */
+PHPDBG_COMMAND(run) /* {{{ */
 {
 	if (EG(in_execution)) {
 		phpdbg_error("Cannot start another execution while one is in progress");
@@ -508,7 +483,7 @@ out:
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(eval) /* {{{ */
+PHPDBG_COMMAND(eval) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM: {
@@ -554,7 +529,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(back) /* {{{ */
+PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!EG(in_execution)) {
 		phpdbg_error("Not executing!");
@@ -592,7 +567,7 @@ static PHPDBG_COMMAND(back) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(print) /* {{{ */
+PHPDBG_COMMAND(print) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM: {
@@ -644,12 +619,12 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(info) /* {{{ */
+PHPDBG_COMMAND(info) /* {{{ */
 {
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(break) /* {{{ */
+PHPDBG_COMMAND(break) /* {{{ */
 {
 	switch (param->type) {
 		case ADDR_PARAM:
@@ -674,7 +649,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(shell) /* {{{ */
+PHPDBG_COMMAND(shell) /* {{{ */
 {
 	/* don't allow this to loop, ever ... */
 	switch (param->type) {
@@ -710,7 +685,7 @@ static PHPDBG_COMMAND(shell) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(register) /* {{{ */
+PHPDBG_COMMAND(register) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM: {
@@ -742,7 +717,7 @@ static PHPDBG_COMMAND(register) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(quit) /* {{{ */
+PHPDBG_COMMAND(quit) /* {{{ */
 {
     /* don't allow this to loop, ever ... */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -754,7 +729,7 @@ static PHPDBG_COMMAND(quit) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(clean) /* {{{ */
+PHPDBG_COMMAND(clean) /* {{{ */
 {
 	if (EG(in_execution)) {
 		phpdbg_error("Cannot clean environment while executing");
@@ -773,7 +748,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(clear) /* {{{ */
+PHPDBG_COMMAND(clear) /* {{{ */
 {
 	phpdbg_notice("Clearing Breakpoints");
 
@@ -788,7 +763,7 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(aliases) /* {{{ */
+PHPDBG_COMMAND(aliases) /* {{{ */
 {
 	const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
 
@@ -821,7 +796,7 @@ static PHPDBG_COMMAND(aliases) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(oplog) /* {{{ */
+PHPDBG_COMMAND(oplog) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM:
@@ -860,7 +835,7 @@ static PHPDBG_COMMAND(oplog) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(help) /* {{{ */
+PHPDBG_COMMAND(help) /* {{{ */
 {
     switch (param->type) {
         case EMPTY_PARAM: {
@@ -899,6 +874,9 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_writeln(" -i\t-imy.init\t\tSet .phpdbginit file");
 			phpdbg_writeln(" -I\tN/A\t\t\tIgnore default .phpdbginit");
 			phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
+			phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
+			phpdbg_notice(
+				"Note: passing -rr will cause phpdbg to quit after execution");
 			phpdbg_help_footer();
 		} break;
 
@@ -908,7 +886,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(quiet) /* {{{ */
+PHPDBG_COMMAND(quiet) /* {{{ */
 {
 	switch (param->type) {
 		case NUMERIC_PARAM: {
@@ -927,7 +905,7 @@ static PHPDBG_COMMAND(quiet) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(list) /* {{{ */
+PHPDBG_COMMAND(list) /* {{{ */
 {
 	switch (param->type) {
         case NUMERIC_PARAM:
