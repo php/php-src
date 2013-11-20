@@ -485,7 +485,7 @@ out:
 
 PHPDBG_COMMAND(eval) /* {{{ */
 {
-	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
 	zval retval;
 	char *code = NULL;
 
@@ -1212,7 +1212,8 @@ zend_vm_enter:
 
 		/* allow conditional breakpoints and
 			initialization to access the vm uninterrupted */
-		if (PHPDBG_G(flags) & PHPDBG_IN_COND_BP|PHPDBG_IS_INITIALIZING) {
+		if ((PHPDBG_G(flags) & PHPDBG_IN_COND_BP) ||
+			(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
 			/* skip possible breakpoints */
 			goto next;
 		}
