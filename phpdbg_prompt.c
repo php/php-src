@@ -890,7 +890,8 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_writeln(EMPTY);
 			phpdbg_writeln(" -c\t-c/my/php.ini\t\tSet php.ini file to load");
 			phpdbg_writeln(" -d\t-dmemory_limit=4G\tSet a php.ini directive");
-			phpdbg_writeln(" -n\t-N/A\t\t\tDisable default php.ini");
+			phpdbg_writeln(" -n\tN/A\t\t\tDisable default php.ini");
+			phpdbg_writeln(" -q\tN/A\t\t\tSupress welcome banner");
 			phpdbg_writeln(" -e\t-emytest.php\t\tSet execution context");
 			phpdbg_writeln(" -v\tN/A\t\t\tEnable oplog output");
 			phpdbg_writeln(" -s\tN/A\t\t\tEnable stepping");
