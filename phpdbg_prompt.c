@@ -485,7 +485,7 @@ out:
 
 PHPDBG_COMMAND(eval) /* {{{ */
 {
-	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
 	zval retval;
 	char *code = NULL;
 	

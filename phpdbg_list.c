@@ -140,7 +140,7 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 	HANDLE fd, map;
 #endif
 	int all_content = (count == 0);
-	unsigned int line = 0, displayed = 0;
+	int line = 0, displayed = 0;
 
     	if (VCWD_STAT(filename, &st) == FAILURE) {
 		phpdbg_error("Failed to stat file %s", filename);

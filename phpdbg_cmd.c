@@ -370,8 +370,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, const phpdbg_input_t *input T
 		phpdbg_error(
 			"No function executed !!");
 	}
-	
-out:
+
 	return rc;
 } /* }}} */
 
