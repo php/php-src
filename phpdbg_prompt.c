@@ -917,7 +917,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *function = input->argv[0];
 
@@ -925,17 +925,19 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 		&PHPDBG_G(registered), function->string, function->length+1)) {
 
 		zval fname, *fretval;
-		zend_fcall_info *fci = ecalloc(1, sizeof(zend_fcall_info));
+		zend_fcall_info fci;
 		
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
-		fci->size = sizeof(zend_fcall_info);
-		fci->function_table = &PHPDBG_G(registered);
-		fci->function_name = &fname;
-		fci->symbol_table = EG(active_symbol_table);
-		fci->object_ptr = NULL;
-		fci->retval_ptr_ptr = &fretval;
-		fci->no_separation = 1;
+		memset(&fci, 0, sizeof(zend_fcall_info));		
+		
+		fci.size = sizeof(zend_fcall_info);
+		fci.function_table = &PHPDBG_G(registered);
+		fci.function_name = &fname;
+		fci.symbol_table = EG(active_symbol_table);
+		fci.object_ptr = NULL;
+		fci.retval_ptr_ptr = &fretval;
+		fci.no_separation = 1;
 		
 		if (input->argc > 1) {
 			int param;
@@ -954,17 +956,17 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 					param, param+1, input->argv[param+1]->string);
 			}
 			
-			zend_fcall_info_args(fci, &params TSRMLS_CC);
+			zend_fcall_info_args(&fci, &params TSRMLS_CC);
 		} else {
-			fci->params = NULL;
-			fci->param_count = 0;
+			fci.params = NULL;
+			fci.param_count = 0;
 		}
 		
 		phpdbg_debug(
 			"created %d params from %d argvuments", 
-			fci->param_count, input->argc);
+			fci.param_count, input->argc);
 		
-		zend_call_function(fci, NULL TSRMLS_CC);
+		zend_call_function(&fci, NULL TSRMLS_CC);
 		
 		if (fretval) {
 			zend_print_zval_r(
@@ -973,12 +975,6 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 		}
 
 		zval_dtor(&fname);
-
-		if (fci->params) {
-			efree(fci->params);
-		}
-		
-		efree(fci);
 		
 		return SUCCESS;
 	}
