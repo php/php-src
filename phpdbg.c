@@ -452,6 +452,8 @@ int main(int argc, char **argv) /* {{{ */
 	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
 	int run = 0;
+	int step = 0;
+	
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -484,6 +486,7 @@ phpdbg_main:
 	php_optind = 1;
 	opt = 0;
 	run = 0;
+	step = 0;
 	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
@@ -564,7 +567,7 @@ phpdbg_main:
 			break;
 
 			case 's': /* set stepping on */
-				flags |= PHPDBG_IS_STEPPING;
+				step = 1;
 			break;
 
 			case 'b': /* set colours off */
@@ -652,6 +655,11 @@ phpdbg_main:
                 goto phpdbg_out;
             }
         } zend_end_try();
+        
+        /* step from here, not through init */
+        if (step) {
+        	PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+        }
         
         if (run) {
         	/* no need to try{}, run does it ... */
