@@ -477,8 +477,10 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			&PHPDBG_G(seek));
 
 		zend_try {
+			php_output_activate(TSRMLS_C);
 			zend_execute(
 			    EG(active_op_array) TSRMLS_CC);
+			php_output_deactivate(TSRMLS_C);
 		} zend_catch {
 		    EG(active_op_array) = orig_op_array;
 		    EG(opline_ptr) = orig_opline;

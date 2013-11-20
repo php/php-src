@@ -334,6 +334,16 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 }
 /* }}} */
 
+static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int length TSRMLS_DC) /* {{{ */
+{
+	return phpdbg_write(message);
+} /* }}} */
+
+static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
+{
+	fflush(stdout);
+} /* }}} */
+
 /* {{{ sapi_module_struct phpdbg_sapi_module
  */
 static sapi_module_struct phpdbg_sapi_module = {
@@ -346,8 +356,8 @@ static sapi_module_struct phpdbg_sapi_module = {
 	NULL,		                    /* activate */
 	php_sapi_phpdbg_deactivate,		/* deactivate */
 
-	NULL,			                /* unbuffered write */
-	NULL,				            /* flush */
+	php_sapi_phpdbg_ub_write,		/* unbuffered write */
+	php_sapi_phpdbg_flush,			/* flush */
 	NULL,							/* get uid */
 	NULL,				            /* getenv */
 
