@@ -2043,7 +2043,7 @@ PHP_FUNCTION(iconv_strpos)
 	php_iconv_err_t err;
 
 	zend_str_size_uint retval;
-__debugbreak();
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|iS",
 		&haystk, &haystk_len, &ndl, &ndl_len,
 		&offset, &charset, &charset_len) == FAILURE) {
