@@ -63,11 +63,6 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHP_MSHUTDOWN_FUNCTION(phpdbg)
-{
-	return SUCCESS;
-}
-
 static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
 {
 	zend_llist_destroy((zend_llist*)brake);
