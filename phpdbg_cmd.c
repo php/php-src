@@ -118,7 +118,7 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
-static inline phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
+static inline phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
 	char *p;
 	char b[PHPDBG_MAX_CMD];
