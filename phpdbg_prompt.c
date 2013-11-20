@@ -154,12 +154,17 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						goto next_line;
 					}
 					
-					switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
-						case FAILURE:
-							phpdbg_error(
-								"Unrecognized command in %s:%d: %s!", init_file, line, cmd);
-						break;
+					{
+						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
+						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
+							case FAILURE:
+								phpdbg_error(
+									"Unrecognized command in %s:%d: %s!", init_file, line, cmd);
+							break;
+						}
+						phpdbg_destroy_input(&input TSRMLS_CC);
 					}
+					
 				}
 next_line:
 				line++;
@@ -977,11 +982,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
+	phpdbg_input_t* input = phpdbg_read_input(NULL TSRMLS_CC);
 
 	if (input && input->length > 0L) {
 		do {
-			switch (ret = phpdbg_do_cmd_ex(phpdbg_prompt_commands, input TSRMLS_CC)) {
+			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 						if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
@@ -1002,9 +1007,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			}
 
 			phpdbg_destroy_input(&input TSRMLS_CC);
-		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
+		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)) && (input->length > 0L));
 
-		if (!input->length)
+		if (input && !input->length)
 			goto last;
 
 	} else {
