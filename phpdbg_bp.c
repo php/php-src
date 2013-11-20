@@ -125,9 +125,9 @@ void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name 
 
         PHPDBG_G(flags) |= PHPDBG_HAS_METHOD_BP;
 
-        new_break.class_name = class_name;
+        new_break.class_name = estrndup(class_name, class_len);
         new_break.class_len = class_len;
-        new_break.func_name = func_name;
+        new_break.func_name = estrndup(func_name, func_len);
         new_break.func_len = func_len;
         new_break.id = PHPDBG_G(bp_count)++;
 
