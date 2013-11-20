@@ -488,24 +488,24 @@ PHPDBG_COMMAND(eval) /* {{{ */
 	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
 	zval retval;
 	char *code = NULL;
-	
+
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
 		PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
 	}
 
 	if (input && input->start) {
 		code = (char*) input->start;
-	
+
 		if (memcmp(
 			code, "eval", sizeof("eval")-1) == SUCCESS) {
 			code += sizeof("eval")-1;
 		} else code += sizeof("E")-1;
-	
+
 		while (code && isspace(*code)) {
 			code++;
 		}
 	} else phpdbg_error("Nothing to execute");
-	
+
 	/* disable stepping while eval() in progress */
 	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
 	if (zend_eval_stringl(code, strlen(code),
@@ -653,21 +653,21 @@ PHPDBG_COMMAND(shell) /* {{{ */
 		case STR_PARAM: {
 			FILE *fd = NULL;
 			char * program = NULL;
-			
+
 			/* we expect an input, I hope we get one ! */
 			if (input && input->start) {
 				program = (char*) input->start;
-				
+
 				if (memcmp(
 					program, "shell", sizeof("shell")-1) == SUCCESS) {
 					program += sizeof("shell")-1;
 				} else program += sizeof("-")-1;
-				
+
 				while (program && isspace(*program)) {
 					program++;
 				}
 			} else program = param->str;
-			
+
 			if ((fd=VCWD_POPEN((char*)program, "w"))) {
 				/* do something perhaps ?? do we want input ?? */
 				fclose(fd);
@@ -1210,7 +1210,7 @@ zend_vm_enter:
 	} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));\
 } while(0)
 
-		/* allow conditional breakpoints and 
+		/* allow conditional breakpoints and
 			initialization to access the vm uninterrupted */
 		if (PHPDBG_G(flags) & PHPDBG_IN_COND_BP|PHPDBG_IS_INITIALIZING) {
 			/* skip possible breakpoints */

@@ -81,7 +81,7 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	phpdbg_notice("Variables: %d",
 		zend_hash_num_elements(&vars));
-		
+
 	if (zend_hash_num_elements(&vars)) {
 		phpdbg_writeln("Address\t\tRefs\tType\t\tVariable");
 		for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
@@ -106,10 +106,10 @@ PHPDBG_INFO(vars) /* {{{ */
 					case IS_OBJECT:		phpdbg_write("(object)\t"); 	break;
 					case IS_NULL:		phpdbg_write("(null)\t"); 		break;
 				}
-				
+
 				if (Z_TYPE_PP(data) == IS_RESOURCE) {
 					int type;
-					
+
 					phpdbg_writeln(
 						"%s$%s", Z_ISREF_PP(data) ? "&": "", var);
 					if (zend_list_find(Z_RESVAL_PP(data), &type)) {
@@ -144,7 +144,8 @@ PHPDBG_INFO(vars) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) { /* {{{ */
+static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+{
 	phpdbg_write(
 		"%s %s %s (%d)",
 		((*ce)->type == ZEND_USER_CLASS) ?

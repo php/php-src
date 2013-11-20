@@ -26,7 +26,6 @@ function test() {
 
 $dbg = new phpdbg();
 
-$test = 1;
 
 var_dump(
     $dbg->isGreat("PHP Rocks !!"));
@@ -34,12 +33,18 @@ var_dump(
 foreach (test() as $gen)
 	continue;
 
+
+$n = 10;
+while ($n--) {
+	sleep(1);
+}
+
 echo "it works!\n";
 
 if (isset($dump))
 	var_dump($_SERVER);
 
-function phpdbg_test_ob() 
+function phpdbg_test_ob()
 {
 	echo 'Start';
 	ob_start();
@@ -48,4 +53,6 @@ function phpdbg_test_ob()
 	echo 'End';
 	echo $b;
 }
+
+
 ?>

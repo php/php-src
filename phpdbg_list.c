@@ -239,7 +239,7 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 		ops->line_end - ops->line_start + 1, ops->line_start, 0 TSRMLS_CC);
 } /* }}} */
 
-void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)
+void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ */
 {
     HashTable *func_table = EG(function_table);
     zend_function* fbc;
@@ -275,5 +275,5 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC)
     }
 
     efree(func_name);
-}
+} /* }}} */
 

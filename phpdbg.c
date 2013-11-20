@@ -431,6 +431,13 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
+void phpdbg_sigint_handler(int signo)
+{
+	TSRMLS_FETCH();
+	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+	phpdbg_notice("here");
+}
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -449,7 +456,7 @@ int main(int argc, char **argv) /* {{{ */
 	long cleaning = 0;
 	int run = 0;
 	int step = 0;
-	
+
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
@@ -483,7 +490,7 @@ phpdbg_main:
 	opt = 0;
 	run = 0;
 	step = 0;
-	
+
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
@@ -565,7 +572,7 @@ phpdbg_main:
 			case 's': /* set stepping on */
 				step = 1;
 			break;
-			
+
 			case 'E': /* stepping through eval on */
 				flags |= PHPDBG_IS_STEPONEVAL;
 			break;
@@ -603,6 +610,12 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+#ifdef ZEND_SIGNALS
+		zend_signal(SIGINT, phpdbg_sigint_handler);
+#else
+		signal(SIGINT, phpdbg_sigint_handler);
+#endif
+
 		zend_activate(TSRMLS_C);
 
 #ifdef ZEND_SIGNALS
@@ -651,7 +664,7 @@ phpdbg_main:
         zend_try {
         	PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
             phpdbg_init(
-            	init_file, init_file_len, 
+            	init_file, init_file_len,
             	init_file_default TSRMLS_CC);
             PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
         } zend_catch {
@@ -660,12 +673,12 @@ phpdbg_main:
                 goto phpdbg_out;
             }
         } zend_end_try();
-        
+
         /* step from here, not through init */
         if (step) {
         	PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
         }
-        
+
         if (run) {
         	/* no need to try{}, run does it ... */
 	    	PHPDBG_COMMAND_HANDLER(run)(NULL, NULL TSRMLS_CC);
