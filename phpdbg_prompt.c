@@ -485,45 +485,39 @@ out:
 
 PHPDBG_COMMAND(eval) /* {{{ */
 {
-	switch (param->type) {
-		case STR_PARAM: {
-			zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
-			zval retval;
-			char *code = NULL;
-			
-			PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+	zend_bool stepping = (PHPDBG_G(flags) & PHPDBG_IS_STEPPING);
+	zval retval;
+	char *code = NULL;
+	
+	PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
 
-			if (input && input->start) {
-				code = (char*) input->start;
-			
-				if (memcmp(
-					code, "eval", sizeof("eval")-1) == SUCCESS) {
-					code += sizeof("eval")-1;
-				} else code += sizeof("E")-1;
-			
-				while (code && isspace(*code)) {
-					code++;
-				}
-			} else code = param->str;
-			
-			/* disable stepping while eval() in progress */
-			PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-			if (zend_eval_stringl(code, strlen(code),
-				&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-				zend_print_zval_r(
-					&retval, 0 TSRMLS_CC);
-				phpdbg_writeln(EMPTY);
-				zval_dtor(&retval);
-			}
-			PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+	if (input && input->start) {
+		code = (char*) input->start;
+	
+		if (memcmp(
+			code, "eval", sizeof("eval")-1) == SUCCESS) {
+			code += sizeof("eval")-1;
+		} else code += sizeof("E")-1;
+	
+		while (code && isspace(*code)) {
+			code++;
+		}
+	} else phpdbg_error("Nothing to execute");
+	
+	/* disable stepping while eval() in progress */
+	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+	if (zend_eval_stringl(code, strlen(code),
+		&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+		zend_print_zval_r(
+			&retval, 0 TSRMLS_CC);
+		phpdbg_writeln(EMPTY);
+		zval_dtor(&retval);
+	}
+	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
-            /* switch stepping back on */
-			if (stepping) {
-				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-			}
-		} break;
-
-		phpdbg_default_switch_case();
+    /* switch stepping back on */
+	if (stepping) {
+		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 	}
 
 	return SUCCESS;
