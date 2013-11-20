@@ -114,7 +114,7 @@ const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 /*
 * Command Executor
 */
-int phpdbg_do_cmd(const phpdbg_command_t*, const phpdbg_input_t* TSRMLS_DC);
+int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC);
 
 /**
  * Command Declarators

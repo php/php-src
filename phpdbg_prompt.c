@@ -485,42 +485,34 @@ out:
 
 PHPDBG_COMMAND(eval) /* {{{ */
 {
-	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
-	zval retval;
-	char *code = NULL;
+	switch (param->type) {
+		case STR_PARAM: {
+			zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
+			zval retval;
 
-	if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
-		PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-	}
+			if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
+				PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+			}
 
-	if (input && input->start) {
-		code = (char*) input->start;
+			/* disable stepping while eval() in progress */
+			PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+			if (zend_eval_stringl(param->str, param->len,
+				&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+				zend_print_zval_r(
+					&retval, 0 TSRMLS_CC);
+				phpdbg_writeln(EMPTY);
+				zval_dtor(&retval);
+			}
+			PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
-		if (memcmp(
-			code, "eval", sizeof("eval")-1) == SUCCESS) {
-			code += sizeof("eval")-1;
-		} else code += sizeof("E")-1;
-
-		while (code && isspace(*code)) {
-			code++;
-		}
-	} else phpdbg_error("Nothing to execute");
-
-	/* disable stepping while eval() in progress */
-	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-	if (zend_eval_stringl(code, strlen(code),
-		&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-		zend_print_zval_r(
-			&retval, 0 TSRMLS_CC);
-		phpdbg_writeln(EMPTY);
-		zval_dtor(&retval);
-	}
-	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
-
-    /* switch stepping back on */
-	if (stepping &&
-		!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
-		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+			/* switch stepping back on */
+			if (stepping &&
+				!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
+				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+			}
+		} break;
+		
+		phpdbg_default_switch_case();
 	}
 
 	return SUCCESS;
@@ -652,28 +644,12 @@ PHPDBG_COMMAND(shell) /* {{{ */
 	switch (param->type) {
 		case STR_PARAM: {
 			FILE *fd = NULL;
-			char * program = NULL;
-
-			/* we expect an input, I hope we get one ! */
-			if (input && input->start) {
-				program = (char*) input->start;
-
-				if (memcmp(
-					program, "shell", sizeof("shell")-1) == SUCCESS) {
-					program += sizeof("shell")-1;
-				} else program += sizeof("-")-1;
-
-				while (program && isspace(*program)) {
-					program++;
-				}
-			} else program = param->str;
-
-			if ((fd=VCWD_POPEN((char*)program, "w"))) {
+			if ((fd=VCWD_POPEN((char*)param->str, "w"))) {
 				/* do something perhaps ?? do we want input ?? */
 				fclose(fd);
 			} else {
 				phpdbg_error(
-					"Failed to execute %s", program);
+					"Failed to execute %s", param->str);
 			}
 		} break;
 
