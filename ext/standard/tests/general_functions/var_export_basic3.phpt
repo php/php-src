@@ -1,7 +1,7 @@
 --TEST--
 Test var_export() function with valid float values
 --INI--
-precision=14
+serialize_precision=17
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
