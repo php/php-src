@@ -23,7 +23,7 @@ Planned
 =======
 
  - Improve Everything :)
- 
+
 Installation
 ============
 
@@ -50,7 +50,7 @@ The following switchess are implemented (just like cli SAPI):
  - -c search for php ini in path
  - -z load zend extension
  - -d define php ini entry
- 
+
 The following switches change the default behaviour of phpdbg:
 
  - -v disables quietness
@@ -60,6 +60,7 @@ The following switches change the default behaviour of phpdbg:
  - -I ignore .phpdbginit (default init file)
  - -i override .phpgdbinit location (implies -I)
  - -O set oplog output file
+ - -q do not print banner on startup
 
 Screeny
 =======

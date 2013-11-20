@@ -384,6 +384,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'n', 0, "no php.ini"},
 	{'z', 1, "load zend_extension"},
 	/* phpdbg options */
+	{'q', 0, "no banner"},
 	{'e', 1, "exec"},
 	{'v', 0, "disable quietness"},
 	{'s', 0, "enable stepping"},
@@ -447,8 +448,7 @@ int main(int argc, char **argv) /* {{{ */
 	size_t oplog_file_len;
 	zend_ulong flags;
 	char *php_optarg;
-	int php_optind;
-	int opt;
+	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -564,6 +564,10 @@ phpdbg_main:
 			case 'b': /* set colours off */
 				flags &= ~PHPDBG_IS_COLOURED;
 			break;
+
+			case 'q': /* hide banner */
+				show_banner = 0;
+			break;
 		}
 	}
 
@@ -624,8 +628,10 @@ phpdbg_main:
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
 
-        /* print blurb */
-		phpdbg_welcome((cleaning > 0) TSRMLS_CC);
+		if (show_banner) {
+			/* print blurb */
+			phpdbg_welcome((cleaning > 0) TSRMLS_CC);
+		}
 
 		zend_try {
         	/* activate globals, they can be overwritten */
