@@ -84,16 +84,38 @@ struct _phpdbg_command_t {
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 #define PHPDBG_MAX_CMD 500
 
-/**
- * Command Executor
- */
+/*
+* Workflow:
+* 1) read input
+*	input takes the line from console, creates argc/argv
+* 2) parse parameters into suitable types based on arg_type
+*	takes input from 1) and arg_type and creates parameters
+* 3) do command
+*	executes commands
+* 4) destroy parameters
+*	cleans up what was allocated by creation of parameters
+* 5) destroy input
+*	cleans up what was allocated by creation of input
+*/
+
+/*
+* Input Management
+*/
 phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
 phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
-int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t *input TSRMLS_DC);
+void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
+
+/*
+* Parameter Management
+*/
 phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
 const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
-void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
+
+/*
+* Command Executor
+*/
+int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t *input TSRMLS_DC);
 
 /**
  * Command Declarators
