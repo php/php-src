@@ -585,7 +585,8 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			*/
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
-				convert_to_double_ex(&tmp_data);
+				//convert_to_double_ex(&tmp_data);
+				convert_to_long_ex(&tmp_data);
 				if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
 					stmt->send_types_to_server = resend_types_next_time = 1;
 				}
@@ -632,7 +633,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 
-					convert_to_double_ex(&tmp_data);
+					//convert_to_double_ex(&tmp_data);
 					if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
 						convert_to_string_ex(&tmp_data);
 						current_type = MYSQL_TYPE_VAR_STRING;
