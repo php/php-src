@@ -153,7 +153,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						}
 						goto next_line;
 					}
-					
+
 					{
 						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
 						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
@@ -164,7 +164,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						}
 						phpdbg_destroy_input(&input TSRMLS_CC);
 					}
-					
+
 				}
 next_line:
 				line++;
@@ -920,10 +920,10 @@ static PHPDBG_COMMAND(list) /* {{{ */
 int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *function = input->argv[0];
-	
+
 	if (zend_hash_exists(
 		&PHPDBG_G(registered), function->string, function->length+1)) {
-		
+
 		zval fname, *fretval;
 		zend_fcall_info *fci = emalloc(sizeof(zend_fcall_info));
 		
@@ -971,9 +971,9 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 				fretval, 0 TSRMLS_CC);
 			phpdbg_writeln(EMPTY);
 		}
-		
+
 		zval_dtor(&fname);
-		
+
 		if (fci->params) {
 			efree(fci->params);
 		}
@@ -990,7 +990,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t* input = phpdbg_read_input(NULL TSRMLS_CC);
+	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
 
 	if (input && input->length > 0L) {
 		do {

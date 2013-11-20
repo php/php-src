@@ -43,12 +43,11 @@ typedef enum {
 typedef struct _phpdbg_input_t phpdbg_input_t;
 
 struct _phpdbg_input_t {
-	char* const*    start;
-	char 		  *string;
-	size_t		   length;
-
+	char * const *start;
+	char *string;
+	size_t length;
 	phpdbg_input_t **argv;
-	int				 argc;
+	int argc;
 };
 
 typedef struct _phpdbg_param {
@@ -67,7 +66,7 @@ typedef struct _phpdbg_param {
 	size_t len;
 } phpdbg_param_t;
 
-typedef int (*phpdbg_command_handler_t)(phpdbg_param_t *param TSRMLS_DC);
+typedef int (*phpdbg_command_handler_t)(phpdbg_param_t* TSRMLS_DC);
 
 struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
