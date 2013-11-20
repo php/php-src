@@ -241,9 +241,9 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 }
 
-SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
+SAPI_API zend_str_size_int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
 {
-	int read_bytes;
+	zend_str_size_int read_bytes;
 
 	if (!sapi_module.read_post) {
 		return -1;
@@ -623,7 +623,7 @@ static void sapi_remove_header(zend_llist *l, char *name, zend_str_size_uint len
 	}
 }
 
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
+SAPI_API int sapi_add_header_ex(char *header_line, zend_str_size_uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
 {
 	sapi_header_line ctr = {0};
 	int r;

@@ -183,14 +183,14 @@ BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC);
 
 /* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
+SAPI_API int sapi_add_header_ex(char *header_line, zend_str_size_uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1 TSRMLS_CC)
 
 
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
-SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
+SAPI_API zend_str_size_int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
