@@ -925,7 +925,7 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 		&PHPDBG_G(registered), function->string, function->length+1)) {
 
 		zval fname, *fretval;
-		zend_fcall_info *fci = emalloc(sizeof(zend_fcall_info));
+		zend_fcall_info *fci = ecalloc(1, sizeof(zend_fcall_info));
 		
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
