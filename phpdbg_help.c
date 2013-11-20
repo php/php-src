@@ -412,14 +412,14 @@ PHPDBG_HELP(oplog) /* {{{ */
 PHPDBG_HELP(register) /* {{{ */
 {
 	phpdbg_help_header();
-    phpdbg_writeln("Register any global function that accepts 0 or 1 arguments for use as a command in phpdbg console");
+    phpdbg_writeln("Register any global function for use as a command in phpdbg console");
 	phpdbg_writeln(EMPTY);
     phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sregister scandir", PROMPT);
     phpdbg_writeln("\t%sR scandir", PROMPT);
     phpdbg_writeln("\tWill register the scandir function for use in phpdbg");
 	phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Note: argument will be passed as a string to the function and the return printed to the console");
+    phpdbg_writeln("Note: arguments passed as strings, return (if present) print_r'd on console");
     if (zend_hash_num_elements(&PHPDBG_G(registered))) {
    		HashPosition position;
    		char *name = NULL;
