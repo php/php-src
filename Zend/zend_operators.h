@@ -789,6 +789,7 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+#if 0
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && 0) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
@@ -843,6 +844,7 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 			return SUCCESS;
 		}
 	}
+#endif
 	return div_function(result, op1, op2 TSRMLS_CC);
 }
 
