@@ -917,7 +917,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *function = input->argv[0];
 	
@@ -925,52 +925,46 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		&PHPDBG_G(registered), function->string, function->length+1)) {
 		
 		zval fname, *fretval;
-		zend_fcall_info fci;
+		zend_fcall_info *fci = emalloc(sizeof(zend_fcall_info));
 		
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
-		fci.size = sizeof(fci);
-		fci.function_table = &PHPDBG_G(registered);
-		fci.function_name = &fname;
-		fci.symbol_table = EG(active_symbol_table);
-		fci.object_ptr = NULL;
-		fci.retval_ptr_ptr = &fretval;
-		fci.no_separation = 1;
+		fci->size = sizeof(zend_fcall_info);
+		fci->function_table = &PHPDBG_G(registered);
+		fci->function_name = &fname;
+		fci->symbol_table = EG(active_symbol_table);
+		fci->object_ptr = NULL;
+		fci->retval_ptr_ptr = &fretval;
+		fci->no_separation = 1;
 		
 		if (input->argc > 1) {
-			int arg;
-			zval ***params;
-			zval *zparam;
-			
-			fci.param_count = (input->argc > 1) ? (input->argc-1) : 0;
-			fci.params = (zval***) emalloc(fci.param_count * sizeof(zval**));
-			
-			params = fci.params;
-			
-			for (arg = 1; arg <= (input->argc-1); arg++) {
-				MAKE_STD_ZVAL(zparam);
-				ZVAL_STRINGL(
-					zparam,
-					input->argv[arg]->string,
-					input->argv[arg]->length, 1);
-				
-				*params++ = &zparam;
-			}
-		} else {
-			fci.params = NULL;
-			fci.param_count = 0;
-		}
-
-		zend_call_function(&fci, NULL TSRMLS_CC);
-
-		if (input->argc > 1) {
 			int param;
+			zval params;
 			
-			for (param = 0; param < fci.param_count; param++) {
-				zval_ptr_dtor(fci.params[param]);
+			array_init(&params);
+			
+			for (param = 0; param < (input->argc-1); param++) {
+				add_next_index_stringl(
+					&params, 
+					input->argv[param+1]->string,
+					input->argv[param+1]->length, 1);
+			
+				phpdbg_debug(
+					"created param[%d] from argv[%d]: %s", 
+					param, param+1, input->argv[param+1]->string);
 			}
-			efree(fci.params);
+			
+			zend_fcall_info_args(fci, &params TSRMLS_CC);
+		} else {
+			fci->params = NULL;
+			fci->param_count = 0;
 		}
+		
+		phpdbg_debug(
+			"created %d params from %d argvuments", 
+			fci->param_count, input->argc);
+		
+		zend_call_function(fci, NULL TSRMLS_CC);
 		
 		if (fretval) {
 			zend_print_zval_r(
@@ -979,6 +973,12 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		}
 		
 		zval_dtor(&fname);
+		
+		if (fci->params) {
+			efree(fci->params);
+		}
+		
+		efree(fci);
 		
 		return SUCCESS;
 	}

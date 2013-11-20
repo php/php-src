@@ -130,7 +130,7 @@ phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 	} state = IN_BETWEEN;
 	phpdbg_input_t **argv = NULL;
 
-	argv = (phpdbg_input_t**) emalloc(sizeof(phpdbg_input_t**));
+	argv = (phpdbg_input_t**) emalloc(sizeof(phpdbg_input_t*));
 	(*argc) = 0;
 
 #define RESET_STATE() do {\
