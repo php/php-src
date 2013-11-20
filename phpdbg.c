@@ -654,8 +654,13 @@ phpdbg_main:
 
         /* initialize from file */
         zend_try {
-            phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+        	PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
+            phpdbg_init(
+            	init_file, init_file_len, 
+            	init_file_default TSRMLS_CC);
+            PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
         } zend_catch {
+        	PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
             if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
                 goto phpdbg_out;
             }

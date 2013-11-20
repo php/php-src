@@ -1210,8 +1210,9 @@ zend_vm_enter:
 	} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));\
 } while(0)
 
-		/* allow conditional breakpoints to access the vm uninterrupted */
-		if (PHPDBG_G(flags) & PHPDBG_IN_COND_BP) {
+		/* allow conditional breakpoints and 
+			initialization to access the vm uninterrupted */
+		if (PHPDBG_G(flags) & PHPDBG_IN_COND_BP|PHPDBG_IS_INITIALIZING) {
 			/* skip possible breakpoints */
 			goto next;
 		}
