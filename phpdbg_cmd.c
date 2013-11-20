@@ -342,7 +342,10 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 						}
 						
 						efree(sub.string);
-					} else {
+					}
+					
+					/* no sub command found */
+					{
 						char *store = input->string;
 						
 						input->string += input->argv[0]->length;

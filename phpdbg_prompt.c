@@ -854,7 +854,10 @@ PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_help_footer();
 		} break;
 
-		phpdbg_default_switch_case();
+		default: {
+			phpdbg_error(
+				"No help can be found for the subject \"%s\"", param->str);
+		}
 	}
 
 	return SUCCESS;
