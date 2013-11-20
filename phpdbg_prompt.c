@@ -489,7 +489,9 @@ PHPDBG_COMMAND(eval) /* {{{ */
 	zval retval;
 	char *code = NULL;
 	
-	PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+	if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
+		PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
+	}
 
 	if (input && input->start) {
 		code = (char*) input->start;
@@ -516,7 +518,8 @@ PHPDBG_COMMAND(eval) /* {{{ */
 	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
     /* switch stepping back on */
-	if (stepping) {
+	if (stepping &&
+		!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
 		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 	}
 
@@ -869,6 +872,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 			phpdbg_writeln(" -I\tN/A\t\t\tIgnore default .phpdbginit");
 			phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 			phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
+			phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
 			phpdbg_notice(
 				"Note: passing -rr will cause phpdbg to quit after execution");
 			phpdbg_help_footer();
@@ -1184,13 +1188,15 @@ zend_vm_enter:
 #endif
 
 #define DO_INTERACTIVE() do {\
-	phpdbg_list_file(\
-		zend_get_executed_filename(TSRMLS_C), \
-		3, \
-		zend_get_executed_lineno(TSRMLS_C)-1, \
-		zend_get_executed_lineno(TSRMLS_C) \
-		TSRMLS_CC\
-	);\
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {\
+		phpdbg_list_file(\
+			zend_get_executed_filename(TSRMLS_C), \
+			3, \
+			zend_get_executed_lineno(TSRMLS_C)-1, \
+			zend_get_executed_lineno(TSRMLS_C) \
+			TSRMLS_CC\
+		);\
+	}\
 	\
 	do {\
 		switch (phpdbg_interactive(TSRMLS_C)) {\

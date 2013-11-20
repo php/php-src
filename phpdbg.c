@@ -393,6 +393,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'I', 0, "ignore init"},
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
+	{'E', 0, "step-through-eval"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -568,6 +569,10 @@ phpdbg_main:
 
 			case 's': /* set stepping on */
 				step = 1;
+			break;
+			
+			case 'E': /* stepping through eval on */
+				flags |= PHPDBG_IS_STEPONEVAL;
 			break;
 
 			case 'b': /* set colours off */
