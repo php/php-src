@@ -66,7 +66,7 @@ typedef struct _phpdbg_param {
 	size_t len;
 } phpdbg_param_t;
 
-typedef int (*phpdbg_command_handler_t)(phpdbg_param_t* TSRMLS_DC);
+typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*, const phpdbg_input_t* TSRMLS_DC);
 
 struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
@@ -114,7 +114,7 @@ const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 /*
 * Command Executor
 */
-int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t *input TSRMLS_DC);
+int phpdbg_do_cmd(const phpdbg_command_t*, const phpdbg_input_t* TSRMLS_DC);
 
 /**
  * Command Declarators
@@ -127,7 +127,9 @@ int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t *input TSRMLS_DC);
 #define PHPDBG_COMMAND_D(name, tip, alias, children, has_args) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, has_args}
 
-#define PHPDBG_COMMAND(name) int phpdbg_do_##name(phpdbg_param_t *param TSRMLS_DC)
+#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC)
+
+#define PHPDBG_COMMAND_ARGS param, input TSRMLS_CC
 
 #define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
 

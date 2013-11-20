@@ -102,15 +102,15 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 static void php_phpdbg_destroy_registered(void *data)
 {
 	TSRMLS_FETCH();
-	
+
 	zend_function *function = (zend_function*) data;
-	
+
 	destroy_zend_function(
 		function TSRMLS_CC);
 }
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
-{	
+{
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
@@ -118,7 +118,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
     zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -131,7 +131,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
-	
+
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
         PHPDBG_G(exec) = NULL;
@@ -170,19 +170,19 @@ static PHP_FUNCTION(phpdbg_break)
 
         switch (type) {
             case METHOD_PARAM:
-                phpdbg_do_break_method(&param TSRMLS_CC);
+                phpdbg_do_break_method(&param, NULL TSRMLS_CC);
             break;
 
             case FILE_PARAM:
-                phpdbg_do_break_file(&param TSRMLS_CC);
+                phpdbg_do_break_file(&param, NULL TSRMLS_CC);
             break;
 
             case NUMERIC_PARAM:
-                phpdbg_do_break_lineno(&param TSRMLS_CC);
+                phpdbg_do_break_lineno(&param, NULL TSRMLS_CC);
             break;
 
             case STR_PARAM:
-                phpdbg_do_break_func(&param TSRMLS_CC);
+                phpdbg_do_break_func(&param, NULL TSRMLS_CC);
             break;
 
             default: zend_error(
@@ -616,7 +616,7 @@ phpdbg_main:
 
         /* print blurb */
 		phpdbg_welcome((cleaning > 0) TSRMLS_CC);
-		
+
 		zend_try {
         	/* activate globals, they can be overwritten */
         	zend_activate_auto_globals(TSRMLS_C);

@@ -899,17 +899,17 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	switch (param->type) {
         case NUMERIC_PARAM:
 	    case EMPTY_PARAM:
-			return PHPDBG_LIST_HANDLER(lines)(param TSRMLS_CC);
+			return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
 
 		case FILE_PARAM:
-			return PHPDBG_LIST_HANDLER(lines)(param TSRMLS_CC);
+			return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
 
 		case STR_PARAM:
 		    phpdbg_list_function_byname(param->str, param->len TSRMLS_CC);
 			break;
 
 		case METHOD_PARAM:
-		    return PHPDBG_LIST_HANDLER(method)(param TSRMLS_CC);
+		    return PHPDBG_LIST_HANDLER(method)(PHPDBG_COMMAND_ARGS);
 
 		phpdbg_default_switch_case();
     }
@@ -926,7 +926,7 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 
 		zval fname, *fretval;
 		zend_fcall_info *fci = ecalloc(1, sizeof(zend_fcall_info));
-		
+
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
 		fci->size = sizeof(zend_fcall_info);
@@ -936,36 +936,36 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 		fci->object_ptr = NULL;
 		fci->retval_ptr_ptr = &fretval;
 		fci->no_separation = 1;
-		
+
 		if (input->argc > 1) {
 			int param;
 			zval params;
-			
+
 			array_init(&params);
-			
+
 			for (param = 0; param < (input->argc-1); param++) {
 				add_next_index_stringl(
-					&params, 
+					&params,
 					input->argv[param+1]->string,
 					input->argv[param+1]->length, 1);
-			
+
 				phpdbg_debug(
-					"created param[%d] from argv[%d]: %s", 
+					"created param[%d] from argv[%d]: %s",
 					param, param+1, input->argv[param+1]->string);
 			}
-			
+
 			zend_fcall_info_args(fci, &params TSRMLS_CC);
 		} else {
 			fci->params = NULL;
 			fci->param_count = 0;
 		}
-		
+
 		phpdbg_debug(
-			"created %d params from %d argvuments", 
+			"created %d params from %d argvuments",
 			fci->param_count, input->argc);
-		
+
 		zend_call_function(fci, NULL TSRMLS_CC);
-		
+
 		if (fretval) {
 			zend_print_zval_r(
 				fretval, 0 TSRMLS_CC);
@@ -977,9 +977,9 @@ int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 		if (fci->params) {
 			efree(fci->params);
 		}
-		
+
 		efree(fci);
-		
+
 		return SUCCESS;
 	}
 
@@ -1024,7 +1024,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 last:
 		if (PHPDBG_G(lcmd)) {
 			ret = PHPDBG_G(lcmd)->handler(
-					&PHPDBG_G(lparam) TSRMLS_CC);
+					&PHPDBG_G(lparam), input TSRMLS_CC);
 			goto out;
 		}
 	}
