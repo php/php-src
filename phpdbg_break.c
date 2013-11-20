@@ -67,6 +67,12 @@ PHPDBG_BREAK(address) /* {{{ */
 
 PHPDBG_BREAK(on) /* {{{ */
 {
+	if (input && input->argc > 2) {
+		phpdbg_error(
+			"Unquoted complex expression detected, please \"quote\" complex expressions");
+		return SUCCESS;
+	}
+	
     switch (param->type) {
         case STR_PARAM:
             phpdbg_set_breakpoint_expression(param->str, param->len TSRMLS_CC);

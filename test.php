@@ -26,7 +26,6 @@ function test() {
 
 $dbg = new phpdbg();
 
-
 var_dump(
     $dbg->isGreat("PHP Rocks !!"));
 

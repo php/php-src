@@ -322,7 +322,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, const phpdbg_input_t *input T
 				if (input->argc > 1) {
 					if (command->subs) {
 						phpdbg_input_t sub;
-
+						
 						sub.argc = input->argc-1;
 						sub.argv = &input->argv[1];
 
