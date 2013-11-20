@@ -33,12 +33,6 @@ var_dump(
 foreach (test() as $gen)
 	continue;
 
-
-$n = 10;
-while ($n--) {
-	sleep(1);
-}
-
 echo "it works!\n";
 
 if (isset($dump))
