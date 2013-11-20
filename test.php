@@ -38,11 +38,14 @@ echo "it works!\n";
 
 if (isset($dump))
 	var_dump($_SERVER);
-	
-echo 'Start';
-ob_start();
-echo 'Hello';
-$b = ob_get_clean();
-echo 'End';
-echo $b;
+
+function phpdbg_test_ob() 
+{
+	echo 'Start';
+	ob_start();
+	echo 'Hello';
+	$b = ob_get_clean();
+	echo 'End';
+	echo $b;
+}
 ?>
