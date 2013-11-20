@@ -153,7 +153,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						}
 						goto next_line;
 					}
-					
+
 					{
 						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
 						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
@@ -164,7 +164,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						}
 						phpdbg_destroy_input(&input TSRMLS_CC);
 					}
-					
+
 				}
 next_line:
 				line++;
@@ -920,13 +920,13 @@ static PHPDBG_COMMAND(list) /* {{{ */
 static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *function = input->argv[0];
-	
+
 	if (zend_hash_exists(
 		&PHPDBG_G(registered), function->string, function->length+1)) {
-		
+
 		zval fname, *fretval;
 		zend_fcall_info fci;
-		
+
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
 		fci.size = sizeof(fci);
@@ -936,24 +936,24 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		fci.object_ptr = NULL;
 		fci.retval_ptr_ptr = &fretval;
 		fci.no_separation = 1;
-		
+
 		if (input->argc > 1) {
 			int arg;
 			zval ***params;
 			zval *zparam;
-			
+
 			fci.param_count = (input->argc > 1) ? (input->argc-1) : 0;
 			fci.params = (zval***) emalloc(fci.param_count * sizeof(zval**));
-			
+
 			params = fci.params;
-			
+
 			for (arg = 1; arg <= (input->argc-1); arg++) {
 				MAKE_STD_ZVAL(zparam);
 				ZVAL_STRINGL(
 					zparam,
 					input->argv[arg]->string,
 					input->argv[arg]->length, 1);
-				
+
 				*params++ = &zparam;
 			}
 		} else {
@@ -965,21 +965,21 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 
 		if (input->argc > 1) {
 			int param;
-			
+
 			for (param = 0; param < fci.param_count; param++) {
 				zval_ptr_dtor(fci.params[param]);
 			}
 			efree(fci.params);
 		}
-		
+
 		if (fretval) {
 			zend_print_zval_r(
 				fretval, 0 TSRMLS_CC);
 			phpdbg_writeln(EMPTY);
 		}
-		
+
 		zval_dtor(&fname);
-		
+
 		return SUCCESS;
 	}
 
@@ -990,7 +990,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t* input = phpdbg_read_input(NULL TSRMLS_CC);
+	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
 
 	if (input && input->length > 0L) {
 		do {
