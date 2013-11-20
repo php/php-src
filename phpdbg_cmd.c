@@ -118,7 +118,7 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
-static inline phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
+phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
 	char *p;
 	char b[PHPDBG_MAX_CMD];
@@ -208,36 +208,39 @@ static inline phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_D
 	return argv;
 } /* }}} */
 
-phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
+phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
+	phpdbg_input_t *buffer = NULL;
+	size_t cmd_len = 0L;
+	char *cmd = NULL;
+
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		phpdbg_input_t *buffer = NULL;
-
+		if (buffered == NULL) {
 #ifndef HAVE_LIBREADLINE
-		char *cmd = NULL;
-		char buf[PHPDBG_MAX_CMD];
-		if (!phpdbg_write(PROMPT) ||
-			!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
-			/* the user has gone away */
-			phpdbg_error("Failed to read console !");
-			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-			zend_bailout();
-			return NULL;
-		}
+			char buf[PHPDBG_MAX_CMD];
+			if (!phpdbg_write(PROMPT) ||
+				!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
+				/* the user has gone away */
+				phpdbg_error("Failed to read console !");
+				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+				zend_bailout();
+				return NULL;
+			}
 
-		cmd = buf;
+			cmd = buf;
 #else
-		char *cmd = readline(PROMPT);
-		if (!cmd) {
-			/* the user has gone away */
-			phpdbg_error("Failed to read console !");
-			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-			zend_bailout();
-			return NULL;
-		}
+			cmd = readline(PROMPT);
+			if (!cmd) {
+				/* the user has gone away */
+				phpdbg_error("Failed to read console !");
+				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+				zend_bailout();
+				return NULL;
+			}
 
-		add_history(cmd);
+			add_history(cmd);
 #endif
+		} else cmd = buffered;
 
 		/* allocate and sanitize buffer */
 		buffer = (phpdbg_input_t*) emalloc(sizeof(phpdbg_input_t));
@@ -266,7 +269,7 @@ phpdbg_input_t *phpdbg_read_input(TSRMLS_D) /* {{{ */
 #endif
 
 #ifdef HAVE_LIBREADLINE
-		if (cmd) {
+		if (!buffered && cmd) {
 			free(cmd);
 		}
 #endif
@@ -300,7 +303,7 @@ void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 	}
 } /* }}} */
 
-int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	int rc = FAILURE;
 
@@ -326,8 +329,7 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 						phpdbg_debug(
 							"trying sub commands in \"%s\" for \"%s\" with %d arguments",
 							command->name, sub.argv[0]->string, sub.argc-1);
-
-						return phpdbg_do_cmd_ex(command->subs, &sub TSRMLS_CC);
+						return phpdbg_do_cmd(command->subs, &sub TSRMLS_CC);
 					} else {
 						phpdbg_parse_param(
 							input->argv[1]->string,
@@ -369,51 +371,3 @@ int phpdbg_do_cmd_ex(const phpdbg_command_t *command, phpdbg_input_t *input TSRM
 	return rc;
 } /* }}} */
 
-int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
-{
-	int rc = FAILURE;
-	char *expr = NULL;
-#ifndef _WIN32
-	const char *cmd = strtok_r(cmd_line, " ", &expr);
-#else
-	const char *cmd = strtok_s(cmd_line, " ", &expr);
-#endif
-	size_t expr_len = (cmd != NULL) ? strlen(cmd) : 0;
-
-	while (command && command->name && command->handler) {
-		if ((command->name_len == expr_len && memcmp(cmd, command->name, expr_len) == 0)
-			|| (expr_len == 1 && command->alias && command->alias == cmd_line[0])) {
-			phpdbg_param_t param;
-			phpdbg_parse_param(
-				expr,
-				(cmd_len - expr_len) ? (((cmd_len - expr_len) - sizeof(" "))+1) : 0,
-				&param TSRMLS_CC);
-
-			if (command->subs && param.type == STR_PARAM) {
-				if (phpdbg_do_cmd(command->subs, param.str, param.len TSRMLS_CC) == SUCCESS) {
-					rc = SUCCESS;
-					goto done;
-				}
-			}
-
-			if (command->arg_type == REQUIRED_ARG && param.type == EMPTY_PARAM) {
-				phpdbg_error("This command requires argument!");
-				rc = FAILURE;
-			} else if (command->arg_type == NO_ARG && param.type != EMPTY_PARAM) {
-				phpdbg_error("This command does not expect argument!");
-				rc = FAILURE;
-			} else {
-				PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
-				phpdbg_clear_param(
-					&PHPDBG_G(lparam) TSRMLS_CC);
-				PHPDBG_G(lparam) = param;
-				rc = command->handler(&param TSRMLS_CC);
-			}
-			break;
-		}
-		++command;
-	}
-
-done:
-	return rc;
-} /* }}} */

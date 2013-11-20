@@ -154,12 +154,17 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 						goto next_line;
 					}
 					
-					switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
-						case FAILURE:
-							phpdbg_error(
-								"Unrecognized command in %s:%d: %s!", init_file, line, cmd);
-						break;
+					{
+						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
+						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
+							case FAILURE:
+								phpdbg_error(
+									"Unrecognized command in %s:%d: %s!", init_file, line, cmd);
+							break;
+						}
+						phpdbg_destroy_input(&input TSRMLS_CC);
 					}
+					
 				}
 next_line:
 				line++;
@@ -918,24 +923,10 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 	
 	if (zend_hash_exists(
 		&PHPDBG_G(registered), function->string, function->length+1)) {
+		
 		zval fname, *fretval;
 		zend_fcall_info fci;
-		zval **params = NULL;
-
-		if (input->argc > 1) {
-			int arg;
-			
-			params = emalloc(sizeof(zval*) * input->argc);
-			
-			for (arg = 1; arg <= (input->argc-1); arg++) {
-				MAKE_STD_ZVAL((params[arg-1]));
-				ZVAL_STRINGL(
-					(params[arg-1]), 
-					input->argv[arg]->string,
-					input->argv[arg]->length, 1);
-			}
-		}
-
+		
 		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
 		fci.size = sizeof(fci);
@@ -944,29 +935,51 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		fci.symbol_table = EG(active_symbol_table);
 		fci.object_ptr = NULL;
 		fci.retval_ptr_ptr = &fretval;
-
-		fci.param_count = (input->argc > 1) ? (input->argc-1) : 0;
-		fci.params = (input->argc > 1) ? &params : NULL;
 		fci.no_separation = 1;
-
-		zend_call_function(
-			&fci, NULL TSRMLS_CC);
-
-		zval_dtor(&fname);
 		
 		if (input->argc > 1) {
 			int arg;
+			zval ***params;
+			zval *zparam;
+			
+			fci.param_count = (input->argc > 1) ? (input->argc-1) : 0;
+			fci.params = (zval***) emalloc(fci.param_count * sizeof(zval**));
+			
+			params = fci.params;
 			
 			for (arg = 1; arg <= (input->argc-1); arg++) {
-				zval_ptr_dtor(&params[arg-1]);
+				MAKE_STD_ZVAL(zparam);
+				ZVAL_STRINGL(
+					zparam,
+					input->argv[arg]->string,
+					input->argv[arg]->length, 1);
+				
+				*params++ = &zparam;
 			}
-			efree(params);
+		} else {
+			fci.params = NULL;
+			fci.param_count = 0;
 		}
+
+		zend_call_function(&fci, NULL TSRMLS_CC);
+
+		if (input->argc > 1) {
+			int param;
+			
+			for (param = 0; param < fci.param_count; param++) {
+				zval_ptr_dtor(fci.params[param]);
+			}
+			efree(fci.params);
+		}
+		
 		if (fretval) {
 			zend_print_zval_r(
 				fretval, 0 TSRMLS_CC);
 			phpdbg_writeln(EMPTY);
 		}
+		
+		zval_dtor(&fname);
+		
 		return SUCCESS;
 	}
 
@@ -977,11 +990,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t* input = phpdbg_read_input(TSRMLS_C);
+	phpdbg_input_t* input = phpdbg_read_input(NULL TSRMLS_CC);
 
 	if (input && input->length > 0L) {
 		do {
-			switch (ret = phpdbg_do_cmd_ex(phpdbg_prompt_commands, input TSRMLS_CC)) {
+			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
 				case FAILURE:
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 						if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
@@ -1002,9 +1015,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			}
 
 			phpdbg_destroy_input(&input TSRMLS_CC);
-		} while ((input = phpdbg_read_input(TSRMLS_C)) && (input->length > 0L));
+		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)) && (input->length > 0L));
 
-		if (!input->length)
+		if (input && !input->length)
 			goto last;
 
 	} else {
