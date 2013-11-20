@@ -663,13 +663,29 @@ static PHPDBG_COMMAND(shell) /* {{{ */
 	/* don't allow this to loop, ever ... */
 	switch (param->type) {
 		case STR_PARAM: {
-			FILE *fd = VCWD_POPEN(param->str, "w");
-			if (fd) {
+			FILE *fd = NULL;
+			char * program = NULL;
+			
+			/* we expect an input, I hope we get one ! */
+			if (input && input->start) {
+				program = (char*) input->start;
+				
+				if (memcmp(
+					program, "shell", sizeof("shell")-1) == SUCCESS) {
+					program += sizeof("shell")-1;
+				} else program += sizeof("-")-1;
+				
+				while (program && isspace(*program)) {
+					program++;
+				}
+			} else program = param->str;
+			
+			if ((fd=VCWD_POPEN((char*)program, "w"))) {
 				/* do something perhaps ?? do we want input ?? */
 				fclose(fd);
 			} else {
 				phpdbg_error(
-					"Failed to execute %s", param->str);
+					"Failed to execute %s", program);
 			}
 		} break;
 
