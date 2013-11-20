@@ -250,29 +250,23 @@ phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 
 		buffer->string = phpdbg_trim(cmd, strlen(cmd), &buffer->length);
 
-		if (buffer->string) {
-			/* temporary, when we switch to argv/argc handling
-				will be unnecessary */
-			char *store = (char*) estrdup(buffer->string);
+		/* store constant pointer to start of buffer */
+		buffer->start = (char* const*) buffer->string;
 
-			/* store constant pointer to start of buffer */
-			buffer->start = (char* const*) buffer->string;
+		buffer->argv = phpdbg_read_argv(
+			buffer->string, &buffer->argc TSRMLS_CC);
 
-			buffer->argv = phpdbg_read_argv(
-				store, &buffer->argc TSRMLS_CC);
+#ifdef PHPDBG_DEBUG
+		if (buffer->argc) {
+			int arg = 0;
 
-			if (buffer->argc) {
-				int arg = 0;
-
-				while (arg < buffer->argc) {
-					phpdbg_debug(
-						"argv %d=%s", arg, buffer->argv[arg]->string);
-					arg++;
-				}
+			while (arg < buffer->argc) {
+				phpdbg_debug(
+					"argv %d=%s", arg, buffer->argv[arg]->string);
+				arg++;
 			}
-
-			efree(store);
 		}
+#endif
 
 #ifdef HAVE_LIBREADLINE
 		if (!buffered && cmd) {
@@ -320,9 +314,9 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 				(command->alias &&
 				(input->argv[0]->length == 1) &&
 				(command->alias == *input->argv[0]->string))) {
-				
+
 				phpdbg_param_t param;
-				
+
 				param.type = EMPTY_PARAM;
 
 				if (input->argc > 1) {
@@ -333,9 +327,8 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 						sub.argv = &input->argv[1];
 
 						phpdbg_debug(
-							"trying sub commands in \"%s\" for \"%s\" with %d arguments", 
+							"trying sub commands in \"%s\" for \"%s\" with %d arguments",
 							command->name, sub.argv[0]->string, sub.argc-1);
-					
 						return phpdbg_do_cmd(command->subs, &sub TSRMLS_CC);
 					} else {
 						phpdbg_parse_param(
@@ -344,7 +337,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 							&param TSRMLS_CC);
 					}
 				}
-				
+
 				phpdbg_debug(
 					"found command %s for %s with %d arguments",
 					command->name, input->argv[0]->string, input->argc-1);
@@ -358,12 +351,12 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 							input->argv[arg]->length);
 					}
 				}
-				
+
 				PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
 				phpdbg_clear_param(
 					&PHPDBG_G(lparam) TSRMLS_CC);
 				PHPDBG_G(lparam) = param;
-				
+
 				rc = command->handler(&param TSRMLS_CC);
 				break;
 			}
