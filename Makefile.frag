@@ -1,4 +1,4 @@
-phpdbg: clean-phpdbg $(BUILD_BINARY)
+phpdbg: $(BUILD_BINARY)
 
 $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
@@ -13,4 +13,7 @@ install-phpdbg: $(BUILD_BINARY)
 clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."
 	find sapi/phpdbg/ -name *.lo -o -name *.o | xargs rm -f
+
+.PHONY: clean-phpdbg
+
 
