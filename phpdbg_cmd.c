@@ -329,15 +329,18 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, const phpdbg_input_t *input T
 						phpdbg_debug(
 							"trying sub commands in \"%s\" for \"%s\" with %d arguments",
 							command->name, sub.argv[0]->string, sub.argc-1);
-						return phpdbg_do_cmd(command->subs, &sub TSRMLS_CC);
-					} else {
-						phpdbg_parse_param(
-							input->argv[1]->string,
-							input->argv[1]->length,
-							&param TSRMLS_CC);
+						if (phpdbg_do_cmd(command->subs, &sub TSRMLS_CC) == SUCCESS) {
+							return SUCCESS;
+						}
 					}
+					
+					/* pass parameter on */
+					phpdbg_parse_param(
+						input->argv[1]->string,
+						input->argv[1]->length,
+						&param TSRMLS_CC);
 				}
-
+				
 				phpdbg_debug(
 					"found command %s for %s with %d arguments",
 					command->name, input->argv[0]->string, input->argc-1);
@@ -367,7 +370,8 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, const phpdbg_input_t *input T
 		phpdbg_error(
 			"No function executed !!");
 	}
-
+	
+out:
 	return rc;
 } /* }}} */
 
