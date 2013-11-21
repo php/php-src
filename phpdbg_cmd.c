@@ -211,7 +211,6 @@ phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *buffer = NULL;
-	size_t cmd_len = 0L;
 	char *cmd = NULL;
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -318,52 +317,52 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 				phpdbg_param_t param;
 
 				param.type = EMPTY_PARAM;
-				
+
 				if (input->argc > 1) {
 					if (command->subs) {
 						phpdbg_input_t sub = *input;
-						
+
 						sub.string += input->argv[0]->length;
 						sub.length -= input->argv[0]->length;
-						
+
 						sub.string = phpdbg_trim(
 							sub.string, sub.length, &sub.length);
 
 						sub.argc--;
 						sub.argv++;
-						
+
 						phpdbg_debug(
 							"trying sub commands in \"%s\" for \"%s\" with %d arguments",
 							command->name, sub.argv[0]->string, sub.argc-1);
-							
+
 						if (phpdbg_do_cmd(command->subs, &sub TSRMLS_CC) == SUCCESS) {
 							efree(sub.string);
 							return SUCCESS;
 						}
-						
+
 						efree(sub.string);
 					}
-					
+
 					/* no sub command found */
 					{
 						char *store = input->string;
-						
+
 						input->string += input->argv[0]->length;
 						input->length -= input->argv[0]->length;
-						
+
 						input->string = phpdbg_trim(
 							input->string, input->length, &input->length);
-						
+
 						efree(store);
 					}
-					
+
 					/* pass parameter on */
 					phpdbg_parse_param(
 						input->string,
 						input->length,
 						&param TSRMLS_CC);
 				}
-				
+
 				phpdbg_debug(
 					"found command %s for %s with %d arguments",
 					command->name, input->argv[0]->string, input->argc-1);
