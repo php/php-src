@@ -23,5 +23,6 @@
 #include "zend_types.h"
 
 const char *phpdbg_decode_opcode(zend_uchar);
+char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
 
 #endif /* PHPDBG_OPCODE_H */
