@@ -34,7 +34,7 @@
 #include "phpdbg_cmd.h"
 
 /* {{{ command declarations */
-static const phpdbg_command_t phpdbg_prompt_commands[] = {
+const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
 	PHPDBG_COMMAND_D(compile, "attempt compilation", 					  'c', NULL, 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 1),
@@ -1025,49 +1025,6 @@ out:
 	return ret;
 } /* }}} */
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
-{
-    /* force out a line while stepping so the user knows what is happening */
-	if (ignore_flags ||
-		(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ||
-		(PHPDBG_G(oplog)))) {
-
-		zend_op *opline = execute_data->opline;
-		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
-		
-		if (ignore_flags ||
-			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
-			/* output line info */
-			phpdbg_notice("#%- 5lu %16p %-30s %s %s",
-			   opline->lineno,
-			   opline,
-			   phpdbg_decode_opcode(opline->opcode),
-			   decode,
-			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
-        }
-
-		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "#%- 5lu %16p %-30s %s %s",
-				opline->lineno,
-				opline,
-				phpdbg_decode_opcode(opline->opcode),
-				decode,
-				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
-		}
-		
-		if (decode) {
-			free(decode);
-		}
-    }
-} /* }}} */
-
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
-{
-	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags TSRMLS_CC);
-} /* }}} */
-
 void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 {
 	/* this is implicitly required */
@@ -1083,12 +1040,6 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 		zend_bailout();
 	}
 } /* }}} */
-
-void phpdbg_sigint_handler(int signo)
-{
-	TSRMLS_FETCH();
-	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
-}
 
 static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
 {

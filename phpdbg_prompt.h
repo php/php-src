@@ -20,21 +20,13 @@
 #ifndef PHPDBG_PROMPT_H
 #define PHPDBG_PROMPT_H
 
+/* {{{ */
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 int phpdbg_interactive(TSRMLS_D);
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
 int phpdbg_compile(TSRMLS_D);
-void phpdbg_clean(zend_bool full TSRMLS_DC);
-void phpdbg_sigint_handler(int signo);
+void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
 
-#if PHP_VERSION_ID >= 50500
-void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
-#else
-void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
-#endif
-
-/* {{{ */
+/* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
 PHPDBG_COMMAND(compile);
 PHPDBG_COMMAND(step);
@@ -58,5 +50,15 @@ PHPDBG_COMMAND(shell);
 PHPDBG_COMMAND(oplog);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit); /* }}} */
+
+/* {{{ prompt commands */
+extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
+
+/* {{{ */
+#if PHP_VERSION_ID >= 50500
+void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+#else
+void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC);
+#endif /* }}} */
 
 #endif /* PHPDBG_PROMPT_H */

@@ -17,9 +17,13 @@
    +----------------------------------------------------------------------+
 */
 
+#include "phpdbg.h"
 #include "zend_vm_opcodes.h"
 #include "zend_compile.h"
 #include "phpdbg_opcode.h"
+#include "phpdbg_utils.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
@@ -131,6 +135,49 @@ format:
 		free(decode[3]);
 
 	return decode[0];
+} /* }}} */
+
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+{
+    /* force out a line while stepping so the user knows what is happening */
+	if (ignore_flags ||
+		(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
+		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ||
+		(PHPDBG_G(oplog)))) {
+
+		zend_op *opline = execute_data->opline;
+		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
+		
+		if (ignore_flags ||
+			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
+			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+			/* output line info */
+			phpdbg_notice("#%- 5lu %16p %-30s %s %s",
+			   opline->lineno,
+			   opline,
+			   phpdbg_decode_opcode(opline->opcode),
+			   decode,
+			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+        }
+
+		if (!ignore_flags && PHPDBG_G(oplog)) {
+			phpdbg_log_ex(PHPDBG_G(oplog), "#%- 5lu %16p %-30s %s %s",
+				opline->lineno,
+				opline,
+				phpdbg_decode_opcode(opline->opcode),
+				decode,
+				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+		}
+		
+		if (decode) {
+			free(decode);
+		}
+    }
+} /* }}} */
+
+void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+{
+	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags TSRMLS_CC);
 } /* }}} */
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */

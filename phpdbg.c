@@ -434,6 +434,12 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
+static inline void phpdbg_sigint_handler(int signo) /* {{{ */
+{
+	TSRMLS_FETCH();
+	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
