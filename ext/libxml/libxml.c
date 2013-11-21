@@ -88,7 +88,7 @@ static PHP_MINIT_FUNCTION(libxml);
 static PHP_RINIT_FUNCTION(libxml);
 static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
-static int php_libxml_post_deactivate();
+static int php_libxml_post_deactivate(void);
 
 /* }}} */
 
@@ -356,13 +356,13 @@ static void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 static int php_libxml_streams_IO_read(void *context, char *buffer, int len)
 {
 	TSRMLS_FETCH();
-	return php_stream_read((php_stream*)context, buffer, len);
+	return (int)php_stream_read((php_stream*)context, buffer, len);
 }
 
 static int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
 {
 	TSRMLS_FETCH();
-	return php_stream_write((php_stream*)context, buffer, len);
+	return (int)php_stream_write((php_stream*)context, buffer, len);
 }
 
 static int php_libxml_streams_IO_close(void *context)
@@ -515,7 +515,7 @@ void php_libxml_issue_error(int level, const char *msg TSRMLS_DC)
 static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
 {
 	char *buf;
-	int len, len_iter, output = 0;
+	zend_str_size_int len, len_iter, output = 0;
 
 	TSRMLS_FETCH();
 
@@ -876,7 +876,7 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 	return SUCCESS;
 }
 
-static int php_libxml_post_deactivate()
+static int php_libxml_post_deactivate(void)
 {
 	TSRMLS_FETCH();
 	/* reset libxml generic error handling */
