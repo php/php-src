@@ -269,10 +269,10 @@ static void print_extensions(TSRMLS_D)
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRMLS_DC)
+static inline size_t sapi_cgi_single_write(const char *str, zend_str_size_uint str_length TSRMLS_DC)
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	int ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
@@ -285,11 +285,11 @@ static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRM
 #endif
 }
 
-static int sapi_cgi_ub_write(const char *str, uint str_length TSRMLS_DC)
+static zend_str_size_int sapi_cgi_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	uint remaining = str_length;
-	size_t ret;
+	zend_str_size_uint remaining = str_length;
+	zend_str_size_int ret;
 
 	while (remaining > 0) {
 		ret = sapi_cgi_single_write(ptr, remaining TSRMLS_CC);
@@ -304,14 +304,14 @@ static int sapi_cgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static int sapi_fcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
+static zend_str_size_int sapi_fcgi_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	zend_str_size_uint remaining = str_length;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
-		long ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
+		php_int_t ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
 
 		if (ret <= 0) {
 			php_handle_aborted_connection();
@@ -503,14 +503,13 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static zend_str_size_int sapi_cgi_read_post(char *buffer, zend_str_size_uint count_bytes TSRMLS_DC)
 {
-	uint read_bytes = 0;
-	int tmp_read_bytes;
+	zend_str_size_uint read_bytes = 0;
 
 	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
-		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
+		int tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -519,7 +518,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	return read_bytes;
 }
 
-static int sapi_fcgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static zend_str_size_int sapi_fcgi_read_post(char *buffer, zend_str_size_uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
@@ -616,11 +615,11 @@ static char *sapi_fcgi_read_cookies(TSRMLS_D)
 	return FCGI_GETENV(request, "HTTP_COOKIE");
 }
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC)
+static void cgi_php_load_env_var(char *var, zend_str_size_uint var_len, char *val, zend_str_size_uint val_len, void *arg TSRMLS_DC)
 {
 	zval *array_ptr = (zval*)arg;	
 	int filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
-	unsigned int new_val_len;
+	zend_str_size_uint new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
@@ -662,7 +661,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	unsigned int php_self_len;
+	zend_str_size_uint php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -685,10 +684,10 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		}
 
 		if (path_info) {
-			unsigned int path_info_len = strlen(path_info);
+			zend_str_size_uint path_info_len = strlen(path_info);
 
 			if (script_name) {
-				unsigned int script_name_len = strlen(script_name);
+				zend_str_size_uint script_name_len = strlen(script_name);
 
 				php_self_len = script_name_len + path_info_len;
 				php_self = do_alloca(php_self_len + 1, use_heap);
@@ -733,7 +732,7 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = strlen(message);
+			zend_str_size_int len = strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
@@ -751,7 +750,7 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
+static void php_cgi_ini_activate_user_config(char *path, zend_str_size_int path_len, const char *doc_root, zend_str_size_int doc_root_len, zend_str_size_int start TSRMLS_DC)
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
@@ -770,9 +769,9 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
 		char *real_path = NULL;
-		int real_path_len;
+		zend_str_size_int real_path_len;
 		char *s1, *s2;
-		int s_len;
+		zend_str_size_int s_len;
 
 		/* Clear the expired config */
 		zend_hash_clean(entry->user_config);
@@ -831,7 +830,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 static int sapi_cgi_activate(TSRMLS_D)
 {
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len, server_name_len;
+	zend_str_size_uint path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -1197,7 +1196,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
 			char *orig_script_filename = env_script_filename;
-			int script_path_translated_len;
+			zend_str_size_int script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
@@ -1238,12 +1237,12 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				(real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
-				int len = script_path_translated_len;
+				zend_str_size_int len = script_path_translated_len;
 				char *ptr;
 
 				while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
 					*ptr = 0;
-					if (stat(pt, &st) == 0 && S_ISREG(st.st_mode)) {
+					if (zend_stat(pt, &st) == 0 && S_ISREG(st.st_mode)) {
 						/*
 						 * okay, we found the base script!
 						 * work out how many chars we had to strip off;
@@ -1259,8 +1258,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * we have to play the game of hide and seek to figure
 						 * out what SCRIPT_NAME should be
 						 */
-						int slen = len - strlen(pt);
-						int pilen = env_path_info ? strlen(env_path_info) : 0;
+						zend_str_size_int slen = len - strlen(pt);
+						zend_str_size_int pilen = env_path_info ? strlen(env_path_info) : 0;
 						char *path_info = env_path_info ? env_path_info + pilen - slen : NULL;
 
 						if (orig_path_info != path_info) {
@@ -1296,8 +1295,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * SCRIPT_FILENAME minus SCRIPT_NAME
 						 */
 						if (env_document_root) {
-							int l = strlen(env_document_root);
-							int path_translated_len = 0;
+							zend_str_size_int l = strlen(env_document_root);
+							zend_str_size_int path_translated_len = 0;
 							char *path_translated = NULL;
 
 							if (l && env_document_root[l - 1] == '/') {
@@ -1326,8 +1325,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 									strstr(pt, env_script_name)
 						) {
 							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
-							int ptlen = strlen(pt) - strlen(env_script_name);
-							int path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
+							zend_str_size_int ptlen = strlen(pt) - strlen(env_script_name);
+							zend_str_size_int path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
 							char *path_translated = NULL;
 
 							path_translated = (char *) emalloc(path_translated_len + 1);
@@ -1530,7 +1529,7 @@ PHP_FUNCTION(apache_child_terminate) /* {{{ */
 }
 /* }}} */
 
-static void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC) /* {{{ */
+static void add_request_header(char *var, zend_str_size_uint var_len, char *val, zend_str_size_uint val_len, void *arg TSRMLS_DC) /* {{{ */
 {
 	zval *return_value = (zval*)arg;
 	char *str = NULL;
@@ -1592,7 +1591,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 		char buf[128];
 		char **env, *p, *q, *var, *val, *t = buf;
 		size_t alloc_size = sizeof(buf);
-		unsigned long var_len;
+		zend_str_size var_len;
 
 		for (env = environ; env != NULL && *env != NULL; env++) {
 			val = strchr(*env, '=');
@@ -1664,7 +1663,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len;
+	php_int_t  len;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {
@@ -1743,7 +1742,7 @@ int main(int argc, char *argv[])
 	int orig_optind = php_optind;
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
-	int ini_entries_len = 0;
+	zend_str_size_int ini_entries_len = 0;
 	/* end of temporary locals */
 
 #ifdef ZTS
@@ -1846,7 +1845,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = strlen(php_optarg);
+				zend_str_size_int len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
@@ -2281,7 +2280,7 @@ consult the installation file that came with this distribution, or visit \n\
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					int slen = strlen(PG(arg_separator).input);
+					zend_str_size_int slen = strlen(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {
@@ -2421,7 +2420,7 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (php_stream_getc((php_stream*)file_handle.handle.stream.handle) != '\n') {
-									long pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
+									zend_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
 									php_stream_seek((php_stream*)file_handle.handle.stream.handle, pos - 1, SEEK_SET);
 								}
 							}

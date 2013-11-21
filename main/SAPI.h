@@ -237,7 +237,7 @@ struct _sapi_module_struct {
 	int (*send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC);
 
-	zend_str_size_int (*read_post)(char *buffer, uint count_bytes TSRMLS_DC);
+	zend_str_size_int (*read_post)(char *buffer, zend_str_size_uint count_bytes TSRMLS_DC);
 	char *(*read_cookies)(TSRMLS_D);
 
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);

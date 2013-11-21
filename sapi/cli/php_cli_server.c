@@ -687,7 +687,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 	return *val;
 } /* }}} */
 
-static zend_str_size_int sapi_cli_server_read_post(char *buf, uint count_bytes TSRMLS_DC) /* {{{ */
+static zend_str_size_int sapi_cli_server_read_post(char *buf, zend_str_size_uint count_bytes TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (client->request.content) {
