@@ -28,14 +28,14 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
 	zend_uint iter = 0;
-	
+
 	while (iter < ops->last_literal) {
 		if (literal == &ops->literals[iter]) {
 			return iter;
 		}
 		iter++;
 	}
-	
+
 	return 0;
 } /* }}} */
 
@@ -47,24 +47,24 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 		case IS_CV:
 			asprintf(&decode, "$%s", ops->vars[op->var].name);
 		break;
-		
+
 		case IS_VAR:
 		case IS_TMP_VAR: {
 			zend_ulong id = 0, *pid = NULL;
 			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
 				id = zend_hash_num_elements(vars);
 				zend_hash_index_update(
-					vars, (zend_ulong) ops->vars - op->var, 
-					(void**) &id, 
+					vars, (zend_ulong) ops->vars - op->var,
+					(void**) &id,
 					sizeof(zend_ulong), NULL);
 			} else id = *pid;
 			asprintf(&decode, "@%lu", id);
 		} break;
-		
+
 		case IS_CONST:
-			asprintf(&decode, "C%lu", phpdbg_decode_literal(ops, op->literal TSRMLS_CC));
+			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->literal TSRMLS_CC));
 		break;
-		
+
 		case IS_UNUSED:
 			asprintf(&decode, "<unused>");
 		break;
@@ -75,7 +75,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
 {
 	char *decode[4] = {NULL, NULL, NULL, NULL};
-	
+
 	switch (op->opcode) {
 	case ZEND_JMP:
 #ifdef ZEND_GOTO
@@ -86,18 +86,18 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #endif
 			asprintf(&decode[1], "#%lu", op->op1.jmp_addr - ops->opcodes);
 		goto format;
-	      
+
 	case ZEND_JMPZNZ:
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
 			asprintf(
-				&decode[2], "#%lu or #%lu", op->op2.opline_num, op->extended_value);
+				&decode[2], "#%u or #%lu", op->op2.opline_num, op->extended_value);
 		goto result;
-      
+
 	case ZEND_JMPZ:
 	case ZEND_JMPNZ:
 	case ZEND_JMPZ_EX:
 	case ZEND_JMPNZ_EX:
-      
+
 #ifdef ZEND_JMP_SET
 	case ZEND_JMP_SET:
 #endif
@@ -111,22 +111,22 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 
 	case ZEND_RECV_INIT:
 		goto result;
-          
+
 		default: {
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
 			decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
 result:
-			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars TSRMLS_CC);		
+			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars TSRMLS_CC);
 format:
 			asprintf(
 				&decode[0],
-				"%-20s %-20s %-20s", 
-				decode[1] ? decode[1] : "", 
+				"%-20s %-20s %-20s",
+				decode[1] ? decode[1] : "",
 				decode[2] ? decode[2] : "",
 				decode[3] ? decode[3] : "");
 		}
 	}
-	
+
 	if (decode[1])
 		free(decode[1]);
 	if (decode[2])
@@ -147,7 +147,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 
 		zend_op *opline = execute_data->opline;
 		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
-		
+
 		if (ignore_flags ||
 			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
 			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
@@ -168,7 +168,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 				decode,
 				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
 		}
-		
+
 		if (decode) {
 			free(decode);
 		}
@@ -356,7 +356,7 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_RECV_VARIADIC);
 #endif
 		CASE(ZEND_OP_DATA);
-		default: 
+		default:
 		    return "UNKNOWN";
 	}
 } /* }}} */
