@@ -8,7 +8,7 @@ install-phpdbg: $(BUILD_BINARY)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
-	@$(INSTALL) -m 0755 $(BUILD_BINARY) $(INSTALL_ROOT)$(sbindir)/$(program_prefix)phpdbg$(program_suffix)$(EXEEXT)
+	@$(INSTALL) -m 0755 $(BUILD_BINARY) $(INSTALL_ROOT)$(bindir)/$(program_prefix)phpdbg$(program_suffix)$(EXEEXT)
 
 clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."
