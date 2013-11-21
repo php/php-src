@@ -1029,22 +1029,21 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 {
 	char *decode = NULL;
 
-	switch (type) {
+	switch (type &~ EXT_TYPE_UNUSED) {
 		case IS_CV:
 			asprintf(&decode, "$%s", ops->vars[op->var].name);
 		break;
 		
 		case IS_VAR:
 		case IS_TMP_VAR: {
-			zend_ulong id = 0;
-			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &id) != SUCCESS) {
+			zend_ulong id = 0, *pid = NULL;
+			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
 				id = zend_hash_num_elements(vars);
 				zend_hash_index_update(
 					vars, (zend_ulong) ops->vars - op->var, 
 					(void**) &id, 
 					sizeof(zend_ulong), NULL);
-			}
-			
+			} else id = *pid;
 			asprintf(&decode, "@%lu", id);
 		} break;
 		
@@ -1061,22 +1060,66 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 
 char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
 {
-	char *decode[3];
-	
-	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-	decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
-	
+	char *decode[4] = {NULL, NULL, NULL, NULL};
+		
 	switch (op->opcode) {
-		default: asprintf(
-			&decode[0], "%-20s %-20s",
-			decode[1], decode[2]
-		);
+		case ZEND_JMP:
+#ifdef ZEND_GOTO
+      case ZEND_GOTO:
+#endif
+#ifdef ZEND_FAST_CALL
+      case ZEND_FAST_CALL:
+#endif
+        	asprintf(&decode[1], "#%lu", op->op1.jmp_addr - ops->opcodes);
+        goto format;
+		
+		      
+      case ZEND_JMPZNZ:
+        	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+        	asprintf(
+        		&decode[2], "#%lu or #%lu", op->op2.opline_num, op->extended_value);
+        goto result;
+      
+      case ZEND_JMPZ:
+      case ZEND_JMPNZ:
+      case ZEND_JMPZ_EX:
+      case ZEND_JMPNZ_EX:
+      
+#ifdef ZEND_JMP_SET
+      case ZEND_JMP_SET:
+#endif      
+#ifdef ZEND_JMP_SET_VAR
+      case ZEND_JMP_SET_VAR:
+#endif
+        	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+      		asprintf(
+      			&decode[2], "#%lu", op->op2.jmp_addr - ops->opcodes);
+      	goto result;
+
+      case ZEND_RECV_INIT:
+        goto result;
+          
+		default: {
+			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+			decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
+result:
+			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars TSRMLS_CC);		
+format:
+			asprintf(
+				&decode[0],
+				"%-20s %-20s %-20s", 
+				decode[1] ? decode[1] : "", 
+				decode[2] ? decode[2] : "",
+				decode[3] ? decode[3] : "");
+		}
 	}
 	
 	if (decode[1])
 		free(decode[1]);
 	if (decode[2])
 		free(decode[2]);
+	if (decode[3])
+		free(decode[3]);
 	
 	return decode[0];
 } /* }}} */
