@@ -42,7 +42,8 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
     switch (method->type) {
         case ZEND_USER_FUNCTION: {
             zend_op_array* op_array = &(method->op_array);
-
+			HashTable vars;
+			
             if (op_array) {
                 zend_op     *opline = &(op_array->opcodes[0]);
                 zend_uint   opcode = 0,
@@ -64,16 +65,21 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                         op_array->filename ? op_array->filename : "unknown");
                 }
 
-
+				zend_hash_init(&vars, op_array->last, NULL, NULL, 0);
                 do {
-                    const char *decode = phpdbg_decode_opcode(opline->opcode);
+                    char *decode = phpdbg_decode_opline(op_array, opline, &vars TSRMLS_CC);
                     if (decode != NULL) {
                         phpdbg_writeln(
-                            "\t\t#%lu\t%p %s", opline->lineno, opline, decode);
+                            "\t\t#%lu\t%p %-30s %s", 
+                            opline->lineno,
+                            opline, 
+                            phpdbg_decode_opcode(opline->opcode),
+                            decode);
                     } else phpdbg_error("\tFailed to decode opline @ %ld", opline);
-
+					free(decode);
                     opline++;
                 } while (++opcode < end);
+                zend_hash_destroy(&vars);
             }
         } break;
 

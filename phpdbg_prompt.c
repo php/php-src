@@ -1059,7 +1059,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 	return decode;
 } /* }}} */
 
-static inline char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
+char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
 {
 	char *decode[3];
 	
