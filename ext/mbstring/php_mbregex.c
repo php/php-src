@@ -1059,9 +1059,9 @@ PHP_FUNCTION(mb_split)
 	zend_str_size_int string_len;
 
 	int n, err;
-	long count = -1;
+	php_int_t count = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
 		RETURN_FALSE;
 	} 
 
@@ -1398,9 +1398,9 @@ PHP_FUNCTION(mb_ereg_search_getpos)
    Set search start position */
 PHP_FUNCTION(mb_ereg_search_setpos)
 {
-	long position;
+	php_int_t position;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &position) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &position) == FAILURE) {
 		return;
 	}
 
