@@ -610,6 +610,9 @@ PHPDBG_COMMAND(print) /* {{{ */
 
 PHPDBG_COMMAND(info) /* {{{ */
 {
+	phpdbg_error(
+		"No information command selected !");
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -780,8 +783,11 @@ PHPDBG_COMMAND(oplog) /* {{{ */
 					fclose(
 						PHPDBG_G(oplog));
 				} else {
-					phpdbg_error("No oplog currently open");
+					phpdbg_error("No oplog currently open !");
 				}
+			} else {
+				phpdbg_error(
+					"No action taken !");
 			}
 		break;
 
@@ -1019,6 +1025,55 @@ out:
 	return ret;
 } /* }}} */
 
+static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type TSRMLS_DC) /* {{{ */
+{	
+	char *decode = NULL;
+	switch (type) {
+		case IS_CV:
+			asprintf(&decode, "$%s", ops->vars[op->var].name);
+		break;
+		
+		case IS_TMP_VAR: /* this address is wrong */
+			asprintf(&decode, "T%p", ops->vars - op->var);
+		break;
+		
+		case IS_VAR: /* this address is wrong */
+			asprintf(&decode, "%p", ops->vars - op->var);
+		break;
+		
+		case IS_CONST:
+			asprintf(&decode, "<constant>");
+		break;
+		
+		case IS_UNUSED:
+			asprintf(&decode, "<unused>");
+		break;
+	}
+	return decode;
+} /* }}} */
+
+static inline char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op TSRMLS_DC) /*{{{ */
+{
+	char *decode[3];
+	
+	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type TSRMLS_CC);
+	decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type TSRMLS_CC);
+	
+	switch (op->opcode) {
+		default: asprintf(
+			&decode[0], "%-20s %-20s",
+			decode[1], decode[2]
+		);
+	}
+	
+	if (decode[1])
+		free(decode[1]);
+	if (decode[2])
+		free(decode[2]);
+	
+	return decode[0];
+} /* }}} */
+
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
 {
     /* force out a line while stepping so the user knows what is happening */
@@ -1028,24 +1083,31 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 		(PHPDBG_G(oplog)))) {
 
 		zend_op *opline = execute_data->opline;
-
+		char *decode = phpdbg_decode_opline(execute_data->op_array, opline TSRMLS_CC);
+		
 		if (ignore_flags ||
 			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
 			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("#%lu %p %s %s",
+			phpdbg_notice("#%- 5lu %16p %30s %s %s",
 			   opline->lineno,
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
+			   decode,
 			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
         }
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "#%lu %p %s %s",
+			phpdbg_log_ex(PHPDBG_G(oplog), "#%- 5lu %16p %30s %s %s",
 				opline->lineno,
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
+				decode,
 				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+		}
+		
+		if (decode) {
+			free(decode);
 		}
     }
 } /* }}} */
