@@ -511,7 +511,7 @@ PHPDBG_COMMAND(eval) /* {{{ */
 				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 			}
 		} break;
-		
+
 		phpdbg_default_switch_case();
 	}
 
@@ -612,7 +612,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 {
 	phpdbg_error(
 		"No information command selected !");
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -1115,7 +1115,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 #endif
 	zend_bool original_in_execution = EG(in_execution);
 	HashTable vars;
-	
+
 #if PHP_VERSION_ID < 50500
 	if (EG(exception)) {
 		return;
@@ -1265,8 +1265,8 @@ next:
 			DO_INTERACTIVE();
 		}
 
-        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-		
+		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+
 		if (PHPDBG_G(vmret) > 0) {
 			switch (PHPDBG_G(vmret)) {
 				case 1:
