@@ -1025,21 +1025,28 @@ out:
 	return ret;
 } /* }}} */
 
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type TSRMLS_DC) /* {{{ */
-{	
+static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type, HashTable *vars TSRMLS_DC) /* {{{ */
+{
 	char *decode = NULL;
+
 	switch (type) {
 		case IS_CV:
 			asprintf(&decode, "$%s", ops->vars[op->var].name);
 		break;
 		
-		case IS_TMP_VAR: /* this address is wrong */
-			asprintf(&decode, "T%p", ops->vars - op->var);
-		break;
-		
-		case IS_VAR: /* this address is wrong */
-			asprintf(&decode, "%p", ops->vars - op->var);
-		break;
+		case IS_VAR:
+		case IS_TMP_VAR: {
+			zend_ulong id = 0;
+			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &id) != SUCCESS) {
+				id = zend_hash_num_elements(vars);
+				zend_hash_index_update(
+					vars, (zend_ulong) ops->vars - op->var, 
+					(void**) &id, 
+					sizeof(zend_ulong), NULL);
+			}
+			
+			asprintf(&decode, "@%lu", id);
+		} break;
 		
 		case IS_CONST:
 			asprintf(&decode, "<constant>");
@@ -1052,12 +1059,12 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 	return decode;
 } /* }}} */
 
-static inline char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op TSRMLS_DC) /*{{{ */
+static inline char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
 {
 	char *decode[3];
 	
-	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type TSRMLS_CC);
-	decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type TSRMLS_CC);
+	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+	decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
 	
 	switch (op->opcode) {
 		default: asprintf(
@@ -1074,7 +1081,7 @@ static inline char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op TSRMLS_
 	return decode[0];
 } /* }}} */
 
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
 {
     /* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
@@ -1083,7 +1090,7 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 		(PHPDBG_G(oplog)))) {
 
 		zend_op *opline = execute_data->opline;
-		char *decode = phpdbg_decode_opline(execute_data->op_array, opline TSRMLS_CC);
+		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
 		
 		if (ignore_flags ||
 			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
@@ -1110,6 +1117,11 @@ void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags
 			free(decode);
 		}
     }
+} /* }}} */
+
+void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+{
+	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags TSRMLS_CC);
 } /* }}} */
 
 void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
@@ -1207,7 +1219,8 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	zend_bool nested = 0;
 #endif
 	zend_bool original_in_execution = EG(in_execution);
-
+	HashTable vars;
+	
 #if PHP_VERSION_ID < 50500
 	if (EG(exception)) {
 		return;
@@ -1221,10 +1234,12 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 zend_vm_enter:
 		execute_data = phpdbg_create_execute_data(EG(active_op_array), 1 TSRMLS_CC);
 	}
+	zend_hash_init(&vars, EG(active_op_array)->last, NULL, NULL, 0);
 #else
 zend_vm_enter:
-		execute_data = phpdbg_create_execute_data(op_array, nested TSRMLS_CC);
-		nested = 1;
+	execute_data = phpdbg_create_execute_data(op_array, nested TSRMLS_CC);
+	nested = 1;
+	zend_hash_init(&vars, EG(active_op_array)->last, NULL, NULL, 0);
 #endif
 
 	while (1) {
@@ -1313,8 +1328,8 @@ zend_vm_enter:
 		}
 
 		/* not while in conditionals */
-		phpdbg_print_opline(
-			execute_data, 0 TSRMLS_CC);
+		phpdbg_print_opline_ex(
+			execute_data, &vars, 0 TSRMLS_CC);
 
 		/* conditions cannot be executed by eval()'d code */
 		if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
@@ -1356,16 +1371,18 @@ next:
 		}
 
         PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-
+		
 		if (PHPDBG_G(vmret) > 0) {
 			switch (PHPDBG_G(vmret)) {
 				case 1:
 					EG(in_execution) = original_in_execution;
+					zend_hash_destroy(&vars);
 					return;
 				case 2:
 #if PHP_VERSION_ID < 50500
 					op_array = EG(active_op_array);
 #endif
+					zend_hash_destroy(&vars);
 					goto zend_vm_enter;
 					break;
 				case 3:
