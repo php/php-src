@@ -43,7 +43,7 @@ echo "Done";
 *** Testing unserialize() error/boolean distinction ***
 string(4) "b:0;"
 
-Notice: unserialize(): Error at offset 0 of 27 bytes in %s/serialization_error_002.php on line 20
+Notice: unserialize(): Error at offset 0 of 27 bytes in %s%eserialization_error_002.php on line 20
 bool(false)
 bool(false)
 unserialize error and deserialized false are identical? 1
