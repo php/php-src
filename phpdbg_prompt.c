@@ -1025,6 +1025,20 @@ out:
 	return ret;
 } /* }}} */
 
+static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
+{
+	zend_uint iter = 0;
+	
+	while (iter < ops->last_literal) {
+		if (literal == &ops->literals[iter]) {
+			return iter;
+		}
+		iter++;
+	}
+	
+	return 0;
+} /* }}} */
+
 static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type, HashTable *vars TSRMLS_DC) /* {{{ */
 {
 	char *decode = NULL;
@@ -1048,7 +1062,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 		} break;
 		
 		case IS_CONST:
-			asprintf(&decode, "<constant>");
+			asprintf(&decode, "C%lu", phpdbg_decode_literal(ops, op->literal TSRMLS_CC));
 		break;
 		
 		case IS_UNUSED:
