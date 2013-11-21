@@ -569,9 +569,8 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	  occur, and force resend for the next execution.
 	*/
 	for (i = 0; i < stmt->param_count; i++) {
-		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL &&
-			(stmt->param_bind[i].type == MYSQL_TYPE_LONG || stmt->param_bind[i].type == MYSQL_TYPE_LONGLONG))
-		{
+		short current_type = stmt->param_bind[i].type;
+		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
 			/* always copy the var, because we do many conversions */
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG &&
 				PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
@@ -585,10 +584,31 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			*/
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
-				convert_to_double_ex(&tmp_data);
-				if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
+				/*
+				  Because converting to double and back to long can lead
+				  to losing precision we need second variable. Conversion to double is to see if 
+				  value is too big for a long. As said, precision could be lost.
+				*/
+				zval *tmp_data_copy;
+				MAKE_STD_ZVAL(tmp_data_copy);
+				*tmp_data_copy = *tmp_data;
+				Z_SET_REFCOUNT_P(tmp_data_copy, 1);
+				zval_copy_ctor(tmp_data_copy);
+				convert_to_double_ex(&tmp_data_copy);
+
+				/*
+				  if it doesn't fit in a long send it as a string.
+				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
+				  We do transformation here, which will be used later when sending types. The code later relies on this.
+				*/
+				if (Z_DVAL_P(tmp_data_copy) > LONG_MAX || Z_DVAL_P(tmp_data_copy) < LONG_MIN) {
 					stmt->send_types_to_server = resend_types_next_time = 1;
+					convert_to_string_ex(&tmp_data);
+				} else {
+					convert_to_long_ex(&tmp_data);
 				}
+
+				zval_ptr_dtor(&tmp_data_copy);
 			}
 		}
 	}
@@ -631,10 +651,11 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				*/
 				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
-
-					convert_to_double_ex(&tmp_data);
-					if (Z_DVAL_P(tmp_data) > LONG_MAX || Z_DVAL_P(tmp_data) < LONG_MIN) {
-						convert_to_string_ex(&tmp_data);
+					/*
+					  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
+					  The actual transformation has been performed several dozens line above.
+					*/
+					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						current_type = MYSQL_TYPE_VAR_STRING;
 						/*
 						  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
@@ -642,8 +663,6 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 						  if the type is however not long, then we will do a goto in the next switch.
 						  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 						*/
-					} else {
-						convert_to_long_ex(&tmp_data);
 					}
 				}
 			}
