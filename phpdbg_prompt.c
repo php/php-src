@@ -1061,43 +1061,42 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
 {
 	char *decode[4] = {NULL, NULL, NULL, NULL};
-		
+	
 	switch (op->opcode) {
-		case ZEND_JMP:
+	case ZEND_JMP:
 #ifdef ZEND_GOTO
-      case ZEND_GOTO:
+	case ZEND_GOTO:
 #endif
 #ifdef ZEND_FAST_CALL
-      case ZEND_FAST_CALL:
+	case ZEND_FAST_CALL:
 #endif
-        	asprintf(&decode[1], "#%lu", op->op1.jmp_addr - ops->opcodes);
-        goto format;
-		
-		      
-      case ZEND_JMPZNZ:
-        	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-        	asprintf(
-        		&decode[2], "#%lu or #%lu", op->op2.opline_num, op->extended_value);
-        goto result;
+			asprintf(&decode[1], "#%lu", op->op1.jmp_addr - ops->opcodes);
+		goto format;
+	      
+	case ZEND_JMPZNZ:
+			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+			asprintf(
+				&decode[2], "#%lu or #%lu", op->op2.opline_num, op->extended_value);
+		goto result;
       
-      case ZEND_JMPZ:
-      case ZEND_JMPNZ:
-      case ZEND_JMPZ_EX:
-      case ZEND_JMPNZ_EX:
+	case ZEND_JMPZ:
+	case ZEND_JMPNZ:
+	case ZEND_JMPZ_EX:
+	case ZEND_JMPNZ_EX:
       
 #ifdef ZEND_JMP_SET
-      case ZEND_JMP_SET:
-#endif      
+	case ZEND_JMP_SET:
+#endif
 #ifdef ZEND_JMP_SET_VAR
-      case ZEND_JMP_SET_VAR:
+	case ZEND_JMP_SET_VAR:
 #endif
         	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
       		asprintf(
       			&decode[2], "#%lu", op->op2.jmp_addr - ops->opcodes);
       	goto result;
 
-      case ZEND_RECV_INIT:
-        goto result;
+	case ZEND_RECV_INIT:
+		goto result;
           
 		default: {
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
@@ -1120,7 +1119,7 @@ format:
 		free(decode[2]);
 	if (decode[3])
 		free(decode[3]);
-	
+
 	return decode[0];
 } /* }}} */
 
