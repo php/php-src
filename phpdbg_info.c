@@ -144,6 +144,28 @@ PHPDBG_INFO(vars) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_INFO(literal) /* {{{ */
+{
+	if (EG(in_execution) && EG(active_op_array)) {
+		zend_uint literal =0;
+		phpdbg_notice(
+			"Literal Constants %d", EG(active_op_array)->last_literal-1);
+		
+		while (literal < EG(active_op_array)->last_literal) {
+			phpdbg_write("|-------- C%lu -------> [", literal);
+			zend_print_zval(
+				&EG(active_op_array)->literals[literal].constant, 0);
+			phpdbg_write("]");
+			phpdbg_writeln(EMPTY);
+			literal++;
+		}
+	} else {
+		phpdbg_error("Not executing !");
+	}
+	
+	return SUCCESS;
+} /* }}} */
+
 static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	phpdbg_write(

@@ -437,7 +437,18 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 {
 	TSRMLS_FETCH();
-	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+	
+	if (EG(in_execution)) {
+		/* we don't want to set signalled while phpdbg is interactive */
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+		}
+	} else {
+		/* if we are not executing then just provide advice */
+		phpdbg_writeln(EMPTY);
+		phpdbg_error(
+			"Please leave phpdbg gracefully !");
+	}
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */

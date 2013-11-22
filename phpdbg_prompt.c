@@ -980,8 +980,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
+	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
+	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
+	
 	if (input && input->length > 0L) {
 		do {
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
@@ -1021,6 +1023,8 @@ last:
 
 out:
 	phpdbg_destroy_input(&input TSRMLS_CC);
+	
+	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
 
 	return ret;
 } /* }}} */
