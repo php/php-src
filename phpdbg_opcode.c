@@ -27,7 +27,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
-	zend_uint iter = 0;
+	int iter = 0;
 
 	while (iter < ops->last_literal) {
 		if (literal == &ops->literals[iter]) {

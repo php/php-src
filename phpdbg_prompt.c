@@ -1094,10 +1094,11 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
-
+	phpdbg_input_t *input;
+	
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
-	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
+	input = phpdbg_read_input(NULL TSRMLS_CC);
 	
 	if (input && input->length > 0L) {
 		do {
