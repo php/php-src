@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -32,7 +33,6 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_cmd.h"
-#include "phpdbg_frame.h"
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -45,10 +45,10 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
-	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, 1),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
+	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, 1),
 	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, 2),
 	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, 1),
 	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
@@ -372,15 +372,87 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	return PHPDBG_LEAVE;
 } /* }}} */
 
+static inline void phpdbg_restore_frame(TSRMLS_D) { /* {{{ */
+	if (PHPDBG_FRAME(num) == 0) {
+		return;
+	}
+
+	PHPDBG_FRAME(num) = 0;
+
+	/* move things back */
+	EG(current_execute_data) = PHPDBG_FRAME(execute_data);
+
+	EG(opline_ptr) = &PHPDBG_EX(opline);
+	EG(active_op_array) = PHPDBG_EX(op_array);
+	EG(return_value_ptr_ptr) = PHPDBG_EX(original_return_value);
+	EG(active_symbol_table) = PHPDBG_EX(symbol_table);
+	EG(This) = PHPDBG_EX(current_this);
+	EG(scope) = PHPDBG_EX(current_scope);
+	EG(called_scope) = PHPDBG_EX(current_called_scope);
+} /* }}} */
+
+static inline void phpdbg_switch_frame(int frame TSRMLS_DC) { /* {{{ */
+	zend_execute_data *execute_data = PHPDBG_FRAME(num)?PHPDBG_FRAME(execute_data):EG(current_execute_data);
+	int i = 0;
+
+	if (PHPDBG_FRAME(num) == frame) {
+		phpdbg_notice("Already in frame #%d", frame);
+		return;
+	}
+
+	while (execute_data) {
+		if (i++ == frame) {
+			break;
+		}
+
+		do {
+			execute_data = execute_data->prev_execute_data;
+		} while (execute_data && execute_data->opline == NULL);
+	}
+
+	if (execute_data == NULL) {
+		phpdbg_error("No frame #%d", frame);
+		return;
+	}
+
+	phpdbg_restore_frame(TSRMLS_C);
+
+	if (frame > 0) {
+		PHPDBG_FRAME(num) = frame;
+
+		/* backup things and jump back */
+		PHPDBG_FRAME(execute_data) = EG(current_execute_data);
+		EG(current_execute_data) = execute_data;
+
+		EG(opline_ptr) = &PHPDBG_EX(opline);
+		EG(active_op_array) = PHPDBG_EX(op_array);
+		PHPDBG_FRAME(execute_data)->original_return_value = EG(return_value_ptr_ptr);
+		EG(return_value_ptr_ptr) = PHPDBG_EX(original_return_value);
+		EG(active_symbol_table) = PHPDBG_EX(symbol_table);
+		EG(This) = PHPDBG_EX(current_this);
+		EG(scope) = PHPDBG_EX(current_scope);
+		EG(called_scope) = PHPDBG_EX(current_called_scope);
+	}
+
+	phpdbg_notice("Switched to frame #%d", frame);
+	phpdbg_list_file(
+		zend_get_executed_filename(TSRMLS_C),
+		3,
+		zend_get_executed_lineno(TSRMLS_C)-1,
+		zend_get_executed_lineno(TSRMLS_C)
+		TSRMLS_CC
+	);
+} /* }}} */
+
 PHPDBG_COMMAND(frame) /* {{{ */
 {
 	switch (param->type) {
 		case NUMERIC_PARAM:
-			switch_to_frame(param->num TSRMLS_CC);
+			phpdbg_switch_frame(param->num TSRMLS_CC);
 			break;
 
 		case EMPTY_PARAM:
-			phpdbg_writeln("Currently at frame %d:", PHPDBG_G(frame).num);
+			phpdbg_notice("Currently at frame %d:", PHPDBG_G(frame).num);
 			break;
 
 		phpdbg_default_switch_case();
@@ -567,7 +639,9 @@ PHPDBG_COMMAND(back) /* {{{ */
 				zend_hash_find(Z_ARRVAL_PP(tmp), "line", sizeof("line"), (void **)&line);
 				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 				if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
-					phpdbg_write("frame #%d {main} at %s:%d", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+					phpdbg_write(
+						"frame #%d {main} at %s:%d",
+						i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 					break;
 				}
 				zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"), (void **)&funcname);
@@ -583,7 +657,10 @@ PHPDBG_COMMAND(back) /* {{{ */
 				funcsize = Z_STRLEN_PP(funcname) + (is_class == FAILURE?0:Z_STRLEN_PP(type) + Z_STRLEN_PP(class)) + 1;
 
 				func = emalloc(funcsize + 2);
-				phpdbg_write("frame #%d: %s%s%s(", i++, Z_STRVAL_PP(funcname), is_class == FAILURE?"":Z_STRVAL_PP(type), is_class == FAILURE?"":Z_STRVAL_PP(class));
+				phpdbg_write(
+					"frame #%d: %s%s%s(", 
+					i++, Z_STRVAL_PP(funcname), 
+					is_class == FAILURE?"":Z_STRVAL_PP(type), is_class == FAILURE?"":Z_STRVAL_PP(class));
 
 				if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **)&args) == SUCCESS) {
 					HashPosition iterator;
@@ -1081,7 +1158,7 @@ out:
 	phpdbg_destroy_input(&input TSRMLS_CC);
 
 	if (EG(in_execution)) {
-		restore_frame(TSRMLS_C);
+		phpdbg_restore_frame(TSRMLS_C);
 	}
 
 	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;

@@ -88,7 +88,7 @@ PHPDBG_HELP(finish) /* {{{ */
 	phpdbg_writeln(EMPTY);
     phpdbg_notice("Examples");
     phpdbg_writeln("\t%sfinish", PROMPT);
-    phpdbg_writeln("\t%sf", PROMPT);
+    phpdbg_writeln("\t%sF", PROMPT);
     phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
     phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: this allows all breakpoints that would otherwise break execution in the current scope to be skipped");
@@ -329,7 +329,7 @@ PHPDBG_HELP(quiet) /* {{{ */
 PHPDBG_HELP(back) /* {{{ */
 {
     phpdbg_help_header();
-	phpdbg_writeln("The backtrace is gathered with the default debug backtrace functionality");
+	phpdbg_writeln("The backtrace is built with the default debug backtrace functionality");
     phpdbg_writeln(EMPTY);
     phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sback 5", PROMPT);
@@ -337,6 +337,21 @@ PHPDBG_HELP(back) /* {{{ */
 	phpdbg_writeln("\tWill limit the number of frames to 5, the default is no limit");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: it is not necessary for an exception to be thrown to show a backtrace");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(frame) /* {{{ */
+{
+    phpdbg_help_header();
+	phpdbg_writeln("When viewing a backtrace, it is sometimes useful to jump to a frame in that trace");
+    phpdbg_writeln(EMPTY);
+    phpdbg_notice("Examples");
+	phpdbg_writeln("\t%sframe 2", PROMPT);
+	phpdbg_writeln("\t%sf 2", PROMPT);
+	phpdbg_writeln("\tWill go to frame 2, temporarily affecting scope and allowing access to the variables in that frame");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("Note: the current frame is restored when execution continues");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -407,7 +422,7 @@ PHPDBG_HELP(oplog) /* {{{ */
 	phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
 	phpdbg_help_footer();
 	return SUCCESS;
-} /* }}} */
+} 
 
 PHPDBG_HELP(register) /* {{{ */
 {

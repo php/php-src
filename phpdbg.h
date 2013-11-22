@@ -54,7 +54,6 @@
 #endif
 
 #include "phpdbg_cmd.h"
-#include "phpdbg_frame.h"
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
@@ -111,7 +110,7 @@
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.0.2-dev" /* }}} */
+#define PHPDBG_VERSION "0.1.0-dev" /* }}} */
 
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
@@ -133,7 +132,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable seek;						/* seek oplines */
 	zend_ulong flags;                   /* phpdbg flags */
 	HashTable registered;				/* registered */
-	phpdbg_frame frame;		/* frame */
+	phpdbg_frame_t frame;				/* frame */
 	FILE *io[3];						/* stdin/stdout/stderr */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 

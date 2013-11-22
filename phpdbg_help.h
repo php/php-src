@@ -44,6 +44,7 @@ PHPDBG_HELP(clean);
 PHPDBG_HELP(clear);
 PHPDBG_HELP(info);
 PHPDBG_HELP(back);
+PHPDBG_HELP(frame);
 PHPDBG_HELP(quiet);
 PHPDBG_HELP(list);
 PHPDBG_HELP(oplog);
@@ -61,7 +62,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_D_EX(run,      "execute inside the phpdbg vm",         											 'r', help_run,     NULL, 0),
 	PHPDBG_COMMAND_D_EX(eval,     "access to eval() allows affecting the environment",          				 	 'E', help_eval,    NULL, 0),
 	PHPDBG_COMMAND_D_EX(until,    "continue until the current line is executed", 									 'u', help_until,   NULL, 0),
-	PHPDBG_COMMAND_D_EX(finish,   "continue until the current function has returned",                                'f', help_finish,  NULL, 0),
+	PHPDBG_COMMAND_D_EX(finish,   "continue until the current function has returned",                                'F', help_finish,  NULL, 0),
 	PHPDBG_COMMAND_D_EX(leave,    "continue until the current function is returning",                                'L', help_leave,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(print,    "print context information or instructions",                         			     'p', help_print,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(break,    "breakpoints allow execution interruption",                                        'b', help_break,   NULL, 0),
@@ -69,6 +70,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_D_EX(clear,    "reset breakpoints to execute without interruption",                			 	 'c', help_clear,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(info,     "quick access to useful information on the console",                               'i', help_info,    NULL, 0),
 	PHPDBG_COMMAND_D_EX(back,     "show debug backtrace information during execution",                               't', help_back,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(frame,    "switch to a frame in the current stack for inspection",                           'f', help_frame,   NULL, 0),
     PHPDBG_COMMAND_D_EX(quiet,    "be quiet during execution",                                                       'Q', help_quiet,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(list,     "list code gives you quick access to code",                     					 'l', help_list,    NULL, 0),
 	PHPDBG_COMMAND_D_EX(oplog,    "keep clutter off the screen by logging oplines",                         		 'O', help_oplog,   NULL, 0),

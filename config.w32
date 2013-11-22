@@ -1,7 +1,7 @@
 ARG_ENABLE('phpdbg', 'Build phpdbg', 'yes');
 
 if (PHP_PHPDBG == "yes") {
-    SAPI('phpdbg', 'phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_frame.c', 'phpdbg.exe');
+    SAPI('phpdbg', 'phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c', 'phpdbg.exe');
     ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
 }
 
