@@ -181,7 +181,7 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
    context.
  */
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   unsigned int inputLen)
+			   zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 

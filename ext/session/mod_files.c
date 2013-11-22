@@ -69,8 +69,8 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 {
 	size_t key_len;
 	const char *p;
-	int i;
-	int n;
+	size_t i;
+	size_t n;
 
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
@@ -169,12 +169,12 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 	}
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
+static int ps_files_cleanup_dir(const char *dirname, php_int_t maxlifetime TSRMLS_DC)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
-	struct stat sbuf;
+	php_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -225,7 +225,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-	struct stat sbuf;
+	php_stat_t sbuf;
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;

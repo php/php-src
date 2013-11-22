@@ -34,11 +34,11 @@
 
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
 #define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
-#define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen TSRMLS_DC
-#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
+#define PS_READ_ARGS void **mod_data, const char *key, char **val, zend_str_size_int *vallen TSRMLS_DC
+#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const zend_str_size_int vallen TSRMLS_DC
 #define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
-#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
-#define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
+#define PS_GC_ARGS void **mod_data, php_int_t maxlifetime, php_int_t *nrdels TSRMLS_DC
+#define PS_CREATE_SID_ARGS void **mod_data, zend_str_size_int *newlen TSRMLS_DC
 
 /* default create id function */
 PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
@@ -104,8 +104,8 @@ typedef struct _php_session_rfc1867_progress {
 	zval      sid;
 	smart_str key;
 
-	long      update_step;
-	long      next_update;
+	php_int_t      update_step;
+	php_int_t      next_update;
 	double    next_update_time;
 	zend_bool cancel_upload;
 	zend_bool apply_trans_sid;
@@ -137,7 +137,7 @@ typedef struct _php_ps_globals {
 	php_session_status session_status;
 	long gc_probability;
 	long gc_divisor;
-	long gc_maxlifetime;
+	php_int_t gc_maxlifetime;
 	int module_number;
 	long cache_expire;
 	union {
@@ -194,8 +194,8 @@ extern zend_module_entry session_module_entry;
 #define PS(v) (ps_globals.v)
 #endif
 
-#define PS_SERIALIZER_ENCODE_ARGS char **newstr, int *newlen TSRMLS_DC
-#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen TSRMLS_DC
+#define PS_SERIALIZER_ENCODE_ARGS char **newstr, zend_str_size_int *newlen TSRMLS_DC
+#define PS_SERIALIZER_DECODE_ARGS const char *val, zend_str_size_int vallen TSRMLS_DC
 
 typedef struct ps_serializer_struct {
 	const char *name;
@@ -254,8 +254,8 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 
 #define PS_ENCODE_VARS 											\
 	char *key;													\
-	uint key_length;											\
-	ulong num_key;												\
+	zend_str_size_uint key_length;											\
+	php_uint_t num_key;												\
 	zval **struc;
 
 #define PS_ENCODE_LOOP(code) do {									\
@@ -266,7 +266,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; \
 					zend_hash_move_forward(_ht)) {					\
 			if (key_type == HASH_KEY_IS_LONG) {						\
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld", num_key);	\
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key " ZEND_INT_FMT, num_key);	\
 				continue;											\
 			}														\
 			key_length--;											\
