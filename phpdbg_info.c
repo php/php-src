@@ -18,8 +18,11 @@
 */
 
 #include "php.h"
+#include "phpdbg.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_info.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_INFO(files) /* {{{ */
 {
@@ -146,15 +149,32 @@ PHPDBG_INFO(vars) /* {{{ */
 
 PHPDBG_INFO(literal) /* {{{ */
 {
-	if (EG(in_execution) && EG(active_op_array)) {
-		zend_uint literal =0;
-		phpdbg_notice(
-			"Literal Constants %d", EG(active_op_array)->last_literal-1);
+	if ((EG(in_execution) && EG(active_op_array)) || PHPDBG_G(ops)) {
+		zend_op_array *ops = EG(active_op_array) ? EG(active_op_array) : PHPDBG_G(ops);
+		zend_uint literal =0, count = ops->last_literal-1;
 		
-		while (literal < EG(active_op_array)->last_literal) {
+		if (ops->function_name) {
+			if (ops->scope) {
+				phpdbg_notice(
+				"Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name, count);
+			} else {
+				phpdbg_notice(
+					"Literal Constants in %s() (%d)", ops->function_name, count);
+			}
+		} else {
+			if (ops->filename) {
+				phpdbg_notice(
+				"Literal Constants in %s (%d)", ops->filename, count);
+			} else {
+				phpdbg_notice(
+					"Literal Constants @ %p (%d)", ops, count);
+			}
+		}
+		
+		while (literal < ops->last_literal) {
 			phpdbg_write("|-------- C%lu -------> [", literal);
 			zend_print_zval(
-				&EG(active_op_array)->literals[literal].constant, 0);
+				&ops->literals[literal].constant, 0);
 			phpdbg_write("]");
 			phpdbg_writeln(EMPTY);
 			literal++;
