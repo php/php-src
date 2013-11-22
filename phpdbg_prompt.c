@@ -571,6 +571,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 	}
 
 out:
+	PHPDBG_FRAME(num) = 0;
 	return SUCCESS;
 } /* }}} */
 
@@ -658,8 +659,8 @@ PHPDBG_COMMAND(back) /* {{{ */
 
 				func = emalloc(funcsize + 2);
 				phpdbg_write(
-					"frame #%d: %s%s%s(", 
-					i++, Z_STRVAL_PP(funcname), 
+					"frame #%d: %s%s%s(",
+					i++, Z_STRVAL_PP(funcname),
 					is_class == FAILURE?"":Z_STRVAL_PP(type), is_class == FAILURE?"":Z_STRVAL_PP(class));
 
 				if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **)&args) == SUCCESS) {
@@ -1095,11 +1096,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 	phpdbg_input_t *input;
-	
+
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
 	input = phpdbg_read_input(NULL TSRMLS_CC);
-	
+
 	if (input && input->length > 0L) {
 		do {
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
