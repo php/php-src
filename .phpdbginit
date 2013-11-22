@@ -33,7 +33,7 @@ function my_debugging_function()
 /* phpdbg_break(PHPDBG_FILE, "/path/to/file.php:10"); */
 
 /*
- If readline is loaded, you might want to setup completion for your project:
+ If readline is loaded, you might want to setup completion:
 */
 if (function_exists('readline_completion_function')) {
 	readline_completion_function(function(){
