@@ -44,6 +44,9 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->lcmd = NULL;
     pg->flags = PHPDBG_DEFAULT_FLAGS;
     pg->oplog = NULL;
+    pg->io[PHPDBG_STDIN] = NULL;
+    pg->io[PHPDBG_STDOUT] = NULL;
+    pg->io[PHPDBG_STDERR] = NULL;
     memset(&pg->lparam, 0, sizeof(phpdbg_param_t));
 } /* }}} */
 
@@ -339,7 +342,9 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
-	fflush(stdout);
+	TSRMLS_FETCH();
+	
+	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
 
 /* {{{ sapi_module_struct phpdbg_sapi_module
@@ -635,6 +640,11 @@ phpdbg_main:
 #endif
 
 		PG(modules_activated) = 0;
+
+		/* set up basic io here */
+		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
+		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
+		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 
         if (exec) { /* set execution context */
             PHPDBG_G(exec) = phpdbg_resolve_path(

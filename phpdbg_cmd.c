@@ -218,7 +218,7 @@ phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if (!phpdbg_write(PROMPT) ||
-				!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
+				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
 				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
