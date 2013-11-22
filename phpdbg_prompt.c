@@ -372,7 +372,8 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	return PHPDBG_LEAVE;
 } /* }}} */
 
-static inline void phpdbg_restore_frame(TSRMLS_D) { /* {{{ */
+static inline void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
+{
 	if (PHPDBG_FRAME(num) == 0) {
 		return;
 	}
@@ -391,7 +392,8 @@ static inline void phpdbg_restore_frame(TSRMLS_D) { /* {{{ */
 	EG(called_scope) = PHPDBG_EX(current_called_scope);
 } /* }}} */
 
-static inline void phpdbg_switch_frame(int frame TSRMLS_DC) { /* {{{ */
+static inline void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
+{
 	zend_execute_data *execute_data = PHPDBG_FRAME(num)?PHPDBG_FRAME(execute_data):EG(current_execute_data);
 	int i = 0;
 
@@ -627,8 +629,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 				limit = (param->type == NUMERIC_PARAM) ? param->num : 0;
 
 			zval **file, **line, **funcname, **class, **type, **args;
-			char *func, is_class;
-			long funcsize;
+			char is_class;
 
 			zend_fetch_debug_backtrace(
 				&zbacktrace, 0, 0, limit TSRMLS_CC);
@@ -655,9 +656,6 @@ PHPDBG_COMMAND(back) /* {{{ */
 					zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
 				}
 
-				funcsize = Z_STRLEN_PP(funcname) + (is_class == FAILURE?0:Z_STRLEN_PP(type) + Z_STRLEN_PP(class)) + 1;
-
-				func = emalloc(funcsize + 2);
 				phpdbg_write(
 					"frame #%d: %s%s%s(",
 					i++, Z_STRVAL_PP(funcname),
