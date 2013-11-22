@@ -101,6 +101,7 @@
 #define PHPDBG_IS_STEPONEVAL	(1<<17)
 #define PHPDBG_IS_INITIALIZING	(1<<18)
 #define PHPDBG_IS_SIGNALED      (1<<19)
+#define PHPDBG_IS_INTERACTIVE	(1<<20)
 
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
@@ -111,6 +112,11 @@
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.0.2-dev" /* }}} */
+
+/* {{{ output descriptors */
+#define PHPDBG_STDIN 			0
+#define PHPDBG_STDOUT			1
+#define PHPDBG_STDERR			2 /* }}} */
 
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
@@ -128,6 +134,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_ulong flags;                   /* phpdbg flags */
 	HashTable registered;				/* registered */
 	phpdbg_frame frame;		/* frame */
+	FILE *io[3];						/* stdin/stdout/stderr */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif /* PHPDBG_H */

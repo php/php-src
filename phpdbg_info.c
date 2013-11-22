@@ -18,8 +18,11 @@
 */
 
 #include "php.h"
+#include "phpdbg.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_info.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_INFO(files) /* {{{ */
 {
@@ -141,6 +144,45 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	zend_hash_destroy(&vars);
 
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_INFO(literal) /* {{{ */
+{
+	if ((EG(in_execution) && EG(active_op_array)) || PHPDBG_G(ops)) {
+		zend_op_array *ops = EG(active_op_array) ? EG(active_op_array) : PHPDBG_G(ops);
+		zend_uint literal =0, count = ops->last_literal-1;
+		
+		if (ops->function_name) {
+			if (ops->scope) {
+				phpdbg_notice(
+				"Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name, count);
+			} else {
+				phpdbg_notice(
+					"Literal Constants in %s() (%d)", ops->function_name, count);
+			}
+		} else {
+			if (ops->filename) {
+				phpdbg_notice(
+				"Literal Constants in %s (%d)", ops->filename, count);
+			} else {
+				phpdbg_notice(
+					"Literal Constants @ %p (%d)", ops, count);
+			}
+		}
+		
+		while (literal < ops->last_literal) {
+			phpdbg_write("|-------- C%lu -------> [", literal);
+			zend_print_zval(
+				&ops->literals[literal].constant, 0);
+			phpdbg_write("]");
+			phpdbg_writeln(EMPTY);
+			literal++;
+		}
+	} else {
+		phpdbg_error("Not executing !");
+	}
+	
 	return SUCCESS;
 } /* }}} */
 

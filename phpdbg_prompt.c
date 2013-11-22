@@ -35,7 +35,7 @@
 #include "phpdbg_frame.h"
 
 /* {{{ command declarations */
-static const phpdbg_command_t phpdbg_prompt_commands[] = {
+const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
 	PHPDBG_COMMAND_D(compile, "attempt compilation", 					  'c', NULL, 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 1),
@@ -528,7 +528,7 @@ PHPDBG_COMMAND(eval) /* {{{ */
 				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 			}
 		} break;
-		
+
 		phpdbg_default_switch_case();
 	}
 
@@ -666,7 +666,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 {
 	phpdbg_error(
 		"No information command selected !");
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -1034,8 +1034,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
 
-	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
+	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
+	phpdbg_input_t *input = phpdbg_read_input(NULL TSRMLS_CC);
+	
 	if (input && input->length > 0L) {
 		do {
 			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
@@ -1075,110 +1077,10 @@ last:
 
 out:
 	phpdbg_destroy_input(&input TSRMLS_CC);
-	if (EG(in_execution)) {
-		restore_frame();
-	}
+	
+	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
 
 	return ret;
-} /* }}} */
-
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type, HashTable *vars TSRMLS_DC) /* {{{ */
-{
-	char *decode = NULL;
-
-	switch (type) {
-		case IS_CV:
-			asprintf(&decode, "$%s", ops->vars[op->var].name);
-		break;
-		
-		case IS_VAR:
-		case IS_TMP_VAR: {
-			zend_ulong id = 0;
-			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &id) != SUCCESS) {
-				id = zend_hash_num_elements(vars);
-				zend_hash_index_update(
-					vars, (zend_ulong) ops->vars - op->var, 
-					(void**) &id, 
-					sizeof(zend_ulong), NULL);
-			}
-			
-			asprintf(&decode, "@%lu", id);
-		} break;
-		
-		case IS_CONST:
-			asprintf(&decode, "<constant>");
-		break;
-		
-		case IS_UNUSED:
-			asprintf(&decode, "<unused>");
-		break;
-	}
-	return decode;
-} /* }}} */
-
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
-{
-	char *decode[3];
-	
-	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-	decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
-	
-	switch (op->opcode) {
-		default: asprintf(
-			&decode[0], "%-20s %-20s",
-			decode[1], decode[2]
-		);
-	}
-	
-	if (decode[1])
-		free(decode[1]);
-	if (decode[2])
-		free(decode[2]);
-	
-	return decode[0];
-} /* }}} */
-
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
-{
-    /* force out a line while stepping so the user knows what is happening */
-	if (ignore_flags ||
-		(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ||
-		(PHPDBG_G(oplog)))) {
-
-		zend_op *opline = execute_data->opline;
-		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
-		
-		if (ignore_flags ||
-			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
-			/* output line info */
-			phpdbg_notice("#%- 5lu %16p %-30s %s %s",
-			   opline->lineno,
-			   opline,
-			   phpdbg_decode_opcode(opline->opcode),
-			   decode,
-			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
-        }
-
-		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "#%- 5lu %16p %-30s %s %s",
-				opline->lineno,
-				opline,
-				phpdbg_decode_opcode(opline->opcode),
-				decode,
-				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
-		}
-		
-		if (decode) {
-			free(decode);
-		}
-    }
-} /* }}} */
-
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
-{
-	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags TSRMLS_CC);
 } /* }}} */
 
 void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
@@ -1196,12 +1098,6 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 		zend_bailout();
 	}
 } /* }}} */
-
-void phpdbg_sigint_handler(int signo)
-{
-	TSRMLS_FETCH();
-	PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
-}
 
 static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
 {
@@ -1277,7 +1173,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 #endif
 	zend_bool original_in_execution = EG(in_execution);
 	HashTable vars;
-	
+
 #if PHP_VERSION_ID < 50500
 	if (EG(exception)) {
 		return;
@@ -1427,8 +1323,8 @@ next:
 			DO_INTERACTIVE();
 		}
 
-        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-		
+		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+
 		if (PHPDBG_G(vmret) > 0) {
 			switch (PHPDBG_G(vmret)) {
 				case 1:

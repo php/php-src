@@ -218,7 +218,7 @@ phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if (!phpdbg_write(PROMPT) ||
-				!fgets(buf, PHPDBG_MAX_CMD, stdin)) {
+				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
 				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
@@ -377,10 +377,12 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_
 					}
 				}
 
-				PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
-				phpdbg_clear_param(
-					&PHPDBG_G(lparam) TSRMLS_CC);
-				PHPDBG_G(lparam) = param;
+				if (!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
+					PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
+					phpdbg_clear_param(
+						&PHPDBG_G(lparam) TSRMLS_CC);
+					PHPDBG_G(lparam) = param;
+				}
 
 				rc = command->handler(&param, input TSRMLS_CC);
 				break;

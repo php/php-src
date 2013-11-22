@@ -1,3 +1,31 @@
+phpdbginit
+==========
+*Setting up your debugging session automatically*
+
+By default, phpdbg looks for *.phpdbginit* in the current working directory, this location can be overrideen on the command line:
+
+```
+phpdbg -imy.phpdbginit
+```
+
+An init file should contain one command per line, any phpdbg command is supported during init.
+
+In addition, *.phpdbginit* can contain embedded code, allowing, for example 
+
+ - the setup of auto completion
+ - the registration of functions
+ - the acquisition and pre-compilation of code
+ - bootstrapping a web application
+
+It is common for C projects (PHP included) to include an init file for the GDB debugger; this would be a clever practice to adopt
+for those distributing PHP library code.
+
+The default .phpdbginit
+=======================
+
+We distribute the following init file by default, it should be copied to any directory you commonly execute in:
+
+```
 ##########################################################
 # .phpdbginit
 #
@@ -12,26 +40,6 @@
 # Embedding code in .phpdbginit
 ##########################################################
 <:
-/*
-* This embedded PHP is executed at init time
-*/
-
-/*
-* Functions defined and registered by init
-* will persist across cleans
-*/
-
-/*
-function my_debugging_function() 
-{
-	var_dump(func_get_args());
-}
-*/
-
-/* phpdbg_break(PHPDBG_METHOD, "phpdbg::method"); */
-/* phpdbg_break(PHPDBG_FUNC, "my_global_function"); */
-/* phpdbg_break(PHPDBG_FILE, "/path/to/file.php:10"); */
-
 /*
  If readline is loaded, you might want to setup completion:
 */
@@ -69,3 +77,6 @@ if (function_exists('readline_completion_function')) {
 ##########################################################
 # TLDR; if you have a good shell, use it ...
 ##########################################################
+```
+
+

@@ -44,6 +44,9 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->lcmd = NULL;
     pg->flags = PHPDBG_DEFAULT_FLAGS;
     pg->oplog = NULL;
+    pg->io[PHPDBG_STDIN] = NULL;
+    pg->io[PHPDBG_STDOUT] = NULL;
+    pg->io[PHPDBG_STDERR] = NULL;
     memset(&pg->lparam, 0, sizeof(phpdbg_param_t));
     pg->frame.num = 0;
 } /* }}} */
@@ -340,7 +343,9 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
-	fflush(stdout);
+	TSRMLS_FETCH();
+	
+	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
 
 /* {{{ sapi_module_struct phpdbg_sapi_module
@@ -432,6 +437,23 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
 		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
 		phpdbg_writeln("Includes\t\t%d",  zend_hash_num_elements(&EG(included_files)));
+	}
+} /* }}} */
+
+static inline void phpdbg_sigint_handler(int signo) /* {{{ */
+{
+	TSRMLS_FETCH();
+	
+	if (EG(in_execution)) {
+		/* we don't want to set signalled while phpdbg is interactive */
+		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+		}
+	} else {
+		/* if we are not executing then just provide advice */
+		phpdbg_writeln(EMPTY);
+		phpdbg_error(
+			"Please leave phpdbg gracefully !");
 	}
 } /* }}} */
 
@@ -619,6 +641,11 @@ phpdbg_main:
 #endif
 
 		PG(modules_activated) = 0;
+
+		/* set up basic io here */
+		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
+		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
+		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 
         if (exec) { /* set execution context */
             PHPDBG_G(exec) = phpdbg_resolve_path(
