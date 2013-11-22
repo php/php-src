@@ -467,3 +467,26 @@ PHPDBG_HELP(shell) /* {{{ */
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
+
+PHPDBG_HELP(options) /* {{{ */
+{
+	phpdbg_help_header();
+	phpdbg_writeln("Below are the command line options supported by phpdbg");
+	phpdbg_notice("Command Line Options and Flags");
+	phpdbg_writeln(" -c\t-c/my/php.ini\t\tSet php.ini file to load");
+	phpdbg_writeln(" -d\t-dmemory_limit=4G\tSet a php.ini directive");
+	phpdbg_writeln(" -n\tN/A\t\t\tDisable default php.ini");
+	phpdbg_writeln(" -q\tN/A\t\t\tSupress welcome banner");
+	phpdbg_writeln(" -e\t-emytest.php\t\tSet execution context");
+	phpdbg_writeln(" -v\tN/A\t\t\tEnable oplog output");
+	phpdbg_writeln(" -s\tN/A\t\t\tEnable stepping");
+	phpdbg_writeln(" -b\tN/A\t\t\tDisable colour");
+	phpdbg_writeln(" -i\t-imy.init\t\tSet .phpdbginit file");
+	phpdbg_writeln(" -I\tN/A\t\t\tIgnore default .phpdbginit");
+	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
+	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
+	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
+	phpdbg_notice("Passing -rr will quit automatically after execution");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
