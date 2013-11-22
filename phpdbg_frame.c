@@ -28,7 +28,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 #define PHPDBG_FRAME(v) (PHPDBG_G(frame).v)
 #define PHPDBG_EX(v) (EG(current_execute_data)->v)
 
-void switch_to_frame(int frame) {
+void switch_to_frame(int frame TSRMLS_DC) {
 	zend_execute_data *execute_data = PHPDBG_FRAME(num)?PHPDBG_FRAME(execute_data):EG(current_execute_data);
 	int i = 0;
 
@@ -52,7 +52,7 @@ void switch_to_frame(int frame) {
 		return;
 	}
 
-	restore_frame();
+	restore_frame(TSRMLS_C);
 
 	if (frame > 0) {
 		PHPDBG_FRAME(num) = frame;
@@ -63,6 +63,7 @@ void switch_to_frame(int frame) {
 
 		EG(opline_ptr) = &PHPDBG_EX(opline);
 		EG(active_op_array) = PHPDBG_EX(op_array);
+		PHPDBG_FRAME(execute_data)->original_return_value = EG(return_value_ptr_ptr);
 		EG(return_value_ptr_ptr) = PHPDBG_EX(original_return_value);
 		EG(active_symbol_table) = PHPDBG_EX(symbol_table);
 		EG(This) = PHPDBG_EX(current_this);
@@ -80,7 +81,7 @@ void switch_to_frame(int frame) {
 	);
 }
 
-void restore_frame() {
+void restore_frame(TSRMLS_D) {
 	if (PHPDBG_FRAME(num) == 0) {
 		return;
 	}

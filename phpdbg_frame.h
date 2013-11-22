@@ -29,8 +29,8 @@ typedef struct {
 	zend_execute_data *execute_data;
 } phpdbg_frame;
 
-void switch_to_frame(int frame);
+void switch_to_frame(int frame TSRMLS_DC);
 
-void restore_frame();
+void restore_frame(TSRMLS_D);
 
 #endif /* PHPDBG_FRAME_H */

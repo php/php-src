@@ -376,7 +376,7 @@ PHPDBG_COMMAND(frame) /* {{{ */
 {
 	switch (param->type) {
 		case NUMERIC_PARAM:
-			switch_to_frame(param->num);
+			switch_to_frame(param->num TSRMLS_CC);
 			break;
 
 		case EMPTY_PARAM:
@@ -1077,7 +1077,11 @@ last:
 
 out:
 	phpdbg_destroy_input(&input TSRMLS_CC);
-	
+
+	if (EG(in_execution)) {
+		restore_frame(TSRMLS_C);
+	}
+
 	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
 
 	return ret;
