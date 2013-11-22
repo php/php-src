@@ -43,11 +43,42 @@ if (function_exists('readline_completion_function')) {
 		);
 	});
 }
+
+/*
+ Setting argv made trivial ...
+ 
+ argv 1 2 3 4
+ ^ set argv for next execution
+ 
+ argv
+ ^ unset argv for next execution
+ 
+*/
+function argv()
+{
+	$argv = func_get_args();
+	
+	if (!$argv) {
+		$_SERVER['argv'] = array();
+		$_SERVER['argc'] = 0;
+		return;
+	}
+	
+	$_SERVER['argv'] = array_merge
+	(
+		array("phpdbg"),
+		$argv
+	); 
+	$_SERVER['argc'] = count($_SERVER['argv']);
+	
+	return $_SERVER['argv'];
+}
 :>
 ##########################################################
 # Now carry on initializing phpdbg ...
 ##########################################################
 # R my_debugging_function
+# R argv
 
 ##########################################################
 # PHP has many functions that might be useful
