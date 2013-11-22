@@ -45,6 +45,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->flags = PHPDBG_DEFAULT_FLAGS;
     pg->oplog = NULL;
     memset(&pg->lparam, 0, sizeof(phpdbg_param_t));
+    pg->frame.num = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */

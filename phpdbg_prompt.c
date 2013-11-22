@@ -32,6 +32,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_cmd.h"
+#include "phpdbg_frame.h"
 
 /* {{{ command declarations */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -42,8 +43,9 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
 	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, 1),
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
-	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'f', NULL, 0),
+	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
+	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, 1),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
@@ -370,6 +372,21 @@ PHPDBG_COMMAND(leave) /* {{{ */
 	return PHPDBG_LEAVE;
 } /* }}} */
 
+PHPDBG_COMMAND(frame) /* {{{ */
+{
+	switch (param->type) {
+		case NUMERIC_PARAM:
+			switch_to_frame(param->num);
+			break;
+
+		case EMPTY_PARAM:
+			phpdbg_writeln("Currently at frame %d:", PHPDBG_G(frame).num);
+			break;
+
+		phpdbg_default_switch_case();
+	}
+} /* }}} */
+
 static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 {
 	zend_fcall_info fci;
@@ -529,21 +546,58 @@ PHPDBG_COMMAND(back) /* {{{ */
 		case EMPTY_PARAM:
 		case NUMERIC_PARAM: {
 			zval zbacktrace;
-			zval **tmp;
+			zval **tmp, **argstmp;
 			HashPosition position;
 			int i = 0,
 				limit = (param->type == NUMERIC_PARAM) ? param->num : 0;
 
+			zval **file, **line, **funcname, **class, **type, **args;
+			char *func, is_class;
+			long funcsize;
+
 			zend_fetch_debug_backtrace(
 				&zbacktrace, 0, 0, limit TSRMLS_CC);
 
-			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-				zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
-				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
-				if (i++) {
-					phpdbg_writeln(",");
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
+			zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position);
+			while (1) {
+				zend_hash_find(Z_ARRVAL_PP(tmp), "file", sizeof("file"), (void **)&file);
+				zend_hash_find(Z_ARRVAL_PP(tmp), "line", sizeof("line"), (void **)&line);
+				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
+				if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
+					phpdbg_write("frame #%d {main} at %s:%d", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+					break;
 				}
-				zend_print_flat_zval_r(*tmp TSRMLS_CC);
+				zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"), (void **)&funcname);
+				if ((is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "object", sizeof("object"), (void **)&class)) == FAILURE) {
+					is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "class", sizeof("class"), (void **)&class);
+				} else {
+					zend_get_object_classname(class, &Z_STRVAL_PP(class), &Z_STRLEN_PP(class) TSRMLS_CC);
+				}
+				if (is_class) {
+					zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
+				}
+
+				funcsize = Z_STRLEN_PP(funcname) + (is_class == FAILURE?0:Z_STRLEN_PP(type) + Z_STRLEN_PP(class)) + 1;
+
+				func = emalloc(funcsize + 2);
+				phpdbg_write("frame #%d: %s%s%s(", i++, Z_STRVAL_PP(funcname), is_class == FAILURE?"":Z_STRVAL_PP(type), is_class == FAILURE?"":Z_STRVAL_PP(class));
+
+				if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **)&args) == SUCCESS) {
+					HashPosition iterator;
+					int j = 0;
+
+					zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
+					while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args), (void **) &argstmp, &iterator) == SUCCESS) {
+						if (j++) {
+							phpdbg_write(", ");
+						}
+						zend_print_flat_zval_r(*argstmp TSRMLS_CC);
+						zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
+					}
+				}
+
+				phpdbg_writeln(") at %s:%d", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			}
 
 			phpdbg_writeln(EMPTY);
@@ -1021,6 +1075,9 @@ last:
 
 out:
 	phpdbg_destroy_input(&input TSRMLS_CC);
+	if (EG(in_execution)) {
+		restore_frame();
+	}
 
 	return ret;
 } /* }}} */

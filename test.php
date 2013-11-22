@@ -12,12 +12,14 @@ class phpdbg {
     }
 }
 
-function test() {
-	$var = 1 + 1;
+function test($x) {
+	$var = $x + 1;
 	$var += 2;
 	$var <<= 3;
 
-	$foo = function () {};
+	$foo = function () {
+		echo "bar!\n";
+	};
 
 	$foo();
 
@@ -29,7 +31,7 @@ $dbg = new phpdbg();
 var_dump(
     $dbg->isGreat("PHP Rocks !!"));
 
-foreach (test() as $gen)
+foreach (test(1) as $gen)
 	continue;
 
 echo "it works!\n";
