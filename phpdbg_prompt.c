@@ -385,6 +385,8 @@ PHPDBG_COMMAND(frame) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
+
+	return SUCCESS;
 } /* }}} */
 
 static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
@@ -572,7 +574,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 				if ((is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "object", sizeof("object"), (void **)&class)) == FAILURE) {
 					is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "class", sizeof("class"), (void **)&class);
 				} else {
-					zend_get_object_classname(class, &Z_STRVAL_PP(class), &Z_STRLEN_PP(class) TSRMLS_CC);
+					zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class), (zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
 				}
 				if (is_class) {
 					zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
