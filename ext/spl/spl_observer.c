@@ -404,7 +404,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSR
 }
 /* }}} */
 
-static int spl_object_storage_compare_info(spl_SplObjectStorageElement *e1, spl_SplObjectStorageElement *e2 TSRMLS_DC) /* {{{ */
+static php_int_t spl_object_storage_compare_info(spl_SplObjectStorageElement *e1, spl_SplObjectStorageElement *e2 TSRMLS_DC) /* {{{ */
 {
 	zval result;
 
