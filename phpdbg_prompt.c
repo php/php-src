@@ -753,6 +753,11 @@ PHPDBG_COMMAND(info) /* {{{ */
 PHPDBG_COMMAND(break) /* {{{ */
 {
 	switch (param->type) {
+		case EMPTY_PARAM:
+			phpdbg_set_breakpoint_file(
+				zend_get_executed_filename(TSRMLS_C),
+				zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+			break;
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
 			break;
