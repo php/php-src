@@ -16,6 +16,8 @@ Version 0.1.0 2013-11-23
 3. Make uniform commands and aliases where possible
 4. Include all alias information and sub-command information in help
 5. Added signal handling to break execution (ctrl-c)
+6. Fixed #13 (Output Buffering Control seems fail)
+7. Fixed #14 (Fixed typo in Makefile.frag)
 
 
 Version 0.0.1 2013-11-15
