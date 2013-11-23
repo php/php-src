@@ -171,28 +171,31 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 		    if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		        if (sb.st_mode & (S_IFREG|S_IFLNK)) {
-		        	if (PHPDBG_G(exec)) {
-		            	phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
-		            	efree(PHPDBG_G(exec));
-		            	PHPDBG_G(exec) = NULL;
-		            }
+		        	char *res = phpdbg_resolve_path(param->str TSRMLS_CC);
+		        	size_t res_len = strlen(res);
+		        	
+		        	if ((res_len != PHPDBG_G(exec_len)) || 
+		        		(memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
+		        		
+		        		if (PHPDBG_G(exec)) {
+				        	phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
+				        	efree(PHPDBG_G(exec));
+				        	PHPDBG_G(exec) = NULL;
+				        	PHPDBG_G(exec_len) = 0L;
+				        }
 
-					if (PHPDBG_G(ops)) {
-						phpdbg_notice("Destroying compiled opcodes");
-						phpdbg_clean(0 TSRMLS_CC);
-					}
+						if (PHPDBG_G(ops)) {
+							phpdbg_notice("Destroying compiled opcodes");
+							phpdbg_clean(0 TSRMLS_CC);
+						}
 
-					PHPDBG_G(exec) = phpdbg_resolve_path(param->str TSRMLS_CC);
+						PHPDBG_G(exec) = res;
+						PHPDBG_G(exec_len) = res_len;
 
-					if (!PHPDBG_G(exec)) {
-						phpdbg_error("Cannot get real file path");
-						return SUCCESS;
-					}
-
-					PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
-
-					phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-
+						phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+		        	} else {
+		        		phpdbg_notice("Execution context not changed ...");
+		        	}
 				} else {
 					phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
 				}
