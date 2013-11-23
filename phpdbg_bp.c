@@ -23,6 +23,7 @@
 #include "phpdbg.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_opcode.h"
 #include "zend_globals.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -443,6 +444,36 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D) /* {{{ */
     }
 
 	return breakpoint;
+} /* }}} */
+
+int phpdbg_find_breakpoint(zend_execute_data* execute_data TSRMLS_DC) /* {{{ */
+{
+	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP
+		&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	if (PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP)) {
+		/* check we are at the beginning of the stack */
+		if (execute_data->opline == EG(active_op_array)->opcodes) {
+			if (phpdbg_find_breakpoint_symbol(
+					execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
+				return SUCCESS;
+			}
+		}
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP
+		&& phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP
+		&& phpdbg_find_breakpoint_opcode(execute_data->opline->opcode TSRMLS_CC) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	return FAILURE;
 } /* }}} */
 
 PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
