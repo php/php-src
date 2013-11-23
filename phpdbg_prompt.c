@@ -194,7 +194,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 						phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 		        	} else {
-		        		phpdbg_notice("Execution context not changed ...");
+		        		phpdbg_notice("Execution context not changed");
 		        	}
 				} else {
 					phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
