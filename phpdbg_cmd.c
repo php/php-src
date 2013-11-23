@@ -164,7 +164,7 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 				continue;
 
 			case IN_STRING:
-				if ((c == '"')) {
+				if (c == '"') {
 					if (buffer[(p - buffer)-1] == '\\') {
 						b[l-1]=c;
 						continue;
@@ -194,6 +194,9 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 			phpdbg_error(
 				"Malformed command line (unclosed quote) @ %d: %s!",
 				(p - buffer)-1, &buffer[(p - buffer)-1]);
+		break;
+
+		case IN_BETWEEN:
 		break;
 	}
 
