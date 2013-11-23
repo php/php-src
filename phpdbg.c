@@ -463,6 +463,8 @@ int main(int argc, char **argv) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *ini_entries;
 	int   ini_entries_len;
+	zend_bool ini_ignore;
+	char *ini_override;
 	char *exec;
 	size_t exec_len;
 	char *init_file;
@@ -497,6 +499,8 @@ int main(int argc, char **argv) /* {{{ */
 phpdbg_main:
 	ini_entries = NULL;
 	ini_entries_len = 0;
+	ini_ignore = 0;
+	ini_override = NULL;
 	exec = NULL;
 	exec_len = 0;
 	init_file = NULL;
@@ -517,13 +521,13 @@ phpdbg_main:
 				run++;
 			break;
 			case 'n':
-				phpdbg->php_ini_ignore = 1;
+				ini_ignore = 1;
 			break;
 			case 'c':
-				if (phpdbg->php_ini_path_override) {
-					free(phpdbg->php_ini_path_override);
+				if (ini_override) {
+					free(ini_override);
 				}
-				phpdbg->php_ini_path_override = strdup(php_optarg);
+				ini_override = strdup(php_optarg);
 			break;
 			case 'd': {
 				int len = strlen(php_optarg);
@@ -615,7 +619,8 @@ phpdbg_main:
 
 	phpdbg->executable_location = argv[0];
 	phpdbg->phpinfo_as_text = 1;
-	phpdbg->php_ini_ignore = 0;
+	phpdbg->php_ini_ignore = ini_ignore;
+	phpdbg->php_ini_path_override = ini_override;
 
 	if (ini_entries) {
 		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
@@ -729,6 +734,10 @@ phpdbg_main:
 phpdbg_out:
 		if (ini_entries) {
 		    free(ini_entries);
+		}
+		
+		if (ini_override) {
+			free(ini_override);
 		}
 
 		if (PG(modules_activated)) {

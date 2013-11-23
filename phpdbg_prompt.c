@@ -556,7 +556,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		    EG(active_op_array) = orig_op_array;
 		    EG(opline_ptr) = orig_opline;
 		    EG(return_value_ptr_ptr) = orig_retval_ptr;
-
+			
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				phpdbg_error("Caught exit/error from VM");
 				goto out;
