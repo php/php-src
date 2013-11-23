@@ -44,7 +44,7 @@ make install-phpdbg
 Command Line Options
 ====================
 
-The following switchess are implemented (just like cli SAPI):
+The following switches are implemented (just like cli SAPI):
 
  - -n ignore php ini
  - -c search for php ini in path
