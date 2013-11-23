@@ -344,7 +344,7 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
 	TSRMLS_FETCH();
-	
+
 	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
 
@@ -444,9 +444,9 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 {
 	TSRMLS_FETCH();
-	
+
 	if (EG(in_execution)) {
-		/* we don't want to set signalled while phpdbg is interactive */
+		/* we don't want to set signalled while phpdbg is not interactive */
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
@@ -454,7 +454,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 		/* if we are not executing then just provide advice */
 		phpdbg_writeln(EMPTY);
 		phpdbg_error(
-			"Please leave phpdbg gracefully !");
+			"Please leave phpdbg gracefully!");
 	}
 } /* }}} */
 
@@ -735,7 +735,7 @@ phpdbg_out:
 		if (ini_entries) {
 		    free(ini_entries);
 		}
-		
+
 		if (ini_override) {
 			free(ini_override);
 		}
