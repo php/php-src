@@ -345,7 +345,7 @@ ZEND_API int zend_ini_register_displayer(char *name, zend_str_size_uint name_len
  * Data retrieval
  */
 
-ZEND_API long zend_ini_long(char *name, zend_str_size_uint name_length, int orig) /* {{{ */
+ZEND_API zend_int_t zend_ini_long(char *name, zend_str_size_uint name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -577,7 +577,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 {
-	long *p;
+	zend_int_t *p;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -586,7 +586,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	p = (long *) (base+(size_t) mh_arg1);
+	p = (zend_int_t *) (base+(size_t) mh_arg1);
 
 	*p = zend_atol(new_value, new_value_length);
 	return SUCCESS;
@@ -595,7 +595,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 {
-	long *p, tmp;
+	zend_int_t *p, tmp;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -609,7 +609,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 		return FAILURE;
 	}
 
-	p = (long *) (base+(size_t) mh_arg1);
+	p = (zend_int_t *) (base+(size_t) mh_arg1);
 	*p = tmp;
 
 	return SUCCESS;
