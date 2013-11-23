@@ -593,13 +593,15 @@ PHPDBG_COMMAND(eval) /* {{{ */
 
 			/* disable stepping while eval() in progress */
 			PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-			if (zend_eval_stringl(param->str, param->len,
-				&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-				zend_print_zval_r(
-					&retval, 0 TSRMLS_CC);
-				phpdbg_writeln(EMPTY);
-				zval_dtor(&retval);
-			}
+			zend_try {
+				if (zend_eval_stringl(param->str, param->len,
+					&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+					zend_print_zval_r(
+						&retval, 0 TSRMLS_CC);
+					phpdbg_writeln(EMPTY);
+					zval_dtor(&retval);
+				}
+			} zend_end_try();
 			PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
 			/* switch stepping back on */
@@ -607,6 +609,8 @@ PHPDBG_COMMAND(eval) /* {{{ */
 				!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
 				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 			}
+			
+			CG(unclean_shutdown) = 0;
 		} break;
 
 		phpdbg_default_switch_case();
