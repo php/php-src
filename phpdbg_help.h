@@ -44,6 +44,7 @@ PHPDBG_HELP(clean);
 PHPDBG_HELP(clear);
 PHPDBG_HELP(info);
 PHPDBG_HELP(back);
+PHPDBG_HELP(catch);
 PHPDBG_HELP(frame);
 PHPDBG_HELP(quiet);
 PHPDBG_HELP(list);
@@ -71,6 +72,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_D_EX(clear,    "reset breakpoints to execute without interruption",                			 	 'c', help_clear,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(info,     "quick access to useful information on the console",                               'i', help_info,    NULL, 0),
 	PHPDBG_COMMAND_D_EX(back,     "show debug backtrace information during execution",                               't', help_back,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(catch,    "catch an opcode before its execution",                                            'o', help_catch,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(frame,    "switch to a frame in the current stack for inspection",                           'f', help_frame,   NULL, 0),
     PHPDBG_COMMAND_D_EX(quiet,    "be quiet during execution",                                                       'Q', help_quiet,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(list,     "list code gives you quick access to code",                     					 'l', help_list,    NULL, 0),

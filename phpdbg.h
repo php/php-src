@@ -110,6 +110,8 @@
 #define PHPDBG_IS_SIGNALED      (1<<19)
 #define PHPDBG_IS_INTERACTIVE	(1<<20)
 
+#define PHPDBG_HAS_CATCH        (1<<21)
+
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
 #else
@@ -138,6 +140,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_param_t lparam;              /* last param */
 	FILE *oplog;                        /* opline log */
 	HashTable seek;						/* seek oplines */
+	HashTable catch;					/* seek opcodes */
 	zend_ulong flags;                   /* phpdbg flags */
 	HashTable registered;				/* registered */
 	phpdbg_frame_t frame;				/* frame */

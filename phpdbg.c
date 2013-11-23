@@ -119,6 +119,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
+	zend_hash_init(&PHPDBG_G(catch), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
 
 	return SUCCESS;
@@ -132,6 +133,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(seek));
+	zend_hash_destroy(&PHPDBG_G(catch));
 	zend_hash_destroy(&PHPDBG_G(registered));
 
 	if (PHPDBG_G(exec)) {

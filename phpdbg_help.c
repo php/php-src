@@ -341,6 +341,19 @@ PHPDBG_HELP(back) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(catch) /* {{{ */
+{
+    phpdbg_help_header();
+	phpdbg_writeln("Catch a VM opcode before its execution");
+    phpdbg_writeln(EMPTY);
+    phpdbg_notice("Examples");
+	phpdbg_writeln("\t%scatch ZEND_ADD", PROMPT);
+	phpdbg_writeln("\t%so ZEND_ADD", PROMPT);
+	phpdbg_writeln("\tWill break the execution before the specified opcode is reached");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(frame) /* {{{ */
 {
     phpdbg_help_header();
@@ -422,7 +435,7 @@ PHPDBG_HELP(oplog) /* {{{ */
 	phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
 	phpdbg_help_footer();
 	return SUCCESS;
-} 
+}
 
 PHPDBG_HELP(register) /* {{{ */
 {
@@ -439,7 +452,7 @@ PHPDBG_HELP(register) /* {{{ */
    		HashPosition position;
    		char *name = NULL;
    		zend_uint name_len = 0;
-   		
+
    		phpdbg_notice("Registered Functions (%d)", zend_hash_num_elements(&PHPDBG_G(registered)));
    		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(registered), &position);
    			zend_hash_get_current_key_ex(&PHPDBG_G(registered), &name, &name_len, NULL, 1, &position) == HASH_KEY_IS_STRING;
@@ -448,7 +461,7 @@ PHPDBG_HELP(register) /* {{{ */
    			efree(name);
    		}
     }
-    
+
     phpdbg_help_footer();
     return SUCCESS;
 } /* }}} */
