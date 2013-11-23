@@ -69,7 +69,7 @@ typedef struct _phpdbg_breakop_t {
 } phpdbg_breakop_t;
 
 /**
- * Breakpoint opline based representation
+ * Breakpoint condition based representation
  */
 typedef struct _phpdbg_breakcond_t {
     zval            code;
