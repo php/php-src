@@ -20,6 +20,14 @@
 #ifndef PHPDBG_H
 #define PHPDBG_H
 
+#ifdef PHP_WIN32
+# define PHPDBG_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHPDBG_API __attribute__ ((visibility("default")))
+#else
+# define PHPDBG_API
+#endif
+
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
