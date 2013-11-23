@@ -1,16 +1,23 @@
 ChangeLog for phpdbg
 ====================
 
-Version 0.0.2 0000-00-00
+Version 0.1.0 2013-11-23
 ------------------------
 
-1. Added until/u command
+1. New commands:
+  - until    (continue until the current line is executed)
+  - frame    (switch to a frame in the current stack for inspection)
+  - info     (quick access to useful information on the console)
+  - finish   (continue until the current function has returned)
+  - leave    (continue until the current function is returning)
+  - shell    (shell a command)
+  - register (register a function for use as a command)
 2. Added printers for class and method
 3. Make uniform commands and aliases where possible
 4. Include all alias information and sub-command information in help
-5. Added finish/f command
-6. Added info command
-7. Added signal handling to break execution (ctrl-c)
+5. Added signal handling to break execution (ctrl-c)
+6. Fixed #13 (Output Buffering Control seems fail)
+7. Fixed #14 (Fixed typo in Makefile.frag)
 
 
 Version 0.0.1 2013-11-15
