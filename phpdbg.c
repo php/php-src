@@ -406,6 +406,7 @@ const char phpdbg_ini_hardcoded[] =
 	"register_argc_argv=On\n"
 	"implicit_flush=On\n"
 	"display_errors=Off\n"
+	"log_errors=On\n"
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
