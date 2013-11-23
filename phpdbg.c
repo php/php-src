@@ -451,10 +451,8 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	} else {
-		/* if we are not executing then just provide advice */
-		phpdbg_writeln(EMPTY);
-		phpdbg_error(
-			"Please leave phpdbg gracefully !");
+		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+		zend_bailout();
 	}
 } /* }}} */
 
