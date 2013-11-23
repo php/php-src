@@ -120,7 +120,7 @@
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.1.0-dev" /* }}} */
+#define PHPDBG_VERSION "0.1.1-dev" /* }}} */
 
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0

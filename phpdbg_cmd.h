@@ -108,21 +108,21 @@ typedef struct {
 /*
 * Input Management
 */
-phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
-phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
-void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
+PHPDBG_API phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
+PHPDBG_API phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
+PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
 
 /*
 * Parameter Management
 */
-phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
-void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
-const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
+PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
+PHPDBG_API void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
+PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 
 /*
 * Command Executor
 */
-int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC);
+PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC);
 
 /**
  * Command Declarators
