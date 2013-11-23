@@ -706,14 +706,14 @@ static PHP_INI_MH(OnUpdateName) /* {{{ */
 
 static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 {
-	long val;
+	php_int_t val;
 	char *endptr = NULL;
 
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	PS(hash_ops) = NULL;
 #endif
 
-	val = strtol(new_value, &endptr, 10);
+	val = ZEND_STRTOL(new_value, &endptr, 10);
 	if (endptr && (*endptr == '\0')) {
 		/* Numeric value */
 		PS(hash_func) = val ? 1 : 0;

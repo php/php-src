@@ -125,8 +125,8 @@ typedef struct _php_ps_globals {
 	char *extern_referer_chk;
 	char *entropy_file;
 	char *cache_limiter;
-	long entropy_length;
-	long cookie_lifetime;
+	php_int_t entropy_length;
+	php_int_t cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
 	zend_bool  cookie_secure;
@@ -135,11 +135,11 @@ typedef struct _php_ps_globals {
 	ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
-	long gc_probability;
-	long gc_divisor;
+	php_int_t gc_probability;
+	php_int_t gc_divisor;
 	php_int_t gc_maxlifetime;
 	int module_number;
-	long cache_expire;
+	php_int_t cache_expire;
 	union {
 		zval *names[7];
 		struct {

@@ -57,7 +57,7 @@ typedef struct {
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
-	int filemode;
+	php_int_t filemode;
 } ps_files;
 
 ps_module ps_mod_files = {
@@ -246,7 +246,7 @@ PS_OPEN_FUNC(files)
 	const char *argv[3];
 	int argc = 0;
 	size_t dirdepth = 0;
-	int filemode = 0600;
+	php_int_t filemode = 0600;
 
 	if (*save_path == '\0') {
 		/* if save path is an empty string, determine the temporary dir */
@@ -270,7 +270,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) strtol(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -279,7 +279,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = strtol(argv[1], NULL, 8);
+		filemode = ZEND_STRTOL(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
