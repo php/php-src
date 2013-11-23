@@ -23,7 +23,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM:
@@ -43,7 +43,7 @@ const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ 
     }
 }
 
-phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	char *class_name, *func_name;
 
@@ -97,7 +97,7 @@ parsed:
 	return param->type;
 } /* }}} */
 
-void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	if (param) {
 		switch (param->type) {
@@ -118,7 +118,7 @@ void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
-phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
 	char *p;
 	char b[PHPDBG_MAX_CMD];
@@ -208,7 +208,7 @@ phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 	return argv;
 } /* }}} */
 
-phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *buffer = NULL;
 	char *cmd = NULL;
@@ -279,7 +279,7 @@ phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 	return NULL;
 } /* }}} */
 
-void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
+PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 {
 	if (*input) {
 		if ((*input)->string) {
@@ -302,7 +302,7 @@ void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 	}
 } /* }}} */
 
-int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
 	int rc = FAILURE;
 
