@@ -180,6 +180,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		parse_port:
 		p = e + 1;
 		pp = p;
+		if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+			s += 2;
+		}
 
 		while (pp-p < 6 && isdigit(*pp)) {
 			pp++;
@@ -201,10 +204,6 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
-		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
-			s += 2;
-		} else {
-			goto just_path;
 		}
 	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
 		s += 2;
@@ -307,6 +306,48 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		STR_FREE(ret->pass);
 		efree(ret);
 		return NULL;
+	} else {
+		/* Does the rest really look like a hostname? */
+		const char* diff;
+		char* tld;
+		diff = (const char*)estrndup(s, (p-s));
+
+		/* top level domain */
+		if ((tld = strrchr(diff, '.'))) {
+			/* If tld less than 3 chars (country tlds) and no IP */
+			if (strlen(tld) == 3 || isdigit(*(tld+1)));
+			else if (strlen(tld) == 4
+				&& strncasecmp(".com", tld, 4) != 0
+				&& strncasecmp(".org", tld, 4) != 0
+				&& strncasecmp(".net", tld, 4) != 0
+				&& strncasecmp(".edu", tld, 4) != 0
+				&& strncasecmp(".cat", tld, 4) != 0
+				&& strncasecmp(".eus", tld, 4) != 0
+				&& strncasecmp(".gal", tld, 4) != 0
+				&& strncasecmp(".mil", tld, 4) != 0
+				&& strncasecmp(".gov", tld, 4) != 0
+				&& strncasecmp(".mil", tld, 4) != 0
+				&& strncasecmp(".xxx", tld, 4) != 0
+				&& strncasecmp(".tel", tld, 4) != 0
+				&& strncasecmp(".pro", tld, 4) != 0
+				&& strncasecmp(".int", tld, 4) != 0
+				&& strncasecmp(".biz", tld, 4) != 0) {
+				STR_FREE(diff);
+				goto nohost; 
+			} else if (strlen(tld) == 5
+				&& strncasecmp(".aero", tld, 5) != 0
+				&& strncasecmp(".asia", tld, 5) != 0
+				&& strncasecmp(".coop", tld, 5) != 0
+				&& strncasecmp(".info", tld, 5) != 0
+				&& strncasecmp(".jobs", tld, 5) != 0
+				&& strncasecmp(".mobi", tld, 5) != 0
+				&& strncasecmp(".name", tld, 5) != 0
+				&& strncasecmp(".post", tld, 5) != 0) {
+				STR_FREE(diff);
+				goto nohost;
+			}
+		}
+		STR_FREE(diff);
 	}
 
 	ret->host = estrndup(s, (p-s));
