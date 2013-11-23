@@ -446,7 +446,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	TSRMLS_FETCH();
 
 	if (EG(in_execution)) {
-		/* we don't want to set signalled while phpdbg is not interactive */
+		/* we don't want to set signalled while phpdbg is interactive */
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
