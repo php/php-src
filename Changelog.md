@@ -1,7 +1,7 @@
 ChangeLog for phpdbg
 ====================
 
-Version 0.0.2 0000-00-00
+Version 0.1.0 2013-11-23
 ------------------------
 
 1. New commands:
