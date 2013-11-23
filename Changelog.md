@@ -4,8 +4,7 @@ ChangeLog for phpdbg
 Version 0.1.1 2013-00-00
 ------------------------
 
-1. New commands:
-  - catch   (catch an opcode before its execution)
+
 
 Version 0.1.0 2013-11-23
 ------------------------

@@ -341,19 +341,6 @@ PHPDBG_HELP(back) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_HELP(catch) /* {{{ */
-{
-    phpdbg_help_header();
-	phpdbg_writeln("Catch a VM opcode before its execution");
-    phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
-	phpdbg_writeln("\t%scatch ZEND_ADD", PROMPT);
-	phpdbg_writeln("\t%so ZEND_ADD", PROMPT);
-	phpdbg_writeln("\tWill break the execution before the specified opcode is reached");
-	phpdbg_help_footer();
-	return SUCCESS;
-} /* }}} */
-
 PHPDBG_HELP(frame) /* {{{ */
 {
     phpdbg_help_header();

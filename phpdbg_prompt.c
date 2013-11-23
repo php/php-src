@@ -48,7 +48,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
-	PHPDBG_COMMAND_D(catch,   "catch an opcode",                          'o', NULL, 1),
 	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, 1),
 	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, 2),
 	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, 1),
@@ -162,38 +161,6 @@ next_line:
 			free(init_file);
 		}
 	}
-} /* }}} */
-
-int phpdbg_find_catch(zend_uchar opcode TSRMLS_DC) /* {{{ */
-{
-	const char *opname = phpdbg_decode_opcode(opcode);
-
-	if (memcmp(opname, PHPDBG_STRL("UNKNOWN")) == 0) {
-		return FAILURE;
-	}
-
-	return zend_hash_index_exists(&PHPDBG_G(catch),
-		zend_hash_func(opname, strlen(opname))) ? SUCCESS : FAILURE;
-} /* }}} */
-
-PHPDBG_COMMAND(catch) /* {{{ */
-{
-	switch (param->type) {
-		case STR_PARAM: {
-			int tmp = 0;
-
-			zend_hash_index_update(&PHPDBG_G(catch),
-				zend_hash_func(param->str, param->len),
-				&tmp, sizeof(int), NULL);
-
-			PHPDBG_G(flags) |= PHPDBG_HAS_CATCH;
-		}
-		break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
 } /* }}} */
 
 PHPDBG_COMMAND(exec) /* {{{ */
@@ -1423,12 +1390,8 @@ zend_vm_enter:
 			DO_INTERACTIVE();
 		}
 
-		if (PHPDBG_G(flags) & PHPDBG_HAS_CATCH
-			&& phpdbg_find_catch(execute_data->opline->opcode TSRMLS_CC) == SUCCESS) {
-			phpdbg_notice("Catched opcode %s at %s:%u",
-				phpdbg_decode_opcode(execute_data->opline->opcode),
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C));
+		if (PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP
+			&& phpdbg_find_breakpoint_opcode(execute_data->opline->opcode TSRMLS_CC) == SUCCESS) {
 			DO_INTERACTIVE();
 		}
 

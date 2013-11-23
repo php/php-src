@@ -162,6 +162,25 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 	}
 } /* }}} */
 
+PHPDBG_API void phpdbg_set_breakpoint_opcode(zend_ulong hash TSRMLS_DC) /* {{{ */
+{
+	phpdbg_breakop_t new_break;
+
+	if (zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], hash)) {
+		return;
+	}
+
+	new_break.hash = hash;
+	new_break.id = PHPDBG_G(bp_count)++;
+
+	zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], hash,
+		&new_break, sizeof(phpdbg_breakop_t), NULL);
+
+	PHPDBG_G(flags) |= PHPDBG_HAS_OPCODE_BP;
+
+	phpdbg_notice("Breakpoint #%d added", new_break.id);
+} /* }}} */
+
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
 {
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
@@ -331,6 +350,28 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 		return SUCCESS;
 	}
 
+	return FAILURE;
+} /* }}} */
+
+int phpdbg_find_breakpoint_opcode(zend_uchar opcode TSRMLS_DC) /* {{{ */
+{
+	phpdbg_breakop_t *bp;
+	const char *opname = phpdbg_decode_opcode(opcode);
+
+	if (memcmp(opname, PHPDBG_STRL("UNKNOWN")) == 0) {
+		return FAILURE;
+	}
+
+	if (zend_hash_index_find(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE],
+		zend_hash_func(opname, strlen(opname)), (void**)&bp) == SUCCESS) {
+		phpdbg_notice("Breakpoint #%d in %s at %s:%u",
+			bp->id,
+			opname,
+			zend_get_executed_filename(TSRMLS_C),
+			zend_get_executed_lineno(TSRMLS_C));
+
+		return SUCCESS;
+	}
 	return FAILURE;
 } /* }}} */
 

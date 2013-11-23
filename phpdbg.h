@@ -80,7 +80,8 @@
 #define PHPDBG_BREAK_OPLINE     2
 #define PHPDBG_BREAK_METHOD     3
 #define PHPDBG_BREAK_COND       4
-#define PHPDBG_BREAK_TABLES     5 /* }}} */
+#define PHPDBG_BREAK_OPCODE     5
+#define PHPDBG_BREAK_TABLES     6 /* }}} */
 
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP      (1<<1)
@@ -88,29 +89,29 @@
 #define PHPDBG_HAS_OPLINE_BP    (1<<3)
 #define PHPDBG_HAS_METHOD_BP    (1<<4)
 #define PHPDBG_HAS_COND_BP      (1<<5)
-#define PHPDBG_BP_MASK          (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP)
+#define PHPDBG_HAS_OPCODE_BP    (1<<6)
+#define PHPDBG_BP_MASK          (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP|PHPDBG_HAS_OPCODE_BP)
 
-#define PHPDBG_IN_COND_BP       (1<<6)
-#define PHPDBG_IN_EVAL          (1<<7)
+#define PHPDBG_IN_COND_BP       (1<<7)
+#define PHPDBG_IN_EVAL          (1<<8)
 
-#define PHPDBG_IS_STEPPING      (1<<8)
-#define PHPDBG_IS_QUIET         (1<<9)
-#define PHPDBG_IS_QUITTING      (1<<10)
-#define PHPDBG_IS_COLOURED      (1<<11)
-#define PHPDBG_IS_CLEANING      (1<<12)
+#define PHPDBG_IS_STEPPING      (1<<9)
+#define PHPDBG_IS_QUIET         (1<<10)
+#define PHPDBG_IS_QUITTING      (1<<11)
+#define PHPDBG_IS_COLOURED      (1<<12)
+#define PHPDBG_IS_CLEANING      (1<<13)
 
-#define PHPDBG_IN_UNTIL			(1<<13)
-#define PHPDBG_IN_FINISH		(1<<14)
-#define PHPDBG_IN_LEAVE			(1<<15)
+#define PHPDBG_IN_UNTIL			(1<<14)
+#define PHPDBG_IN_FINISH		(1<<15)
+#define PHPDBG_IN_LEAVE			(1<<16)
 #define PHPDBG_SEEK_MASK		(PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 
-#define PHPDBG_IS_REGISTERED	(1<<16)
-#define PHPDBG_IS_STEPONEVAL	(1<<17)
-#define PHPDBG_IS_INITIALIZING	(1<<18)
-#define PHPDBG_IS_SIGNALED      (1<<19)
-#define PHPDBG_IS_INTERACTIVE	(1<<20)
+#define PHPDBG_IS_REGISTERED	(1<<17)
+#define PHPDBG_IS_STEPONEVAL	(1<<18)
+#define PHPDBG_IS_INITIALIZING	(1<<19)
+#define PHPDBG_IS_SIGNALED      (1<<20)
+#define PHPDBG_IS_INTERACTIVE	(1<<21)
 
-#define PHPDBG_HAS_CATCH        (1<<21)
 
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
@@ -140,7 +141,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_param_t lparam;              /* last param */
 	FILE *oplog;                        /* opline log */
 	HashTable seek;						/* seek oplines */
-	HashTable catch;					/* seek opcodes */
 	zend_ulong flags;                   /* phpdbg flags */
 	HashTable registered;				/* registered */
 	phpdbg_frame_t frame;				/* frame */

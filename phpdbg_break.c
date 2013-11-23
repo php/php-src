@@ -58,7 +58,7 @@ PHPDBG_BREAK(address) /* {{{ */
 		case ADDR_PARAM:
             phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
             break;
-            
+
 		phpdbg_default_switch_case();
     }
 
@@ -66,7 +66,7 @@ PHPDBG_BREAK(address) /* {{{ */
 } /* }}} */
 
 PHPDBG_BREAK(on) /* {{{ */
-{	
+{
     switch (param->type) {
         case STR_PARAM:
             phpdbg_set_breakpoint_expression(param->str, param->len TSRMLS_CC);
@@ -107,4 +107,17 @@ PHPDBG_BREAK(func) /* {{{ */
 	}
 
     return SUCCESS;
+} /* }}} */
+
+PHPDBG_BREAK(op) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM:
+			phpdbg_set_breakpoint_opcode(zend_hash_func(param->str, param->len) TSRMLS_CC);
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
 } /* }}} */
