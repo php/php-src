@@ -338,7 +338,7 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 
 static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int length TSRMLS_DC) /* {{{ */
 {
-	return phpdbg_write(message);
+	return phpdbg_write("%s", message);
 } /* }}} */
 
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */

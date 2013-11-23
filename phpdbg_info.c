@@ -172,11 +172,13 @@ PHPDBG_INFO(literal) /* {{{ */
 		}
 		
 		while (literal < ops->last_literal) {
-			phpdbg_write("|-------- C%lu -------> [", literal);
-			zend_print_zval(
-				&ops->literals[literal].constant, 0);
-			phpdbg_write("]");
-			phpdbg_writeln(EMPTY);
+			if (Z_TYPE(ops->literals[literal].constant) != IS_NULL) {
+				phpdbg_write("|-------- C%lu -------> [", literal);
+				zend_print_zval(
+					&ops->literals[literal].constant, 0);
+				phpdbg_write("]");
+				phpdbg_writeln(EMPTY);
+			}
 			literal++;
 		}
 	} else {
