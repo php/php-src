@@ -1665,6 +1665,7 @@ ZEND_FUNCTION(gmp_cmp)
    Gets the sign of the number */
 ZEND_FUNCTION(gmp_sign)
 {
+	/* Can't use gmp_unary_opl here, because mpz_sgn is a macro */
 	zval *a_arg;
 	mpz_ptr gmpnum_a;
 	gmp_temp_t temp_a;
@@ -1672,7 +1673,7 @@ ZEND_FUNCTION(gmp_sign)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &a_arg) == FAILURE){
 		return;
 	}
-	
+
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
 	RETVAL_LONG(mpz_sgn(gmpnum_a));
@@ -1747,32 +1748,6 @@ ZEND_FUNCTION(gmp_nextprime)
 ZEND_FUNCTION(gmp_xor)
 {
 	gmp_binary_op(mpz_xor);
-	/* use formula: a^b = (a|b)&~(a&b) */
-	/*zval **a_arg, **b_arg;
-	mpz_t *gmpnum_a, *gmpnum_b, *gmpnum_result, *gmpnum_t;
-	gmp_temp_t temp_a, temp_b;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &a_arg, &b_arg) == FAILURE){
-		return;
-	}
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
-
-	INIT_GMP_NUM(gmpnum_result);
-	INIT_GMP_NUM(gmpnum_t);
-
-	mpz_and(*gmpnum_t, *gmpnum_a, *gmpnum_b);
-	mpz_com(*gmpnum_t, *gmpnum_t);
-
-	mpz_ior(*gmpnum_result, *gmpnum_a, *gmpnum_b);
-	mpz_and(*gmpnum_result, *gmpnum_result, *gmpnum_t);
-
-	FREE_GMP_NUM(gmpnum_t);
-
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
-	RETVAL_GMP(gmpnum_result);*/
 }
 /* }}} */
 
@@ -1852,18 +1827,7 @@ ZEND_FUNCTION(gmp_testbit)
    Calculates the population count of a */
 ZEND_FUNCTION(gmp_popcount)
 {
-	zval *a_arg;
-	mpz_ptr gmpnum_a;
-	gmp_temp_t temp_a;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &a_arg) == FAILURE){
-		return;
-	}
-	
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-
-	RETVAL_LONG(mpz_popcount(gmpnum_a));
-	FREE_GMP_TEMP(temp_a);
+	gmp_unary_opl((gmp_unary_opl_t) mpz_popcount);
 }
 /* }}} */
 
@@ -1871,20 +1835,7 @@ ZEND_FUNCTION(gmp_popcount)
    Calculates hamming distance between a and b */
 ZEND_FUNCTION(gmp_hamdist)
 {
-	zval *a_arg, *b_arg;
-	mpz_ptr gmpnum_a, gmpnum_b;
-	gmp_temp_t temp_a, temp_b;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &a_arg, &b_arg) == FAILURE){
-		return;
-	}
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
-
-	RETVAL_LONG(mpz_hamdist(gmpnum_a, gmpnum_b));
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
+	gmp_binary_opl((gmp_binary_opl_t) mpz_hamdist);
 }
 /* }}} */
 
