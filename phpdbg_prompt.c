@@ -173,10 +173,10 @@ PHPDBG_COMMAND(exec) /* {{{ */
 		        if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 		        	char *res = phpdbg_resolve_path(param->str TSRMLS_CC);
 		        	size_t res_len = strlen(res);
-		        	
-		        	if ((res_len != PHPDBG_G(exec_len)) || 
+
+		        	if ((res_len != PHPDBG_G(exec_len)) ||
 		        		(memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
-		        		
+
 		        		if (PHPDBG_G(exec)) {
 				        	phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
 				        	efree(PHPDBG_G(exec));
@@ -609,7 +609,7 @@ PHPDBG_COMMAND(eval) /* {{{ */
 				!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
 				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 			}
-			
+
 			CG(unclean_shutdown) = 0;
 		} break;
 
@@ -1083,7 +1083,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		}
 
 		phpdbg_debug(
-			"created %d params from %d argvuments",
+			"created %d params from %d arguments",
 			fci.param_count, input->argc);
 
 		zend_call_function(&fci, NULL TSRMLS_CC);
