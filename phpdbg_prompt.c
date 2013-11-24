@@ -775,7 +775,11 @@ PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
 			break;
 		case NUMERIC_PARAM:
-			phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
+			if (PHPDBG_G(exec)) {
+				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
+			} else {
+				phpdbg_error("Execution context not set !");
+			}
 			break;
 		case METHOD_PARAM:
 			phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
