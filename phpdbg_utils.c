@@ -259,6 +259,11 @@ PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_l
 	} else PHPDBG_G(colors)[element] = colors;
 } /* }}} */
 
+PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D) /* {{{ */
+{
+	return colors;
+} /* }}} */
+
 PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 {
 	/* free formatted prompt */

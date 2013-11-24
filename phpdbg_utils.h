@@ -96,7 +96,8 @@ typedef struct _phpdbg_color_t {
 
 PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC);
 PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS_DC);
-PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC); /* }}} */
+PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC);
+PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D); /* }}} */
 
 /* {{{ Prompt Management */
 PHPDBG_API void phpdbg_set_prompt(const char* TSRMLS_DC);
