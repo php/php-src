@@ -23,13 +23,13 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_set_prompt(const char* prompt TSRMLS_DC) /* {{{ */
+void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 {
 	if (PHPDBG_G(prompt)) {
 		efree(PHPDBG_G(prompt));
+		PHPDBG_G(prompt) = NULL;
 	}
 
-	PHPDBG_G(prompt) = NULL;
 	spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
 } /* }}} */
 
