@@ -729,7 +729,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 			if (EG(in_execution)) {
 				phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
 			}
-			
+
 			phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
 			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
 			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
@@ -738,12 +738,13 @@ PHPDBG_COMMAND(print) /* {{{ */
 				"Memory\t\t%.3f/%.3f (kB)",
 				(float) (zend_memory_usage(1 TSRMLS_CC)/1024),
 				(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
-			
+
 			phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+			phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
 
 			phpdbg_writeln(SEPARATE);
 		} break;
