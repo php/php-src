@@ -80,7 +80,7 @@ typedef struct {
 	const char *request_method;
 	char *query_string;
 	char *cookie_data;
-	long content_length;
+	php_int_t content_length;
 
 	char *path_translated;
 	char *request_uri;
@@ -127,7 +127,7 @@ typedef struct _sapi_globals_struct {
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
-	long post_max_size;
+	php_int_t post_max_size;
 	int options;
 	zend_bool sapi_started;
 	double global_request_time;

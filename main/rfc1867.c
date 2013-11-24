@@ -710,7 +710,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
-		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
+		sapi_module.sapi_error(E_WARNING, "POST Content-Length of " ZEND_INT_FMT " bytes exceeds the limit of " ZEND_INT_FMT " bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 
@@ -888,7 +888,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					safe_php_register_variable(param, value, new_val_len, array_ptr, 0 TSRMLS_CC);
 				} else {
 					if (count == PG(max_input_vars) + 1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded " ZEND_INT_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 					}
 				
 					if (php_rfc1867_callback != NULL) {
