@@ -1047,7 +1047,7 @@ fetch_string_dim:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
+			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (" ZEND_INT_FMT ")", Z_LVAL_P(dim), Z_LVAL_P(dim));
 			/* Fall Through */
 		case IS_BOOL:
 		case IS_LONG:
@@ -1056,14 +1056,14 @@ num_index:
 			if (zend_hash_index_find(ht, hval, (void **) &retval) == FAILURE) {
 				switch (type) {
 					case BP_VAR_R:
-						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
+						zend_error(E_NOTICE,"Undefined offset: " ZEND_INT_FMT, hval);
 						/* break missing intentionally */
 					case BP_VAR_UNSET:
 					case BP_VAR_IS:
 						retval = &EG(uninitialized_zval_ptr);
 						break;
 					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
+						zend_error(E_NOTICE,"Undefined offset: " ZEND_INT_FMT, hval);
 						/* break missing intentionally */
 					case BP_VAR_W: {
 						zval *new_zval = &EG(uninitialized_zval);
@@ -1305,7 +1305,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 
 				if (Z_LVAL_P(dim) < 0 || Z_STRSIZE_P(container) <= Z_LVAL_P(dim)) {
 					if (type != BP_VAR_IS) {
-						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+						zend_error(E_NOTICE, "Uninitialized string offset: " ZEND_INT_FMT, Z_LVAL_P(dim));
 					}
 					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
 					Z_STRSIZE_P(ptr) = 0;

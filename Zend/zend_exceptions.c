@@ -619,12 +619,12 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (Z_STRSIZE(message) > 0) {
-			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
+			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		} else {
-			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
+			len = zend_spprintf(&str, 0, "exception '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);

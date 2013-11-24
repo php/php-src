@@ -430,7 +430,7 @@ ZEND_FUNCTION(func_get_arg)
 	arg_count = (int)(zend_uintptr_t) *p;		/* this is the amount of arguments passed to func_get_arg(); */
 
 	if (requested_offset >= arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument %ld not passed to function", requested_offset);
+		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_INT_FMT " not passed to function", requested_offset);
 		RETURN_FALSE;
 	}
 

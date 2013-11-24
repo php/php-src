@@ -616,7 +616,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
-			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #%ld", tmp);
+			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #" ZEND_INT_FMT, tmp);
 			break;
 		}
 		case IS_LONG:
