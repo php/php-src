@@ -730,7 +730,7 @@ PHP_FUNCTION(file)
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'" ZEND_INT_FMT "' flag is not supported", flags);
 		RETURN_FALSE;
 	}
 
@@ -1255,7 +1255,7 @@ PHPAPI PHP_FUNCTION(rewind)
 PHPAPI PHP_FUNCTION(ftell)
 {
 	zval *arg1;
-	long ret;
+	php_int_t ret;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
@@ -1951,7 +1951,7 @@ PHP_FUNCTION(fgetcsv)
 
 	/* first section exactly as php_fgetss */
 
-	long len = 0;
+	php_int_t len = 0;
 	size_t buf_len;
 	char *buf;
 	php_stream *stream;

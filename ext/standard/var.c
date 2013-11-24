@@ -157,7 +157,7 @@ head_done:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-		php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
+		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
 		break;
 	}
 	default:
@@ -193,7 +193,7 @@ static int zval_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list ar
 	level = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		/* XXX: perphaps when we are inside the class we should permit access to
 		 * private & protected values
@@ -218,7 +218,7 @@ static int zval_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list 
 	level = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+		php_printf("%*c[" ZEND_UINT_FMT "]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
@@ -303,7 +303,7 @@ head_done:
 		break;
 	case IS_RESOURCE: {
 		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-		php_printf("%sresource(%ld) of type (%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown", Z_REFCOUNT_PP(struc));
+		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown", Z_REFCOUNT_PP(struc));
 		break;
 	}
 	default:

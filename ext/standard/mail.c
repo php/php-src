@@ -284,9 +284,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_INT_FMT ":%s\n%s", php_getuid(TSRMLS_C), f, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_INT_FMT ":%s\n", php_getuid(TSRMLS_C), f);
 		}
 		efree(f);
 	}

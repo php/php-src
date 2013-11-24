@@ -749,13 +749,13 @@ PHP_FUNCTION(dns_get_record)
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%ld' not supported", type_param);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '" ZEND_INT_FMT "' not supported", type_param);
 			RETURN_FALSE;
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
+				"Numeric DNS record type must be between 1 and 65535, '" ZEND_INT_FMT "' given", type_param);
 			RETURN_FALSE;
 		}
 	}
@@ -771,11 +771,11 @@ PHP_FUNCTION(dns_get_record)
 	 * - In case of raw mode, we query only the requestd type instead of looping type by type
 	 *   before going with the additional info stuff.
 	 */
-
+php_cli_server_send_error_page
 	if (raw) {
 		type = -1;
 	} else if (type_param == PHP_DNS_ANY) {
-		type = PHP_DNS_NUM_TYPES + 1;
+		type = PHP_DNS_NUM_TYPES + 1;php_cli_server_send_error_page
 	} else {
 		type = 0;
 	}

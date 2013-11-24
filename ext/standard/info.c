@@ -222,7 +222,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					}
 					break;
 				case HASH_KEY_IS_LONG:
-					php_info_printf("%ld", num_key);
+					php_info_printf(ZEND_INT_FMT, num_key);
 					break;
 			}
 			php_info_print("\"]");
