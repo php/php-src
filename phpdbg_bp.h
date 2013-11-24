@@ -64,6 +64,7 @@ typedef struct _phpdbg_breakline_t {
  * Breakpoint opcode based representation
  */
 typedef struct _phpdbg_breakop_t {
+	zend_ulong      hash;
 	const char *name;
 	int id;
 } phpdbg_breakop_t;

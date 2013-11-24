@@ -170,6 +170,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len T
 		return;
 	}
 
+	new_break.hash = hash;
 	new_break.name = estrndup(name, name_len);
 	new_break.id = PHPDBG_G(bp_count)++;
 
@@ -548,6 +549,7 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 		     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], &position)) {
 			if (brake->id == num) {
 				zend_hash_index_del(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], brake->opline);
+				return;
 			}
 		}
 	}
@@ -561,6 +563,20 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 		     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
 			if (brake->id == num) {
 				zend_hash_index_del(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], brake->hash);
+				return;
+			}
+		}
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP) {
+		HashPosition position;
+		phpdbg_breakop_t *brake;
+
+		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], &position);
+		     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], (void**) &brake, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], &position)) {
+			if (brake->id == num) {
+				zend_hash_index_del(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], brake->hash);
 				return;
 			}
 		}
