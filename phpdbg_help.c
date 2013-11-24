@@ -455,13 +455,13 @@ PHPDBG_HELP(set) /* {{{ */
 		const phpdbg_color_t *color = phpdbg_get_colors(TSRMLS_C);
 		
 		if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-			phpdbg_writeln("\t%-15s\t\tExample", "Name");
+			phpdbg_writeln("\t%-20s\t\tExample", "Name");
 		} else phpdbg_writeln("\tName");
 		
 		while (color && color->name) {
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				phpdbg_writeln(
-					"\t%-15s\t\t\033[%smphpdbg rocks :)\033[0m", color->name, color->code);
+					"\t%-20s\t\t\033[%smphpdbg rocks :)\033[0m", color->name, color->code);
 			} else phpdbg_writeln("\t%s", color->name);
 			
 			++color;
