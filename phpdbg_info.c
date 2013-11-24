@@ -151,8 +151,7 @@ PHPDBG_INFO(literal) /* {{{ */
 {
 	if ((EG(in_execution) && EG(active_op_array)) || PHPDBG_G(ops)) {
 		zend_op_array *ops = EG(active_op_array) ? EG(active_op_array) : PHPDBG_G(ops);
-		unsigned int literal = 0;
-		int count = ops->last_literal-1;
+		int literal = 0, count = ops->last_literal-1;
 
 		if (ops->function_name) {
 			if (ops->scope) {
