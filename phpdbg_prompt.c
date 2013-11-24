@@ -457,7 +457,7 @@ PHPDBG_COMMAND(frame) /* {{{ */
 			break;
 
 		case EMPTY_PARAM:
-			phpdbg_notice("Currently at frame %d:", PHPDBG_G(frame).num);
+			phpdbg_notice("Currently at frame %ld:", PHPDBG_G(frame).num);
 			break;
 
 		phpdbg_default_switch_case();
@@ -509,7 +509,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 
 	/* output useful information about address */
 	phpdbg_writeln(
-		"Stacked entered at %p in %s on line %lu",
+		"Stacked entered at %p in %s on line %u",
 		EG(active_op_array)->opcodes, filename, lineno);
 
 	zval_dtor(&fname);
@@ -651,7 +651,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 				if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
 					phpdbg_write(
-						"frame #%d: {main} at %s:%d",
+						"frame #%d: {main} at %s:%ld",
 						i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 					break;
 				}
@@ -684,7 +684,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 					}
 				}
 
-				phpdbg_writeln(") at %s:%d", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+				phpdbg_writeln(") at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			}
 
 			phpdbg_writeln(EMPTY);
