@@ -39,11 +39,11 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
 	pg->prompt[0] = NULL;
 	pg->prompt[1] = NULL;
-	
+
 	pg->colors[0] = NULL;
 	pg->colors[1] = NULL;
 	pg->colors[2] = NULL;
-		
+
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->ops = NULL;
@@ -161,7 +161,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(prompt)[1]) {
 		free(PHPDBG_G(prompt)[1]);
 	}
-	
+
 	PHPDBG_G(prompt)[0] = NULL;
 	PHPDBG_G(prompt)[1] = NULL;
 
@@ -698,13 +698,13 @@ phpdbg_main:
 		PHPDBG_G(flags) = flags;
 
 		/* set default colors */
-		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  "white-bold", sizeof("white-bold")-1 TSRMLS_CC);
-		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   "red-bold", sizeof("red-bold")-1 TSRMLS_CC);
-		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  "green", sizeof("green")-1 TSRMLS_CC);
+		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold") TSRMLS_CC);
+		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold") TSRMLS_CC);
+		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green") TSRMLS_CC);
 
 		/* set default prompt */
 		phpdbg_set_prompt(PROMPT TSRMLS_CC);
-		
+
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
