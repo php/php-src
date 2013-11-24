@@ -151,8 +151,9 @@ PHPDBG_INFO(literal) /* {{{ */
 {
 	if ((EG(in_execution) && EG(active_op_array)) || PHPDBG_G(ops)) {
 		zend_op_array *ops = EG(active_op_array) ? EG(active_op_array) : PHPDBG_G(ops);
-		int literal =0, count = ops->last_literal-1;
-		
+		unsigned int literal = 0;
+		int count = ops->last_literal-1;
+
 		if (ops->function_name) {
 			if (ops->scope) {
 				phpdbg_notice(
@@ -170,10 +171,10 @@ PHPDBG_INFO(literal) /* {{{ */
 					"Literal Constants @ %p (%d)", ops, count);
 			}
 		}
-		
+
 		while (literal < ops->last_literal) {
 			if (Z_TYPE(ops->literals[literal].constant) != IS_NULL) {
-				phpdbg_write("|-------- C%lu -------> [", literal);
+				phpdbg_write("|-------- C%u -------> [", literal);
 				zend_print_zval(
 					&ops->literals[literal].constant, 0);
 				phpdbg_write("]");
@@ -184,7 +185,7 @@ PHPDBG_INFO(literal) /* {{{ */
 	} else {
 		phpdbg_error("Not executing !");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -241,7 +242,7 @@ PHPDBG_INFO(classes) /* {{{ */
 
         if ((*ce)->info.user.filename) {
     		phpdbg_writeln(
-    			"|---- in %s on line %lu",
+    			"|---- in %s on line %u",
     			(*ce)->info.user.filename,
     			(*ce)->info.user.line_start);
     	} else phpdbg_writeln("|---- no source code");
