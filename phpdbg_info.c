@@ -21,8 +21,21 @@
 #include "phpdbg.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_info.h"
+#include "phpdbg_bp.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+PHPDBG_INFO(break) /* {{{ */
+{
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
+
+	return SUCCESS;
+} /* }}} */
 
 PHPDBG_INFO(files) /* {{{ */
 {

@@ -739,13 +739,6 @@ PHPDBG_COMMAND(print) /* {{{ */
 				(float) (zend_memory_usage(1 TSRMLS_CC)/1024),
 				(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
 
-			phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
-			phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
-			phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
-			phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
-			phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
-			phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
-
 			phpdbg_writeln(SEPARATE);
 		} break;
 
