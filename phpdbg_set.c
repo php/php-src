@@ -78,7 +78,7 @@ PHPDBG_SET(color) /* {{{ */
 	} else {
 usage:
 		phpdbg_error(
-			"set color used incorrected: set color <prompt|error|notice> <color>");
+			"set color used incorrectly: set color <prompt|error|notice> <color>");
 	}
 	return SUCCESS;
 } /* }}} */
