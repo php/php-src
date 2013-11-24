@@ -1369,13 +1369,6 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
-		/* conditions cannot be executed by eval()'d code */
-		if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
-			&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
-			&& phpdbg_find_conditional_breakpoint(TSRMLS_C) == SUCCESS) {
-			DO_INTERACTIVE();
-		}
-
 		if (PHPDBG_G(flags) & PHPDBG_BP_MASK
 			&& phpdbg_find_breakpoint(execute_data TSRMLS_CC) == SUCCESS) {
 			DO_INTERACTIVE();

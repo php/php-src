@@ -449,6 +449,13 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D) /* {{{ */
 
 int phpdbg_find_breakpoint(zend_execute_data* execute_data TSRMLS_DC) /* {{{ */
 {
+	/* conditions cannot be executed by eval()'d code */
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
+		&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
+		&& phpdbg_find_conditional_breakpoint(TSRMLS_C) == SUCCESS) {
+		return SUCCESS;
+	}
+
 	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP
 		&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
