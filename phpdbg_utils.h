@@ -20,16 +20,31 @@
 #ifndef PHPDBG_UTILS_H
 #define PHPDBG_UTILS_H
 
+/* {{{ color management */
+#define PHPDBG_COLOR_LEN 12
+#define PHPDBG_COLOR_D(color, code) \
+	{color, sizeof(color), code}
+#define PHPDBG_COLOR_END \
+	{NULL, 0L, {0}}
+
+typedef struct _phpdbg_color_t {
+	char			*name;
+	size_t			name_length;
+	const char		code[PHPDBG_COLOR_LEN];
+} phpdbg_color_t; 
+
+PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_length); /* }}} */
+
 /**
  * Input scan functions
  */
-int phpdbg_is_numeric(const char*);
-int phpdbg_is_empty(const char*);
-int phpdbg_is_addr(const char*);
-int phpdbg_is_class_method(const char*, size_t, char**, char**);
-const char *phpdbg_current_file(TSRMLS_D);
-char *phpdbg_resolve_path(const char* TSRMLS_DC);
-char *phpdbg_trim(const char*, size_t, size_t*);
+PHPDBG_API int phpdbg_is_numeric(const char*);
+PHPDBG_API int phpdbg_is_empty(const char*);
+PHPDBG_API int phpdbg_is_addr(const char*);
+PHPDBG_API int phpdbg_is_class_method(const char*, size_t, char**, char**);
+PHPDBG_API const char *phpdbg_current_file(TSRMLS_D);
+PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
+PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
 
 /**
  * Error/notice/formatting helper
@@ -43,9 +58,9 @@ enum {
 };
 
 #ifdef ZTS
-int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 #else
-int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #endif
 
 #define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)

@@ -32,7 +32,18 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-int phpdbg_is_numeric(const char *str) /* {{{ */
+/* {{{ color structures */
+const static phpdbg_color_t colors[] = {
+	PHPDBG_COLOR_D("white",	 "0:0"),
+	PHPDBG_COLOR_D("red",	 "0:31"),
+	PHPDBG_COLOR_D("green",	 "0:32"),
+	PHPDBG_COLOR_D("blue",   "0;34"),
+	PHPDBG_COLOR_D("purple", "0;35"),
+	PHPDBG_COLOR_D("cyan",   "0;36"),
+	PHPDBG_COLOR_END
+}; /* }}} */
+
+PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 {
     if (!str)
         return 0;
@@ -46,7 +57,7 @@ int phpdbg_is_numeric(const char *str) /* {{{ */
 	return 0;
 } /* }}} */
 
-int phpdbg_is_empty(const char *str) /* {{{ */
+PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
 {
     if (!str)
         return 1;
@@ -60,12 +71,12 @@ int phpdbg_is_empty(const char *str) /* {{{ */
 	return 1;
 } /* }}} */
 
-int phpdbg_is_addr(const char *str) /* {{{ */
+PHPDBG_API int phpdbg_is_addr(const char *str) /* {{{ */
 {
 	return str[0] && str[1] && memcmp(str, "0x", 2) == 0;
 } /* }}} */
 
-int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
+PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
 {
 	char *sep = NULL;
 
@@ -91,7 +102,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	return 1;
 } /* }}} */
 
-char *phpdbg_resolve_path(const char *path TSRMLS_DC) /* {{{ */
+PHPDBG_API char *phpdbg_resolve_path(const char *path TSRMLS_DC) /* {{{ */
 {
 	char resolved_name[MAXPATHLEN];
 
@@ -102,7 +113,7 @@ char *phpdbg_resolve_path(const char *path TSRMLS_DC) /* {{{ */
 	return estrdup(resolved_name);
 } /* }}} */
 
-const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
+PHPDBG_API const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 {
 	const char *file = zend_get_executed_filename(TSRMLS_C);
 
@@ -113,7 +124,7 @@ const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 	return file;
 } /* }}} */
 
-char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
+PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
 {
 	const char *p = str;
 	char *new = NULL;
@@ -143,7 +154,7 @@ char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
 
 } /* }}} */
 
-int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
+PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
 {
     int rc = 0;
 	char *buffer = NULL;
@@ -205,4 +216,19 @@ int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ *
 	}
 
 	return rc;
+} /* }}} */
+
+PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_length) /* {{{ */
+{
+	const phpdbg_color_t *color = colors;
+	
+	while (color && color->name) {
+		if (name_length == color->name_length &&
+			memcmp(name, color->name, name_length) == SUCCESS) {
+			return color;
+		}
+		++color;
+	}
+	
+	return NULL;
 } /* }}} */

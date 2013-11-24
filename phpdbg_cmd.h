@@ -89,7 +89,8 @@ struct _phpdbg_command_t {
 typedef struct {
 	long num;
 	zend_execute_data *execute_data;
-} phpdbg_frame_t; /* }}} */
+} phpdbg_frame_t;
+/* }}} */
 
 /*
 * Workflow:
