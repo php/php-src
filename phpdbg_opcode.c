@@ -152,7 +152,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
 			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("#%- 5lu %16p %-30s %s %s",
+			phpdbg_notice("#%-5u %16p %-30s %s %s",
 			   opline->lineno,
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
@@ -161,7 +161,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
         }
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "#%- 5lu %16p %-30s %s %s",
+			phpdbg_log_ex(PHPDBG_G(oplog), "#%-5u %16p %-30s %s %s",
 				opline->lineno,
 				opline,
 				phpdbg_decode_opcode(opline->opcode),

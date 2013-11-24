@@ -286,7 +286,7 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 
 static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 {
-	phpdbg_error(message);
+	phpdbg_error("%s", message);
 }
 /* }}} */
 

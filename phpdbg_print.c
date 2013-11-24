@@ -70,12 +70,12 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                     char *decode = phpdbg_decode_opline(op_array, opline, &vars TSRMLS_CC);
                     if (decode != NULL) {
                         phpdbg_writeln(
-                            "\t\t#%lu\t%p %-30s %s", 
+                            "\t\t#%u\t%p %-30s %s", 
                             opline->lineno,
                             opline, 
                             phpdbg_decode_opcode(opline->opcode),
                             decode);
-                    } else phpdbg_error("\tFailed to decode opline @ %ld", opline);
+                    } else phpdbg_error("\tFailed to decode opline %16p", opline);
 					free(decode);
                     opline++;
                 } while (++opcode < end);

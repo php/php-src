@@ -192,7 +192,7 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 
 		case IN_STRING:
 			phpdbg_error(
-				"Malformed command line (unclosed quote) @ %d: %s!",
+				"Malformed command line (unclosed quote) @ %ld: %s!",
 				(p - buffer)-1, &buffer[(p - buffer)-1]);
 		break;
 
