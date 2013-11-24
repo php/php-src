@@ -483,10 +483,10 @@ int phpdbg_find_breakpoint(zend_execute_data* execute_data TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-int phpdbg_delete_breakpoint_from_file_llist(void *brake) {
+int phpdbg_delete_breakpoint_from_file_llist(void *brake) { /* {{{ */
 	TSRMLS_FETCH();
 	return ((phpdbg_breakfile_t*)brake)->id == PHPDBG_G(del_bp_num);
-}
+} /* }}} */
 
 PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 {

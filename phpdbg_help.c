@@ -247,6 +247,10 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("\t%sb O ZEND_ADD", PROMPT);
 	phpdbg_writeln("\tWill break on every occurence of the opcode provided");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak del 1", PROMPT);
+	phpdbg_writeln("\t%sb d 1", PROMPT);
+	phpdbg_writeln("\tWill remove the breakpoint with the given identifier");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: An address is only valid for the current compilation");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");

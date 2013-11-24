@@ -92,7 +92,6 @@ int phpdbg_find_breakpoint_method(zend_op_array* TSRMLS_DC);
 int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t TSRMLS_DC);
 int phpdbg_find_breakpoint_opcode(zend_uchar TSRMLS_DC);
 int phpdbg_find_conditional_breakpoint(TSRMLS_D);
-int phpdbg_find_catch(zend_uchar TSRMLS_DC);
 int phpdbg_find_breakpoint(zend_execute_data* TSRMLS_DC);
 
 PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC);
