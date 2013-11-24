@@ -774,7 +774,7 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-			long overflow;
+			zend_int_t overflow;
 
 			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
 			Z_TYPE_P(result) = overflow ? IS_DOUBLE : IS_LONG;

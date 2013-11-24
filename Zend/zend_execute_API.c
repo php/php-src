@@ -1447,7 +1447,7 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
+void zend_set_timeout(zend_int_t seconds, int reset_signals) /* {{{ */
 {
 	TSRMLS_FETCH();
 

@@ -64,7 +64,7 @@ ZEND_API char *(*zend_resolve_path)(const char *filename, zend_str_size_int file
 
 void (*zend_on_timeout)(int seconds TSRMLS_DC);
 
-static void (*zend_message_dispatcher_p)(long message, const void *data TSRMLS_DC);
+static void (*zend_message_dispatcher_p)(zend_int_t message, const void *data TSRMLS_DC);
 static int (*zend_get_configuration_directive_p)(const char *name, zend_str_size_uint name_length, zval *contents);
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
@@ -179,7 +179,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_LONG:
 				{
 					char key[25];
-					snprintf(key, sizeof(key), "%ld", num_key);
+					snprintf(key, sizeof(key), ZEND_INT_FMT, num_key);
 					ZEND_PUTS_EX(key);
 				}
 				break;
@@ -217,7 +217,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 				ZEND_PUTS(string_key);
 				break;
 			case HASH_KEY_IS_LONG:
-				zend_printf("%ld", num_key);
+				zend_printf(ZEND_INT_FMT, num_key);
 				break;
 		}
 		ZEND_PUTS("] => ");
@@ -249,7 +249,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			break;
 		case IS_RESOURCE:
 			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG);
-			Z_STRSIZE_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #%ld", Z_LVAL_P(expr));
+			Z_STRSIZE_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #" ZEND_INT_FMT, Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
@@ -985,7 +985,7 @@ ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 /* }}} */
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC) /* {{{ */
+ZEND_API void zend_message_dispatcher(zend_int_t message, const void *data TSRMLS_DC) /* {{{ */
 {
 	if (zend_message_dispatcher_p) {
 		zend_message_dispatcher_p(message, data TSRMLS_CC);
@@ -1306,7 +1306,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
-    long orig_interactive = CG(interactive);
+	zend_int_t orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {

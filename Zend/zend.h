@@ -544,7 +544,7 @@ typedef struct _zend_utility_functions {
 	zend_str_size_int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	zend_str_size_int (*write_function)(const char *str, zend_str_size_uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
-	void (*message_handler)(long message, const void *data TSRMLS_DC);
+	void (*message_handler)(zend_int_t message, const void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, zend_str_size_uint name_length, zval *contents);
@@ -727,7 +727,7 @@ END_EXTERN_C()
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC);
+ZEND_API void zend_message_dispatcher(zend_int_t message, const void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, zend_str_size_uint name_length, zval *contents);
 END_EXTERN_C()
