@@ -30,7 +30,7 @@ void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 		PHPDBG_G(prompt) = NULL;
 	}
 
-	if (PHPDBG_IS_COLOURED) {
+	if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 		spprintf(&PHPDBG_G(prompt), 0, "\033[1;64m%s\033[0m ", prompt);
 	} else {
 		spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
