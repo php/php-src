@@ -243,6 +243,10 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("\t%sb on ($expression == true)", PROMPT);
 	phpdbg_writeln("\tWill break when the condition evaluates to true");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak op ZEND_ADD", PROMPT);
+	phpdbg_writeln("\t%sb O ZEND_ADD", PROMPT);
+	phpdbg_writeln("\tWill break on every occurence of the opcode provided");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: An address is only valid for the current compilation");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");

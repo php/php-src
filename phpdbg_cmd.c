@@ -380,14 +380,16 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 					}
 				}
 
-				if (!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
+				rc = command->handler(&param, input TSRMLS_CC);
+				
+				/* only set last command when it is worth it ! */
+				if ((rc != FAILURE) &&
+					!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
 					PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
 					phpdbg_clear_param(
 						&PHPDBG_G(lparam) TSRMLS_CC);
 					PHPDBG_G(lparam) = param;
 				}
-
-				rc = command->handler(&param, input TSRMLS_CC);
 				break;
 			}
 			command++;
