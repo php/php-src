@@ -9,7 +9,7 @@ Features
 ========
 
  - Stepthrough Debugging
- - Flexible Breakpoints (Class Method, Function, File:Line, Address)
+ - Flexible Breakpoints (Class Method, Function, File:Line, Address, Opcode)
  - Easy Access to PHP with built-in eval()
  - Easy Access to Currently Executing Code
  - Userland API
@@ -63,7 +63,7 @@ The following switches change the default behaviour of phpdbg:
  - -q do not print banner on startup
  - -r jump straight to run
  - -E enable step through eval()
- 
+
 *Note: passing -rr will cause phpdbg to quit after execution, rather than returning to the console*
 
 Screeny
