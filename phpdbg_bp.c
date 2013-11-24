@@ -84,10 +84,8 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
     }
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len TSRMLS_DC) /* {{{ */
 {
-	size_t name_len = strlen(name);
-
 	if (!zend_hash_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], name, name_len)) {
 		phpdbg_breaksymbol_t new_break;
 

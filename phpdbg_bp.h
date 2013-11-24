@@ -78,7 +78,7 @@ typedef struct _phpdbg_breakcond_t {
 } phpdbg_breakcond_t;
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_symbol(const char*, size_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char*, const char* TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char*, size_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong TSRMLS_DC);

@@ -100,7 +100,7 @@ PHPDBG_BREAK(func) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM:
-			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
+			phpdbg_set_breakpoint_symbol(param->str, param->len TSRMLS_CC);
 			break;
 
 		phpdbg_default_switch_case();
