@@ -24,15 +24,20 @@
 
 #define PHPDBG_SET(name) PHPDBG_COMMAND(set_##name)
 
-void phpdbg_set_prompt(const char* TSRMLS_DC);
-const char* phpdbg_get_prompt(TSRMLS_D);
+void phpdbg_set_prompt(const char*, const char* TSRMLS_DC);
+const char *phpdbg_get_prompt(TSRMLS_D);
+
+void phpdbg_set_prompt_color(const char* TSRMLS_DC);
+const char *phpdbg_get_prompt_color(TSRMLS_D);
 
 PHPDBG_SET(prompt);
+PHPDBG_SET(prompt_color);
 PHPDBG_SET(oplog);
 
 static const phpdbg_command_t phpdbg_set_commands[] = {
-    PHPDBG_COMMAND_D_EX(prompt,		 "set prompt",                'p', set_prompt,   NULL, 0),
-    PHPDBG_COMMAND_D_EX(oplog,		 "set oplog output",          'O', set_oplog,    NULL, 0),
+    PHPDBG_COMMAND_D_EX(prompt,       "set prompt",                'p', set_prompt,       NULL, 0),
+    PHPDBG_COMMAND_D_EX(prompt_color, "set prompt color",          'c', set_prompt_color, NULL, 0),
+    PHPDBG_COMMAND_D_EX(oplog,        "set oplog output",          'O', set_oplog,        NULL, 0),
     PHPDBG_END_COMMAND
 };
 

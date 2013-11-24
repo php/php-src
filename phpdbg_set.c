@@ -18,28 +18,62 @@
 */
 
 #include "phpdbg.h"
+#include "phpdbg_cmd.h"
 #include "phpdbg_set.h"
 #include "phpdbg_utils.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
+void phpdbg_set_prompt(const char *prompt, const char *color TSRMLS_DC) /* {{{ */
 {
+	char *old_prompt_raw = PHPDBG_G(prompt_raw);
+
 	if (PHPDBG_G(prompt)) {
 		efree(PHPDBG_G(prompt));
 		PHPDBG_G(prompt) = NULL;
 	}
 
+	if (color) {
+		if (PHPDBG_G(prompt_color)) {
+			efree(PHPDBG_G(prompt_color));
+		}
+		PHPDBG_G(prompt_color) = estrdup(color);
+	}
+
 	if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-		spprintf(&PHPDBG_G(prompt), 0, "\033[1;64m%s\033[0m ", prompt);
+		spprintf(&PHPDBG_G(prompt), 0, "\033[%sm%s\033[0m ",
+			PHPDBG_G(prompt_color) ? PHPDBG_G(prompt_color) : "1;64", prompt);
 	} else {
 		spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
+	}
+
+	PHPDBG_G(prompt_raw) = estrdup(prompt);
+
+	if (old_prompt_raw) {
+		efree(old_prompt_raw);
 	}
 } /* }}} */
 
 const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 {
 	return PHPDBG_G(prompt);
+} /* }}} */
+
+void phpdbg_set_prompt_color(const char *color TSRMLS_DC) /* {{{ */
+{
+	if (memcmp(color, PHPDBG_STRL("blue")) == 0) {
+		PHPDBG_G(prompt_color) = estrndup("blue", sizeof("blue")-1);
+		phpdbg_set_prompt(PHPDBG_G(prompt_raw), "0;34" TSRMLS_CC);
+	} else if (memcmp(color, PHPDBG_STRL("green")) == 0) {
+		PHPDBG_G(prompt_color) = estrndup("green", sizeof("green")-1);
+		phpdbg_set_prompt(PHPDBG_G(prompt_raw), "0;32" TSRMLS_CC);
+	}
+
+} /* }}} */
+
+const char* phpdbg_get_prompt_color(TSRMLS_D) /* {{{ */
+{
+	return PHPDBG_G(prompt_color);
 } /* }}} */
 
 PHPDBG_SET(prompt) /* {{{ */
@@ -50,7 +84,24 @@ PHPDBG_SET(prompt) /* {{{ */
 			break;
 
 		case STR_PARAM:
-			phpdbg_set_prompt(param->str TSRMLS_CC);
+			phpdbg_set_prompt(param->str, NULL TSRMLS_CC);
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(prompt_color) /* {{{ */
+{
+	switch (param->type) {
+		case EMPTY_PARAM:
+			phpdbg_writeln(phpdbg_get_prompt_color(TSRMLS_C));
+			break;
+
+		case STR_PARAM:
+			phpdbg_set_prompt_color(param->str TSRMLS_CC);
 			break;
 
 		phpdbg_default_switch_case();
