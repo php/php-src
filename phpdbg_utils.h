@@ -70,7 +70,7 @@ int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(pr
 #define EMPTY "" /* }}} */
 
 /* {{{ For prompt lines */
-#define PROMPT ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m" : "phpdbg>") /* }}} */
+#define PROMPT "phpdbg>" /* }}} */
 
 /* {{{ For separation */
 #define SEPARATE "------------------------------------------------" /* }}} */

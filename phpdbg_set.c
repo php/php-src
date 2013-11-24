@@ -30,7 +30,11 @@ void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 		PHPDBG_G(prompt) = NULL;
 	}
 
-	spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
+	if (PHPDBG_IS_COLOURED) {
+		spprintf(&PHPDBG_G(prompt), 0, "\033[1;64m%s\033[0m ", prompt);
+	} else {
+		spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
+	}
 } /* }}} */
 
 const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
@@ -62,13 +66,13 @@ PHPDBG_SET(oplog) /* {{{ */
 			phpdbg_notice(
 				"Oplog %s", PHPDBG_G(oplog) ? "enabled" : "disabled");
 		break;
-		
+
 		case NUMERIC_PARAM: switch (param->num) {
 			case 1:
 				phpdbg_error(
 					"An output file must be provided to enable oplog");
 			break;
-			
+
 			case 0: {
 				if (PHPDBG_G(oplog)) {
 					phpdbg_notice("Disabling oplog");
@@ -77,7 +81,7 @@ PHPDBG_SET(oplog) /* {{{ */
 				} else {
 					phpdbg_error("Oplog is not enabled !");
 				}
-			} break;	
+			} break;
 		} break;
 
 		case STR_PARAM: {
