@@ -87,7 +87,7 @@ struct _phpdbg_command_t {
 #define PHPDBG_EX(v) (EG(current_execute_data)->v) 
 
 typedef struct {
-	long num;
+	int num;
 	zend_execute_data *execute_data;
 } phpdbg_frame_t;
 /* }}} */

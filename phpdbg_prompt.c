@@ -458,7 +458,7 @@ PHPDBG_COMMAND(frame) /* {{{ */
 			break;
 
 		case EMPTY_PARAM:
-			phpdbg_notice("Currently at frame %ld:", PHPDBG_G(frame).num);
+			phpdbg_notice("Currently in frame #%d", PHPDBG_G(frame).num);
 			break;
 
 		phpdbg_default_switch_case();
