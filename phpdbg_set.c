@@ -55,3 +55,51 @@ PHPDBG_SET(prompt) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_SET(oplog) /* {{{ */
+{
+	switch (param->type) {
+		case EMPTY_PARAM:
+			phpdbg_notice(
+				"Oplog %s", PHPDBG_G(oplog) ? "enabled" : "disabled");
+		break;
+		
+		case NUMERIC_PARAM: switch (param->num) {
+			case 1:
+				phpdbg_error(
+					"An output file must be provided to enable oplog");
+			break;
+			
+			case 0: {
+				if (PHPDBG_G(oplog)) {
+					phpdbg_notice("Disabling oplog");
+					fclose(
+						PHPDBG_G(oplog));
+				} else {
+					phpdbg_error("Oplog is not enabled !");
+				}
+			} break;	
+		} break;
+
+		case STR_PARAM: {
+			/* open oplog */
+			FILE *old = PHPDBG_G(oplog);
+
+			PHPDBG_G(oplog) = fopen(param->str, "w+");
+			if (!PHPDBG_G(oplog)) {
+				phpdbg_error("Failed to open %s for oplog", param->str);
+				PHPDBG_G(oplog) = old;
+			} else {
+				if (old) {
+					phpdbg_notice("Closing previously open oplog");
+					fclose(old);
+				}
+				phpdbg_notice("Successfully opened oplog %s", param->str);
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+    return SUCCESS;
+} /* }}} */
+

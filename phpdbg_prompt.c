@@ -46,7 +46,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
-	PHPDBG_COMMAND_D(set,     "set debug properties",                     'S', phpdbg_set_commands,   1),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
@@ -58,7 +57,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 2),
 	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
-	PHPDBG_COMMAND_D(oplog,   "sets oplog output",                        'O', NULL, 1),
+	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   1),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
 	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
@@ -929,48 +928,6 @@ PHPDBG_COMMAND(aliases) /* {{{ */
 	phpdbg_help_footer();
 
 	return SUCCESS;
-} /* }}} */
-
-PHPDBG_COMMAND(oplog) /* {{{ */
-{
-	switch (param->type) {
-		case EMPTY_PARAM:
-		case NUMERIC_PARAM:
-			if ((param->type != NUMERIC_PARAM) || !param->num) {
-				if (PHPDBG_G(oplog)) {
-					phpdbg_notice("Disabling oplog");
-					fclose(
-						PHPDBG_G(oplog));
-				} else {
-					phpdbg_error("No oplog currently open !");
-				}
-			} else {
-				phpdbg_error(
-					"No action taken !");
-			}
-		break;
-
-		case STR_PARAM: {
-			/* open oplog */
-			FILE *old = PHPDBG_G(oplog);
-
-			PHPDBG_G(oplog) = fopen(param->str, "w+");
-			if (!PHPDBG_G(oplog)) {
-				phpdbg_error("Failed to open %s for oplog", param->str);
-				PHPDBG_G(oplog) = old;
-			} else {
-				if (old) {
-					phpdbg_notice("Closing previously open oplog");
-					fclose(old);
-				}
-				phpdbg_notice("Successfully opened oplog %s", param->str);
-			}
-		} break;
-
-		phpdbg_default_switch_case();
-	}
-
-    return SUCCESS;
 } /* }}} */
 
 PHPDBG_COMMAND(help) /* {{{ */

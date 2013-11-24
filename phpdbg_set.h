@@ -28,9 +28,11 @@ void phpdbg_set_prompt(const char* TSRMLS_DC);
 const char* phpdbg_get_prompt(TSRMLS_D);
 
 PHPDBG_SET(prompt);
+PHPDBG_SET(oplog);
 
 static const phpdbg_command_t phpdbg_set_commands[] = {
     PHPDBG_COMMAND_D_EX(prompt,		 "set prompt",                'p', set_prompt,   NULL, 0),
+    PHPDBG_COMMAND_D_EX(oplog,		 "set oplog output",          'O', set_oplog,    NULL, 0),
     PHPDBG_END_COMMAND
 };
 

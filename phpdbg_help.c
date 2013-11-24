@@ -24,6 +24,7 @@
 #include "phpdbg_break.h"
 #include "phpdbg_list.h"
 #include "phpdbg_info.h"
+#include "phpdbg_set.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -430,7 +431,28 @@ PHPDBG_HELP(oplog) /* {{{ */
 	phpdbg_writeln("Note: upon failure to open a new oplog, the last oplog is held open");
 	phpdbg_help_footer();
 	return SUCCESS;
-}
+} /* }}} */
+
+PHPDBG_HELP(set) /* {{{ */
+{
+	phpdbg_help_header();
+	phpdbg_writeln("Configure how phpdbg looks and behaves with the set command");
+	phpdbg_writeln("Specific set commands are show below:");
+	phpdbg_notice("Commands");
+	{
+	    const phpdbg_command_t *set_command = phpdbg_set_commands;
+
+        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+	    while (set_command && set_command->name) {
+			if (set_command->alias) {
+			    phpdbg_writeln("\t[%c]\t%s\t\t%s", set_command->alias, set_command->name, set_command->tip);
+			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", set_command->name, set_command->tip);
+			++set_command;
+		}
+	}
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
 
 PHPDBG_HELP(register) /* {{{ */
 {

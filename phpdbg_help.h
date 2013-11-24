@@ -47,7 +47,7 @@ PHPDBG_HELP(back);
 PHPDBG_HELP(frame);
 PHPDBG_HELP(quiet);
 PHPDBG_HELP(list);
-PHPDBG_HELP(oplog);
+PHPDBG_HELP(set);
 PHPDBG_HELP(register);
 PHPDBG_HELP(options);
 PHPDBG_HELP(shell);
@@ -74,7 +74,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_COMMAND_D_EX(frame,    "switch to a frame in the current stack for inspection",                           'f', help_frame,   NULL, 0),
     PHPDBG_COMMAND_D_EX(quiet,    "be quiet during execution",                                                       'Q', help_quiet,   NULL, 0),
 	PHPDBG_COMMAND_D_EX(list,     "list code gives you quick access to code",                     					 'l', help_list,    NULL, 0),
-	PHPDBG_COMMAND_D_EX(oplog,    "keep clutter off the screen by logging oplines",                         		 'O', help_oplog,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(set,      "configure how phpdbg looks and behaves",						 		 			 'S', help_set,     NULL, 0),
 	PHPDBG_COMMAND_D_EX(register, "register a function for use as a command",						 		 	 	 'R', help_register,NULL, 0),
 	PHPDBG_COMMAND_D_EX(options,  "show information about command line options",                         		 	 'o', help_options, NULL, 0),
 	PHPDBG_COMMAND_D_EX(shell,    "execute system commands with direct shell access",						 		 '-', help_shell,   NULL, 0),
