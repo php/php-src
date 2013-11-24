@@ -467,6 +467,7 @@ PHPDBG_HELP(set) /* {{{ */
 			++color;
 		}
 	}
+	phpdbg_writeln("The <element> for set color can be \"prompt\", \"notice\", or \"error\"");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
