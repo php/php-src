@@ -651,7 +651,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 				if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
 					phpdbg_write(
-						"frame #%d {main} at %s:%d",
+						"frame #%d: {main} at %s:%d",
 						i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 					break;
 				}
@@ -729,16 +729,22 @@ PHPDBG_COMMAND(print) /* {{{ */
 			if (EG(in_execution)) {
 				phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
 			}
+
 			phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
 			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
 			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
 			phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
+			phpdbg_writeln(
+				"Memory\t\t%.3f/%.3f (kB)",
+				(float) (zend_memory_usage(1 TSRMLS_CC)/1024),
+				(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
 
 			phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
 			phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
+			phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
 
 			phpdbg_writeln(SEPARATE);
 		} break;
@@ -778,7 +784,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
 			break;
 		case STR_PARAM:
-			phpdbg_set_breakpoint_symbol(param->str TSRMLS_CC);
+			phpdbg_set_breakpoint_symbol(param->str, param->len TSRMLS_CC);
 			break;
 
 		phpdbg_default_switch_case();
@@ -1362,13 +1368,6 @@ zend_vm_enter:
 		/* not while in conditionals */
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
-
-		/* conditions cannot be executed by eval()'d code */
-		if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
-			&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
-			&& phpdbg_find_conditional_breakpoint(TSRMLS_C) == SUCCESS) {
-			DO_INTERACTIVE();
-		}
 
 		if (PHPDBG_G(flags) & PHPDBG_BP_MASK
 			&& phpdbg_find_breakpoint(execute_data TSRMLS_CC) == SUCCESS) {

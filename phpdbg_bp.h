@@ -64,7 +64,7 @@ typedef struct _phpdbg_breakline_t {
  * Breakpoint opcode based representation
  */
 typedef struct _phpdbg_breakop_t {
-	zend_ulong hash;
+	const char *name;
 	int id;
 } phpdbg_breakop_t;
 
@@ -79,9 +79,9 @@ typedef struct _phpdbg_breakcond_t {
 } phpdbg_breakcond_t;
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_symbol(const char*, size_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char*, const char* TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_opcode(zend_ulong TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_opcode(const char*, size_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_expression(const char*, size_t TSRMLS_DC);
