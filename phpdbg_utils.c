@@ -42,14 +42,17 @@ const static phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("red-bold",	 	"1;31"),
 	PHPDBG_COLOR_D("green",	 		"0;32"),
 	PHPDBG_COLOR_D("green-bold", 	"1;32"),
+	PHPDBG_COLOR_D("yellow",        "0;33"),
+	PHPDBG_COLOR_D("yellow-bold",   "1;33"),
 	PHPDBG_COLOR_D("blue",   	 	"0;34"),
 	PHPDBG_COLOR_D("blue-bold",  	"1;34"),
 	PHPDBG_COLOR_D("purple", 	 	"0;35"),
 	PHPDBG_COLOR_D("purple-bold",	"1;35"),
 	PHPDBG_COLOR_D("cyan",   	 	"0;36"),
 	PHPDBG_COLOR_D("cyan-bold",   	"1;36"),
-	PHPDBG_COLOR_D("yellow",        "0;33"),
-	PHPDBG_COLOR_D("yellow-bold",   "1;33"),
+	PHPDBG_COLOR_D("black",   	 	"0;30"),
+	PHPDBG_COLOR_D("black-bold",   	"1;30"),
+	
 	PHPDBG_COLOR_END
 }; /* }}} */
 
