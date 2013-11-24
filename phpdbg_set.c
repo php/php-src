@@ -28,7 +28,7 @@ PHPDBG_SET(prompt) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM:
-			phpdbg_writeln(phpdbg_get_prompt(TSRMLS_C));
+			phpdbg_writeln("%s", phpdbg_get_prompt(TSRMLS_C));
 			break;
 
 		case STR_PARAM:
