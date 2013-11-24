@@ -121,7 +121,7 @@
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.1.1-dev" /* }}} */
+#define PHPDBG_VERSION "0.2.0-dev" /* }}} */
 
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
@@ -136,6 +136,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_op_array *ops;                 /* op_array */
 	zval *retval;                       /* return value */
 	int bp_count;                       /* breakpoint count */
+	int del_bp_num;                     /* breakpoint to delete */
 	int vmret;                          /* return from last opcode handler execution */
 	phpdbg_command_t *lcmd;				/* last command */
 	phpdbg_param_t lparam;              /* last param */

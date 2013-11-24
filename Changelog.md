@@ -1,10 +1,10 @@
 ChangeLog for phpdbg
 ====================
 
-Version 0.1.1 2013-00-00
+Version 0.2.0 2013-00-00
 ------------------------
 
-
+1. Added "break delete <id>" command
 
 Version 0.1.0 2013-11-23
 ------------------------
