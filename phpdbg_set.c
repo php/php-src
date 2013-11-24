@@ -75,6 +75,7 @@ void phpdbg_set_prompt_color(const char *color TSRMLS_DC) /* {{{ */
 		if (memcmp(color, *p, strlen(*p)+1) == 0) {
 			PHPDBG_G(prompt_color) = estrdup(*p);
 			phpdbg_set_prompt(PHPDBG_G(prompt_raw), *(p+1) TSRMLS_CC);
+			return;
 		}
 	} while (++p && *(++p));
 } /* }}} */
