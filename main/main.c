@@ -160,7 +160,9 @@ static php_win32_disable_functions(TSRMLS_D)
  */
 static PHP_INI_MH(OnSetPrecision)
 {
-	int i = atoi(new_value);
+	php_int_t i;
+
+	ZEND_ATOI(i, new_value);
 	if (i >= 0) {
 		EG(precision) = i;
 		return SUCCESS;
@@ -316,11 +318,11 @@ static PHP_INI_MH(OnUpdateTimeout)
 {
 	if (stage==PHP_INI_STAGE_STARTUP) {
 		/* Don't set a timeout on startup, only per-request */
-		EG(timeout_seconds) = atoi(new_value);
+		ZEND_ATOI(EG(timeout_seconds), new_value);
 		return SUCCESS;
 	}
 	zend_unset_timeout(TSRMLS_C);
-	EG(timeout_seconds) = atoi(new_value);
+	ZEND_ATOI(EG(timeout_seconds), new_value);
 	zend_set_timeout(EG(timeout_seconds), 0);
 	return SUCCESS;
 }
@@ -347,7 +349,7 @@ static int php_get_display_errors_mode(char *value, zend_str_size_int value_leng
 	} else if (value_length == 6 && !strcasecmp(value, "stdout")) {
 		mode = PHP_DISPLAY_ERRORS_STDOUT;
 	} else {
-		mode = atoi(value);
+		ZEND_ATOI(mode, value);
 		if (mode && mode != PHP_DISPLAY_ERRORS_STDOUT && mode != PHP_DISPLAY_ERRORS_STDERR) {
 			mode = PHP_DISPLAY_ERRORS_STDOUT;
 		}
@@ -2299,7 +2301,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				const char **p = directives[i].directives;
 
 				while(*p) {
-					long value;
+					php_int_t value;
 
 					if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
 						zend_error(directives[i].error_level, directives[i].phrase, *p);

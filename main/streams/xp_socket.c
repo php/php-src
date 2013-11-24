@@ -102,8 +102,8 @@ retry:
 			} while (err == EINTR);
 		}
 		estr = php_socket_strerror(err, NULL, 0);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of %ld bytes failed with errno=%ld %s",
-				(long)count, err, estr);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "send of " ZEND_INT_FMT " bytes failed with errno=%ld %s",
+				(php_int_t)count, err, estr);
 		efree(estr);
 	}
 
