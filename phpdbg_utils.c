@@ -228,7 +228,7 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	return rc;
 } /* }}} */
 
-PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC) /* {{{ */
+PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC) /* {{{ */
 {
 	const phpdbg_color_t *color = colors;
 
@@ -256,6 +256,7 @@ PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS
 PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC) /* {{{ */
 {
 	const phpdbg_color_t *color = phpdbg_get_color(name, name_length TSRMLS_CC);
+
 	if (color) {
 		phpdbg_set_color(element, color TSRMLS_CC);
 	} else PHPDBG_G(colors)[element] = colors;
