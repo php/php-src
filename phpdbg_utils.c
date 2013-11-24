@@ -35,7 +35,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 /* {{{ color structures */
 const static phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("none",	 	 	"0;0"),
-	
+
 	PHPDBG_COLOR_D("white",		 	"0;64"),
 	PHPDBG_COLOR_D("white-bold", 	"1;64"),
 	PHPDBG_COLOR_D("red",	 	 	"0;31"),
@@ -48,6 +48,8 @@ const static phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("purple-bold",	"1;35"),
 	PHPDBG_COLOR_D("cyan",   	 	"0;36"),
 	PHPDBG_COLOR_D("cyan-bold",   	"1;36"),
+	PHPDBG_COLOR_D("yellow",        "0;33"),
+	PHPDBG_COLOR_D("yellow-bold",   "1;33"),
 	PHPDBG_COLOR_END
 }; /* }}} */
 
@@ -179,8 +181,8 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	switch (type) {
 		case P_ERROR:
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp, 
-						"\033[%sm[%s]\033[0m\n", 
+				rc = fprintf(fp,
+						"\033[%sm[%s]\033[0m\n",
 						PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, buffer);
 			} else {
 				rc = fprintf(fp, "[%s]\n", buffer);
@@ -189,8 +191,8 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 
 		case P_NOTICE:
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp, 
-						"\033[%sm[%s]\033[0m\n", 
+				rc = fprintf(fp,
+						"\033[%sm[%s]\033[0m\n",
 						PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, buffer);
 			} else {
 				rc = fprintf(fp, "[%s]\n", buffer);
@@ -226,10 +228,10 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	return rc;
 } /* }}} */
 
-PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC) /* {{{ */
+PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC) /* {{{ */
 {
 	const phpdbg_color_t *color = colors;
-	
+
 	while (color && color->name) {
 		if (name_length == color->name_length &&
 			memcmp(name, color->name, name_length) == SUCCESS) {
@@ -239,10 +241,10 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_color(const char *name, size_t name_
 		}
 		++color;
 	}
-	
+
 	phpdbg_debug(
 		"phpdbg_get_color(%s, %lu): failed", name, name_length);
-	
+
 	return NULL;
 } /* }}} */
 
@@ -254,6 +256,7 @@ PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS
 PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC) /* {{{ */
 {
 	const phpdbg_color_t *color = phpdbg_get_color(name, name_length TSRMLS_CC);
+
 	if (color) {
 		phpdbg_set_color(element, color TSRMLS_CC);
 	} else PHPDBG_G(colors)[element] = colors;
@@ -276,7 +279,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 		free(PHPDBG_G(prompt)[0]);
 		PHPDBG_G(prompt)[0] = NULL;
 	}
-	
+
 	/* copy new prompt */
 	PHPDBG_G(prompt)[0] = strdup(prompt);
 } /* }}} */
@@ -287,18 +290,18 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 	if (PHPDBG_G(prompt)[1]) {
 		return PHPDBG_G(prompt)[1];
 	}
-	
+
 	/* create cached prompt */
 	if ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED)) {
-		asprintf(	
+		asprintf(
 			&PHPDBG_G(prompt)[1], "\033[%sm%s\033[0m ",
 			PHPDBG_G(colors)[PHPDBG_COLOR_PROMPT]->code,
 			PHPDBG_G(prompt)[0]);
 	} else {
-		asprintf(	
+		asprintf(
 			&PHPDBG_G(prompt)[1], "%s ",
 			PHPDBG_G(prompt)[0]);
 	}
-	
+
 	return PHPDBG_G(prompt)[1];
 } /* }}} */
