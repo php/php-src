@@ -61,14 +61,22 @@ const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 
 void phpdbg_set_prompt_color(const char *color TSRMLS_DC) /* {{{ */
 {
-	if (memcmp(color, PHPDBG_STRL("blue")) == 0) {
-		PHPDBG_G(prompt_color) = estrndup("blue", sizeof("blue")-1);
-		phpdbg_set_prompt(PHPDBG_G(prompt_raw), "0;34" TSRMLS_CC);
-	} else if (memcmp(color, PHPDBG_STRL("green")) == 0) {
-		PHPDBG_G(prompt_color) = estrndup("green", sizeof("green")-1);
-		phpdbg_set_prompt(PHPDBG_G(prompt_raw), "0;32" TSRMLS_CC);
-	}
+	static const char *colors[] = {
+		"blue",   "0;34",
+		"green",  "0;32",
+		"red",    "0;31",
+		"cyan",   "0;36",
+		"purple", "0;35",
+		NULL, NULL
+	};
+	const char **p = colors;
 
+	do {
+		if (memcmp(color, *p, strlen(*p)+1) == 0) {
+			PHPDBG_G(prompt_color) = estrdup(*p);
+			phpdbg_set_prompt(PHPDBG_G(prompt_raw), *(p+1) TSRMLS_CC);
+		}
+	} while (++p && *(++p));
 } /* }}} */
 
 const char* phpdbg_get_prompt_color(TSRMLS_D) /* {{{ */
