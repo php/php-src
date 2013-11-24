@@ -662,14 +662,17 @@ PHPDBG_COMMAND(back) /* {{{ */
 				} else {
 					zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class), (zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
 				}
-				if (is_class) {
+				if (is_class == SUCCESS) {
 					zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
 				}
 
 				phpdbg_write(
 					"frame #%d: %s%s%s(",
-					i++, Z_STRVAL_PP(funcname),
-					is_class == FAILURE?"":Z_STRVAL_PP(type), is_class == FAILURE?"":Z_STRVAL_PP(class));
+					i++,
+					is_class == FAILURE?"":Z_STRVAL_PP(class),
+					is_class == FAILURE?"":Z_STRVAL_PP(type),
+					Z_STRVAL_PP(funcname)
+				);
 
 				if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **)&args) == SUCCESS) {
 					HashPosition iterator;
