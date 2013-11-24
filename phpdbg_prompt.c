@@ -856,6 +856,8 @@ PHPDBG_COMMAND(quit) /* {{{ */
     /* don't allow this to loop, ever ... */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 
+		phpdbg_destroy_input(&input TSRMLS_CC);
+
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 		zend_bailout();
 	}
