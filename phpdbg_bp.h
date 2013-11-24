@@ -72,9 +72,10 @@ typedef struct _phpdbg_breakop_t {
  * Breakpoint condition based representation
  */
 typedef struct _phpdbg_breakcond_t {
-    zval            code;
-    zend_op_array   *ops;
-    int id;
+	zend_ulong      hash;
+	zval            code;
+	zend_op_array   *ops;
+	int id;
 } phpdbg_breakcond_t;
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
@@ -94,6 +95,7 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D);
 int phpdbg_find_catch(zend_uchar TSRMLS_DC);
 int phpdbg_find_breakpoint(zend_execute_data* TSRMLS_DC);
 
+PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC);
 PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D);
 PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC);
 

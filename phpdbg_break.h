@@ -31,10 +31,11 @@
 PHPDBG_BREAK(file);
 PHPDBG_BREAK(method);
 PHPDBG_BREAK(address);
+PHPDBG_BREAK(op);
 PHPDBG_BREAK(on);
 PHPDBG_BREAK(lineno);
 PHPDBG_BREAK(func);
-PHPDBG_BREAK(op);
+PHPDBG_BREAK(del);
 
 /**
  * Commands
@@ -47,6 +48,7 @@ static const phpdbg_command_t phpdbg_break_commands[] = {
 	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by expression",                       'o', break_on,      NULL, 1),
 	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, 1),
 	PHPDBG_COMMAND_D_EX(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, 1),
+	PHPDBG_COMMAND_D_EX(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, 1),
 	PHPDBG_END_COMMAND
 };
 

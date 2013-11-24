@@ -121,3 +121,16 @@ PHPDBG_BREAK(op) /* {{{ */
 
 	return SUCCESS;
 } /* }}} */
+
+PHPDBG_BREAK(del) /* {{{ */
+{
+	switch (param->type) {
+		case NUMERIC_PARAM: {
+			phpdbg_delete_breakpoint(param->num TSRMLS_CC);
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
