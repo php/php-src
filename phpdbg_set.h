@@ -29,9 +29,9 @@ PHPDBG_SET(color);
 PHPDBG_SET(oplog);
 
 static const phpdbg_command_t phpdbg_set_commands[] = {
-    PHPDBG_COMMAND_D_EX(prompt,       "set prompt <string>",             		   'p', set_prompt,       NULL, 0),
-    PHPDBG_COMMAND_D_EX(color, 		  "set color <element> <color>",          	   'C', set_color,        NULL, 1),
-    PHPDBG_COMMAND_D_EX(oplog,        "set oplog <output>",          			   'O', set_oplog,        NULL, 0),
+    PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",             		   'p', set_prompt,       NULL, 0),
+    PHPDBG_COMMAND_D_EX(color, 		  "usage: set color  <element> <color>",          	   'c', set_color,        NULL, 1),
+    PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          			   'O', set_oplog,        NULL, 0),
     PHPDBG_END_COMMAND
 };
 
