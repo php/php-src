@@ -699,7 +699,7 @@ phpdbg_main:
 
 		/* set default colors */
 		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  "white-bold", sizeof("white-bold")-1 TSRMLS_CC);
-		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   "red", sizeof("red")-1 TSRMLS_CC);
+		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   "red-bold", sizeof("red-bold")-1 TSRMLS_CC);
 		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  "green", sizeof("green")-1 TSRMLS_CC);
 
 		/* set default prompt */
