@@ -651,7 +651,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 				if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
 					phpdbg_write(
-						"frame #%d {main} at %s:%d",
+						"frame #%d: {main} at %s:%d",
 						i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 					break;
 				}
