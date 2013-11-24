@@ -84,13 +84,13 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_FAST_CALL
 	case ZEND_FAST_CALL:
 #endif
-			asprintf(&decode[1], "#%lu", op->op1.jmp_addr - ops->opcodes);
+			asprintf(&decode[1], "J%lu", op->op1.jmp_addr - ops->opcodes);
 		goto format;
 
 	case ZEND_JMPZNZ:
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
 			asprintf(
-				&decode[2], "#%u or #%lu", op->op2.opline_num, op->extended_value);
+				&decode[2], "J%u or J%lu", op->op2.opline_num, op->extended_value);
 		goto result;
 
 	case ZEND_JMPZ:
@@ -106,7 +106,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #endif
         	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
       		asprintf(
-      			&decode[2], "#%lu", op->op2.jmp_addr - ops->opcodes);
+      			&decode[2], "J%lu", op->op2.jmp_addr - ops->opcodes);
       	goto result;
 
 	case ZEND_RECV_INIT:
@@ -152,7 +152,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
 			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("#%-5u %16p %-30s %s %s",
+			phpdbg_notice("L%-5u %16p %-30s %s %s",
 			   opline->lineno,
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
@@ -161,7 +161,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
         }
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "#%-5u %16p %-30s %s %s",
+			phpdbg_log_ex(PHPDBG_G(oplog), "L%-5u %16p %-30s %s %s",
 				opline->lineno,
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
