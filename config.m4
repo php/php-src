@@ -18,7 +18,7 @@ if test "$PHP_PHPDBG" != "no"; then
   fi
 
   PHP_PHPDBG_CFLAGS="-I$abc_srcdir"
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c"
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
@@ -28,7 +28,7 @@ if test "$PHP_PHPDBG" != "no"; then
 
   BUILD_BINARY="sapi/phpdbg/phpdbg"
   BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
-  
+
   BUILD_PHPDBG="\$(LIBTOOL) --mode=link \
         \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
                 \$(PHP_GLOBAL_OBJS) \
@@ -38,7 +38,7 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
          -o \$(BUILD_BINARY)"
-  
+
   BUILD_PHPDBG_SHARED="\$(LIBTOOL) --mode=link \
         \$(CC) -shared -Wl,-soname,libphpdbg.so -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \
                 \$(PHP_GLOBAL_OBJS) \

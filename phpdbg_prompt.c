@@ -33,6 +33,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_cmd.h"
+#include "phpdbg_set.h"
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -45,6 +46,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
+	PHPDBG_COMMAND_D(set,     "set debug properties",                     'S', phpdbg_set_commands,   1),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
@@ -749,6 +751,14 @@ PHPDBG_COMMAND(print) /* {{{ */
 } /* }}} */
 
 PHPDBG_COMMAND(info) /* {{{ */
+{
+	phpdbg_error(
+		"No information command selected !");
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_COMMAND(set) /* {{{ */
 {
 	phpdbg_error(
 		"No information command selected !");

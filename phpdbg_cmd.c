@@ -20,6 +20,7 @@
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_set.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -220,7 +221,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 		if (buffered == NULL) {
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
-			if (!phpdbg_write(PROMPT) ||
+			if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C)) ||
 				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
@@ -231,7 +232,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 
 			cmd = buf;
 #else
-			cmd = readline(PROMPT);
+			cmd = readline(phpdbg_get_prompt(TSRMLS_C));
 			if (!cmd) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
@@ -381,7 +382,7 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 				}
 
 				rc = command->handler(&param, input TSRMLS_CC);
-				
+
 				/* only set last command when it is worth it ! */
 				if ((rc != FAILURE) &&
 					!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {

@@ -25,6 +25,7 @@
 #include "phpdbg_bp.h"
 #include "phpdbg_break.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_set.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -36,6 +37,7 @@ void (*zend_execute_old)(zend_op_array *op_array TSRMLS_DC);
 
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
+	pg->prompt = NULL;
 	pg->exec = NULL;
 	pg->exec_len = 0;
 	pg->ops = NULL;
@@ -145,6 +147,11 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
+	}
+
+	if (PHPDBG_G(prompt)) {
+		efree(PHPDBG_G(prompt));
+		PHPDBG_G(prompt) = NULL;
 	}
 
 	if (PHPDBG_G(oplog)) {
@@ -678,6 +685,9 @@ phpdbg_main:
 
 		/* set flags from command line */
 		PHPDBG_G(flags) = flags;
+
+		/* set default prompt */
+		phpdbg_set_prompt(PROMPT TSRMLS_CC);
 
 		zend_try {
 			zend_activate_modules(TSRMLS_C);

@@ -131,6 +131,7 @@
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
     HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
+    char *prompt;                       /* prompt */
 	char *exec;                         /* file to execute */
 	size_t exec_len;                    /* size of exec */
 	zend_op_array *ops;                 /* op_array */
