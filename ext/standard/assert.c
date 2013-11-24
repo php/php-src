@@ -25,10 +25,10 @@
 /* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(assert)
-	long active;
-	long bail;
-	long warning;
-	long quiet_eval;
+	php_int_t active;
+	php_int_t bail;
+	php_int_t warning;
+	php_int_t quiet_eval;
 	zval *callback;
 	char *cb;
 ZEND_END_MODULE_GLOBALS(assert)
@@ -141,7 +141,7 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval **assertion;
-	int val;
+	php_int_t val;
 	zend_str_size_int description_len = 0;
 	char *myeval = NULL;
 	char *compiled_string_description, *description = NULL;
@@ -156,7 +156,7 @@ PHP_FUNCTION(assert)
 
 	if (Z_TYPE_PP(assertion) == IS_STRING) {
 		zval retval;
-		int old_error_reporting = 0; /* shut up gcc! */
+		php_int_t old_error_reporting = 0; /* shut up gcc! */
 
 		myeval = Z_STRVAL_PP(assertion);
 
@@ -204,7 +204,7 @@ PHP_FUNCTION(assert)
 		zval **args = safe_emalloc(description_len == 0 ? 3 : 4, sizeof(zval *), 0);
 		zval *retval;
 		int i;
-		uint lineno = zend_get_executed_lineno(TSRMLS_C);
+		zend_uint_t lineno = zend_get_executed_lineno(TSRMLS_C);
 		const char *filename = zend_get_executed_filename(TSRMLS_C);
 
 		MAKE_STD_ZVAL(args[0]);
@@ -266,7 +266,7 @@ PHP_FUNCTION(assert_options)
 {
 	zval **value = NULL;
 	php_int_t what;
-	int oldint;
+	php_int_t oldint;
 	int ac = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ac TSRMLS_CC, "i|Z", &what, &value) == FAILURE) {
@@ -329,7 +329,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %ld", what);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value " ZEND_INT_FMT, what);
 		break;
 	}
 
