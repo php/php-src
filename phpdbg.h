@@ -62,6 +62,7 @@
 #endif
 
 #include "phpdbg_cmd.h"
+#include "phpdbg_utils.h"
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
@@ -112,7 +113,6 @@
 #define PHPDBG_IS_SIGNALED      (1<<20)
 #define PHPDBG_IS_INTERACTIVE	(1<<21)
 
-
 #ifndef _WIN32
 #   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED)
 #else
@@ -126,29 +126,34 @@
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
 #define PHPDBG_STDOUT			1
-#define PHPDBG_STDERR			2 /* }}} */
+#define PHPDBG_STDERR			2
+#define PHPDBG_IO_FDS 			3 /* }}} */
 
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-    HashTable bp[PHPDBG_BREAK_TABLES];  /* break points */
-    char *prompt;                       /* prompt */
-    char *prompt_raw;                   /* prompt unmodified */
-    char *prompt_color;                 /* prompt color */
-	char *exec;                         /* file to execute */
-	size_t exec_len;                    /* size of exec */
-	zend_op_array *ops;                 /* op_array */
-	zval *retval;                       /* return value */
-	int bp_count;                       /* breakpoint count */
-	int del_bp_num;                     /* breakpoint to delete */
-	int vmret;                          /* return from last opcode handler execution */
-	phpdbg_command_t *lcmd;				/* last command */
-	phpdbg_param_t lparam;              /* last param */
-	FILE *oplog;                        /* opline log */
-	HashTable seek;						/* seek oplines */
-	zend_ulong flags;                   /* phpdbg flags */
-	HashTable registered;				/* registered */
-	phpdbg_frame_t frame;				/* frame */
-	FILE *io[3];						/* stdin/stdout/stderr */
+    HashTable bp[PHPDBG_BREAK_TABLES];  			/* break points */
+	HashTable registered;							/* registered */
+	HashTable seek;									/* seek oplines */
+	phpdbg_frame_t frame;							/* frame */
+	
+	char *exec;                         			/* file to execute */
+	size_t exec_len;                    			/* size of exec */
+	zend_op_array *ops;                 			/* op_array */
+	zval *retval;                       			/* return value */
+	int bp_count;                       			/* breakpoint count */
+	int del_bp_num;                     			/* breakpoint to delete */
+	int vmret;                          			/* return from last opcode handler execution */
+
+	FILE *oplog;                        			/* opline log */
+	FILE *io[PHPDBG_IO_FDS];						/* io */
+
+    char *prompt[2];                       			/* prompt */
+    const phpdbg_color_t *colors[PHPDBG_COLORS];	/* colors */
+    
+	phpdbg_command_t *lcmd;							/* last command */
+	phpdbg_param_t lparam;              			/* last param */
+	
+	zend_ulong flags;                   			/* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif /* PHPDBG_H */

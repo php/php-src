@@ -92,6 +92,8 @@ typedef struct {
 } phpdbg_frame_t;
 /* }}} */
 
+
+
 /*
 * Workflow:
 * 1) read input
@@ -112,6 +114,8 @@ typedef struct {
 PHPDBG_API phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
 PHPDBG_API phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
 PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
+#define phpdbg_argv_is(n, s) \
+	(memcmp(input->argv[n]->string, s, input->argv[n]->length-1) == SUCCESS)
 
 /*
 * Parameter Management

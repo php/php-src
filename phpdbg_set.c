@@ -24,67 +24,6 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_set_prompt(const char *prompt, const char *color TSRMLS_DC) /* {{{ */
-{
-	char *old_prompt_raw = PHPDBG_G(prompt_raw);
-
-	if (PHPDBG_G(prompt)) {
-		efree(PHPDBG_G(prompt));
-		PHPDBG_G(prompt) = NULL;
-	}
-
-	if (color) {
-		if (PHPDBG_G(prompt_color)) {
-			efree(PHPDBG_G(prompt_color));
-		}
-		PHPDBG_G(prompt_color) = estrdup(color);
-	}
-
-	if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-		spprintf(&PHPDBG_G(prompt), 0, "\033[%sm%s\033[0m ",
-			PHPDBG_G(prompt_color) ? PHPDBG_G(prompt_color) : "1;64", prompt);
-	} else {
-		spprintf(&PHPDBG_G(prompt), 0, "%s ", prompt);
-	}
-
-	PHPDBG_G(prompt_raw) = estrdup(prompt);
-
-	if (old_prompt_raw) {
-		efree(old_prompt_raw);
-	}
-} /* }}} */
-
-const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
-{
-	return PHPDBG_G(prompt);
-} /* }}} */
-
-void phpdbg_set_prompt_color(const char *color TSRMLS_DC) /* {{{ */
-{
-	static const char *colors[] = {
-		"blue",   "0;34",
-		"green",  "0;32",
-		"red",    "0;31",
-		"cyan",   "0;36",
-		"purple", "0;35",
-		NULL, NULL
-	};
-	const char **p = colors;
-
-	do {
-		if (memcmp(color, *p, strlen(*p)+1) == 0) {
-			PHPDBG_G(prompt_color) = estrdup(*p);
-			phpdbg_set_prompt(PHPDBG_G(prompt_raw), *(p+1) TSRMLS_CC);
-			return;
-		}
-	} while (++p && *(++p));
-} /* }}} */
-
-const char* phpdbg_get_prompt_color(TSRMLS_D) /* {{{ */
-{
-	return PHPDBG_G(prompt_color);
-} /* }}} */
-
 PHPDBG_SET(prompt) /* {{{ */
 {
 	switch (param->type) {
@@ -93,7 +32,7 @@ PHPDBG_SET(prompt) /* {{{ */
 			break;
 
 		case STR_PARAM:
-			phpdbg_set_prompt(param->str, NULL TSRMLS_CC);
+			phpdbg_set_prompt(param->str TSRMLS_CC);
 			break;
 
 		phpdbg_default_switch_case();
@@ -102,20 +41,45 @@ PHPDBG_SET(prompt) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_SET(prompt_color) /* {{{ */
+PHPDBG_SET(color) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_writeln(phpdbg_get_prompt_color(TSRMLS_C));
-			break;
+	if ((param->type == STR_PARAM) && (input->argc == 3)) {
+		const phpdbg_color_t *color = phpdbg_get_color(
+			input->argv[2]->string, input->argv[2]->length TSRMLS_CC);
+		int element = PHPDBG_COLOR_INVALID;
+		
+		if (color) {
+			if (phpdbg_argv_is(1, "prompt")) {	
+				phpdbg_notice(	
+					"setting prompt color to %s (%s)", color->name, color->code);
+				element = PHPDBG_COLOR_PROMPT;
+				if (PHPDBG_G(prompt)[1]) {
+					free(PHPDBG_G(prompt)[1]);
+					PHPDBG_G(prompt)[1]=NULL;
+				}
+			} else if (phpdbg_argv_is(1, "error")) {
+				phpdbg_notice(	
+					"setting error color to %s (%s)", color->name, color->code);
+				element = PHPDBG_COLOR_ERROR;
+			
+			} else if (phpdbg_argv_is(1, "notice")) {
+				phpdbg_notice(	
+					"setting notice color to %s (%s)", color->name, color->code);
+				element = PHPDBG_COLOR_NOTICE;
+				
+			} else goto usage; 
 
-		case STR_PARAM:
-			phpdbg_set_prompt_color(param->str TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
+			/* set color for element */
+			phpdbg_set_color(element, color TSRMLS_CC);
+		} else {
+			phpdbg_error(
+				"Failed to find the requested color (%s)", input->argv[2]->string);
+		}
+	} else {
+usage:
+		phpdbg_error(
+			"set color used incorrected: set color <prompt|error|notice> <color>");
 	}
-
 	return SUCCESS;
 } /* }}} */
 
