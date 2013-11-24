@@ -51,14 +51,14 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 
                 if (method->common.scope) {
                     phpdbg_writeln(
-                        "\t#%d-%d %s::%s() %s",
+                        "\tL%d-%d %s::%s() %s",
                         op_array->line_start, op_array->line_end,
                         method->common.scope->name,
                         method->common.function_name,
                         op_array->filename ? op_array->filename : "unknown");
                 } else {
                     phpdbg_writeln(
-                        "\t#%d-%d %s() %s",
+                        "\tL%d-%d %s() %s",
                         method->common.function_name ? op_array->line_start : 0, 
                         method->common.function_name ? op_array->line_end : 0,
                         method->common.function_name ? method->common.function_name : "{main}",
@@ -70,7 +70,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
                     char *decode = phpdbg_decode_opline(op_array, opline, &vars TSRMLS_CC);
                     if (decode != NULL) {
                         phpdbg_writeln(
-                            "\t\t#%u\t%p %-30s %s", 
+                            "\t\tL%u\t%p %-30s %s", 
                             opline->lineno,
                             opline, 
                             phpdbg_decode_opcode(opline->opcode),
