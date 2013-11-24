@@ -75,6 +75,10 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR", PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -239,17 +243,63 @@ static PHP_FUNCTION(phpdbg_clear)
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
 
-	ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_arginfo, 0, 0, 0)
+/* {{{ proto void phpdbg_color(integer element, string color) */
+static PHP_FUNCTION(phpdbg_color)
+{
+	long element;
+	char *color;
+	zend_uint color_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
+		return;
+	}
+	
+	switch (element) {
+		case PHPDBG_COLOR_NOTICE:
+		case PHPDBG_COLOR_ERROR:
+		case PHPDBG_COLOR_PROMPT:
+			phpdbg_set_color_ex(element, color, color_len TSRMLS_CC);
+		break;
+		
+		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
+	}
+} /* }}} */
+
+/* {{{ proto void phpdbg_prompt(string prompt) */
+static PHP_FUNCTION(phpdbg_prompt) 
+{
+	char *prompt;
+	zend_uint prompt_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
+		return;
+	}
+	
+	phpdbg_set_prompt(prompt TSRMLS_CC);
+} /* }}} */
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_arginfo, 0, 0, 0)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, expression)
 ZEND_END_ARG_INFO()
 
-	ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, element)
+	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-	zend_function_entry phpdbg_user_functions[] = {
-		PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
-			PHP_FE(phpdbg_break, phpdbg_break_arginfo)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+zend_function_entry phpdbg_user_functions[] = {
+	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
+	PHP_FE(phpdbg_break, phpdbg_break_arginfo)
+	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
+	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else
