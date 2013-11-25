@@ -74,6 +74,21 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 		}
 	}
 	
+	if (PHPDBG_G(flags) & PHPDBG_HAS_SYM_BP) {
+		phpdbg_breaksymbol_t *brake;
+		
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_SYM];
+		
+		phpdbg_notice("Exporting symbol breakpoints (%d)", zend_hash_num_elements(table));
+		
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void*) &brake, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+			fprintf(
+				handle, "break %s\n", brake->symbol);
+		}
+	}
+	
 	/* export other types here after resolving errors from source command */
 	
 } /* }}} */
