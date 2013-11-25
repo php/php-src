@@ -78,7 +78,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR", PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -249,32 +249,32 @@ static PHP_FUNCTION(phpdbg_color)
 	long element;
 	char *color;
 	zend_uint color_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
 	}
-	
+
 	switch (element) {
 		case PHPDBG_COLOR_NOTICE:
 		case PHPDBG_COLOR_ERROR:
 		case PHPDBG_COLOR_PROMPT:
 			phpdbg_set_color_ex(element, color, color_len TSRMLS_CC);
 		break;
-		
+
 		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
 	}
 } /* }}} */
 
 /* {{{ proto void phpdbg_prompt(string prompt) */
-static PHP_FUNCTION(phpdbg_prompt) 
+static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt;
 	zend_uint prompt_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
 	}
-	
+
 	phpdbg_set_prompt(prompt TSRMLS_CC);
 } /* }}} */
 

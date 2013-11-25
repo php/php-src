@@ -27,11 +27,13 @@
 PHPDBG_SET(prompt);
 PHPDBG_SET(color);
 PHPDBG_SET(oplog);
+PHPDBG_SET(breakpoint);
 
 static const phpdbg_command_t phpdbg_set_commands[] = {
     PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",             		   'p', set_prompt,       NULL, 0),
     PHPDBG_COMMAND_D_EX(color, 		  "usage: set color  <element> <color>",          	   'c', set_color,        NULL, 1),
     PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          			   'O', set_oplog,        NULL, 0),
+    PHPDBG_COMMAND_D_EX(breakpoint,   "usage: set breakpoint <on|off>",       			   'b', set_breakpoint,   NULL, 0),
     PHPDBG_END_COMMAND
 };
 

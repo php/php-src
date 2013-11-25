@@ -48,20 +48,20 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 {
 	HashPosition position;
 	HashTable *table = NULL;
-	
+
 	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP) {
 		zend_llist *brakes;
 
 		table = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
-		
+
 		for (zend_hash_internal_pointer_reset_ex(table, &position);
 			zend_hash_get_current_data_ex(table, (void*) &brakes, &position) == SUCCESS;
 			zend_hash_move_forward_ex(table, &position)) {
-			
+
 			zend_llist_position lposition;
             phpdbg_breakfile_t *brake;
 			zend_ulong count = zend_llist_count(brakes);
-			
+
 			if ((brake = zend_llist_get_first_ex(brakes, &lposition))) {
 				phpdbg_notice(
 					"Exporting file breakpoints in %s (%d)", brake->filename, count);
@@ -72,14 +72,14 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 			}
 		}
 	}
-	
+
 	if (PHPDBG_G(flags) & PHPDBG_HAS_SYM_BP) {
 		phpdbg_breaksymbol_t *brake;
-		
+
 		table = &PHPDBG_G(bp)[PHPDBG_BREAK_SYM];
-		
+
 		phpdbg_notice("Exporting symbol breakpoints (%d)", zend_hash_num_elements(table));
-		
+
 		for (zend_hash_internal_pointer_reset_ex(table, &position);
 			zend_hash_get_current_data_ex(table, (void*) &brake, &position) == SUCCESS;
 			zend_hash_move_forward_ex(table, &position)) {
@@ -106,36 +106,36 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 				zend_hash_move_forward_ex(class, &mposition)) {
 				if (!noted) {
 					phpdbg_notice(
-						"Exporting method breakpoints in %s (%d)", 
+						"Exporting method breakpoints in %s (%d)",
 						brake->class_name, zend_hash_num_elements(class));
 					noted = 1;
 				}
-				
+
 				fprintf(
 					handle, "break %s::%s\n", brake->class_name, brake->func_name);
 			}
 		}
 	}
-	
+
 	if (PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP) {
 		phpdbg_breakop_t *brake;
-		
+
 		table = &PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE];
-		
+
 		phpdbg_notice(
 			"Exporting opcode breakpoints (%d)", zend_hash_num_elements(table));
-		
+
 		for (zend_hash_internal_pointer_reset_ex(table, &position);
 			zend_hash_get_current_data_ex(table, (void**) &brake, &position) == SUCCESS;
 			zend_hash_move_forward_ex(table, &position)) {
-		
+
 			fprintf(
-				handle, "break op %s\n", brake->name);	
+				handle, "break op %s\n", brake->name);
 		}
 	}
-	
+
 	/* export other types here after resolving errors from source command */
-	
+
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
@@ -545,6 +545,10 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D) /* {{{ */
 
 int phpdbg_find_breakpoint(zend_execute_data* execute_data TSRMLS_DC) /* {{{ */
 {
+	if (!(PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED)) {
+		return FAILURE;
+	}
+
 	/* conditions cannot be executed by eval()'d code */
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
 		&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
