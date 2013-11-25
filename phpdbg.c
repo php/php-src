@@ -652,7 +652,7 @@ phpdbg_main:
 			case 'i': { /* set init file */
 						  init_file_len = strlen(php_optarg);
 						  if (init_file_len) {
-							  init_file = strdup(php_optarg);
+							  init_file = estrdup(php_optarg);
 						  }
 					  } break;
 
