@@ -835,7 +835,17 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 				}
 			} else {
 				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
-					/* Mangled key, ignore and wait for runtime */
+					/* Mangled key */
+					if (((zend_function*)p->pData)->common.fn_flags & ZEND_ACC_CLOSURE) {
+						/* update closure */
+						if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+							if (pCopyConstructor) {
+								pCopyConstructor(t);
+							}
+						}
+					} else {
+						/* ignore and wait for runtime */
+					} 
 				} else if (!ignore_dups && zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS) {
 					*fail_data = p->pData;
 					*conflict_data = t;

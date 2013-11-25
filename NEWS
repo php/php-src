@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
     string). (Laruence)
 
+- OPCache
+  . Fixed bug #65915 (Inconsistent results with require return value). (Dmitry)
+
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
 
