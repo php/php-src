@@ -501,6 +501,19 @@ PHPDBG_HELP(register) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(source) /* {{{ */
+{
+	phpdbg_help_header();
+	phpdbg_writeln("Sourcing a phpdbginit during your debugging session might save some time");
+	phpdbg_writeln(EMPTY);
+    phpdbg_notice("Examples");
+	phpdbg_writeln("\t%ssource /my/phpdbginit", PROMPT);
+    phpdbg_writeln("\t%s. /my/phpdbginit", PROMPT);
+    phpdbg_writeln("\tWill execute the init file at /my/phpdbginit");
+	phpdbg_help_footer();
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(shell) /* {{{ */
 {
 	phpdbg_help_header();

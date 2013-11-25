@@ -59,6 +59,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   1),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
+	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, 1),
 	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
@@ -815,6 +816,18 @@ PHPDBG_COMMAND(shell) /* {{{ */
 				phpdbg_error(
 					"Failed to execute %s", param->str);
 			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_COMMAND(source) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM: {
+			phpdbg_init(param->str, param->len, 0 TSRMLS_CC);
 		} break;
 
 		phpdbg_default_switch_case();

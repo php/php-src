@@ -49,6 +49,7 @@ PHPDBG_COMMAND(quiet);
 PHPDBG_COMMAND(aliases);
 PHPDBG_COMMAND(shell);
 PHPDBG_COMMAND(set);
+PHPDBG_COMMAND(source);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit); /* }}} */
 
