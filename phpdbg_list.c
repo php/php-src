@@ -42,8 +42,9 @@ PHPDBG_LIST(lines) /* {{{ */
 		case NUMERIC_PARAM:
 		case EMPTY_PARAM:
 			phpdbg_list_file(phpdbg_current_file(TSRMLS_C),
-				param->type == EMPTY_PARAM ? 0 : param->num,
-				zend_get_executed_lineno(TSRMLS_C), 0 TSRMLS_CC);
+				param->type == EMPTY_PARAM ? 0 : (param->num < 0 ? 1 - param->num : param->num),
+				(param->type != EMPTY_PARAM && param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C),
+				0 TSRMLS_CC);
 			break;
 		case FILE_PARAM:
 			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);

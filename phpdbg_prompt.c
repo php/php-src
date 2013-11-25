@@ -668,6 +668,10 @@ PHPDBG_COMMAND(back) /* {{{ */
 			zval **file, **line, **funcname, **class, **type, **args;
 			char is_class;
 
+			if (limit < 0) {
+				phpdbg_error("Invalid backtrace size %d", limit);
+			}
+
 			zend_fetch_debug_backtrace(
 				&zbacktrace, 0, 0, limit TSRMLS_CC);
 

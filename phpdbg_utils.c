@@ -69,7 +69,7 @@ PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
         return 0;
 
 	for (; *str; str++) {
-		if (isspace(*str)) {
+		if (isspace(*str) || *str == '-') {
 			continue;
 		}
 		return isdigit(*str);
