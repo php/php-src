@@ -32,7 +32,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 	const int32_t*         vfield;
 	int32_t                ilen;
 	int                    i;
-	long                   lfield;
+	php_int_t                   lfield;
 	ResourceBundle_object* newrb;
 
 	restype = ures_getType( source->child );

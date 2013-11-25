@@ -50,25 +50,25 @@ grapheme_close_global_iterator( TSRMLS_D )
 
 /* XXX that's the same mess we have in substr(), revise it with care when int64 is integrated and get rid of this ugly casts */
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, zend_str_size_int str_len, long f, long l, int argc, char **sub_str, zend_str_size_int *sub_str_len)
+void grapheme_substr_ascii(char *str, zend_str_size_int str_len, php_int_t f, php_int_t l, int argc, char **sub_str, zend_str_size_int *sub_str_len)
 {
     *sub_str = NULL;
 
     if (argc > 2) {
         if ((l < 0 && -l > str_len)) {
             return;
-        } else if (l > (long)str_len) {
+        } else if (l > (php_int_t)str_len) {
             l = str_len;
         }
     } else {
         l = str_len;
     }
 
-    if (f > (long)str_len || (f < 0 && -f > str_len)) {
+    if (f > (php_int_t)str_len || (f < 0 && -f > str_len)) {
         return;
     }
 
-    if (l < 0 && (l + (long)str_len - f) < 0) {
+    if (l < 0 && (l + (php_int_t)str_len - f) < 0) {
         return;
     }
 
@@ -76,7 +76,7 @@ void grapheme_substr_ascii(char *str, zend_str_size_int str_len, long f, long l,
      * of the string
      */
     if (f < 0) {
-        f = (long)str_len + f;
+        f = (php_int_t)str_len + f;
         if (f < 0) {
             f = 0;
         }
@@ -87,17 +87,17 @@ void grapheme_substr_ascii(char *str, zend_str_size_int str_len, long f, long l,
      * needed to stop that many chars from the end of the string
      */
     if (l < 0) {
-        l = ((long)str_len - f) + l;
+        l = ((php_int_t)str_len - f) + l;
         if (l < 0) {
             l = 0;
         }
     }
 
-    if (f >= (long)str_len) {
+    if (f >= (php_int_t)str_len) {
         return;
     }
 
-    if ((f + l) > (long)str_len) {
+    if ((f + l) > (php_int_t)str_len) {
         l = str_len - f;
     }
 

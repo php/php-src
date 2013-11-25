@@ -69,7 +69,7 @@ static void _breakiterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
 	int32_t pos = biter->next();
 	if (pos != BreakIterator::DONE) {
 		MAKE_STD_ZVAL(zoi_iter->current);
-		ZVAL_LONG(zoi_iter->current, (long)pos);
+		ZVAL_LONG(zoi_iter->current, (php_int_t)pos);
 	} //else we've reached the end of the enum, nothing more is required
 }
 
@@ -80,7 +80,7 @@ static void _breakiterator_rewind(zend_object_iterator *iter TSRMLS_DC)
 
 	int32_t pos = biter->first();
 	MAKE_STD_ZVAL(zoi_iter->current);
-	ZVAL_LONG(zoi_iter->current, (long)pos);
+	ZVAL_LONG(zoi_iter->current, (php_int_t)pos);
 }
 
 static zend_object_iterator_funcs breakiterator_iterator_funcs = {

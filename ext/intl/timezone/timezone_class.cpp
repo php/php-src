@@ -320,9 +320,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		return Z_ARRVAL(zv);
 	}
 	
-	add_assoc_long_ex(&zv, "rawOffset", sizeof("rawOffset"), (long)rawOffset);
+	add_assoc_long_ex(&zv, "rawOffset", sizeof("rawOffset"), (php_int_t)rawOffset);
 	add_assoc_long_ex(&zv, "currentOffset", sizeof("currentOffset"),
-		(long)(rawOffset + dstOffset));
+		(php_int_t)(rawOffset + dstOffset));
 
 	return Z_ARRVAL(zv);
 }

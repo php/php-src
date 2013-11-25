@@ -41,7 +41,7 @@
 
 /* {{{ collator_convert_hash_item_from_utf8_to_utf16 */
 static void collator_convert_hash_item_from_utf8_to_utf16(
-	HashTable* hash, int hashKeyType, char* hashKey, ulong hashIndex,
+	HashTable* hash, int hashKeyType, char* hashKey, zend_uint_t hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
@@ -85,7 +85,7 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 
 /* {{{ collator_convert_hash_item_from_utf16_to_utf8 */
 static void collator_convert_hash_item_from_utf16_to_utf8(
-	HashTable* hash, int hashKeyType, char* hashKey, ulong hashIndex,
+	HashTable* hash, int hashKeyType, char* hashKey, zend_uint_t hashIndex,
 	UErrorCode* status )
 {
 	const char* old_val;
@@ -133,7 +133,7 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
  */
 void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* status )
 {
-	ulong    hashIndex    = 0;
+	zend_uint_t    hashIndex    = 0;
 	char*    hashKey      = NULL;
 	int      hashKeyType  = 0;
 
@@ -158,7 +158,7 @@ void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* stat
  */
 void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* status )
 {
-	ulong    hashIndex    = 0;
+	zend_uint_t    hashIndex    = 0;
 	char*    hashKey      = NULL;
 	int      hashKeyType  = 0;
 
@@ -374,7 +374,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str )
 {
 	zval* num      = NULL;
 	int is_numeric = 0;
-	long lval      = 0;
+	php_int_t lval      = 0;
 	double dval    = 0;
 
 	if( Z_TYPE_P( str ) != IS_STRING )

@@ -27,7 +27,7 @@
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, zend_str_size_int str_id_len, long direction, zval *object TSRMLS_DC )
+static int create_transliterator( char *str_id, zend_str_size_int str_id_len, php_int_t direction, zval *object TSRMLS_DC )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = NULL;
@@ -105,14 +105,14 @@ PHP_FUNCTION( transliterator_create )
 {
 	char  *str_id;
 	zend_str_size_int   str_id_len;
-	long  direction   = TRANSLITERATOR_FORWARD;
+	php_int_t  direction   = TRANSLITERATOR_FORWARD;
 	int res;
 
 	TRANSLITERATOR_METHOD_INIT_VARS;
 	
 	(void) to; /* unused */
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|i",
 		&str_id, &str_id_len, &direction ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -139,14 +139,14 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	zend_str_size_int             str_rules_len;
 	UChar		    *ustr_rules    = NULL;
 	zend_str_size_int         ustr_rules_len = 0;
-	long            direction      = TRANSLITERATOR_FORWARD;
+	php_int_t            direction      = TRANSLITERATOR_FORWARD;
 	UParseError     parse_error    = {0, -1};
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|i",
 		&str_rules, &str_rules_len, &direction ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -305,7 +305,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	zend_str_size_int		ustr_len	= 0;
 	int32_t			capacity,
 				uresult_len;
-	long		start		= 0,
+	php_int_t		start		= 0,
 				limit		= -1;
 	int			success     = 0,
 				temp_trans  = 0;
@@ -317,7 +317,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		/* in non-OOP version, accept both a transliterator and a string */
 		zval **arg1;
-		if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ZS|ll",
+		if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ZS|ii",
 			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
 		{
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -353,7 +353,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			}
 		}
 	}
-	else if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|ll",
+	else if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S|ii",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -496,7 +496,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if (to == NULL )
 		RETURN_FALSE;
 
-	RETURN_LONG( (long) TRANSLITERATOR_ERROR_CODE( to ) );
+	RETURN_LONG( (php_int_t) TRANSLITERATOR_ERROR_CODE( to ) );
 }
 /* }}} */
 
