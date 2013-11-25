@@ -27,10 +27,10 @@
 #endif
 
 typedef struct {
-	long engine;
-	long last_modified;
-	long xbithack;
-	long terminate_child;
+	php_int_t engine;
+	php_int_t last_modified;
+	php_int_t xbithack;
+	php_int_t terminate_child;
 	zend_bool in_request;
 } php_apache_info_struct;
 
