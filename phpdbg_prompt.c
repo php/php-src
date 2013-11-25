@@ -67,21 +67,10 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC) /* {{{ */
-{
-	zend_bool init_default = 0;
+void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) {
+	struct stat sb;
 
-	if (!init_file && use_default) {
-		struct stat sb;
-
-		if (VCWD_STAT(".phpdbginit", &sb) != -1) {
-			init_file = ".phpdbginit";
-			init_file_len = strlen(".phpdbginit");
-			init_default = 1;
-		}
-	}
-
-	if (init_file) {
+	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
 		if (fp) {
 			int line = 1;
@@ -159,11 +148,48 @@ next_line:
 				"Failed to open %s for initialization", init_file);
 		}
 
-		if (!init_default) {
+		if (free_init) {
 			free(init_file);
 		}
 	}
 } /* }}} */
+
+void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC) /* {{{ */
+{
+	if (!init_file && use_default) {
+		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
+		int i;
+
+		phpdbg_try_file_init(ZEND_STRS(PHP_CONFIG_FILE_PATH "/" PHPDBG_INIT_FILENAME) - 1 , 0 TSRMLS_CC);
+
+		if (!scan_dir) {
+			scan_dir = PHP_CONFIG_FILE_SCAN_DIR;
+		}
+		while (*scan_dir != 0) {
+			i = 0;
+			while (scan_dir[i] != ':') {
+				if (scan_dir[i++] == 0) {
+					i = -1;
+					break;
+				}
+			}
+			if (i != -1) {
+				scan_dir[i] = 0;
+			}
+			init_file = malloc(strlen(scan_dir) + sizeof(PHPDBG_INIT_FILENAME));
+			sprintf(init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME);
+			phpdbg_try_file_init(init_file, strlen(init_file), 1 TSRMLS_CC);
+			if (i == -1) {
+				break;
+			}
+			scan_dir += i + 1;
+		}
+
+		phpdbg_try_file_init(ZEND_STRS(PHPDBG_INIT_FILENAME) - 1, 0 TSRMLS_CC);
+	} else {
+		phpdbg_try_file_init(init_file, init_file_len, 1 TSRMLS_CC);
+	}
+}
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
