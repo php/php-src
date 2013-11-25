@@ -853,7 +853,23 @@ PHPDBG_COMMAND(source) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM: {
-			phpdbg_init(param->str, param->len, 0 TSRMLS_CC);
+			if (input->argc > 2) {
+				if (phpdbg_argv_is(1, "export")) {	
+					FILE *h = VCWD_FOPEN(input->argv[2]->string, "w+");
+					if (h) {
+						phpdbg_export_breakpoints(h TSRMLS_CC);
+						fclose(h);
+					} else phpdbg_error("Failed to open %s", input->argv[1]->string);
+				} else {
+					phpdbg_error(
+						"Incorrect usage of source command, see help");
+				}
+			} else {
+				struct stat sb;
+				if (VCWD_STAT(param->str, &sb) != -1) {
+					phpdbg_init(param->str, param->len, 0 TSRMLS_CC);
+				} else phpdbg_error("Cannot stat %s", param->str);
+			}
 		} break;
 
 		phpdbg_default_switch_case();

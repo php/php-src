@@ -505,11 +505,15 @@ PHPDBG_HELP(source) /* {{{ */
 {
 	phpdbg_help_header();
 	phpdbg_writeln("Sourcing a phpdbginit during your debugging session might save some time");
+	phpdbg_writeln("The source command can also be used to export breakpoints to a phpdbginit file");
 	phpdbg_writeln(EMPTY);
     phpdbg_notice("Examples");
-	phpdbg_writeln("\t%ssource /my/phpdbginit", PROMPT);
-    phpdbg_writeln("\t%s. /my/phpdbginit", PROMPT);
-    phpdbg_writeln("\tWill execute the init file at /my/phpdbginit");
+	phpdbg_writeln("\t%ssource /my/init", PROMPT);
+    phpdbg_writeln("\t%s. /my/init", PROMPT);
+    phpdbg_writeln("\tWill execute the phpdbginit file at /my/init");
+	phpdbg_writeln("\t%ssource export /my/init", PROMPT);
+    phpdbg_writeln("\t%s. export /my/init", PROMPT);
+    phpdbg_writeln("\tWill export breakpoints to /my/init in phpdbginit file format");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */

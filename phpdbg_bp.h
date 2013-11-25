@@ -99,4 +99,6 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC);
 PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D);
 PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC);
 
+PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC);
+
 #endif /* PHPDBG_BP_H */

@@ -44,6 +44,40 @@ static void phpdbg_class_breaks_dtor(void *data) /* {{{ */
     efree((char*)bp->func_name);
 } /* }}} */
 
+PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
+{
+	HashPosition position;
+	HashTable *table = NULL;
+	
+	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP) {
+		zend_llist *brakes;
+
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
+		
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void*) &brakes, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+			
+			zend_llist_position lposition;
+            phpdbg_breakfile_t *brake;
+			zend_ulong count = zend_llist_count(brakes);
+			
+			if ((brake = zend_llist_get_first_ex(brakes, &lposition))) {
+				phpdbg_notice(
+					"Exporting file breakpoints in %s (%d)", brake->filename, count);
+
+				fprintf(handle, "# Breakpoints in %s (%d)\n", brake->filename, count);
+				do {
+					fprintf(handle, "break file %s:%lu\n", brake->filename, brake->line);
+				} while ((brake = zend_llist_get_next_ex(brakes, &lposition)));
+			}
+		}
+	}
+	
+	/* export other types here after resolving errors from source command */
+	
+} /* }}} */
+
 PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
     struct stat sb;
