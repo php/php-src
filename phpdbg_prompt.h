@@ -22,6 +22,7 @@
 
 /* {{{ */
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
+void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC);
 int phpdbg_interactive(TSRMLS_D);
 int phpdbg_compile(TSRMLS_D);
 void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
