@@ -552,6 +552,7 @@ int main(int argc, char **argv) /* {{{ */
 	long cleaning = 0;
 	int run = 0;
 	int step = 0;
+	char *bp_tmp_file;
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -569,6 +570,12 @@ int main(int argc, char **argv) /* {{{ */
 
 	tsrm_ls = ts_resource(0);
 #endif
+
+	bp_tmp_file = malloc(L_tmpnam);
+	tmpnam(bp_tmp_file);
+	if (bp_tmp_file == NULL) {
+		phpdbg_error("Unable to create temporary file");
+	}
 
 phpdbg_main:
 	ini_entries = NULL;
@@ -772,9 +779,8 @@ phpdbg_main:
 		/* initialize from file */
 		zend_try {
 			PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
-			phpdbg_init(
-					init_file, init_file_len,
-					init_file_default TSRMLS_CC);
+			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+			phpdbg_try_file_init(bp_tmp_file, strlen(bp_tmp_file), 0 TSRMLS_CC);
 			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 		} zend_catch {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
@@ -803,9 +809,14 @@ phpdbg_main:
 				phpdbg_interactive(TSRMLS_C);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
+					FILE *bp_tmp_fp = fopen(bp_tmp_file, "w");
+					phpdbg_export_breakpoints(bp_tmp_fp TSRMLS_CC);
+					fclose(bp_tmp_fp);
 					cleaning = 1;
 					goto phpdbg_out;
-				} else cleaning = 0;
+				} else {
+					cleaning = 0;
+				}
 
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
 					goto phpdbg_out;
@@ -850,6 +861,8 @@ phpdbg_out:
 	if (cleaning) {
 		goto phpdbg_main;
 	}
+
+	free(bp_tmp_file);
 
 #ifdef ZTS
 	/* bugggy */
