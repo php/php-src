@@ -628,11 +628,6 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 	if (phar_get_pharfp(phar TSRMLS_CC)) {
 		return SUCCESS;
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && (!php_checkuid(phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
 
 	if (php_check_open_basedir(phar->fname TSRMLS_CC)) {
 		return FAILURE;
@@ -814,6 +809,7 @@ int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry,
 	if (entry->fp_type == PHAR_MOD) {
 		/* already newly created, truncate */
 		php_stream_truncate_set_size(entry->fp, 0);
+
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		phar->is_modified = 1;
@@ -929,7 +925,8 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 
 PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC) /* {{{ */ {
 	phar_archive_data **fd_ptr;
-	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
+	if (PHAR_GLOBALS->phar_alias_map.arBuckets
+			&& SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
 		*filename = (*fd_ptr)->fname;
 		*filename_len = (*fd_ptr)->fname_len;
 		return SUCCESS;
@@ -1423,11 +1420,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	Z_TYPE_P(zdata) = IS_STRING;
 	Z_STRLEN_P(zdata) = end;
 
-#if PHP_MAJOR_VERSION > 5
-	if (end != (off_t) php_stream_copy_to_mem(fp, (void **) &(Z_STRVAL_P(zdata)), (size_t) end, 0)) {
-#else
 	if (end != (off_t) php_stream_copy_to_mem(fp, &(Z_STRVAL_P(zdata)), (size_t) end, 0)) {
-#endif
 		zval_dtor(zdata);
 		zval_dtor(zsig);
 		zval_dtor(zkey);
@@ -1460,6 +1453,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		Z_ADDREF_P(zsig);
 	}
 	Z_ADDREF_P(zkey);
+
 	fci.retval_ptr_ptr = &retval_ptr;
 
 	if (FAILURE == zend_call_function(&fci, &fcc TSRMLS_CC)) {
@@ -1477,12 +1471,14 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	zval_dtor(openssl);
 	efree(openssl);
 	Z_DELREF_P(zdata);
+
 	if (is_sign) {
 		Z_UNSET_ISREF_P(zsig);
 	} else {
 		Z_DELREF_P(zsig);
 	}
 	Z_DELREF_P(zkey);
+
 	zval_dtor(zdata);
 	efree(zdata);
 	zval_dtor(zkey);

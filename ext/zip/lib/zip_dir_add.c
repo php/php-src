@@ -1,6 +1,6 @@
 /*
-  zip_free.c -- free struct zip
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  zip_dir_add.c -- add directory
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -34,50 +34,55 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "zipint.h"
 
 
 
-/* _zip_free:
-   frees the space allocated to a zipfile struct, and closes the
-   corresponding file. */
+/* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
 
-void
-_zip_free(struct zip *za)
+ZIP_EXTERN zip_int64_t
+zip_dir_add(struct zip *za, const char *name, zip_flags_t flags)
 {
-    int i;
+    size_t len;
+    zip_int64_t ret;
+    char *s;
+    struct zip_source *source;
 
-    if (za == NULL)
-	return;
-
-    if (za->zn)
-	free(za->zn);
-
-    if (za->zp)
-	fclose(za->zp);
-
-    free(za->default_password);
-    _zip_cdir_free(za->cdir);
-    free(za->ch_comment);
-
-    if (za->entry) {
-	for (i=0; i<za->nentry; i++) {
-	    _zip_entry_free(za->entry+i);
-	}
-	free(za->entry);
+    if (ZIP_IS_RDONLY(za)) {
+	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+	return -1;
     }
 
-    for (i=0; i<za->nfile; i++) {
-	if (za->file[i]->error.zip_err == ZIP_ER_OK) {
-	    _zip_error_set(&za->file[i]->error, ZIP_ER_ZIPCLOSED, 0);
-	    za->file[i]->za = NULL;
-	}
+    if (name == NULL) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
     }
 
-    free(za->file);
-    
-    free(za);
+    s = NULL;
+    len = strlen(name);
 
-    return;
+    if (name[len-1] != '/') {
+	if ((s=(char *)malloc(len+2)) == NULL) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
+	    return -1;
+	}
+	strcpy(s, name);
+	s[len] = '/';
+	s[len+1] = '\0';
+    }
+
+    if ((source=zip_source_buffer(za, NULL, 0, 0)) == NULL) {
+	free(s);
+	return -1;
+    }
+	
+    ret = _zip_file_replace(za, ZIP_UINT64_MAX, s ? s : name, source, flags);
+
+    free(s);
+    if (ret < 0)
+	zip_source_free(source);
+
+    return ret;
 }

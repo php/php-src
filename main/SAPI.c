@@ -91,8 +91,6 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_globals_ctor(&sapi_globals);
 #endif
 
-	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
-
 #ifdef PHP_WIN32
 	tsrm_win32_startup();
 #endif
@@ -109,8 +107,6 @@ SAPI_API void sapi_shutdown(void)
 #endif
 
 	reentrancy_shutdown();
-
-	virtual_cwd_shutdown();
 
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();

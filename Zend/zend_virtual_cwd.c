@@ -30,7 +30,8 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "tsrm_virtual_cwd.h"
+#include "zend.h"
+#include "zend_virtual_cwd.h"
 #include "tsrm_strtok_r.h"
 
 #ifdef TSRM_WIN32
@@ -126,7 +127,6 @@ static int php_check_dots(const char *element, int n)
 #define TOKENIZER_STRING "/"
 #endif
 
-
 /* default macros */
 
 #ifndef IS_DIRECTORY_UP
@@ -149,11 +149,21 @@ static int php_check_dots(const char *element, int n)
 
 #define CWD_STATE_COPY(d, s)				\
 	(d)->cwd_length = (s)->cwd_length;		\
-	(d)->cwd = (char *) malloc((s)->cwd_length+1);	\
+	(d)->cwd = (char *) emalloc((s)->cwd_length+1);	\
 	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
 
 #define CWD_STATE_FREE(s)			\
-	free((s)->cwd);
+	efree((s)->cwd);
+
+#ifdef TSRM_WIN32
+# define CWD_STATE_FREE_ERR(state) do { \
+		DWORD last_error = GetLastError(); \
+		CWD_STATE_FREE(state); \
+		SetLastError(last_error); \
+	} while (0)
+#else
+# define CWD_STATE_FREE_ERR(state) CWD_STATE_FREE(state)
+#endif
 
 #ifdef TSRM_WIN32
 
@@ -286,6 +296,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
 	const size_t path_len = strlen(path);
+	ALLOCA_FLAG(use_heap_large);
 
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
 		return stat(path, buf);
@@ -337,16 +348,15 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 		HANDLE hLink = NULL;
 		REPARSE_DATA_BUFFER * pbuffer;
 		unsigned int retlength = 0;
-		TSRM_ALLOCA_FLAG(use_heap_large);
 
 		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
 			return -1;
 		}
 
-		pbuffer = (REPARSE_DATA_BUFFER *)tsrm_do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+		pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
-			tsrm_free_alloca(pbuffer, use_heap_large);
+			free_alloca(pbuffer, use_heap_large);
 			CloseHandle(hLink);
 			return -1;
 		}
@@ -363,7 +373,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 			buf->st_mode |=;
 		}
 #endif
-		tsrm_free_alloca(pbuffer, use_heap_large);
+		free_alloca(pbuffer, use_heap_large);
 	} else {
 		buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
 		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
@@ -429,7 +439,6 @@ static void cwd_globals_ctor(virtual_cwd_globals *cwd_g TSRMLS_DC) /* {{{ */
 
 static void cwd_globals_dtor(virtual_cwd_globals *cwd_g TSRMLS_DC) /* {{{ */
 {
-	CWD_STATE_FREE(&cwd_g->cwd);
 	realpath_cache_clean(TSRMLS_C);
 }
 /* }}} */
@@ -490,6 +499,25 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
+CWD_API int virtual_cwd_activate(TSRMLS_D) /* {{{ */
+{
+	if (CWDG(cwd).cwd == NULL) {
+		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
+	}
+	return 0;
+}
+/* }}} */
+
+CWD_API int virtual_cwd_deactivate(TSRMLS_D) /* {{{ */
+{
+	if (CWDG(cwd).cwd != NULL) {
+		CWD_STATE_FREE(&CWDG(cwd));
+		CWDG(cwd).cwd = NULL;
+	}
+	return 0;
+}
+/* }}} */
+
 CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 {
 	cwd_state *state;
@@ -500,7 +528,7 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 		char *retval;
 
 		*length = 1;
-		retval = (char *) malloc(2);
+		retval = (char *) emalloc(2);
 		if (retval == NULL) {
 			return NULL;
 		}
@@ -515,7 +543,7 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 		char *retval;
 
 		*length = state->cwd_length+1;
-		retval = (char *) malloc(*length+1);
+		retval = (char *) emalloc(*length+1);
 		if (retval == NULL) {
 			return NULL;
 		}
@@ -527,7 +555,7 @@ CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC) /* {{{ */
 	}
 #endif
 	*length = state->cwd_length;
-	return strdup(state->cwd);
+	return estrdup(state->cwd);
 }
 /* }}} */
 
@@ -543,12 +571,12 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 		return cwd;
 	}
 	if (length > size-1) {
-		free(cwd);
+		efree(cwd);
 		errno = ERANGE; /* Is this OK? */
 		return NULL;
 	}
 	memcpy(buf, cwd, length+1);
-	free(cwd);
+	efree(cwd);
 	return buf;
 }
 /* }}} */
@@ -754,13 +782,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef TSRM_WIN32
 	WIN32_FIND_DATA data;
 	HANDLE hFind;
-	TSRM_ALLOCA_FLAG(use_heap_large)
+	ALLOCA_FLAG(use_heap_large)
 #else
 	struct stat st;
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
-	TSRM_ALLOCA_FLAG(use_heap)
+	ALLOCA_FLAG(use_heap)
 
 	while (1) {
 		if (len <= start) {
@@ -860,7 +888,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			FindClose(hFind);
 		}
 
-		tmp = tsrm_do_alloca(len+1, use_heap);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
 		if(save &&
@@ -887,12 +915,12 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 
-			pbuffer = (REPARSE_DATA_BUFFER *)tsrm_do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
+			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
-				tsrm_free_alloca(pbuffer, use_heap_large);
+				free_alloca(pbuffer, use_heap_large);
 				CloseHandle(hLink);
 				return -1;
 			}
@@ -908,7 +936,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname_len + 1,
 					printname, MAX_PATH, NULL, NULL
 				)) {
-					tsrm_free_alloca(pbuffer, use_heap_large);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
@@ -920,7 +948,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename_len + 1,
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
-					tsrm_free_alloca(pbuffer, use_heap_large);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -934,7 +962,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname_len + 1,
 					printname, MAX_PATH, NULL, NULL
 				)) {
-					tsrm_free_alloca(pbuffer, use_heap_large);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
@@ -945,7 +973,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename_len + 1,
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
-					tsrm_free_alloca(pbuffer, use_heap_large);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -955,7 +983,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
 			} else {
-				tsrm_free_alloca(pbuffer, use_heap_large);
+				free_alloca(pbuffer, use_heap_large);
 				return -1;
 			}
 
@@ -999,21 +1027,21 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			fprintf(stderr, "sub: %s ", substitutename);
 			fprintf(stderr, "resolved: %s ", path);
 #endif
-			tsrm_free_alloca(pbuffer, use_heap_large);
+			free_alloca(pbuffer, use_heap_large);
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
 					/* use_realpath is 0 in the call below coz path is absolute*/
 					j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory TSRMLS_CC);
 					if(j < 0) {
-						tsrm_free_alloca(tmp, use_heap);
+						free_alloca(tmp, use_heap);
 						return -1;
 					}
 				}
 			}
 			else {
 				if(i + j >= MAXPATHLEN - 1) {
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 
@@ -1022,7 +1050,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				path[i-1] = DEFAULT_SLASH;
 				j  = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if(j < 0) {
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1043,7 +1071,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 #elif defined(NETWARE)
 		save = 0;
-		tmp = tsrm_do_alloca(len+1, use_heap);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 #else
 		if (save && php_sys_lstat(path, &st) < 0) {
@@ -1055,25 +1083,25 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			save = 0;
 		}
 
-		tmp = tsrm_do_alloca(len+1, use_heap);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
 		if (save && S_ISLNK(st.st_mode)) {
 			if (++(*ll) > LINK_MAX || (j = php_sys_readlink(tmp, path, MAXPATHLEN)) < 0) {
 				/* too many links or broken symlinks */
-				tsrm_free_alloca(tmp, use_heap);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			path[j] = 0;
 			if (IS_ABSOLUTE_PATH(path, j)) {
 				j = tsrm_realpath_r(path, 1, j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			} else {
 				if (i + j >= MAXPATHLEN-1) {
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1; /* buffer overflow */
 				}
 				memmove(path+i, path, j+1);
@@ -1081,7 +1109,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				path[i-1] = DEFAULT_SLASH;
 				j = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1096,7 +1124,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				}
 				if (is_dir && !directory) {
 					/* not a directory */
-					tsrm_free_alloca(tmp, use_heap);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1112,7 +1140,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 #ifdef TSRM_WIN32
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
-				tsrm_free_alloca(tmp, use_heap);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			if (save) {
@@ -1127,7 +1155,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 #else
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
-				tsrm_free_alloca(tmp, use_heap);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			memcpy(path+j, tmp+i, len-i+1);
@@ -1140,7 +1168,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			realpath_cache_add(tmp, len, path, j, directory, *t TSRMLS_CC);
 		}
 
-		tsrm_free_alloca(tmp, use_heap);
+		free_alloca(tmp, use_heap);
 		return j;
 	}
 }
@@ -1316,7 +1344,7 @@ verify:
 		CWD_STATE_COPY(&old_state, state);
 		state->cwd_length = path_length;
 
-		tmp = realloc(state->cwd, state->cwd_length+1);
+		tmp = erealloc(state->cwd, state->cwd_length+1);
 		if (tmp == NULL) {
 #if VIRTUAL_CWD_DEBUG
 			fprintf (stderr, "Out of memory\n");
@@ -1336,7 +1364,7 @@ verify:
 		}
 	} else {
 		state->cwd_length = path_length;
-		tmp = realloc(state->cwd, state->cwd_length+1);
+		tmp = erealloc(state->cwd, state->cwd_length+1);
 		if (tmp == NULL) {
 #if VIRTUAL_CWD_DEBUG
 			fprintf (stderr, "Out of memory\n");
@@ -1367,7 +1395,7 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	int length = strlen(path);
 	char *temp;
 	int retval;
-	TSRM_ALLOCA_FLAG(use_heap)
+	ALLOCA_FLAG(use_heap)
 
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
@@ -1384,14 +1412,14 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
 		length++;
 	}
-	temp = (char *) tsrm_do_alloca(length+1, use_heap);
+	temp = (char *) do_alloca(length+1, use_heap);
 	memcpy(temp, path, length);
 	temp[length] = 0;
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
 	retval = p_chdir(temp TSRMLS_CC);
-	tsrm_free_alloca(temp, use_heap);
+	free_alloca(temp, use_heap);
 	return retval;
 }
 /* }}} */
@@ -1404,7 +1432,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 
 	/* realpath("") returns CWD */
 	if (!*path) {
-		new_state.cwd = (char*)malloc(1);
+		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {
 			retval = NULL;
 			goto end;
@@ -1417,7 +1445,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC) /* {
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path))) {
 		CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	} else {
-		new_state.cwd = (char*)malloc(1);
+		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {
 			retval = NULL;
 			goto end;
@@ -1474,13 +1502,14 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC) /* {{{
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return NULL;
 	}
 
 	f = fopen(new_state.cwd, mode);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
+
 	return f;
 }
 /* }}} */
@@ -1492,7 +1521,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
@@ -1502,7 +1531,7 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 	ret = access(new_state.cwd, mode);
 #endif
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 
 	return ret;
 }
@@ -1565,7 +1594,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
@@ -1575,7 +1604,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /
 	ret = utime(new_state.cwd, buf);
 #endif
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
 /* }}} */
@@ -1588,13 +1617,13 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	ret = chmod(new_state.cwd, mode);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
 /* }}} */
@@ -1607,7 +1636,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
@@ -1621,7 +1650,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 		ret = chown(new_state.cwd, owner, group);
 	}
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return ret;
 }
 /* }}} */
@@ -1634,7 +1663,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
@@ -1650,7 +1679,7 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...) /* {{{ */
 	} else {
 		f = open(new_state.cwd, flags);
 	}
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return f;
 }
 /* }}} */
@@ -1662,13 +1691,13 @@ CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	f = creat(new_state.cwd,  mode);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return f;
 }
 /* }}} */
@@ -1681,15 +1710,15 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
 	if (virtual_file_ex(&old_state, oldname, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&old_state);
+		CWD_STATE_FREE_ERR(&old_state);
 		return -1;
 	}
 	oldname = old_state.cwd;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, newname, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&old_state);
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&old_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 	newname = new_state.cwd;
@@ -1703,8 +1732,8 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 	retval = rename(oldname, newname);
 #endif
 
-	CWD_STATE_FREE(&old_state);
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&old_state);
+	CWD_STATE_FREE_ERR(&new_state);
 
 	return retval;
 }
@@ -1717,13 +1746,13 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	retval = php_sys_stat(new_state.cwd, buf);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1735,13 +1764,13 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ *
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	retval = php_sys_lstat(new_state.cwd, buf);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1753,13 +1782,13 @@ CWD_API int virtual_unlink(const char *path TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	retval = unlink(new_state.cwd);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1771,7 +1800,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_FILEPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
@@ -1780,7 +1809,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC) /* {{{ */
 #else
 	retval = mkdir(new_state.cwd, mode);
 #endif
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1792,13 +1821,13 @@ CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_EXPAND TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return -1;
 	}
 
 	retval = rmdir(new_state.cwd);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1814,13 +1843,13 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC) /* {{{ */
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH TSRMLS_CC)) {
-		CWD_STATE_FREE(&new_state);
+		CWD_STATE_FREE_ERR(&new_state);
 		return NULL;
 	}
 
 	retval = opendir(new_state.cwd);
 
-	CWD_STATE_FREE(&new_state);
+	CWD_STATE_FREE_ERR(&new_state);
 	return retval;
 }
 /* }}} */
@@ -1882,7 +1911,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC) /* 
 	dir_length = CWDG(cwd).cwd_length;
 	dir = CWDG(cwd).cwd;
 
-	ptr = command_line = (char *) malloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
+	ptr = command_line = (char *) emalloc(command_length + sizeof("cd '' ; ") + dir_length + extra+1+1);
 	if (!command_line) {
 		return NULL;
 	}
@@ -1916,7 +1945,7 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC) /* 
 	memcpy(ptr, command, command_length+1);
 	retval = popen(command_line, type);
 
-	free(command_line);
+	efree(command_line);
 	return retval;
 }
 /* }}} */
@@ -1929,7 +1958,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 
 	/* realpath("") returns CWD */
 	if (!*path) {
-		new_state.cwd = (char*)malloc(1);
+		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {
 			return NULL;
 		}
@@ -1940,10 +1969,10 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 		}
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
 					VCWD_GETCWD(cwd, MAXPATHLEN)) {
-		new_state.cwd = strdup(cwd);
+		new_state.cwd = estrdup(cwd);
 		new_state.cwd_length = strlen(cwd);
 	} else {
-		new_state.cwd = (char*)malloc(1);
+		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {
 			return NULL;
 		}
@@ -1952,7 +1981,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 	}
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return NULL;
 	}
 
@@ -1960,7 +1989,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 		int copy_len = new_state.cwd_length>MAXPATHLEN-1 ? MAXPATHLEN-1 : new_state.cwd_length;
 		memcpy(real_path, new_state.cwd, copy_len);
 		real_path[copy_len] = '\0';
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return real_path;
 	} else {
 		return new_state.cwd;

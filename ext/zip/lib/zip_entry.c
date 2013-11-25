@@ -1,6 +1,6 @@
 /*
-  zip_entry_free.c -- free struct zip_entry
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  zip_entry.c -- struct zip_entry helper functions
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,23 +33,23 @@
 
 
 
-#include <stdlib.h>
-
 #include "zipint.h"
+
+void
+_zip_entry_finalize(struct zip_entry *e)
+{
+    _zip_unchange_data(e);
+    _zip_dirent_free(e->orig);
+    _zip_dirent_free(e->changes);
+}
 
 
 
 void
-_zip_entry_free(struct zip_entry *ze)
+_zip_entry_init(struct zip_entry *e)
 {
-    free(ze->ch_filename);
-    ze->ch_filename = NULL;
-    free(ze->ch_extra);
-    ze->ch_extra = NULL;
-    ze->ch_extra_len = -1;
-    free(ze->ch_comment);
-    ze->ch_comment = NULL;
-    ze->ch_comment_len = -1;
-
-    _zip_unchange_data(ze);
+    e->orig = NULL;
+    e->changes = NULL;
+    e->source = NULL;
+    e->deleted = 0;
 }

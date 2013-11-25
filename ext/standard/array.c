@@ -127,6 +127,9 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", COUNT_NORMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", COUNT_RECURSIVE, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1518,13 +1521,17 @@ PHP_FUNCTION(array_fill)
 		return;
 	}
 
-	if (num < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
+	if (num < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements can't be negative");
 		RETURN_FALSE;
 	}
 
 	/* allocate an array for return */
 	array_init_size(return_value, num);
+
+	if (num == 0) {
+		return;
+	}
 
 	num--;
 	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
@@ -4205,9 +4212,11 @@ PHP_FUNCTION(array_filter)
 {
 	zval *array;
 	zval **operand;
-	zval **args[1];
+	zval **args[2];
 	zval *retval = NULL;
+    zval *key = NULL;
 	zend_bool have_callback = 0;
+	long use_type = 0;
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -4215,7 +4224,7 @@ PHP_FUNCTION(array_filter)
 	ulong num_key;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fl", &array, &fci, &fci_cache, &use_type) == FAILURE) {
 		return;
 	}
 
@@ -4228,23 +4237,54 @@ PHP_FUNCTION(array_filter)
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval_ptr_ptr = &retval;
-		fci.param_count = 1;
+
+		if (use_type == ARRAY_FILTER_USE_BOTH) {
+			fci.param_count = 2;
+			args[1] = &key;
+		} else {
+			fci.param_count = 1;
+			if (use_type == ARRAY_FILTER_USE_KEY) {
+				args[0] = &key;
+			}
+		}
 	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&operand, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 	) {
+		int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos);
+
 		if (have_callback) {
-			args[0] = operand;
+			if (use_type) {
+				MAKE_STD_ZVAL(key);
+				/* Set up the key */
+				switch (key_type) {
+					case HASH_KEY_IS_LONG:
+						Z_TYPE_P(key) = IS_LONG;
+						Z_LVAL_P(key) = num_key;
+						break;
+
+					case HASH_KEY_IS_STRING:
+						ZVAL_STRINGL(key, string_key, string_key_len - 1, 1);
+						break;
+				}
+			}
+
+			if (use_type != ARRAY_FILTER_USE_KEY) {
+				args[0] = operand;
+			}
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-				if (!zend_is_true(retval)) {
-					zval_ptr_dtor(&retval);
+				int retval_true = zend_is_true(retval);
+
+				zval_ptr_dtor(&retval);
+				if (use_type) {
+					zval_ptr_dtor(&key);
+				}
+				if (!retval_true) {
 					continue;
-				} else {
-					zval_ptr_dtor(&retval);
 				}
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
@@ -4255,7 +4295,7 @@ PHP_FUNCTION(array_filter)
 		}
 
 		zval_add_ref(operand);
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos)) {
+		switch (key_type) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, operand, sizeof(zval *), NULL);
 				break;

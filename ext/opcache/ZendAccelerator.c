@@ -36,8 +36,7 @@
 #include "main/php_open_temporary_file.h"
 #include "zend_API.h"
 #include "zend_ini.h"
-#include "TSRM/tsrm_virtual_cwd.h"
-#include "ext/phar/php_phar.h"
+#include "zend_virtual_cwd.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -143,21 +142,6 @@ static inline int is_cacheable_stream_path(const char *filename)
 {
 	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
 	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
-}
-
-static inline int is_phar_relative_alias_path(const char *filename, char **alias, int *alias_len)
-{
-	if (memcmp(filename, "phar://", sizeof("phar://") - 1) == 0
-			&& filename[sizeof("phar://") - 1] != '\0' && filename[sizeof("phar://") - 1] != '/') {
-		char *slash;
-		*alias = (char*)filename + sizeof("phar://") - 1;
-		slash = strstr(*alias, "/");
-		if (slash) {
-			*alias_len = slash - *alias;
-			return 1;
-		}
-	}
-	return 0;
 }
 
 /* O+ overrides PHP chdir() function and remembers the current working directory
@@ -1044,33 +1028,15 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
         }
 		memcpy(ZCG(key) + cur_len, include_path, include_path_len);
 		ZCG(key)[key_length] = '\0';
-	} else {
-		/* not use_cwd */
-		key_length = path_length;
+    } else {
+        /* not use_cwd */
+        key_length = path_length;
 		if ((size_t)key_length >= sizeof(ZCG(key))) {
 			ZCG(key_len) = 0;
 			return NULL;
-		} else {
-			char *alias;
-			int alias_len;
-			if (is_phar_relative_alias_path(file_handle->filename, &alias, &alias_len)) {
-				char *phar_path;
-				int phar_path_len;
-				if (phar_resolve_alias(alias, alias_len, &phar_path, &phar_path_len TSRMLS_CC) == SUCCESS) {
-					int filename_len = strlen(file_handle->filename);
-					memcpy(ZCG(key), "phar://", sizeof("phar://") -1);
-					memcpy(ZCG(key) + sizeof("phar://") - 1, phar_path, phar_path_len);
-					memcpy(ZCG(key) + sizeof("phar://") - 1 + phar_path_len,
-							alias + alias_len, filename_len - alias_len - sizeof("phar://") + 2);
-					key_length = filename_len + (phar_path_len - alias_len);
-				} else {
-					memcpy(ZCG(key), file_handle->filename, key_length + 1);
-				}
-			} else {
-				memcpy(ZCG(key), file_handle->filename, key_length + 1);
-			}
 		}
-	}
+		memcpy(ZCG(key), file_handle->filename, key_length + 1);
+    }
 
 	*key_len = ZCG(key_len) = key_length;
 	return ZCG(key);
@@ -1234,6 +1200,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
 	if (bucket &&
+	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
+	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
 	    (new_persistent_script->full_path_len != key_length ||
 	     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
 		/* link key to the same persistent script in hash table */
@@ -1689,7 +1657,18 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 #endif
 				void *dummy = (void *) 1;
 
-				zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL);
+				if (zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL) == SUCCESS) {
+					/* ext/phar has to load phar's metadata into memory */
+					if (strstr(persistent_script->full_path, ".phar") && !strstr(persistent_script->full_path, "://")) {
+						php_stream_statbuf ssb;
+						char *fname = emalloc(sizeof("phar://") + persistent_script->full_path_len);
+
+						memcpy(fname, "phar://", sizeof("phar://") - 1);
+						memcpy(fname + sizeof("phar://") - 1, persistent_script->full_path, persistent_script->full_path_len + 1);
+						php_stream_stat_path(fname, &ssb);
+						efree(fname);
+					}
+				}
 			}
 		}
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO

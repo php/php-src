@@ -228,7 +228,9 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					switch (Z_TYPE_P(param->parameter)) {
+					zval tmp_param = *param->parameter;
+					zval_copy_ctor(&tmp_param);
+					switch (Z_TYPE(tmp_param)) {
 						case IS_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
@@ -236,20 +238,20 @@ safe:
 							break;
 
 						case IS_BOOL:
-							convert_to_long(param->parameter);
-
+							convert_to_long(&tmp_param);
+							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:
-							convert_to_string(param->parameter);
-							plc->qlen = Z_STRLEN_P(param->parameter);
-							plc->quoted = Z_STRVAL_P(param->parameter);
-							plc->freeq = 0;
+							convert_to_string(&tmp_param);
+							plc->qlen = Z_STRLEN(tmp_param);
+							plc->quoted = estrdup(Z_STRVAL(tmp_param));
+							plc->freeq = 1;
 							break;
 
 						default:
-							convert_to_string(param->parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-									Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
+							convert_to_string(&tmp_param);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
+									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
@@ -258,6 +260,7 @@ safe:
 							}
 							plc->freeq = 1;
 					}
+					zval_dtor(&tmp_param);
 				}
 			} else {
 				plc->quoted = Z_STRVAL_P(param->parameter);

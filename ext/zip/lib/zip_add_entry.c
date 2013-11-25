@@ -1,6 +1,6 @@
 /*
-  zip_set_file_extra.c -- set extra field for file in archive
-  Copyright (C) 2006-2010 Dieter Baron and Thomas Klausner
+  zip_add_entry.c -- create and init struct zip_entry
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
-
+ 
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,42 +31,36 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <stdlib.h>
 
 #include "zipint.h"
 
+
 
+/* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
 
-ZIP_EXTERN(int)
-zip_set_file_extra(struct zip *za, zip_uint64_t idx,
-		   const char *extra, int len)
+zip_int64_t
+_zip_add_entry(struct zip *za)
 {
-    char *tmpext;
+    zip_uint64_t idx;
 
-    if (idx >= za->nentry
-	|| len < 0 || len > MAXEXTLEN
-	|| (len > 0 && extra == NULL)) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
-	return -1;
-    }
-
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
-	return -1;
-    }
-
-    if (len > 0) {
-	if ((tmpext=(char *)_zip_memdup(extra, len, &za->error)) == NULL)
+    if (za->nentry+1 >= za->nentry_alloc) {
+	struct zip_entry *rentries;
+	zip_uint64_t nalloc = za->nentry_alloc + 16;
+	rentries = (struct zip_entry *)realloc(za->entry, sizeof(struct zip_entry) * nalloc);
+	if (!rentries) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	    return -1;
+	}
+	za->entry = rentries;
+	za->nentry_alloc = nalloc;
     }
-    else
-	tmpext = NULL;
 
-    free(za->entry[idx].ch_extra);
-    za->entry[idx].ch_extra = tmpext;
-    za->entry[idx].ch_extra_len = len;
+    idx = za->nentry++;
 
-    return 0;
+    _zip_entry_init(za->entry+idx);
+
+    return (zip_int64_t)idx;
 }
