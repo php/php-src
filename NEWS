@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
 
+- mysqlnd:
+  . Fixed bug #66124 (mysqli under mysqlnd loses precision when bind_param
+    with 'i'). (Andrey)
+
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
