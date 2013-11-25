@@ -867,7 +867,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 			} else {
 				struct stat sb;
 				if (VCWD_STAT(param->str, &sb) != -1) {
-					phpdbg_init(param->str, param->len, 0 TSRMLS_CC);
+					phpdbg_try_file_init(param->str, param->len, 0 TSRMLS_CC);
 				} else phpdbg_error("Cannot stat %s", param->str);
 			}
 		} break;
