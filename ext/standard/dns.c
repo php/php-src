@@ -771,11 +771,11 @@ PHP_FUNCTION(dns_get_record)
 	 * - In case of raw mode, we query only the requestd type instead of looping type by type
 	 *   before going with the additional info stuff.
 	 */
-php_cli_server_send_error_page
+
 	if (raw) {
 		type = -1;
 	} else if (type_param == PHP_DNS_ANY) {
-		type = PHP_DNS_NUM_TYPES + 1;php_cli_server_send_error_page
+		type = PHP_DNS_NUM_TYPES + 1;
 	} else {
 		type = 0;
 	}
