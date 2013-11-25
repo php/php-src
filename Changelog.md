@@ -8,6 +8,7 @@ Version 0.2.0 2013-00-00
 2. Added "break opcode <opcode>" command
 3. Added "set" command
 4. .phpdbginit now searched in (additional) ini dirs
+4. Added source command
 
 Version 0.1.0 2013-11-23
 ------------------------
