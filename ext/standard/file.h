@@ -117,8 +117,8 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	long auto_detect_line_endings;
-	long default_socket_timeout;
+	php_int_t auto_detect_line_endings;
+	php_int_t default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */

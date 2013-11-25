@@ -1056,7 +1056,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	char *res;
-	long reslen;
+	zend_str_size_long reslen;
 	php_stream *stream;
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
