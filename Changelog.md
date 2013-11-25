@@ -3,12 +3,13 @@ ChangeLog for phpdbg
 
 Version 0.2.0 2013-00-00
 ------------------------
+(this needs tidying before release)
 
 1. Added "break delete <id>" command
 2. Added "break opcode <opcode>" command
-3. Added "set" command
+3. Added "set" command - control prompt and console colors
 4. .phpdbginit now searched in (additional) ini dirs
-4. Added source command
+5. Added source command - load additional .phpdbginit script during session
 
 Version 0.1.0 2013-11-23
 ------------------------
