@@ -41,7 +41,7 @@ PHPDBG_SET(prompt) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_SET(breakpoint) /* {{{ */
+PHPDBG_SET(break) /* {{{ */
 {
 	switch (param->type) {
 		case EMPTY_PARAM:
