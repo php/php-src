@@ -95,8 +95,27 @@ PHPDBG_INFO(vars) /* {{{ */
 		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
 	}
 
-	phpdbg_notice("Variables: %d",
-		zend_hash_num_elements(&vars));
+	{
+		zend_op_array *ops = EG(active_op_array);
+		
+		if (ops->function_name) {
+			if (ops->scope) {
+				phpdbg_notice(
+				"Variables in %s::%s() (%d)", ops->scope->name, ops->function_name, zend_hash_num_elements(&vars));
+			} else {
+				phpdbg_notice(
+					"Variables in %s() (%d)", ops->function_name, zend_hash_num_elements(&vars));
+			}
+		} else {
+			if (ops->filename) {
+				phpdbg_notice(
+				"Variables in %s (%d)", ops->filename, zend_hash_num_elements(&vars));
+			} else {
+				phpdbg_notice(
+					"Variables @ %p (%d)", ops, zend_hash_num_elements(&vars));
+			}
+		}
+	}
 
 	if (zend_hash_num_elements(&vars)) {
 		phpdbg_writeln("Address\t\tRefs\tType\t\tVariable");

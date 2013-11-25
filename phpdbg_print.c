@@ -117,12 +117,28 @@ PHPDBG_PRINT(exec) /* {{{ */
 
 PHPDBG_PRINT(stack) /* {{{ */
 {
-    if (EG(in_execution) && EG(active_op_array)) {
-        phpdbg_notice(
-            "Stack in %s", zend_get_executed_filename(TSRMLS_C));
-
+	zend_op_array *ops = EG(active_op_array);
+	
+    if (EG(in_execution) && ops) {
+        if (ops->function_name) {
+			if (ops->scope) {
+				phpdbg_notice(
+				"Stack in %s::%s()", ops->scope->name, ops->function_name);
+			} else {
+				phpdbg_notice(
+					"Stack in %s()", ops->function_name);
+			}
+		} else {
+			if (ops->filename) {
+				phpdbg_notice(
+				"Stack in %s", ops->filename);
+			} else {
+				phpdbg_notice(
+					"Stack @ %p", ops);
+			}
+		}
         phpdbg_print_function_helper(
-        	(zend_function*) EG(active_op_array) TSRMLS_CC);
+        	(zend_function*) ops TSRMLS_CC);
     } else {
         phpdbg_error("Not Executing!");
     }

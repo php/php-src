@@ -1,6 +1,7 @@
 <?php
-if (isset($include))
+if (isset($include)) {
 	include (sprintf("%s/web-bootstrap.php", dirname(__FILE__)));
+}
 
 $stdout = fopen("php://stdout", "w+");
 

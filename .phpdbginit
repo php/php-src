@@ -7,6 +7,9 @@
 # Place initialization commands one per line
 ##########################################################
 # exec sapi/phpdbg/test.php
+# set color prompt white-bold
+# set color notice green
+# set color error red
 
 ##########################################################
 # Embedding code in .phpdbginit
