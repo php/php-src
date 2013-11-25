@@ -66,7 +66,6 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 				phpdbg_notice(
 					"Exporting file breakpoints in %s (%d)", brake->filename, count);
 
-				fprintf(handle, "# Breakpoints in %s (%d)\n", brake->filename, count);
 				do {
 					fprintf(handle, "break file %s:%lu\n", brake->filename, brake->line);
 				} while ((brake = zend_llist_get_next_ex(brakes, &lposition)));

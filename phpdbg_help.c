@@ -221,7 +221,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sbreak [file] test.php:1", phpdbg_get_prompt(TSRMLS_C));
-	phpdbg_writeln("\t%sb [f] test.php:1", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sb [F] test.php:1", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break execution on line 1 of test.php");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak [func] my_function", phpdbg_get_prompt(TSRMLS_C));
