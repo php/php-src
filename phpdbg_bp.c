@@ -89,6 +89,35 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 		}
 	}
 	
+	if (PHPDBG_G(flags) & PHPDBG_HAS_METHOD_BP) {
+		HashTable *class;
+		phpdbg_breakmethod_t *brake;
+		HashPosition mposition;
+		zend_bool noted = 0;
+		
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD];
+		
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void**) &class, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+			noted = 0;
+			
+			for (zend_hash_internal_pointer_reset_ex(class, &mposition);
+				zend_hash_get_current_data_ex(class, (void**) &brake, &mposition) == SUCCESS;
+				zend_hash_move_forward_ex(class, &mposition)) {
+				if (!noted) {
+					phpdbg_notice(
+						"Exporting method breakpoints in %s (%d)", 
+						brake->class_name, zend_hash_num_elements(class));
+					noted = 1;
+				}
+				
+				fprintf(
+					handle, "break %s::%s\n", brake->class_name, brake->func_name);
+			}
+		}
+	}
+	
 	/* export other types here after resolving errors from source command */
 	
 } /* }}} */
