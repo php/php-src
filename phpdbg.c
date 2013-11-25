@@ -78,7 +78,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR", PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -162,6 +162,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(prompt)[0]) {
 		free(PHPDBG_G(prompt)[0]);
 	}
+	
 	if (PHPDBG_G(prompt)[1]) {
 		free(PHPDBG_G(prompt)[1]);
 	}
@@ -249,32 +250,32 @@ static PHP_FUNCTION(phpdbg_color)
 	long element;
 	char *color;
 	zend_uint color_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
 	}
-	
+
 	switch (element) {
 		case PHPDBG_COLOR_NOTICE:
 		case PHPDBG_COLOR_ERROR:
 		case PHPDBG_COLOR_PROMPT:
 			phpdbg_set_color_ex(element, color, color_len TSRMLS_CC);
 		break;
-		
+
 		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
 	}
 } /* }}} */
 
 /* {{{ proto void phpdbg_prompt(string prompt) */
-static PHP_FUNCTION(phpdbg_prompt) 
+static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt;
 	zend_uint prompt_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
 	}
-	
+
 	phpdbg_set_prompt(prompt TSRMLS_CC);
 } /* }}} */
 
@@ -565,19 +566,21 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #endif
 
+phpdbg_main:
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
 #endif
 
-	bp_tmp_file = malloc(L_tmpnam);
-	tmpnam(bp_tmp_file);
-	if (bp_tmp_file == NULL) {
-		phpdbg_error("Unable to create temporary file");
+	if (!cleaning) {
+		bp_tmp_file = malloc(L_tmpnam);
+		tmpnam(bp_tmp_file);
+		if (bp_tmp_file == NULL) {
+			phpdbg_error("Unable to create temporary file");
+		}
 	}
 
-phpdbg_main:
 	ini_entries = NULL;
 	ini_entries_len = 0;
 	ini_ignore = 0;
@@ -858,16 +861,15 @@ phpdbg_out:
 		sapi_shutdown();
 	}
 
+#ifdef ZTS
+	tsrm_shutdown();
+#endif
+
 	if (cleaning) {
 		goto phpdbg_main;
 	}
 
 	free(bp_tmp_file);
-
-#ifdef ZTS
-	/* bugggy */
-	/* tsrm_shutdown(); */
-#endif
 
 	return 0;
 } /* }}} */
