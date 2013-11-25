@@ -162,7 +162,6 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	if (PHPDBG_G(prompt)[0]) {
 		free(PHPDBG_G(prompt)[0]);
 	}
-	
 	if (PHPDBG_G(prompt)[1]) {
 		free(PHPDBG_G(prompt)[1]);
 	}
@@ -565,13 +564,13 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #endif
 
-phpdbg_main:
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
 #endif
 
+phpdbg_main:
 	ini_entries = NULL;
 	ini_entries_len = 0;
 	ini_ignore = 0;
@@ -848,13 +847,14 @@ phpdbg_out:
 		sapi_shutdown();
 	}
 
-#ifdef ZTS
-	tsrm_shutdown();
-#endif
-
 	if (cleaning) {
 		goto phpdbg_main;
 	}
+
+#ifdef ZTS
+	/* bugggy */
+	/* tsrm_shutdown(); */
+#endif
 
 	return 0;
 } /* }}} */
