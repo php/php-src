@@ -234,7 +234,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak [address] 0x7ff68f570e08", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb [a] 0x7ff68f570e08", phpdbg_get_prompt(TSRMLS_C));
-	phpdbg_writeln("\tWill break at the opline with the address provided (addresses are shown during execution)");
+	phpdbg_writeln("\tWill break at the opline with the address provided");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak [lineno] 200", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb [l] 200", phpdbg_get_prompt(TSRMLS_C));
