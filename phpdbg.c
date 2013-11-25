@@ -849,7 +849,6 @@ phpdbg_out:
 	}
 
 #ifdef ZTS
-	/* bugggy */
 	tsrm_shutdown();
 #endif
 
