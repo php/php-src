@@ -458,6 +458,7 @@ PHPDBG_HELP(set) /* {{{ */
 			++set_command;
 		}
 	}
+#ifndef _WIN32
 	phpdbg_notice("Colors");
 	{
 		const phpdbg_color_t *color = phpdbg_get_colors(TSRMLS_C);
@@ -479,6 +480,7 @@ PHPDBG_HELP(set) /* {{{ */
 		}
 	}
 	phpdbg_writeln("The <element> for set color can be \"prompt\", \"notice\", or \"error\"");
+#endif
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */

@@ -63,6 +63,7 @@ PHPDBG_SET(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+#ifndef _WIN32
 PHPDBG_SET(color) /* {{{ */
 {
 	if ((param->type == STR_PARAM) && (input->argc == 3)) {
@@ -104,6 +105,7 @@ usage:
 	}
 	return SUCCESS;
 } /* }}} */
+#endif
 
 PHPDBG_SET(oplog) /* {{{ */
 {
