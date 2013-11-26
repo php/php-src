@@ -165,3 +165,5 @@
 #define ZEND_FAST_CALL                       162
 #define ZEND_FAST_RET                        163
 #define ZEND_RECV_VARIADIC                   164
+#define ZEND_ASSRT_CHECK                     165
+#define ZEND_ASSRT                           166

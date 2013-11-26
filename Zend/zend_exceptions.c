@@ -29,6 +29,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 
+static zend_class_entry *assertion_exception_ce;
 static zend_class_entry *default_exception_ce;
 static zend_class_entry *error_exception_ce;
 static zend_object_handlers default_exception_handlers;
@@ -177,6 +178,12 @@ static zend_object_value zend_default_exception_new(zend_class_entry *class_type
 static zend_object_value zend_error_exception_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	return zend_default_exception_new_ex(class_type, 2 TSRMLS_CC);
+}
+/* }}} */
+
+static zend_object_value zend_assertion_exception_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+{
+	return zend_default_exception_new_ex(class_type, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -717,6 +724,10 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 	error_exception_ce = zend_register_internal_class_ex(&ce, default_exception_ce, NULL TSRMLS_CC);
 	error_exception_ce->create_object = zend_error_exception_new;
 	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
+	
+	INIT_CLASS_ENTRY(ce, "AssertionException", NULL);
+	assertion_exception_ce = zend_register_internal_class_ex(&ce, error_exception_ce, NULL TSRMLS_CC);
+	assertion_exception_ce->create_object = zend_assertion_exception_new;
 }
 /* }}} */
 
@@ -729,6 +740,12 @@ ZEND_API zend_class_entry *zend_exception_get_default(TSRMLS_D) /* {{{ */
 ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D) /* {{{ */
 {
 	return error_exception_ce;
+}
+/* }}} */
+
+ZEND_API zend_class_entry *zend_get_assertion_exception(TSRMLS_D) /* {{{ */
+{
+	return assertion_exception_ce;
 }
 /* }}} */
 

@@ -5464,4 +5464,67 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 	}
 }
 
+ZEND_VM_HANDLER(165, ZEND_ASSRT_CHECK, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (!EG(assertions)) {
+		ZEND_VM_JMP(opline->op1.jmp_addr);
+	} else {
+		ZEND_VM_NEXT_OPCODE();
+	}
+}
+
+ZEND_VM_HANDLER(166, ZEND_ASSRT, ANY, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+	{
+		zval *expression =  GET_OP1_ZVAL_PTR(BP_VAR_R);
+	    zval *message  =  GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zend_bool assertion = 0;
+        
+		/* provide compat with old API */
+		if (OP1_TYPE == IS_CONST && Z_TYPE_P(expression) == IS_STRING) {
+			zval retval; 
+			char *assert_desc = zend_make_compiled_string_description(
+				"assert()'d code" TSRMLS_CC);
+
+			if (zend_eval_stringl(Z_STRVAL_P(expression), Z_STRLEN_P(expression), &retval, assert_desc TSRMLS_CC) == SUCCESS) {
+				convert_to_boolean(&retval);
+                
+				assertion = Z_BVAL(retval);
+                
+				zval_dtor(&retval);
+			}
+
+			efree(assert_desc);
+		} else {
+			assertion = zend_is_true(expression);
+		}
+
+		if (!assertion) {
+			zend_class_entry *ce = zend_get_assertion_exception(TSRMLS_C);
+	        
+			if (Z_TYPE_P(message) == IS_OBJECT &&
+				instanceof_function(Z_OBJCE_P(message), ce TSRMLS_CC)) {
+				zend_throw_exception_object(message TSRMLS_CC);
+			} else {
+				convert_to_string_ex(&message);
+
+				zend_throw_exception(
+					ce, Z_STRVAL_P(message), E_ERROR TSRMLS_CC);
+			}
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	FREE_OP1();
+	FREE_OP2();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

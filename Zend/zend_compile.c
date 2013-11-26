@@ -102,6 +102,25 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
+/* {{{ */
+static inline void zend_copy_statement(zval *target, const char *start_statement, const char *end_statement TSRMLS_DC) {
+    const char *statement = start_statement;
+    size_t statement_length = end_statement - start_statement;
+
+    while (statement && isspace(*statement)) {
+        statement_length--;
+        statement++;
+    }
+
+    while (end_statement && isspace(*end_statement)) {
+        statement_length--;
+        end_statement--;
+    }
+
+    ZVAL_STRINGL(target, statement, statement_length+1, 1);
+}
+/* }}} */
+
 static void zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
 	property_info->name = str_estrndup(property_info->name, property_info->name_length);
@@ -1015,6 +1034,44 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 }
 /* }}} */
 
+void zend_do_assert_begin(znode *token TSRMLS_DC) /* {{{ */
+{
+    token->u.op.opline_num = get_next_op_number(
+        CG(active_op_array));
+    {
+        zend_op *opline = get_next_op(
+            CG(active_op_array) TSRMLS_CC);
+            
+        opline->opcode = ZEND_ASSRT_CHECK;
+    }
+}
+/* }}} */
+
+void zend_do_assert_end(const znode *token, const znode *expression, const znode *reason, const char *start_statement, const char *end_statement TSRMLS_DC) /* {{{ */
+{
+    zend_op *opline = NULL;
+    
+    opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+    opline->opcode = ZEND_ASSRT;
+    SET_NODE(opline->op1, expression);
+    if (reason->op_type == IS_UNUSED) {
+        zval message;
+        
+        zend_copy_statement(
+            &message, start_statement, --end_statement TSRMLS_CC);
+        opline->op2_type = IS_CONST;
+        opline->op2.constant = zend_add_literal(CG(active_op_array), &message TSRMLS_CC);
+        Z_HASH_P(&CONSTANT(opline->op2.constant)) = zend_hash_func(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant)));
+    } else {
+        SET_NODE(opline->op2, reason);
+    }
+
+    opline = &CG(active_op_array)->opcodes[token->u.op.opline_num];
+    opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+    SET_UNUSED(opline->op2);
+}
+
+/* }}} */
 void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;

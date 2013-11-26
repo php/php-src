@@ -198,6 +198,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LINE            "__LINE__ (T_LINE)"
 %token T_FILE            "__FILE__ (T_FILE)"
 %token T_COMMENT         "comment (T_COMMENT)"
+%token T_ASSERT          "assert (T_ASSERT)"
 %token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
 %token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
 %token T_OPEN_TAG_WITH_ECHO "open tag with echo (T_OPEN_TAG_WITH_ECHO)"
@@ -280,6 +281,11 @@ statement:
 	|	T_STRING ':' { zend_do_label(&$1 TSRMLS_CC); }
 ;
 
+assert_optional_reason:
+                           { $$.op_type = IS_UNUSED; }
+    |   ',' expr           { $$ = $2; }
+;
+
 unticked_statement:
 		'{' inner_statement_list '}'
 	|	T_IF parenthesis_expr { zend_do_if_cond(&$2, &$1 TSRMLS_CC); } statement { zend_do_if_after_statement(&$1, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); }
@@ -307,6 +313,7 @@ unticked_statement:
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
+	|   T_ASSERT '(' { zend_do_assert_begin(&$$ TSRMLS_CC); } expr assert_optional_reason ')' ';' { zend_do_assert_end(&$3, &$4, &$5, Z_STRVAL($1.u.constant), (const char*) LANG_SCNG(yy_text) TSRMLS_CC); } 
 	|	T_INLINE_HTML			{ zend_do_echo(&$1 TSRMLS_CC); }
 	|	expr ';'				{ zend_do_free(&$1 TSRMLS_CC); }
 	|	T_UNSET '(' unset_variables ')' ';'

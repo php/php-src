@@ -257,6 +257,8 @@ struct _zend_executor_globals {
 	XPFPA_CW_DATATYPE saved_fpu_cw;
 #endif
 
+    zend_bool assertions;
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

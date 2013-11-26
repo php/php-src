@@ -57,13 +57,16 @@ static void nop_removal(zend_op_array *op_array)
 		/* update JMPs */
 		for (opline = op_array->opcodes; opline<end; opline++) {
 			switch (opline->opcode) {
+#ifdef ZEND_ASSRT_CHECK
+				case ZEND_ASSRT_CHECK:
+#endif
 				case ZEND_JMP:
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 				case ZEND_GOTO:
 #endif
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 				case ZEND_FAST_CALL:
-#endif
+#endif              
 					ZEND_OP1(opline).opline_num -= shiftlist[ZEND_OP1(opline).opline_num];
 					break;
 				case ZEND_JMPZ:

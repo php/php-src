@@ -316,6 +316,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (ZEND_DONE_PASS_TWO(op_array)) {
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
+#ifdef ZEND_ASSRT_CHECK
+					case ZEND_ASSRT_CHECK:
+#endif
 					case ZEND_JMP:
 					case ZEND_GOTO:
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO

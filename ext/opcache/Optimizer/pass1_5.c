@@ -305,6 +305,9 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_FAST_CALL:
 		case ZEND_FAST_RET:
 #endif
+#ifdef ZEND_ASSRT_CHECK
+		case ZEND_ASSRT_CHECK:
+#endif
 		case ZEND_JMP:
 		case ZEND_JMPZNZ:
 		case ZEND_JMPZ:
