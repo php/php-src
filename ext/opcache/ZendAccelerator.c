@@ -2730,6 +2730,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	}
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
 
+	SHM_UNPROTECT();
 	ZCSG(restart_pending) = 1;
 	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
@@ -2740,6 +2741,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	} else {
 		ZCSG(force_restart_time) = 0;
 	}
+	SHM_PROTECT();
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
