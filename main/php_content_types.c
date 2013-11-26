@@ -33,6 +33,19 @@ static sapi_post_entry php_post_entries[] = {
 };
 /* }}} */
 
+static zend_bool populate_raw_post_data(TSRMLS_D)
+{
+	if (!SG(request_info).request_body) {
+		return (zend_bool) 0;
+	}
+
+	if (!PG(always_populate_raw_post_data)) {
+		return (zend_bool) !SG(request_info).post_entry;
+	}
+
+	return (zend_bool) (PG(always_populate_raw_post_data) > 0);
+}
+
 /* {{{ SAPI_POST_READER_FUNC
  */
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
@@ -41,6 +54,17 @@ SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader)
 		if (NULL == SG(request_info).post_entry) {
 			/* no post handler registered, so we just swallow the data */
 			sapi_read_standard_form_data(TSRMLS_C);
+		}
+
+		if (populate_raw_post_data(TSRMLS_C)) {
+			size_t length;
+			char *data = NULL;
+
+			php_stream_rewind(SG(request_info).request_body);
+			length = php_stream_copy_to_mem(SG(request_info).request_body, &data, PHP_STREAM_COPY_ALL, 0);
+			php_stream_rewind(SG(request_info).request_body);
+
+			SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, length);
 		}
 	}
 }

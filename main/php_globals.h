@@ -132,6 +132,7 @@ struct _php_core_globals {
 	zend_bool allow_url_fopen;
 	zend_bool enable_post_data_reading;
 	zend_bool report_zend_debug;
+	long always_populate_raw_post_data;
 
 	int last_error_type;
 	char *last_error_message;

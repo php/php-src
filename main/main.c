@@ -460,6 +460,37 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnChangeAlwaysPopulateRawPostData)
+{
+	signed char *p;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (signed char *) (base+(size_t) mh_arg1);
+
+	*p = zend_atol(new_value, new_value_length);
+	if (new_value_length == 2 && strcasecmp("on", new_value) == 0) {
+		*p = (signed char) 1;
+	}
+	else if (new_value_length == 3 && strcasecmp("yes", new_value) == 0) {
+		*p = (signed char) 1;
+	}
+	else if (new_value_length == 4 && strcasecmp("true", new_value) == 0) {
+		*p = (signed char) 1;
+	}
+	else {
+		*p = (signed char) atoi(new_value);
+	}
+	return SUCCESS;
+}
+/* }}} */
 
 /* Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
@@ -562,6 +593,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("allow_url_fopen",		"1",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_fopen,		php_core_globals,		core_globals)
 	STD_PHP_INI_BOOLEAN("allow_url_include",	"0",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_include,		php_core_globals,		core_globals)
 	STD_PHP_INI_BOOLEAN("enable_post_data_reading",	"1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateBool,	enable_post_data_reading,	php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("always_populate_raw_post_data","0",PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnChangeAlwaysPopulateRawPostData,	always_populate_raw_post_data,	php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("realpath_cache_size",	"16K",		PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_size_limit,	virtual_cwd_globals,	cwd_globals)
 	STD_PHP_INI_ENTRY("realpath_cache_ttl",		"120",		PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_ttl,			virtual_cwd_globals,	cwd_globals)
