@@ -300,6 +300,61 @@ check_numeric:
 #endif
 }
 
+static int replace_var_by_const(zend_op_array *op_array,
+                                zend_op       *opline,
+                                zend_uint      var,
+                                zval          *val TSRMLS_DC)
+{
+	zend_op *end = op_array->opcodes + op_array->last;
+
+	while (opline < end) {
+		if (ZEND_OP1_TYPE(opline) == IS_VAR &&
+			ZEND_OP1(opline).var == var) {
+			switch (opline->opcode) {
+				case ZEND_FETCH_DIM_W:
+				case ZEND_FETCH_DIM_RW:
+				case ZEND_FETCH_DIM_FUNC_ARG:
+				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_ASSIGN_DIM:
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+				case ZEND_SEPARATE:
+#endif
+					return 0;
+				case ZEND_SEND_VAR_NO_REF:
+					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
+						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
+							return 0;
+						}
+						opline->extended_value = ZEND_DO_FCALL;
+					} else {
+						opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+					}
+					opline->opcode = ZEND_SEND_VAL;
+					break;
+				default:
+					break;
+			} 
+			update_op1_const(op_array, opline, val TSRMLS_CC);
+			break;
+		}
+		
+		if (ZEND_OP2_TYPE(opline) == IS_VAR &&
+			ZEND_OP2(opline).var == var) {
+			switch (opline->opcode) {
+				case ZEND_ASSIGN_REF:
+					return 0;
+				default:
+					break;
+			}
+			update_op2_const(op_array, opline, val TSRMLS_CC);
+			break;
+		}
+		opline++;
+	}
+
+	return 1;
+}
+
 static void replace_tmp_by_const(zend_op_array *op_array,
                                  zend_op       *opline,
                                  zend_uint      var,
@@ -355,6 +410,7 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - convert non-numeric constants to numeric constants in numeric operators
 	 * - optimize constant conditional JMPs
 	 * - optimize static BRKs and CONTs
+	 * - pre-evaluate constant function calls
 	 */
 #include "Optimizer/pass2.c"
 
