@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Fixed bug #66124 (mysqli under mysqlnd loses precision when bind_param
     with 'i'). (Andrey)
+  . Fixed bug #66141 (mysqlnd quote function is wrong with NO_BACKSLASH_ESCAPES
+    after failed query). (Andrey)
 
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
