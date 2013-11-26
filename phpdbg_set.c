@@ -53,7 +53,7 @@ PHPDBG_SET(break) /* {{{ */
 			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
 				PHPDBG_G(flags) |= PHPDBG_IS_BP_ENABLED;
 			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
-				PHPDBG_G(flags) ^= PHPDBG_IS_BP_ENABLED;
+				PHPDBG_G(flags) &= ~PHPDBG_IS_BP_ENABLED;
 			}
 			break;
 

@@ -44,6 +44,10 @@
 #if defined(_WIN32) && !defined(__MINGW32__)
 # include <windows.h>
 # include "config.w32.h"
+# undef  strcasecmp
+# undef  strncasecmp
+# define strcasecmp _stricmp 
+# define strncasecmp _strnicmp 
 #else
 # include "php_config.h"
 #endif
