@@ -59,8 +59,8 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 			zend_hash_move_forward_ex(table, &position)) {
 
 			zend_llist_position lposition;
-            phpdbg_breakfile_t *brake;
-			zend_ulong count = zend_llist_count(brakes);
+			phpdbg_breakfile_t *brake;
+			int count = zend_llist_count(brakes);
 
 			if ((brake = zend_llist_get_first_ex(brakes, &lposition))) {
 				phpdbg_notice(
@@ -134,8 +134,22 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 		}
 	}
 
-	/* export other types here after resolving errors from source command */
+	if (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP) {
+		phpdbg_breakcond_t *brake;
 
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_COND];
+
+		phpdbg_notice(
+			"Exporting conditional breakpoints (%d)", zend_hash_num_elements(table));
+
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void**) &brake, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+
+			fprintf(
+				handle, "break on %s\n", Z_STRVAL(brake->code));
+		}
+	}
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
