@@ -70,14 +70,14 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_execute = phpdbg_execute_ex;
 #endif
 
-	REGISTER_LONG_CONSTANT("PHPDBG_FILE",    FILE_PARAM, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHPDBG_METHOD",  METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_FILE",   FILE_PARAM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_METHOD", METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHPDBG_FUNC",    STR_PARAM, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_FUNC",   STR_PARAM, CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_PROMPT", PHPDBG_COLOR_PROMPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_NOTICE", PHPDBG_COLOR_NOTICE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR", PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PHPDBG_COLOR_ERROR",  PHPDBG_COLOR_ERROR, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 } /* }}} */
@@ -427,33 +427,33 @@ static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 /* {{{ sapi_module_struct phpdbg_sapi_module
 */
 static sapi_module_struct phpdbg_sapi_module = {
-	"phpdbg",						/* name */
-	"phpdbg",					    /* pretty name */
+	"phpdbg",                       /* name */
+	"phpdbg",                       /* pretty name */
 
-	php_sapi_phpdbg_module_startup,	/* startup */
+	php_sapi_phpdbg_module_startup, /* startup */
 	php_module_shutdown_wrapper,    /* shutdown */
 
-	NULL,		                    /* activate */
-	php_sapi_phpdbg_deactivate,		/* deactivate */
+	NULL,                           /* activate */
+	php_sapi_phpdbg_deactivate,     /* deactivate */
 
-	php_sapi_phpdbg_ub_write,		/* unbuffered write */
-	php_sapi_phpdbg_flush,			/* flush */
-	NULL,							/* get uid */
-	NULL,				            /* getenv */
+	php_sapi_phpdbg_ub_write,       /* unbuffered write */
+	php_sapi_phpdbg_flush,          /* flush */
+	NULL,                           /* get uid */
+	NULL,                           /* getenv */
 
-	php_error,						/* error handler */
+	php_error,                      /* error handler */
 
-	php_sapi_phpdbg_header_handler,	/* header handler */
-	php_sapi_phpdbg_send_headers,	/* send headers handler */
-	php_sapi_phpdbg_send_header,	/* send header handler */
+	php_sapi_phpdbg_header_handler, /* header handler */
+	php_sapi_phpdbg_send_headers,   /* send headers handler */
+	php_sapi_phpdbg_send_header,    /* send header handler */
 
-	NULL,				            /* read POST data */
+	NULL,                           /* read POST data */
 	php_sapi_phpdbg_read_cookies,   /* read Cookies */
 
-	php_sapi_phpdbg_register_vars,	/* register server variables */
-	php_sapi_phpdbg_log_message,	/* Log message */
-	NULL,							/* Get request time */
-	NULL,							/* Child terminate */
+	php_sapi_phpdbg_register_vars,  /* register server variables */
+	php_sapi_phpdbg_log_message,    /* Log message */
+	NULL,                           /* Get request time */
+	NULL,                           /* Child terminate */
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
@@ -487,11 +487,11 @@ const char phpdbg_ini_hardcoded[] =
 "max_input_time=-1\n\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
-#define INI_DEFAULT(name,value)\
-	Z_SET_REFCOUNT(tmp, 0);\
-Z_UNSET_ISREF(tmp);	\
-ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0);\
-zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);\
+#define INI_DEFAULT(name, value) \
+        Z_SET_REFCOUNT(tmp, 0); \
+        Z_UNSET_ISREF(tmp); \
+        ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0); \
+        zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);
 
 void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 {

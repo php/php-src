@@ -33,14 +33,14 @@ PHPDBG_INFO(vars);
 PHPDBG_INFO(literal);
 
 static const phpdbg_command_t phpdbg_info_commands[] = {
-    PHPDBG_COMMAND_D_EX(break,		 "show breakpoints",                'b', info_break,   NULL, 0),
-    PHPDBG_COMMAND_D_EX(files,   	 "lists included files",  			'F', info_files,   NULL, 0),
-    PHPDBG_COMMAND_D_EX(classes, 	 "lists loaded classes",  			'c', info_classes, NULL, 0),
-    PHPDBG_COMMAND_D_EX(funcs,   	 "lists loaded classes",  			'f', info_funcs,   NULL, 0),
-    PHPDBG_COMMAND_D_EX(error,   	 "show the last error",   			'e', info_error,   NULL, 0),
-    PHPDBG_COMMAND_D_EX(vars,    	 "show active variables", 			'v', info_vars,    NULL, 0),
-    PHPDBG_COMMAND_D_EX(literal,	 "show active literal constants", 	'l', info_literal, NULL, 0),
-    PHPDBG_END_COMMAND
+	PHPDBG_COMMAND_D_EX(break,     "show breakpoints",             'b', info_break,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(files,    "lists included files",          'F', info_files,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(classes,  "lists loaded classes",          'c', info_classes, NULL, 0),
+	PHPDBG_COMMAND_D_EX(funcs,    "lists loaded classes",          'f', info_funcs,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(error,    "show the last error",           'e', info_error,   NULL, 0),
+	PHPDBG_COMMAND_D_EX(vars,     "show active variables",         'v', info_vars,    NULL, 0),
+	PHPDBG_COMMAND_D_EX(literal,  "show active literal constants", 'l', info_literal, NULL, 0),
+	PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_INFO_H */

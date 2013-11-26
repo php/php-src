@@ -61,9 +61,9 @@ PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUT
 #define phpdbg_log_ex(out, fmt, ...)        phpdbg_print(P_LOG     TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 
 #if PHPDBG_DEBUG
-#   define phpdbg_debug(fmt, ...)           phpdbg_print(P_LOG   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDERR], fmt, ##__VA_ARGS__)
+#	define phpdbg_debug(fmt, ...) phpdbg_print(P_LOG   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDERR], fmt, ##__VA_ARGS__)
 #else
-#   define phpdbg_debug(fmt, ...)
+#	define phpdbg_debug(fmt, ...)
 #endif
 
 /* {{{ For writing blank lines */
@@ -89,9 +89,9 @@ PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUT
 #define PHPDBG_COLORS			3
 
 typedef struct _phpdbg_color_t {
-	char			*name;
-	size_t			name_length;
-	const char		code[PHPDBG_COLOR_LEN];
+	char       *name;
+	size_t      name_length;
+	const char  code[PHPDBG_COLOR_LEN];
 } phpdbg_color_t;
 
 PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC);

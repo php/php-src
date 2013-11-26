@@ -104,10 +104,10 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_JMP_SET_VAR
 	case ZEND_JMP_SET_VAR:
 #endif
-        	decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-      		asprintf(
-      			&decode[2], "J%lu", op->op2.jmp_addr - ops->opcodes);
-      	goto result;
+		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+		asprintf(
+			&decode[2], "J%lu", op->op2.jmp_addr - ops->opcodes);
+	goto result;
 
 	case ZEND_RECV_INIT:
 		goto result;
@@ -139,7 +139,7 @@ format:
 
 void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
 {
-    /* force out a line while stepping so the user knows what is happening */
+	/* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
 		(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
 		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ||
@@ -148,9 +148,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		zend_op *opline = execute_data->opline;
 		char *decode = phpdbg_decode_opline(execute_data->op_array, opline, vars TSRMLS_CC);
 
-		if (ignore_flags ||
-			(!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ||
-			(PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
 			phpdbg_notice("L%-5u %16p %-30s %s %s",
 			   opline->lineno,
@@ -158,7 +156,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			   phpdbg_decode_opcode(opline->opcode),
 			   decode,
 			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
-        }
+		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
 			phpdbg_log_ex(PHPDBG_G(oplog), "L%-5u %16p %-30s %s %s",
@@ -172,7 +170,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		if (decode) {
 			free(decode);
 		}
-    }
+	}
 } /* }}} */
 
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
@@ -344,7 +342,7 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_YIELD);
 #endif
 #ifdef ZEND_GENERATOR_RETURN
-        CASE(ZEND_GENERATOR_RETURN);
+		CASE(ZEND_GENERATOR_RETURN);
 #endif
 #ifdef ZEND_FAST_CALL
 		CASE(ZEND_FAST_CALL);
@@ -357,6 +355,6 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 #endif
 		CASE(ZEND_OP_DATA);
 		default:
-		    return "UNKNOWN";
+			return "UNKNOWN";
 	}
 } /* }}} */

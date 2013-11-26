@@ -30,11 +30,11 @@ PHPDBG_SET(oplog);
 PHPDBG_SET(break);
 
 static const phpdbg_command_t phpdbg_set_commands[] = {
-    PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",             		   'p', set_prompt,       NULL, 0),
-    PHPDBG_COMMAND_D_EX(color, 		  "usage: set color  <element> <color>",          	   'c', set_color,        NULL, 1),
-    PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          			   'O', set_oplog,        NULL, 0),
-    PHPDBG_COMMAND_D_EX(break,        "usage: set break  <on|off>",       			       'b', set_break,        NULL, 0),
-    PHPDBG_END_COMMAND
+	PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",          'p', set_prompt,       NULL, 0),
+	PHPDBG_COMMAND_D_EX(color,        "usage: set color  <element> <color>", 'c', set_color,        NULL, 1),
+	PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          'O', set_oplog,        NULL, 0),
+	PHPDBG_COMMAND_D_EX(break,        "usage: set break  <on|off>",       	 'b', set_break,        NULL, 0),
+	PHPDBG_END_COMMAND
 };
 
 #endif /* PHPDBG_SET_H */

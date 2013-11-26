@@ -34,39 +34,39 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 /* {{{ color structures */
 const static phpdbg_color_t colors[] = {
-	PHPDBG_COLOR_D("none",	 	 	"0;0"),
+	PHPDBG_COLOR_D("none",             "0;0"),
 
-	PHPDBG_COLOR_D("white",		 		"0;64"),
-	PHPDBG_COLOR_D("white-bold", 		"1;64"),
-	PHPDBG_COLOR_D("white-underline", 	"4;64"),
-	PHPDBG_COLOR_D("red",	 	 		"0;31"),
-	PHPDBG_COLOR_D("red-bold",	 		"1;31"),
-	PHPDBG_COLOR_D("red-underline",		"4;31"),
-	PHPDBG_COLOR_D("green",	 			"0;32"),
-	PHPDBG_COLOR_D("green-bold", 		"1;32"),
-	PHPDBG_COLOR_D("green-underline", 	"4;32"),
-	PHPDBG_COLOR_D("yellow",        	"0;33"),
-	PHPDBG_COLOR_D("yellow-bold",   	"1;33"),
-	PHPDBG_COLOR_D("yellow-underline",  "4;33"),
-	PHPDBG_COLOR_D("blue",   	 		"0;34"),
-	PHPDBG_COLOR_D("blue-bold",  		"1;34"),
-	PHPDBG_COLOR_D("blue-underline",  	"4;34"),
-	PHPDBG_COLOR_D("purple", 	 		"0;35"),
-	PHPDBG_COLOR_D("purple-bold",		"1;35"),
-	PHPDBG_COLOR_D("purple-underline",	"4;35"),
-	PHPDBG_COLOR_D("cyan",   	 		"0;36"),
-	PHPDBG_COLOR_D("cyan-bold",   		"1;36"),
-	PHPDBG_COLOR_D("cyan-underline",   	"4;36"),
-	PHPDBG_COLOR_D("black",   	 		"0;30"),
-	PHPDBG_COLOR_D("black-bold",   		"1;30"),
-	PHPDBG_COLOR_D("black-underline",   "4;30"),
+	PHPDBG_COLOR_D("white",            "0;64"),
+	PHPDBG_COLOR_D("white-bold",       "1;64"),
+	PHPDBG_COLOR_D("white-underline",  "4;64"),
+	PHPDBG_COLOR_D("red",              "0;31"),
+	PHPDBG_COLOR_D("red-bold",         "1;31"),
+	PHPDBG_COLOR_D("red-underline",    "4;31"),
+	PHPDBG_COLOR_D("green",            "0;32"),
+	PHPDBG_COLOR_D("green-bold",       "1;32"),
+	PHPDBG_COLOR_D("green-underline",  "4;32"),
+	PHPDBG_COLOR_D("yellow",           "0;33"),
+	PHPDBG_COLOR_D("yellow-bold",      "1;33"),
+	PHPDBG_COLOR_D("yellow-underline", "4;33"),
+	PHPDBG_COLOR_D("blue",             "0;34"),
+	PHPDBG_COLOR_D("blue-bold",        "1;34"),
+	PHPDBG_COLOR_D("blue-underline",   "4;34"),
+	PHPDBG_COLOR_D("purple",           "0;35"),
+	PHPDBG_COLOR_D("purple-bold",      "1;35"),
+	PHPDBG_COLOR_D("purple-underline", "4;35"),
+	PHPDBG_COLOR_D("cyan",             "0;36"),
+	PHPDBG_COLOR_D("cyan-bold",        "1;36"),
+	PHPDBG_COLOR_D("cyan-underline",   "4;36"),
+	PHPDBG_COLOR_D("black",            "0;30"),
+	PHPDBG_COLOR_D("black-bold",       "1;30"),
+	PHPDBG_COLOR_D("black-underline",  "4;30"),
 	PHPDBG_COLOR_END
 }; /* }}} */
 
 PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 {
-    if (!str)
-        return 0;
+	if (!str)
+		return 0;
 
 	for (; *str; str++) {
 		if (isspace(*str) || *str == '-') {
@@ -79,8 +79,8 @@ PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 
 PHPDBG_API int phpdbg_is_empty(const char *str) /* {{{ */
 {
-    if (!str)
-        return 1;
+	if (!str)
+		return 1;
 
 	for (; *str; str++) {
 		if (isspace(*str)) {
@@ -100,8 +100,8 @@ PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class,
 {
 	char *sep = NULL;
 
-    if (strstr(str, " ") != NULL)
-	    return 0;
+	if (strstr(str, " ") != NULL)
+		return 0;
 
 	sep = strstr(str, "::");
 
@@ -110,13 +110,12 @@ PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class,
 	}
 
 	if (class != NULL) {
-	    *class = estrndup(str, sep - str);
-	    (*class)[sep - str] = 0;
+		*class = estrndup(str, sep - str);
+		(*class)[sep - str] = 0;
 	}
 
 	if (method != NULL) {
-	    *method = estrndup(
-	        sep+2, str + len - (sep + 2));
+		*method = estrndup(sep+2, str + len - (sep + 2));
 	}
 
 	return 1;
@@ -176,17 +175,17 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 
 PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
 {
-    int rc = 0;
+	int rc = 0;
 	char *buffer = NULL;
 	va_list args;
 
 	if (format != NULL && strlen(format) > 0L) {
-	    va_start(args, format);
-	    vspprintf(&buffer, 0, format, args);
-	    va_end(args);
+		va_start(args, format);
+		vspprintf(&buffer, 0, format, args);
+		va_end(args);
 	}
 
-    /* TODO(anyone) colours */
+	/* TODO(anyone) colours */
 
 	switch (type) {
 		case P_ERROR:
@@ -210,25 +209,30 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 		break;
 
 		case P_WRITELN: {
-		    if (buffer) {
-			    rc = fprintf(fp, "%s\n", buffer);
+			if (buffer) {
+				rc = fprintf(fp, "%s\n", buffer);
 			} else {
-			    rc = fprintf(fp, "\n");
+				rc = fprintf(fp, "\n");
 			}
 		} break;
 
-		case P_WRITE: if (buffer) {
-		    rc = fprintf(fp, "%s", buffer);
-		} break;
+		case P_WRITE:
+			if (buffer) {
+				rc = fprintf(fp, "%s", buffer);
+			}
+		break;
 
 		/* no formatting on logging output */
-	    case P_LOG: if (buffer) {
-	        struct timeval tp;
-	        if (gettimeofday(&tp, NULL) == SUCCESS) {
-	            rc = fprintf(
-	                fp, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
-	        } else rc = FAILURE;
-	    } break;
+		case P_LOG:
+			if (buffer) {
+				struct timeval tp;
+				if (gettimeofday(&tp, NULL) == SUCCESS) {
+					rc = fprintf(fp, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
+				} else {
+					rc = FAILURE;
+				}
+			}
+			break;
 	}
 
 	if (buffer) {

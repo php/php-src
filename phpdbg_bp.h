@@ -28,8 +28,8 @@ typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
  */
 typedef struct _phpdbg_breakfile_t {
 	const char *filename;
-	long line;
-	int id;
+	long        line;
+	int         id;
 } phpdbg_breakfile_t;
 
 /**
@@ -37,36 +37,36 @@ typedef struct _phpdbg_breakfile_t {
  */
 typedef struct _phpdbg_breaksymbol_t {
 	const char *symbol;
-	int id;
+	int         id;
 } phpdbg_breaksymbol_t;
 
 /**
  * Breakpoint method based representation
  */
 typedef struct _phpdbg_breakmethod_t {
-    const char *class_name;
-    size_t      class_len;
-    const char *func_name;
-    size_t      func_len;
-    int id;
+	const char *class_name;
+	size_t      class_len;
+	const char *func_name;
+	size_t      func_len;
+	int         id;
 } phpdbg_breakmethod_t;
 
 /**
  * Breakpoint opline based representation
  */
 typedef struct _phpdbg_breakline_t {
-    const char *name;
-    zend_ulong opline;
-    int id;
+	const char *name;
+	zend_ulong  opline;
+	int         id;
 } phpdbg_breakline_t;
 
 /**
  * Breakpoint opcode based representation
  */
 typedef struct _phpdbg_breakop_t {
-	zend_ulong      hash;
+	zend_ulong  hash;
 	const char *name;
-	int id;
+	int         id;
 } phpdbg_breakop_t;
 
 /**
@@ -75,8 +75,8 @@ typedef struct _phpdbg_breakop_t {
 typedef struct _phpdbg_breakcond_t {
 	zend_ulong      hash;
 	zval            code;
-	zend_op_array   *ops;
-	int id;
+	zend_op_array  *ops;
+	int             id;
 } phpdbg_breakcond_t;
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
