@@ -643,8 +643,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode != ZEND_FREE
 			) {
 			zend_op *src = VAR_SOURCE(opline->op1);
+			zval c = ZEND_OP1_LITERAL(src);
 			VAR_UNSET(opline->op1);
-			update_op1_const(op_array, opline, &ZEND_OP1_LITERAL(src) TSRMLS_CC);
+			zval_copy_ctor(&c);
+			update_op1_const(op_array, opline, &c TSRMLS_CC);
+			literal_dtor(&ZEND_OP1_LITERAL(src));
 			MAKE_NOP(src);
 		}
 
@@ -654,8 +657,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op2)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op2)) == IS_CONST) {
 			zend_op *src = VAR_SOURCE(opline->op2);
+			zval c = ZEND_OP1_LITERAL(src);
 			VAR_UNSET(opline->op2);
-			update_op2_const(op_array, opline, &ZEND_OP1_LITERAL(src) TSRMLS_CC);
+			zval_copy_ctor(&c);
+			update_op2_const(op_array, opline, &c TSRMLS_CC);
+			literal_dtor(&ZEND_OP1_LITERAL(src));
 			MAKE_NOP(src);
 		}
 
