@@ -203,6 +203,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char*
     HashTable class_breaks, *class_table;
     size_t class_len = strlen(class_name);
     size_t func_len = strlen(func_name);
+    char *lcname = zend_str_tolower_dup(func_name, func_len);	
 
     if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], class_name,
 		class_len, (void**)&class_table) != SUCCESS) {
@@ -224,7 +225,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char*
         new_break.func_len = func_len;
         new_break.id = PHPDBG_G(bp_count)++;
 
-        zend_hash_update(class_table, func_name, func_len,
+        zend_hash_update(class_table, lcname, func_len,
 			&new_break, sizeof(phpdbg_breakmethod_t), NULL);
 
         phpdbg_notice("Breakpoint #%d added at %s::%s",
@@ -232,6 +233,8 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char*
     } else {
 		phpdbg_notice("Breakpoint exists at %s::%s", class_name, func_name);
     }
+    
+    efree(lcname);
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
@@ -408,9 +411,6 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-/*
-* @TODO(anyone) this is case sensitive
-*/
 int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 {
 	HashTable *class_table;
@@ -418,17 +418,22 @@ int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 
 	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], ops->scope->name,
 		ops->scope->name_length, (void**)&class_table) == SUCCESS) {
+		char *lcname = zend_str_tolower_dup(ops->function_name, strlen(ops->function_name));
+		size_t lcname_len = strlen(lcname);
+		
 		if (zend_hash_find(
 		        class_table,
-		        ops->function_name,
-		        strlen(ops->function_name), (void**)&bp) == SUCCESS) {
-
+		        lcname,
+		        lcname_len, (void**)&bp) == SUCCESS) {
+			efree(lcname);
 		    phpdbg_notice("Breakpoint #%d in %s::%s() at %s:%u",
 		        bp->id, bp->class_name, bp->func_name,
 			    zend_get_executed_filename(TSRMLS_C),
 			    zend_get_executed_lineno(TSRMLS_C));
 			return SUCCESS;
 		}
+		
+		efree(lcname);
 	}
 
 	return FAILURE;
