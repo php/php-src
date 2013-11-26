@@ -229,6 +229,7 @@ typedef struct _zend_accel_directives {
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	unsigned long  revalidate_freq;
+	unsigned long  file_update_protection;
 	char          *error_log;
 #ifdef ZEND_WIN32
 	char          *mmap_base;
