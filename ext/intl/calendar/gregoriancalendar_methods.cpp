@@ -75,7 +75,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		}
 	}
 	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
+			"iii|iii", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
 			&largs[5]) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_create_instance: bad arguments", 0 TSRMLS_CC);
