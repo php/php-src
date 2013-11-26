@@ -23,60 +23,73 @@
 /* {{{ */
 typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 
+/* {{{ breakpoint base */
+typedef struct _phpdbg_breakbase_t {
+	int			id;
+	zend_uchar  type;
+	const char  *name;
+} phpdbg_breakbase_t; /* }}} */
+
 /**
  * Breakpoint file-based representation
  */
 typedef struct _phpdbg_breakfile_t {
+	int         id;
+	zend_uchar  type;
 	const char *filename;
 	long        line;
-	int         id;
 } phpdbg_breakfile_t;
 
 /**
  * Breakpoint symbol-based representation
  */
 typedef struct _phpdbg_breaksymbol_t {
-	const char *symbol;
 	int         id;
+	zend_uchar  type;
+	const char *symbol;
 } phpdbg_breaksymbol_t;
 
 /**
  * Breakpoint method based representation
  */
 typedef struct _phpdbg_breakmethod_t {
+	int         id;
+	zend_uchar  type;
 	const char *class_name;
 	size_t      class_len;
 	const char *func_name;
 	size_t      func_len;
-	int         id;
 } phpdbg_breakmethod_t;
 
 /**
  * Breakpoint opline based representation
  */
 typedef struct _phpdbg_breakline_t {
+	int         id;
+	zend_uchar  type;
 	const char *name;
 	zend_ulong  opline;
-	int         id;
 } phpdbg_breakline_t;
 
 /**
  * Breakpoint opcode based representation
  */
 typedef struct _phpdbg_breakop_t {
-	zend_ulong  hash;
-	const char *name;
 	int         id;
+	zend_uchar  type;
+	const char *name;
+	zend_ulong  hash;
 } phpdbg_breakop_t;
 
 /**
  * Breakpoint condition based representation
  */
 typedef struct _phpdbg_breakcond_t {
+	int             id;
+	zend_uchar  	type;
 	zend_ulong      hash;
 	zval            code;
 	zend_op_array  *ops;
-	int             id;
 } phpdbg_breakcond_t;
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);

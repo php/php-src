@@ -79,6 +79,10 @@
 #define PHPDBG_FINISH 4
 #define PHPDBG_LEAVE  5
 
+/*
+ BEGIN: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
+*/
+
 /* {{{ tables */
 #define PHPDBG_BREAK_FILE       0
 #define PHPDBG_BREAK_SYM        1
@@ -86,7 +90,8 @@
 #define PHPDBG_BREAK_METHOD     3
 #define PHPDBG_BREAK_COND       4
 #define PHPDBG_BREAK_OPCODE     5
-#define PHPDBG_BREAK_TABLES     6 /* }}} */
+#define PHPDBG_BREAK_MAP		6
+#define PHPDBG_BREAK_TABLES     7 /* }}} */
 
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP      (1<<1)
@@ -96,6 +101,10 @@
 #define PHPDBG_HAS_COND_BP      (1<<5)
 #define PHPDBG_HAS_OPCODE_BP    (1<<6)
 #define PHPDBG_BP_MASK          (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP|PHPDBG_HAS_OPCODE_BP)
+
+/*
+ END: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
+*/
 
 #define PHPDBG_IN_COND_BP       (1<<7)
 #define PHPDBG_IN_EVAL          (1<<8)
@@ -148,7 +157,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_op_array *ops;                 	     /* op_array */
 	zval *retval;                                /* return value */
 	int bp_count;                                /* breakpoint count */
-	int del_bp_num;                              /* breakpoint to delete */
 	int vmret;                                   /* return from last opcode handler execution */
 
 	FILE *oplog;                                 /* opline log */

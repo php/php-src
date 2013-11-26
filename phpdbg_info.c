@@ -73,6 +73,11 @@ PHPDBG_INFO(vars) /* {{{ */
 	char *var;
 	zval **data;
 
+	if (!EG(active_op_array)) {
+		phpdbg_error("No active op array!");
+		return SUCCESS;
+	}
+
 	if (!EG(active_symbol_table)) {
 		zend_rebuild_symbol_table(TSRMLS_C);
 
