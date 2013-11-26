@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     string). (Laruence)
 
 - OPCache
+  . Fixed bug #66176 (Invalid constant substitution). (Dmitry)
   . Fixed bug #65915 (Inconsistent results with require return value). (Dmitry)
   . Fixed bug #65559 (Opcache: cache not cleared if changes occur while
     running). (Dmitry)

@@ -219,15 +219,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				EG(in_execution) = 1;
 				EG(active_op_array) = op_array;
 				if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
+					zend_uint tv = ZEND_RESULT(opline).var;
+
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
-					ZEND_OP1_TYPE(opline) = IS_CONST;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-					opline->op1.constant = zend_optimizer_add_literal(op_array, &offset TSRMLS_CC);
-#else
-					ZEND_OP1_LITERAL(opline) = offset;
-#endif
-					SET_UNUSED(opline->op2);
-					opline->opcode = ZEND_QM_ASSIGN;
+					MAKE_NOP(opline);
+					replace_tmp_by_const(op_array, opline, tv, &offset TSRMLS_CC);
 				}
 				EG(active_op_array) = orig_op_array;
 				EG(in_execution) = orig_in_execution;
@@ -238,20 +234,15 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
 				/* substitute persistent constants */
+				zend_uint tv = ZEND_RESULT(opline).var;
 				zval c;
 
 				if (!zend_get_persistent_constant(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
 					break;
 				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
-				ZEND_OP1_TYPE(opline) = IS_CONST;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-				opline->op1.constant = zend_optimizer_add_literal(op_array, &c TSRMLS_CC);
-#else
-				ZEND_OP1_LITERAL(opline) = c;
-#endif
-				SET_UNUSED(opline->op2);
-				opline->opcode = ZEND_QM_ASSIGN;
+				MAKE_NOP(opline);
+				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
 			}
 			break;
 
