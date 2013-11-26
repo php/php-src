@@ -160,7 +160,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 		char *scan_dir = getenv("PHP_INI_SCAN_DIR");
 		int i;
 
-		phpdbg_try_file_init(ZEND_STRS(PHP_CONFIG_FILE_PATH "/" PHPDBG_INIT_FILENAME) - 1 , 0 TSRMLS_CC);
+		phpdbg_try_file_init(PHPDBG_STRL(PHP_CONFIG_FILE_PATH "/" PHPDBG_INIT_FILENAME), 0 TSRMLS_CC);
 
 		if (!scan_dir) {
 			scan_dir = PHP_CONFIG_FILE_SCAN_DIR;
@@ -185,7 +185,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 			scan_dir += i + 1;
 		}
 
-		phpdbg_try_file_init(ZEND_STRS(PHPDBG_INIT_FILENAME) - 1, 0 TSRMLS_CC);
+		phpdbg_try_file_init(PHPDBG_STRL(PHPDBG_INIT_FILENAME), 0 TSRMLS_CC);
 	} else {
 		phpdbg_try_file_init(init_file, init_file_len, 1 TSRMLS_CC);
 	}
