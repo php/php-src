@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 
 - OPCache
   . Fixed bug #65915 (Inconsistent results with require return value). (Dmitry)
+  . Fixed bug #65559 (Opcache: cache not cleared if changes occur while
+    running). (Dmitry)
 
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)

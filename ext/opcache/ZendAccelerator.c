@@ -1331,7 +1331,9 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 #endif
 
-	if (ZCG(accel_directives).validate_timestamps || ZCG(accel_directives).max_file_size > 0) {
+	if (ZCG(accel_directives).validate_timestamps ||
+	    ZCG(accel_directives).file_update_protection ||
+	    ZCG(accel_directives).max_file_size > 0) {
 		size_t size = 0;
 
 		/* Obtain the file timestamps, *before* actually compiling them,
@@ -1343,6 +1345,13 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 *  we won't cache it
 		 */
 		if (timestamp == 0) {
+			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
+			return NULL;
+		}
+
+		/* check if file is too new (may be it's not written completely yet) */
+		if (ZCG(accel_directives).file_update_protection &&
+		    (ZCG(request_time) - ZCG(accel_directives).file_update_protection < timestamp)) {
 			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 			return NULL;
 		}

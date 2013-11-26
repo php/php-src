@@ -241,6 +241,7 @@ $ini_overwrites = array(
 		'precision=14',
 		'memory_limit=128M',
 		'opcache.fast_shutdown=0',
+		'opcache.file_update_protection=0',
 	);
 
 function write_information($show_html)
