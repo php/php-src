@@ -644,7 +644,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			) {
 			zend_op *src = VAR_SOURCE(opline->op1);
 			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, src->op1);
+			update_op1_const(op_array, opline, &ZEND_OP1_LITERAL(src) TSRMLS_CC);
 			MAKE_NOP(src);
 		}
 
@@ -655,50 +655,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op2)) == IS_CONST) {
 			zend_op *src = VAR_SOURCE(opline->op2);
 			VAR_UNSET(opline->op2);
-			COPY_NODE(opline->op2, src->op1);
+			update_op2_const(op_array, opline, &ZEND_OP1_LITERAL(src) TSRMLS_CC);
 			MAKE_NOP(src);
-
-#if ZEND_EXTENSION_API_NO >= PHP_5_4_X_API_NO
-			/* numeric string constants used as array indeces have to be
-			   converted to long at compile time */
-			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT ||
-			    opline->opcode == ZEND_INIT_ARRAY ||
-			    opline->opcode == ZEND_UNSET_DIM ||
-			    opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_DIM_W ||
-			    opline->opcode == ZEND_FETCH_DIM_RW ||
-			    opline->opcode == ZEND_FETCH_DIM_IS ||
-			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
-			    opline->opcode == ZEND_FETCH_DIM_UNSET ||
-			    opline->opcode == ZEND_FETCH_DIM_TMP_VAR ||
-			    (opline->opcode == ZEND_OP_DATA &&
-			     ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-			      ((opline-1)->extended_value == ZEND_ASSIGN_DIM &&
-			       ((opline-1)->opcode == ZEND_ASSIGN_ADD ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-			        (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-			        (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-			        (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SL ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SR ||
-			        (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_XOR))))) {
-
-				if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-					ulong index;
-					int numeric = 0;
-
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline))+1, index, numeric = 1);
-					if (numeric) {
-						zval_dtor(&ZEND_OP2_LITERAL(opline));
-						ZVAL_LONG(&ZEND_OP2_LITERAL(opline), index);
-		        	}
-				}
-			}
-#endif
 		}
 
 		/* T = PRINT(X), F(T) => ECHO(X), F(1) */

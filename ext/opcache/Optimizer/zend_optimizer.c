@@ -220,6 +220,49 @@ static void update_op2_const(zend_op_array *op_array,
 					op_array->last_cache_slot += 2;
 				}
 				break;
+#if ZEND_EXTENSION_API_NO >= PHP_5_4_X_API_NO
+			case ZEND_OP_DATA:
+				if ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
+				    ((opline-1)->extended_value == ZEND_ASSIGN_DIM &&
+				     ((opline-1)->opcode == ZEND_ASSIGN_ADD ||
+				     (opline-1)->opcode == ZEND_ASSIGN_SUB ||
+				     (opline-1)->opcode == ZEND_ASSIGN_MUL ||
+				     (opline-1)->opcode == ZEND_ASSIGN_DIV ||
+				     (opline-1)->opcode == ZEND_ASSIGN_MOD ||
+				     (opline-1)->opcode == ZEND_ASSIGN_SL ||
+				     (opline-1)->opcode == ZEND_ASSIGN_SR ||
+				     (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
+				     (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
+				     (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
+				     (opline-1)->opcode == ZEND_ASSIGN_BW_XOR))) {
+					goto check_numeric;
+				}
+				break;
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+			case ZEND_ADD_ARRAY_ELEMENT:
+			case ZEND_INIT_ARRAY:
+			case ZEND_UNSET_DIM:
+			case ZEND_FETCH_DIM_R:
+			case ZEND_FETCH_DIM_W:
+			case ZEND_FETCH_DIM_RW:
+			case ZEND_FETCH_DIM_IS:
+			case ZEND_FETCH_DIM_FUNC_ARG:
+			case ZEND_FETCH_DIM_UNSET:
+			case ZEND_FETCH_DIM_TMP_VAR:
+check_numeric:
+				{
+					ulong index;
+					int numeric = 0;
+
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRLEN_P(val)+1, index, numeric = 1);
+					if (numeric) {
+						zval_dtor(val);
+						ZVAL_LONG(val, index);
+						op_array->literals[opline->op2.constant].constant = *val;
+		        	}
+				}
+				break;
+#endif
 			default:
 				break;
 		}
