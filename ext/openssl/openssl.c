@@ -810,7 +810,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 	else \
 		varname = defval
 
-static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
+static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(php_int_t algo);
 
 int openssl_spki_cleanup(const char *src, char *dest);
 
@@ -866,7 +866,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	}
 
 	if (req->priv_key_encrypt && optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher"), (void**)&item) == SUCCESS) {
-		long cipher_algo = Z_LVAL_PP(item);
+		php_int_t cipher_algo = Z_LVAL_PP(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm for private key.");
@@ -1018,7 +1018,7 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 }
 /* }}} */
 
-static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo) { /* {{{ */
+static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(php_int_t algo) { /* {{{ */
 	switch (algo) {
 #ifndef OPENSSL_NO_RC2
 		case PHP_OPENSSL_CIPHER_RC2_40:
@@ -4985,7 +4985,8 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 static zend_bool matches_wildcard_name(const char *subjectname, const char *certname)
 {
 	char *wildcard;
-	int prefix_len, suffix_len, subject_len;
+	ptrdiff_t prefix_len;
+	size_t suffix_len, subject_len;
 
 	if (strcasecmp(subjectname, certname) == 0) {
 		return 1;
