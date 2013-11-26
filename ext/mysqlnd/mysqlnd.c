@@ -318,14 +318,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet;
 
-<<<<<<< HEAD
 	DBG_ENTER("mysqlnd_conn_data::simple_command_send_request");
 	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
-=======
-	DBG_ENTER("mysqlnd_conn_data::simple_command");
-	DBG_INF_FMT("command=%s ok_packet=%u silent=%u", mysqlnd_command_to_text[command], ok_packet, silent);
 	DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
->>>>>>> PHP-5.4
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
@@ -814,6 +809,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	{
 		goto err;
 	}
+	memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 	conn->upsert_status->warning_count = 0;
 	conn->upsert_status->server_status = greet_packet->server_status;
 	conn->upsert_status->affected_rows = 0;
@@ -1038,14 +1034,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		/* todo: check if charset is available */
-<<<<<<< HEAD
-=======
-		conn->server_capabilities = greet_packet->server_capabilities;
-		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
-		conn->upsert_status->warning_count = 0;
-		conn->upsert_status->server_status = greet_packet->server_status;
-		conn->upsert_status->affected_rows = 0;
->>>>>>> PHP-5.4
 
 		SET_EMPTY_ERROR(*conn->error_info);
 
