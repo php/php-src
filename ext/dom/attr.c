@@ -61,11 +61,12 @@ PHP_METHOD(domattr, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	int name_len, value_len, name_valid;
+	zend_str_size_int name_len, value_len;
+	int name_valid;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|s", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS|S", &id, dom_attr_class_entry, &name, &name_len, &value, &value_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -192,7 +193,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		convert_to_string(newval);
 	}
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRSIZE_P(newval) + 1);
 
 	if (newval == &value_copy) {
 		zval_dtor(newval);

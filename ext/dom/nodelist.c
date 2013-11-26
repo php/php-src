@@ -105,7 +105,7 @@ Since:
 PHP_FUNCTION(dom_nodelist_item)
 {
 	zval *id;
-	long index;
+	php_int_t index;
 	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -116,7 +116,7 @@ PHP_FUNCTION(dom_nodelist_item)
 	HashTable *nodeht;
 	zval **entry;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_nodelist_class_entry, &index) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &id, dom_nodelist_class_entry, &index) == FAILURE) {
 		return;
 	}
 

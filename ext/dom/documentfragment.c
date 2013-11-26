@@ -124,11 +124,11 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	xmlNode *nodep;
 	dom_object *intern;
 	char *data = NULL;
-	int data_len = 0;
+	zend_str_size_int data_len = 0;
 	int err;
 	xmlNodePtr lst;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_documentfragment_class_entry, &data, &data_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_documentfragment_class_entry, &data, &data_len) == FAILURE) {
 		return;
 	}
 
