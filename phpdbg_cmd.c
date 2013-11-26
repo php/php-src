@@ -41,7 +41,7 @@ PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_
 			return "string";
 		default: /* this is bad */
 			return "unknown";
-    }
+	}
 }
 
 PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
@@ -63,7 +63,7 @@ PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, php
 
 		param->num = strtol(str, NULL, 0);
 		param->type = NUMERIC_PARAM;
-        goto parsed;
+		goto parsed;
 
 	} else if (phpdbg_is_class_method(str, len+1, &class_name, &func_name)) {
 
@@ -93,7 +93,7 @@ PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, php
 	param->type = STR_PARAM;
 
 parsed:
-    phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s",
+	phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s",
 		str, len, phpdbg_get_param_type(param TSRMLS_CC));
 	return param->type;
 } /* }}} */
@@ -134,31 +134,31 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 	argv = (phpdbg_input_t**) emalloc(sizeof(phpdbg_input_t*));
 	(*argc) = 0;
 
-#define RESET_STATE() do {\
-	phpdbg_input_t *arg = emalloc(sizeof(phpdbg_input_t));\
-    if (arg) {\
-    	b[l]=0;\
-    	arg->length = l;\
-    	arg->string = estrndup(b, arg->length);\
-    	arg->argv=NULL;\
-    	arg->argc=0;\
-    	argv = (phpdbg_input_t**) erealloc(argv, sizeof(phpdbg_input_t*) * ((*argc)+1));\
-    	argv[(*argc)++] = arg;\
-    	l=0;\
-    }\
-    state = IN_BETWEEN;\
-} while(0)
+#define RESET_STATE() do { \
+	phpdbg_input_t *arg = emalloc(sizeof(phpdbg_input_t)); \
+	if (arg) { \
+		b[l]=0; \
+		arg->length = l; \
+		arg->string = estrndup(b, arg->length); \
+		arg->argv = NULL; \
+		arg->argc = 0; \
+		argv = (phpdbg_input_t**) erealloc(argv, sizeof(phpdbg_input_t*) * ((*argc)+1)); \
+		argv[(*argc)++] = arg; \
+		l = 0; \
+	} \
+	state = IN_BETWEEN; \
+} while (0)
 
 	for (p = buffer; *p != '\0'; p++) {
 		int c = (unsigned char) *p;
 		switch (state) {
 			case IN_BETWEEN:
 				if (isspace(c)) {
-				    continue;
+					continue;
 				}
 				if (c == '"') {
-				    state = IN_STRING;
-				    continue;
+					state = IN_STRING;
+					continue;
 				}
 				state = IN_WORD;
 				b[l++]=c;
@@ -170,7 +170,7 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 						b[l-1]=c;
 						continue;
 					}
-				    RESET_STATE();
+					RESET_STATE();
 				} else {
 					b[l++]=c;
 				}
@@ -178,7 +178,7 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 
 			case IN_WORD:
 				if (isspace(c)) {
-				    RESET_STATE();
+					RESET_STATE();
 				} else {
 					b[l++]=c;
 				}

@@ -106,22 +106,22 @@
 #define PHPDBG_IS_COLOURED      (1<<12)
 #define PHPDBG_IS_CLEANING      (1<<13)
 
-#define PHPDBG_IN_UNTIL			(1<<14)
-#define PHPDBG_IN_FINISH		(1<<15)
-#define PHPDBG_IN_LEAVE			(1<<16)
-#define PHPDBG_SEEK_MASK		(PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
+#define PHPDBG_IN_UNTIL         (1<<14)
+#define PHPDBG_IN_FINISH        (1<<15)
+#define PHPDBG_IN_LEAVE         (1<<16)
+#define PHPDBG_SEEK_MASK        (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 
-#define PHPDBG_IS_REGISTERED	(1<<17)
-#define PHPDBG_IS_STEPONEVAL	(1<<18)
-#define PHPDBG_IS_INITIALIZING	(1<<19)
+#define PHPDBG_IS_REGISTERED    (1<<17)
+#define PHPDBG_IS_STEPONEVAL    (1<<18)
+#define PHPDBG_IS_INITIALIZING  (1<<19)
 #define PHPDBG_IS_SIGNALED      (1<<20)
-#define PHPDBG_IS_INTERACTIVE	(1<<21)
+#define PHPDBG_IS_INTERACTIVE   (1<<21)
 #define PHPDBG_IS_BP_ENABLED    (1<<22)
 
 #ifndef _WIN32
-#   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED|PHPDBG_IS_BP_ENABLED)
+#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED|PHPDBG_IS_BP_ENABLED)
 #else
-#   define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
+#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
 #endif /* }}} */
 
 /* {{{ strings */
@@ -138,29 +138,29 @@
 
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-    HashTable bp[PHPDBG_BREAK_TABLES];  			/* break points */
-	HashTable registered;							/* registered */
-	HashTable seek;									/* seek oplines */
-	phpdbg_frame_t frame;							/* frame */
+	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
+	HashTable registered;                        /* registered */
+	HashTable seek;                              /* seek oplines */
+	phpdbg_frame_t frame;                        /* frame */
 
-	char *exec;                         			/* file to execute */
-	size_t exec_len;                    			/* size of exec */
-	zend_op_array *ops;                 			/* op_array */
-	zval *retval;                       			/* return value */
-	int bp_count;                       			/* breakpoint count */
-	int del_bp_num;                     			/* breakpoint to delete */
-	int vmret;                          			/* return from last opcode handler execution */
+	char *exec;                                  /* file to execute */
+	size_t exec_len;                             /* size of exec */
+	zend_op_array *ops;                 	     /* op_array */
+	zval *retval;                                /* return value */
+	int bp_count;                                /* breakpoint count */
+	int del_bp_num;                              /* breakpoint to delete */
+	int vmret;                                   /* return from last opcode handler execution */
 
-	FILE *oplog;                        			/* opline log */
-	FILE *io[PHPDBG_IO_FDS];						/* io */
+	FILE *oplog;                                 /* opline log */
+	FILE *io[PHPDBG_IO_FDS];                     /* io */
 
-    char *prompt[2];                       			/* prompt */
-    const phpdbg_color_t *colors[PHPDBG_COLORS];	/* colors */
+	char *prompt[2];                             /* prompt */
+	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 
-	phpdbg_command_t *lcmd;							/* last command */
-	phpdbg_param_t lparam;              			/* last param */
+	phpdbg_command_t *lcmd;                      /* last command */
+	phpdbg_param_t lparam;                       /* last param */
 
-	zend_ulong flags;                   			/* phpdbg flags */
+	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif /* PHPDBG_H */

@@ -43,37 +43,37 @@ PHPDBG_BREAK(method) /* {{{ */
 {
 	switch (param->type) {
 		case METHOD_PARAM:
-            phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
-            break;
+			phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
+			break;
 
 		phpdbg_default_switch_case();
-    }
+	}
 
-    return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(address) /* {{{ */
 {
 	switch (param->type) {
 		case ADDR_PARAM:
-            phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
-            break;
+			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
+			break;
 
 		phpdbg_default_switch_case();
-    }
+	}
 
-    return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(on) /* {{{ */
 {
-    switch (param->type) {
-        case STR_PARAM:
-            phpdbg_set_breakpoint_expression(param->str, param->len TSRMLS_CC);
-        break;
+	switch (param->type) {
+		case STR_PARAM:
+			phpdbg_set_breakpoint_expression(param->str, param->len TSRMLS_CC);
+			break;
 
-        phpdbg_default_switch_case();
-    }
+		phpdbg_default_switch_case();
+	}
 
 	return SUCCESS;
 } /* }}} */
@@ -82,12 +82,11 @@ PHPDBG_BREAK(lineno) /* {{{ */
 {
 	switch (param->type) {
 		case NUMERIC_PARAM: {
-		    if (PHPDBG_G(exec)) {
-		        phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
-		    } else {
-		        phpdbg_error(
-		            "Execution context not set !");
-		    }
+			if (PHPDBG_G(exec)) {
+				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
+			} else {
+				phpdbg_error("Execution context not set !");
+			}
 		} break;
 
 		phpdbg_default_switch_case();
@@ -106,7 +105,7 @@ PHPDBG_BREAK(func) /* {{{ */
 		phpdbg_default_switch_case();
 	}
 
-    return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(op) /* {{{ */

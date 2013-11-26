@@ -51,7 +51,7 @@ struct _phpdbg_input_t {
 };
 
 typedef struct _phpdbg_param {
-    phpdbg_param_type type;
+	phpdbg_param_type type;
 	long num;
 	zend_ulong addr;
 	struct {
@@ -150,10 +150,8 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC)
 * Default Switch Case
 */
 #define phpdbg_default_switch_case() \
-    default:\
-        phpdbg_error(\
-            "Unsupported parameter type (%s) for command", \
-                phpdbg_get_param_type(param TSRMLS_CC)); \
-    break
+	default: \
+		phpdbg_error("Unsupported parameter type (%s) for command", phpdbg_get_param_type(param TSRMLS_CC)); \
+	break
 
 #endif /* PHPDBG_CMD_H */

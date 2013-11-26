@@ -150,6 +150,6 @@ PHPDBG_SET(oplog) /* {{{ */
 		phpdbg_default_switch_case();
 	}
 
-    return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 

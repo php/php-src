@@ -30,7 +30,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_HELP(exec) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("\tWill attempt execution, if compilation has not yet taken place, it occurs now");
 	phpdbg_writeln("The execution context must be set before execution can take place");
 	phpdbg_help_footer();
@@ -39,29 +39,29 @@ PHPDBG_HELP(exec) /* {{{ */
 
 PHPDBG_HELP(step) /* {{{ */
 {
-    phpdbg_help_header();
-    phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
-    phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
-    phpdbg_writeln("\t%sstepping 1", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%ss 1", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill enable stepping");
-    phpdbg_writeln(EMPTY);
-    phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
-    phpdbg_help_footer();
-    return SUCCESS;
+	phpdbg_help_header();
+	phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
+	phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
+	phpdbg_writeln("\t%sstepping 1", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%ss 1", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill enable stepping");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
+	phpdbg_help_footer();
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(next) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_write("Step back into the vm and execute the next opcode");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
-    phpdbg_writeln("\t%snext", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%sn", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
-    phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
+	phpdbg_writeln("\t%snext", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sn", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: is only useful while executing");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -69,14 +69,14 @@ PHPDBG_HELP(next) /* {{{ */
 
 PHPDBG_HELP(until) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Step back into the vm, skipping breakpoints until the next source line");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
-    phpdbg_writeln("\t%suntil", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%su", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
-    phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
+	phpdbg_writeln("\t%suntil", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%su", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: is only useful while executing");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -84,14 +84,14 @@ PHPDBG_HELP(until) /* {{{ */
 
 PHPDBG_HELP(finish) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Step back into the vm, skipping breakpoints until past the end of the current stack");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
-    phpdbg_writeln("\t%sfinish", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%sF", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
-    phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
+	phpdbg_writeln("\t%sfinish", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sF", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill cause control to be passed back to the vm, continuing execution");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: this allows all breakpoints that would otherwise break execution in the current scope to be skipped");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -99,7 +99,7 @@ PHPDBG_HELP(finish) /* {{{ */
 
 PHPDBG_HELP(leave) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Step back into the vm, skipping breakpoints until the current stack is returning");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
@@ -114,7 +114,7 @@ PHPDBG_HELP(leave) /* {{{ */
 
 PHPDBG_HELP(compile) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Pre-compilation of the execution context provides the opportunity to inspect opcodes before execution");
 	phpdbg_writeln("The execution context must be set for compilation to succeed");
 	phpdbg_writeln(EMPTY);
@@ -130,7 +130,7 @@ PHPDBG_HELP(compile) /* {{{ */
 
 PHPDBG_HELP(print) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("By default, print will show information about the current execution context");
 	phpdbg_writeln("Other printing commands give access to instruction information");
 	phpdbg_writeln(EMPTY);
@@ -166,13 +166,15 @@ PHPDBG_HELP(print) /* {{{ */
 	phpdbg_writeln("Specific printers loaded are show below:");
 	phpdbg_notice("Commands");
 	{
-	    const phpdbg_command_t *print_command = phpdbg_print_commands;
+		const phpdbg_command_t *print_command = phpdbg_print_commands;
 
-        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
-	    while (print_command && print_command->name) {
+		phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+		while (print_command && print_command->name) {
 			if (print_command->alias) {
-			    phpdbg_writeln("\t[%c]\t%s\t\t%s", print_command->alias, print_command->name, print_command->tip);
-			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", print_command->name, print_command->tip);
+				phpdbg_writeln("\t[%c]\t%s\t\t%s", print_command->alias, print_command->name, print_command->tip);
+			} else {
+				phpdbg_writeln("\t[ ]\t%s\t\t%s", print_command->name, print_command->tip);
+			}
 			++print_command;
 		}
 	}
@@ -182,7 +184,7 @@ PHPDBG_HELP(print) /* {{{ */
 
 PHPDBG_HELP(run) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Execute the current context inside the phpdbg vm");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
@@ -197,7 +199,7 @@ PHPDBG_HELP(run) /* {{{ */
 
 PHPDBG_HELP(eval) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
@@ -216,7 +218,7 @@ PHPDBG_HELP(eval) /* {{{ */
 
 PHPDBG_HELP(break) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("Setting a breakpoint stops execution at a specific stage");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
@@ -259,18 +261,20 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("Specific breakers loaded are show below:");
 	phpdbg_notice("Commands");
 	{
-	    const phpdbg_command_t *break_command = phpdbg_break_commands;
+		const phpdbg_command_t *break_command = phpdbg_break_commands;
 
-        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
-	    while (break_command && break_command->name) {
+		phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+		while (break_command && break_command->name) {
 			if (break_command->alias) {
-			    phpdbg_writeln("\t[%c]\t%s\t\t%s", break_command->alias, break_command->name, break_command->tip);
-			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", break_command->name, break_command->tip);
+				phpdbg_writeln("\t[%c]\t%s\t\t%s", break_command->alias, break_command->name, break_command->tip);
+			} else {
+				phpdbg_writeln("\t[ ]\t%s\t\t%s", break_command->name, break_command->tip);
+			}
 			++break_command;
 		}
 	}
 	phpdbg_writeln("Note: Conditional breaks are costly, use them sparingly !");
-    phpdbg_help_footer();
+	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
 
@@ -278,7 +282,6 @@ PHPDBG_HELP(clean) /* {{{ */
 {
 	phpdbg_help_header();
 	phpdbg_writeln("While debugging you may experience errors because of attempts to redeclare classes, constants or functions");
-
 	phpdbg_writeln("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -288,7 +291,6 @@ PHPDBG_HELP(clear) /* {{{ */
 {
 	phpdbg_help_header();
 	phpdbg_writeln("Clearing breakpoints means you can once again run code without interruption");
-
 	phpdbg_writeln("Note: all breakpoints are lost; be sure debugging is complete before clearing");
 	phpdbg_help_footer();
 	return SUCCESS;
@@ -307,7 +309,9 @@ PHPDBG_HELP(info) /* {{{ */
 		while (info_command && info_command->name) {
 			if (info_command->alias) {
 				phpdbg_writeln("\t[%c]\t%s\t\t%s", info_command->alias, info_command->name, info_command->tip);
-			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", info_command->name, info_command->tip);
+			} else {
+				phpdbg_writeln("\t[ ]\t%s\t\t%s", info_command->name, info_command->tip);
+			}
 			++info_command;
 		}
 	}
@@ -332,15 +336,15 @@ PHPDBG_HELP(quiet) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: Quietness is disabled automatically while stepping");
 	phpdbg_help_footer();
-    return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(back) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("The backtrace is built with the default debug backtrace functionality");
-    phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
+	phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sback 5", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%st 5", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill limit the number of frames to 5, the default is no limit");
@@ -352,10 +356,10 @@ PHPDBG_HELP(back) /* {{{ */
 
 PHPDBG_HELP(frame) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("When viewing a backtrace, it is sometimes useful to jump to a frame in that trace");
-    phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
+	phpdbg_writeln(EMPTY);
+	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sframe 2", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sf 2", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill go to frame 2, temporarily affecting scope and allowing access to the variables in that frame");
@@ -367,7 +371,7 @@ PHPDBG_HELP(frame) /* {{{ */
 
 PHPDBG_HELP(list) /* {{{ */
 {
-    phpdbg_help_header();
+	phpdbg_help_header();
 	phpdbg_writeln("The list command displays source code for the given argument");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
@@ -398,13 +402,15 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_writeln("Specific listers loaded are show below:");
 	phpdbg_notice("Commands");
 	{
-	    const phpdbg_command_t *list_command = phpdbg_list_commands;
+		const phpdbg_command_t *list_command = phpdbg_list_commands;
 
-        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
-	    while (list_command && list_command->name) {
+		phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+		while (list_command && list_command->name) {
 			if (list_command->alias) {
-			    phpdbg_writeln("\t[%c]\t%s\t\t%s", list_command->alias, list_command->name, list_command->tip);
-			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", list_command->name, list_command->tip);
+				phpdbg_writeln("\t[%c]\t%s\t\t%s", list_command->alias, list_command->name, list_command->tip);
+			} else {
+				phpdbg_writeln("\t[ ]\t%s\t\t%s", list_command->name, list_command->tip);
+			}
 			++list_command;
 		}
 	}
@@ -440,13 +446,15 @@ PHPDBG_HELP(set) /* {{{ */
 	phpdbg_writeln("Specific set commands are show below:");
 	phpdbg_notice("Commands");
 	{
-	    const phpdbg_command_t *set_command = phpdbg_set_commands;
+		const phpdbg_command_t *set_command = phpdbg_set_commands;
 
-        phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
-	    while (set_command && set_command->name) {
+		phpdbg_writeln("\tAlias\tCommand\t\tPurpose");
+		while (set_command && set_command->name) {
 			if (set_command->alias) {
-			    phpdbg_writeln("\t[%c]\t%s\t\t%s", set_command->alias, set_command->name, set_command->tip);
-			} else phpdbg_writeln("\t[ ]\t%s\t\t%s", set_command->name, set_command->tip);
+				phpdbg_writeln("\t[%c]\t%s\t\t%s", set_command->alias, set_command->name, set_command->tip);
+			} else {
+				phpdbg_writeln("\t[ ]\t%s\t\t%s", set_command->name, set_command->tip);
+			}
 			++set_command;
 		}
 	}
@@ -456,14 +464,17 @@ PHPDBG_HELP(set) /* {{{ */
 		
 		if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 			phpdbg_writeln("\t%-20s\t\tExample", "Name");
-		} else phpdbg_writeln("\tName");
+		} else {
+			phpdbg_writeln("\tName");
+		}
 		
 		while (color && color->name) {
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
 				phpdbg_writeln(
 					"\t%-20s\t\t\033[%smphpdbg rocks :)\033[0m", color->name, color->code);
-			} else phpdbg_writeln("\t%s", color->name);
-			
+			} else {
+				phpdbg_writeln("\t%s", color->name);
+			}
 			++color;
 		}
 	}
@@ -475,15 +486,15 @@ PHPDBG_HELP(set) /* {{{ */
 PHPDBG_HELP(register) /* {{{ */
 {
 	phpdbg_help_header();
-    phpdbg_writeln("Register any global function for use as a command in phpdbg console");
+	phpdbg_writeln("Register any global function for use as a command in phpdbg console");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
+	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sregister scandir", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%sR scandir", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill register the scandir function for use in phpdbg");
+	phpdbg_writeln("\t%sR scandir", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill register the scandir function for use in phpdbg");
 	phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Note: arguments passed as strings, return (if present) print_r'd on console");
-    if (zend_hash_num_elements(&PHPDBG_G(registered))) {
+	phpdbg_writeln("Note: arguments passed as strings, return (if present) print_r'd on console");
+	if (zend_hash_num_elements(&PHPDBG_G(registered))) {
    		HashPosition position;
    		char *name = NULL;
    		zend_uint name_len = 0;
@@ -495,10 +506,10 @@ PHPDBG_HELP(register) /* {{{ */
    			phpdbg_writeln("|-------> %s", name);
    			efree(name);
    		}
-    }
+	}
 
-    phpdbg_help_footer();
-    return SUCCESS;
+	phpdbg_help_footer();
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(source) /* {{{ */
@@ -507,13 +518,13 @@ PHPDBG_HELP(source) /* {{{ */
 	phpdbg_writeln("Sourcing a phpdbginit during your debugging session might save some time");
 	phpdbg_writeln("The source command can also be used to export breakpoints to a phpdbginit file");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
+	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%ssource /my/init", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%s. /my/init", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill execute the phpdbginit file at /my/init");
+	phpdbg_writeln("\t%s. /my/init", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill execute the phpdbginit file at /my/init");
 	phpdbg_writeln("\t%ssource export /my/init", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%s. export /my/init", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill export breakpoints to /my/init in phpdbginit file format");
+	phpdbg_writeln("\t%s. export /my/init", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill export breakpoints to /my/init in phpdbginit file format");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -521,16 +532,16 @@ PHPDBG_HELP(source) /* {{{ */
 PHPDBG_HELP(shell) /* {{{ */
 {
 	phpdbg_help_header();
-    phpdbg_writeln("Direct access to shell commands saves having to switch windows/consoles");
+	phpdbg_writeln("Direct access to shell commands saves having to switch windows/consoles");
 	phpdbg_writeln(EMPTY);
-    phpdbg_notice("Examples");
+	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%sshell ls /usr/src/php-src", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\t%s- ls /usr/src/php-src", phpdbg_get_prompt(TSRMLS_C));
-    phpdbg_writeln("\tWill execute ls /usr/src/php-src, displaying the output in the console");
+	phpdbg_writeln("\t%s- ls /usr/src/php-src", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill execute ls /usr/src/php-src, displaying the output in the console");
 	phpdbg_writeln(EMPTY);
-    phpdbg_writeln("Note: read only commands please !");
-    phpdbg_help_footer();
-    return SUCCESS;
+	phpdbg_writeln("Note: read only commands please !");
+	phpdbg_help_footer();
+	return SUCCESS;
 } /* }}} */
 
 PHPDBG_HELP(options) /* {{{ */
