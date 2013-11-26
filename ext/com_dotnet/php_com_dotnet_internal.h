@@ -36,7 +36,7 @@ typedef struct _php_com_dotnet_object {
 	int modified;
 
 	ITypeInfo *typeinfo;
-	long code_page;
+	php_int_t code_page;
 
 	zend_class_entry *ce;
 
@@ -85,9 +85,9 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		uint *string_len, int codepage TSRMLS_DC);
+		zend_str_size_uint *string_len, php_int_t codepage TSRMLS_DC);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
-		uint string_len, int codepage TSRMLS_DC);
+		zend_str_size_uint string_len, php_int_t codepage TSRMLS_DC);
 
 
 /* com_com.c */
@@ -102,12 +102,12 @@ PHP_FUNCTION(com_get_active_object);
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg TSRMLS_DC);
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		int namelen, DISPID *dispid TSRMLS_DC);
+		zend_str_size_int namelen, DISPID *dispid TSRMLS_DC);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval **args, int silent, int allow_noarg TSRMLS_DC);
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke(php_com_dotnet_object *obj, char *name, zend_str_size_int namelen,
 		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC);
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, zend_str_size_int namelen,
 		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC);
 
 /* com_wrapper.c */
@@ -147,9 +147,9 @@ PHP_FUNCTION(variant_get_type);
 PHP_FUNCTION(variant_set_type);
 PHP_FUNCTION(variant_cast);
 
-PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage TSRMLS_DC);
-PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC);
-PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC);
+PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, php_int_t codepage TSRMLS_DC);
+PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, php_int_t codepage TSRMLS_DC);
+PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, php_int_t codepage TSRMLS_DC);
 PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dst, VARIANT *src TSRMLS_DC);
 
 /* com_dotnet.c */
@@ -160,20 +160,20 @@ void php_com_dotnet_mshutdown(TSRMLS_D);
 /* com_misc.c */
 void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC);
 PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
-		int codepage TSRMLS_DC);
+		php_int_t codepage TSRMLS_DC);
 PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
-		int codepage TSRMLS_DC);
+		php_int_t codepage TSRMLS_DC);
 PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC);
 
 /* com_typeinfo.c */
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
-		int codepage, int *cached TSRMLS_DC);
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC);
+		php_int_t codepage, int *cached TSRMLS_DC);
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, php_int_t codepage TSRMLS_DC);
 PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
-		int codepage TSRMLS_DC);
+		php_int_t codepage TSRMLS_DC);
 void php_com_typelibrary_dtor(void *pDest);
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink TSRMLS_DC);
-int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage TSRMLS_DC);
+int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, php_int_t codepage TSRMLS_DC);
 
 /* com_iterator.c */
 zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
