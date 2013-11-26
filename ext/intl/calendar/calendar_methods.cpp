@@ -224,7 +224,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"Ol", &object, Calendar_ce_ptr, &field) == FAILURE) {
+			"Oi", &object, Calendar_ce_ptr, &field) == FAILURE) {
 		spprintf(&message, 0, "%s: bad arguments", method_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 		efree(message);
