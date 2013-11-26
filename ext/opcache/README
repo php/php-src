@@ -103,6 +103,12 @@ opcache.revalidate_freq (default "2")
 	memory storage allocation. ("1" means validate once per second, but only
 	once per request. "0" means always validate)
 
+opcache.file_update_protection (default "2")
+	Prevents caching files that are less than this number of seconds old.
+	It protects from caching of incompletely updated files. In case all file
+	updates on your site are atomic, you may increase performance setting it
+	to "0".
+
 opcache.revalidate_path (default "0")
 	Enables or disables file search in include_path optimization
 	If the file search is disabled and a cached file is found that uses
