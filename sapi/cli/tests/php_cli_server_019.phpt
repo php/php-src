@@ -60,7 +60,7 @@ array(2) {
 }
 array(3) {
   ["X-Powered-By"]=>
-  string(13) "P%s"
+  string(%d) "P%s"
   ["Bar-Foo"]=>
   string(3) "Foo"
   ["Content-type"]=>
