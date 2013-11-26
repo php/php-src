@@ -1070,10 +1070,9 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
-				ZEND_OP1_LITERAL(opline) = result;
-				SET_UNUSED(opline->op2);
-
 				opline->opcode = ZEND_QM_ASSIGN;
+				SET_UNUSED(opline->op2);
+				update_op1_const(op_array, opline, &result TSRMLS_CC);
 			}
 			EG(error_reporting) = er;
 		} else if ((opline->opcode == ZEND_BOOL ||
@@ -1097,8 +1096,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 			PZ_SET_REFCOUNT_P(&result, 1);
 			PZ_UNSET_ISREF_P(&result);
-			ZEND_OP1_LITERAL(opline) = result;
 			opline->opcode = ZEND_QM_ASSIGN;
+			update_op1_const(op_array, opline, &result TSRMLS_CC);
 		} else if ((opline->opcode == ZEND_RETURN || opline->opcode == ZEND_EXIT) &&
 					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 				   	VAR_SOURCE(opline->op1) &&
