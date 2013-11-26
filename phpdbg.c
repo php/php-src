@@ -612,84 +612,84 @@ phpdbg_main:
 				ini_override = strdup(php_optarg);
 				break;
 			case 'd': {
-						  int len = strlen(php_optarg);
-						  char *val;
+				int len = strlen(php_optarg);
+				char *val;
 
-						  if ((val = strchr(php_optarg, '='))) {
-							  val++;
-							  if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
-								  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
-								  memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-								  ini_entries_len += (val - php_optarg);
-								  memcpy(ini_entries + ini_entries_len, "\"", 1);
-								  ini_entries_len++;
-								  memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-								  ini_entries_len += len - (val - php_optarg);
-								  memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
-								  ini_entries_len += sizeof("\n\0\"") - 2;
-							  } else {
-								  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
-								  memcpy(ini_entries + ini_entries_len, php_optarg, len);
-								  memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
-								  ini_entries_len += len + sizeof("\n\0") - 2;
-							  }
-						  } else {
-							  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
-							  memcpy(ini_entries + ini_entries_len, php_optarg, len);
-							  memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
-							  ini_entries_len += len + sizeof("=1\n\0") - 2;
-						  }
-					  } break;
+				if ((val = strchr(php_optarg, '='))) {
+				  val++;
+				  if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+					  memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
+					  ini_entries_len += (val - php_optarg);
+					  memcpy(ini_entries + ini_entries_len, "\"", 1);
+					  ini_entries_len++;
+					  memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
+					  ini_entries_len += len - (val - php_optarg);
+					  memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
+					  ini_entries_len += sizeof("\n\0\"") - 2;
+				  } else {
+					  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					  memcpy(ini_entries + ini_entries_len, php_optarg, len);
+					  memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+					  ini_entries_len += len + sizeof("\n\0") - 2;
+				  }
+				} else {
+				  ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+				  memcpy(ini_entries + ini_entries_len, php_optarg, len);
+				  memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
+				  ini_entries_len += len + sizeof("=1\n\0") - 2;
+				}
+			} break;
 			case 'z':
-					  zend_load_extension(php_optarg);
-					  break;
+				zend_load_extension(php_optarg);
+			break;
 
-					  /* begin phpdbg options */
+			/* begin phpdbg options */
 
 			case 'e': { /* set execution context */
-						  exec_len = strlen(php_optarg);
-						  if (exec_len) {
-							  exec = strdup(php_optarg);
-						  }
-					  } break;
+				exec_len = strlen(php_optarg);
+				if (exec_len) {
+					exec = strdup(php_optarg);
+				}
+			} break;
 
 			case 'I': { /* ignore .phpdbginit */
-						  init_file_default = 0;
-					  } break;
+				init_file_default = 0;
+			} break;
 
 			case 'i': { /* set init file */
-						  init_file_len = strlen(php_optarg);
-						  if (init_file_len) {
-							  init_file = estrdup(php_optarg);
-						  }
-					  } break;
+				init_file_len = strlen(php_optarg);
+				if (init_file_len) {
+					init_file = estrdup(php_optarg);
+				}
+			} break;
 
 			case 'O': { /* set oplog output */
-						  oplog_file_len = strlen(php_optarg);
-						  if (oplog_file_len) {
-							  oplog_file = strdup(php_optarg);
-						  }
-					  } break;
+				oplog_file_len = strlen(php_optarg);
+				if (oplog_file_len) {
+					oplog_file = strdup(php_optarg);
+				}
+			} break;
 
 			case 'v': /* set quietness off */
-					  flags &= ~PHPDBG_IS_QUIET;
-					  break;
+				flags &= ~PHPDBG_IS_QUIET;
+			break;
 
 			case 's': /* set stepping on */
-					  step = 1;
-					  break;
+				step = 1;
+			break;
 
 			case 'E': /* stepping through eval on */
-					  flags |= PHPDBG_IS_STEPONEVAL;
-					  break;
+				flags |= PHPDBG_IS_STEPONEVAL;
+			break;
 
 			case 'b': /* set colours off */
-					  flags &= ~PHPDBG_IS_COLOURED;
-					  break;
+				flags &= ~PHPDBG_IS_COLOURED;
+			break;
 
 			case 'q': /* hide banner */
-					  show_banner = 0;
-					  break;
+				show_banner = 0;
+			break;
 		}
 	}
 
