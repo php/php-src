@@ -485,6 +485,9 @@ static PHP_INI_MH(OnChangeAlwaysPopulateRawPostData)
 	else if (new_value_length == 4 && strcasecmp("true", new_value) == 0) {
 		*p = (signed char) 1;
 	}
+	else if (new_value_length == 5 && strcasecmp("never", new_value) == 0) {
+		*p = (signed char) -1;
+	}
 	else {
 		*p = (signed char) atoi(new_value);
 	}
