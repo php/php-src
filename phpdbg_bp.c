@@ -554,14 +554,14 @@ PHPDBG_API phpdbg_breakbase_t* phpdbg_find_breakpoint(zend_execute_data* execute
 	}
 
 	/* conditions cannot be executed by eval()'d code */
-	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)
-		&& (PHPDBG_G(flags) & PHPDBG_HAS_COND_BP)
-		&& (base = phpdbg_find_conditional_breakpoint(TSRMLS_C))) {
+	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL) && 
+		(PHPDBG_G(flags) & PHPDBG_HAS_COND_BP) && 
+		(base = phpdbg_find_conditional_breakpoint(TSRMLS_C))) {
 		return base;
 	}
 
-	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP
-		&& (base = phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC))) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP) && 
+		(base = phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC))) {
 		return base;
 	}
 
@@ -575,13 +575,13 @@ PHPDBG_API phpdbg_breakbase_t* phpdbg_find_breakpoint(zend_execute_data* execute
 		}
 	}
 
-	if (PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP
-		&& phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP) && 
+		(base = phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC))) {
 		return base;
 	}
 
-	if (PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP
-		&& phpdbg_find_breakpoint_opcode(execute_data->opline->opcode TSRMLS_CC) == SUCCESS) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP) && 
+		(base = phpdbg_find_breakpoint_opcode(execute_data->opline->opcode TSRMLS_CC))) {
 		return base;
 	}
 
