@@ -60,7 +60,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
-	int arch_len, entry_len;
+	zend_str_size_int arch_len, entry_len;
 
 	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -378,7 +378,7 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 
 	got = php_stream_read(data->fp, buf, MIN(count, entry->uncompressed_filesize - data->position));
 	data->position = php_stream_tell(data->fp) - data->zero;
-	stream->eof = (data->position == (off_t) entry->uncompressed_filesize);
+	stream->eof = (data->position == (zend_off_t) entry->uncompressed_filesize);
 
 	return got;
 }
@@ -387,12 +387,12 @@ static size_t phar_stream_read(php_stream *stream, char *buf, size_t count TSRML
 /**
  * Used for fseek($fp) on a phar file handle
  */
-static int phar_stream_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
 	phar_entry_info *entry;
 	int res;
-	off_t temp;
+	zend_off_t temp;
 
 	if (data->internal_file->link) {
 		entry = phar_get_link_source(data->internal_file TSRMLS_CC);
@@ -441,7 +441,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 		return -1;
 	}
 	data->position = php_stream_tell(data->fp);
-	if (data->position > (off_t)data->internal_file->uncompressed_filesize) {
+	if (data->position > (zend_off_t)data->internal_file->uncompressed_filesize) {
 		data->internal_file->uncompressed_filesize = data->position;
 	}
 	data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize;
@@ -570,8 +570,8 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	uint host_len;
-	int internal_file_len;
+	zend_str_size_uint host_len;
+	zend_str_size_int internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		return FAILURE;
@@ -628,19 +628,19 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	/* check for mounted directories */
 	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
 		char *str_key;
-		ulong unused;
-		uint keylen;
+		php_uint_t unused;
+		zend_str_size_uint keylen;
 		HashPosition pos;
 
 		for (zend_hash_internal_pointer_reset_ex(&phar->mounted_dirs, &pos);
 			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &keylen, &unused, 0, &pos);
 			zend_hash_move_forward_ex(&phar->mounted_dirs, &pos)
 		) {
-			if ((int)keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
+			if (keylen >= internal_file_len || strncmp(str_key, internal_file, keylen)) {
 				continue;
 			} else {
 				char *test;
-				int test_len;
+				zend_str_size_int test_len;
 				php_stream_statbuf ssbi;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
@@ -682,10 +682,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 {
 	php_url *resource;
 	char *internal_file, *error;
-	int internal_file_len;
+	zend_str_size_int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data **pphar;
-	uint host_len;
+	zend_str_size_uint host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unlink failed");
@@ -903,10 +903,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	if (is_dir) {
 		int key_type;
 		char *str_key, *new_str_key;
-		uint key_len, new_key_len;
-		ulong unused;
-		uint from_len = strlen(resource_from->path+1);
-		uint to_len = strlen(resource_to->path+1);
+		zend_str_size_uint key_len, new_key_len;
+		php_uint_t unused;
+		zend_str_size_uint from_len = strlen(resource_from->path+1);
+		zend_str_size_uint to_len = strlen(resource_to->path+1);
 
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
 			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &str_key, &key_len, &unused, 0, NULL)) &&

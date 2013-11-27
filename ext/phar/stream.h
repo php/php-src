@@ -34,7 +34,7 @@ static size_t phar_stream_write(php_stream *stream, const char *buf, size_t coun
 static size_t phar_stream_read( php_stream *stream, char *buf, size_t count TSRMLS_DC);
 static int    phar_stream_close(php_stream *stream, int close_handle TSRMLS_DC);
 static int    phar_stream_flush(php_stream *stream TSRMLS_DC);
-static int    phar_stream_seek( php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+static int    phar_stream_seek( php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC);
 static int    phar_stream_stat( php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 END_EXTERN_C()
 

@@ -163,11 +163,11 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_zipfile(php_stream *fp, char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
-	long size;
+	php_int_t size;
 	php_uint16 i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -350,7 +350,7 @@ foundit:
 	/* add each central directory item to the manifest */
 	for (i = 0; i < PHAR_GET_16(locator.count); ++i) {
 		phar_zip_central_dir_file zipentry;
-		off_t beforeus = php_stream_tell(fp);
+		zend_off_t beforeus = php_stream_tell(fp);
 
 		if (sizeof(zipentry) != php_stream_read(fp, (char *) &zipentry, sizeof(zipentry))) {
 			PHAR_ZIP_FAIL("unable to read central directory entry, truncated");
@@ -405,7 +405,7 @@ foundit:
 		if (entry.filename_len == sizeof(".phar/signature.bin")-1 && !strncmp(entry.filename, ".phar/signature.bin", sizeof(".phar/signature.bin")-1)) {
 			size_t read;
 			php_stream *sigfile;
-			off_t now;
+			zend_off_t now;
 			char *sig;
 
 			now = php_stream_tell(fp);
@@ -460,7 +460,7 @@ foundit:
 		phar_add_virtual_dirs(mydata, entry.filename, entry.filename_len TSRMLS_CC);
 
 		if (PHAR_GET_16(zipentry.extra_len)) {
-			off_t loc = php_stream_tell(fp);
+			zend_off_t loc = php_stream_tell(fp);
 			if (FAILURE == phar_zip_process_extra(fp, &entry, PHAR_GET_16(zipentry.extra_len) TSRMLS_CC)) {
 				pefree(entry.filename, entry.is_persistent);
 				PHAR_ZIP_FAIL("Unable to process extra field header for file in central directory");
@@ -556,7 +556,7 @@ foundit:
 
 		if (!actual_alias && entry.filename_len == sizeof(".phar/alias.txt")-1 && !strncmp(entry.filename, ".phar/alias.txt", sizeof(".phar/alias.txt")-1)) {
 			php_stream_filter *filter;
-			off_t saveloc;
+			zend_off_t saveloc;
 			/* verify local file header */
 			phar_zip_file_header local;
 
@@ -717,7 +717,7 @@ foundit:
 /**
  * Create or open a zip-based phar for writing
  */
-int phar_open_or_create_zip(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_zip(char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error TSRMLS_CC);
@@ -769,7 +769,7 @@ static int phar_zip_changed_apply(void *data, void *arg TSRMLS_DC) /* {{{ */
 	phar_zip_central_dir_file central;
 	struct _phar_zip_pass *p;
 	php_uint32 newcrc32;
-	off_t offset;
+	zend_off_t offset;
 	int not_really_modified = 0;
 	entry = (phar_entry_info *)data;
 	p = (struct _phar_zip_pass*) arg;
@@ -1079,11 +1079,11 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 {
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
-		int signature_length;
+		zend_str_size_int signature_length;
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;
-		off_t tell, st;
+		zend_off_t tell, st;
 
 		newfile = php_stream_fopen_tmpfile();
 		if (newfile == NULL) {
@@ -1152,7 +1152,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 }
 /* }}} */
 
-int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
+int phar_zip_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
 {
 	char *pos;
 	smart_str main_metadata_str = {0};
