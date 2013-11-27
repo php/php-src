@@ -1554,7 +1554,15 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
 	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
+# ifdef _WIN64
+	if (stat_ssb.sb.st_rdev < ((_dev_t)-1)) {
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
+	} else {
+		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+	}
+# else
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
+# endif
 #else
 	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif
