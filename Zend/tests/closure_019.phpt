@@ -20,7 +20,6 @@ test();
 
 ?>
 --EXPECTF--
-
 Notice: Only variable references should be returned by reference in %sclosure_019.php on line 4
 int(9)
 
