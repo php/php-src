@@ -12,7 +12,7 @@
  *
  *     int
  *     DayOfWeek(
- *         long int sdn);
+ *         php_int_t sdn);
  *
  * Convert a SDN to a day-of-week number (0 to 6).  Where 0 stands for
  * Sunday, 1 for Monday, etc. and 6 stands for Saturday.
@@ -32,7 +32,7 @@
 #include "sdncal.h"
 
 int DayOfWeek(
-				 long int sdn)
+				 php_int_t sdn)
 {
 	int dow;
 
