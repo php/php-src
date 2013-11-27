@@ -1394,9 +1394,16 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
-		if (PHPDBG_G(flags) & PHPDBG_BP_MASK
-			&& phpdbg_find_breakpoint(execute_data TSRMLS_CC) == SUCCESS) {
-			DO_INTERACTIVE();
+		/* search for breakpoints */
+		{
+			phpdbg_breakbase_t *brake;
+			
+			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) && 
+				(brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))) {
+				phpdbg_hit_breakpoint(
+					brake, 1 TSRMLS_CC);
+				DO_INTERACTIVE();
+			}
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
