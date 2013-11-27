@@ -187,9 +187,9 @@ static const unsigned char SS[80] = {
    Decodes input (unsigned char) into output (php_hash_uint32). Assumes len is
    a multiple of 4.
  */
-static void RIPEMDDecode(php_hash_uint32 *output, const unsigned char *input, unsigned int len)
+static void RIPEMDDecode(php_hash_uint32 *output, const unsigned char *input, zend_str_size_uint len)
 {
-	unsigned int i, j;
+	zend_str_size_uint i, j;
 
 	for (i = 0, j = 0; j < len; i++, j += 4)
 		output[i] = ((php_hash_uint32) input[j + 0]) | (((php_hash_uint32) input[j + 1]) << 8) |
@@ -253,7 +253,7 @@ static void RIPEMD128Transform(php_hash_uint32 state[4], const unsigned char blo
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD128Update(PHP_RIPEMD128_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -351,7 +351,7 @@ static void RIPEMD256Transform(php_hash_uint32 state[8], const unsigned char blo
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD256Update(PHP_RIPEMD256_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -450,7 +450,7 @@ static void RIPEMD160Transform(php_hash_uint32 state[5], const unsigned char blo
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD160Update(PHP_RIPEMD160_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -558,7 +558,7 @@ static void RIPEMD320Transform(php_hash_uint32 state[10], const unsigned char bl
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_RIPEMD320Update(PHP_RIPEMD320_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 

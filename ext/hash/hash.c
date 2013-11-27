@@ -86,7 +86,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 
 /* Hash Registry Access */
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len) /* {{{ */
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, zend_str_size_int algo_len) /* {{{ */
 {
 	php_hash_ops *ops;
 	char *lower = estrndup(algo, algo_len);
@@ -103,7 +103,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_l
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
-	int algo_len = strlen(algo);
+	zend_str_size_int algo_len = strlen(algo);
 	char *lower = estrndup(algo, algo_len);
 	
 	zend_str_tolower(lower, algo_len);
@@ -126,13 +126,13 @@ PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_c
 static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
 {
 	char *algo, *data, *digest;
-	int algo_len, data_len;
+	zend_str_size_int algo_len, data_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -203,21 +203,21 @@ PHP_FUNCTION(hash_file)
 }
 /* }}} */
 
-static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const int length) {
-	int i;
+static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const zend_str_size_int length) {
+	zend_str_size_int i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with;
 	}
 }
 
-static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const int length) {
-	int i;
+static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const zend_str_size_int length) {
+	zend_str_size_int i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with[i];
 	}
 }
 
-static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const int key_len) {
+static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const zend_str_size_int key_len) {
 	memset(K, 0, ops->block_size);
 	if (key_len > ops->block_size) {
 		/* Reduce the key first */
@@ -231,7 +231,7 @@ static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *
 	php_hash_string_xor_char(K, K, 0x36, ops->block_size);
 }
 
-static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops *ops, void *context, const unsigned char *key, const unsigned char *data, const long data_size) {
+static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops *ops, void *context, const unsigned char *key, const unsigned char *data, const php_int_t data_size) {
 	ops->hash_init(context);
 	ops->hash_update(context, key, ops->block_size);
 	ops->hash_update(context, data, data_size);
@@ -241,13 +241,13 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
 {
 	char *algo, *data, *digest, *key, *K;
-	int algo_len, data_len, key_len;
+	zend_str_size_int algo_len, data_len, key_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|b", &algo, &algo_len, &data, &data_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS|b", &algo, &algo_len, &data, &data_len, 
 																  &key, &key_len, &raw_output) == FAILURE) {
 		return;
 	}
@@ -274,7 +274,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		int n;
+		zend_str_size_int n;
 		ops->hash_init(context);
 		ops->hash_update(context, (unsigned char *) K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
@@ -333,13 +333,14 @@ Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
 	char *algo, *key = NULL;
-	int algo_len, key_len = 0, argc = ZEND_NUM_ARGS();
-	long options = 0;
+	zend_str_size_int algo_len, key_len = 0;
+	int argc = ZEND_NUM_ARGS();
+	php_int_t options = 0;
 	void *context;
 	const php_hash_ops *ops;
 	php_hash_data *hash;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|ls", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "S|iS", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
 		return;
 	}
 
@@ -400,9 +401,9 @@ PHP_FUNCTION(hash_update)
 	zval *zhash;
 	php_hash_data *hash;
 	char *data;
-	int data_len;
+	zend_str_size_int data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zhash, &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &zhash, &data, &data_len) == FAILURE) {
 		return;
 	}
 
@@ -421,9 +422,9 @@ PHP_FUNCTION(hash_update_stream)
 	zval *zhash, *zstream;
 	php_hash_data *hash;
 	php_stream *stream = NULL;
-	long length = -1, didread = 0;
+	php_int_t length = -1, didread = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zhash, &zstream, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|i", &zhash, &zstream, &length) == FAILURE) {
 		return;
 	}
 
@@ -432,7 +433,8 @@ PHP_FUNCTION(hash_update_stream)
 
 	while (length) {
 		char buf[1024];
-		long n, toread = 1024;
+		zend_str_size_int n;
+		php_int_t toread = 1024;
 
 		if (length > 0 && toread > length) {
 			toread = length;
@@ -460,9 +462,9 @@ PHP_FUNCTION(hash_update_file)
 	php_stream_context *context;
 	php_stream *stream;
 	char *filename, buf[1024];
-	int filename_len, n;
+	zend_str_size_int filename_len, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -493,7 +495,7 @@ PHP_FUNCTION(hash_final)
 	zend_bool raw_output = 0;
 	zend_rsrc_list_entry *le;
 	char *digest;
-	int digest_len;
+	zend_str_size_int digest_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &zhash, &raw_output) == FAILURE) {
 		return;
@@ -505,7 +507,7 @@ PHP_FUNCTION(hash_final)
 	digest = emalloc(digest_len + 1);
 	hash->ops->hash_final((unsigned char *) digest, hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
-		int i;
+		zend_str_size_int i;
 
 		/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
 		for(i=0; i < hash->ops->block_size; i++) {
@@ -591,9 +593,9 @@ PHP_FUNCTION(hash_algos)
 {
 	HashPosition pos;
 	char *str;
-	uint str_len;
-	long type;
-	ulong idx;
+	zend_str_size_uint str_len;
+	php_int_t type;
+	php_uint_t idx;
 
 	array_init(return_value);
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
@@ -611,14 +613,16 @@ PHP_FUNCTION(hash_pbkdf2)
 {
 	char *returnval, *algo, *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
-	long loops, i, j, algo_len, pass_len, iterations, length, digest_length = 0;
-	int argc, salt_len = 0;
+	php_int_t loops, i, j, iterations, length;
+	zend_str_size_int algo_len, pass_len, digest_length = 0;
+	int argc;
+	zend_str_size_int salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
 
 	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "SSSi|ib", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -629,17 +633,17 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: %ld", iterations);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: " ZEND_INT_FMT, iterations);
 		RETURN_FALSE;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: %ld", length);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: %zd", length);
 		RETURN_FALSE;
 	}
 
-	if (salt_len > INT_MAX - 4) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %d supplied", salt_len);
+	if (salt_len > PHP_INT_MAX - 4) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of PHP_INT_MAX - 4 bytes: " ZEND_UINT_FMT " supplied", salt_len);
 		RETURN_FALSE;
 	}
 
@@ -665,10 +669,10 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 	digest_length = length;
 	if (!raw_output) {
-		digest_length = (long) ceil((float) length / 2.0);
+		digest_length = (php_int_t) ceil((float) length / 2.0);
 	}
 
-	loops = (long) ceil((float) digest_length / (float) ops->digest_size);
+	loops = (php_int_t) ceil((float) digest_length / (float) ops->digest_size);
 
 	result = safe_emalloc(loops, ops->digest_size, 0);
 
@@ -684,7 +688,7 @@ PHP_FUNCTION(hash_pbkdf2)
 		computed_salt[salt_len + 2] = (unsigned char) ((i & 0xFF00) >> 8);
 		computed_salt[salt_len + 3] = (unsigned char) (i & 0xFF);
 
-		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (long) salt_len + 4);
+		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (php_int_t) salt_len + 4);
 		php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
 		/* } */
 
@@ -831,9 +835,9 @@ PHP_FUNCTION(mhash)
    Gets the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
 {
-	long algorithm;
+	php_int_t algorithm;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &algorithm) == FAILURE) {
 		return;
 	}
 
@@ -862,9 +866,9 @@ PHP_FUNCTION(mhash_count)
    Gets the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
-	long algorithm;
+	php_int_t algorithm;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &algorithm) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -887,18 +891,16 @@ PHP_FUNCTION(mhash_get_block_size)
    Generates a key using hash functions */
 PHP_FUNCTION(mhash_keygen_s2k)
 {
-	long algorithm, l_bytes;
-	int bytes;
+	php_int_t algorithm, l_bytes;
 	char *password, *salt;
-	int password_len, salt_len;
+	zend_str_size_int password_len, salt_len;
 	char padded_salt[SALT_SIZE];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lssl", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iSSi", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
 		return;
 	}
 
-	bytes = (int)l_bytes;
-	if (bytes <= 0){
+	if (l_bytes <= 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater than 0");
 		RETURN_FALSE;
 	}
@@ -920,10 +922,10 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				unsigned char null = '\0';
 				void *context;
 				char *key, *digest;
-				int i = 0, j = 0;
-				int block_size = ops->digest_size;
-				int times = bytes / block_size;
-				if (bytes % block_size  != 0) times++;
+				php_int_t i = 0, j = 0;
+				zend_str_size_int block_size = ops->digest_size;
+				php_int_t times = l_bytes / block_size;
+				if (l_bytes % block_size  != 0) times++;
 
 				context = emalloc(ops->context_size);
 				ops->hash_init(context);
@@ -943,8 +945,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 					memcpy( &key[i*block_size], digest, block_size);
 				}
 
-				RETVAL_STRINGL(key, bytes, 1);
-				memset(key, 0, bytes);
+				RETVAL_STRINGL(key, l_bytes, 1);
+				memset(key, 0, l_bytes);
 				efree(digest);
 				efree(context);
 				efree(key);
@@ -1039,8 +1041,8 @@ PHP_MINFO_FUNCTION(hash)
 	HashPosition pos;
 	char buffer[2048];
 	char *s = buffer, *e = s + sizeof(buffer), *str;
-	ulong idx;
-	long type;
+	php_uint_t idx;
+	php_int_t type;
 
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
 		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTENT;
