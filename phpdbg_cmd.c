@@ -219,6 +219,9 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		if (buffered == NULL) {
+		
+			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+			
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C)) ||

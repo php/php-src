@@ -27,6 +27,13 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
 #if PHP_VERSION_ID >= 50500
@@ -477,6 +484,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
 	{'E', 0, "step-through-eval"},
+	{'l', 1, "listen"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -535,6 +543,90 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	}
 } /* }}} */
 
+int phpdbg_open_socket(short port) /* {{{ */
+{
+	int fd = socket(AF_INET, SOCK_STREAM, 0);
+	
+	switch (fd) {
+		case -1:
+			return -1;
+			
+		default: {
+			int boolean = 1;
+			
+			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &boolean, sizeof(int))) {
+				case -1:
+					close(fd);
+					return -2;
+				
+				default: {
+					struct sockaddr_in address;
+					
+					memset(&address, 0, sizeof(address));
+					
+					address.sin_port = htons(port);
+					address.sin_family = AF_INET;
+					
+					if (!inet_pton(AF_INET, "127.0.0.1", &address.sin_addr)) {
+						close(fd);
+						return -3;
+					}
+					
+					switch (bind(fd, (struct sockaddr *)&address, sizeof(address))) {
+						case -1:
+							close(fd);
+							return -4;
+							
+						default: {
+							listen(fd, 5);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return fd;
+} /* }}} */
+
+int phpdbg_open_sockets(short listen[2], FILE* streams[2]) /* {{{ */
+{
+	int sockets[2] = {
+		phpdbg_open_socket(listen[0]),
+		phpdbg_open_socket(listen[1])
+	};
+	int accepted[2] = {-1, -1};
+	
+	streams[0] = NULL;
+	streams[1] = NULL;
+	
+	if (sockets[0] < 0 || sockets[1] < 0) {
+		if (sockets[0] >= 0)
+			close(sockets[0]);
+		if (sockets[1] >= 0)
+			close(sockets[1]);
+		return FAILURE;
+	}
+	
+	{
+		struct sockaddr_in address;
+        socklen_t size = sizeof(address);
+
+        memset(&address, 0, size);
+        accepted[0] = accept(
+        	sockets[0], &address, &size);
+        
+        memset(&address, 0, size);
+        accepted[1] = accept(
+        	sockets[1], &address, &size);
+	}
+	
+	streams[0] = fdopen(accepted[0], "r");
+	streams[1] = fdopen(accepted[1], "w");
+
+	return SUCCESS;
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -556,6 +648,8 @@ int main(int argc, char **argv) /* {{{ */
 	int run = 0;
 	int step = 0;
 	char *bp_tmp_file;
+	short listen[2];
+	FILE* streams[2] = {NULL, NULL};
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -599,7 +693,9 @@ phpdbg_main:
 	opt = 0;
 	run = 0;
 	step = 0;
-
+	listen[0] = 0;
+	listen[1] = 0;
+	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
@@ -693,9 +789,23 @@ phpdbg_main:
 			case 'q': /* hide banner */
 				show_banner = 0;
 			break;
+			
+			/* if you pass a listen port, we will accept input on listen port */
+			/* and write output to listen port * 2 */
+			
+			case 'l': /* set listen settings */
+				listen[0] = atoi(php_optarg);
+				listen[1] = (listen[0] * 2);
+			break;
 		}
 	}
 
+	if (!cleaning && 
+		(listen[0] && listen[1])) {
+		phpdbg_open_sockets(listen, streams);
+		/* now is a sensible time to announce listen settings on the console */
+	}
+	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
@@ -733,10 +843,21 @@ phpdbg_main:
 
 		PG(modules_activated) = 0;
 
-		/* set up basic io here */
-		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
-		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
-		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+		/* setup io here */
+		if (streams[0] && streams[1]) {
+			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
+			/* remote console */
+			PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
+			PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
+			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+			
+			signal(SIGPIPE, SIG_IGN);
+		} else {
+			/* local console */
+			PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
+			PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
+			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+		}
 
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(
