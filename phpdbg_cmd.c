@@ -220,11 +220,13 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		if (buffered == NULL) {
 		
-			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {	
+				fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+			}
 			
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
-			if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C)) ||
+			if ((!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && !phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) ||
 				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
@@ -232,10 +234,16 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 				zend_bailout();
 				return NULL;
 			}
-
+			
 			cmd = buf;
 #else
-			cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+				char buf[PHPDBG_MAX_CMD];
+				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
+					cmd = buf;
+				} else cmd = NULL;
+			} else cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+			
 			if (!cmd) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
@@ -244,7 +252,9 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 				return NULL;
 			}
 
-			add_history(cmd);
+			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+				add_history(cmd);
+			}
 #endif
 		} else cmd = buffered;
 
@@ -275,7 +285,8 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 #endif
 
 #ifdef HAVE_LIBREADLINE
-		if (!buffered && cmd) {
+		if (!buffered && cmd && 
+			!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 			free(cmd);
 		}
 #endif

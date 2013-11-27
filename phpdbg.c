@@ -589,11 +589,11 @@ int phpdbg_open_socket(short port) /* {{{ */
 	return fd;
 } /* }}} */
 
-int phpdbg_open_sockets(short listen[2], FILE* streams[2]) /* {{{ */
+int phpdbg_open_sockets(int listen[2], FILE* streams[2]) /* {{{ */
 {
 	int sockets[2] = {
-		phpdbg_open_socket(listen[0]),
-		phpdbg_open_socket(listen[1])
+		phpdbg_open_socket((short)listen[0]),
+		phpdbg_open_socket((short)listen[1])
 	};
 	int accepted[2] = {-1, -1};
 	
@@ -614,11 +614,11 @@ int phpdbg_open_sockets(short listen[2], FILE* streams[2]) /* {{{ */
 
         memset(&address, 0, size);
         accepted[0] = accept(
-        	sockets[0], &address, &size);
+        	sockets[0], (struct sockaddr *) &address, &size);
         
         memset(&address, 0, size);
         accepted[1] = accept(
-        	sockets[1], &address, &size);
+        	sockets[1], (struct sockaddr *) &address, &size);
 	}
 	
 	streams[0] = fdopen(accepted[0], "r");
@@ -648,7 +648,7 @@ int main(int argc, char **argv) /* {{{ */
 	int run = 0;
 	int step = 0;
 	char *bp_tmp_file;
-	short listen[2];
+	int listen[2];
 	FILE* streams[2] = {NULL, NULL};
 
 #ifdef ZTS
@@ -803,7 +803,6 @@ phpdbg_main:
 	if (!cleaning && 
 		(listen[0] && listen[1])) {
 		phpdbg_open_sockets(listen, streams);
-		/* now is a sensible time to announce listen settings on the console */
 	}
 	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
@@ -842,6 +841,9 @@ phpdbg_main:
 #endif
 
 		PG(modules_activated) = 0;
+		
+		/* set flags from command line */
+		PHPDBG_G(flags) = flags;
 
 		/* setup io here */
 		if (streams[0] && streams[1]) {
@@ -850,7 +852,6 @@ phpdbg_main:
 			PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
 			PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
 			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
-			
 			signal(SIGPIPE, SIG_IGN);
 		} else {
 			/* local console */
@@ -875,9 +876,6 @@ phpdbg_main:
 			}
 			free(oplog_file);
 		}
-
-		/* set flags from command line */
-		PHPDBG_G(flags) = flags;
 
 		/* set default colors */
 		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold") TSRMLS_CC);

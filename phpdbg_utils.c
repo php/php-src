@@ -299,7 +299,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 } /* }}} */
 
 PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
-{
+{	
 	/* find cached prompt */
 	if (PHPDBG_G(prompt)[1]) {
 		return PHPDBG_G(prompt)[1];
