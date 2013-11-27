@@ -108,7 +108,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 						case PHPDBG_BREAK_COND: {
 							fprintf(handle, 
 								"break on %s\n", 
-								Z_STRVAL(((phpdbg_breakcond_t*)brake)->code));
+								((phpdbg_breakcond_t*)brake)->code);
 						} break;
 					}
 				}
@@ -307,8 +307,6 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 		zend_uint cops = CG(compiler_options);
 		zval pv;
 
-		ZVAL_STRINGL(&new_break.code, expr, expr_len, 1);
-
 		new_break.hash = hash;
 		new_break.id = PHPDBG_G(bp_count)++;
 		new_break.type = PHPDBG_BREAK_COND;
@@ -317,8 +315,8 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 
 		CG(compiler_options) = ZEND_COMPILE_DEFAULT_FOR_EVAL;
 
-		Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
-		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+		new_break.code_len = Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
+		new_break.code = Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
@@ -336,14 +334,14 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 				sizeof(phpdbg_breakcond_t), (void**)&brake);
 
 			phpdbg_notice("Conditional breakpoint #%d added %s/%p",
-				brake->id, Z_STRVAL(brake->code), brake->ops);
+				brake->id, brake->code, brake->ops);
 
 			PHPDBG_G(flags) |= PHPDBG_HAS_COND_BP;
 			PHPDBG_BREAK_MAPPING(new_break.id, &PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 		} else {
 			 phpdbg_error(
 				"Failed to compile code for expression %s", expr);
-			 zval_dtor(&new_break.code);
+			 efree((char*)new_break.code);
 			 PHPDBG_G(bp_count)--;
 		}
 		CG(compiler_options) = cops;
@@ -507,7 +505,7 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D) /* {{{ */
 				breakpoint = SUCCESS;
 			}
 		} zend_catch {
-			phpdbg_error("Error detected while evaluating expression %s", Z_STRVAL(bp->code));
+			phpdbg_error("Error detected while evaluating expression %s", bp->code);
 			CG(interactive) = orig_interactive;
 
 			EG(no_extensions)=1;
@@ -532,7 +530,7 @@ int phpdbg_find_conditional_breakpoint(TSRMLS_D) /* {{{ */
 
 	if (breakpoint == SUCCESS) {
 		phpdbg_notice("Conditional breakpoint #%d: (%s) %s:%u",
-			bp->id, Z_STRVAL(bp->code),
+			bp->id, bp->code,
 			zend_get_executed_filename(TSRMLS_C),
 			zend_get_executed_lineno(TSRMLS_C));
 	}
@@ -753,7 +751,7 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position);
 			     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void**) &brake, &position) == SUCCESS;
 			     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
-				phpdbg_writeln("#%d\t\t%s", brake->id, Z_STRVAL(brake->code));
+				phpdbg_writeln("#%d\t\t%s", brake->id, brake->code);
 			}
 		} break;
 

@@ -87,8 +87,9 @@ typedef struct _phpdbg_breakop_t {
 typedef struct _phpdbg_breakcond_t {
 	int             id;
 	zend_uchar  	type;
+	const char     *code;
+	size_t			code_len;
 	zend_ulong      hash;
-	zval            code;
 	zend_op_array  *ops;
 } phpdbg_breakcond_t;
 

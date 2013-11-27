@@ -115,7 +115,7 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 					brake->ops TSRMLS_CC);
 			efree(brake->ops);
 		}
-		zval_dtor(&brake->code);
+		efree((char*)brake->code);
 	}
 } /* }}} */
 
