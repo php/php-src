@@ -162,11 +162,11 @@ typedef struct _php_ps_globals {
 	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
 	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
 
-	long hash_func;
+	php_int_t hash_func;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	php_hash_ops *hash_ops;
 #endif
-	long hash_bits_per_character;
+	php_int_t hash_bits_per_character;
 	int send_cookie;
 	int define_sid;
 	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
@@ -176,7 +176,7 @@ typedef struct _php_ps_globals {
 	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
 	smart_str rfc1867_name;    /* session.upload_progress.name */
-	long rfc1867_freq;         /* session.upload_progress.freq */
+	php_int_t rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */

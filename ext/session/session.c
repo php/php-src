@@ -2756,7 +2756,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				ALLOC_INIT_ZVAL(progress->files);
 				array_init(progress->files);
 
-				add_assoc_long_ex(progress->data, "start_time",      sizeof("start_time"),      (long)sapi_get_request_time(TSRMLS_C));
+				add_assoc_long_ex(progress->data, "start_time",      sizeof("start_time"),      (php_int_t)sapi_get_request_time(TSRMLS_C));
 				add_assoc_long_ex(progress->data, "content_length",  sizeof("content_length"),  progress->content_length);
 				add_assoc_zval_ex(progress->data, "bytes_processed", sizeof("bytes_processed"), progress->post_bytes_processed);
 				add_assoc_bool_ex(progress->data, "done",            sizeof("done"),            0);
@@ -2781,7 +2781,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_long_ex(progress->current_file, "error",           sizeof("error"),           0);
 
 			add_assoc_bool_ex(progress->current_file, "done",            sizeof("done"),            0);
-			add_assoc_long_ex(progress->current_file, "start_time",      sizeof("start_time"),      (long)time(NULL));
+			add_assoc_long_ex(progress->current_file, "start_time",      sizeof("start_time"),      (php_int_t)time(NULL));
 			add_assoc_zval_ex(progress->current_file, "bytes_processed", sizeof("bytes_processed"), progress->current_file_bytes_processed);
 
 			add_next_index_zval(progress->files, progress->current_file);

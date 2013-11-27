@@ -322,7 +322,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -384,7 +384,7 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key TSRMLS_CC);
