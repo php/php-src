@@ -2717,7 +2717,9 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	if (expr) {
 		SET_NODE(opline->op1, expr);
 
-		if (do_end_vparse && zend_is_function_or_method_call(expr)) {
+		if (!do_end_vparse) {
+			opline->extended_value = ZEND_RETURNS_VALUE;
+		} else if (zend_is_function_or_method_call(expr)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
 		}
 	} else {
