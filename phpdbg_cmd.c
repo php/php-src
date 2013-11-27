@@ -246,7 +246,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 		} else cmd = buffered;
 
 		/* allocate and sanitize buffer */
-		buffer = (phpdbg_input_t*) emalloc(sizeof(phpdbg_input_t));
+		buffer = (phpdbg_input_t*) ecalloc(1, sizeof(phpdbg_input_t));
 		if (!buffer) {
 			return NULL;
 		}
@@ -283,6 +283,21 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 	return NULL;
 } /* }}} */
 
+PHPDBG_API void phpdbg_destroy_argv(phpdbg_input_t **argv, int argc TSRMLS_DC) /* {{{ */
+{
+	if (argv) {
+		if (argc) {
+			int arg;
+			for (arg=0; arg<argc; arg++) {
+				phpdbg_destroy_input(
+					&argv[arg] TSRMLS_CC);
+			}
+		}
+		efree(argv);
+	}
+	
+} /* }}} */
+
 PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 {
 	if (*input) {
@@ -290,17 +305,8 @@ PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
 			efree((*input)->string);
 		}
 
-		if ((*input)->argc > 0) {
-			int arg;
-			for (arg=0; arg<(*input)->argc; arg++) {
-				phpdbg_destroy_input(
-					&(*input)->argv[arg] TSRMLS_CC);
-			}
-		}
-
-		if ((*input)->argv) {
-			efree((*input)->argv);
-		}
+		phpdbg_destroy_argv(
+			(*input)->argv, (*input)->argc TSRMLS_CC);
 
 		efree(*input);
 	}

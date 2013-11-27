@@ -66,7 +66,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 		phpdbg_notice(
 			"Exporting %ld breakpoints", 
 			zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]));
-		
+		/* this only looks like magic, it isn't */	
 		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], &position[0]);
 			zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], (void**)&table, &position[0]) == SUCCESS;
 			zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], &position[0])) {

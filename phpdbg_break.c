@@ -48,7 +48,7 @@ PHPDBG_BREAK(method) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
-
+	
 	return SUCCESS;
 } /* }}} */
 
