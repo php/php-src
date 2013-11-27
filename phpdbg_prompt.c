@@ -573,6 +573,9 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_hash_clean(
 			&PHPDBG_G(seek));
 
+		/* reset hit counters */
+		phpdbg_reset_breakpoints(TSRMLS_C);
+
 		zend_try {
 			php_output_activate(TSRMLS_C);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;

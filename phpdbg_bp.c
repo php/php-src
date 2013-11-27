@@ -56,6 +56,26 @@ static void phpdbg_class_breaks_dtor(void *data) /* {{{ */
 	efree((char*)bp->func_name);
 } /* }}} */
 
+PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D) /* {{{ */
+{
+	if (zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP])) {
+		HashPosition position[2];
+		HashTable **table = NULL;
+		
+		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], &position[0]);
+			zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], (void**)&table, &position[0]) == SUCCESS;
+			zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], &position[0])) {
+			phpdbg_breakbase_t *brake;
+			
+			for (zend_hash_internal_pointer_reset_ex((*table), &position[1]);
+				zend_hash_get_current_data_ex((*table), (void**)&brake, &position[1]) == SUCCESS;
+				zend_hash_move_forward_ex((*table), &position[1])) {
+				brake->hits = 0;	
+			}
+		}
+	}
+} /* }}} */
+
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 {
 	HashPosition position[2];

@@ -104,6 +104,7 @@ phpdbg_breakbase_t* phpdbg_find_breakpoint(zend_execute_data* TSRMLS_DC);
 
 PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC);
 PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D);
+PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D);
 PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t* brake, zend_bool output TSRMLS_DC);
 PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t* brake TSRMLS_DC);
 PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC);
