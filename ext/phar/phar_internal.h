@@ -567,7 +567,7 @@ char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, zend_str_size_int filename_len TSRMLS_DC);
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, zend_str_size_int filename_len TSRMLS_DC);
 int phar_mount_entry(phar_archive_data *phar, char *filename, zend_str_size_int filename_len, char *path, zend_str_size_int path_len TSRMLS_DC);
-char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar TSRMLS_DC);
+char *phar_find_in_include_path(char *file, zend_str_size_int file_len, phar_archive_data **pphar TSRMLS_DC);
 char *phar_fix_filepath(char *path, zend_str_size_int *new_len, int use_cwd TSRMLS_DC);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC);
 int phar_parse_metadata(char **buffer, zval **metadata, zend_str_size_int zip_metadata_len TSRMLS_DC);

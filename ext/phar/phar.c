@@ -988,7 +988,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, zend_str_size_int fn
 	/* tmp_len = 0 says alias length is 0, which means the alias is not stored in the phar */
 	if (tmp_len) {
 		/* if the alias is stored we enforce it (implicit overrides explicit) */
-		if (alias && alias_len && (alias_len != (int)tmp_len || strncmp(alias, buffer, tmp_len)))
+		if (alias && alias_len && (alias_len != tmp_len || strncmp(alias, buffer, tmp_len)))
 		{
 			buffer[tmp_len] = '\0';
 			php_stream_close(fp);
@@ -1089,7 +1089,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, zend_str_size_int fn
 		PHAR_GET_32(buffer, entry.uncompressed_filesize);
 		PHAR_GET_32(buffer, entry.timestamp);
 
-		if (offset == halt_offset + (int)manifest_len + 4) {
+		if (offset == halt_offset + manifest_len + 4) {
 			mydata->min_timestamp = entry.timestamp;
 			mydata->max_timestamp = entry.timestamp;
 		} else {
@@ -1530,7 +1530,7 @@ int phar_open_from_filename(char *fname, zend_str_size_int fname_len, char *alia
 static inline char *phar_strnstr(const char *buf, zend_str_size_int buf_len, const char *search, zend_str_size_int search_len) /* {{{ */
 {
 	const char *c;
-	int so_far = 0;
+	ptrdiff_t so_far = 0;
 
 	if (buf_len < search_len) {
 		return NULL;
@@ -2540,7 +2540,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int conv
 	char halt_stub[] = "__HALT_COMPILER();";
 	char *newstub, *tmp;
 	phar_entry_info *entry, *newentry;
-	int halt_offset, restore_alias_len, global_flags = 0, closeoldfile;
+	zend_str_size_int halt_offset, restore_alias_len;
+	int global_flags = 0, closeoldfile;
 	char *pos, has_dirs = 0;
 	char manifest[18], entry_buffer[24];
 	zend_off_t manifest_ftell;

@@ -957,7 +957,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int 
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return -1;
 		}
-		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
@@ -1203,7 +1203,7 @@ nostub:
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);
 
-		if (8 != (int)php_stream_write(entry.fp, sigbuf, 8) || signature_length != (int)php_stream_write(entry.fp, signature, signature_length)) {
+		if (8 != (int)php_stream_write(entry.fp, sigbuf, 8) || signature_length != php_stream_write(entry.fp, signature, signature_length)) {
 			efree(signature);
 			if (error) {
 				spprintf(error, 0, "phar error: unable to write signature to tar-based phar %s", phar->fname);

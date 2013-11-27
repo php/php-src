@@ -1125,7 +1125,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);
 
-		if (8 != (int)php_stream_write(entry.fp, sigbuf, 8) || signature_length != (int)php_stream_write(entry.fp, signature, signature_length)) {
+		if (8 != (int)php_stream_write(entry.fp, sigbuf, 8) || signature_length != php_stream_write(entry.fp, signature, signature_length)) {
 			efree(signature);
 			if (pass->error) {
 				spprintf(pass->error, 0, "phar error: unable to write signature to zip-based phar %s", phar->fname);
@@ -1195,7 +1195,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int 
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return EOF;
 		}
-		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
+		if (phar->alias_len != php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
 			}

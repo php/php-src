@@ -307,7 +307,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	php_uint_t unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry = NULL;
-	uint host_len;
+	zend_str_size_uint host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar url \"%s\" is unknown", path);

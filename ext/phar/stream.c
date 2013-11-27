@@ -165,7 +165,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	php_url *resource = NULL;
 	php_stream *fpf;
 	zval **pzoption, *metadata;
-	uint host_len;
+	zend_str_size_uint host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;

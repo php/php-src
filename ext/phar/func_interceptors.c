@@ -635,7 +635,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			arch_len = PHAR_G(last_phar_name_len);
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			entry_len = (int) filename_length;
+			entry_len = filename_length;
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
@@ -644,7 +644,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			efree(entry);
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
-			entry_len = (int) filename_length;
+			entry_len = filename_length;
 			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
 				efree(arch);
 				efree(entry);

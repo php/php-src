@@ -169,7 +169,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	sapi_header_line ctr = {0};
 	size_t got;
-	int dummy = 1;
+	php_int_t dummy = 1;
 	zend_str_size_int name_len;
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
@@ -259,7 +259,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			PHAR_G(cwd) = NULL;
 			PHAR_G(cwd_len) = 0;
 
-			if (zend_hash_add(&EG(included_files), name, name_len+1, (void *)&dummy, sizeof(int), NULL) == SUCCESS) {
+			if (zend_hash_add(&EG(included_files), name, name_len+1, (void *)&dummy, sizeof(php_int_t), NULL) == SUCCESS) {
 				if ((cwd = zend_memrchr(entry, '/', entry_len))) {
 					PHAR_G(cwd_init) = 1;
 					if (entry == cwd) {
@@ -570,7 +570,8 @@ PHP_METHOD(Phar, webPhar)
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
 	zend_str_size_int fname_len, entry_len, index_php_len = 0;
-	int code, not_cgi, ret, free_pathinfo = 0;
+	php_int_t code;
+	int not_cgi, ret, free_pathinfo = 0;
 	phar_archive_data *phar = NULL;
 	phar_entry_info *info = NULL;
 

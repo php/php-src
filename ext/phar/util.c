@@ -1399,7 +1399,7 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature 
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, zend_str_size_int key_len, char **signature, int *signature_len TSRMLS_DC) /* {{{ */
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, zend_str_size_int key_len, char **signature, zend_str_size_int *signature_len TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -1528,7 +1528,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
 			EVP_MD_CTX md_ctx;
 #else
-			int tempsig;
+			zend_str_size_int tempsig;
 #endif
 			php_uint32 pubkey_len;
 			char *pubkey = NULL, *pfile;
