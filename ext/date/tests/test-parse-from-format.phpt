@@ -32,8 +32,8 @@ object(DateTime)#2 (3) {
   string(6) "+02:00"
 }
 
-string(16) "l, d-M-y H:i:s T"
-string(36) "Tuesday, 08-Jul-08 22:14:12 GMT+0200"
+string(16) "l, d-M-Y H:i:s T"
+string(38) "Tuesday, 08-Jul-2008 22:14:12 GMT+0200"
 object(DateTime)#1 (3) {
   ["date"]=>
   string(19) "2008-07-08 22:14:12"
