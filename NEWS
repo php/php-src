@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.23
+28 Nov 2013, PHP 5.4.23 RC1
 
 - Core:
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
@@ -24,7 +24,7 @@ PHP                                                                        NEWS
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
-?? ??? 2013, PHP 5.4.22
+14 Nov 2013, PHP 5.4.22
 
 - Core:
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
