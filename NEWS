@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.4.24
+
 ?? ??? 2013, PHP 5.4.23
 
 - Core:
@@ -24,7 +26,7 @@ PHP                                                                        NEWS
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
-?? ??? 2013, PHP 5.4.22
+14 Nov 2013, PHP 5.4.22
 
 - Core:
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
