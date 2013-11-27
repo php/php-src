@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
     string). (Laruence)
+  . Fixed bug #65969 (Chain assignment with T_LIST failure). (Dmitry)
 
 - OPCache
   . Fixed bug #66176 (Invalid constant substitution). (Dmitry)

@@ -1247,9 +1247,8 @@ convert_to_array:
 	}
 }
 
-static void zend_fetch_dimension_address_read(temp_variable *result, zval **container_ptr, zval *dim, int dim_type, int type TSRMLS_DC)
+static void zend_fetch_dimension_address_read(temp_variable *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
 {
-	zval *container = *container_ptr;
 	zval **retval;
 
 	switch (Z_TYPE_P(container)) {
