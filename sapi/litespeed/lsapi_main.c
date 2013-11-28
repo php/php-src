@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: lsapi_main.c,v 1.57 2013/08/23 14:50:25 gwang Exp $ */
+/* $Id: lsapi_main.c,v 1.59 2013/11/18 21:14:38 gwang Exp $ */
 
 #include "php.h"
 #include "SAPI.h"
@@ -372,7 +372,7 @@ static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.4",
+    "LiteSpeed V6.6",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */

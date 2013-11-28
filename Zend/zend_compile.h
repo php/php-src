@@ -216,6 +216,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+/* function has arguments with type hinting */
+#define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 
@@ -844,6 +847,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_NEW      1<<1
+#define ZEND_RETURNS_VALUE    1<<2
 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
