@@ -317,6 +317,7 @@ typedef struct _zend_object {
 } zend_object;
 
 #include "zend_object_handlers.h"
+#include "zend_ast.h"
 
 typedef union _zvalue_value {
 	long lval;					/* long value */
@@ -327,6 +328,7 @@ typedef union _zvalue_value {
 	} str;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
+	zend_ast *ast;
 } zvalue_value;
 
 struct _zval_struct {
@@ -587,7 +589,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
-#define IS_CALLABLE	10
+#define IS_CONSTANT_AST		10
+#define IS_CALLABLE	11
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f
@@ -596,6 +599,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100
+
+#define IS_CONSTANT_TYPE(type) (((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
