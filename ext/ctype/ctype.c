@@ -159,7 +159,7 @@ static PHP_MINFO_FUNCTION(ctype)
 		tmp = *c; \
 	} \
 	if (Z_TYPE(tmp) == IS_STRING) { \
-		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRLEN(tmp); \
+		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRSIZE(tmp); \
 		if (e == p) {	\
 			if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 			RETURN_FALSE;	\
