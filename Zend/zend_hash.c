@@ -876,12 +876,6 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 }
 
 
-ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength)
-{
-	return zend_inline_hash_func(arKey, nKeyLength);
-}
-
-
 /* Returns SUCCESS if found and FAILURE if not. The pointer to the
  * data is returned in pData. The reason is that there's no reason
  * someone using the hash table might not want to have NULL data
