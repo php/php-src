@@ -319,10 +319,11 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 			}
 		} while (--i);
 
-		if (!branch ||
+		if (i ||
 		    (zend_ulong)(branch->op_array + branch->op_array->last) <= opline ||
 		    (opline - (zend_ulong)branch->op_array) % sizeof(zend_op) > 0) {
 			phpdbg_error("No opline could be found at 0x%lx", opline);
+			return;
 		}
 
 		opline_break.opline = (opline - (zend_ulong)branch->op_array) / sizeof(zend_op);
@@ -379,7 +380,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) {
+PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) {
 	phpdbg_breakline_t opline_break;
 	if (op_array->last < brake->opline) {
 		if (brake->class_name == NULL) {
@@ -387,6 +388,8 @@ PHPDBG_API void phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_
 		} else {
 			phpdbg_error("There are only %d oplines in method %s::%s (breaking at opline %d impossible)", op_array->last, brake->class_name, brake->func_name, brake->opline);
 		}
+
+		return FAILURE;
 	}
 
 	opline_break.id = brake->id;
@@ -396,6 +399,8 @@ PHPDBG_API void phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_
 	PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
 	zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline_break.opline, &opline_break, sizeof(phpdbg_breakline_t), NULL);
+
+	return SUCCESS;
 }
 
 PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC) {
@@ -416,9 +421,7 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 	for (zend_hash_internal_pointer_reset_ex(oplines_table, &position);
 	     zend_hash_get_current_data_ex(oplines_table, (void**) &brake, &position) == SUCCESS;
 	     zend_hash_move_forward_ex(oplines_table, &position)) {
-		zend_try {
-			phpdbg_resolve_op_array_break(brake, op_array TSRMLS_CC);
-		} zend_end_try();
+		phpdbg_resolve_op_array_break(brake, op_array TSRMLS_CC);
 	}
 }
 
@@ -447,9 +450,12 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 		} else {
 			phpdbg_error("%s::%s is not an user defined method, no oplines exist", new_break->class_name, new_break->func_name);
 		}
+		return 2;
 	}
 
-	phpdbg_resolve_op_array_break(new_break, &func->op_array TSRMLS_CC);
+	if (phpdbg_resolve_op_array_break(new_break, &func->op_array TSRMLS_CC) == FAILURE) {
+		return 2;
+	}
 
 	return SUCCESS;
 }
@@ -467,10 +473,17 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 	new_break.opline = opline;
 	new_break.id = PHPDBG_G(bp_count)++;
 
-	if (phpdbg_resolve_opline_break(&new_break TSRMLS_CC) == FAILURE) {
-		phpdbg_notice("Pending breakpoint #%d at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
-	} else {
-		phpdbg_notice("Breakpoint #%d added at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
+	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
+		case FAILURE:
+			phpdbg_notice("Pending breakpoint #%d at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
+			break;
+
+		case SUCCESS:
+			phpdbg_notice("Breakpoint #%d added at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
+			break;
+
+		case 2:
+			return;
 	}
 
 	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], new_break.class_name, new_break.class_len, (void **)&class_table) == FAILURE) {
@@ -512,10 +525,17 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int 
 	new_break.opline = opline;
 	new_break.id = PHPDBG_G(bp_count)++;
 
-	if (phpdbg_resolve_opline_break(&new_break TSRMLS_CC) == FAILURE) {
-		phpdbg_notice("Pending breakpoint #%d at %s:%d", new_break.id, new_break.func_name, new_break.opline);
-	} else {
-		phpdbg_notice("Breakpoint #%d added at %s:%d", new_break.id, new_break.func_name, new_break.opline);
+	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
+		case FAILURE:
+			phpdbg_notice("Pending breakpoint #%d at %s:%d", new_break.id, new_break.func_name, new_break.opline);
+			break;
+
+		case SUCCESS:
+			phpdbg_notice("Breakpoint #%d added at %s:%d", new_break.id, new_break.func_name, new_break.opline);
+			break;
+
+		case 2:
+			return;
 	}
 
 	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], new_break.func_name, new_break.func_len, (void **)&func_table) == FAILURE) {
