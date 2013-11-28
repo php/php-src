@@ -1951,7 +1951,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	LOAD_OPLINE();
 
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-		if (fbc->common.arg_info) {
+		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			zend_uint i=0;
 			zval **p = (zval**)EX(function_state).arguments;
 			ulong arg_count = opline->extended_value;
