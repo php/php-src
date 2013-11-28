@@ -413,7 +413,7 @@ static int phar_stream_seek(php_stream *stream, zend_off_t offset, int whence, z
 		default:
 			temp = 0;
 	}
-	if (temp > data->zero + (off_t) entry->uncompressed_filesize) {
+	if (temp > data->zero + (zend_off_t) entry->uncompressed_filesize) {
 		*newoffset = -1;
 		return -1;
 	}

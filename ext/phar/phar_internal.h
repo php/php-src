@@ -179,15 +179,15 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
-	zend_str_size_int         cwd_len;
+	php_int_t         cwd_len;
 	int         cwd_init;
 	char        *openssl_privatekey;
 	int         openssl_privatekey_len;
 	/* phar_get_archive cache */
 	char*       last_phar_name;
-	zend_str_size_int         last_phar_name_len;
+	int         last_phar_name_len;
 	char*       last_alias;
-	zend_str_size_int         last_alias_len;
+	int         last_alias_len;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
@@ -244,7 +244,7 @@ typedef struct _phar_entry_info {
 	/* when changing compression, save old flags in case fp is NULL */
 	php_uint32               old_flags;
 	zval                     *metadata;
-	zend_str_size_int                      metadata_len; /* only used for cached manifests */
+	int                      metadata_len; /* only used for cached manifests */
 	php_uint32               filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
@@ -287,12 +287,12 @@ typedef struct _phar_entry_info {
 /* information about a phar file (the archive itself) */
 struct _phar_archive_data {
 	char                     *fname;
-	int                      fname_len;
+	zend_str_size_int                      fname_len;
 	/* for phar_detect_fname_ext, this stores the location of the file extension within fname */
 	char                     *ext;
 	zend_str_size_int                      ext_len;
 	char                     *alias;
-	zend_str_size_int                      alias_len;
+	int                      alias_len;
 	char                     version[12];
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
@@ -312,7 +312,7 @@ struct _phar_archive_data {
 	zend_str_size_int                      sig_len;
 	char                     *signature;
 	zval                     *metadata;
-	zend_str_size_int                      metadata_len; /* only used for cached manifests */
+	int                      metadata_len; /* only used for cached manifests */
 	uint                     phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	unsigned int             is_temporary_alias:1;
@@ -456,7 +456,7 @@ static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry TSRMLS_DC)
 
 typedef struct _phar_mime_type {
 	char *mime;
-	zend_str_size_int len;
+	int len;
 	/* one of PHAR_MIME_* */
 	char type;
 } phar_mime_type;
