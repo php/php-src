@@ -2611,6 +2611,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 
 	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
+	timelib_update_from_sse(dateobj->time);
 
 	dateobj->time->have_relative = 0;
 

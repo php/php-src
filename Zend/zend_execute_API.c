@@ -592,7 +592,10 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
+			if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
+				zend_ast_evaluate(&const_value, *(zend_ast **)str_index TSRMLS_CC);
+				zend_ast_destroy(*(zend_ast **)str_index);
+			} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
 				char *actual;
 				const char *save = str_index;
 				if ((colon = (char*)zend_memrchr(str_index, ':', str_index_len - 3))) {
@@ -660,6 +663,15 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		}
 		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
+	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		SEPARATE_ZVAL_IF_NOT_REF(pp);
+		p = *pp;
+
+		zend_ast_evaluate(&const_value, Z_AST_P(p) TSRMLS_CC);
+		if (inline_change) {
+			zend_ast_destroy(Z_AST_P(p));
+		}
+		ZVAL_COPY_VALUE(p, &const_value);
 	}
 	return 0;
 }

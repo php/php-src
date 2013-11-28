@@ -51,6 +51,7 @@
 typedef void (*zend_persist_func_t)(void * TSRMLS_DC);
 
 static void zend_persist_zval_ptr(zval **zp TSRMLS_DC);
+static void zend_persist_zval(zval *z TSRMLS_DC);
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 static const Bucket *uninitialized_bucket = NULL;
@@ -138,6 +139,29 @@ static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElem
 #endif
 }
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
+{
+	int i;
+	zend_ast *node;
+
+	if (ast->kind == ZEND_CONST) {
+		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zval));
+		node->u.val = (zval*)(node + 1);
+		zend_persist_zval(node->u.val TSRMLS_CC);
+	} else {
+		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		for (i = 0; i < ast->children; i++) {
+			if ((&node->u.child)[i]) {
+				(&node->u.child)[i] = zend_persist_ast((&node->u.child)[i] TSRMLS_CC);
+			}
+		}
+	}
+	efree(ast);
+	return node;
+}
+#endif
+
 static void zend_persist_zval(zval *z TSRMLS_DC)
 {
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -154,6 +178,11 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			zend_accel_store(z->value.ht, sizeof(HashTable));
 			zend_hash_persist(z->value.ht, (zend_persist_func_t) zend_persist_zval_ptr, sizeof(zval**) TSRMLS_CC);
 			break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		case IS_CONSTANT_AST:
+			Z_AST_P(z) = zend_persist_ast(Z_AST_P(z) TSRMLS_CC);
+			break;
+#endif
 	}
 }
 

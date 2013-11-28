@@ -454,6 +454,7 @@ END_EXTERN_C()
 
 #define Z_STRSIZE(zval)			(zval).value.str.len
 #define Z_ARRVAL(zval)			(zval).value.ht
+#define Z_AST(zval)			(zval).value.ast
 #define Z_OBJVAL(zval)			(zval).value.obj
 #define Z_OBJ_HANDLE(zval)		Z_OBJVAL(zval).handle
 #define Z_OBJ_HT(zval)			Z_OBJVAL(zval).handlers
@@ -469,6 +470,7 @@ END_EXTERN_C()
 #define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
 #define Z_STRSIZE_P(zval_p)		Z_STRSIZE(*zval_p)
 #define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
+#define Z_AST_P(zval_p)			Z_AST(*zval_p)
 #define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
 #define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
 #define Z_RESVAL_P(zval_p)		Z_RESVAL(*zval_p)
@@ -484,6 +486,7 @@ END_EXTERN_C()
 #define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
 #define Z_STRSIZE_PP(zval_pp)	Z_STRSIZE(**zval_pp)
 #define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
+#define Z_AST_PP(zval_p)		Z_AST(**zval_p)
 #define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
 #define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
 #define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)

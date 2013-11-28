@@ -45,6 +45,7 @@
 #endif
 
 static uint zend_persist_zval_ptr_calc(zval **zp TSRMLS_DC);
+static uint zend_persist_zval_calc(zval *z TSRMLS_DC);
 
 static uint zend_hash_persist_calc(HashTable *ht, int (*pPersistElement)(void *pElement TSRMLS_DC), size_t el_size TSRMLS_DC)
 {
@@ -91,6 +92,27 @@ static uint zend_hash_persist_calc(HashTable *ht, int (*pPersistElement)(void *p
 	RETURN_SIZE();
 }
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
+{
+	int i;
+	START_SIZE();
+
+	if (ast->kind == ZEND_CONST) {
+		ADD_SIZE(sizeof(zend_ast) + sizeof(zval));
+		ADD_SIZE(zend_persist_zval_calc(ast->u.val TSRMLS_CC));
+	} else {
+		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		for (i = 0; i < ast->children; i++) {
+			if ((&ast->u.child)[i]) {
+				ADD_SIZE(zend_persist_ast_calc((&ast->u.child)[i] TSRMLS_CC));
+			}
+		}
+	}
+	RETURN_SIZE();
+}
+#endif
+
 static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 {
 	START_SIZE();
@@ -109,6 +131,11 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 			ADD_DUP_SIZE(z->value.ht, sizeof(HashTable));
 			ADD_SIZE(zend_hash_persist_calc(z->value.ht, (int (*)(void* TSRMLS_DC)) zend_persist_zval_ptr_calc, sizeof(zval**) TSRMLS_CC));
 			break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		case IS_CONSTANT_AST:
+			ADD_SIZE(zend_persist_ast_calc(Z_AST_P(z) TSRMLS_CC));
+			break;
+#endif
 	}
 	RETURN_SIZE();
 }

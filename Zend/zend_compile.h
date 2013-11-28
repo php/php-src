@@ -23,6 +23,7 @@
 #define ZEND_COMPILE_H
 
 #include "zend.h"
+#include "zend_ast.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -92,6 +93,7 @@ typedef struct _znode { /* used only during compilation */
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
 		zend_op_array *op_array;
+		zend_ast *ast;
 	} u;
 	zend_uint EA;      /* extended attributes */
 } znode;
@@ -645,6 +647,7 @@ void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
+void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
 
