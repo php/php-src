@@ -25,10 +25,7 @@ static int m_table_leap[13] =   { -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1
 
 static timelib_sll century_value(timelib_sll j)
 {
-	timelib_sll i = j - 17;
-	timelib_sll c = (4 - i * 2 + (i + 1) / 4) % 7;
-
-	return c < 0 ? c + 7 : c;
+	return 6 - (j % 4) * 2;
 }
 
 static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_sll d, int iso)
@@ -36,11 +33,8 @@ static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_
 	timelib_sll c1, y1, m1, dow;
 
 	/* Only valid for Gregorian calendar, commented out as we don't handle
-	 * julian calendar. We just return the 'wrong' day of week to be
-	 * consistent.
-	if (y < 1753) {
-		return -1;
-	} */
+	 * Julian calendar. We just return the 'wrong' day of week to be
+	 * consistent. */
 	c1 = century_value(y / 100);
 	y1 = (y % 100);
 	m1 = timelib_is_leap(y) ? m_table_leap[m] : m_table_common[m];

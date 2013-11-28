@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
+  . Fixed bug #63391 (Incorrect/inconsistent day of week prior to the year
+    1600). (Derick, T. Carter)
+  . Fixed bug #61599 (Wrong Day of Week). (Derick, T. Carter)
 
 ?? ??? 2013, PHP 5.4.23
 
