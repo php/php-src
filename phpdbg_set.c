@@ -57,7 +57,9 @@ PHPDBG_SET(break) /* {{{ */
 			}
 			break;
 
-		phpdbg_default_switch_case();
+		default:
+			phpdbg_error(
+				"set break used incorrectly: set break <on|off>");
 	}
 
 	return SUCCESS;
@@ -71,6 +73,7 @@ PHPDBG_SET(color) /* {{{ */
 			input->argv[2]->string, input->argv[2]->length TSRMLS_CC);
 		int element = PHPDBG_COLOR_INVALID;
 
+		/* @TODO(anyone) make this consistent with other set commands */
 		if (color) {
 			if (phpdbg_argv_is(1, "prompt")) {
 				phpdbg_notice(
@@ -103,6 +106,34 @@ usage:
 		phpdbg_error(
 			"set color used incorrectly: set color <prompt|error|notice> <color>");
 	}
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(colors) /* {{{ */
+{
+	switch (param->type) {
+		case EMPTY_PARAM: {
+			phpdbg_writeln(
+				"%s", PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "on" : "off");
+			goto done;
+		}
+		
+		case STR_PARAM: {
+			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
+				PHPDBG_G(flags) |= PHPDBG_IS_COLOURED;
+				goto done;
+			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
+				PHPDBG_G(flags) &= ~PHPDBG_IS_COLOURED;
+				goto done;
+			}
+		}
+	}
+	
+usage:
+	phpdbg_error(
+			"set colors used incorrectly: set colors <on|off>");
+
+done:
 	return SUCCESS;
 } /* }}} */
 #endif
