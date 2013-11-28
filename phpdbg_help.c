@@ -564,6 +564,7 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
 	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
+	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console, see docs");
 	phpdbg_notice("Passing -rr will quit automatically after execution");
 	phpdbg_help_footer();
 	return SUCCESS;
