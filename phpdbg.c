@@ -557,9 +557,17 @@ int phpdbg_open_socket(short port) /* {{{ */
 			return -1;
 			
 		default: {
+#ifndef _WIN32
 			int boolean = 1;
-			
-			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &boolean, sizeof(int))) {
+#else
+			const char *boolean = "1";
+#endif
+
+#ifndef _WIN32
+			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &boolean, sizeof(boolean))) {
+#else
+			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, boolean, sizeof(boolean))) {
+#endif
 				case -1:
 					close(fd);
 					return -2;

@@ -218,12 +218,12 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 	char *cmd = NULL;
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		if (buffered == NULL) {
+		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) &&
+			(buffered == NULL)) {	
+			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+		}
 		
-			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {	
-				fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
-			}
-			
+		if (buffered == NULL) {	
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if ((!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && !phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) ||
