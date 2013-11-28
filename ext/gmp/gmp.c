@@ -126,6 +126,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_gmp_sqrtrem, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_root, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, nth)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_rootrem, 0)
+	ZEND_ARG_INFO(0, a)
+	ZEND_ARG_INFO(0, nth)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_gmp_perfect_square, 0)
 	ZEND_ARG_INFO(0, a)
 ZEND_END_ARG_INFO()
@@ -256,6 +266,8 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_fact,	arginfo_gmp_fact)
 	ZEND_FE(gmp_sqrt,	arginfo_gmp_sqrt)
 	ZEND_FE(gmp_sqrtrem,	arginfo_gmp_sqrtrem)
+	ZEND_FE(gmp_root,	arginfo_gmp_root)
+	ZEND_FE(gmp_rootrem,	arginfo_gmp_rootrem)
 	ZEND_FE(gmp_pow,	arginfo_gmp_pow)
 	ZEND_FE(gmp_powm,	arginfo_gmp_powm)
 	ZEND_FE(gmp_perfect_square,	arginfo_gmp_perfect_square)
@@ -1510,6 +1522,73 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	add_index_zval(return_value, 1, gmp_create(&gmpnum_result2 TSRMLS_CC));
 
 	mpz_sqrtrem(gmpnum_result1, gmpnum_result2, gmpnum_a);
+	FREE_GMP_TEMP(temp_a);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_root(mixed a, int nth)
+   Takes integer part of nth root */
+ZEND_FUNCTION(gmp_root)
+{
+	zval *a_arg;
+	long nth;
+	mpz_ptr gmpnum_a, gmpnum_result;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &nth) == FAILURE) {
+		return;
+	}
+
+	if (nth <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The root must be positive");
+		RETURN_FALSE;
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+
+	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't take even root of negative number");
+		FREE_GMP_TEMP(temp_a);
+		RETURN_FALSE;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	mpz_root(gmpnum_result, gmpnum_a, (unsigned long) nth);
+	FREE_GMP_TEMP(temp_a);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_rootrem(mixed a, int nth)
+   Calculates integer part of nth root and remainder */
+ZEND_FUNCTION(gmp_rootrem)
+{
+	zval *a_arg;
+	long nth;
+	mpz_ptr gmpnum_a, gmpnum_result1, gmpnum_result2;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &nth) == FAILURE) {
+		return;
+	}
+
+	if (nth <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The root must be positive");
+		RETURN_FALSE;
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+
+	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't take even root of negative number");
+		FREE_GMP_TEMP(temp_a);
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	add_index_zval(return_value, 0, gmp_create(&gmpnum_result1 TSRMLS_CC));
+	add_index_zval(return_value, 1, gmp_create(&gmpnum_result2 TSRMLS_CC));
+
+	mpz_rootrem(gmpnum_result1, gmpnum_result2, gmpnum_a, (unsigned long) nth);
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */

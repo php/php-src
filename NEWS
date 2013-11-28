@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   . Moved GMP to use object as the underlying structure and implemented various
     improvements based on this.
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+  . Added gmp_root() and gmp_rootrem() functions for calculating nth roots.
+    (Nikita)
 
 - Hash:
   . Added gost-crypto (CryptoPro S-box) GOST hash algo. (Manuel Mausz)
