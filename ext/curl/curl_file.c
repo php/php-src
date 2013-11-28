@@ -32,10 +32,10 @@ PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *fname = NULL, *mime = NULL, *postname = NULL;
-	int fname_len, mime_len, postname_len;
+	zend_str_size_int fname_len, mime_len, postname_len;
 	zval *cf = return_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|SS", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
 		return;
 	}
 
@@ -85,9 +85,9 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *arg = NULL;
-	int arg_len;
+	zend_str_size_int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg TSRMLS_CC);
