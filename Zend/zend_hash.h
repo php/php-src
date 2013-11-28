@@ -157,8 +157,8 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
-
-ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength);
+#define zend_get_hash_value \
+		zend_hash_func
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
