@@ -28,7 +28,7 @@ typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 	int			id; \
 	zend_uchar  type; \
 	zend_ulong  hits; \
-	const char  *name; /* }}} */
+	const char  *name /* }}} */
 
 /* {{{ breakpoint base */
 typedef struct _phpdbg_breakbase_t {

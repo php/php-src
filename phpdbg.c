@@ -27,12 +27,17 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#else
+#include <Winsock2.h>
+#define SHUT_RDWR SD_BOTH
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -929,7 +934,9 @@ phpdbg_main:
 		if (streams[0] && streams[1]) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
 			
+#ifndef _WIN32
 			signal(SIGPIPE, SIG_IGN);
+#endif
 		}
 		
 		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
