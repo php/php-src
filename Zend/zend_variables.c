@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_ast.h"
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
@@ -46,6 +47,9 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 					FREE_HASHTABLE(zvalue->value.ht);
 				}
 			}
+			break;
+		case IS_CONSTANT_AST:
+			zend_ast_destroy(Z_AST_P(zvalue));
 			break;
 		case IS_OBJECT:
 			{
@@ -83,6 +87,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
 			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
@@ -138,6 +143,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				zend_hash_copy(tmp_ht, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 				zvalue->value.ht = tmp_ht;
 			}
+			break;
+		case IS_CONSTANT_AST:
+			Z_AST_P(zvalue) = zend_ast_copy(Z_AST_P(zvalue));
 			break;
 		case IS_OBJECT:
 			{
