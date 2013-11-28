@@ -230,7 +230,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
-				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
 			}
@@ -247,7 +247,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 			if (!cmd) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
-				PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
 			}

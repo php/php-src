@@ -589,22 +589,23 @@ int phpdbg_open_socket(short port) /* {{{ */
 	return fd;
 } /* }}} */
 
-int phpdbg_open_sockets(int listen[2], FILE* streams[2]) /* {{{ */
+/* don't inline this, want to debug it easily, will inline when done */
+
+int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
 {
-	int sockets[2] = {
-		phpdbg_open_socket((short)listen[0]),
-		phpdbg_open_socket((short)listen[1])
-	};
-	int accepted[2] = {-1, -1};
+	if (((*listen)[0]) < 0 && ((*listen)[1]) < 0) {
+		((*listen)[0]) = phpdbg_open_socket((short)port[0]);
+		((*listen)[1]) = phpdbg_open_socket((short)port[1]);
+	}
 	
 	streams[0] = NULL;
 	streams[1] = NULL;
 	
-	if (sockets[0] < 0 || sockets[1] < 0) {
-		if (sockets[0] >= 0)
-			close(sockets[0]);
-		if (sockets[1] >= 0)
-			close(sockets[1]);
+	if ((*listen)[0] < 0 || (*listen)[1] < 0) {
+		if ((*listen)[0] >= 0)
+			close((*listen)[0]);
+		if ((*listen)[1] >= 0)
+			close((*listen)[1]);
 		return FAILURE;
 	}
 	
@@ -613,18 +614,38 @@ int phpdbg_open_sockets(int listen[2], FILE* streams[2]) /* {{{ */
         socklen_t size = sizeof(address);
 
         memset(&address, 0, size);
-        accepted[0] = accept(
-        	sockets[0], (struct sockaddr *) &address, &size);
+        (*socket)[0] = accept(
+        	(*listen)[0], (struct sockaddr *) &address, &size);
         
         memset(&address, 0, size);
-        accepted[1] = accept(
-        	sockets[1], (struct sockaddr *) &address, &size);
+        (*socket)[1] = accept(
+        	(*listen)[1], (struct sockaddr *) &address, &size);
 	}
 	
-	streams[0] = fdopen(accepted[0], "r");
-	streams[1] = fdopen(accepted[1], "w");
+	streams[0] = fdopen((*socket)[0], "r");
+	streams[1] = fdopen((*socket)[1], "w");
 
 	return SUCCESS;
+} /* }}} */
+
+static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
+{
+	if ((*socket)[0]) {
+		close((*socket)[0]);
+	}
+	
+	if (streams[0]) {
+		fclose(streams[0]);
+	}
+	
+	if (streams[1]) {
+		fflush(streams[1]);
+		fclose(streams[1]);
+	}
+	
+	if ((*socket)[1]) {
+		close((*socket)[1]);
+	}
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
@@ -649,11 +670,22 @@ int main(int argc, char **argv) /* {{{ */
 	int step = 0;
 	char *bp_tmp_file;
 	int listen[2];
+	int server[2];
+	int socket[2];
 	FILE* streams[2] = {NULL, NULL};
 
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
+	
+	socket[0] = -1;
+	socket[1] = -1;
+	listen[0] = -1;
+	listen[1] = -1;
+	server[0] = -1;
+	server[1] = -1;
+	streams[0] = NULL;
+	streams[1] = NULL;
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
@@ -693,8 +725,6 @@ phpdbg_main:
 	opt = 0;
 	run = 0;
 	step = 0;
-	listen[0] = 0;
-	listen[1] = 0;
 	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
@@ -800,9 +830,10 @@ phpdbg_main:
 		}
 	}
 
+	/* setup remote server if necessary */
 	if (!cleaning && 
-		(listen[0] && listen[1])) {
-		phpdbg_open_sockets(listen, streams);
+		(listen[0] > 0 && listen[1] > 0)) {
+		phpdbg_open_sockets(listen, &server, &socket, streams);
 	}
 	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
@@ -852,6 +883,7 @@ phpdbg_main:
 			PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
 			PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
 			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+			
 			signal(SIGPIPE, SIG_IGN);
 		} else {
 			/* local console */
@@ -926,6 +958,7 @@ phpdbg_main:
 			}
 		}
 
+phpdbg_interact:
 		/* phpdbg main() */
 		do {
 			zend_try {
@@ -941,13 +974,38 @@ phpdbg_main:
 					cleaning = 0;
 				}
 
+				/* remote client disconnected */
+				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
+
+					/* close old streams/sockets */
+					phpdbg_close_sockets(&socket, streams);
+					
+					/* renegociate connections */
+					phpdbg_open_sockets(
+						listen, &server, &socket, streams);
+					
+					/* set streams */
+					if (streams[0] && streams[1]) {
+						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+						PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
+						PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
+						PHPDBG_G(io)[PHPDBG_STDERR] =  stderr;
+						CG(unclean_shutdown) = 0;
+					}
+				}
+
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
 					goto phpdbg_out;
 				}
 			} zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
-
+		
 phpdbg_out:
+		if (PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED) {
+			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
+			goto phpdbg_interact;
+		}
+		
 		if (ini_entries) {
 			free(ini_entries);
 		}
