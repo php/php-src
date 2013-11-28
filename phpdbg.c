@@ -590,22 +590,23 @@ int phpdbg_open_socket(short port) /* {{{ */
 } /* }}} */
 
 static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
-{
+{	
+	if ((*socket)[0]) {
+		shutdown((*socket)[0], SHUT_RDWR);
+		close((*socket)[0]);
+	}
+	
 	if (streams[0]) {
 		fclose(streams[0]);
 	}
 	
-	if ((*socket)[0]) {
-		close((*socket)[0]);
+	if ((*socket)[1]) {
+		shutdown((*socket)[1], SHUT_RDWR);
+		close((*socket)[1]);
 	}
 	
 	if (streams[1]) {
-		fflush(streams[1]);
 		fclose(streams[1]);
-	}
-	
-	if ((*socket)[1]) {
-		close((*socket)[1]);
 	}
 } /* }}} */
 
@@ -645,6 +646,8 @@ int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* s
 	
 	dup2((*socket)[0], fileno(stdin));
 	dup2((*socket)[1], fileno(stdout));
+	
+	setbuf(stdout, NULL);
 	
 	streams[0] = fdopen((*socket)[0], "r");
 	streams[1] = fdopen((*socket)[1], "w");
@@ -837,7 +840,10 @@ phpdbg_main:
 	/* setup remote server if necessary */
 	if (!cleaning && 
 		(listen[0] > 0 && listen[1] > 0)) {
-		phpdbg_open_sockets(listen, &server, &socket, streams);
+		if (phpdbg_open_sockets(listen, &server, &socket, streams) == FAILURE) {
+			fprintf(stderr, "Failed to open remote console on ports %d/%d", listen[0], listen[1]);
+			goto phpdbg_out;
+		}
 	}
 	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
@@ -866,13 +872,19 @@ phpdbg_main:
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
 
+		/* do not install sigint handlers for remote consoles */
+		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifdef ZEND_SIGNALS
-		zend_try {
-			zend_signal_activate(TSRMLS_C);
-			zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
-		} zend_end_try();
+		if (listen[0] < 0) {
+			zend_try {
+				zend_signal_activate(TSRMLS_C);
+				zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
+			} zend_end_try();
+		}
 #else
-		signal(SIGINT, phpdbg_sigint_handler);
+		if (listen[0] < 0) {
+			signal(SIGINT, phpdbg_sigint_handler);
+		}
 #endif
 
 		PG(modules_activated) = 0;
@@ -983,9 +995,7 @@ phpdbg_interact:
 					/* set streams */
 					if (streams[0] && streams[1]) {
 						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
-						PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
-						PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
-						PHPDBG_G(io)[PHPDBG_STDERR] =  stderr;
+						
 						CG(unclean_shutdown) = 0;
 					}
 				}
