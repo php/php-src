@@ -618,37 +618,67 @@ int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* s
 		((*listen)[0]) = phpdbg_open_socket((short)port[0]);
 		((*listen)[1]) = phpdbg_open_socket((short)port[1]);
 	}
-	
+
 	streams[0] = NULL;
 	streams[1] = NULL;
-	
+
 	if ((*listen)[0] < 0 || (*listen)[1] < 0) {
-		if ((*listen)[0] >= 0)
+		if ((*listen)[0] < 0) {
+			fprintf(stderr, 
+				"Failed to start remote console (stdin) on port %d\n", port[0]);
+		}
+
+		if ((*listen)[1] < 0) {
+			fprintf(stderr, 
+				"Failed to open remote console (stdout) on port %d\n", port[1]);
+		}
+
+		if ((*listen)[0] >= 0) {
 			close((*listen)[0]);
-		if ((*listen)[1] >= 0)
+		}
+
+		if ((*listen)[1] >= 0) {
 			close((*listen)[1]);
+		}
+
 		return FAILURE;
 	}
-	
+
 	phpdbg_close_sockets(socket, streams);
+
+	fprintf(stderr,
+		"Remote console accepting (stdin/stdout) on ports %d/%d\n", port[0], port[1]);
 	{
 		struct sockaddr_in address;
-        socklen_t size = sizeof(address);
+		socklen_t size = sizeof(address);
+		char buffer[20] = {0};
 
-        memset(&address, 0, size);
-        (*socket)[0] = accept(
-        	(*listen)[0], (struct sockaddr *) &address, &size);
-        
-        memset(&address, 0, size);
-        (*socket)[1] = accept(
-        	(*listen)[1], (struct sockaddr *) &address, &size);
+		{
+			memset(&address, 0, size);
+			(*socket)[0] = accept(
+				(*listen)[0], (struct sockaddr *) &address, &size);
+			inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+
+			fprintf(stderr,
+				"Remote console (stdin) connection from %s\n", buffer);
+		}
+
+		{
+			memset(&address, 0, size);
+			(*socket)[1] = accept(
+				(*listen)[1], (struct sockaddr *) &address, &size);
+		    inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+
+		    fprintf(stderr,
+				"Remote console (stdout) connection from %s\n", buffer);
+		}
 	}
-	
+
 	dup2((*socket)[0], fileno(stdin));
 	dup2((*socket)[1], fileno(stdout));
-	
+
 	setbuf(stdout, NULL);
-	
+
 	streams[0] = fdopen((*socket)[0], "r");
 	streams[1] = fdopen((*socket)[1], "w");
 
@@ -673,6 +703,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
+	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
 	char *bp_tmp_file;
@@ -838,12 +869,14 @@ phpdbg_main:
 	}
 
 	/* setup remote server if necessary */
-	if (!cleaning && 
+	if (!cleaning &&
 		(listen[0] > 0 && listen[1] > 0)) {
 		if (phpdbg_open_sockets(listen, &server, &socket, streams) == FAILURE) {
-			fprintf(stderr, "Failed to open remote console on ports %d/%d", listen[0], listen[1]);
+			remote = 0;
 			goto phpdbg_out;
 		}
+		/* set remote flag to stop service shutting down upon quit */
+		remote = 1;
 	}
 	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
@@ -1045,7 +1078,7 @@ phpdbg_out:
 		sapi_shutdown();
 	}
 
-	if (cleaning) {
+	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
 
