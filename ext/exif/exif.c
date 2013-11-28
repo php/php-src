@@ -2337,10 +2337,10 @@ static char * exif_get_markername(int marker)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	long tag;
+	php_int_t tag;
 	char *szTemp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &tag) == FAILURE) {
 		return;
 	}
 
@@ -3845,7 +3845,7 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
 {
 	int ret;
-	struct stat st;
+	zend_stat_t st;
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
@@ -3907,14 +3907,14 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	char *p_name, *p_sections_needed = NULL;
-	int p_name_len, p_sections_needed_len = 0;
+	zend_str_size_int p_name_len, p_sections_needed_len = 0;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
 	int i, ret, sections_needed=0;
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str, *s;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|Sbb", &p_name, &p_name_len, &p_sections_needed, &p_sections_needed_len, &sub_arrays, &read_thumbnail) == FAILURE) {
 		return;
 	}
 
@@ -4086,7 +4086,8 @@ PHP_FUNCTION(exif_thumbnail)
 {
 	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
 	char *p_name;
-	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
+	zend_str_size_int p_name_len;
+	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -4095,7 +4096,7 @@ PHP_FUNCTION(exif_thumbnail)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(arg_c TSRMLS_CC, "p|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
+	if (zend_parse_parameters(arg_c TSRMLS_CC, "P|z/z/z/", &p_name, &p_name_len, &p_width, &p_height, &p_imagetype) == FAILURE) {
 		return;
 	}
 
@@ -4149,11 +4150,11 @@ PHP_FUNCTION(exif_thumbnail)
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;
-	int imagefile_len;
+	zend_str_size_int imagefile_len;
 	php_stream * stream;
  	int itype = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &imagefile, &imagefile_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &imagefile, &imagefile_len) == FAILURE) {
 		return;
 	}
 
