@@ -78,7 +78,7 @@ inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static zval *xml_call_handler(xml_parser *, zval *, zend_function *, int, zval **);
-static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
+static zval *_xml_xmlchar_zval(const XML_Char *, zend_str_size_int, const XML_Char *);
 static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser,char *name);
 inline static char *_xml_decode_tag(xml_parser *parser, const char *tag);
@@ -373,7 +373,7 @@ PHP_MINFO_FUNCTION(xml)
 /* }}} */
 
 /* {{{ extension-internal functions */
-static zval *_xml_resource_zval(long value)
+static zval *_xml_resource_zval(php_int_t value)
 {
 	zval *ret;
 	TSRMLS_FETCH();
@@ -395,12 +395,12 @@ static zval *_xml_string_zval(const char *str)
 	MAKE_STD_ZVAL(ret);
 
 	Z_TYPE_P(ret) = IS_STRING;
-	Z_STRLEN_P(ret) = len;
+	Z_STRSIZE_P(ret) = len;
 	Z_STRVAL_P(ret) = estrndup(str, len);
 	return ret;
 }
 
-static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encoding)
+static zval *_xml_xmlchar_zval(const XML_Char *s, zend_str_size_int len, const XML_Char *encoding)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -413,7 +413,7 @@ static zval *_xml_xmlchar_zval(const XML_Char *s, int len, const XML_Char *encod
 		len = _xml_xmlcharlen(s);
 	}
 	Z_TYPE_P(ret) = IS_STRING;
-	Z_STRVAL_P(ret) = xml_utf8_decode(s, len, &Z_STRLEN_P(ret), encoding);
+	Z_STRVAL_P(ret) = xml_utf8_decode(s, len, &Z_STRSIZE_P(ret), encoding);
 	return ret;
 }
 /* }}} */
@@ -488,7 +488,7 @@ static void xml_set_handler(zval **handler, zval **data)
 	if (Z_TYPE_PP(data) != IS_ARRAY && Z_TYPE_PP(data) != IS_OBJECT) {
 
 		convert_to_string_ex(data);
-		if (Z_STRLEN_PP(data) == 0) {
+		if (Z_STRSIZE_PP(data) == 0) {
 			*handler = NULL;
 			return;
 		}
@@ -607,9 +607,9 @@ static xml_encoding *xml_get_encoding(const XML_Char *name)
 /* }}} */
 
 /* {{{ xml_utf8_encode */
-PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char *encoding)
+PHPAPI char *xml_utf8_encode(const char *s, zend_str_size_int len, zend_str_size_int *newlen, const XML_Char *encoding)
 {
-	int pos = len;
+	zend_str_size_int pos = len;
 	char *newbuf;
 	unsigned int c;
 	unsigned short (*encoder)(unsigned char) = NULL;
@@ -661,7 +661,7 @@ PHPAPI char *xml_utf8_encode(const char *s, int len, int *newlen, const XML_Char
 /* }}} */
 
 /* {{{ xml_utf8_decode */
-PHPAPI char *xml_utf8_decode(const XML_Char *s, int len, int *newlen, const XML_Char *encoding)
+PHPAPI char *xml_utf8_decode(const XML_Char *s, zend_str_size_int len, zend_str_size_int *newlen, const XML_Char *encoding)
 {
 	size_t pos = 0;
 	char *newbuf = emalloc(len + 1);
@@ -719,9 +719,9 @@ static int _xml_xmlcharlen(const XML_Char *s)
 PHPAPI char *_xml_zval_strdup(zval *val)
 {
 	if (Z_TYPE_P(val) == IS_STRING) {
-		char *buf = emalloc(Z_STRLEN_P(val) + 1);
-		memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val));
-		buf[Z_STRLEN_P(val)] = '\0';
+		char *buf = emalloc(Z_STRSIZE_P(val) + 1);
+		memcpy(buf, Z_STRVAL_P(val), Z_STRSIZE_P(val));
+		buf[Z_STRSIZE_P(val)] = '\0';
 		return buf;
 	}
 	return NULL;
@@ -755,7 +755,7 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 static char *_xml_decode_tag(xml_parser *parser, const char *tag)
 {
 	char *newstr;
-	int out_len;
+	zend_str_size_int out_len;
 
 	newstr = xml_utf8_decode(tag, strlen(tag), &out_len, parser->target_encoding);
 
@@ -774,7 +774,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 	const char **attrs = (const char **) attributes;
 	char *tag_name;
 	char *att, *val;
-	int val_len;
+	zend_str_size_int val_len;
 	zval *retval, *args[3];
 
 	if (parser) {
@@ -926,11 +926,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		} 
 
 		if (parser->data) {
-			int i;
+			zend_str_size_int i;
 			int doprint = 0;
 
 			char *decoded_value;
-			int decoded_len;
+			zend_str_size_int decoded_len;
 			
 			decoded_value = xml_utf8_decode(s,len,&decoded_len,parser->target_encoding);
 			for (i = 0; i < decoded_len; i++) {
@@ -953,10 +953,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					
 					/* check if the current tag already has a value - if yes append to that! */
 					if (zend_hash_find(Z_ARRVAL_PP(parser->ctag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
-						int newlen = Z_STRLEN_PP(myval) + decoded_len;
+						zend_str_size_int newlen = Z_STRSIZE_PP(myval) + decoded_len;
 						Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
-						strncpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval), decoded_value, decoded_len + 1);
-						Z_STRLEN_PP(myval) += decoded_len;
+						strncpy(Z_STRVAL_PP(myval) + Z_STRSIZE_PP(myval), decoded_value, decoded_len + 1);
+						Z_STRSIZE_PP(myval) += decoded_len;
 						efree(decoded_value);
 					} else {
 						add_assoc_string(*(parser->ctag),"value",decoded_value,0);
@@ -973,10 +973,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						if (zend_hash_find(Z_ARRVAL_PP(curtag),"type",sizeof("type"),(void **) &mytype) == SUCCESS) {
 							if (!strcmp(Z_STRVAL_PP(mytype), "cdata")) {
 								if (zend_hash_find(Z_ARRVAL_PP(curtag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
-									int newlen = Z_STRLEN_PP(myval) + decoded_len;
+									int newlen = Z_STRSIZE_PP(myval) + decoded_len;
 									Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
-									strncpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval), decoded_value, decoded_len + 1);
-									Z_STRLEN_PP(myval) += decoded_len;
+									strncpy(Z_STRVAL_PP(myval) + Z_STRSIZE_PP(myval), decoded_value, decoded_len + 1);
+									Z_STRSIZE_PP(myval) += decoded_len;
 									efree(decoded_value);
 									return;
 								}
@@ -1168,14 +1168,14 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	int auto_detect = 0;
 
 	char *encoding_param = NULL;
-	int encoding_param_len = 0;
+	zend_str_size_int encoding_param_len = 0;
 
 	char *ns_param = NULL;
-	int ns_param_len = 0;
+	zend_str_size_int ns_param_len = 0;
 	
 	XML_Char *encoding;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (ns_support ? "|ss": "|s"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (ns_support ? "|SS": "|S"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1442,10 +1442,11 @@ PHP_FUNCTION(xml_parse)
 	xml_parser *parser;
 	zval *pind;
 	char *data;
-	int data_len, ret;
-	long isFinal = 0;
+	zend_str_size_int data_len;
+	int ret;
+	php_int_t isFinal = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|i", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
@@ -1466,9 +1467,10 @@ PHP_FUNCTION(xml_parse_into_struct)
 	xml_parser *parser;
 	zval *pind, **xdata, **info = NULL;
 	char *data;
-	int data_len, ret;
+	zend_str_size_int data_len;
+	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZ|Z", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSZ|Z", &pind, &data, &data_len, &xdata, &info) == FAILURE) {
 		return;
 	}
 	
@@ -1515,7 +1517,7 @@ PHP_FUNCTION(xml_get_error_code)
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
-	RETVAL_LONG((long)XML_GetErrorCode(parser->parser));
+	RETVAL_LONG((php_int_t)XML_GetErrorCode(parser->parser));
 }
 /* }}} */
 
@@ -1523,10 +1525,10 @@ PHP_FUNCTION(xml_get_error_code)
    Get XML parser error string */
 PHP_FUNCTION(xml_error_string)
 {
-	long code;
+	php_int_t code;
 	char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &code) == FAILURE) {
 		return;
 	}
 
@@ -1617,9 +1619,9 @@ PHP_FUNCTION(xml_parser_set_option)
 {
 	xml_parser *parser;
 	zval *pind, **val;
-	long opt;
+	php_int_t opt;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &pind, &opt, &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riZ", &pind, &opt, &val) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
@@ -1663,9 +1665,9 @@ PHP_FUNCTION(xml_parser_get_option)
 {
 	xml_parser *parser;
 	zval *pind;
-	long opt;
+	php_int_t opt;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &pind, &opt) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &pind, &opt) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
@@ -1693,9 +1695,10 @@ PHP_FUNCTION(utf8_encode)
 {
 	char *arg;
 	XML_Char *encoded;
-	int arg_len, len;
+	zend_str_size_int arg_len;
+	zend_str_size_int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -1713,9 +1716,10 @@ PHP_FUNCTION(utf8_decode)
 {
 	char *arg;
 	XML_Char *decoded;
-	int arg_len, len;
+	zend_str_size_int arg_len;
+	zend_str_size_int len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
