@@ -604,6 +604,7 @@ int phpdbg_open_socket(short port) /* {{{ */
 
 static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
 {	
+#ifndef _WIN32
 	if ((*socket)[0]) {
 		shutdown((*socket)[0], SHUT_RDWR);
 		close((*socket)[0]);
@@ -621,6 +622,7 @@ static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {
 	if (streams[1]) {
 		fclose(streams[1]);
 	}
+#endif
 } /* }}} */
 
 /* don't inline this, want to debug it easily, will inline when done */
@@ -739,6 +741,11 @@ int main(int argc, char **argv) /* {{{ */
 	streams[1] = NULL;
 
 #ifdef PHP_WIN32
+	{
+		WSADATA WSAData;
+
+		WSAStartup (0x0101, &WSAData);
+	}
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
@@ -886,7 +893,7 @@ phpdbg_main:
 		(listen[0] > 0 && listen[1] > 0)) {
 		if (phpdbg_open_sockets(listen, &server, &socket, streams) == FAILURE) {
 			remote = 0;
-			goto phpdbg_out;
+			exit(0);
 		}
 		/* set remote flag to stop service shutting down upon quit */
 		remote = 1;
