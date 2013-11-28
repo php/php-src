@@ -77,7 +77,7 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
+static unsigned int php_sapi_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC);
 static unsigned int php_sapi_filter_init(TSRMLS_D);
 
 /* {{{ arginfo */
@@ -327,7 +327,7 @@ PHP_MINFO_FUNCTION(filter)
 }
 /* }}} */
 
-static filter_list_entry php_find_filter(long id) /* {{{ */
+static filter_list_entry php_find_filter(php_int_t id) /* {{{ */
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
@@ -358,7 +358,7 @@ static unsigned int php_sapi_filter_init(TSRMLS_D)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval **value, long filter, long flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
+static void php_zval_filter(zval **value, php_int_t filter, php_int_t flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -404,7 +404,7 @@ static void php_zval_filter(zval **value, long filter, long flags, zval *options
 }
 /* }}} */
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC) /* {{{ */
+static unsigned int php_sapi_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -449,7 +449,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (array_ptr) {
 		/* Store the RAW variable internally */
-		Z_STRLEN(raw_var) = val_len;
+		Z_STRSIZE(raw_var) = val_len;
 		Z_STRVAL(raw_var) = estrndup(*val, val_len);
 		Z_TYPE(raw_var) = IS_STRING;
 
@@ -458,7 +458,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (val_len) {
 		/* Register mangled variable */
-		Z_STRLEN(new_var) = val_len;
+		Z_STRSIZE(new_var) = val_len;
 		Z_TYPE(new_var) = IS_STRING;
 
 		if (IF_G(default_filter) != FILTER_UNSAFE_RAW) {
@@ -479,11 +479,11 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (retval) {
 		if (new_val_len) {
-			*new_val_len = Z_STRLEN(new_var);
+			*new_val_len = Z_STRSIZE(new_var);
 		}
 		efree(*val);
-		if (Z_STRLEN(new_var)) {
-			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var));
+		if (Z_STRSIZE(new_var)) {
+			*val = estrndup(Z_STRVAL(new_var), Z_STRSIZE(new_var));
 		} else {
 			*val = estrdup("");
 		}
@@ -494,7 +494,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval **value, long filter, long flags, zval *options, char *charset, zend_bool copy TSRMLS_DC) /* {{{ */
+static void php_zval_filter_recursive(zval **value, php_int_t filter, php_int_t flags, zval *options, char *charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	if (Z_TYPE_PP(value) == IS_ARRAY) {
 		zval **element;
@@ -523,7 +523,7 @@ static void php_zval_filter_recursive(zval **value, long filter, long flags, zva
 }
 /* }}} */
 
-static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
+static zval *php_filter_get_storage(php_int_t arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
@@ -569,12 +569,12 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
  */
 PHP_FUNCTION(filter_has_var)
 {
-	long        arg;
+	php_int_t        arg;
 	char       *var;
-	int         var_len;
+	zend_str_size_int         var_len;
 	zval       *array_ptr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &arg, &var, &var_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS", &arg, &var, &var_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -588,14 +588,14 @@ PHP_FUNCTION(filter_has_var)
 }
 /* }}} */
 
-static void php_filter_call(zval **filtered, long filter, zval **filter_args, const int copy, long filter_flags TSRMLS_DC) /* {{{ */
+static void php_filter_call(zval **filtered, php_int_t filter, zval **filter_args, const int copy, php_int_t filter_flags TSRMLS_DC) /* {{{ */
 {
 	zval  *options = NULL;
 	zval **option;
 	char  *charset = NULL;
 
 	if (filter_args && Z_TYPE_PP(filter_args) != IS_ARRAY) {
-		long lval;
+		php_int_t lval;
 
 		PHP_FILTER_GET_LONG_OPT(filter_args, lval);
 
@@ -681,8 +681,8 @@ static void php_filter_call(zval **filtered, long filter, zval **filter_args, co
 static void php_filter_array_handler(zval *input, zval **op, zval *return_value, zend_bool add_empty TSRMLS_DC) /* {{{ */
 {
 	char *arg_key;
-	uint arg_key_len;
-	ulong index;
+	zend_str_size_uint arg_key_len;
+	php_uint_t index;
 	HashPosition pos;
 	zval **tmp, **arg_elm;
 
@@ -737,13 +737,13 @@ static void php_filter_array_handler(zval *input, zval **op, zval *return_value,
  */
 PHP_FUNCTION(filter_input)
 {
-	long   fetch_from, filter = FILTER_DEFAULT;
+	php_int_t   fetch_from, filter = FILTER_DEFAULT;
 	zval **filter_args = NULL, **tmp;
 	zval  *input = NULL;
 	char *var;
-	int var_len;
+	zend_str_size_int var_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls|lZ", &fetch_from, &var, &var_len, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS|iZ", &fetch_from, &var, &var_len, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -754,7 +754,7 @@ PHP_FUNCTION(filter_input)
 	input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!input || !HASH_OF(input) || zend_hash_find(HASH_OF(input), var, var_len + 1, (void **)&tmp) != SUCCESS) {
-		long filter_flags = 0;
+		php_int_t filter_flags = 0;
 		zval **option, **opt, **def;
 		if (filter_args) {
 			if (Z_TYPE_PP(filter_args) == IS_LONG) {
@@ -795,10 +795,10 @@ PHP_FUNCTION(filter_input)
  */
 PHP_FUNCTION(filter_var)
 {
-	long filter = FILTER_DEFAULT;
+	php_int_t filter = FILTER_DEFAULT;
 	zval **filter_args = NULL, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|lZ", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|iZ", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -817,11 +817,11 @@ PHP_FUNCTION(filter_var)
  */
 PHP_FUNCTION(filter_input_array)
 {
-	long    fetch_from;
+	php_int_t    fetch_from;
 	zval   *array_input = NULL, **op = NULL;
 	zend_bool add_empty = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|Zb",  &fetch_from, &op, &add_empty) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|Zb",  &fetch_from, &op, &add_empty) == FAILURE) {
 		return;
 	}
 
@@ -835,7 +835,7 @@ PHP_FUNCTION(filter_input_array)
 	array_input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!array_input || !HASH_OF(array_input)) {
-		long filter_flags = 0;
+		php_int_t filter_flags = 0;
 		zval **option;
 		if (op) {
 			if (Z_TYPE_PP(op) == IS_LONG) {
@@ -905,11 +905,12 @@ PHP_FUNCTION(filter_list)
  * Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
-	int i, filter_len;
+	int i;
+	zend_str_size_int filter_len;
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 	char *filter;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filter, &filter_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &filter, &filter_len) == FAILURE) {
 		return;
 	}
 
