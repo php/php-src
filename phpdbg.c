@@ -589,6 +589,26 @@ int phpdbg_open_socket(short port) /* {{{ */
 	return fd;
 } /* }}} */
 
+static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
+{
+	if (streams[0]) {
+		fclose(streams[0]);
+	}
+	
+	if ((*socket)[0]) {
+		close((*socket)[0]);
+	}
+	
+	if (streams[1]) {
+		fflush(streams[1]);
+		fclose(streams[1]);
+	}
+	
+	if ((*socket)[1]) {
+		close((*socket)[1]);
+	}
+} /* }}} */
+
 /* don't inline this, want to debug it easily, will inline when done */
 
 int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
@@ -609,6 +629,7 @@ int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* s
 		return FAILURE;
 	}
 	
+	phpdbg_close_sockets(socket, streams);
 	{
 		struct sockaddr_in address;
         socklen_t size = sizeof(address);
@@ -622,30 +643,13 @@ int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* s
         	(*listen)[1], (struct sockaddr *) &address, &size);
 	}
 	
+	dup2((*socket)[0], fileno(stdin));
+	dup2((*socket)[1], fileno(stdout));
+	
 	streams[0] = fdopen((*socket)[0], "r");
 	streams[1] = fdopen((*socket)[1], "w");
 
 	return SUCCESS;
-} /* }}} */
-
-static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
-{
-	if ((*socket)[0]) {
-		close((*socket)[0]);
-	}
-	
-	if (streams[0]) {
-		fclose(streams[0]);
-	}
-	
-	if (streams[1]) {
-		fflush(streams[1]);
-		fclose(streams[1]);
-	}
-	
-	if ((*socket)[1]) {
-		close((*socket)[1]);
-	}
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
@@ -879,19 +883,14 @@ phpdbg_main:
 		/* setup io here */
 		if (streams[0] && streams[1]) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-			/* remote console */
-			PHPDBG_G(io)[PHPDBG_STDIN] = streams[0];
-			PHPDBG_G(io)[PHPDBG_STDOUT] = streams[1];
-			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 			
 			signal(SIGPIPE, SIG_IGN);
-		} else {
-			/* local console */
-			PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
-			PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
-			PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 		}
-
+		
+		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
+		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
+		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
+		
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(
 					exec TSRMLS_CC);
@@ -977,9 +976,6 @@ phpdbg_interact:
 				/* remote client disconnected */
 				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 
-					/* close old streams/sockets */
-					phpdbg_close_sockets(&socket, streams);
-					
 					/* renegociate connections */
 					phpdbg_open_sockets(
 						listen, &server, &socket, streams);
