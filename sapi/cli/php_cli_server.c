@@ -266,6 +266,7 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "js", "text/javascript" },
 	{ "css", "text/css" },
 	{ "gif", "image/gif" },
+	{ "ico", "image/x-icon" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
 	{ "jpe", "image/jpeg" },
