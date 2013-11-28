@@ -133,12 +133,15 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
+	PHPDBG_G(opline_btree) = NULL;
 
 	return SUCCESS;
 } /* }}} */
@@ -309,14 +312,14 @@ zend_function_entry phpdbg_user_functions[] = {
 
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"phpdbg",
+	PHPDBG_NAME,
 	phpdbg_user_functions,
 	PHP_MINIT(phpdbg),
 	NULL,
 	PHP_RINIT(phpdbg),
 	PHP_RSHUTDOWN(phpdbg),
 	NULL,
-	"0.1",
+	PHPDBG_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -457,6 +460,38 @@ static sapi_module_struct phpdbg_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
+
+void phpdbg_op_array_handler(zend_op_array *op_array) {
+	TSRMLS_FETCH();
+
+	phpdbg_save_oplines(op_array TSRMLS_CC);
+	phpdbg_resolve_op_array_breaks(op_array TSRMLS_CC);
+}
+
+#ifndef ZEND_EXT_API
+#define ZEND_EXT_API ZEND_DLEXPORT
+#endif
+ZEND_EXTENSION();
+
+ZEND_DLEXPORT zend_extension zend_extension_entry = {
+	PHPDBG_NAME,
+	PHPDBG_VERSION,
+	PHPDBG_AUTHORS,
+	PHPDBG_URL,
+	"(c) 2013",
+	NULL,                    /* startup_func_t */
+	NULL,                    /* shutdown_func_t */
+	NULL,                    /* activate_func_t */
+	NULL,                    /* deactivate_func_t */
+	NULL,                    /* message_handler_func_t */
+	phpdbg_op_array_handler, /* op_array_handler_func_t */
+	NULL,                    /* statement_handler_func_t */
+	NULL,                    /* fcall_begin_handler_func_t */
+	NULL,                    /* fcall_end_handler_func_t */
+	NULL,                    /* op_array_ctor_func_t */
+	NULL,                    /* op_array_dtor_func_t */
+	STANDARD_ZEND_EXTENSION_PROPERTIES
+};
 
 const opt_struct OPTIONS[] = { /* {{{ */
 	{'c', 1, "ini path override"},
@@ -717,6 +752,8 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+		zend_register_extension(&zend_extension_entry, NULL);
+
 		zend_activate(TSRMLS_C);
 
 #ifdef ZEND_SIGNALS

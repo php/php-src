@@ -80,13 +80,15 @@
 #define PHPDBG_LEAVE  5
 
 /* {{{ tables */
-#define PHPDBG_BREAK_FILE       0
-#define PHPDBG_BREAK_SYM        1
-#define PHPDBG_BREAK_OPLINE     2
-#define PHPDBG_BREAK_METHOD     3
-#define PHPDBG_BREAK_COND       4
-#define PHPDBG_BREAK_OPCODE     5
-#define PHPDBG_BREAK_TABLES     6 /* }}} */
+#define PHPDBG_BREAK_FILE            0
+#define PHPDBG_BREAK_SYM             1
+#define PHPDBG_BREAK_OPLINE          2
+#define PHPDBG_BREAK_METHOD          3
+#define PHPDBG_BREAK_COND            4
+#define PHPDBG_BREAK_OPCODE          5
+#define PHPDBG_BREAK_FUNCTION_OPLINE 6
+#define PHPDBG_BREAK_METHOD_OPLINE   7
+#define PHPDBG_BREAK_TABLES          8/* }}} */
 
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP      (1<<1)
@@ -125,6 +127,9 @@
 #endif /* }}} */
 
 /* {{{ strings */
+#define PHPDBG_NAME "phpdbg"
+#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
+#define PHPDBG_URL "http://phpdbg.com"
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.2.0-dev"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
@@ -137,8 +142,15 @@
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
 /* {{{ structs */
+typedef union _phpdbg_btree phpdbg_btree;
+union _phpdbg_btree {
+	phpdbg_btree  *branches[2];
+	zend_op_array *op_array;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
+	phpdbg_btree *opline_btree;                  /* opline root -> op_array */
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */

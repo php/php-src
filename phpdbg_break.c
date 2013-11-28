@@ -59,6 +59,15 @@ PHPDBG_BREAK(address) /* {{{ */
 			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
 			break;
 
+		case NUMERIC_METHOD_PARAM:
+			phpdbg_set_breakpoint_method_opline(param->method.class, param->method.name, param->num TSRMLS_CC);
+			break;
+
+		case NUMERIC_PARAM:
+		case FILE_PARAM:
+			phpdbg_set_breakpoint_function_opline(param->str, param->num TSRMLS_CC);
+			break;
+
 		phpdbg_default_switch_case();
 	}
 
