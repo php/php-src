@@ -395,7 +395,7 @@ struct magic_set {
 	struct {
 		const char *s;		/* start of search in original source */
 		size_t s_len;		/* length of search region */
-		size_t offset;		/* starting offset in source: XXX - should this be off_t? */
+		size_t offset;		/* starting offset in source: XXX - should this be zend_off_t? */
 		size_t rm_len;		/* match length */
 	} search;
 

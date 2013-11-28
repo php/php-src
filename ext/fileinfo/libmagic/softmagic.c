@@ -1820,11 +1820,11 @@ convert_libmagic_pattern(zval *pattern, int options)
 		int i, j=0;
 		char *t;
 
-		t = (char *) safe_emalloc(Z_STRLEN_P(pattern), 2, 5);
+		t = (char *) safe_emalloc(Z_STRSIZE_P(pattern), 2, 5);
 		
 		t[j++] = '~';
 		
-		for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
+		for (i=0; i<Z_STRSIZE_P(pattern); i++, j++) {
 			switch (Z_STRVAL_P(pattern)[i]) {
 				case '~':
 					t[j++] = '\\';
@@ -1846,7 +1846,7 @@ convert_libmagic_pattern(zval *pattern, int options)
 		t[j]='\0';
 	
 		Z_STRVAL_P(pattern) = t;
-		Z_STRLEN_P(pattern) = j;
+		Z_STRSIZE_P(pattern) = j;
 
 }
 
@@ -2026,7 +2026,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		convert_libmagic_pattern(pattern, options);
 		
 		l = v = 0;
-		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
+		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRSIZE_P(pattern) TSRMLS_CC)) == NULL) {
 			zval_dtor(pattern);
 			FREE_ZVAL(pattern);
 			return -1;
@@ -2100,7 +2100,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 								
 								MAKE_STD_ZVAL(pattern_match);
 								Z_STRVAL_P(pattern_match) = (char *)Z_STRVAL(matchcopy);
-								Z_STRLEN_P(pattern_match) = Z_STRLEN(matchcopy);
+								Z_STRSIZE_P(pattern_match) = Z_STRSIZE(matchcopy);
 								Z_TYPE_P(pattern_match) = IS_STRING; 
 
 								zval_dtor(&matchcopy);
@@ -2130,7 +2130,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
 						ms->search.s += (int)Z_LVAL_P(pattern_offset); /* this is where the match starts */
 						ms->search.offset += (size_t)Z_LVAL_P(pattern_offset); /* this is where the match starts as size_t */
-						ms->search.rm_len = Z_STRLEN_P(pattern_match) /* This is the length of the matched pattern */;
+						ms->search.rm_len = Z_STRSIZE_P(pattern_match) /* This is the length of the matched pattern */;
 						v = 0;
 						
 						efree(pattern_match);

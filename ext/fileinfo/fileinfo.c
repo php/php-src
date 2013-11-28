@@ -44,7 +44,7 @@
 
 /* {{{ macros and type definitions */
 struct php_fileinfo {
-	long options;
+	php_int_t options;
 	struct magic_set *magic;
 };
 
@@ -177,7 +177,7 @@ zend_function_entry finfo_class_functions[] = {
 /* }}} */
 
 #define FINFO_SET_OPTION(magic, options) \
-	if (magic_setflags(magic, options) == -1) { \
+	if (magic_setflags(magic, (int)options) == -1) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to set option '%ld' %d:%s", \
 				options, magic_errno(magic), magic_error(magic)); \
 		RETURN_FALSE; \
@@ -289,14 +289,14 @@ PHP_MINFO_FUNCTION(fileinfo)
    Create a new fileinfo resource. */
 PHP_FUNCTION(finfo_open)
 {
-	long options = MAGIC_NONE;
+	php_int_t options = MAGIC_NONE;
 	char *file = NULL;
-	int file_len = 0;
+	zend_str_size_int file_len = 0;
 	struct php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lp", &options, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iP", &options, &file, &file_len) == FAILURE) {
 		FILEINFO_DESTROY_OBJECT(object);
 		RETURN_FALSE;
 	}
@@ -380,18 +380,18 @@ PHP_FUNCTION(finfo_close)
    Set libmagic configuration options. */
 PHP_FUNCTION(finfo_set_flags)
 {
-	long options;
+	php_int_t options;
 	struct php_fileinfo *finfo;
 	zval *zfinfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 
 	if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &options) == FAILURE) {
 			RETURN_FALSE;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zfinfo, &options) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &zfinfo, &options) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
@@ -410,9 +410,9 @@ PHP_FUNCTION(finfo_set_flags)
 
 static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mimetype_emu) /* {{{ */
 {
-	long options = 0;
+	php_int_t options = 0;
 	char *ret_val = NULL, *buffer = NULL;
-	int buffer_len;
+	zend_str_size_int buffer_len;
 	struct php_fileinfo *finfo = NULL;
 	zval *zfinfo, *zcontext = NULL;
 	zval *what;
@@ -431,7 +431,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		switch (Z_TYPE_P(what)) {
 			case IS_STRING:
 				buffer = Z_STRVAL_P(what);
-				buffer_len = Z_STRLEN_P(what);
+				buffer_len = Z_STRSIZE_P(what);
 				mode = FILEINFO_MODE_FILE;
 				break;
 
@@ -450,13 +450,13 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			goto common;
 		}
 	} else if (object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ir", &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		FILEINFO_FROM_OBJECT(finfo, object);
 		magic = finfo->magic;
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lr", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|ir", &zfinfo, &buffer, &buffer_len, &options, &zcontext) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ZEND_FETCH_RESOURCE(finfo, struct php_fileinfo *, &zfinfo, -1, "file_info", le_fileinfo);
@@ -478,7 +478,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		case FILEINFO_MODE_STREAM:
 		{
 				php_stream *stream;
-				off_t streampos;
+				zend_off_t streampos;
 
 				php_stream_from_zval_no_verify(stream, &what);
 				if (!stream) {
