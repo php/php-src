@@ -27,17 +27,15 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
+/* {{{ remote console headers */
 #ifndef _WIN32
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#else
-#include <Winsock2.h>
-#define SHUT_RDWR SD_BOTH
-#endif
+#	include <sys/socket.h>
+#	include <sys/select.h>
+#	include <sys/time.h>
+#	include <sys/types.h>
+#	include <unistd.h>
+#	include <arpa/inet.h>
+#endif /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -489,7 +487,9 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
 	{'E', 0, "step-through-eval"},
+#ifndef _WIN32
 	{'l', 1, "listen"},
+#endif
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -548,6 +548,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	}
 } /* }}} */
 
+#ifndef _WIN32
 int phpdbg_open_socket(short port) /* {{{ */
 {
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -557,17 +558,9 @@ int phpdbg_open_socket(short port) /* {{{ */
 			return -1;
 			
 		default: {
-#ifndef _WIN32
-			int boolean = 1;
-#else
-			const char *boolean = "1";
-#endif
+			int reuse = 1;
 
-#ifndef _WIN32
-			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &boolean, sizeof(boolean))) {
-#else
-			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, boolean, sizeof(boolean))) {
-#endif
+			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse))) {
 				case -1:
 					close(fd);
 					return -2;
@@ -604,7 +597,6 @@ int phpdbg_open_socket(short port) /* {{{ */
 
 static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
 {	
-#ifndef _WIN32
 	if ((*socket)[0]) {
 		shutdown((*socket)[0], SHUT_RDWR);
 		close((*socket)[0]);
@@ -622,7 +614,6 @@ static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {
 	if (streams[1]) {
 		fclose(streams[1]);
 	}
-#endif
 } /* }}} */
 
 /* don't inline this, want to debug it easily, will inline when done */
@@ -691,14 +682,15 @@ int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* s
 
 	dup2((*socket)[0], fileno(stdin));
 	dup2((*socket)[1], fileno(stdout));
-
+	
 	setbuf(stdout, NULL);
 
 	streams[0] = fdopen((*socket)[0], "r");
 	streams[1] = fdopen((*socket)[1], "w");
-
+	
 	return SUCCESS;
 } /* }}} */
+#endif
 
 int main(int argc, char **argv) /* {{{ */
 {
@@ -722,15 +714,18 @@ int main(int argc, char **argv) /* {{{ */
 	int run = 0;
 	int step = 0;
 	char *bp_tmp_file;
+#ifndef _WIN32
 	int listen[2];
 	int server[2];
 	int socket[2];
 	FILE* streams[2] = {NULL, NULL};
+#endif
 
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
-	
+
+#ifndef _WIN32
 	socket[0] = -1;
 	socket[1] = -1;
 	listen[0] = -1;
@@ -739,13 +734,9 @@ int main(int argc, char **argv) /* {{{ */
 	server[1] = -1;
 	streams[0] = NULL;
 	streams[1] = NULL;
+#endif
 
 #ifdef PHP_WIN32
-	{
-		WSADATA WSAData;
-
-		WSAStartup (0x0101, &WSAData);
-	}
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
@@ -877,7 +868,8 @@ phpdbg_main:
 			case 'q': /* hide banner */
 				show_banner = 0;
 			break;
-			
+
+#ifndef _WIN32
 			/* if you pass a listen port, we will accept input on listen port */
 			/* and write output to listen port * 2 */
 			
@@ -885,9 +877,12 @@ phpdbg_main:
 				listen[0] = atoi(php_optarg);
 				listen[1] = (listen[0] * 2);
 			break;
+#endif
+
 		}
 	}
 
+#ifndef _WIN32
 	/* setup remote server if necessary */
 	if (!cleaning &&
 		(listen[0] > 0 && listen[1] > 0)) {
@@ -898,7 +893,8 @@ phpdbg_main:
 		/* set remote flag to stop service shutting down upon quit */
 		remote = 1;
 	}
-	
+#endif
+
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
@@ -945,15 +941,15 @@ phpdbg_main:
 		/* set flags from command line */
 		PHPDBG_G(flags) = flags;
 
+#ifndef _WIN32
 		/* setup io here */
 		if (streams[0] && streams[1]) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-			
-#ifndef _WIN32
+
 			signal(SIGPIPE, SIG_IGN);
-#endif
 		}
-		
+#endif
+
 		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
 		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
 		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
@@ -1039,7 +1035,7 @@ phpdbg_interact:
 				} else {
 					cleaning = 0;
 				}
-
+#ifndef _WIN32
 				/* remote client disconnected */
 				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 
@@ -1054,7 +1050,7 @@ phpdbg_interact:
 						CG(unclean_shutdown) = 0;
 					}
 				}
-
+#endif
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
 					goto phpdbg_out;
 				}
@@ -1062,11 +1058,12 @@ phpdbg_interact:
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 		
 phpdbg_out:
+#ifndef _WIN32
 		if (PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 			goto phpdbg_interact;
 		}
-		
+#endif
 		if (ini_entries) {
 			free(ini_entries);
 		}
