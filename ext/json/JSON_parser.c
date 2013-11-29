@@ -328,7 +328,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type, int options)
 			}
 		}
 
-		ZVAL_LONG(*z, strtol(buf->c, NULL, 10));
+		ZVAL_LONG(*z, ZEND_STRTOL(buf->c, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {
@@ -436,7 +436,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     machine with a stack.
 */
 int
-parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options TSRMLS_DC)
+parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], zend_str_size_int length, int options TSRMLS_DC)
 {
     int next_char;  /* the next character */
     int next_class;  /* the next character class */
