@@ -489,6 +489,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'E', 0, "step-through-eval"},
 #ifndef _WIN32
 	{'l', 1, "listen"},
+	{'a', 1, "address-or-any"},
 #endif
 	{'-', 0, NULL}
 }; /* }}} */
@@ -549,7 +550,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 } /* }}} */
 
 #ifndef _WIN32
-int phpdbg_open_socket(short port) /* {{{ */
+int phpdbg_open_socket(const char *interface, short port) /* {{{ */
 {
 	int fd = socket(AF_INET, SOCK_STREAM, 0);
 	
@@ -573,7 +574,9 @@ int phpdbg_open_socket(short port) /* {{{ */
 					address.sin_port = htons(port);
 					address.sin_family = AF_INET;
 					
-					if (!inet_pton(AF_INET, "127.0.0.1", &address.sin_addr)) {
+					if ((*interface == '*')) {
+						address.sin_addr.s_addr = htonl(INADDR_ANY);						
+					} else if (!inet_pton(AF_INET, interface, &address.sin_addr)) {
 						close(fd);
 						return -3;
 					}
@@ -618,11 +621,11 @@ static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {
 
 /* don't inline this, want to debug it easily, will inline when done */
 
-int phpdbg_open_sockets(int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
+int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
 {
 	if (((*listen)[0]) < 0 && ((*listen)[1]) < 0) {
-		((*listen)[0]) = phpdbg_open_socket((short)port[0]);
-		((*listen)[1]) = phpdbg_open_socket((short)port[1]);
+		((*listen)[0]) = phpdbg_open_socket(address, (short)port[0]);
+		((*listen)[1]) = phpdbg_open_socket(address, (short)port[1]);
 	}
 
 	streams[0] = NULL;
@@ -715,6 +718,7 @@ int main(int argc, char **argv) /* {{{ */
 	int step = 0;
 	char *bp_tmp_file;
 #ifndef _WIN32
+	char *address;
 	int listen[2];
 	int server[2];
 	int socket[2];
@@ -726,6 +730,7 @@ int main(int argc, char **argv) /* {{{ */
 #endif
 
 #ifndef _WIN32
+	address = strdup("127.0.0.1");
 	socket[0] = -1;
 	socket[1] = -1;
 	listen[0] = -1;
@@ -873,7 +878,7 @@ phpdbg_main:
 			/* if you pass a listen port, we will accept input on listen port */
 			/* and write output to listen port * 2 */
 			
-			case 'l': { /* set listen settings */
+			case 'l': { /* set listen ports */
 				if (sscanf(php_optarg, "%d/%d", &listen[0], &listen[1]) != 2) {
 					if (sscanf(php_optarg, "%d", &listen[0]) != 1) {
 						/* default to hardcoded ports */
@@ -884,6 +889,13 @@ phpdbg_main:
 					}
 				}
 			} break;
+			
+			case 'a': { /* set bind address */
+				free(address);
+				if (!php_optarg) {
+					address = strdup("*");
+				} else address = strdup(php_optarg);
+			} break;
 #endif
 		}
 	}
@@ -892,7 +904,7 @@ phpdbg_main:
 	/* setup remote server if necessary */
 	if (!cleaning &&
 		(listen[0] > 0 && listen[1] > 0)) {
-		if (phpdbg_open_sockets(listen, &server, &socket, streams) == FAILURE) {
+		if (phpdbg_open_sockets(address, listen, &server, &socket, streams) == FAILURE) {
 			remote = 0;
 			exit(0);
 		}
@@ -1047,7 +1059,7 @@ phpdbg_interact:
 
 					/* renegociate connections */
 					phpdbg_open_sockets(
-						listen, &server, &socket, streams);
+						address, listen, &server, &socket, streams);
 					
 					/* set streams */
 					if (streams[0] && streams[1]) {
@@ -1074,6 +1086,7 @@ phpdbg_out:
 			goto phpdbg_interact;
 		}
 #endif
+		
 		if (ini_entries) {
 			free(ini_entries);
 		}
@@ -1114,6 +1127,12 @@ phpdbg_out:
 #ifdef ZTS
 	/* bugggy */
 	/* tsrm_shutdown(); */
+#endif
+
+#ifndef _WIN32
+	if (address) {
+		free(address);	
+	}
 #endif
 	
 	free(bp_tmp_file);

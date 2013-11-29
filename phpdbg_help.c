@@ -564,8 +564,18 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
 	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
-	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console, see docs");
+#ifndef _WIN32
+	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console ports");
+	phpdbg_writeln(" -a\t-a192.168.0.3\t\tSetup remote console bind address");
+#endif
 	phpdbg_notice("Passing -rr will quit automatically after execution");
+#ifndef _WIN32
+	phpdbg_writeln("Remote Console Mode");
+	phpdbg_notice("For security, phpdbg will bind only to the loopback interface by default");
+	phpdbg_writeln("-a without an argument implies all; phpdbg will bind to all available interfaces.");
+	phpdbg_writeln("specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2.");
+	phpdbg_notice("Steps should be taken to secure this service if bound to a public interface/port");
+#endif
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
