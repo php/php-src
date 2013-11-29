@@ -100,7 +100,7 @@ void http_context_headers(php_stream_context* context,
 		Z_TYPE_PP(tmp) == IS_STRING && Z_STRSIZE_PP(tmp)) {
 		char *s = Z_STRVAL_PP(tmp);
 		char *p;
-		int name_len;
+		ptrdiff_t name_len;
 
 		while (*s) {
 			/* skip leading newlines and spaces */
@@ -807,7 +807,7 @@ try_again:
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
 			zval **data;
 			char *key;
-			uint key_len;
+			zend_str_size_uint key_len;
 			int i, n;
 
 			has_cookies = 1;
@@ -956,7 +956,7 @@ try_again:
 		sempos = strstr(cookie, ";");
 		if (eqpos != NULL && (sempos == NULL || sempos > eqpos)) {
 			smart_str name = {0};
-			int cookie_len;
+			ptrdiff_t cookie_len;
 			zval *zcookie;
 
 			if (sempos != NULL) {
@@ -1208,7 +1208,7 @@ try_again:
 	content_type = get_http_header_value(http_headers,"Content-Type: ");
 	if (content_type) {
 		char *pos = NULL;
-		int cmplen;
+		ptrdiff_t cmplen;
 		pos = strstr(content_type,";");
 		if (pos != NULL) {
 			cmplen = pos - content_type;

@@ -164,7 +164,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	return enc;
 }
 
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len)
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, zend_str_size_int len)
 {
 	encodePtr *enc;
 	TSRMLS_FETCH();

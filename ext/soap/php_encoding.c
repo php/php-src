@@ -815,7 +815,7 @@ static zval *to_zval_hexbin(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 {
 	zval *ret;
 	unsigned char *str;
-	int str_len, i, j;
+	size_t str_len, i, j;
 	unsigned char c;
 
 	MAKE_STD_ZVAL(ret);
@@ -3584,7 +3584,7 @@ void encode_finish()
 	}
 }
 
-encodePtr get_conversion(int encode)
+encodePtr get_conversion(php_int_t encode)
 {
 	encodePtr *enc = NULL;
 	TSRMLS_FETCH();

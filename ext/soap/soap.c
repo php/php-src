@@ -68,7 +68,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -1705,7 +1705,7 @@ PHP_METHOD(SoapServer, handle)
 				zval_dtor(&constructor);
 				zval_dtor(&c_ret);
 			} else {
-				int class_name_len = strlen(service->soap_class.ce->name);
+				size_t class_name_len = strlen(service->soap_class.ce->name);
 				char *class_name = emalloc(class_name_len+1);
 
 				memcpy(class_name, service->soap_class.ce->name,class_name_len+1);
@@ -2110,7 +2110,7 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args)
 {
 	zend_bool _old_in_compilation, _old_in_execution;
 	zend_execute_data *_old_current_execute_data;
@@ -4472,7 +4472,7 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name)
 {
 	sdlFunctionPtr *tmp;
 
-	int len = strlen(function_name);
+	zend_str_size_int len = strlen(function_name);
 	char *str = estrndup(function_name,len);
 	php_strtolower(str,len);
 	if (sdl != NULL) {
@@ -4714,7 +4714,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 				      (void **)&attr) == SUCCESS &&
 				      zend_hash_find((*attr)->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType"), (void **)&ext) == SUCCESS) {
 					char *end = strchr((*ext)->val, '[');
-					int len;
+					ptrdiff_t len;
 					if (end == NULL) {
 						len = strlen((*ext)->val);
 					} else {
