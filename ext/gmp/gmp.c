@@ -564,7 +564,7 @@ static int gmp_compare(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int gmp_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+static int gmp_serialize(zval *object, unsigned char **buffer, zend_str_size_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	mpz_ptr gmpnum = GET_GMP_FROM_ZVAL(object);
 	smart_str buf = {0};
@@ -592,7 +592,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, zend_uint *buf_le
 }
 /* }}} */
 
-static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+static int gmp_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_str_size_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
 	mpz_ptr gmpnum;
 	const unsigned char *p, *max;
@@ -1398,11 +1398,11 @@ ZEND_FUNCTION(gmp_sqrtrem)
 ZEND_FUNCTION(gmp_root)
 {
 	zval *a_arg;
-	long nth;
+	php_int_t nth;
 	mpz_ptr gmpnum_a, gmpnum_result;
 	gmp_temp_t temp_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &nth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zi", &a_arg, &nth) == FAILURE) {
 		return;
 	}
 
@@ -1430,7 +1430,7 @@ ZEND_FUNCTION(gmp_root)
 ZEND_FUNCTION(gmp_rootrem)
 {
 	zval *a_arg;
-	long nth;
+	php_int_t nth;
 	mpz_ptr gmpnum_a, gmpnum_result1, gmpnum_result2;
 	gmp_temp_t temp_a;
 
