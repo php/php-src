@@ -33,7 +33,7 @@ Starting phpdbg-jui Anywhere
 A JRE is needed for the bundled remote client, given any operating system with a working installation of Java:
 
 ```
-java -jar /path/to/phpdb-jui.jar
+java -jar /path/to/phpdbg-ui.jar
 ```
 
 Will initialize the bundled client, simply configure the settings accordingly and press *Connect*
