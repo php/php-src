@@ -201,7 +201,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	if (zend_hash_find(HASH_OF(filterparams), "key", sizeof("key"), (void**)&tmpzval) == SUCCESS &&
 		Z_TYPE_PP(tmpzval) == IS_STRING) {
 		key = Z_STRVAL_PP(tmpzval);
-		key_len = Z_STRLEN_PP(tmpzval);
+		key_len = Z_STRSIZE_PP(tmpzval);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key not specified or is not a string");
 		return NULL;
@@ -226,11 +226,11 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	}
 
 	iv = emalloc(iv_len + 1);
-	if (iv_len <= Z_STRLEN_PP(tmpzval)) {
+	if (iv_len <= Z_STRSIZE_PP(tmpzval)) {
 		memcpy(iv, Z_STRVAL_PP(tmpzval), iv_len);
 	} else {
-		memcpy(iv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
-		memset(iv + Z_STRLEN_PP(tmpzval), 0, iv_len - Z_STRLEN_PP(tmpzval));
+		memcpy(iv, Z_STRVAL_PP(tmpzval), Z_STRSIZE_PP(tmpzval));
+		memset(iv + Z_STRSIZE_PP(tmpzval), 0, iv_len - Z_STRSIZE_PP(tmpzval));
 	}
 
 	result = mcrypt_generic_init(mcrypt_module, key, key_len, iv);
