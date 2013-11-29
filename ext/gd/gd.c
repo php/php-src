@@ -1422,7 +1422,8 @@ PHP_FUNCTION(imageloadfont)
 	char *file;
 	zend_str_size_int file_name;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
-	int ind, body_size, n = 0, b, i, body_size_check;
+	int ind, body_size, n = 0, b;
+	zend_off_t body_size_check, i;
 	gdFontPtr font;
 	php_stream *stream;
 
@@ -3396,7 +3397,7 @@ PHP_FUNCTION(imagefilledpolygon)
 
 /* {{{ php_find_gd_font
  */
-static gdFontPtr php_find_gd_font(int size TSRMLS_DC)
+static gdFontPtr php_find_gd_font(php_int_t size TSRMLS_DC)
 {
 	gdFontPtr font;
 	int ind_type;
@@ -3830,7 +3831,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		do {
 			zval ** item;
 			char * key;
-			ulong num_key;
+			php_uint_t num_key;
 
 			if (zend_hash_get_current_key_ex(HASH_OF(EXT), &key, NULL, &num_key, 0, &pos) != HASH_KEY_IS_STRING) {
 				continue;
