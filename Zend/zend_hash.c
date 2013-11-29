@@ -1123,7 +1123,7 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 		Z_TYPE_P(key) = IS_NULL;
 	} else if (p->nKeyLength) {
 		Z_TYPE_P(key) = IS_STRING;
-		Z_STRVAL_P(key) = estrndup(p->arKey, p->nKeyLength - 1);
+		Z_STRVAL_P(key) = IS_INTERNED(p->arKey) ? (char*)p->arKey : estrndup(p->arKey, p->nKeyLength - 1);
 		Z_STRSIZE_P(key) = p->nKeyLength - 1;
 	} else {
 		Z_TYPE_P(key) = IS_LONG;
