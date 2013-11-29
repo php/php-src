@@ -40,10 +40,6 @@ public class JConsole extends javax.swing.JDialog {
 
         stdoutPopupMenu = new javax.swing.JPopupMenu();
         resetStdout = new javax.swing.JMenuItem();
-        mainSplit = new javax.swing.JSplitPane();
-        input = new javax.swing.JTextField();
-        outputScrollPane = new javax.swing.JScrollPane();
-        output = new phpdbg.ui.JTerminalPane();
         host = new javax.swing.JTextField();
         stdoutPort = new javax.swing.JTextField();
         stdinCheckBox = new javax.swing.JCheckBox();
@@ -51,6 +47,10 @@ public class JConsole extends javax.swing.JDialog {
         openButton = new javax.swing.JButton();
         stdinPort = new javax.swing.JTextField();
         hostLabel = new javax.swing.JLabel();
+        input = new javax.swing.JTextField();
+        outputScrollPane = new javax.swing.JScrollPane();
+        output = new phpdbg.ui.JTerminalPane();
+        echoCheckBox = new javax.swing.JCheckBox();
 
         resetStdout.setText("Clear");
         resetStdout.addActionListener(new java.awt.event.ActionListener() {
@@ -63,29 +63,11 @@ public class JConsole extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("phpdbg jui");
 
-        mainSplit.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        mainSplit.setToolTipText("");
-
-        input.setToolTipText("");
-        input.setEnabled(false);
-        input.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                inputKeyReleased(evt);
-            }
-        });
-        mainSplit.setLeftComponent(input);
-
-        output.setFont(new java.awt.Font("DialogInput", 0, 12)); // NOI18N
-        output.setComponentPopupMenu(stdoutPopupMenu);
-        outputScrollPane.setViewportView(output);
-
-        mainSplit.setRightComponent(outputScrollPane);
-
         host.setText("127.0.0.1");
         host.setToolTipText("Set the hostname, or IPv4 address of the machine running the phpdbg remote console server");
 
         stdoutPort.setText("8000");
-        stdoutPort.setToolTipText("");
+        stdoutPort.setToolTipText("By default, stdin * 2");
 
         stdinCheckBox.setSelected(true);
         stdinCheckBox.setText("stdin:");
@@ -95,8 +77,8 @@ public class JConsole extends javax.swing.JDialog {
         stdoutCheckBox.setText("stdout:");
         stdoutCheckBox.setToolTipText("Set the port for stdout, or unset to disable stdout");
 
+        openButton.setText("Connect");
         openButton.setActionCommand("open");
-        openButton.setLabel("open");
         openButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 openButtonActionPerformed(evt);
@@ -104,9 +86,26 @@ public class JConsole extends javax.swing.JDialog {
         });
 
         stdinPort.setText("4000");
-        stdinPort.setToolTipText("");
+        stdinPort.setToolTipText("The listen port passed to phpdbg (-l option)");
 
         hostLabel.setText("Hostname:");
+
+        input.setToolTipText("Enter phpdbg commands here !");
+        input.setEnabled(false);
+        input.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                inputKeyReleased(evt);
+            }
+        });
+
+        output.setFont(new java.awt.Font("DialogInput", 0, 12)); // NOI18N
+        output.setComponentPopupMenu(stdoutPopupMenu);
+        outputScrollPane.setViewportView(output);
+
+        echoCheckBox.setSelected(true);
+        echoCheckBox.setToolTipText("Check to echo sent commands in output");
+        echoCheckBox.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        echoCheckBox.setLabel("echo");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,11 +114,11 @@ public class JConsole extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mainSplit)
-                    .addGroup(layout.createSequentialGroup()
+                    .addComponent(outputScrollPane)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(hostLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(host, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+                        .addComponent(host, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(stdinCheckBox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -129,24 +128,32 @@ public class JConsole extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(openButton)))
+                        .addComponent(openButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(input)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(echoCheckBox)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(mainSplit, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addComponent(outputScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(host, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(echoCheckBox))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(stdinCheckBox)
                         .addComponent(stdoutCheckBox)
                         .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(hostLabel)))
+                        .addComponent(hostLabel)
+                        .addComponent(host, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(openButton))
                 .addContainerGap())
         );
 
@@ -236,6 +243,10 @@ public class JConsole extends javax.swing.JDialog {
     
     public Boolean isConnected() {
         return connected;
+    }
+    
+    public Boolean isEchoing() {
+        return echoCheckBox.isSelected();
     }
     
     public void setConnected(Boolean isConnected) {
@@ -353,10 +364,10 @@ public class JConsole extends javax.swing.JDialog {
     private static CommandHistory history = new CommandHistory();
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox echoCheckBox;
     private javax.swing.JTextField host;
     private javax.swing.JLabel hostLabel;
     private javax.swing.JTextField input;
-    private javax.swing.JSplitPane mainSplit;
     private javax.swing.JButton openButton;
     private phpdbg.ui.JTerminalPane output;
     private javax.swing.JScrollPane outputScrollPane;

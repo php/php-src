@@ -70,7 +70,12 @@ public class DebugSocket extends Socket implements Runnable {
                         
                         command = main.getInputField().getText();
                         /* send command to stdin socket */
-                        if (command != null) {    
+                        if (command != null) {
+                            if (main.isEchoing()) {
+                                main.getOutputField().appendANSI("remote> ");
+                                main.getOutputField().appendANSI(command);
+                                main.getOutputField().appendANSI("\n");
+                            }
                             output.write(
                                command.getBytes());
                             output.write("\n".getBytes());

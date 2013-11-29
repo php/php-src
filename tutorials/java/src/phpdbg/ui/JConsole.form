@@ -42,14 +42,14 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="mainSplit" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
+                  <Component id="outputScrollPane" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
                       <Component id="hostLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="host" pref="359" max="32767" attributes="0"/>
+                      <Component id="host" pref="345" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="stdinCheckBox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -59,7 +59,12 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="stdoutPort" min="-2" pref="60" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="openButton" min="-2" max="-2" attributes="0"/>
+                      <Component id="openButton" min="-2" pref="100" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="input" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="echoCheckBox" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -70,18 +75,23 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="mainSplit" pref="428" max="32767" attributes="0"/>
+              <Component id="outputScrollPane" pref="403" max="32767" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="host" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="openButton" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="input" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="echoCheckBox" alignment="3" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="stdoutPort" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="stdinCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="stdoutCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="stdinPort" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="hostLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="host" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <Component id="openButton" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -89,54 +99,6 @@
     </DimensionLayout>
   </Layout>
   <SubComponents>
-    <Container class="javax.swing.JSplitPane" name="mainSplit">
-      <Properties>
-        <Property name="orientation" type="int" value="0"/>
-        <Property name="toolTipText" type="java.lang.String" value=""/>
-      </Properties>
-
-      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout"/>
-      <SubComponents>
-        <Component class="javax.swing.JTextField" name="input">
-          <Properties>
-            <Property name="toolTipText" type="java.lang.String" value=""/>
-            <Property name="enabled" type="boolean" value="false"/>
-          </Properties>
-          <Events>
-            <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="inputKeyReleased"/>
-          </Events>
-          <Constraints>
-            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
-              <JSplitPaneConstraints position="left"/>
-            </Constraint>
-          </Constraints>
-        </Component>
-        <Container class="javax.swing.JScrollPane" name="outputScrollPane">
-          <AuxValues>
-            <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-          </AuxValues>
-          <Constraints>
-            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JSplitPaneSupportLayout$JSplitPaneConstraintsDescription">
-              <JSplitPaneConstraints position="right"/>
-            </Constraint>
-          </Constraints>
-
-          <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-          <SubComponents>
-            <Component class="phpdbg.ui.JTerminalPane" name="output">
-              <Properties>
-                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="DialogInput" size="12" style="0"/>
-                </Property>
-                <Property name="componentPopupMenu" type="javax.swing.JPopupMenu" editor="org.netbeans.modules.form.ComponentChooserEditor">
-                  <ComponentRef name="stdoutPopupMenu"/>
-                </Property>
-              </Properties>
-            </Component>
-          </SubComponents>
-        </Container>
-      </SubComponents>
-    </Container>
     <Component class="javax.swing.JTextField" name="host">
       <Properties>
         <Property name="text" type="java.lang.String" value="127.0.0.1"/>
@@ -146,7 +108,7 @@
     <Component class="javax.swing.JTextField" name="stdoutPort">
       <Properties>
         <Property name="text" type="java.lang.String" value="8000"/>
-        <Property name="toolTipText" type="java.lang.String" value=""/>
+        <Property name="toolTipText" type="java.lang.String" value="By default, stdin * 2"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="stdinCheckBox">
@@ -165,8 +127,8 @@
     </Component>
     <Component class="javax.swing.JButton" name="openButton">
       <Properties>
+        <Property name="text" type="java.lang.String" value="Connect"/>
         <Property name="actionCommand" type="java.lang.String" value="open"/>
-        <Property name="label" type="java.lang.String" value="open"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openButtonActionPerformed"/>
@@ -175,12 +137,48 @@
     <Component class="javax.swing.JTextField" name="stdinPort">
       <Properties>
         <Property name="text" type="java.lang.String" value="4000"/>
-        <Property name="toolTipText" type="java.lang.String" value=""/>
+        <Property name="toolTipText" type="java.lang.String" value="The listen port passed to phpdbg (-l option)"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="hostLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Hostname:"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JTextField" name="input">
+      <Properties>
+        <Property name="toolTipText" type="java.lang.String" value="Enter phpdbg commands here !"/>
+        <Property name="enabled" type="boolean" value="false"/>
+      </Properties>
+      <Events>
+        <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="inputKeyReleased"/>
+      </Events>
+    </Component>
+    <Container class="javax.swing.JScrollPane" name="outputScrollPane">
+      <AuxValues>
+        <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+      </AuxValues>
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+      <SubComponents>
+        <Component class="phpdbg.ui.JTerminalPane" name="output">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="DialogInput" size="12" style="0"/>
+            </Property>
+            <Property name="componentPopupMenu" type="javax.swing.JPopupMenu" editor="org.netbeans.modules.form.ComponentChooserEditor">
+              <ComponentRef name="stdoutPopupMenu"/>
+            </Property>
+          </Properties>
+        </Component>
+      </SubComponents>
+    </Container>
+    <Component class="javax.swing.JCheckBox" name="echoCheckBox">
+      <Properties>
+        <Property name="selected" type="boolean" value="true"/>
+        <Property name="toolTipText" type="java.lang.String" value="Check to echo sent commands in output"/>
+        <Property name="horizontalAlignment" type="int" value="2"/>
+        <Property name="label" type="java.lang.String" value="echo"/>
       </Properties>
     </Component>
   </SubComponents>
