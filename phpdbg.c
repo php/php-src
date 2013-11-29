@@ -1046,9 +1046,10 @@ phpdbg_interact:
 					/* set streams */
 					if (streams[0] && streams[1]) {
 						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
-						
-						CG(unclean_shutdown) = 0;
 					}
+					
+					/* this must be forced */
+					CG(unclean_shutdown) = 0;
 				}
 #endif
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
@@ -1056,6 +1057,9 @@ phpdbg_interact:
 				}
 			} zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+		
+		/* this must be forced */
+		CG(unclean_shutdown) = 0;
 		
 phpdbg_out:
 #ifndef _WIN32
