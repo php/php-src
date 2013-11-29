@@ -239,7 +239,7 @@ pop(JSON_parser jp, int mode)
     JSON_checker_char will delete the JSON_checker object if it sees an error.
 */
 JSON_parser
-new_JSON_parser(int depth)
+new_JSON_parser(php_int_t depth)
 {
     JSON_parser jp = (JSON_parser)emalloc(sizeof(struct JSON_parser_struct));
     jp->state = GO;
@@ -291,7 +291,7 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval **z, smart_str *buf, int type, int options)
+static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t options)
 {
     ALLOC_INIT_ZVAL(*z);
 
@@ -418,7 +418,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
 #define FREE_BUFFERS() smart_str_free(&buf); smart_str_free(&key);
 #define SWAP_BUFFERS(from, to) do { \
         char *t1 = from.c; \
-        int t2 = from.a; \
+        zend_str_size_int t2 = from.a; \
         from.c = to.c; \
         from.a = to.a; \
         to.c = t1; \
@@ -436,7 +436,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     machine with a stack.
 */
 int
-parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], zend_str_size_int length, int options TSRMLS_DC)
+parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], zend_str_size_int length, php_int_t options TSRMLS_DC)
 {
     int next_char;  /* the next character */
     int next_class;  /* the next character class */
