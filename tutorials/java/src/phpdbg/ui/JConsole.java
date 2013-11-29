@@ -89,6 +89,8 @@ public class JConsole extends javax.swing.JDialog {
         });
         mainSplit.setLeftComponent(input);
 
+        output.setFont(new java.awt.Font("DialogInput", 0, 12)); // NOI18N
+        output.setComponentPopupMenu(stdoutPopupMenu);
         outputScrollPane.setViewportView(output);
 
         mainSplit.setRightComponent(outputScrollPane);
