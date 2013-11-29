@@ -13,6 +13,10 @@ package phpdbg.ui;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 
 public class JTerminalPane extends JTextPane {
   
@@ -32,22 +36,44 @@ public class JTerminalPane extends JTextPane {
   private static final Color B_Yellow  = Color.getHSBColor( 0.167f, 1.000f, 1.000f );
   private static final Color B_Cyan    = Color.getHSBColor( 0.500f, 1.000f, 1.000f );
   private static final Color B_White   = Color.getHSBColor( 0.000f, 0.000f, 1.000f );
-  private static final Color cReset    = Color.getHSBColor( 0.000f, 0.000f, 0.000f );
+  private static final Color cReset    = Color.getHSBColor( 0.000f, 0.000f, 1.000f );
 
   private Color colorCurrent    = cReset;
   private String remaining = "";
   
   public JTerminalPane() {
       super();
+      setOpaque(false);
+      setBackground(new Color(0, 0, 0, 0));
+  }
+  
+  @Override public void paintComponent(Graphics g) {
+      g.setColor(Color.BLACK);
+      g.fillRect(0, 0, getWidth(), getHeight());
+      
+      try {
+          Image image = ImageIO.read(
+                  JTerminalPane.class.getResource("logo-small.png"));
+          
+          g.drawImage(
+                  image, 
+                  getWidth() - image.getWidth(this) - 10, 
+                  getHeight() - image.getHeight(this) - 10, 
+                  image.getWidth(this), image.getHeight(this), this);
+          
+      } catch (IOException | NullPointerException | IllegalArgumentException ex) {}
+      
+      super.paintComponent(g);
   }
   
   public void append(Color c, String s) {
     StyleContext sc = StyleContext.getDefaultStyleContext();
     AttributeSet aset = sc.addAttribute(
             SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
-    setCaretPosition(getDocument().getLength());
     setCharacterAttributes(aset, false);
     replaceSelection(s);
+    setCaretPosition(
+            (getDocument().getLength() > 0) ? (getDocument().getLength() - 1) : 0);
   }
 
   public void appendANSI(String s) {

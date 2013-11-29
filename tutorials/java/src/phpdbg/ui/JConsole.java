@@ -7,6 +7,7 @@ import static java.awt.event.KeyEvent.VK_UP;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -68,7 +69,6 @@ public class JConsole extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("phpdbg jui");
-        setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         host.setText("127.0.0.1");
         host.setToolTipText("Set the hostname, or IPv4 address of the machine running the phpdbg remote console server");
