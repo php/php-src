@@ -293,10 +293,10 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 				    	
 						rest += 2;
 						Z_TYPE(new_header) = IS_STRING;
-						Z_STRLEN(new_header) = Z_STRLEN_PP(header) - (rest - s);
-						Z_STRVAL(new_header) = emalloc(Z_STRLEN_PP(header) + 1);
+						Z_STRSIZE(new_header) = Z_STRSIZE_PP(header) - (rest - s);
+						Z_STRVAL(new_header) = emalloc(Z_STRSIZE_PP(header) + 1);
 						memcpy(Z_STRVAL(new_header), Z_STRVAL_PP(header), s - Z_STRVAL_PP(header));
-						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_PP(header)), rest, Z_STRLEN_PP(header) - (rest - Z_STRVAL_PP(header)) + 1);
+						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_PP(header)), rest, Z_STRSIZE_PP(header) - (rest - Z_STRVAL_PP(header)) + 1);
 						ctx->old_header = *header;
 						Z_ADDREF_P(ctx->old_header);
 						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
@@ -1800,8 +1800,8 @@ static void sdl_serialize_string(const char *str, smart_str *out)
 static void sdl_serialize_key(HashTable *ht, smart_str *out)
 {
 	char *key;
-	uint  key_len;
-	ulong index;
+	zend_str_size_uint  key_len;
+	php_uint_t index;
 
 	if (zend_hash_get_current_key_ex(ht, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
 		WSDL_CACHE_PUT_INT(key_len, out);
@@ -2442,9 +2442,9 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 	sdlSoapBindingFunctionHeaderPtr *tmp, pheader;
 	encodePtr *penc;
 	sdlTypePtr *ptype;
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 
 	pheaders = malloc(sizeof(HashTable));
 	zend_hash_init(pheaders, zend_hash_num_elements(headers), NULL, delete_header_persistent, 1);
@@ -2510,9 +2510,9 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 	sdlParamPtr *tmp, pparam;
 	sdlTypePtr *ptype;
 	encodePtr *penc;
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 
 	pparams = malloc(sizeof(HashTable));
 	zend_hash_init(pparams, zend_hash_num_elements(params), NULL, delete_parameter_persistent, 1);
@@ -2557,9 +2557,9 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 {
 	HashTable *pfaults;
 	sdlFaultPtr  *tmp, pfault;
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 
 	pfaults = malloc(sizeof(HashTable));
 	zend_hash_init(pfaults, zend_hash_num_elements(faults), NULL, delete_fault_persistent, 1);
@@ -2606,9 +2606,9 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashTable *ptr_map, HashTable *bp_types, HashTable *bp_encoders)
 {
 	sdlAttributePtr pattr;
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 
 	pattr = malloc(sizeof(sdlAttribute));
 	memset(pattr, 0, sizeof(sdlAttribute));
@@ -2718,9 +2718,9 @@ static sdlContentModelPtr make_persistent_sdl_model(sdlContentModelPtr model, Ha
 
 static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, HashTable *bp_types, HashTable *bp_encoders)
 {
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 	sdlTypePtr ptype = NULL;
 
 	ptype = malloc(sizeof(sdlType));
@@ -2952,9 +2952,9 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 	sdlPtr psdl = NULL;
 	HashTable ptr_map;
 	HashTable bp_types, bp_encoders;
-	ulong index;
+	php_uint_t index;
 	char *key;
-	uint key_len;
+	zend_str_size_uint key_len;
 
 	zend_hash_init(&bp_types, 0, NULL, NULL, 0);
 	zend_hash_init(&bp_encoders, 0, NULL, NULL, 0);
@@ -3186,7 +3186,7 @@ static void delete_psdl(void *data)
 	free(tmp);
 }
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
+sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 {
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
@@ -3263,7 +3263,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **) &tmp) == SUCCESS &&
-	    Z_TYPE_PP(tmp) == IS_STRING && Z_STRLEN_PP(tmp) > 0) {	
+	    Z_TYPE_PP(tmp) == IS_STRING && Z_STRSIZE_PP(tmp) > 0) {	
 		smart_str_appends(&headers, "User-Agent: ");
 		smart_str_appends(&headers, Z_STRVAL_PP(tmp));
 		smart_str_appends(&headers, "\r\n");
@@ -3377,8 +3377,8 @@ cache_in_memory:
 				HashPosition pos;
 				time_t latest = t;
 				char *key = NULL;
-				uint key_len;
-				ulong idx;
+				zend_str_size_uint key_len;
+				php_uint_t idx;
 
 				for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(mem_cache), &pos);
 					 zend_hash_get_current_data_ex(SOAP_GLOBAL(mem_cache), (void **) &q, &pos) == SUCCESS;
