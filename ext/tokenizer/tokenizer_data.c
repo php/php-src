@@ -162,7 +162,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);
 }
 
-char *get_token_type_name(int token_type)
+char *get_token_type_name(php_int_t token_type)
 {
 	switch (token_type) {
 
