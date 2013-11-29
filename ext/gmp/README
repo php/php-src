@@ -1,5 +1,6 @@
-Arbitrary length number support with GNU MP library.
-Please see the PGP manual for more documentation.
-See also GNU MP home page at http://www.swox.com/gmp/.
-GNU MP library is available under the tems of GNU LGPL 
-license. Please see http://www.swox.com/gmp/lgpl.html
+GMP is a free library for arbitrary precision arithmetic,
+operating on signed integers, rational numbers, and floating-point numbers.
+
+Website: http://gmplib.org/
+Manual:  http://gmplib.org/manual/
+License: GNU LGPL, https://www.gnu.org/copyleft/lesser.html
