@@ -266,7 +266,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char*
 
 PHPDBG_API void phpdbg_save_oplines(zend_op_array *op_array TSRMLS_DC) {
 	phpdbg_btree **branch = &PHPDBG_G(opline_btree);
-	int i = sizeof(zend_ulong) * 8 - 1;
+	int i = sizeof(void *) * 8 - 1;
 
 	do {
 		if (*branch == NULL) {
@@ -276,11 +276,12 @@ PHPDBG_API void phpdbg_save_oplines(zend_op_array *op_array TSRMLS_DC) {
 	} while (i--);
 
 	if (*branch == NULL) {
-		phpdbg_btree *memory = *branch = emalloc(i * sizeof(phpdbg_btree));
-		while (i--) {
+		phpdbg_btree *memory = *branch = emalloc((i + 2) * sizeof(phpdbg_btree));
+		do {
+			(*branch)->branches[!(((zend_ulong)op_array->opcodes >> i) % 2)] = NULL;
 			branch = &(*branch)->branches[((zend_ulong)op_array->opcodes >> i) % 2];
 			*branch = ++memory;
-		}
+		} while (i--);
 	}
 
 	(*branch)->op_array = op_array;
@@ -288,24 +289,32 @@ PHPDBG_API void phpdbg_save_oplines(zend_op_array *op_array TSRMLS_DC) {
 
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
 {
+	if (PHPDBG_G(opline_btree) == NULL) {
+		phpdbg_error("No oplines initialized yet");
+		return;
+	}
+
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline)) {
 		phpdbg_breakline_t new_break;
 		phpdbg_breakopline_t opline_break;
-		int i = sizeof(zend_ulong) * 8 - 1, last_superior_i = -1;
+		int i = sizeof(void *) * 8 - 1, last_superior_i = -1;
 		phpdbg_btree *branch = PHPDBG_G(opline_btree);
 		HashTable *insert = &PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE];
 		HashTable func_breaks, *func_table;
 
 		do {
 			if ((opline >> i) % 2 == 0 && !branch->branches[0]) {
-				if (last_superior_i != -1) {
-					i = sizeof(zend_ulong) * 8 - 1;
-					do {
-						branch = branch->branches[(opline >> i) % 2 == 1 && branch->branches[1]];
-					} while (i-- > last_superior_i);
-					do {
-						branch = branch->branches[!!branch->branches[1]];
-					} while (i--);
+				if (last_superior_i == -1) {
+					goto error;
+				}
+				branch = PHPDBG_G(opline_btree);
+				i = sizeof(void *) * 8 - 1;
+				do {
+					branch = branch->branches[(opline >> i) % 2 == 1 && branch->branches[1]];
+				} while (i-- > last_superior_i);
+				branch = branch->branches[0];
+				while (i--) {
+					branch = branch->branches[branch->branches[1] != NULL];
 				}
 				break;
 			}
@@ -317,11 +326,11 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 			} else {
 				branch = branch->branches[0];
 			}
-		} while (--i);
+		} while (i--);
 
-		if (i ||
-		    (zend_ulong)(branch->op_array + branch->op_array->last) <= opline ||
-		    (opline - (zend_ulong)branch->op_array) % sizeof(zend_op) > 0) {
+		if ((zend_ulong)(branch->op_array->opcodes + branch->op_array->last) <= opline ||
+		    (opline - (zend_ulong)branch->op_array->opcodes) % sizeof(zend_op) > 0) {
+error:
 			phpdbg_error("No opline could be found at 0x%lx", opline);
 			return;
 		}
@@ -421,7 +430,14 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 	for (zend_hash_internal_pointer_reset_ex(oplines_table, &position);
 	     zend_hash_get_current_data_ex(oplines_table, (void**) &brake, &position) == SUCCESS;
 	     zend_hash_move_forward_ex(oplines_table, &position)) {
-		phpdbg_resolve_op_array_break(brake, op_array TSRMLS_CC);
+		if (phpdbg_resolve_op_array_break(brake, op_array TSRMLS_CC) == SUCCESS) {
+			phpdbg_breakline_t *opline_break;
+
+			zend_hash_internal_pointer_end(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+			zend_hash_get_current_data(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (void **)&opline_break);
+
+			phpdbg_notice("Breakpoint #%d resolved at %s%s%s:%d (opline %#lx)", brake->id, brake->class_name?brake->class_name:"", brake->class_name?"::":"", brake->func_name, brake->opline, opline_break->opline);
+		}
 	}
 }
 
