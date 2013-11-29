@@ -3,11 +3,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -16,80 +11,52 @@ import javax.swing.JTextField;
  */
 
 /**
- * In a RUSH !!!
- * @author joe
+ * Manage input and output data
+ * @author krakjoe
  */
 public class DBGThread extends Socket implements Runnable {
-    private final String host;
-    private final Integer port;
     private final Boolean reader;
-    private final JTextField field;
-    private final JTextArea area;
-    private final JScrollPane pane;
-    private InputStream input;
-    private OutputStream output;
-    private String buffer;
+    private final Main main;
     private Boolean quit;
 
-    public DBGThread(final String host, final Integer port, final JTextField field) throws IOException {
+    public DBGThread(final String host, final Integer port, final Main main, Boolean reader) throws IOException {
         super(host, port);
         
-        this.host = host;
-        this.port = port;
-        this.reader = true;
-        this.field = field;
-        this.area = null;
-        this.pane = null;
+        this.main = main;
+        this.reader = reader;
         this.quit = false;
-        this.buffer = null;
-    }
-    
-    public DBGThread(final String host, final Integer port, final JTextArea area, JScrollPane pane) throws IOException {
-        super(host, port);
         
-        this.host = host;
-        this.port = port;
-        this.reader = false;
-        this.field = null;
-        this.area = area;
-        this.pane = pane;
-        this.quit = false;
-        this.buffer = null;
-    }
-    
-    public Boolean isReader() {
-        return this.reader;
+        main.setConnected(true);
     }
     
     public void quit() {
         synchronized(this) {
-            this.quit = true;
+            quit = true;
             this.notifyAll(); 
         }
     }
     
-    @Override
-    public void run() {
+    @Override public void run() {
         try {
-            if (this.reader) {
-                output = this.getOutputStream();
-            } else input = this.getInputStream();
-            
             synchronized(this) {
                 do {
-                    if (this.reader) {
+                    if (reader) {
+                        String command;
+                        OutputStream output = getOutputStream();
+                        
                         this.wait();
                         
+                        command = main.getInputField().getText();
                         /* send command to stdin socket */
-                        if (this.field.getText() != null) {    
+                        if (command != null) {    
                             output.write(
-                               this.field.getText().getBytes());
+                               command.getBytes());
                             output.write("\n".getBytes());
                             output.flush();
                         }
-                        this.field.setText(null);
-                        
+                        main.getInputField().setText(null);
                     } else {
+                        InputStream input = getInputStream();
                         /* get data from stdout socket */
                         byte[] bytes = new byte[1];
                         do {
@@ -100,16 +67,24 @@ public class DBGThread extends Socket implements Runnable {
                             }
                             
                             if (input.read(bytes, 0, 1) > -1) {
-                                area.setCaretPosition(
-                                        area.getText().length());
-                                area.append(new String(bytes));
+                                main.getOutputField().setCaretPosition(
+                                        main.getOutputField().getText().length());
+                                main.getOutputField().append(new String(bytes));
                             }
-                        } while (!this.quit);
+                        } while (!quit);
                     }
-                } while(!this.quit);
+                } while(!quit);
             }
         } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(DBGThread.class.getName()).log(Level.SEVERE, null, ex);
+            if (!quit) {
+                main.messageBox(ex.getMessage());
+            }
+        } finally {
+            try {
+                close();
+            } catch (IOException ex) { /* naughty me */ } finally {
+               main.setConnected(false); 
+            }
         }
     }
 }

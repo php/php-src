@@ -1,8 +1,14 @@
 
+import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_ENTER;
+import static java.awt.event.KeyEvent.VK_UP;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -12,12 +18,13 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author joe
+ * @author krakjoe
  */
 public class Main extends javax.swing.JDialog {
-
     /**
-     * Creates new form NewJDialog
+     * Creates user interface
+     * @param parent
+     * @param modal
      */
     public Main(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -33,36 +40,78 @@ public class Main extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jSplitPane1 = new javax.swing.JSplitPane();
+        stdoutPopupMenu = new javax.swing.JPopupMenu();
+        resetStdout = new javax.swing.JMenuItem();
+        mainSplit = new javax.swing.JSplitPane();
         input = new javax.swing.JTextField();
         outScrollPane = new javax.swing.JScrollPane();
         output = new javax.swing.JTextArea();
+        host = new javax.swing.JTextField();
+        stdoutPort = new javax.swing.JTextField();
+        stdinCheckBox = new javax.swing.JCheckBox();
+        stdoutCheckBox = new javax.swing.JCheckBox();
+        openButton = new javax.swing.JButton();
+        stdinPort = new javax.swing.JTextField();
+        hostLabel = new javax.swing.JLabel();
+
+        resetStdout.setText("Clear");
+        resetStdout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resetStdoutActionPerformed(evt);
+            }
+        });
+        stdoutPopupMenu.add(resetStdout);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("phpdbg jui");
 
-        jSplitPane1.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
-        jSplitPane1.setToolTipText("");
+        mainSplit.setOrientation(javax.swing.JSplitPane.VERTICAL_SPLIT);
+        mainSplit.setToolTipText("");
 
         input.setToolTipText("");
-        input.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                inputActionPerformed(evt);
-            }
-        });
+        input.setEnabled(false);
         input.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 inputKeyReleased(evt);
             }
         });
-        jSplitPane1.setLeftComponent(input);
+        mainSplit.setLeftComponent(input);
 
+        output.setEditable(false);
         output.setColumns(20);
         output.setFont(new java.awt.Font("DialogInput", 0, 12)); // NOI18N
         output.setRows(5);
+        output.setComponentPopupMenu(stdoutPopupMenu);
         outScrollPane.setViewportView(output);
 
-        jSplitPane1.setRightComponent(outScrollPane);
+        mainSplit.setRightComponent(outScrollPane);
+
+        host.setText("127.0.0.1");
+        host.setToolTipText("Set the hostname, or IPv4 address of the machine running the phpdbg remote console server");
+
+        stdoutPort.setText("8000");
+        stdoutPort.setToolTipText("");
+
+        stdinCheckBox.setSelected(true);
+        stdinCheckBox.setText("stdin:");
+        stdinCheckBox.setToolTipText("Set the port for stdin, or uncheck to disable stdin");
+
+        stdoutCheckBox.setSelected(true);
+        stdoutCheckBox.setText("stdout:");
+        stdoutCheckBox.setToolTipText("Set the port for stdout, or unset to disable stdout");
+
+        openButton.setActionCommand("open");
+        openButton.setLabel("open");
+        openButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openButtonActionPerformed(evt);
+            }
+        });
+
+        stdinPort.setText("4000");
+        stdinPort.setToolTipText("");
+
+        hostLabel.setText("Hostname:");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -70,34 +119,181 @@ public class Main extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 796, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mainSplit)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(hostLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(host, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(stdinCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(stdoutCheckBox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(openButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jSplitPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 457, Short.MAX_VALUE)
+                .addComponent(mainSplit, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE, false)
+                    .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(stdinCheckBox)
+                    .addComponent(stdoutCheckBox)
+                    .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(host, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(openButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(hostLabel))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void inputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputActionPerformed
-        // TODO add your handling code here:
-        
-    }//GEN-LAST:event_inputActionPerformed
-
     private void inputKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputKeyReleased
-        // TODO add your handling code here:
-        if (evt.getKeyCode() == VK_ENTER) {
-            synchronized(this.in) {
-                this.in.notifyAll();
-            }
+        switch (evt.getKeyCode()) {
+            case VK_ENTER: {
+                if (in != null) {
+                    history.add(input.getText());
+                    synchronized(in) {
+                        in.notifyAll();
+                    }
+                }
+            } break;
+ 
+            case VK_UP: {
+                String last = history.last();
+                if (last.length() > 0) {
+                    input.setText(last);
+                }
+            } break;
+                
+            case VK_DOWN: {
+                String next = history.next();
+                if (next.length() > 0) {
+                    input.setText(next);
+                }
+            } break;
         }
     }//GEN-LAST:event_inputKeyReleased
 
+    private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
+        try {
+            if (!connected) {
+                Integer ports[] = new Integer[2];
+                String address = getHost();
+
+                if (address != null) {
+                    ports[0] = stdinCheckBox.isSelected() ? getStdinPort() : -1;
+                    ports[1] = stdoutCheckBox.isSelected() ? getStdoutPort() : -1;
+
+                    if (ports[0] != 0 && ports[1] != 0) {
+                        if (stdinCheckBox.isSelected()) {
+                            if (ports[0] > 0) {
+                                in = new DBGThread(
+                                        address, ports[0], this, true);
+                                new Thread(in).start();
+                            }
+                        }
+
+                        if (stdoutCheckBox.isSelected()) {
+                            if (ports[1] > 0) {
+                               out = new DBGThread(
+                                       address, ports[1], this, false);
+                                new Thread(out).start(); 
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (in != null) {
+                    in.quit();
+                }
+                if (out != null) {
+                    out.quit();
+                }
+            }
+        } catch (IOException ex) {
+            messageBox(ex.getMessage());
+        }
+    }//GEN-LAST:event_openButtonActionPerformed
+
+    private void resetStdoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetStdoutActionPerformed
+        // TODO add your handling code here:
+        output.setText(null);
+    }//GEN-LAST:event_resetStdoutActionPerformed
+
+    
+    public void setConnected(Boolean isConnected) {
+        synchronized(this) {
+            if (isConnected) {
+                connected = true;
+                openButton.setText("Disconnect");
+                host.setEnabled(false);
+                stdinPort.setEnabled(false);
+                stdinCheckBox.setEnabled(false);
+                if (stdinCheckBox.isSelected()) {
+                    input.setEnabled(true);
+                } else input.setEnabled(false);
+                stdoutPort.setEnabled(false);
+                stdoutCheckBox.setEnabled(false);
+            } else {
+                connected = false;
+                openButton.setText("Connect");
+                host.setEnabled(true);
+                stdinPort.setEnabled(true);
+                input.setEnabled(false);
+                stdinCheckBox.setEnabled(true);
+                stdoutPort.setEnabled(true);
+                stdoutCheckBox.setEnabled(true);
+            }
+        }
+    }
+    
+    public JTextField getInputField() { return input; }
+    public JTextArea getOutputField() { return output; }
+    
+    public String getHost() { 
+        String address = host.getText();
+        if (address != null && address.length() > 0) {
+            return address;
+        } else {
+            messageBox("Invalid hostname provided !");
+        }
+        
+        return null;
+    }
+    
+    public Integer getStdinPort() { 
+        try {
+            return Integer.parseInt(stdinPort.getText()); 
+        } catch (NumberFormatException ex) {
+            messageBox("Invalid stdin port provided !");
+        }
+        
+        return 0;
+    }
+    
+    public Integer getStdoutPort() { 
+        try {
+            return Integer.parseInt(stdoutPort.getText()); 
+        } catch (NumberFormatException ex) {
+            messageBox("Invalid stdout port provided !");
+        }
+        
+        return 0;
+    }
+    
+    public synchronized void messageBox(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
     /**
      * @param args the command line arguments
      */
@@ -124,50 +320,47 @@ public class Main extends javax.swing.JDialog {
             java.util.logging.Logger.getLogger(Main.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
+            @Override public void run() {
                 dialog = new Main(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        dialog.in.quit();
-                        dialog.out.quit();
+                        if (in != null)
+                            in.quit();
+                        
+                        if (out != null)
+                            out.quit();
+                        
                         System.exit(0);
                     }
                 });
                 dialog.setVisible(true);
             }
         });
-        
-        java.awt.EventQueue.invokeLater(new Runnable(){
-            public void run(){
-                try {
-                    dialog.in = new DBGThread(
-                            args[0], Integer.parseInt(args[1]), input);
-                    dialog.out = new DBGThread(
-                            args[0], Integer.parseInt(args[1]) * 2, output, outScrollPane);
-                    
-                    new Thread(dialog.in).start();
-                    new Thread(dialog.out).start();
-                    
-                } catch (IOException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                    System.exit(0);
-                }
-            }
-        });
     }
     
-    private DBGThread in;
-    private DBGThread out;
-    protected static Main dialog;
+    private static DBGThread in;
+    private static DBGThread out;
+    private static Main dialog;
+    private static Boolean connected = false;
+    private static History history = new History();
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    protected static javax.swing.JTextField input;
-    private javax.swing.JSplitPane jSplitPane1;
-    protected static javax.swing.JScrollPane outScrollPane;
-    protected static javax.swing.JTextArea output;
+    private javax.swing.JTextField host;
+    private javax.swing.JLabel hostLabel;
+    private javax.swing.JTextField input;
+    private javax.swing.JSplitPane mainSplit;
+    private javax.swing.JButton openButton;
+    private javax.swing.JScrollPane outScrollPane;
+    private javax.swing.JTextArea output;
+    private javax.swing.JMenuItem resetStdout;
+    private javax.swing.JCheckBox stdinCheckBox;
+    private javax.swing.JTextField stdinPort;
+    private javax.swing.JCheckBox stdoutCheckBox;
+    private javax.swing.JPopupMenu stdoutPopupMenu;
+    private javax.swing.JTextField stdoutPort;
     // End of variables declaration//GEN-END:variables
 }
