@@ -23,8 +23,31 @@ This will initialize phpdbg in Remote Console Mode, using port 4000 for stdin an
 
 To stop the service, send *SIGINT* to the phpdbg process, this will force it to bailout, as gracefully as it ever does.
 
-*To get help using these options see the help menu in phpdbg "help options"*
+Specific Ports
+--------------
 
+To listen on specific ports, the -l flag will accept a pair of ports in the following way:
+
+```
+./phpdbg -l4000/8000
+```
+
+Specific Interfaces
+-------------------
+
+To bind to a specific interface, or all interfaces use the -a flag:
+
+```
+./phpdbg -l4000 -a192.168.0.3
+```
+
+Will bind the Remote Console to the interface with the specified address, while:
+
+```
+./phpdbg -l4000 -a
+```
+
+Will bind the Remote Console to all available addresses.
 
 Starting phpdbg-jui Anywhere
 ============================
