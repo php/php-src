@@ -303,9 +303,9 @@ static void to_zval_read_aggregation(const char *structure,
 }
 
 /* CONVERSIONS for integers */
-static long from_zval_integer_common(const zval *arr_value, ser_context *ctx)
+static php_int_t from_zval_integer_common(const zval *arr_value, ser_context *ctx)
 {
-	long ret = 0;
+	php_int_t ret = 0;
 	zval lzval = zval_used_for_init;
 
 	if (Z_TYPE_P(arr_value) != IS_LONG) {
@@ -328,12 +328,12 @@ double_case:
 
 	case IS_OBJECT:
 	case IS_STRING: {
-		long lval;
+		php_int_t lval;
 		double dval;
 
 		convert_to_string(&lzval);
 
-		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
+		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRSIZE(lzval), &lval, &dval, 0)) {
 		case IS_DOUBLE:
 			zval_dtor(&lzval);
 			Z_TYPE(lzval) = IS_DOUBLE;
@@ -365,7 +365,7 @@ double_case:
 }
 void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	int ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -384,7 +384,7 @@ void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 }
 static void from_zval_write_uint32(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uint32_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -403,7 +403,7 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 }
 static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uint16_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -422,7 +422,7 @@ static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_c
 }
 static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	sa_family_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -441,7 +441,7 @@ static void from_zval_write_sa_family(const zval *arr_value, char *field, ser_co
 }
 static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	pid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -460,7 +460,7 @@ static void from_zval_write_pid_t(const zval *arr_value, char *field, ser_contex
 }
 static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	uid_t ival;
 
 	lval = from_zval_integer_common(arr_value, ctx);
@@ -570,7 +570,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 
 	Z_TYPE_P(zv) = IS_STRING;
 	Z_STRVAL_P(zv) = ecalloc(1, size);
-	Z_STRLEN_P(zv) = 0;
+	Z_STRSIZE_P(zv) = 0;
 
 	if (inet_ntop(AF_INET, addr, Z_STRVAL_P(zv), size) == NULL) {
 		do_to_zval_err(ctx, "could not convert IPv4 address to string "
@@ -578,7 +578,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STRSIZE_P(zv) = strlen(Z_STRVAL_P(zv));
 }
 static const field_descriptor descriptors_sockaddr_in[] = {
 		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in, sin_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -628,7 +628,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 
 	Z_TYPE_P(zv) = IS_STRING;
 	Z_STRVAL_P(zv) = ecalloc(1, size);
-	Z_STRLEN_P(zv) = 0;
+	Z_STRSIZE_P(zv) = 0;
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
 		do_to_zval_err(ctx, "could not convert IPv6 address to string "
@@ -636,7 +636,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 		return;
 	}
 
-	Z_STRLEN_P(zv) = strlen(Z_STRVAL_P(zv));
+	Z_STRSIZE_P(zv) = strlen(Z_STRVAL_P(zv));
 }
 static const field_descriptor descriptors_sockaddr_in6[] = {
 		{"family", sizeof("family"), 0, offsetof(struct sockaddr_in6, sin6_family), from_zval_write_sa_family, to_zval_read_sa_family},
@@ -670,18 +670,18 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	/* code in this file relies on the path being nul terminated, even though
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
-	if (Z_STRLEN_P(path) == 0) {
+	if (Z_STRSIZE_P(path) == 0) {
 		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
 		return;
 	}
-	if (Z_STRLEN_P(path) >= sizeof(saddr->sun_path)) {
+	if (Z_STRSIZE_P(path) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %ld", sizeof(saddr->sun_path) - 1);
 		return;
 	}
 
-	memcpy(&saddr->sun_path, Z_STRVAL_P(path), Z_STRLEN_P(path));
-	saddr->sun_path[Z_STRLEN_P(path)] = '\0';
+	memcpy(&saddr->sun_path, Z_STRVAL_P(path), Z_STRSIZE_P(path));
+	saddr->sun_path[Z_STRSIZE_P(path)] = '\0';
 
 	zval_dtor(&lzval);
 }
@@ -1076,7 +1076,7 @@ static void to_zval_read_name(const char *sockaddr_p, zval *zv, res_context *ctx
 }
 static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c, ser_context *ctx)
 {
-	long lval;
+	php_int_t lval;
 	struct msghdr *msghdr = (struct msghdr *)msghdr_c;
 
 	lval = from_zval_integer_common(elem, ctx);
@@ -1103,7 +1103,7 @@ static void from_zval_write_iov_array_aux(zval **elem, unsigned i, void **args, 
 	zval_add_ref(elem);
 	convert_to_string_ex(elem);
 
-	len = Z_STRLEN_PP(elem);
+	len = Z_STRSIZE_PP(elem);
 	msg->msg_iov[i - 1].iov_base = accounted_emalloc(len, ctx);
 	msg->msg_iov[i - 1].iov_len = len;
 	memcpy(msg->msg_iov[i - 1].iov_base, Z_STRVAL_PP(elem), len);
