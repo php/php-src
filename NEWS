@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.24
 
+- Core:
+  . Added validation of class names in the autoload process. (Dmitry)
+
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
   . Fixed bug #63391 (Incorrect/inconsistent day of week prior to the year
