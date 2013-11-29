@@ -873,12 +873,18 @@ phpdbg_main:
 			/* if you pass a listen port, we will accept input on listen port */
 			/* and write output to listen port * 2 */
 			
-			case 'l': /* set listen settings */
-				listen[0] = atoi(php_optarg);
-				listen[1] = (listen[0] * 2);
-			break;
+			case 'l': { /* set listen settings */
+				if (sscanf(php_optarg, "%d/%d", &listen[0], &listen[1]) != 2) {
+					if (sscanf(php_optarg, "%d", &listen[0]) != 1) {
+						/* default to hardcoded ports */
+						listen[0] = 4000;
+						listen[1] = 8000;
+					} else {
+						listen[1] = (listen[0] * 2);
+					}
+				}
+			} break;
 #endif
-
 		}
 	}
 
