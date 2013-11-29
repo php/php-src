@@ -19,20 +19,6 @@ import javax.swing.JTextField;
  * @author krakjoe
  */
 public class JConsole extends javax.swing.JDialog {
-    public enum MessageType {
-        INFO (JOptionPane.INFORMATION_MESSAGE),
-        WARN (JOptionPane.WARNING_MESSAGE),
-        ERROR (JOptionPane.ERROR_MESSAGE);
-        
-        private final Integer type;
-        private MessageType(Integer type) {
-            this.type = type;
-        }
-        public Integer getType() { return this.type; }
-        public Boolean equals(Integer other)  { return this.type.equals(other); }
-        public Boolean equals(MessageType other)  { return this.type.equals(other.getType()); }
-    }
-    
     /**
      * Creates user interface
      * @param parent
@@ -197,38 +183,9 @@ public class JConsole extends javax.swing.JDialog {
     private void openButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openButtonActionPerformed
         try {
             if (!connected) {
-                Integer ports[] = new Integer[2];
-                String address = getHost();
-
-                if (address != null) {
-                    ports[0] = stdinCheckBox.isSelected() ? getStdinPort() : -1;
-                    ports[1] = stdoutCheckBox.isSelected() ? getStdoutPort() : -1;
-
-                    if (ports[0] != 0 && ports[1] != 0) {
-                        if (stdinCheckBox.isSelected()) {
-                            if (ports[0] > 0) {
-                                in = new DebugSocket(
-                                        address, ports[0], this, true);
-                                new Thread(in).start();
-                            }
-                        }
-
-                        if (stdoutCheckBox.isSelected()) {
-                            if (ports[1] > 0) {
-                               out = new DebugSocket(
-                                       address, ports[1], this, false);
-                                new Thread(out).start(); 
-                            }
-                        }
-                    }
-                }
+                connect();
             } else {
-                if (in != null) {
-                    in.quit();
-                }
-                if (out != null) {
-                    out.quit();
-                }
+                disconnect();
             }
         } catch (IOException ex) {
             messageBox(ex.getMessage(), MessageType.ERROR);
@@ -239,7 +196,44 @@ public class JConsole extends javax.swing.JDialog {
         // TODO add your handling code here:
         output.setText(null);
     }//GEN-LAST:event_resetStdoutActionPerformed
+    
+    private void disconnect() {
+        if (in != null) {
+            in.quit();
+        }
+        if (out != null) {
+            out.quit();
+        }
+    }
+    
+    private void connect() throws IOException {
+        Integer ports[] = new Integer[2];
+        String address = getHost();
 
+        if (address != null) {
+            ports[0] = stdinCheckBox.isSelected() ? getStdinPort() : -1;
+            ports[1] = stdoutCheckBox.isSelected() ? getStdoutPort() : -1;
+
+            if (ports[0] != 0 && ports[1] != 0) {
+                if (stdinCheckBox.isSelected()) {
+                    if (ports[0] > 0) {
+                        in = new DebugSocket(
+                                address, ports[0], this, true);
+                        in.start();
+                    }
+                }
+
+                if (stdoutCheckBox.isSelected()) {
+                    if (ports[1] > 0) {
+                        out = new DebugSocket(
+                               address, ports[1], this, false);
+                        out.start();
+                    }
+                }
+            }
+        }
+    }
+    
     public Boolean isConnected() {
         return connected;
     }
@@ -290,7 +284,6 @@ public class JConsole extends javax.swing.JDialog {
         } catch (NumberFormatException ex) {
             messageBox("Invalid stdin port provided !", MessageType.WARN);
         }
-        
         return 0;
     }
     
@@ -300,7 +293,6 @@ public class JConsole extends javax.swing.JDialog {
         } catch (NumberFormatException ex) {
             messageBox("Invalid stdout port provided !", MessageType.WARN);
         }
-        
         return 0;
     }
     
@@ -345,12 +337,7 @@ public class JConsole extends javax.swing.JDialog {
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        if (in != null)
-                            in.quit();
-                        
-                        if (out != null)
-                            out.quit();
-                        
+                        dialog.disconnect();
                         System.exit(0);
                     }
                 });
@@ -380,4 +367,17 @@ public class JConsole extends javax.swing.JDialog {
     private javax.swing.JPopupMenu stdoutPopupMenu;
     private javax.swing.JTextField stdoutPort;
     // End of variables declaration//GEN-END:variables
+    public enum MessageType {
+        INFO (JOptionPane.INFORMATION_MESSAGE),
+        WARN (JOptionPane.WARNING_MESSAGE),
+        ERROR (JOptionPane.ERROR_MESSAGE);
+        
+        private final Integer type;
+        private MessageType(Integer type) {
+            this.type = type;
+        }
+        public Integer getType() { return this.type; }
+        public Boolean equals(Integer other)  { return this.type.equals(other); }
+        public Boolean equals(MessageType other)  { return this.type.equals(other.getType()); }
+    }
 }

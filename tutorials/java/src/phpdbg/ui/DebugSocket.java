@@ -20,18 +20,26 @@ import phpdbg.ui.JConsole.MessageType;
 public class DebugSocket extends Socket implements Runnable {
     private final Boolean reader;
     private final JConsole main;
-    private Boolean quit;
+    private final Thread thread;
 
+    private volatile Boolean quit;
+    private volatile Boolean started;
+    
     public DebugSocket(final String host, final Integer port, final JConsole main, Boolean reader) throws IOException {
         super(host, port);
         
         this.main = main;
         this.reader = reader;
         this.quit = false;
-        
-        synchronized(main) {
-            if (!main.isConnected()) {
-                main.setConnected(true);
+        this.started = false;
+        this.thread = new Thread(this);
+    }
+    
+    public void start() {
+        synchronized(this) {
+            if (!started) {
+               started = true;
+               thread.start(); 
             }
         }
     }
@@ -39,19 +47,26 @@ public class DebugSocket extends Socket implements Runnable {
     public void quit() {
         synchronized(this) {
             quit = true;
-            this.notifyAll(); 
+            started = false;
+            notifyAll();
         }
     }
     
     @Override public void run() {
         try {
+            synchronized(main) {
+                if (!main.isConnected()) {
+                    main.setConnected(true);
+                }
+            }
+            
             synchronized(this) {
                 do {
                     if (reader) {
                         String command;
                         OutputStream output = getOutputStream();
                         
-                        this.wait();
+                        wait();
                         
                         command = main.getInputField().getText();
                         /* send command to stdin socket */
@@ -67,9 +82,8 @@ public class DebugSocket extends Socket implements Runnable {
                         /* get data from stdout socket */
                         byte[] bytes = new byte[1];
                         do {
-                            /* this is some of the laziest programming I ever done */
                             if (input.available() == 0) {
-                                this.wait(400);
+                                wait(400);
                                 continue;
                             }
                             
