@@ -5,8 +5,13 @@ import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_ENTER;
 import static java.awt.event.KeyEvent.VK_UP;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -46,11 +51,12 @@ public class JConsole extends javax.swing.JDialog {
         stdoutCheckBox = new javax.swing.JCheckBox();
         openButton = new javax.swing.JButton();
         stdinPort = new javax.swing.JTextField();
-        hostLabel = new javax.swing.JLabel();
+        hostnameLabel = new javax.swing.JLabel();
         input = new javax.swing.JTextField();
         outputScrollPane = new javax.swing.JScrollPane();
         output = new phpdbg.ui.JTerminalPane();
         echoCheckBox = new javax.swing.JCheckBox();
+        commandLabel = new javax.swing.JLabel();
 
         resetStdout.setText("Clear");
         resetStdout.addActionListener(new java.awt.event.ActionListener() {
@@ -62,6 +68,7 @@ public class JConsole extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("phpdbg jui");
+        setModalityType(java.awt.Dialog.ModalityType.TOOLKIT_MODAL);
 
         host.setText("127.0.0.1");
         host.setToolTipText("Set the hostname, or IPv4 address of the machine running the phpdbg remote console server");
@@ -88,7 +95,7 @@ public class JConsole extends javax.swing.JDialog {
         stdinPort.setText("4000");
         stdinPort.setToolTipText("The listen port passed to phpdbg (-l option)");
 
-        hostLabel.setText("Hostname:");
+        hostnameLabel.setText("Hostname:");
 
         input.setToolTipText("Enter phpdbg commands here !");
         input.setEnabled(false);
@@ -104,8 +111,12 @@ public class JConsole extends javax.swing.JDialog {
 
         echoCheckBox.setSelected(true);
         echoCheckBox.setToolTipText("Check to echo sent commands in output");
+        echoCheckBox.setEnabled(false);
         echoCheckBox.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         echoCheckBox.setLabel("echo");
+
+        commandLabel.setText("Command:");
+        commandLabel.setEnabled(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,24 +126,28 @@ public class JConsole extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(outputScrollPane)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(hostLabel)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(hostnameLabel)
+                            .addComponent(commandLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(host, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(stdinCheckBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(stdoutCheckBox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(openButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(input)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(echoCheckBox)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(input)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(echoCheckBox))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(host, javax.swing.GroupLayout.DEFAULT_SIZE, 345, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(stdinCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(stdoutCheckBox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(stdoutPort, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(openButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -143,7 +158,8 @@ public class JConsole extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(input, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(echoCheckBox))
+                    .addComponent(echoCheckBox)
+                    .addComponent(commandLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -151,7 +167,7 @@ public class JConsole extends javax.swing.JDialog {
                         .addComponent(stdinCheckBox)
                         .addComponent(stdoutCheckBox)
                         .addComponent(stdinPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(hostLabel)
+                        .addComponent(hostnameLabel)
                         .addComponent(host, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(openButton))
                 .addContainerGap())
@@ -259,18 +275,29 @@ public class JConsole extends javax.swing.JDialog {
                 stdinCheckBox.setEnabled(false);
                 if (stdinCheckBox.isSelected()) {
                     input.setEnabled(true);
-                } else input.setEnabled(false);
+                    commandLabel.setEnabled(true);
+                    echoCheckBox.setEnabled(true);
+                } else {
+                    input.setEnabled(false);
+                    commandLabel.setEnabled(false);
+                    echoCheckBox.setEnabled(false);
+                }
                 stdoutPort.setEnabled(false);
                 stdoutCheckBox.setEnabled(false);
+                hostnameLabel.setEnabled(false);
+                commandLabel.setEnabled(true);
             } else {
                 connected = false;
                 openButton.setText("Connect");
                 host.setEnabled(true);
                 stdinPort.setEnabled(true);
                 input.setEnabled(false);
+                commandLabel.setEnabled(false);
+                echoCheckBox.setEnabled(false);
                 stdinCheckBox.setEnabled(true);
                 stdoutPort.setEnabled(true);
                 stdoutCheckBox.setEnabled(true);
+                hostnameLabel.setEnabled(true);
             }
         }
     }
@@ -307,6 +334,10 @@ public class JConsole extends javax.swing.JDialog {
         return 0;
     }
     
+    public JScrollPane getOutputScrollPane() {
+        return outputScrollPane;
+    }
+    
     public synchronized void messageBox(String message) {
         messageBox(message, MessageType.INFO);
     }
@@ -318,28 +349,21 @@ public class JConsole extends javax.swing.JDialog {
      * @param args the command line arguments
      */
     public static void main(final String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+ 
+        for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+            if (info.getName().equals("Nimbus")) {
+                try {
+                    UIManager.setLookAndFeel(
+                            info.getClassName());
                     break;
+                } catch (ClassNotFoundException | 
+                        InstantiationException | 
+                        IllegalAccessException | 
+                        UnsupportedLookAndFeelException ex) {
+                    Logger.getLogger(JConsole.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JConsole.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JConsole.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JConsole.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(JConsole.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        //</editor-fold>
         
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -364,9 +388,10 @@ public class JConsole extends javax.swing.JDialog {
     private static CommandHistory history = new CommandHistory();
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel commandLabel;
     private javax.swing.JCheckBox echoCheckBox;
     private javax.swing.JTextField host;
-    private javax.swing.JLabel hostLabel;
+    private javax.swing.JLabel hostnameLabel;
     private javax.swing.JTextField input;
     private javax.swing.JButton openButton;
     private phpdbg.ui.JTerminalPane output;

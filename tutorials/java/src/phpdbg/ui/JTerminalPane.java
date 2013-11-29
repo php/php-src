@@ -33,7 +33,7 @@ public class JTerminalPane extends JTextPane {
   private static final Color B_Cyan    = Color.getHSBColor( 0.500f, 1.000f, 1.000f );
   private static final Color B_White   = Color.getHSBColor( 0.000f, 0.000f, 1.000f );
   private static final Color cReset    = Color.getHSBColor( 0.000f, 0.000f, 0.000f );
-  
+
   private Color colorCurrent    = cReset;
   private String remaining = "";
   

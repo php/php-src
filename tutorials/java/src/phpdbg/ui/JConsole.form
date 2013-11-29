@@ -22,6 +22,9 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
     <Property name="title" type="java.lang.String" value="phpdbg jui"/>
+    <Property name="modalityType" type="java.awt.Dialog$ModalityType" editor="org.netbeans.modules.form.editors.EnumEditor">
+      <Value id="TOOLKIT_MODAL"/>
+    </Property>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -46,25 +49,32 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="outputScrollPane" max="32767" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="hostLabel" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="hostnameLabel" min="-2" max="-2" attributes="0"/>
+                          <Component id="commandLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="host" pref="345" max="32767" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="stdinCheckBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="stdinPort" min="-2" pref="60" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="stdoutCheckBox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="stdoutPort" min="-2" pref="60" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="openButton" min="-2" pref="100" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="input" max="32767" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="echoCheckBox" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="input" max="32767" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="echoCheckBox" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="1" attributes="0">
+                              <Component id="host" pref="345" max="32767" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="stdinCheckBox" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="stdinPort" min="-2" pref="60" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="stdoutCheckBox" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="stdoutPort" min="-2" pref="60" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="openButton" min="-2" pref="100" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -80,6 +90,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="input" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="echoCheckBox" alignment="3" max="-2" attributes="0"/>
+                  <Component id="commandLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
@@ -88,7 +99,7 @@
                       <Component id="stdinCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="stdoutCheckBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="stdinPort" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="hostLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="hostnameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="host" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="openButton" min="-2" max="-2" attributes="0"/>
@@ -140,7 +151,7 @@
         <Property name="toolTipText" type="java.lang.String" value="The listen port passed to phpdbg (-l option)"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="hostLabel">
+    <Component class="javax.swing.JLabel" name="hostnameLabel">
       <Properties>
         <Property name="text" type="java.lang.String" value="Hostname:"/>
       </Properties>
@@ -177,8 +188,15 @@
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
         <Property name="toolTipText" type="java.lang.String" value="Check to echo sent commands in output"/>
+        <Property name="enabled" type="boolean" value="false"/>
         <Property name="horizontalAlignment" type="int" value="2"/>
         <Property name="label" type="java.lang.String" value="echo"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="commandLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Command:"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
   </SubComponents>
