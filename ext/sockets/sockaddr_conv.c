@@ -27,7 +27,11 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 
 		memset(&hints, 0, sizeof(struct addrinfo));
 		hints.ai_family = AF_INET6;
+#if HAVE_AI_V4MAPPED
 		hints.ai_flags = AI_V4MAPPED | AI_ADDRCONFIG;
+#else
+		hints.ai_flags = AI_ADDRCONFIG;
+#endif
 		getaddrinfo(string, NULL, &hints, &addrinfo);
 		if (!addrinfo) {
 #ifdef PHP_WIN32
