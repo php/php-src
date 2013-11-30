@@ -74,12 +74,12 @@ public class DebugSocket implements Runnable {
             }
             
             if (reader) {
-                /* The reader thread part will wait() until there is input */
+                /* The reader thread will wait() until there is input */
                 Socket socket = new Socket(this.host, this.port);
+                String command;
+                OutputStream output = socket.getOutputStream();
+                
                 do {
-                    String command;
-                    OutputStream output = socket.getOutputStream();
-
                     synchronized(this) {
                         wait();
 
