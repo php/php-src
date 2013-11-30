@@ -287,7 +287,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 	int			i, ofs;
 	int			var_cnt = argc - start;
 	long		col_type;
-	ulong		rc;
+	php_uint_t		rc;
 
 	/* prevent leak if variables are already bound */
 	if (stmt->result.var_cnt) {
@@ -385,7 +385,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
 				my_bool tmp;
 #else
-				ulong tmp = 0;
+				php_uint_t tmp = 0;
 #endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
@@ -476,7 +476,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 	zval		***args;
 	int			argc = ZEND_NUM_ARGS();
 	int			start = 1;
-	ulong		rc;
+	php_uint_t		rc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 
@@ -933,7 +933,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 	MY_STMT		*stmt;
 	zval			*mysql_stmt;
 	unsigned int	i;
-	ulong			ret;
+	php_uint_t			ret;
 	unsigned int	uval;
 	my_ulonglong	llval;
 
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, &mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (offset < 0 || offset >= (long) mysql_num_fields(result)) {
+	if (offset < 0 || offset >= (php_int_t) mysql_num_fields(result)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field offset is invalid for resultset");
 		RETURN_FALSE;
 	}
@@ -1355,7 +1355,7 @@ PHP_FUNCTION(mysqli_get_client_info)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
-	RETURN_LONG((long)mysql_get_client_version());
+	RETURN_LONG((php_int_t)mysql_get_client_version());
 }
 /* }}} */
 
@@ -2584,7 +2584,7 @@ PHP_FUNCTION(mysqli_thread_id)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_LONG((long) mysql_thread_id(mysql->mysql));
+	RETURN_LONG((php_int_t) mysql_thread_id(mysql->mysql));
 }
 /* }}} */
 

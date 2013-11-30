@@ -42,7 +42,7 @@
 
 /* {{{ php_mysqli_set_error
  */
-static void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC)
+static void php_mysqli_set_error(php_int_t mysql_errno, char *mysql_err TSRMLS_DC)
 {
 	MyG(error_no) = mysql_errno;
 	if (MyG(error_msg)) {
