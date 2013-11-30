@@ -32,15 +32,11 @@ public class JTerminalPane extends JTextPane {
         }
         
         public JTerminalColor(Float h, Float s, Float b, Boolean bold) {
-            this.color = Color.getHSBColor(h, s, b);
-            this.bold = bold;
-            this.underline = false;
+            this(h, s, b, bold, false);
         }
         
         public JTerminalColor(Float h, Float s, Float b) {
-            this.color = Color.getHSBColor(h, s, b);
-            this.underline = false;
-            this.bold = false;
+            this(h, s, b, false, false);
         }
 
         public Boolean      isUnderlined()  { return this.underline; }
@@ -59,7 +55,6 @@ public class JTerminalPane extends JTextPane {
             put("\u001B[0;36m", new JTerminalColor(0.500f, 1.000f, 1.000f));
             put("\u001B[0;37m", new JTerminalColor(0.000f, 0.000f, 1.000f));
             put("\u001B[0;64m", new JTerminalColor(0.000f, 0.000f, 1.000f));
-            
             put("\u001B[1;30m", new JTerminalColor(0.000f, 0.000f, 0.502f, true));
             put("\u001B[1;31m", new JTerminalColor(0.000f, 1.000f, 1.000f, true));
             put("\u001B[1;32m", new JTerminalColor(0.333f, 1.000f, 1.000f, true));
@@ -69,7 +64,6 @@ public class JTerminalPane extends JTextPane {
             put("\u001B[1;36m", new JTerminalColor(0.500f, 1.000f, 1.000f, true));
             put("\u001B[1;37m", new JTerminalColor(0.000f, 0.000f, 1.000f, true));
             put("\u001B[1;64m", new JTerminalColor(0.000f, 0.000f, 1.000f, true));
-            
             put("\u001B[4;30m", new JTerminalColor(0.000f, 0.000f, 0.502f, false, true));
             put("\u001B[4;31m", new JTerminalColor(0.000f, 1.000f, 1.000f, false, true));
             put("\u001B[4;32m", new JTerminalColor(0.333f, 1.000f, 1.000f, false, true));
