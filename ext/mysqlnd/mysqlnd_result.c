@@ -69,7 +69,7 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE_P(data_cursor[i]) >= IS_STRING) {
-					unsigned long len = Z_STRLEN_P(data_cursor[i]);
+					php_uint_t len = Z_STRSIZE_P(data_cursor[i]);
 					if (result->meta->fields[i].max_length < len) {
 						result->meta->fields[i].max_length = len;
 					}
@@ -558,7 +558,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static unsigned long *
+static php_uint_t *
 mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	unsigned int i;
@@ -580,7 +580,7 @@ mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 
 	previous_row = set->data_cursor - result->meta->field_count;
 	for (i = 0; i < result->meta->field_count; i++) {
-		result->lengths[i] = (Z_TYPE_P(previous_row[i]) == IS_NULL)? 0:Z_STRLEN_P(previous_row[i]);
+		result->lengths[i] = (Z_TYPE_P(previous_row[i]) == IS_NULL)? 0:Z_STRSIZE_P(previous_row[i]);
 	}
 
 	return result->lengths;
@@ -589,7 +589,7 @@ mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 
 
 /* {{{ mysqlnd_fetch_lengths_unbuffered */
-static unsigned long *
+static php_uint_t *
 mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
 {
 	/* simulate output of libmysql */
@@ -599,7 +599,7 @@ mysqlnd_fetch_lengths_unbuffered(MYSQLND_RES * const result TSRMLS_DC)
 
 
 /* {{{ mysqlnd_res::fetch_lengths */
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_DC)
+PHPAPI php_uint_t * _mysqlnd_fetch_lengths(MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->m.fetch_lengths? result->m.fetch_lengths(result TSRMLS_CC) : NULL;
 }
@@ -615,7 +615,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 	unsigned int		i,
 						field_count = result->field_count;
 	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
-	unsigned long		*lengths = result->lengths;
+	php_uint_t		*lengths = result->lengths;
 
 	DBG_ENTER("mysqlnd_fetch_row_unbuffered_c");
 
@@ -674,7 +674,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 					if (Z_TYPE_P(data) != IS_NULL) {
 						convert_to_string(data);
 						retrow[i] = Z_STRVAL_P(data);
-						len = Z_STRLEN_P(data);
+						len = Z_STRSIZE_P(data);
 					} else {
 						retrow[i] = NULL;
 						len = 0;
@@ -768,7 +768,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 			MYSQLND_FIELD *field = result->meta->fields;
 			struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
 			unsigned int i, field_count = result->field_count;
-			unsigned long *lengths = result->lengths;
+			php_uint_t *lengths = result->lengths;
 
 			enum_func_status rc = result->m.row_decoder(result->unbuf->last_row_buffer,
 											result->unbuf->last_row_data,
@@ -781,7 +781,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 			}
 			for (i = 0; i < field_count; i++, field++, hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
-				unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRLEN_P(data);
+				unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRSIZE_P(data);
 
 				if (lengths) {
 					lengths[i] = len;
@@ -864,7 +864,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, zend_bool ps
 		result->m.fetch_row		= result->m.fetch_row_normal_unbuffered;
 		result->m.fetch_lengths	= mysqlnd_fetch_lengths_unbuffered;
 		result->m.row_decoder	= php_mysqlnd_rowp_read_text_protocol;
-		result->lengths			= mnd_ecalloc(result->field_count, sizeof(unsigned long));
+		result->lengths			= mnd_ecalloc(result->field_count, sizeof(php_uint_t));
 		if (!result->lengths) {
 			goto oom;
 		}
@@ -945,7 +945,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
-					unsigned long len = Z_STRLEN_P(current_row[i]);
+					php_uint_t len = Z_STRSIZE_P(current_row[i]);
 					if (field->max_length < len) {
 						field->max_length = len;
 					}
@@ -1017,7 +1017,7 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
-					unsigned long len = Z_STRLEN_P(current_row[i]);
+					php_uint_t len = Z_STRSIZE_P(current_row[i]);
 					if (field->max_length < len) {
 						field->max_length = len;
 					}
@@ -1237,7 +1237,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										 php_mysqlnd_rowp_read_text_protocol;
 
 	result->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size) TSRMLS_CC);
-	result->lengths = mnd_ecalloc(result->field_count, sizeof(unsigned long));
+	result->lengths = mnd_ecalloc(result->field_count, sizeof(php_uint_t));
 
 	if (!result->result_set_memory_pool || !result->lengths) {
 		SET_OOM_ERROR(*conn->error_info);
@@ -1532,7 +1532,7 @@ static void
 MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  *row;
-	ulong i = 0;
+	php_uint_t i = 0;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
 	DBG_ENTER("mysqlnd_res::fetch_all");
