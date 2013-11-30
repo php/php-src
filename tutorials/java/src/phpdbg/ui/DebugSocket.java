@@ -88,9 +88,9 @@ public class DebugSocket implements Runnable {
                             /* send command to stdin socket */
                             if (command != null) {
                                 if (main.isEchoing()) {
-                                    main.getOutputField().appendANSI("remote> ");
-                                    main.getOutputField().appendANSI(command);
-                                    main.getOutputField().appendANSI("\n");
+                                    main.getOutputField()
+                                           .appendANSI(
+                                                   String.format("remote> %s\n", command));
                                 }
                                 output.write(
                                    command.getBytes());
