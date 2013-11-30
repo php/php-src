@@ -1,9 +1,15 @@
 package phpdbg.ui;
 
 
+import java.awt.AWTException;
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import static java.awt.event.KeyEvent.VK_DOWN;
 import static java.awt.event.KeyEvent.VK_ENTER;
 import static java.awt.event.KeyEvent.VK_UP;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +52,8 @@ public class JConsole extends javax.swing.JDialog {
 
         stdoutPopupMenu = new javax.swing.JPopupMenu();
         resetStdout = new javax.swing.JMenuItem();
+        systrayMenu = new java.awt.PopupMenu();
+        systrayExitMenuItem = new java.awt.MenuItem();
         host = new javax.swing.JTextField();
         stdoutPort = new javax.swing.JTextField();
         stdinCheckBox = new javax.swing.JCheckBox();
@@ -66,6 +74,22 @@ public class JConsole extends javax.swing.JDialog {
             }
         });
         stdoutPopupMenu.add(resetStdout);
+
+        systrayMenu.setLabel("phpdbg");
+        systrayMenu.setName("");
+        systrayMenu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                systrayMenuActionPerformed(evt);
+            }
+        });
+
+        systrayExitMenuItem.setLabel("Exit");
+        systrayExitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                systrayExitMenuItemActionPerformed(evt);
+            }
+        });
+        systrayMenu.add(systrayExitMenuItem);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("phpdbg jui");
@@ -219,6 +243,16 @@ public class JConsole extends javax.swing.JDialog {
         // TODO add your handling code here:
         output.setText(null);
     }//GEN-LAST:event_resetStdoutActionPerformed
+
+    private void systrayExitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_systrayExitMenuItemActionPerformed
+        // TODO add your handling code here:
+        dialog.disconnect();
+        System.exit(0);
+    }//GEN-LAST:event_systrayExitMenuItemActionPerformed
+
+    private void systrayMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_systrayMenuActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_systrayMenuActionPerformed
     
     private void disconnect() {
         if (in != null) {
@@ -376,6 +410,21 @@ public class JConsole extends javax.swing.JDialog {
                         System.exit(0);
                     }
                 });
+                try {
+                    if (tray == null) {
+                        Image trayIconImage = ImageIO.read(
+                            JConsole.class.getResource("logo-dbg.png"));
+                        dialog.setIconImage(trayIconImage);
+
+                        tray = new TrayIcon(trayIconImage);
+                        tray.setPopupMenu(systrayMenu);
+                        tray.setToolTip("phpdbg - The Interactive PHP Debugger");
+
+                        SystemTray.getSystemTray().add(tray);
+                    } 
+                } catch ( AWTException | IOException ex) {
+                    dialog.messageBox(ex.getMessage(), MessageType.ERROR);
+                }
                 dialog.setVisible(true);
             }
         });
@@ -386,6 +435,7 @@ public class JConsole extends javax.swing.JDialog {
     private static JConsole dialog;
     private static Boolean connected = false;
     private static CommandHistory history = new CommandHistory();
+    private static TrayIcon tray;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel commandLabel;
@@ -402,6 +452,8 @@ public class JConsole extends javax.swing.JDialog {
     private javax.swing.JCheckBox stdoutCheckBox;
     private javax.swing.JPopupMenu stdoutPopupMenu;
     private javax.swing.JTextField stdoutPort;
+    private java.awt.MenuItem systrayExitMenuItem;
+    private static java.awt.PopupMenu systrayMenu;
     // End of variables declaration//GEN-END:variables
     public enum MessageType {
         INFO (JOptionPane.INFORMATION_MESSAGE),

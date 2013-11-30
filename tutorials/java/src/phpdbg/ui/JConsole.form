@@ -18,6 +18,28 @@
         </MenuItem>
       </SubComponents>
     </Container>
+    <Menu class="java.awt.PopupMenu" name="systrayMenu">
+      <Properties>
+        <Property name="label" type="java.lang.String" value="phpdbg"/>
+        <Property name="name" type="java.lang.String" value=""/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="systrayMenuActionPerformed"/>
+      </Events>
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="10"/>
+      </AuxValues>
+      <SubComponents>
+        <MenuItem class="java.awt.MenuItem" name="systrayExitMenuItem">
+          <Properties>
+            <Property name="label" type="java.lang.String" value="Exit"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="systrayExitMenuItemActionPerformed"/>
+          </Events>
+        </MenuItem>
+      </SubComponents>
+    </Menu>
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
