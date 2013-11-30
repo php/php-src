@@ -334,7 +334,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, const zend_lite
 	}
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	}
 
 	if (ret == SUCCESS) {
@@ -376,7 +376,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, const zend_l
 	obj = (mysqli_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
@@ -413,7 +413,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 	mysqli_prop_handler	p;
 	int ret = 0;
 
-	if (zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, (void **)&p) == SUCCESS) {
+	if (zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member) + 1, (void **)&p) == SUCCESS) {
 		switch (has_set_exists) {
 			case 2:
 				ret = 1;
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	char				*statement;
-	int					statement_len;
+	zend_str_size_int					statement_len;
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -1049,7 +1049,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 			stmt->stmt = mysql_stmt_init(mysql->mysql);
 		break;
 		case 2:
-			if (zend_parse_parameters(2 TSRMLS_CC, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
+			if (zend_parse_parameters(2 TSRMLS_CC, "OS", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
 				return;
 			}
 			MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQL_RES			*result = NULL;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	long				resmode = MYSQLI_STORE_RESULT;
+	php_int_t				resmode = MYSQLI_STORE_RESULT;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(mysqli_result_construct)
 			}
 			break;
 		case 2:
-			if (zend_parse_parameters(2 TSRMLS_CC, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
+			if (zend_parse_parameters(2 TSRMLS_CC, "Oi", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
 				return;
 			}
 			break;
@@ -1135,13 +1135,13 @@ PHP_FUNCTION(mysqli_result_construct)
 
 /* {{{ php_mysqli_fetch_into_hash_aux
  */
-void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC)
+void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, php_int_t fetchtype TSRMLS_DC)
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
-	unsigned long	*field_len;
+	php_uint_t	*field_len;
 	
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
@@ -1188,7 +1188,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long
 				/* check if we need magic quotes */
 				if (PG(magic_quotes_runtime)) {
 					Z_TYPE_P(res) = IS_STRING;
-					Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRLEN_P(res), 0 TSRMLS_CC);
+					Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRSIZE_P(res), 0 TSRMLS_CC);
 				} else {
 #endif
 					ZVAL_STRINGL(res, row[i], field_len[i], 1);
@@ -1228,15 +1228,15 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	long			fetchtype;
+	php_int_t			fetchtype;
 	zval			*ctor_params = NULL;
 	zend_class_entry *ce = NULL;
 
 	if (into_object) {
 		char *class_name;
-		int class_name_len;
+		zend_str_size_int class_name_len;
 
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|Sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
 		}
 		if (ZEND_NUM_ARGS() < (getThis() ? 1 : 2)) {
@@ -1257,7 +1257,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			fetchtype = override_flags;
 		} else {
 			fetchtype = MYSQLI_BOTH;
-			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
+			if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|i", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
 				return;
 			}
 		}

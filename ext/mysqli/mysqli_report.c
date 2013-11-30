@@ -33,10 +33,10 @@ extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC
    sets report level */
 PHP_FUNCTION(mysqli_report)
 {
-	long flags;
+	php_int_t flags;
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &flags) == FAILURE) {
 		return;
 	}
 
