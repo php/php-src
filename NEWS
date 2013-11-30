@@ -10,6 +10,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
   . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
+  
+- Sockets:
+  . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
 ?? ??? 2013, PHP 5.5.7
 
