@@ -600,8 +600,9 @@ int phpdbg_open_socket(const char *interface, short port) /* {{{ */
 
 static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
 {	
-	if ((*socket)[0]) {
-		shutdown((*socket)[0], SHUT_RDWR);
+	if ((*socket)[0] >= 0) {
+		shutdown(
+			(*socket)[0], SHUT_RDWR);
 		close((*socket)[0]);
 	}
 	
@@ -609,8 +610,9 @@ static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {
 		fclose(streams[0]);
 	}
 	
-	if ((*socket)[1]) {
-		shutdown((*socket)[1], SHUT_RDWR);
+	if ((*socket)[1] >= 0) {
+		shutdown(
+			(*socket)[1], SHUT_RDWR);
 		close((*socket)[1]);
 	}
 	
@@ -633,13 +635,13 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 
 	if ((*listen)[0] < 0 || (*listen)[1] < 0) {
 		if ((*listen)[0] < 0) {
-			fprintf(stderr, 
-				"Failed to start remote console (stdin) on port %d\n", port[0]);
+			phpdbg_rlog(stderr,
+				"console failed to initialize (stdin) on %s:%d", address, port[0]);
 		}
 
 		if ((*listen)[1] < 0) {
-			fprintf(stderr, 
-				"Failed to open remote console (stdout) on port %d\n", port[1]);
+			phpdbg_rlog(stderr,
+				"console failed to initialize (stdout) on %s:%d", address, port[1]);
 		}
 
 		if ((*listen)[0] >= 0) {
@@ -655,8 +657,8 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 
 	phpdbg_close_sockets(socket, streams);
 
-	fprintf(stderr,
-		"Remote console accepting (stdin/stdout) on ports %d/%d\n", port[0], port[1]);
+	phpdbg_rlog(stderr,
+		"accepting connections on %s:%d/%d", address, port[0], port[1]);
 	{
 		struct sockaddr_in address;
 		socklen_t size = sizeof(address);
@@ -668,8 +670,7 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 				(*listen)[0], (struct sockaddr *) &address, &size);
 			inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
-			fprintf(stderr,
-				"Remote console (stdin) connection from %s\n", buffer);
+			phpdbg_rlog(stderr, "connection (stdin) from %s", buffer);
 		}
 
 		{
@@ -678,8 +679,7 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 				(*listen)[1], (struct sockaddr *) &address, &size);
 		    inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
-		    fprintf(stderr,
-				"Remote console (stdout) connection from %s\n", buffer);
+			phpdbg_rlog(stderr, "connection (stdout) from %s", buffer);
 		}
 	}
 

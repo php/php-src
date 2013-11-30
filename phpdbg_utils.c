@@ -242,6 +242,35 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	return rc;
 } /* }}} */
 
+PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
+	int rc = 0;
+	
+	va_list args;
+	time_t now;
+	struct timeval tp;
+	
+	va_start(args, fmt);
+	if (gettimeofday(&tp, NULL) == SUCCESS)
+	{
+		char friendly[100];
+		char *format = NULL, *buffer = NULL;
+		
+		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tp.tv_sec));
+		asprintf(
+			&buffer, friendly, tp.tv_usec/1000);		
+		asprintf(
+			&format, "[%s]: %s\n", buffer, fmt);
+		rc = vfprintf(
+			fp, format, args);
+			
+		free(format);
+		free(buffer);
+	}
+	va_end(args);
+	
+	return rc;
+} /* }}} */
+
 PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC) /* {{{ */
 {
 	const phpdbg_color_t *color = colors;
