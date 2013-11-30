@@ -257,12 +257,12 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 		
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tp.tv_sec));
 		asprintf(
-			&buffer, friendly, tp.tv_usec/1000);		
+			&buffer, friendly, tp.tv_usec/1000);	
 		asprintf(
 			&format, "[%s]: %s\n", buffer, fmt);
 		rc = vfprintf(
 			fp, format, args);
-			
+
 		free(format);
 		free(buffer);
 	}
