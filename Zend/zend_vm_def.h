@@ -5382,11 +5382,15 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
+	if (RETURN_VALUE_USED(opline)) {
+		/* If the return value of yield is used set the send
+		 * target and initialize it to NULL */
+		generator->send_target = &EX_T(opline->result.var).var.ptr;
+		Z_ADDREF(EG(uninitialized_zval));
+		EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
+	} else {
+		generator->send_target = NULL;
+	}
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
