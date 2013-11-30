@@ -72,11 +72,10 @@ public class JTerminalPane extends JTextPane {
             SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
     setCharacterAttributes(aset, false);
     replaceSelection(s);
-    setCaretPosition(
-            (getDocument().getLength() > 0) ? (getDocument().getLength() - 1) : 0);
+    setCaretPosition(getDocument().getLength());
   }
 
-  public void appendANSI(String s) {
+  public synchronized void appendANSI(String s) {
     int aPos = 0;
     int aIndex;
     int mIndex;

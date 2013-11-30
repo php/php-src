@@ -76,37 +76,33 @@ public class DebugSocket implements Runnable {
             if (reader) {
                 /* The reader thread part will wait() until there is input */
                 Socket socket = new Socket(this.host, this.port);
-                try {
-                    do {
-                        String command;
-                        OutputStream output = socket.getOutputStream();
+                do {
+                    String command;
+                    OutputStream output = socket.getOutputStream();
 
-                        synchronized(this) {
-                            wait();
+                    synchronized(this) {
+                        wait();
 
-                            if (!quit) {
-                                command = main.getInputField().getText();
-                                /* send command to stdin socket */
-                                if (command != null) {
-                                    if (main.isEchoing()) {
-                                        main.getOutputField().appendANSI("remote> ");
-                                        main.getOutputField().appendANSI(command);
-                                        main.getOutputField().appendANSI("\n");
-                                    }
-                                    output.write(
-                                       command.getBytes());
-                                    output.write("\n".getBytes());
-                                    output.flush();
+                        if (!quit) {
+                            command = main.getInputField().getText();
+                            /* send command to stdin socket */
+                            if (command != null) {
+                                if (main.isEchoing()) {
+                                    main.getOutputField().appendANSI("remote> ");
+                                    main.getOutputField().appendANSI(command);
+                                    main.getOutputField().appendANSI("\n");
                                 }
-                                main.getInputField().setText(null);
+                                output.write(
+                                   command.getBytes());
+                                output.write("\n".getBytes());
+                                output.flush();
                             }
+                            main.getInputField().setText(null);
                         }
-                    } while (!quit);
-                } catch (IOException ex) {
-                    if (!quit) {
-                        main.messageBox(ex.getMessage(), MessageType.ERROR);
                     }
-                }
+                } while (!quit);
+                
+                socket.close();
             } else {
                 /*
                 * The writer thread will use non-blocking i/o consuming
@@ -144,6 +140,7 @@ public class DebugSocket implements Runnable {
                         }
                     }
                 }
+                channel.close();
             }
         } catch (IOException | InterruptedException ex) {
             if (!quit) {
