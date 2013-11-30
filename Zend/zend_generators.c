@@ -55,6 +55,11 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
+		if (!finished_execution && generator->send_target) {
+			Z_DELREF_PP(generator->send_target);
+			generator->send_target = NULL;
+		}
+
 		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
 		if (CG(unclean_shutdown)) {
@@ -519,8 +524,12 @@ ZEND_METHOD(Generator, send)
 		return;
 	}
 
-	/* Put sent value into the TMP_VAR slot */
-	MAKE_COPY_ZVAL(&value, &generator->send_target->tmp_var);
+	/* Put sent value in the target VAR slot, if it is used */
+	if (generator->send_target) {
+		Z_DELREF_PP(generator->send_target);
+		Z_ADDREF_P(value);
+		*generator->send_target = value;
+	}
 
 	zend_generator_resume(generator TSRMLS_CC);
 
