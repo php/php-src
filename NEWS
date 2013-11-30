@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed buf #66041 (list() fails to unpack yielded ArrayAccess object).
+    (Nikita)
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
