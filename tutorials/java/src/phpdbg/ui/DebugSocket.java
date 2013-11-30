@@ -4,7 +4,17 @@ package phpdbg.ui;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import static java.nio.channels.SelectionKey.OP_READ;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
+import java.util.Iterator;
+import java.util.Set;
 import phpdbg.ui.JConsole.MessageType;
 
 /*
@@ -17,7 +27,9 @@ import phpdbg.ui.JConsole.MessageType;
  * Manage input and output data
  * @author krakjoe
  */
-public class DebugSocket extends Socket implements Runnable {
+public class DebugSocket implements Runnable {
+    private final String host;
+    private final Integer port;
     private final Boolean reader;
     private final JConsole main;
     private final Thread thread;
@@ -26,8 +38,8 @@ public class DebugSocket extends Socket implements Runnable {
     private volatile Boolean started;
     
     public DebugSocket(final String host, final Integer port, final JConsole main, Boolean reader) throws IOException {
-        super(host, port);
-        
+        this.host = host;
+        this.port = port;
         this.main = main;
         this.reader = reader;
         this.quit = false;
@@ -38,6 +50,7 @@ public class DebugSocket extends Socket implements Runnable {
     public void start() {
         synchronized(this) {
             if (!started) {
+               quit = false;
                started = true;
                thread.start(); 
             }
@@ -60,59 +73,87 @@ public class DebugSocket extends Socket implements Runnable {
                 }
             }
             
-            synchronized(this) {
-                do {
-                    if (reader) {
+            if (reader) {
+                /* The reader thread part will wait() until there is input */
+                Socket socket = new Socket(this.host, this.port);
+                try {
+                    do {
                         String command;
-                        OutputStream output = getOutputStream();
-                        
-                        wait();
-                        
-                        command = main.getInputField().getText();
-                        /* send command to stdin socket */
-                        if (command != null) {
-                            if (main.isEchoing()) {
-                                main.getOutputField().appendANSI("remote> ");
-                                main.getOutputField().appendANSI(command);
-                                main.getOutputField().appendANSI("\n");
+                        OutputStream output = socket.getOutputStream();
+
+                        synchronized(this) {
+                            wait();
+
+                            if (!quit) {
+                                command = main.getInputField().getText();
+                                /* send command to stdin socket */
+                                if (command != null) {
+                                    if (main.isEchoing()) {
+                                        main.getOutputField().appendANSI("remote> ");
+                                        main.getOutputField().appendANSI(command);
+                                        main.getOutputField().appendANSI("\n");
+                                    }
+                                    output.write(
+                                       command.getBytes());
+                                    output.write("\n".getBytes());
+                                    output.flush();
+                                }
+                                main.getInputField().setText(null);
                             }
-                            output.write(
-                               command.getBytes());
-                            output.write("\n".getBytes());
-                            output.flush();
                         }
-                        main.getInputField().setText(null);
-                    } else {
-                        InputStream input = getInputStream();
-                        /* get data from stdout socket */
-                        byte[] bytes = new byte[1];
-                        do {
-                            if (input.available() == 0) {
-                                wait(400);
-                                continue;
-                            }
-                            
-                            if (input.read(bytes, 0, 1) > -1) {
-                                main.getOutputField()
-                                        .appendANSI(new String(bytes));
-                            }
-                        } while (!quit);
+                    } while (!quit);
+                } catch (IOException ex) {
+                    if (!quit) {
+                        main.messageBox(ex.getMessage(), MessageType.ERROR);
                     }
-                } while(!quit);
+                }
+            } else {
+                /*
+                * The writer thread will use non-blocking i/o consuming
+                * resources only when there is data to read
+                */
+                Selector selector = Selector.open();
+                SocketChannel channel = SocketChannel.open();
+                
+                channel.connect(
+                        new InetSocketAddress(this.host, this.port));
+                channel.configureBlocking(false);
+                channel.register(selector, OP_READ);
+
+                while (!quit) {
+                    selector.select();
+
+                    Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
+
+                    while (iter.hasNext()) {
+                        if (!quit) {
+                            SocketChannel ready = (SocketChannel) (iter.next().channel());
+                            ByteBuffer bytes = ByteBuffer.allocate(128);
+                            
+                            if (ready != null) {
+                                if (ready.read(bytes) != -1) {
+                                    bytes.flip();
+                                    
+                                    main.getOutputField()
+                                        .appendANSI(new String(bytes.array()));
+                                    
+                                }
+                            }
+
+                            iter.remove();
+                        }
+                    }
+                }
             }
         } catch (IOException | InterruptedException ex) {
             if (!quit) {
                 main.messageBox(ex.getMessage(), MessageType.ERROR);
             }
         } finally {
-            try {
-                close();
-            } catch (IOException ex) { /* naughty me */ } finally {
-               synchronized(main) {
-                   if (main.isConnected()) {
-                       main.setConnected(false);
-                   }
-               } 
+            synchronized(main) {
+                if (main.isConnected()) {
+                    main.setConnected(false);
+                }
             }
         }
     }
