@@ -10,10 +10,10 @@ PIDFILE=/var/run/phpdbg.pid
 STDIN=4000
 STDOUT=8000
 ################################################################
-# Either set path to phpdbg here or rely on phpdbg in PATH	   #
+# Either set path to phpdbg here or rely on phpdbg in ENV/PATH #
 ################################################################
-if [ "x$PHPDBG" == "x" ]; then
-	PHPDBG=$(which phpdbg)
+if [ "x${PHPDBG}" == "x" ]; then
+	PHPDBG=$(which phpdbg 2>/dev/null)
 fi
 ################################################################
 # Options to pass to phpdbg upon boot						   #
@@ -26,9 +26,36 @@ LOGFILE=/var/log/phpdbg.log
 . /etc/rc.d/init.d/functions
 RETVAL=1
 ################################################################
+insanity()
+{
+	if [ "x${PHPDBG}" == "x" ]; then
+		PHPDBG=$(which phpdbg 2>>/dev/null)
+		if [ $? != 0 ]; then
+			echo -n $"Fatal: cannot find phpdbg ${PHPDBG}"
+			echo_failure
+			echo
+			return 1
+		fi
+	else
+		if [ ! -x ${PHPDBG} ]; then
+			echo -n $"Fatal: cannot execute phpdbg ${PHPDBG}"
+			echo_failure
+			echo
+			return 1
+		fi
+	fi
+	
+	return 0
+}
 
 start()
 {
+		insanity
+
+		if [ $? -eq 1 ]; then
+			return $RETVAL
+		fi
+
         echo -n $"Starting: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
         nohup ${PHPDBG} -l${STDIN}/${STDOUT} ${OPTIONS} 2>>${LOGFILE} 1>/dev/null </dev/null &
         PID=$!
@@ -43,8 +70,15 @@ start()
         [ $RETVAL = 0 ] && touch ${LOCKFILE}
        return $RETVAL
 }
+
 stop()
 {
+		insanity
+
+		if [ $? -eq 1 ]; then
+			return $RETVAL
+		fi
+		
         if [ -f ${LOCKFILE} ] && [ -f ${PIDFILE} ]
         then
                 echo -n $"Stopping: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
