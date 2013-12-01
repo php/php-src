@@ -69,6 +69,7 @@ typedef struct _phpdbg_breakopline_t {
 typedef struct _phpdbg_breakline_t {
 	const char *name;
 	zend_ulong  opline;
+	zend_uchar  type;
 	int         id;
 } phpdbg_breakline_t;
 

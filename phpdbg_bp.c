@@ -53,8 +53,12 @@ static void phpdbg_opline_breaks_dtor(void *data) /* {{{ */
 {
 	phpdbg_breakopline_t *bp = (phpdbg_breakopline_t *) data;
 
-	efree((char*)bp->class_name);
-	efree((char*)bp->func_name);
+	if (bp->class_name) {
+		efree((char*)bp->class_name);
+	}
+	if (bp->func_name) {
+		efree((char*)bp->func_name);
+	}
 } /* }}} */
 
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
@@ -284,7 +288,21 @@ PHPDBG_API void phpdbg_save_oplines(zend_op_array *op_array TSRMLS_DC) {
 		} while (i--);
 	}
 
-	(*branch)->op_array = op_array;
+	if (((*branch)->info.func_name = op_array->function_name)) {
+		(*branch)->info.func_len = strlen(op_array->function_name);
+		if (op_array->scope) {
+			(*branch)->info.class_name = op_array->scope->name;
+			(*branch)->info.class_len = op_array->scope->name_length;
+		} else {
+			(*branch)->info.class_name = NULL;
+			(*branch)->info.class_len = 0;
+		}
+	} else {
+		(*branch)->info.func_len = 0;
+		(*branch)->info.class_name = op_array->filename;
+		(*branch)->info.class_len = strlen(op_array->filename);
+	}
+	(*branch)->info.last = op_array->last;
 }
 
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
@@ -300,75 +318,102 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 		int i = sizeof(void *) * 8 - 1, last_superior_i = -1;
 		phpdbg_btree *branch = PHPDBG_G(opline_btree);
 		HashTable *insert = &PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE];
-		HashTable func_breaks, *func_table;
+		HashTable func_breaks, *func_table = EG(function_table);
+		zend_ulong opcodes = 0;
+
+		/* get highest opcodes root lower than or eqal to opline */
+#define CHOOSE_BRANCH(n) \
+	opcodes = (opcodes << 1) + !!(n); \
+	branch = branch->branches[!!(n)];
 
 		do {
+			/* an impossible branch was found if: */
 			if ((opline >> i) % 2 == 0 && !branch->branches[0]) {
+				/* there's no lower branch than opline */
 				if (last_superior_i == -1) {
-					goto error;
+					phpdbg_error("No opline could be found at 0x%lx", opline);
+					return;
 				}
+				/* reset state */
 				branch = PHPDBG_G(opline_btree);
+				opcodes = 0;
 				i = sizeof(void *) * 8 - 1;
+				/* follow branch according to bits in opline until the last lower branch before the impossible branch */
 				do {
-					branch = branch->branches[(opline >> i) % 2 == 1 && branch->branches[1]];
-				} while (i-- > last_superior_i);
-				branch = branch->branches[0];
+					CHOOSE_BRANCH((opline >> i) % 2 == 1 && branch->branches[1]);
+				} while (--i > last_superior_i);
+				/* use now the lower branch of which we can be sure that it contains only branches lower than opline */
+				CHOOSE_BRANCH(0);
+				/* and choose the highest possible branch in the branch containing only branches lower than opline */
 				while (i--) {
-					branch = branch->branches[branch->branches[1] != NULL];
+					CHOOSE_BRANCH(branch->branches[1]);
 				}
 				break;
 			}
+			/* follow branch according to bits in opline until having found an impossible branch */
 			if ((opline >> i) % 2 == 1 && branch->branches[1]) {
 				if (branch->branches[0]) {
 					last_superior_i = i;
 				}
-				branch = branch->branches[1];
+				CHOOSE_BRANCH(1);
 			} else {
-				branch = branch->branches[0];
+				CHOOSE_BRANCH(0);
 			}
 		} while (i--);
 
-		if ((zend_ulong)(branch->op_array->opcodes + branch->op_array->last) <= opline ||
-		    (opline - (zend_ulong)branch->op_array->opcodes) % sizeof(zend_op) > 0) {
-error:
-			phpdbg_error("No opline could be found at 0x%lx", opline);
+		/* make sure that opline is an opcode address in the closest zend_op array */
+		if (opcodes + branch->info.last * sizeof(zend_op) <= opline ||
+		    (opline - opcodes) % sizeof(zend_op) > 0) {
+			phpdbg_error("No opline could be found at 0x%lx; the closest opline is at 0x%lx (%s %s%s%s) with size %ld",
+				opline,
+				opcodes,
+				branch->info.func_name?(branch->info.class_name?"method":"function"):"file",
+				branch->info.func_name?branch->info.func_name:"",
+				branch->info.func_name&&branch->info.class_name?"::":"",
+				branch->info.class_name?branch->info.class_name:"",
+				branch->info.last);
 			return;
 		}
 
-		opline_break.opline = (opline - (zend_ulong)branch->op_array) / sizeof(zend_op);
+		opline_break.opline = (opline - opcodes) / sizeof(zend_op);
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
-		new_break.name = NULL;
-		new_break.opline = opline;
-		new_break.id = PHPDBG_G(bp_count)++;
+		opline_break.func_len = branch->info.func_len;
+		opline_break.func_name = branch->info.func_name;
+		opline_break.id = PHPDBG_G(bp_count)++;
+		if (branch->info.func_name == NULL) {
+			opline_break.func_len = branch->info.class_len;
+			opline_break.func_name = branch->info.class_name;
 
-		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline,
-			&new_break, sizeof(phpdbg_breakline_t), NULL);
-
-		opline_break.func_len = branch->op_array->function_name?strlen(branch->op_array->function_name):0;
-		opline_break.func_name = opline_break.func_len?estrndup(branch->op_array->function_name, opline_break.func_len):"";
-		opline_break.id = new_break.id;
-		if (branch->op_array->scope) {
+			insert = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE];
+			PHPDBG_G(flags) |= PHPDBG_HAS_FILE_OPLINE_BP;
+			new_break.type = PHPDBG_BREAK_FILE_OPLINE;
+		} else if (branch->info.class_name) {
 			HashTable class_breaks, *class_table;
 
 			if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE],
-				branch->op_array->scope->name,
-				branch->op_array->scope->name_length,
+				branch->info.class_name,
+				branch->info.class_len,
 				(void **)&class_table
 			) == FAILURE) {
 				zend_hash_init(&class_breaks, 8, NULL, phpdbg_opline_class_breaks_dtor, 0);
 				zend_hash_update(
 					&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE],
-					branch->op_array->scope->name,
-					branch->op_array->scope->name_length,
+					branch->info.class_name,
+					branch->info.class_len,
 					(void **)&class_breaks, sizeof(HashTable), (void **)&class_table);
 			}
 
-			opline_break.class_len = branch->op_array->scope->name_length;
-			opline_break.class_name = estrndup(branch->op_array->scope->name, opline_break.class_len);
+			opline_break.class_len = branch->info.class_len;
+			opline_break.class_name = branch->info.class_name;
 
 			insert = class_table;
+			PHPDBG_G(flags) |= PHPDBG_HAS_METHOD_OPLINE_BP;
+			new_break.type = PHPDBG_BREAK_METHOD_OPLINE;
+		} else {
+			PHPDBG_G(flags) |= PHPDBG_HAS_FUNCTION_OPLINE_BP;
+			new_break.type = PHPDBG_BREAK_FUNCTION_OPLINE;
 		}
 
 		if (zend_hash_find(insert, opline_break.func_name, opline_break.func_len, (void **)&func_table) == FAILURE) {
@@ -380,10 +425,24 @@ error:
 				(void **)&func_breaks, sizeof(HashTable), (void **)&func_table);
 		}
 
+		/* insert opline num breakpoint information */
 		zend_hash_index_update(func_table, opline_break.opline, &opline_break, sizeof(phpdbg_breakopline_t), NULL);
 
-		phpdbg_notice("Breakpoint #%d added at %#lx",
-			new_break.id, new_break.opline);
+		/* insert opline breakpoint */
+		new_break.name = NULL;
+		new_break.opline = opline;
+		new_break.id = opline_break.id; /* use same id to identify */
+		zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline,
+			&new_break, sizeof(phpdbg_breakline_t), NULL);
+
+		phpdbg_notice("Breakpoint #%d added at %#lx (opcode #%ld in %s %s%s%s)",
+			new_break.id,
+			new_break.opline,
+			(opline - opcodes) / sizeof(zend_op),
+			branch->info.func_name?(branch->info.class_name?"method":"function"):"file",
+			branch->info.func_name?branch->info.func_name:"",
+			branch->info.func_name&&branch->info.class_name?"::":"",
+			branch->info.class_name?branch->info.class_name:"");
 	} else {
 		phpdbg_notice("Breakpoint exists at %#lx", opline);
 	}
@@ -528,6 +587,8 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 		return;
 	}
 
+	PHPDBG_G(flags) |= PHPDBG_HAS_METHOD_OPLINE_BP;
+
 	zend_hash_index_update(method_table, new_break.opline, &new_break, sizeof(phpdbg_breakopline_t), NULL);
 }
 
@@ -538,6 +599,8 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int 
 
 	new_break.func_len = strlen(function);
 	new_break.func_name = estrndup(function, new_break.func_len);
+	new_break.class_len = 0;
+	new_break.class_name = NULL;
 	new_break.opline = opline;
 	new_break.id = PHPDBG_G(bp_count)++;
 
@@ -564,11 +627,13 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int 
 	}
 
 	if (zend_hash_index_exists(func_table, opline)) {
-		phpdbg_notice("Breakpoint already exists for %s:%d", new_break.func_len, opline);
+		phpdbg_notice("Breakpoint already exists for %s:%d", new_break.func_name, opline);
 		efree(new_break.func_name);
 		PHPDBG_G(bp_count)--;
 		return;
 	}
+
+	PHPDBG_G(flags) |= PHPDBG_HAS_FUNCTION_OPLINE_BP;
 
 	zend_hash_index_update(func_table, new_break.opline, &new_break, sizeof(phpdbg_breakopline_t), NULL);
 }
