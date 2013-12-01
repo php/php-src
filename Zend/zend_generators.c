@@ -560,6 +560,8 @@ ZEND_METHOD(Generator, throw)
 
 	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
+	zend_generator_ensure_initialized(generator TSRMLS_CC); 
+
 	if (generator->execute_data) {
 		/* Throw the exception in the context of the generator */
 		zend_execute_data *current_execute_data = EG(current_execute_data);
