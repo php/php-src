@@ -50,73 +50,73 @@ insanity()
 
 start()
 {
-		insanity
+	insanity
 
-		if [ $? -eq 1 ]; then
-			return $RETVAL
-		fi
+	if [ $? -eq 1 ]; then
+		return $RETVAL
+	fi
 
-        echo -n $"Starting: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
-        nohup ${PHPDBG} -l${STDIN}/${STDOUT} ${OPTIONS} 2>>${LOGFILE} 1>/dev/null </dev/null &
-        PID=$!
-        RETVAL=$?
-        if [ $RETVAL -eq 0 ]; then
-                echo $PID > $PIDFILE
-                echo_success
-        else
-                echo_failure
-        fi
-        echo
-        [ $RETVAL = 0 ] && touch ${LOCKFILE}
-       return $RETVAL
+	echo -n $"Starting: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
+	nohup ${PHPDBG} -l${STDIN}/${STDOUT} ${OPTIONS} 2>>${LOGFILE} 1>/dev/null </dev/null &
+	PID=$!
+	RETVAL=$?
+	if [ $RETVAL -eq 0 ]; then
+		echo $PID > $PIDFILE
+		echo_success
+	else
+		echo_failure
+	fi
+	echo
+	[ $RETVAL = 0 ] && touch ${LOCKFILE}
+	return $RETVAL
 }
 
 stop()
 {
-		insanity
+	insanity
 
-		if [ $? -eq 1 ]; then
-			return $RETVAL
+	if [ $? -eq 1 ]; then
+		return $RETVAL
+	fi
+
+	if [ -f ${LOCKFILE} ] && [ -f ${PIDFILE} ]
+	then
+		echo -n $"Stopping: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
+		kill -s TERM $(cat $PIDFILE)
+		RETVAL=$?
+		if [ $RETVAL -eq 0 ]; then
+			echo_success
+		else
+			echo_failure
 		fi
-		
-        if [ -f ${LOCKFILE} ] && [ -f ${PIDFILE} ]
-        then
-                echo -n $"Stopping: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
-                kill -s TERM $(cat $PIDFILE)
-                RETVAL=$?
-                if [ $RETVAL -eq 0 ]; then
-                        echo_success
-                else
-                        echo_failure
-                fi
-                echo
-                [ $RETVAL = 0 ] && rm -f ${LOCKFILE} ${PIDFILE}
-        else
-                echo -n $"Error: phpdbg not running"
-                echo_failure
-                echo
-                [ $RETVAL = 1 ]
-        fi
-        return $RETVAL
+		echo
+		[ $RETVAL = 0 ] && rm -f ${LOCKFILE} ${PIDFILE}
+	else
+		echo -n $"Error: phpdbg not running"
+		echo_failure
+		echo
+		[ $RETVAL = 1 ]
+	fi
+	return $RETVAL
 }
 ##################################################################
 case "$1" in
-        start)
-        start
-        ;;
-        stop)
-        stop
-        ;;
-        status)
-        status $PHPDBG
-        ;;
-        restart)
-        $0 stop
-        $0 start
-        ;;
-        *)
-        echo "usage: $0 start|stop|restart|status"
-        ;;
+	start)
+	start
+	;;
+	stop)
+	stop
+	;;
+	status)
+	status $PHPDBG
+	;;
+	restart)
+	$0 stop
+	$0 start
+	;;
+	*)
+	echo "usage: $0 start|stop|restart|status"
+	;;
 esac
 ###################################################################
 exit $RETVAL
