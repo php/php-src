@@ -769,11 +769,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
 			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
 			phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
-			phpdbg_writeln(
-				"Memory\t\t%.3f/%.3f (kB)",
-				(float) (zend_memory_usage(1 TSRMLS_CC)/1024),
-				(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
-
+			
 			phpdbg_writeln(SEPARATE);
 		} break;
 

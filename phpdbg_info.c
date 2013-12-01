@@ -225,6 +225,26 @@ PHPDBG_INFO(literal) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_INFO(memory) /* {{{ */
+{
+	if (is_zend_mm(TSRMLS_C)) {
+		phpdbg_notice("Memory Manager Information");
+		phpdbg_notice("Current");
+		phpdbg_writeln("|-------> Used:\t%.3f kB", 
+			(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
+		phpdbg_writeln("|-------> Real:\t%.3f kB", 
+			(float) (zend_memory_usage(1 TSRMLS_CC)/1024));
+		phpdbg_notice("Peak");
+		phpdbg_writeln("|-------> Used:\t%.3f kB", 
+			(float) (zend_memory_peak_usage(0 TSRMLS_CC)/1024));
+		phpdbg_writeln("|-------> Real:\t%.3f kB", 
+			(float) (zend_memory_peak_usage(1 TSRMLS_CC)/1024));
+	} else {
+		phpdbg_error("Memory Manager Disabled !");
+	}
+	return SUCCESS;
+} /* }}} */
+
 static inline void phpdbg_print_class_name(zend_class_entry **ce TSRMLS_DC) /* {{{ */
 {
 	phpdbg_write(

@@ -11,6 +11,7 @@ Version 0.2.0 2013-00-00
 4. .phpdbginit now searched in (additional) ini dirs
 5. Added source command - load additional .phpdbginit script during session
 6. Added remote console mode
+7. Added info memory command
 
 Version 0.1.0 2013-11-23
 ------------------------
