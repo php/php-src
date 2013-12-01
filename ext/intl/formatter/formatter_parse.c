@@ -36,11 +36,11 @@
  */
 PHP_FUNCTION( numfmt_parse )
 {
-	long type = FORMAT_TYPE_DOUBLE;
+	php_int_t type = FORMAT_TYPE_DOUBLE;
 	UChar* sstr = NULL;
-	int sstr_len = 0;
+	zend_str_size_int sstr_len = 0;
 	char* str = NULL;
-	int str_len;
+	zend_str_size_int str_len;
 	int32_t val32, position = 0;
 	int64_t val64;
 	double val_double;
@@ -50,7 +50,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS|iz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -83,10 +83,10 @@ PHP_FUNCTION( numfmt_parse )
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			if(val64 > LONG_MAX || val64 < LONG_MIN) {
+			if(val64 > ZEND_INT_MAX || val64 < ZEND_INT_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
-				RETVAL_LONG((long)val64);
+				RETVAL_LONG((php_int_t)val64);
 			}
 			break;
 		case FORMAT_TYPE_DOUBLE:
@@ -124,18 +124,18 @@ PHP_FUNCTION( numfmt_parse_currency )
 	double number;
 	UChar currency[5] = {0};
 	UChar* sstr = NULL;
-	int sstr_len = 0;
+	zend_str_size_int sstr_len = 0;
 	char *currency_str = NULL;
-	int currency_len = 0;
+	zend_str_size_int currency_len = 0;
 	char *str;
-	int str_len;
+	zend_str_size_int str_len;
 	int32_t* position_p = NULL;
 	int32_t position = 0;
 	zval *zcurrency, *zposition = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osz|z!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OSz|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

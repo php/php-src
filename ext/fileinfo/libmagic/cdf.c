@@ -289,11 +289,11 @@ cdf_check_stream_offset(const cdf_stream_t *sst, const cdf_header_t *h,
 }
 
 static ssize_t
-cdf_read(const cdf_info_t *info, off_t off, void *buf, size_t len)
+cdf_read(const cdf_info_t *info, zend_off_t off, void *buf, size_t len)
 {
 	size_t siz = (size_t)off + len;
 
-	if ((off_t)(off + len) != (off_t)siz) {
+	if ((zend_off_t)(off + len) != (zend_off_t)siz) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -306,7 +306,7 @@ cdf_read(const cdf_info_t *info, off_t off, void *buf, size_t len)
 	if (info->i_fd == -1)
 		return -1;
 
-	if (FINFO_LSEEK_FUNC(info->i_fd, off, SEEK_SET) == (off_t)-1)
+	if (FINFO_LSEEK_FUNC(info->i_fd, off, SEEK_SET) == (zend_off_t)-1)
 		return -1;
 
 	if (FINFO_READ_FUNC(info->i_fd, buf, len) != (ssize_t)len)
@@ -321,7 +321,7 @@ cdf_read_header(const cdf_info_t *info, cdf_header_t *h)
 	char buf[512];
 
 	(void)memcpy(cdf_bo.s, "\01\02\03\04", 4);
-	if (cdf_read(info, (off_t)0, buf, sizeof(buf)) == -1)
+	if (cdf_read(info, (zend_off_t)0, buf, sizeof(buf)) == -1)
 		return -1;
 	cdf_unpack_header(h, buf);
 	cdf_swap_header(h);
@@ -355,7 +355,7 @@ cdf_read_sector(const cdf_info_t *info, void *buf, size_t offs, size_t len,
 	size_t ss = CDF_SEC_SIZE(h);
 	size_t pos = CDF_SEC_POS(h, id);
 	assert(ss == len);
-	return cdf_read(info, (off_t)pos, ((char *)buf) + offs, len);
+	return cdf_read(info, (zend_off_t)pos, ((char *)buf) + offs, len);
 }
 
 ssize_t

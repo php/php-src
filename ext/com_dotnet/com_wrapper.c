@@ -176,7 +176,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 
 	for (i = 0; i < cNames; i++) {
 		char *name;
-		unsigned int namelen;
+		zend_str_size_uint namelen;
 		zval **tmp;
 		
 		name = php_com_olestring_to_string(rgszNames[i], &namelen, COMG(code_page) TSRMLS_CC);
@@ -220,7 +220,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 {
 	HRESULT ret = DISP_E_UNKNOWNNAME;
 	char *name;
-	unsigned int namelen;
+	zend_str_size_uint namelen;
 	zval **tmp;
 	FETCH_DISP("GetDispID");
 
@@ -260,7 +260,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
 		/* TODO: add support for overloaded objects */
 
-		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_PP(name), Z_STRLEN_PP(name), wFlags, pdp->cArgs);
+		trace("-- Invoke: %d %20s [%d] flags=%08x args=%d\n", id, Z_STRVAL_PP(name), Z_STRSIZE_PP(name), wFlags, pdp->cArgs);
 		
 		/* convert args into zvals.
 		 * Args are in reverse order */
@@ -287,9 +287,9 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		 * and expose it as a COM exception */
 		
 		if (wFlags & DISPATCH_PROPERTYGET) {
-			retval = zend_read_property(Z_OBJCE_P(disp->object), disp->object, Z_STRVAL_PP(name), Z_STRLEN_PP(name)+1, 1 TSRMLS_CC);
+			retval = zend_read_property(Z_OBJCE_P(disp->object), disp->object, Z_STRVAL_PP(name), Z_STRSIZE_PP(name)+1, 1 TSRMLS_CC);
 		} else if (wFlags & DISPATCH_PROPERTYPUT) {
-			zend_update_property(Z_OBJCE_P(disp->object), disp->object, Z_STRVAL_PP(name), Z_STRLEN_PP(name)+1, *params[0] TSRMLS_CC);
+			zend_update_property(Z_OBJCE_P(disp->object), disp->object, Z_STRVAL_PP(name), Z_STRSIZE_PP(name)+1, *params[0] TSRMLS_CC);
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, *name,
@@ -389,7 +389,7 @@ static HRESULT STDMETHODCALLTYPE disp_getmembername(
 	FETCH_DISP("GetMemberName");
 
 	if (SUCCESS == zend_hash_index_find(disp->dispid_to_name, id, (void**)&name)) {
-		OLECHAR *olestr = php_com_string_to_olestring(Z_STRVAL_P(name), Z_STRLEN_P(name), COMG(code_page) TSRMLS_CC);
+		OLECHAR *olestr = php_com_string_to_olestring(Z_STRVAL_P(name), Z_STRSIZE_P(name), COMG(code_page) TSRMLS_CC);
 		*pbstrName = SysAllocString(olestr);
 		efree(olestr);
 		return S_OK;
@@ -453,9 +453,9 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	HashPosition pos;
 	char *name = NULL;
 	zval *tmp;
-	int namelen;
+	zend_str_size_int namelen;
 	int keytype;
-	ulong pid;
+	php_uint_t pid;
 
 	if (disp->dispid_to_name == NULL) {
 		ALLOC_HASHTABLE(disp->dispid_to_name);
@@ -472,7 +472,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 			   	&namelen, &pid, 0, &pos))) {
 			char namebuf[32];
 			if (keytype == HASH_KEY_IS_LONG) {
-				snprintf(namebuf, sizeof(namebuf), "%d", pid);
+				snprintf(namebuf, sizeof(namebuf), ZEND_UINT_FMT, pid);
 				name = namebuf;
 				namelen = strlen(namebuf)+1;
 			}
@@ -585,9 +585,9 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	HashPosition pos;
 	char *name = NULL;
 	zval *tmp, **ntmp;
-	int namelen;
+	zend_str_size_int namelen;
 	int keytype;
-	ulong pid;
+	php_uint_t pid;
 
 	disp->dispid_to_name = id_to_name;
 
@@ -608,7 +608,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 			MAKE_STD_ZVAL(tmp);
 			ZVAL_LONG(tmp, pid);
 			zend_hash_update(disp->name_to_dispid, Z_STRVAL_PP(ntmp),
-				Z_STRLEN_PP(ntmp)+1, (void*)&tmp, sizeof(zval *), NULL);
+				Z_STRSIZE_PP(ntmp)+1, (void*)&tmp, sizeof(zval *), NULL);
 		}
 
 		zend_hash_move_forward_ex(id_to_name, &pos);

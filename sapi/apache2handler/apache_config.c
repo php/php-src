@@ -185,7 +185,7 @@ void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;
 	char *str;
-	uint str_len;
+	zend_str_size_uint str_len;
 	php_dir_entry *data;
 	
 	for (zend_hash_internal_pointer_reset(&d->config);

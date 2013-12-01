@@ -144,8 +144,8 @@ PHP_RSHUTDOWN_FUNCTION(browscap);
 
 /* Left for BC (not binary safe!) */
 PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers TSRMLS_DC);
-PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *opt, char *headers TSRMLS_DC);
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC);
+PHPAPI int _php_error_log_ex(int opt_err, char *message, zend_str_size_int message_len, char *opt, char *headers TSRMLS_DC);
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, zend_str_size_int var_name_len, zend_bool add_underscore TSRMLS_DC);
 
 #if SIZEOF_INT == 4
 /* Most 32-bit and 64-bit systems have 32-bit ints */
@@ -180,9 +180,9 @@ typedef struct _php_basic_globals {
 	zval *active_ini_file_section;
 	
 	/* pageinfo.c */
-	long page_uid;
-	long page_gid;
-	long page_inode;
+	php_int_t page_uid;
+	php_int_t page_gid;
+	php_int_t page_inode;
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */

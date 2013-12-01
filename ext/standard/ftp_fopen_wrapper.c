@@ -136,10 +136,11 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 {
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
-	int result, use_ssl, use_ssl_on_data = 0, tmp_len;
+	int result, use_ssl, use_ssl_on_data = 0;
+	zend_str_size_int tmp_len;
 	char tmp_line[512];
 	char *transport;
-	int transport_len;
+	zend_str_size_int transport_len;
 
 	resource = php_url_parse(path);
 	if (resource == NULL || resource->path == NULL) {
@@ -427,7 +428,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int allow_overwrite = 0;
 	int read_write = 0;
 	char *transport;
-	int transport_len;
+	zend_str_size_int transport_len;
 
 	tmp_line[0] = '\0';
 
@@ -531,10 +532,10 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			php_stream_context_get_option(context, "ftp", "resume_pos", &tmpzval) == SUCCESS &&
 			Z_TYPE_PP(tmpzval) == IS_LONG &&
 			Z_LVAL_PP(tmpzval) > 0) {
-			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_LVAL_PP(tmpzval));
+			php_stream_printf(stream TSRMLS_CC, "REST " ZEND_INT_FMT "\r\n", Z_LVAL_PP(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {			
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_LVAL_PP(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset " ZEND_INT_FMT, Z_LVAL_PP(tmpzval));
 				goto errexit;
 			}
 		}

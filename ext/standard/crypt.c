@@ -259,14 +259,14 @@ PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL, *result = NULL;
-	int str_len, salt_in_len = 0;
+	zend_str_size_int str_len, salt_in_len = 0;
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
 	 * available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
 		return;
 	}
 

@@ -32,9 +32,9 @@ ZEND_API int le_index_ptr;
 static HashTable list_destructors;
 
 
-ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC)
+ZEND_API zend_int_t zend_list_insert(void *ptr, int type TSRMLS_DC)
 {
-	int index;
+	zend_int_t index;
 	zend_rsrc_list_entry le;
 
 	le.ptr=ptr;
@@ -47,7 +47,7 @@ ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC)
 	return index;
 }
 
-ZEND_API int _zend_list_delete(int id TSRMLS_DC)
+ZEND_API int _zend_list_delete(zend_int_t id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 	
@@ -64,7 +64,7 @@ ZEND_API int _zend_list_delete(int id TSRMLS_DC)
 }
 
 
-ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
+ZEND_API void *_zend_list_find(zend_int_t id, int *type TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 
@@ -77,7 +77,7 @@ ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
 	}
 }
 
-ZEND_API int _zend_list_addref(int id TSRMLS_DC)
+ZEND_API int _zend_list_addref(zend_int_t id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 	
@@ -91,9 +91,9 @@ ZEND_API int _zend_list_addref(int id TSRMLS_DC)
 }
 
 
-ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC)
+ZEND_API zend_int_t zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC)
 {
-	int rsrc_id;
+	zend_int_t rsrc_id;
 
 	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
 	
@@ -106,9 +106,9 @@ ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int r
 }
 
 
-ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, zend_int_t default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
 {
-	int id;
+	zend_int_t id;
 	int actual_resource_type;
 	void *resource;
 	va_list resource_types;
@@ -139,7 +139,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	if (!resource) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
+			zend_error(E_WARNING, "%s%s%s(): " ZEND_INT_FMT " is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
 		}
 		return NULL;
 	}

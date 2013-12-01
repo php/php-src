@@ -103,7 +103,7 @@ PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 PHP_FUNCTION(array_combine);
 
-PHPAPI HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
+PHPAPI HashTable* php_splice(HashTable *, php_int_t, php_int_t, zval ***, php_int_t, HashTable **);
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC);
 PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);

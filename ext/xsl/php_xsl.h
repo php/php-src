@@ -65,7 +65,7 @@ typedef struct _xsl_object {
 	HashTable *node_list;
 	php_libxml_node_object *doc;
 	char *profiling;
-	long securityPrefs;
+	php_int_t securityPrefs;
 	int securityPrefsSet;
 } xsl_object;
 

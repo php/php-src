@@ -60,7 +60,7 @@ AH_BOTTOM([
 #endif
 
 #if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
+zend_str_size_int zend_sprintf(char *buffer, const char *format, ...);
 #else
 # define zend_sprintf sprintf
 #endif
@@ -862,6 +862,20 @@ if test "$PHP_DEBUG" = "yes"; then
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no
+fi
+
+PHP_ARG_ENABLE(zstrlen, whether to include Z_STRLEN macros,
+[  --enable-zstrlen       Enable legacy Z_STRLEN macros and types], no, no)
+
+if test "$PHP_ZSTRLEN" = "yes"; then
+  AC_DEFINE(ZEND_USE_LEGACY_STRING_TYPES, "1", [ ])
+fi
+
+PHP_ARG_ENABLE(zint64, whether to enable 64 bit integers,
+[  --enable-zint64        Enable 64 bit integers], no, no)
+
+if test "$PHP_ZINT64" = "yes"; then
+	AC_DEFINE(ZEND_ENABLE_INT64, "1", [ ])
 fi
 
 PHP_ARG_WITH(layout, layout of installed files,

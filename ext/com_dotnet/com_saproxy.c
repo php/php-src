@@ -118,7 +118,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type TSRMLS_
 		VariantInit(&v);
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
-			   	Z_STRLEN_P(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
+			   	Z_STRSIZE_P(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
 			   	proxy->dimensions, args, 0 TSRMLS_CC);
 
 		if (res == SUCCESS) {
@@ -230,7 +230,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		convert_to_string(proxy->indices[0]);
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL_P(proxy->indices[0]),
-					Z_STRLEN_P(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
+					Z_STRSIZE_P(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
 					args, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
@@ -321,7 +321,7 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval **object, const char *name, int len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, const char *name, zend_str_size_int len, const zend_literal *key TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
@@ -343,7 +343,7 @@ static zend_class_entry *saproxy_class_entry_get(const zval *object TSRMLS_DC)
 	return php_com_saproxy_class_entry;
 }
 
-static int saproxy_class_name_get(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int saproxy_class_name_get(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC)
 {
 	*class_name = estrndup(php_com_saproxy_class_entry->name, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;
@@ -360,7 +360,7 @@ static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, long *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, php_int_t *count TSRMLS_DC)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;

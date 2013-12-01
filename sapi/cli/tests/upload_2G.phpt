@@ -8,18 +8,36 @@ if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");
 }
 
-if ($f = fopen("/proc/meminfo","r")) {
+$enough_free_ram = false;
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+	exec("c:\\Windows\\System32\\systeminfo.exe", $out);
+
+	foreach($out as $ln) {
+		$s = "Virtual Memory: Available:";
+		if (false !== strpos($ln, $s)) {
+			$p = "/$s\s*([0-9,\.]+)\*s/";
+			if (preg_match("/$s\s*([0-9,\.]+)/", $ln, $m)) {
+				$ram = str_replace(array(",", "."), "", $m[1])/1024;
+				if ($ram > 3) {
+					$enough_free_ram = true;
+					break;
+				}
+			}
+		}
+	}
+} else if ($f = fopen("/proc/meminfo","r")) {
 	while (!feof($f)) {
 		if (!strncmp($line = fgets($f), "MemFree", 7)) {
 			if (substr($line,8)/1024/1024 > 3) {
 				$enough_free_ram = true;
+				break;
 			}
 		}
 	}
 }
 
 if (empty($enough_free_ram)) {
-	die("need +3G free RAM");
+	die("skip need +3G free RAM");
 }
 ?>
 --FILE--

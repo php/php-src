@@ -407,7 +407,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* if the opened path is set, copy it out */
 		if (Z_TYPE_P(zopened) == IS_STRING && opened_path) {
-			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRLEN_P(zopened));
+			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRSIZE_P(zopened));
 		}
 
 		/* set wrapper data to be a reference to our object */
@@ -519,12 +519,12 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 PHP_FUNCTION(stream_wrapper_register)
 {
 	char *protocol, *classname;
-	int protocol_len, classname_len;
+	zend_str_size protocol_len, classname_len;
 	struct php_user_stream_wrapper * uwrap;
 	int rsrc_id;
-	long flags = 0;
+	php_int_t flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -564,9 +564,9 @@ PHP_FUNCTION(stream_wrapper_register)
 PHP_FUNCTION(stream_wrapper_unregister)
 {
 	char *protocol;
-	int protocol_len;
+	zend_str_size protocol_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -585,11 +585,11 @@ PHP_FUNCTION(stream_wrapper_unregister)
 PHP_FUNCTION(stream_wrapper_restore)
 {
 	char *protocol;
-	int protocol_len;
+	zend_str_size protocol_len;
 	php_stream_wrapper **wrapperpp = NULL, *wrapper;
 	HashTable *global_wrapper_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -619,7 +619,7 @@ PHP_FUNCTION(stream_wrapper_restore)
 }
 /* }}} */
 
-static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
@@ -627,7 +627,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval **args[1];
 	zval *zbufptr;
-	size_t didwrite = 0;
+	zend_str_size didwrite = 0;
 
 	assert(us != NULL);
 
@@ -656,9 +656,9 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %ld bytes more data than requested (%ld written, %ld max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote " ZEND_INT_FMT " bytes more data than requested (" ZEND_INT_FMT " written, " ZEND_INT_FMT " max)",
 				us->wrapper->classname,
-				(long)(didwrite - count), (long)didwrite, (long)count);
+				(php_int_t)(didwrite - count), (php_int_t)didwrite, (php_int_t)count);
 		didwrite = count;
 	}
 
@@ -668,13 +668,13 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	return didwrite;
 }
 
-static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_read(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	zval **args[1];
 	int call_result;
-	size_t didread = 0;
+	zend_str_size didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval *zcount;
 
@@ -695,10 +695,10 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_string(retval);
-		didread = Z_STRLEN_P(retval);
+		didread = Z_STRSIZE_P(retval);
 		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
-					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_INT_FMT " bytes more data than requested (" ZEND_INT_FMT " read, " ZEND_INT_FMT " max) - excess data will be lost",
+					us->wrapper->classname, (php_int_t)(didread - count), (php_int_t)didread, (php_int_t)count);
 			didread = count;
 		}
 		if (didread > 0)
@@ -796,7 +796,7 @@ static int php_userstreamop_flush(php_stream *stream TSRMLS_DC)
 	return call_result;
 }
 
-static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_userstreamop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
@@ -1508,12 +1508,12 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 }
 
-static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_readdir(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	int call_result;
-	size_t didread = 0;
+	zend_str_size didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 
@@ -1532,7 +1532,7 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 
 	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) != IS_BOOL) {
 		convert_to_string(retval);
-		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRLEN_P(retval));
+		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRSIZE_P(retval));
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {
@@ -1572,7 +1572,7 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle TSRMLS
 	return 0;
 }
 
-static int php_userstreamop_rewinddir(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_userstreamop_rewinddir(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;

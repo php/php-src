@@ -138,7 +138,7 @@ typedef struct php_cli_server_request {
 	size_t content_len;
 	const char *ext;
 	size_t ext_len;
-	struct stat sb;
+	php_stat_t sb;
 } php_cli_server_request;
 
 typedef struct php_cli_server_chunk {
@@ -477,7 +477,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	php_cli_server_client *client;
 	HashTable *headers;
 	char *key;
-	uint key_len;
+	zend_str_size key_len;
 	char **value_pointer;
 	HashPosition pos;
 
@@ -502,7 +502,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len;
+	ptrdiff_t  len;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {
@@ -605,7 +605,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
+static zend_str_size_int sapi_cli_server_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (!client) {
@@ -687,7 +687,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 	return *val;
 } /* }}} */
 
-static int sapi_cli_server_read_post(char *buf, uint count_bytes TSRMLS_DC) /* {{{ */
+static zend_str_size_int sapi_cli_server_read_post(char *buf, zend_str_size_uint count_bytes TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (client->request.content) {
@@ -703,7 +703,7 @@ static int sapi_cli_server_read_post(char *buf, uint count_bytes TSRMLS_DC) /* {
 static void sapi_cli_server_register_variable(zval *track_vars_array, const char *key, const char *val TSRMLS_DC) /* {{{ */
 {
 	char *new_val = (char *)val;
-	uint new_val_len;
+	zend_str_size_uint new_val_len;
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array TSRMLS_CC);
 	}
@@ -1100,7 +1100,7 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 
 		switch (chunk->type) {
 		case PHP_CLI_SERVER_CHUNK_HEAP:
-			nbytes_sent = send(fd, chunk->data.heap.p, chunk->data.heap.len, 0);
+			nbytes_sent = send(fd, chunk->data.heap.p, chunk->data.heap.len, 0); /* XXX on windows len is int */
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
@@ -1446,7 +1446,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 
 static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
-	struct stat sb;
+	php_stat_t sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
@@ -1483,7 +1483,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	*p = '\0';
 	q = p;
 	while (q > buf) {
-		if (!stat(buf, &sb)) {
+		if (!php_stat_fn(buf, &sb)) {
 			if (sb.st_mode & S_IFDIR) {
 				const char **file = index_files;
 				if (q[-1] != DEFAULT_SLASH) {
@@ -1492,7 +1492,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 				while (*file) {
 					size_t l = strlen(*file);
 					memmove(q, *file, l + 1);
-					if (!stat(buf, &sb) && (sb.st_mode & S_IFREG)) {
+					if (!php_stat_fn(buf, &sb) && (sb.st_mode & S_IFREG)) {
 						q += l;
 						break;
 					}
@@ -1859,7 +1859,7 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	client->addr_len = addr_len;
 	{
 		char *addr_str = 0;
-		long addr_str_len = 0;
+		zend_str_size_long addr_str_len = 0;
 		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, &addr_str_len, NULL, 0 TSRMLS_CC);
 		client->addr_str = pestrndup(addr_str, addr_str_len, 1);
 		client->addr_str_len = addr_str_len;
@@ -2526,9 +2526,9 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 
 	if (document_root) {
-		struct stat sb;
+		php_stat_t sb;
 
-		if (stat(document_root, &sb)) {
+		if (php_stat_fn(document_root, &sb)) {
 			fprintf(stderr, "Directory %s does not exist.\n", document_root);
 			return 1;
 		}

@@ -222,9 +222,9 @@ static long collator_u_strtol(nptr, endptr, base)
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
-zend_uchar collator_is_numeric( UChar *str, int length, long *lval, double *dval, int allow_errors )
+zend_uchar collator_is_numeric( UChar *str, zend_str_size_int length, php_int_t *lval, double *dval, int allow_errors )
 {
-	long local_lval;
+	php_int_t local_lval;
 	double local_dval;
 	UChar *end_ptr_long, *end_ptr_double;
 	int conv_base=10;

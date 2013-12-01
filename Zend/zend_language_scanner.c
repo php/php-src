@@ -633,7 +633,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 		int dummy = 1;
 
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = estrndup(Z_STRVAL_P(filename), Z_STRLEN_P(filename));
+			file_handle.opened_path = opened_path = estrndup(Z_STRVAL_P(filename), Z_STRSIZE_P(filename));
 		}
 
 		zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL);
@@ -656,14 +656,14 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	size_t size;
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
-	Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD);
-	memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), 0, ZEND_MMAP_AHEAD);
+	Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), Z_STRSIZE_P(str) + ZEND_MMAP_AHEAD);
+	memset(Z_STRVAL_P(str) + Z_STRSIZE_P(str), 0, ZEND_MMAP_AHEAD);
 
 	SCNG(yy_in) = NULL;
 	SCNG(yy_start) = NULL;
 
 	buf = Z_STRVAL_P(str);
-	size = Z_STRLEN_P(str);
+	size = Z_STRSIZE_P(str);
 
 	if (CG(multibyte)) {
 		SCNG(script_org) = (unsigned char*)buf;
@@ -724,7 +724,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
 
-	if (Z_STRLEN_P(source_string)==0) {
+	if (Z_STRSIZE_P(source_string)==0) {
 		efree(op_array);
 		return NULL;
 	}
@@ -863,10 +863,10 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 	if (SCNG(output_filter)) { \
 		size_t sz = 0; \
 		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)yytext, (size_t)yyleng TSRMLS_CC); \
-		Z_STRLEN_P(zendlval) = sz; \
+		Z_STRSIZE_P(zendlval) = sz; \
 	} else { \
 		Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng); \
-		Z_STRLEN_P(zendlval) = yyleng; \
+		Z_STRSIZE_P(zendlval) = yyleng; \
 	}
 
 static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
@@ -878,7 +878,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(zendlval);
-	end = s+Z_STRLEN_P(zendlval);
+	end = s+Z_STRSIZE_P(zendlval);
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -890,23 +890,23 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 'r':
 					*t++ = '\r';
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 't':
 					*t++ = '\t';
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 'f':
 					*t++ = '\f';
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 'v':
 					*t++ = '\v';
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 'e':
 #ifdef PHP_WIN32
@@ -914,7 +914,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 #else
 					*t++ = '\e';
 #endif
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case '"':
 				case '`':
@@ -926,22 +926,22 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				case 'x':
 				case 'X':
 					if (ZEND_IS_HEX(*(s+1))) {
 						char hex_buf[3] = { 0, 0, 0 };
 
-						Z_STRLEN_P(zendlval)--; /* for the 'x' */
+						Z_STRSIZE_P(zendlval)--; /* for the 'x' */
 
 						hex_buf[0] = *(++s);
-						Z_STRLEN_P(zendlval)--;
+						Z_STRSIZE_P(zendlval)--;
 						if (ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
+							Z_STRSIZE_P(zendlval)--;
 						}
-						*t++ = (char) strtol(hex_buf, NULL, 16);
+						*t++ = (char) ZEND_STRTOL(hex_buf, NULL, 16);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -953,16 +953,16 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						char octal_buf[4] = { 0, 0, 0, 0 };
 
 						octal_buf[0] = *s;
-						Z_STRLEN_P(zendlval)--;
+						Z_STRSIZE_P(zendlval)--;
 						if (ZEND_IS_OCT(*(s+1))) {
 							octal_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
+							Z_STRSIZE_P(zendlval)--;
 							if (ZEND_IS_OCT(*(s+1))) {
 								octal_buf[2] = *(++s);
-								Z_STRLEN_P(zendlval)--;
+								Z_STRSIZE_P(zendlval)--;
 							}
 						}
-						*t++ = (char) strtol(octal_buf, NULL, 8);
+						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -982,8 +982,8 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
-		Z_STRLEN_P(zendlval) = sz;
+		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)s, (size_t)Z_STRSIZE_P(zendlval) TSRMLS_CC);
+		Z_STRSIZE_P(zendlval) = sz;
 		efree(s);
 	}
 }
@@ -1144,13 +1144,13 @@ inline_html:
 		int readsize;
 		size_t sz = 0;
 		readsize = SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)yytext, (size_t)yyleng TSRMLS_CC);
-		Z_STRLEN_P(zendlval) = sz;
+		Z_STRSIZE_P(zendlval) = sz;
 		if (readsize < yyleng) {
 			yyless(readsize);
 		}
 	} else {
 	  Z_STRVAL_P(zendlval) = (char *) estrndup(yytext, yyleng);
-	  Z_STRLEN_P(zendlval) = yyleng;
+	  Z_STRSIZE_P(zendlval) = yyleng;
 	}
 	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
@@ -2942,10 +2942,10 @@ yy173:
 #line 1513 "Zend/zend_language_scanner.l"
 		{
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		Z_LVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
 	} else {
 		errno = 0;
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		Z_LVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
 				Z_DVAL_P(zendlval) = zend_oct_strtod(yytext, NULL);
@@ -3059,7 +3059,7 @@ yy179:
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(zendlval);
-	end = s+Z_STRLEN_P(zendlval);
+	end = s+Z_STRSIZE_P(zendlval);
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -3068,7 +3068,7 @@ yy179:
 				case '\\':
 				case '\'':
 					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
+					Z_STRSIZE_P(zendlval)--;
 					break;
 				default:
 					*t++ = '\\';
@@ -3089,8 +3089,8 @@ yy179:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
-		Z_STRLEN_P(zendlval) = sz;
+		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)s, (size_t)Z_STRSIZE_P(zendlval) TSRMLS_CC);
+		Z_STRSIZE_P(zendlval) = sz;
 		efree(s);
 	}
 	return T_CONSTANT_ENCAPSED_STRING;
@@ -3304,11 +3304,11 @@ yy200:
 		--len;
 	}
 
-	if (len < SIZEOF_LONG * 8) {
+	if (len < SIZEOF_ZEND_INT * 8) {
 		if (len == 0) {
 			Z_LVAL_P(zendlval) = 0;
 		} else {
-			Z_LVAL_P(zendlval) = strtol(bin, NULL, 2);
+			Z_LVAL_P(zendlval) = ZEND_STRTOL(bin, NULL, 2);
 		}
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
@@ -3340,11 +3340,11 @@ yy203:
 		len--;
 	}
 
-	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+	if (len < SIZEOF_ZEND_INT * 2 || (len == SIZEOF_ZEND_INT * 2 && *hex <= '7')) {
 		if (len == 0) {
 			Z_LVAL_P(zendlval) = 0;
 		} else {
-			Z_LVAL_P(zendlval) = strtol(hex, NULL, 16);
+			Z_LVAL_P(zendlval) = ZEND_STRTOL(hex, NULL, 16);
 		}
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
@@ -4265,7 +4265,7 @@ yy332:
 	const char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name : NULL;
 	const char *func_name = CG(active_op_array)? CG(active_op_array)->function_name : NULL;
 
-	Z_STRLEN_P(zendlval) = zend_spprintf(&Z_STRVAL_P(zendlval), 0, "%s%s%s",
+	Z_STRSIZE_P(zendlval) = zend_spprintf(&Z_STRVAL_P(zendlval), 0, "%s%s%s",
 		class_name ? class_name : "",
 		class_name && func_name ? "::" : "",
 		func_name ? func_name : ""
@@ -4440,8 +4440,8 @@ yy362:
 	if (ce && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
 		/* We create a special __CLASS__ constant that is going to be resolved
 		   at run-time */
-		Z_STRLEN_P(zendlval) = sizeof("__CLASS__")-1;
-		Z_STRVAL_P(zendlval) = estrndup("__CLASS__", Z_STRLEN_P(zendlval));
+		Z_STRSIZE_P(zendlval) = sizeof("__CLASS__")-1;
+		Z_STRVAL_P(zendlval) = estrndup("__CLASS__", Z_STRSIZE_P(zendlval));
 		zendlval->type = IS_CONSTANT;
 	} else {
 		if (ce && ce->name) {
@@ -7631,7 +7631,7 @@ yy835:
 #line 1558 "Zend/zend_language_scanner.l"
 		{ /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		ZVAL_LONG(zendlval, strtol(yytext, NULL, 10));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 10));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng, 1);
 	}
@@ -7833,3 +7833,4 @@ yy863:
 #line 2369 "Zend/zend_language_scanner.l"
 
 }
+

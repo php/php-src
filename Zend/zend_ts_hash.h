@@ -55,13 +55,13 @@ ZEND_API int _zend_ts_hash_add_or_update(TsHashTable *ht, char *arKey, uint nKey
 #define zend_ts_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_ts_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_quick_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_ts_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_ts_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_ts_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_index_update(ht, h, pData, nDataSize, pDest) \
 		_zend_ts_hash_index_update_or_next_insert(ht, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_ts_hash_next_index_insert(ht, pData, nDataSize, pDest) \
@@ -78,22 +78,22 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 
 
 /* Deletes */
-ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag);
+ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, int flag);
 #define zend_ts_hash_del(ht, arKey, nKeyLength) \
 		zend_ts_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
 #define zend_ts_hash_index_del(ht, h) \
 		zend_ts_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
-ZEND_API ulong zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API zend_uint_t zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLength);
 
 /* Data retreival */
 ZEND_API int zend_ts_hash_find(TsHashTable *ht, char *arKey, uint nKeyLength, void **pData);
-ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData);
-ZEND_API int zend_ts_hash_index_find(TsHashTable *ht, ulong h, void **pData);
+ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, void **pData);
+ZEND_API int zend_ts_hash_index_find(TsHashTable *ht, zend_uint_t h, void **pData);
 
 /* Misc */
 ZEND_API int zend_ts_hash_exists(TsHashTable *ht, char *arKey, uint nKeyLength);
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h);
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_uint_t h);
 
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
@@ -108,7 +108,7 @@ ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);
 
 ZEND_API int zend_ts_hash_rehash(TsHashTable *ht);
 
-ZEND_API ulong zend_ts_hash_func(char *arKey, uint nKeyLength);
+ZEND_API zend_uint_t zend_ts_hash_func(char *arKey, uint nKeyLength);
 
 #if ZEND_DEBUG
 /* debug */

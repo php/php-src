@@ -151,7 +151,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
 #define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+PHPAPI php_uint_t * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)
@@ -219,7 +219,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_escape_string(newstr, escapestr, escapestr_len) \
 		mysqlnd_old_escape_string((newstr), (escapestr), (escapestr_len) TSRMLS_CC)
 
-PHPAPI ulong mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
+PHPAPI php_uint_t mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
 
 
 /* PS */
@@ -270,17 +270,17 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	char *			trace_alloc_settings;	/* The actual string */
 	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
 	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
-	long			net_cmd_buffer_size;
-	long			net_read_buffer_size;
-	long			log_mask;
-	long			net_read_timeout;
-	long			mempool_default_size;
-	long			debug_emalloc_fail_threshold;
-	long			debug_ecalloc_fail_threshold;
-	long			debug_erealloc_fail_threshold;
-	long			debug_malloc_fail_threshold;
-	long			debug_calloc_fail_threshold;
-	long			debug_realloc_fail_threshold;
+	php_int_t		net_cmd_buffer_size;
+	php_int_t		net_read_buffer_size;
+	php_int_t		log_mask;
+	php_int_t		net_read_timeout;
+	php_int_t		mempool_default_size;
+	php_int_t		debug_emalloc_fail_threshold;
+	php_int_t		debug_ecalloc_fail_threshold;
+	php_int_t		debug_erealloc_fail_threshold;
+	php_int_t		debug_malloc_fail_threshold;
+	php_int_t		debug_calloc_fail_threshold;
+	php_int_t		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 

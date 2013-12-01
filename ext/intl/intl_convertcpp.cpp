@@ -25,7 +25,7 @@ extern "C" {
 }
 
 /* {{{ intl_stringFromChar */
-int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCode *status)
+int intl_stringFromChar(UnicodeString &ret, char *str, zend_str_size_int str_len, UErrorCode *status)
 {
 	//the number of UTF-16 code units is not larger than that of UTF-8 code
 	//units, + 1 for the terminator
@@ -51,7 +51,7 @@ int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCo
  * faster than doing intl_convert_utf16_to_utf8(&res, &res_len,
  *		from.getBuffer(), from.length(), &status),
  * but consumes more memory */
-int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UErrorCode *status)
+int intl_charFromString(const UnicodeString &from, char **res, zend_str_size_int *res_len, UErrorCode *status)
 {
 	if (from.isBogus()) {
 		return FAILURE;
@@ -82,7 +82,7 @@ int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UEr
 		return FAILURE;
 	}
 	(*res)[actual_len] = '\0';
-	*res_len = (int)actual_len;
+	*res_len = (zend_str_size_int)actual_len;
 	
 	return SUCCESS;
 }

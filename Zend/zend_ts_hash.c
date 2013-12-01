@@ -110,7 +110,7 @@ ZEND_API int _zend_ts_hash_add_or_update(TsHashTable *ht, char *arKey, uint nKey
 	return retval;
 }
 
-ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	int retval;
 
@@ -121,7 +121,7 @@ ZEND_API int _zend_ts_hash_quick_add_or_update(TsHashTable *ht, char *arKey, uin
 	return retval;
 }
 
-ZEND_API int _zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	int retval;
 
@@ -187,7 +187,7 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 	end_write(ht);
 }
 
-ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, int flag)
+ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, int flag)
 {
 	int retval;
 
@@ -198,9 +198,9 @@ ZEND_API int zend_ts_hash_del_key_or_index(TsHashTable *ht, char *arKey, uint nK
 	return retval;
 }
 
-ZEND_API ulong zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLength)
+ZEND_API zend_uint_t zend_ts_get_hash_value(TsHashTable *ht, char *arKey, uint nKeyLength)
 {
-	ulong retval;
+	zend_uint_t retval;
 
 	begin_read(ht);
 	retval = zend_get_hash_value(arKey, nKeyLength);
@@ -220,7 +220,7 @@ ZEND_API int zend_ts_hash_find(TsHashTable *ht, char *arKey, uint nKeyLength, vo
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLength, ulong h, void **pData)
+ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLength, zend_uint_t h, void **pData)
 {
 	int retval;
 
@@ -231,7 +231,7 @@ ZEND_API int zend_ts_hash_quick_find(TsHashTable *ht, char *arKey, uint nKeyLeng
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_index_find(TsHashTable *ht, ulong h, void **pData)
+ZEND_API int zend_ts_hash_index_find(TsHashTable *ht, zend_uint_t h, void **pData)
 {
 	int retval;
 
@@ -253,7 +253,7 @@ ZEND_API int zend_ts_hash_exists(TsHashTable *ht, char *arKey, uint nKeyLength)
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, ulong h)
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_uint_t h)
 {
 	int retval;
 

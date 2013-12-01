@@ -36,7 +36,7 @@
 #define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
-typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
+typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, zend_str_size_uint count);
 typedef void (*php_hash_final_func_t)(unsigned char *digest, void *context);
 typedef int  (*php_hash_copy_func_t)(const void *ops, void *orig_context, void *dest_context);
 
@@ -46,16 +46,16 @@ typedef struct _php_hash_ops {
 	php_hash_final_func_t hash_final;
 	php_hash_copy_func_t hash_copy;
 
-	int digest_size;
-	int block_size;
-	int context_size;
+	zend_str_size_int digest_size;
+	zend_str_size_int block_size;
+	zend_str_size_int context_size;
 } php_hash_ops;
 
 typedef struct _php_hash_data {
 	const php_hash_ops *ops;
 	void *context;
 
-	long options;
+	php_int_t options;
 	unsigned char *key;
 } php_hash_data;
 
@@ -135,14 +135,14 @@ PHP_FUNCTION(hash_final);
 PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, zend_str_size_int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 
-static inline void php_hash_bin2hex(char *out, const unsigned char *in, int in_len)
+static inline void php_hash_bin2hex(char *out, const unsigned char *in, zend_str_size_int in_len)
 {
 	static const char hexits[17] = "0123456789abcdef";
-	int i;
+	zend_str_size_int i;
 
 	for(i = 0; i < in_len; i++) {
 		out[i * 2]       = hexits[in[i] >> 4];

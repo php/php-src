@@ -72,7 +72,7 @@ static PHP_INI_MH(OnUpdateTags)
 		val = strchr(key, '=');
 		if (val) {
 			char *q;
-			int keylen;
+			zend_str_size_int keylen;
 			
 			*val++ = '\0';
 			for (q = key; *q; q++)
@@ -430,7 +430,7 @@ static int php_url_scanner_ex_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static void php_url_scanner_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
+static void php_url_scanner_output_handler(char *output, zend_str_size_uint output_len, char **handled_output, zend_str_size_uint *handled_output_len, int mode TSRMLS_DC)
 {
 	size_t len;
 
@@ -461,10 +461,10 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 	}
 }
 
-PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
+PHPAPI int php_url_scanner_add_var(char *name, zend_str_size_int name_len, char *value, zend_str_size_int value_len, int urlencode TSRMLS_DC)
 {
 	char *encoded = NULL;
-	int encoded_len;
+	zend_str_size_int encoded_len;
 	smart_str val;
 	
 	if (! BG(url_adapt_state_ex).active) {

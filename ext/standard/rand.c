@@ -230,9 +230,9 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	long seed = 0;
+	php_int_t seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -246,9 +246,9 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	long seed = 0;
+	php_int_t seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &seed) == FAILURE) 
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -289,12 +289,12 @@ PHP_FUNCTION(mt_srand)
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	long min;
-	long max;
-	long number;
+	php_int_t min;
+	php_int_t max;
+	php_int_t number;
 	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
+	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ii", &min, &max) == FAILURE)
 		return;
 
 	number = php_rand(TSRMLS_C);
@@ -310,16 +310,16 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	long min;
-	long max;
-	long number;
+	php_int_t min;
+	php_int_t max;
+	php_int_t number;
 	int  argc = ZEND_NUM_ARGS();
 
 	if (argc != 0) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ii", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%ld) is smaller than min(%ld)", max, min);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_INT_FMT ") is smaller than min(" ZEND_INT_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}
@@ -336,7 +336,7 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (long) (php_mt_rand(TSRMLS_C) >> 1);
+	number = (php_int_t) (php_mt_rand(TSRMLS_C) >> 1);
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}

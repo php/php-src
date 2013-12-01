@@ -2141,7 +2141,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 					while (zend_hash_get_current_data((*tmp)->attributes,(void**)&tmp_attr) == SUCCESS) {
 						if (zend_hash_get_current_key_type((*tmp)->attributes) == HASH_KEY_IS_STRING) {
 							char* key;
-							uint key_len;
+							zend_str_size_uint key_len;
 							sdlAttributePtr newAttr;
 
 							schema_attribute_fixup(ctx,*tmp_attr);
@@ -2165,7 +2165,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 
 							zend_hash_move_forward((*tmp)->attributes);
 						} else {
-							ulong index;
+							php_uint_t index;
 
 							schema_attributegroup_fixup(ctx,*tmp_attr, ht);
 							zend_hash_get_current_key((*tmp)->attributes, NULL, &index, 0);
@@ -2276,7 +2276,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 				schema_attribute_fixup(ctx,*attr);
 				zend_hash_move_forward(type->attributes);
 			} else {
-				ulong index;
+				php_uint_t index;
 
 				schema_attributegroup_fixup(ctx,*attr,type->attributes);
 				zend_hash_get_current_key(type->attributes, NULL, &index, 0);

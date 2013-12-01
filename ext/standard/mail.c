@@ -80,9 +80,9 @@ PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
 	unsigned int h = 5381;
-	int j, str_len;
+	zend_str_size_int j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -102,13 +102,13 @@ PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL, *extra_cmd=NULL;
-	int to_len, message_len, headers_len = 0;
-	int subject_len, extra_cmd_len = 0, i;
+	zend_str_size_int to_len, message_len, headers_len = 0;
+	zend_str_size_int subject_len, extra_cmd_len = 0, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS|SS",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
 		return;
 	}
 
@@ -250,7 +250,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log && *mail_log) {
 		char *tmp, *date_str;
 		time_t curtime;
-		int l;
+		zend_str_size_int l;
 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1 TSRMLS_CC);
@@ -284,9 +284,9 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_INT_FMT ":%s\n%s", php_getuid(TSRMLS_C), f, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_INT_FMT ":%s\n", php_getuid(TSRMLS_C), f);
 		}
 		efree(f);
 	}

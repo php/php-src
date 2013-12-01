@@ -43,7 +43,7 @@ ZEND_GET_MODULE(spl_fixedarray)
 #endif
 
 typedef struct _spl_fixedarray { /* {{{ */
-	long size;
+	php_int_t size;
 	zval **elements;
 } spl_fixedarray;
 /* }}} */
@@ -75,7 +75,7 @@ typedef struct _spl_fixedarray_it { /* {{{ */
 #define SPL_FIXEDARRAY_OVERLOADED_CURRENT 0x0008
 #define SPL_FIXEDARRAY_OVERLOADED_NEXT    0x0010
 
-static void spl_fixedarray_init(spl_fixedarray *array, long size TSRMLS_DC) /* {{{ */
+static void spl_fixedarray_init(spl_fixedarray *array, php_int_t size TSRMLS_DC) /* {{{ */
 {
 	if (size > 0) {
 		array->size = 0; /* reset size in case ecalloc() fails */
@@ -88,7 +88,7 @@ static void spl_fixedarray_init(spl_fixedarray *array, long size TSRMLS_DC) /* {
 }
 /* }}} */
 
-static void spl_fixedarray_resize(spl_fixedarray *array, long size TSRMLS_DC) /* {{{ */
+static void spl_fixedarray_resize(spl_fixedarray *array, php_int_t size TSRMLS_DC) /* {{{ */
 {
 	if (size == array->size) {
 		/* nothing to do */
@@ -103,7 +103,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, long size TSRMLS_DC) /*
 
 	/* clearing the array */
 	if (size == 0) {
-		long i;
+		php_int_t i;
 
 		for (i = 0; i < array->size; i++) {
 			if (array->elements[i]) {
@@ -119,7 +119,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, long size TSRMLS_DC) /*
 		array->elements = erealloc(array->elements, sizeof(zval *) * size);
 		memset(array->elements + array->size, '\0', sizeof(zval *) * (size - array->size));
 	} else { /* size < array->size */
-		long i;
+		php_int_t i;
 
 		for (i = size; i < array->size; i++) {
 			if (array->elements[i]) {
@@ -196,7 +196,7 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 static void spl_fixedarray_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_object *intern = (spl_fixedarray_object *)object;
-	long i;
+	php_int_t i;
 
 	if (intern->array) {
 		for (i = 0; i < intern->array->size; i++) {
@@ -343,7 +343,7 @@ static zend_object_value spl_fixedarray_object_clone(zval *zobject TSRMLS_DC) /*
 
 static inline zval **spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset TSRMLS_DC) /* {{{ */
 {
-	long index;
+	php_int_t index;
 
 	/* we have to return NULL on error here to avoid memleak because of 
 	 * ZE duplicating uninitialized_zval_ptr */
@@ -404,7 +404,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 
 static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *intern, zval *offset, zval *value TSRMLS_DC) /* {{{ */
 {
-	long index;
+	php_int_t index;
 
 	if (!offset) {
 		/* '$array[] = value' syntax is not supported */
@@ -456,7 +456,7 @@ static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zv
 
 static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *intern, zval *offset TSRMLS_DC) /* {{{ */
 {
-	long index;
+	php_int_t index;
 	
 	if (Z_TYPE_P(offset) != IS_LONG) {
 		index = spl_offset_convert_to_long(offset TSRMLS_CC);
@@ -496,7 +496,7 @@ static void spl_fixedarray_object_unset_dimension(zval *object, zval *offset TSR
 
 static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
 {
-	long index;
+	php_int_t index;
 	int retval;
 	
 	if (Z_TYPE_P(offset) != IS_LONG) {
@@ -549,7 +549,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 }
 /* }}} */
 
-static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_fixedarray_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 	
@@ -562,7 +562,7 @@ static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
 			convert_to_long(intern->retval);
-			*count = (long) Z_LVAL_P(intern->retval);
+			*count = (php_int_t) Z_LVAL_P(intern->retval);
 			return SUCCESS;
 		}
 	} else if (intern->array) {
@@ -581,9 +581,9 @@ SPL_METHOD(SplFixedArray, __construct)
 {
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
-	long size = 0;
+	php_int_t size = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &size) == FAILURE) {
 		return;
 	}
 
@@ -703,14 +703,14 @@ SPL_METHOD(SplFixedArray, fromArray)
 	if (num > 0 && save_indexes) {
 		zval **element, *value;
 		char *str_index;
-		ulong num_index, max_index = 0;
-		long tmp;
+		zend_uint_t num_index, max_index = 0;
+		php_int_t tmp;
 
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));
 			zend_hash_get_current_data(Z_ARRVAL_P(data), (void **) &element) == SUCCESS;
 			zend_hash_move_forward(Z_ARRVAL_P(data))
 			) {
-			if (zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0) != HASH_KEY_IS_LONG || (long)num_index < 0) {
+			if (zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0) != HASH_KEY_IS_LONG || (php_int_t)num_index < 0) {
 				efree(array);
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "array must contain only positive integer keys");
 				return;
@@ -743,7 +743,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 
 	} else if (num > 0 && !save_indexes) {
 		zval **element, *value;
-		long i = 0;
+		php_int_t i = 0;
 		
 		spl_fixedarray_init(array, num TSRMLS_CC);
 		
@@ -795,9 +795,9 @@ SPL_METHOD(SplFixedArray, setSize)
 {
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
-	long size;
+	php_int_t size;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &size) == FAILURE) {
 		return;
 	}
 

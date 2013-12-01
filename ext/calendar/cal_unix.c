@@ -31,7 +31,7 @@ PHP_FUNCTION(unixtojd)
 	time_t ts = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &ts) == FAILURE) {
 		return;
 	}	
 
@@ -53,9 +53,9 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-	long uday;
+	php_int_t uday;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &uday) == FAILURE) {
 		return;
 	}	
 	uday -= 2440588 /* J.D. of 1.1.1970 */;

@@ -24,9 +24,12 @@
 #endif
 
 #include <unicode/unistr.h>
+extern "C" {
+#include <php.h>
+}
 
-int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCode *status);
+int intl_stringFromChar(UnicodeString &ret, char *str, zend_str_size_int str_len, UErrorCode *status);
 
-int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UErrorCode *status);
+int intl_charFromString(const UnicodeString &from, char **res, zend_str_size_int *res_len, UErrorCode *status);
 
 #endif /* INTL_CONVERTCPP_H */

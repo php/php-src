@@ -181,11 +181,11 @@ PHP_FUNCTION(token_get_all)
 {
 	char *source = NULL;
 	int argc = ZEND_NUM_ARGS();
-	int source_len;
+	zend_str_size_int source_len;
 	zval source_z;
 	zend_lex_state original_lex_state;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "S", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -211,9 +211,9 @@ PHP_FUNCTION(token_get_all)
 PHP_FUNCTION(token_name)
 {
 	int argc = ZEND_NUM_ARGS();
-	long type;
+	php_int_t type;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &type) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "i", &type) == FAILURE) {
 		return;
 	}
 	RETVAL_STRING(get_token_type_name(type), 1);

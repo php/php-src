@@ -233,9 +233,9 @@ PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
 	char *path;
-	int path_len;
+	zend_str_size path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &path, &path_len) == FAILURE) {
 		return;
 	}
 
@@ -368,9 +368,9 @@ PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
 	char *path;
-	int path_len;
+	zend_str_size path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &path, &path_len) == FAILURE) {
 		return;
 	}
 
@@ -420,7 +420,7 @@ PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	zend_str_size filename_len;
 	zval *group;
 #if !defined(WINDOWS)
 	gid_t gid;
@@ -428,7 +428,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &group) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pz/", &filename, &filename_len, &group) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -557,7 +557,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	zend_str_size filename_len;
 	zval *user;
 #if !defined(WINDOWS)
 	uid_t uid;
@@ -565,7 +565,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 #endif
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &user) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pz/", &filename, &filename_len, &user) == FAILURE) {
 		return;
 	}
 
@@ -667,13 +667,13 @@ PHP_FUNCTION(lchown)
 PHP_FUNCTION(chmod)
 {
 	char *filename;
-	int filename_len;
-	long mode;
+	zend_str_size filename_len;
+	php_int_t mode;
 	int ret;
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pi", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
@@ -713,15 +713,15 @@ PHP_FUNCTION(chmod)
 PHP_FUNCTION(touch)
 {
 	char *filename;
-	int filename_len;
-	long filetime = 0, fileatime = 0;
+	zend_str_size filename_len;
+	php_int_t filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "P|ii", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 
@@ -800,7 +800,7 @@ PHP_FUNCTION(touch)
 
 /* {{{ php_clear_stat_cache()
 */
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC)
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, zend_str_size_int filename_len TSRMLS_DC)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
@@ -829,9 +829,9 @@ PHP_FUNCTION(clearstatcache)
 {
 	zend_bool  clear_realpath_cache = 0;
 	char      *filename             = NULL;
-	int        filename_len         = 0;
+	zend_str_size        filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bP", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -850,7 +850,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
-	struct stat *stat_sb;
+	zend_stat_t *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13] = {
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)ssb.sb.st_mode);
+		RETURN_LONG((php_int_t)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)ssb.sb.st_ino);
+		RETURN_LONG((php_int_t)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_LONG((long)ssb.sb.st_size);
+		RETURN_LONG((php_int_t)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_LONG((long)ssb.sb.st_uid);
+		RETURN_LONG((php_int_t)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)ssb.sb.st_gid);
+		RETURN_LONG((php_int_t)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_LONG((long)ssb.sb.st_atime);
+		RETURN_LONG((php_int_t)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_LONG((long)ssb.sb.st_mtime);
+		RETURN_LONG((php_int_t)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((long)ssb.sb.st_ctime);
+		RETURN_LONG((php_int_t)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link", 1);
@@ -1019,7 +1019,15 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
 		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
+# ifdef _WIN64
+		if (stat_sb->st_rdev < ((_dev_t)-1)) {
+			MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+		} else {
+			MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+		}
+# else
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+# endif
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif
@@ -1080,9 +1088,9 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
-	int filename_len; \
+	zend_str_size filename_len; \
 	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename, &filename_len) == FAILURE) { \
 		return; \
 	} \
 	\
@@ -1209,7 +1217,7 @@ PHP_FUNCTION(realpath_cache_get)
 			array_init(entry);
 
 			/* bucket->key is unsigned long */
-			if (LONG_MAX >= bucket->key) {
+			if (ZEND_INT_MAX >= bucket->key) {
 				add_assoc_long(entry, "key", bucket->key);
 			} else {
 				add_assoc_double(entry, "key", (double)bucket->key);

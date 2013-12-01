@@ -449,3 +449,14 @@ if (PHP_STATIC_ANALYZE == "yes") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
 }
+
+ARG_ENABLE("zstrlen", "Include Z_STRLEN macros enabling size_t for string length", "no");
+if (PHP_ZSTRLEN == "yes") {
+	AC_DEFINE('ZEND_USE_LEGACY_STRING_TYPES', 1, "");
+}
+
+ARG_ENABLE("zint64", "Enable 64 bit integers", "no");
+if (PHP_ZINT64== "yes") {
+	AC_DEFINE('ZEND_ENABLE_INT64', 1, "");
+}
+

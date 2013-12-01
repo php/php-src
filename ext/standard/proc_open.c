@@ -81,8 +81,8 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	char **ep;
 #endif
 	char *p;
-	uint string_length, cnt, l, sizeenv=0, el_len;
-	ulong num_key;
+	zend_str_size string_length, cnt, l, sizeenv=0, el_len;
+	zend_uint_t num_key;
 	HashTable *target_hash;
 	HashPosition pos;
 
@@ -113,7 +113,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 		if (el_len == 0) {
 			continue;
 		}
@@ -140,7 +140,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 
 		if (el_len == 0) {
 			continue;
@@ -273,9 +273,9 @@ PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
 	struct php_process_handle *proc;
-	long sig_no = SIGTERM;
+	php_int_t sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zproc, &sig_no) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &zproc, &sig_no) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -430,7 +430,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	char *command, *cwd=NULL;
-	int command_len, cwd_len = 0;
+	zend_str_size command_len, cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;
@@ -471,7 +471,7 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Saz|S!a!a!", &command,
 				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
 				&other_options) == FAILURE) {
 		RETURN_FALSE;
@@ -519,7 +519,7 @@ PHP_FUNCTION(proc_open)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(descriptorspec), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(descriptorspec), (void **)&descitem, &pos) == SUCCESS) {
 		char *str_index;
-		ulong nindex;
+		zend_uint_t nindex;
 		zval **ztype;
 
 		str_index = NULL;
@@ -552,7 +552,7 @@ PHP_FUNCTION(proc_open)
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %ld - %s", nindex, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor " ZEND_UINT_FMT " - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
@@ -602,7 +602,7 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
 #ifdef PHP_WIN32
-				if (Z_STRLEN_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
+				if (Z_STRSIZE_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
 					descriptors[ndesc].mode_flags |= O_BINARY;
 #endif
 

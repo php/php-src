@@ -21,13 +21,13 @@
 #include <unicode/ustring.h>
 
 void intl_convert_utf8_to_utf16(
-	UChar**     target, int* target_len,
-	const char* src,    int  src_len,
+	UChar**     target, zend_str_size_int* target_len,
+	const char* src,    zend_str_size_int  src_len,
 	UErrorCode* status );
 
 void intl_convert_utf16_to_utf8(
-	char**       target, int* target_len,
-	const UChar* src,    int  src_len,
+	char**       target, zend_str_size_int* target_len,
+	const UChar* src,    zend_str_size_int  src_len,
 	UErrorCode*  status );
 
 #endif // INTL_CONVERT_H

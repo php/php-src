@@ -29,7 +29,8 @@
 PHP_FUNCTION(soundex)
 {
 	char	*str;
-	int	i, _small, str_len, code, last;
+	zend_str_size_int i, _small, str_len;
+	int last, code;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
@@ -60,7 +61,7 @@ PHP_FUNCTION(soundex)
 	 0,							/* Y */
 	 '2'};						/* Z */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
 	}
 	if (str_len == 0) {

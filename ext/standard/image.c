@@ -420,7 +420,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static int php_skip_variable(php_stream * stream TSRMLS_DC)
 {
-	off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
+	zend_off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
 
 	if (length < 2)	{
 		return 0;
@@ -1155,9 +1155,9 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	long p_image_type;
+	php_int_t p_image_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &p_image_type) == FAILURE) {
 		return;
 	}
 
@@ -1169,10 +1169,10 @@ PHP_FUNCTION(image_type_to_mime_type)
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
-	long image_type;
+	php_int_t image_type;
 	zend_bool inc_dot=1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|b", &image_type, &inc_dot) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1388,10 +1388,10 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	zval **info = NULL;
 	php_stream *stream = NULL;
 	char *input;
-	int input_len;
+	zend_str_size_int input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "S|Z", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 

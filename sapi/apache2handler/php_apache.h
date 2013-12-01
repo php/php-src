@@ -25,6 +25,9 @@
 #include "http_config.h"
 #include "http_core.h"
 
+#include "php.h"
+#include "main/php_streams.h"
+
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
 extern module AP_MODULE_DECLARE_DATA php5_module;
 
@@ -40,7 +43,7 @@ typedef struct php_struct {
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
 	struct stat_libc finfo;
 #else
-	struct stat finfo;
+	php_stat_t finfo;
 #endif
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;

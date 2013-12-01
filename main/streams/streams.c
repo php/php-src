@@ -123,7 +123,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 			if (stream) {
 				HashPosition pos;
 				zend_rsrc_list_entry *regentry;
-				ulong index = -1; /* intentional */
+				zend_uint_t index = -1; /* intentional */
 
 				/* see if this persistent resource already has been loaded to the
 				 * regular list; allowing the same resource in several entries in the
@@ -585,7 +585,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (zend_off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -671,7 +671,7 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 
 	} else {
 		/* is there enough data in the buffer ? */
-		if (stream->writepos - stream->readpos < (off_t)size) {
+		if (stream->writepos - stream->readpos < (zend_off_t)size) {
 			size_t justread = 0;
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
@@ -805,7 +805,7 @@ PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC)
 
 PHPAPI int _php_stream_puts(php_stream *stream, const char *buf TSRMLS_DC)
 {
-	int len;
+	zend_str_size_int len;
 	char newline[2] = "\n"; /* is this OK for Win? */
 	len = strlen(buf);
 
@@ -1261,12 +1261,12 @@ PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, 
 	return count;
 }
 
-PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
+PHPAPI zend_off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 {
 	return stream->position;
 }
 
-PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence TSRMLS_DC)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 		/* flush to commit data written to the fopencookie FILE* */
@@ -1387,7 +1387,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
 	size_t bcount = 0;
 	char buf[8192];
-	int b;
+	zend_str_size_int b;
 
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
@@ -1676,9 +1676,9 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 /* Validate protocol scheme names during registration
  * Must conform to /^[a-zA-Z0-9+.-]+$/
  */
-static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsigned int protocol_len)
+static inline int php_stream_wrapper_scheme_validate(const char *protocol, zend_str_size_uint protocol_len)
 {
-	unsigned int i;
+	zend_str_size_uint i;
 
 	for(i = 0; i < protocol_len; i++) {
 		if (!isalnum((int)protocol[i]) &&
@@ -1695,7 +1695,7 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 /* API for registering GLOBAL wrappers */
 PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	unsigned int protocol_len = strlen(protocol);
+	zend_str_size_uint protocol_len = strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
@@ -1721,7 +1721,7 @@ static void clone_wrapper_hash(TSRMLS_D)
 /* API for registering VOLATILE wrappers */
 PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	unsigned int protocol_len = strlen(protocol);
+	zend_str_size_uint protocol_len = strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
@@ -2119,7 +2119,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream && stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && strchr(mode, 'a') && stream->position == 0) {
-		off_t newpos = 0;
+		zend_off_t newpos = 0;
 
 		/* if opened for append, we need to revise our idea of the initial file position */
 		if (0 == stream->ops->seek(stream, 0, SEEK_CUR, &newpos TSRMLS_CC)) {

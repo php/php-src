@@ -50,10 +50,11 @@ PHP_FUNCTION(uniqid)
 	zend_bool more_entropy = 0;
 #endif
 	char *uniqid;
-	int sec, usec, prefix_len = 0;
+	int sec, usec;
+	zend_str_size prefix_len = 0;
 	struct timeval tv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &prefix, &prefix_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sb", &prefix, &prefix_len,
 							  &more_entropy)) {
 		return;
 	}

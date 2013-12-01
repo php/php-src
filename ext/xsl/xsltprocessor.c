@@ -137,7 +137,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 	int parsize;
 	zval **value;
 	char *xpath_expr, *string_key = NULL;
-	ulong num_key;
+	php_uint_t num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -162,7 +162,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 			if (!xpath_params) {
 				xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_PP(value) TSRMLS_CC);
 			} else {
-				xpath_expr = estrndup(Z_STRVAL_PP(value), Z_STRLEN_PP(value));
+				xpath_expr = estrndup(Z_STRVAL_PP(value), Z_STRSIZE_PP(value));
 			}
 			if (xpath_expr) {
 				params[i++] = string_key;
@@ -644,7 +644,8 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret, ret_class_len=0;
+	int ret;
+	zend_str_size_int ret_class_len=0;
 	char *ret_class = NULL;
 	xsl_object *intern;
 
@@ -652,7 +653,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|s!", &docp, &ret_class, &ret_class_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|S!", &docp, &ret_class, &ret_class_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -701,7 +702,8 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	zval *id, *docp = NULL;
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
-	int ret, uri_len;
+	int ret;
+	zend_str_size_int uri_len;
 	char *uri;
 	xsl_object *intern;
 	
@@ -709,7 +711,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "op", &docp, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oP", &docp, &uri, &uri_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -772,11 +774,11 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	zval *array_value, **entry, *new_string;
 	xsl_object *intern;
 	char *string_key, *name, *value, *namespace;
-	ulong idx;
-	int string_key_len, namespace_len, name_len, value_len;
+	php_uint_t idx;
+	zend_str_size_int string_key_len, namespace_len, name_len, value_len;
 	DOM_GET_THIS(id);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "Sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 
@@ -798,7 +800,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 		}
 		RETURN_TRUE;
 
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sss", &namespace, &namespace_len, &name, &name_len, &value, &value_len) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "SSS", &namespace, &namespace_len, &name, &name_len, &value, &value_len) == SUCCESS) {
 		
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		
@@ -819,14 +821,14 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
 	zval *id;
-	int name_len = 0, namespace_len = 0;
+	zend_str_size_int name_len = 0, namespace_len = 0;
 	char *name, *namespace;
 	zval **value;
 	xsl_object *intern;
 
 	DOM_GET_THIS(id);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -844,13 +846,13 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
 	zval *id;
-	int name_len = 0, namespace_len = 0;
+	zend_str_size_int name_len = 0, namespace_len = 0;
 	char *name, *namespace;
 	xsl_object *intern;
 
 	DOM_GET_THIS(id);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &namespace, &namespace_len, &name, &name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
@@ -869,7 +871,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 	zval *id;
 	xsl_object *intern;
 	zval *array_value, **entry, *new_string;
-	int  name_len = 0;
+	zend_str_size_int  name_len = 0;
 	char *name;
 
 	DOM_GET_THIS(id);
@@ -885,12 +887,12 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 			MAKE_STD_ZVAL(new_string);
 			ZVAL_LONG(new_string,1);
 		
-			zend_hash_update(intern->registered_phpfunctions, Z_STRVAL_PP(entry), Z_STRLEN_PP(entry) + 1, &new_string, sizeof(zval*), NULL);
+			zend_hash_update(intern->registered_phpfunctions, Z_STRVAL_PP(entry), Z_STRSIZE_PP(entry) + 1, &new_string, sizeof(zval*), NULL);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
 		}
 		intern->registerPhpFunctions = 2;
 
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s",  &name, &name_len) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "S",  &name, &name_len) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		
 		MAKE_STD_ZVAL(new_string);
@@ -912,10 +914,10 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 	zval *id;
 	xsl_object *intern;
 	char *filename = NULL;
-	int filename_len;
+	zend_str_size_int filename_len;
 	DOM_GET_THIS(id);
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p!", &filename, &filename_len) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "P!", &filename, &filename_len) == SUCCESS) {
 		intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
 		if (intern->profiling) {
 			efree(intern->profiling);
@@ -937,10 +939,10 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
 	xsl_object *intern;
-	long securityPrefs, oldSecurityPrefs;
+	php_int_t securityPrefs, oldSecurityPrefs;
 
 	DOM_GET_THIS(id);
- 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &securityPrefs) == FAILURE) {
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &securityPrefs) == FAILURE) {
 		return;
 	}
 	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);

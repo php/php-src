@@ -33,10 +33,10 @@ PHP_FUNCTION(metaphone)
 {
 	char *str;
 	char *result = 0;
-	int str_len;
-	long phones = 0;
+	zend_str_size_int str_len;
+	php_int_t phones = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &str, &str_len,
 							  &phones) == FAILURE) {
 		return;
 	}

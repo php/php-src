@@ -47,7 +47,7 @@ typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type T
 	spl_register_property(spl_ce_ ## class_name, prop_name, sizeof(prop_name)-1, prop_flags TSRMLS_CC);
 
 #define REGISTER_SPL_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+	zend_declare_class_constant_long(spl_ce_ ## class_name, const_name, sizeof(const_name)-1, (php_int_t)value TSRMLS_CC);
 
 void spl_register_std_class(zend_class_entry ** ppce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);
 void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * parent_ce, char * class_name, create_object_func_t ctor, const zend_function_entry * function_list TSRMLS_DC);
@@ -66,7 +66,7 @@ void spl_add_traits(zval * list, zend_class_entry * pce, int allow, int ce_flags
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC);
 
 /* caller must efree(return) */
-char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC);
+char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, zend_str_size_int prop_len, zend_str_size_int *name_len TSRMLS_DC);
 
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)

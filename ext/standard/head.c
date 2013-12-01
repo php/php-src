@@ -41,7 +41,7 @@ PHP_FUNCTION(header)
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|bi", &ctr.line,
 				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
 		return;
 
@@ -55,7 +55,7 @@ PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ctr.line,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &ctr.line,
 	                          &ctr.line_len) == FAILURE)
 		return;
 
@@ -73,10 +73,10 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, zend_str_size_int name_len, char *value, zend_str_size_int value_len, time_t expires, char *path, zend_str_size_int path_len, char *domain, zend_str_size_int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
-	int len=sizeof("Set-Cookie: ");
+	zend_str_size_int len=sizeof("Set-Cookie: ");
 	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
@@ -93,7 +93,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 	len += name_len;
 	if (value && url_encode) {
-		int encoded_value_len;
+		zend_str_size_int encoded_value_len;
 
 		encoded_value = php_url_encode(value, value_len, &encoded_value_len);
 		len += encoded_value_len;
@@ -178,11 +178,11 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 PHP_FUNCTION(setcookie)
 {
 	char *name, *value = NULL, *path = NULL, *domain = NULL;
-	long expires = 0;
+	php_int_t expires = 0;
 	zend_bool secure = 0, httponly = 0;
-	int name_len, value_len = 0, path_len = 0, domain_len = 0;
+	zend_str_size_int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|SiSSbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
@@ -201,11 +201,11 @@ PHP_FUNCTION(setcookie)
 PHP_FUNCTION(setrawcookie)
 {
 	char *name, *value = NULL, *path = NULL, *domain = NULL;
-	long expires = 0;
+	php_int_t expires = 0;
 	zend_bool secure = 0, httponly = 0;
-	int name_len, value_len = 0, path_len = 0, domain_len = 0;
+	zend_str_size_int name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|SiSSbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
@@ -289,9 +289,9 @@ PHP_FUNCTION(headers_list)
    Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {
-	long response_code = 0;
+	php_int_t response_code = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &response_code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &response_code) == FAILURE) {
 		return;
 	}
 

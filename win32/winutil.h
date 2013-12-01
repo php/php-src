@@ -16,10 +16,10 @@
    +----------------------------------------------------------------------+
  */
 
-PHPAPI char *php_win32_error_to_msg(int error);
+PHPAPI char *php_win32_error_to_msg(HRESULT error);
 
 #define php_win_err()	php_win32_error_to_msg(GetLastError())
-int php_win32_check_trailing_space(const char * path, const int path_len);
+int php_win32_check_trailing_space(const char * path, const zend_str_size_int path_len);
 PHPAPI php_win32_get_random_bytes(unsigned char *buf, size_t size);
 
 #ifdef ZTS

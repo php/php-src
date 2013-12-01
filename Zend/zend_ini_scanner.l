@@ -55,7 +55,7 @@
 #define yytext       ((char*)SCNG(yy_text))
 #define yyleng       SCNG(yy_leng)
 #define yyless(x)    do {	YYCURSOR = (unsigned char*)yytext + x; \
-							yyleng   = (unsigned int)x; } while(0)
+							yyleng   = (zend_str_size)x; } while(0)
 
 /* #define yymore()     goto yymore_restart */
 
@@ -133,7 +133,7 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 #define zend_ini_copy_value(retval, str, len) {  \
 	Z_STRVAL_P(retval) = zend_strndup(str, len); \
-	Z_STRLEN_P(retval) = len;                    \
+	Z_STRSIZE_P(retval) = len;                    \
 	Z_TYPE_P(retval) = IS_STRING;                \
 }
 
@@ -261,7 +261,7 @@ int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC)
 
 /* {{{ zend_ini_escape_string()
  */
-static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_type TSRMLS_DC)
+static void zend_ini_escape_string(zval *lval, char *str, zend_str_size_int len, char quote_type TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
@@ -270,7 +270,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 
 	/* convert escape sequences */
 	s = t = Z_STRVAL_P(lval);
-	end = s + Z_STRLEN_P(lval);
+	end = s + Z_STRSIZE_P(lval);
 
 	while (s < end) {
 		if (*s == '\\') {
@@ -289,7 +289,7 @@ static void zend_ini_escape_string(zval *lval, char *str, int len, char quote_ty
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(lval)--;
+					Z_STRSIZE_P(lval)--;
 					break;
 				default:
 					*t++ = '\\';

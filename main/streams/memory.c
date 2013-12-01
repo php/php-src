@@ -22,7 +22,7 @@
 #include "php.h"
 
 PHPAPI int php_url_decode(char *str, int len);
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length);
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, zend_str_size_int *ret_length);
 
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream
@@ -127,7 +127,7 @@ static int php_stream_memory_flush(php_stream *stream TSRMLS_DC)
 
 
 /* {{{ */
-static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
@@ -439,7 +439,7 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
 
 
 /* {{{ */
-static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_stream_temp_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
 	int ret;
@@ -465,7 +465,7 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	php_stream *file;
 	size_t memsize;
 	char *membuf;
-	off_t pos;
+	zend_off_t pos;
 
 	assert(ts != NULL);
 
@@ -572,7 +572,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	off_t newoffs;
+	zend_off_t newoffs;
 
 	if ((stream = php_stream_temp_create_rel(mode, max_memory_usage)) != NULL) {
 		if (length) {
@@ -606,9 +606,10 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	php_stream_temp_data *ts;
 	char *comma, *semi, *sep, *key;
 	size_t mlen, dlen, plen, vlen;
-	off_t newoffs;
+	zend_off_t newoffs;
 	zval *meta = NULL;
-	int base64 = 0, ilen;
+	int base64 = 0;
+	zend_str_size_int ilen;
 
 	if (memcmp(path, "data:", 5)) {
 		return NULL;

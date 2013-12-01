@@ -28,6 +28,34 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+#ifdef ZEND_USE_LEGACY_STRING_TYPES
+# define zend_str_size_int int
+# define zend_str_size_uint unsigned int
+# define zend_str_size_size_t size_t
+# define zend_str_size_long long
+# define ZEND_SIZE_MAX_LONG LONG_MAX
+# define ZEND_SIZE_MAX_INT INT_MAX
+typedef int zend_str_size;
+#else
+# define zend_str_size_int zend_str_size
+# define zend_str_size_uint zend_str_size
+# define zend_str_size_size_t zend_str_size
+# define zend_str_size_long zend_str_size
+# ifdef PHP_WIN32
+#  ifdef _WIN64
+#   define ZEND_SIZE_MAX_LONG  _UI64_MAX
+#   define ZEND_SIZE_MAX_INT  _UI64_MAX
+#  else
+#   define ZEND_SIZE_MAX_LONG  _UI32_MAX
+#   define ZEND_SIZE_MAX_INT  _UI32_MAX
+#  endif
+# else
+#  define ZEND_SIZE_MAX_LONG  SIZE_MAX
+#  define ZEND_SIZE_MAX_INT  SIZE_MAX
+# endif
+typedef size_t zend_str_size;
+#endif
+
 #define HAVE_ZEND_LONG64
 #ifdef ZEND_WIN32
 typedef __int64 zend_long64;
@@ -58,6 +86,8 @@ typedef struct _zend_object_value {
 	zend_object_handle handle;
 	const zend_object_handlers *handlers;
 } zend_object_value;
+
+#include "zend_int.h"
 
 #endif /* ZEND_TYPES_H */
 

@@ -183,14 +183,14 @@ ZEND_END_MODULE_GLOBALS(date)
 #endif
 
 /* Backwards compatibility wrapper */
-PHPAPI signed long php_parse_date(char *string, signed long *now);
+PHPAPI php_int_t php_parse_date(char *string, php_int_t *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
+PHPAPI char *php_format_date(char *format, zend_str_size_int format_len, time_t ts, int localtime TSRMLS_DC);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
@@ -202,7 +202,7 @@ PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, zend_str_size_int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
 
 
 #endif /* PHP_DATE_H */

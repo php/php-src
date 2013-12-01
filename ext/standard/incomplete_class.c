@@ -92,7 +92,7 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zval **object, char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
@@ -135,7 +135,7 @@ PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
+PHPAPI char *php_lookup_class_name(zval *object, zend_str_size_uint *nlen)
 {
 	zval **val;
 	char *retval = NULL;
@@ -145,10 +145,10 @@ PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
 	object_properties = Z_OBJPROP_P(object);
 
 	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
+		retval = estrndup(Z_STRVAL_PP(val), Z_STRSIZE_PP(val));
 
 		if (nlen) {
-			*nlen = Z_STRLEN_PP(val);
+			*nlen = Z_STRSIZE_PP(val);
 		}
 	}
 
@@ -158,7 +158,7 @@ PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
+PHPAPI void php_store_class_name(zval *object, const char *name, zend_str_size_uint len)
 {
 	zval *val;
 	TSRMLS_FETCH();
@@ -167,7 +167,7 @@ PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
 
 	Z_TYPE_P(val)   = IS_STRING;
 	Z_STRVAL_P(val) = estrndup(name, len);
-	Z_STRLEN_P(val) = len;
+	Z_STRSIZE_P(val) = len;
 
 	zend_hash_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
 }

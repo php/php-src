@@ -401,7 +401,7 @@ ZEND_API const char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
+ZEND_API zend_str_size_uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 {
 	if(EG(exception) && EG(opline_ptr) && active_opline->opcode == ZEND_HANDLE_EXCEPTION &&
 		active_opline->lineno == 0 && EG(opline_before_exception)) {
@@ -493,11 +493,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			char *actual = Z_STRVAL_P(p);
 
-			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRSIZE_P(p)))) {
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
+				Z_STRSIZE_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
-					colon = estrndup(colon, Z_STRLEN_P(p));
+					colon = estrndup(colon, Z_STRSIZE_P(p));
 					str_efree(Z_STRVAL_P(p));
 					Z_STRVAL_P(p) = colon;
 				} else {
@@ -505,20 +505,20 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				}
 			} else {
 				char *save = actual, *slash;
-				int actual_len = Z_STRLEN_P(p);
+				zend_str_size actual_len = Z_STRSIZE_P(p);
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						actual = estrndup(actual, actual_len);
 						Z_STRVAL_P(p) = actual;
-						Z_STRLEN_P(p) = actual_len;
+						Z_STRSIZE_P(p) = actual_len;
 					}
 				}
 				if (actual[0] == '\\') {
 					if (inline_change) {
-						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-						--Z_STRLEN_P(p);
+						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRSIZE_P(p));
+						--Z_STRSIZE_P(p);
 					} else {
 						++actual;
 					}
@@ -546,7 +546,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				p->type = IS_STRING;
 				if (!inline_change) {
 					Z_STRVAL_P(p) = actual;
-					Z_STRLEN_P(p) = actual_len;
+					Z_STRSIZE_P(p) = actual_len;
 					zval_copy_ctor(p);
 				}
 			}
@@ -562,8 +562,8 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
-		uint str_index_len;
-		ulong num_index;
+		zend_str_size str_index_len;
+		zend_uint_t num_index;
 		int ret;
 
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
@@ -640,7 +640,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
-					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRLEN(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRSIZE(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
@@ -1023,24 +1023,25 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	zval **args[1];
 	zval autoload_function;
 	zval *class_name_ptr;
 	zval *retval_ptr = NULL;
-	int retval, lc_length;
+	int retval;
+	zend_str_size lc_length;
 	char *lc_name;
 	char *lc_free;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
 	char dummy = 1;
-	ulong hash;
+	zend_uint_t hash;
 	ALLOCA_FLAG(use_heap)
 
 	if (key) {
 		lc_name = Z_STRVAL(key->constant);
-		lc_length = Z_STRLEN(key->constant) + 1;
+		lc_length = Z_STRSIZE(key->constant) + 1;
 		hash = key->hash_value;
 	} else {
 		if (name == NULL || !name_length) {
@@ -1148,13 +1149,13 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class(const char *name, zend_str_size_int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	return zend_lookup_class_ex(name, name_length, NULL, 1, ce TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1163,14 +1164,14 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 	int retval;
 
 	if (retval_ptr) {
-		Z_STRLEN(pv) = str_len + sizeof("return ;") - 1;
-		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+		Z_STRSIZE(pv) = str_len + sizeof("return ;") - 1;
+		Z_STRVAL(pv) = emalloc(Z_STRSIZE(pv) + 1);
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
-		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+		Z_STRVAL(pv)[Z_STRSIZE(pv) - 1] = ';';
+		Z_STRVAL(pv)[Z_STRSIZE(pv)] = '\0';
 	} else {
-		Z_STRLEN(pv) = str_len;
+		Z_STRSIZE(pv) = str_len;
 		Z_STRVAL(pv) = str;
 	}
 	Z_TYPE(pv) = IS_STRING;
@@ -1240,7 +1241,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl_ex(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	int result;
 
@@ -1466,7 +1467,7 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 #define SIGPROF 27
 #endif
 
-void zend_set_timeout(long seconds, int reset_signals) /* {{{ */
+void zend_set_timeout(zend_int_t seconds, int reset_signals) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -1545,7 +1546,7 @@ void zend_unset_timeout(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_fetch_class(const char *class_name, zend_str_size_uint class_name_len, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
@@ -1600,7 +1601,7 @@ check_fetch_type:
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(const char *class_name, zend_str_size_uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
@@ -1695,7 +1696,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	if (zend_hash_quick_del(ht, name, name_len, hash_value) == SUCCESS) {
 		name_len--;
@@ -1718,7 +1719,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ex;
 
@@ -1743,7 +1744,7 @@ ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulon
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable(const char *name, int name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable(const char *name, zend_str_size_int name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_delete_global_variable_ex(name, name_len, zend_inline_hash_func(name, name_len + 1) TSRMLS_CC);
 }

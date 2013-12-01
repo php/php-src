@@ -111,7 +111,7 @@ MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 	w->reason = *reason;
 	zval_copy_ctor(&(w->reason));
 
-	ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRLEN(w->reason),  ZSTR_AUTOFREE);
+	ZVAL_UTF8_STRINGL(&(w->reason),  Z_STRVAL(w->reason), Z_STRSIZE(w->reason),  ZSTR_AUTOFREE);
 
 	ZVAL_UTF8_STRINGL(&(w->sqlstate), "HY000", sizeof("HY000") - 1,  ZSTR_DUPLICATE);
 

@@ -34,7 +34,7 @@ typedef struct _zend_constant {
 	zval value;
 	int flags;
 	char *name;
-	uint name_len;
+	zend_str_size_uint name_len;
 	int module_number;
 } zend_constant;
 
@@ -66,18 +66,18 @@ int zend_startup_constants(TSRMLS_D);
 int zend_shutdown_constants(TSRMLS_D);
 void zend_register_standard_constants(TSRMLS_D);
 void clean_non_persistent_constants(TSRMLS_D);
-ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSRMLS_DC);
-ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result, zend_class_entry *scope, ulong flags TSRMLS_DC);
-ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC);
-ZEND_API void zend_register_null_constant(const char *name, uint name_len, int flags, int module_number TSRMLS_DC);
-ZEND_API void zend_register_long_constant(const char *name, uint name_len, long lval, int flags, int module_number TSRMLS_DC);
-ZEND_API void zend_register_double_constant(const char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC);
-ZEND_API void zend_register_string_constant(const char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC);
-ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC);
+ZEND_API int zend_get_constant(const char *name, zend_str_size_uint name_len, zval *result TSRMLS_DC);
+ZEND_API int zend_get_constant_ex(const char *name, zend_str_size_uint name_len, zval *result, zend_class_entry *scope, zend_uint_t flags TSRMLS_DC);
+ZEND_API void zend_register_long_constant(const char *name, zend_str_size_uint name_len, zend_int_t lval, int flags, int module_number TSRMLS_DC);
+ZEND_API void zend_register_double_constant(const char *name, zend_str_size_uint name_len, double dval, int flags, int module_number TSRMLS_DC);
+ZEND_API void zend_register_string_constant(const char *name, zend_str_size_uint name_len, char *strval, int flags, int module_number TSRMLS_DC);
+ZEND_API void zend_register_stringl_constant(const char *name, zend_str_size_uint name_len, char *strval, zend_str_size_uint strlen, int flags, int module_number TSRMLS_DC);
+ZEND_API void zend_register_bool_constant(const char *name, zend_str_size_uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC);
+ZEND_API void zend_register_null_constant(const char *name, zend_str_size_uint name_len, int flags, int module_number TSRMLS_DC);
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
-zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC);
+zend_constant *zend_quick_get_constant(const zend_literal *key, zend_uint_t flags TSRMLS_DC);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant

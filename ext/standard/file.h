@@ -80,7 +80,7 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php
 PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC);
 PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC);
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
+PHPAPI zend_str_size_int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -117,8 +117,8 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 typedef struct {
 	int pclose_ret;
 	size_t def_chunk_size;
-	long auto_detect_line_endings;
-	long default_socket_timeout;
+	php_int_t auto_detect_line_endings;
+	php_int_t default_socket_timeout;
 	char *user_agent; /* for the http wrapper */
 	char *from_address; /* for the ftp and http wrappers */
 	const char *user_stream_current_filename; /* for simple recursion protection */

@@ -99,7 +99,7 @@ static void spl_ptr_heap_zval_ctor(spl_ptr_heap_element elem TSRMLS_DC) { /* {{{
 }
 /* }}} */
 
-static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, long *result TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, php_int_t *result TSRMLS_DC) { /* {{{ */
 		zval *result_p = NULL;
 
 		zend_call_method_with_2_params(&object, heap_object->std.ce, &heap_object->fptr_cmp, "compare", &result_p, a, b);
@@ -150,7 +150,7 @@ static int spl_ptr_heap_zval_max_cmp(spl_ptr_heap_element a, spl_ptr_heap_elemen
 	if (object) {
 		spl_heap_object *heap_object = (spl_heap_object*)zend_object_store_get_object((zval *)object TSRMLS_CC);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, (zval *)a, (zval *)b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -175,7 +175,7 @@ static int spl_ptr_heap_zval_min_cmp(spl_ptr_heap_element a, spl_ptr_heap_elemen
 	if (object) {
 		spl_heap_object *heap_object = (spl_heap_object*)zend_object_store_get_object((zval *)object TSRMLS_CC);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, (zval *)a, (zval *)b, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -206,7 +206,7 @@ static int spl_ptr_pqueue_zval_cmp(spl_ptr_heap_element a, spl_ptr_heap_element 
 	if (object) {
 		spl_heap_object *heap_object = (spl_heap_object*)zend_object_store_get_object(object TSRMLS_CC);
 		if (heap_object->fptr_cmp) {
-			long lval = 0;
+			php_int_t lval = 0;
 			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, *a_priority_pp, *b_priority_pp, &lval TSRMLS_CC) == FAILURE) {
 				/* exception or call failure */
 				return 0;
@@ -494,7 +494,7 @@ static zend_object_value spl_heap_object_clone(zval *zobject TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
+static int spl_heap_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
 {
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -506,7 +506,7 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
 			convert_to_long(intern->retval);
-			*count = (long) Z_LVAL_P(intern->retval);
+			*count = (php_int_t) Z_LVAL_P(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -523,7 +523,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 	spl_heap_object *intern  = (spl_heap_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	zval *tmp, zrv, *heap_array;
 	char *pnstr;
-	int  pnlen;
+	zend_str_size_int pnlen;
 	int  i;
 
 	*is_temp = 0;
@@ -584,7 +584,7 @@ static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp TSRML
  Return the number of elements in the heap. */
 SPL_METHOD(SplHeap, count)
 {
-	long count;
+	php_int_t count;
 	spl_heap_object *intern = (spl_heap_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -781,10 +781,10 @@ SPL_METHOD(SplPriorityQueue, top)
  Set the flags of extraction*/
 SPL_METHOD(SplPriorityQueue, setExtractFlags)
 {
-	long value;
+	php_int_t value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) == FAILURE) {
 		return;
 	}
 

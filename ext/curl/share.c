@@ -66,7 +66,7 @@ PHP_FUNCTION(curl_share_close)
 }
 /* }}} */
 
-static int _php_curl_share_setopt(php_curlsh *sh, long option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
+static int _php_curl_share_setopt(php_curlsh *sh, php_int_t option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	CURLSHcode error = CURLSHE_OK;
 
@@ -96,10 +96,10 @@ static int _php_curl_share_setopt(php_curlsh *sh, long option, zval **zvalue, zv
 PHP_FUNCTION(curl_share_setopt)
 {
 	zval       *zid, **zvalue;
-	long        options;
+	php_int_t        options;
 	php_curlsh *sh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riZ", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 

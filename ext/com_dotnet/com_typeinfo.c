@@ -35,7 +35,7 @@
  * b) a CLSID, major, minor e.g. "{00000200-0000-0010-8000-00AA006D2EA4},2,0"
  * c) a Type Library name e.g. "Microsoft OLE DB ActiveX Data Objects 1.0 Library"
  */
-PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, php_int_t codepage TSRMLS_DC)
 {
 	ITypeLib *TL = NULL;
 	char *strtok_buf, *major, *minor;
@@ -153,7 +153,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 }
 
 /* Given a type-library, merge it into the current engine state */
-PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, php_int_t codepage TSRMLS_DC)
 {
 	int i, j, interfaces;
 	TYPEKIND pTKind;
@@ -229,12 +229,12 @@ void php_com_typelibrary_dtor(void *pDest)
 }
 
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
-	int codepage, int *cached TSRMLS_DC)
+	php_int_t codepage, int *cached TSRMLS_DC)
 {
 	ITypeLib **TLp;
 	ITypeLib *TL;
 	char *name_dup;
-	int l;
+	zend_str_size_int l;
 
 	l = strlen(search_string);
 
@@ -431,14 +431,14 @@ static char *php_com_string_from_clsid(const CLSID *clsid, int codepage TSRMLS_D
 }
 
 
-int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage TSRMLS_DC)
+int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, php_int_t codepage TSRMLS_DC)
 {
 	TYPEATTR *attr;
 	FUNCDESC *func;
 	int i;
 	OLECHAR *olename;
 	char *ansiname = NULL;
-	unsigned int ansinamelen;
+	zend_str_size_uint ansinamelen;
 	int ret = 0;
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
@@ -492,7 +492,8 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 				if (printdef) {
 					int j;
 					char *funcdesc;
-					unsigned int funcdesclen, cnames = 0;
+					zend_str_size_uint funcdesclen;
+					UINT cnames = 0;
 					BSTR *names;
 
 					names = (BSTR*)safe_emalloc((func->cParams + 1), sizeof(BSTR), 0);

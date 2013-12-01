@@ -108,7 +108,7 @@ typedef struct _fcgi_end_request_rec {
 
 /* FastCGI client API */
 
-typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
+typedef void (*fcgi_apply_func)(char *var, zend_str_size_uint var_len, char *val, zend_str_size_uint val_len, void *arg TSRMLS_DC);
 
 typedef struct _fcgi_request fcgi_request;
 
@@ -123,15 +123,15 @@ void fcgi_destroy_request(fcgi_request *req);
 int fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 
-char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
+char* fcgi_getenv(fcgi_request *req, const char* var, zend_str_size_int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
 char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
 char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
 void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
 
-int fcgi_read(fcgi_request *req, char *str, int len);
+int fcgi_read(fcgi_request *req, char *str, zend_str_size_int len);
 
-int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int len);
+php_int_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, php_int_t len);
 int fcgi_flush(fcgi_request *req, int close);
 
 #ifdef PHP_WIN32

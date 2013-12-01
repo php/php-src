@@ -433,7 +433,7 @@ struct _zend_mm_heap {
 	int                 overflow;
 	int                 internal;
 #if ZEND_MM_CACHE
-	unsigned int        cached;
+	size_t              cached;
 	zend_mm_free_block *cache[ZEND_MM_NUM_BUCKETS];
 #endif
 	zend_mm_free_block *free_buckets[ZEND_MM_NUM_BUCKETS*2];
@@ -615,11 +615,11 @@ static unsigned int _zend_mm_cookie = 0;
 # define END_MAGIC_SIZE sizeof(unsigned int)
 
 # define ZEND_MM_SET_BLOCK_SIZE(block, __size) do { \
-		char *p; \
+		char *__p; \
 		((zend_mm_block*)(block))->debug.size = (__size); \
-		p = ZEND_MM_END_MAGIC_PTR(block); \
+		__p = ZEND_MM_END_MAGIC_PTR(block); \
 		((zend_mm_block*)(block))->debug.start_magic = _mem_block_start_magic; \
-		memcpy(p, &_mem_block_end_magic, END_MAGIC_SIZE); \
+		memcpy(__p, &_mem_block_end_magic, END_MAGIC_SIZE); \
 	} while (0)
 
 static unsigned int _mem_block_start_magic = 0;
@@ -1231,9 +1231,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 }
 
 #if ZEND_DEBUG
-static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
+static zend_int_t zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 {
-	long leaks = 0;
+	zend_int_t leaks = 0;
 	zend_mm_block *p, *q;
 
 	p = ZEND_MM_NEXT_BLOCK(b);
@@ -1291,7 +1291,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		}
 		if (!ZEND_MM_IS_FREE_BLOCK(p)) {
 			if (p->magic == MEM_BLOCK_VALID) {
-				long repeated;
+				zend_int_t repeated;
 				zend_leak_info leak;
 
 				ZEND_MM_SET_MAGIC(p, MEM_BLOCK_LEAK);
@@ -1973,9 +1973,9 @@ static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_INT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_INT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
 #endif
 		}
 
@@ -2286,9 +2286,9 @@ realloc_segment:
 #endif
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted at %s:%d (tried to allocate %ld bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_INT_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of %ld bytes exhausted (tried to allocate %ld bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_INT_FMT " bytes exhausted (tried to allocate " ZEND_UINT_FMT " bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}
@@ -2619,7 +2619,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int length;
+	zend_str_size_int length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2638,7 +2638,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API char *_estrndup(const char *s, zend_str_size_uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
@@ -2659,7 +2659,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 }
 
 
-ZEND_API char *zend_strndup(const char *s, uint length)
+ZEND_API char *zend_strndup(const char *s, zend_str_size_uint length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS

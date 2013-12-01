@@ -61,10 +61,10 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, int len) /* {{{ */
+static zend_str_size_int php_info_print_html_esc(const char *str, zend_str_size_int len) /* {{{ */
 {
 	size_t new_len;
-	int written;
+	zend_str_size_int written;
 	char *new_str;
 	TSRMLS_FETCH();
 
@@ -75,10 +75,10 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 }
 /* }}} */
 
-static int php_info_printf(const char *fmt, ...) /* {{{ */
+static zend_str_size_int php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
-	int len, written;
+	zend_str_size_int len, written;
 	va_list argv;
 	TSRMLS_FETCH();
 
@@ -92,7 +92,7 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static int php_info_print(const char *str) /* {{{ */
+static zend_str_size_int php_info_print(const char *str) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, strlen(str) TSRMLS_CC);
@@ -102,7 +102,7 @@ static int php_info_print(const char *str) /* {{{ */
 static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	char *key;
-	uint len;
+	zend_str_size_uint len;
 
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
@@ -196,8 +196,8 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
 	char *string_key;
-	uint string_len;
-	ulong num_key;
+	zend_str_size_uint string_len;
+	zend_uint_t num_key;
 
 	zend_is_auto_global(name, name_length TSRMLS_CC);
 
@@ -222,7 +222,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					}
 					break;
 				case HASH_KEY_IS_LONG:
-					php_info_printf("%ld", num_key);
+					php_info_printf(ZEND_INT_FMT, num_key);
 					break;
 			}
 			php_info_print("\"]");
@@ -248,10 +248,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				}
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (Z_STRSIZE(tmp2) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRSIZE(tmp2));
 					}
 				} else {
 					php_info_print(Z_STRVAL(tmp2));
@@ -991,7 +991,7 @@ PHPAPI void php_info_print_hr(void) /* {{{ */
 
 PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
 {
-	int spaces;
+	zend_str_size_int spaces;
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
@@ -1138,9 +1138,9 @@ void register_phpinfo_constants(INIT_FUNC_ARGS)
    Output a page of useful information about PHP and the current request */
 PHP_FUNCTION(phpinfo)
 {
-	long flag = PHP_INFO_ALL;
+	php_int_t flag = PHP_INFO_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flag) == FAILURE) {
 		return;
 	}
 
@@ -1159,9 +1159,9 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
-	int ext_name_len = 0;
+	zend_str_size_int ext_name_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext_name, &ext_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &ext_name, &ext_name_len) == FAILURE) {
 		return;
 	}
 
@@ -1182,9 +1182,9 @@ PHP_FUNCTION(phpversion)
    Prints the list of people who've contributed to the PHP project */
 PHP_FUNCTION(phpcredits)
 {
-	long flag = PHP_CREDITS_ALL;
+	php_int_t flag = PHP_CREDITS_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flag) == FAILURE) {
 		return;
 	}
 
@@ -1215,9 +1215,9 @@ PHP_FUNCTION(php_sapi_name)
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
-	int modelen = sizeof("a")-1;
+	zend_str_size_int modelen = sizeof("a")-1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &mode, &modelen) == FAILURE) {
 		return;
 	}
 	RETURN_STRING(php_get_uname(*mode), 0);

@@ -31,10 +31,10 @@
 PHP_FUNCTION(cli_set_process_title)
 {
     char *title = NULL;
-    int title_len;
+    zend_str_size_int title_len;
     int rc;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &title, &title_len) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &title, &title_len) == FAILURE) {
         return;
     }
 

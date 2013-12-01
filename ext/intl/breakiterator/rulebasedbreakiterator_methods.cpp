@@ -33,12 +33,12 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object		= getThis();
 	char		*rules;
-	int			rules_len;
+	zend_str_size_int		rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_create_instance: bad arguments", 0 TSRMLS_CC);
@@ -123,7 +123,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	Z_TYPE_P(return_value) = IS_STRING;
 	if (intl_charFromString(rules, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+			&Z_STRSIZE_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",

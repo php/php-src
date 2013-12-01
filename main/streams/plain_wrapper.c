@@ -53,6 +53,12 @@ extern int php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC);
 extern int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC);
 #endif
 
+#if defined(PHP_WIN32)
+# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+#else
+# define PLAIN_WRAP_BUF_SIZE(st) (st)
+#endif
+
 /* parse standard "fopen" modes into open() flags */
 PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
@@ -130,7 +136,7 @@ typedef struct {
 	HANDLE file_mapping;
 #endif
 
-	struct stat sb;
+	php_stat_t sb;
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
@@ -141,7 +147,7 @@ static int do_fstat(php_stdio_stream_data *d, int force)
 		int r;
 	   
 		PHP_STDIOP_GET_FD(fd, d);
-		r = fstat(fd, &d->sb);
+		r = php_fstat(fd, &d->sb);
 		d->cached_fstat = r == 0;
 
 		return r;
@@ -250,9 +256,9 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
-			stream->position = lseek(self->fd, 0, SEEK_CUR);
+			stream->position = zend_lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
-			if (stream->position == (off_t)-1 && errno == ESPIPE) {
+			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
 				stream->position = 0;
 				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 				self->is_pipe = 1;
@@ -289,7 +295,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
-			stream->position = ftell(file);
+			stream->position = zend_ftell(file);
 		}
 	}
 
@@ -322,14 +328,14 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-		int bytes_written = write(data->fd, buf, count);
+		ssize_t bytes_written = write(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		if (bytes_written < 0) return 0;
 		return (size_t) bytes_written;
 	} else {
 
 #if HAVE_FLUSHIO
 		if (!data->is_pipe && data->last_op == 'r') {
-			fseek(data->file, 0, SEEK_CUR);
+			zend_fseek(data->file, 0, SEEK_CUR);
 		}
 		data->last_op = 'w';
 #endif
@@ -346,13 +352,13 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-		ret = read(data->fd, buf, count);
+		ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 
 		if (ret == (size_t)-1 && errno == EINTR) {
 			/* Read was interrupted, retry once,
 			   If read still fails, giveup with feof==0
 			   so script can retry if desired */
-			ret = read(data->fd, buf, count);
+			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
 		
 		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR && errno != EBADF));
@@ -360,7 +366,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	} else {
 #if HAVE_FLUSHIO
 		if (!data->is_pipe && data->last_op == 'w')
-			fseek(data->file, 0, SEEK_CUR);
+			zend_fseek(data->file, 0, SEEK_CUR);
 		data->last_op = 'r';
 #endif
 
@@ -449,7 +455,7 @@ static int php_stdiop_flush(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
+static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 	int ret;
@@ -462,18 +468,18 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *
 	}
 
 	if (data->fd >= 0) {
-		off_t result;
+		zend_off_t result;
 		
-		result = lseek(data->fd, offset, whence);
-		if (result == (off_t)-1)
+		result = zend_lseek(data->fd, offset, whence);
+		if (result == (zend_off_t)-1)
 			return -1;
 
 		*newoffset = result;
 		return 0;
 		
 	} else {
-		ret = fseek(data->file, offset, whence);
-		*newoffset = ftell(data->file);
+		ret = zend_fseek(data->file, offset, whence);
+		*newoffset = zend_ftell(data->file);
 		return ret;
 	}
 }
@@ -835,7 +841,7 @@ static int php_plain_files_dirstream_close(php_stream *stream, int close_handle 
 	return closedir((DIR *)stream->abstract);
 }
 
-static int php_plain_files_dirstream_rewind(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_plain_files_dirstream_rewind(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	rewinddir((DIR *)stream->abstract);
 	return 0;
@@ -1100,7 +1106,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifndef PHP_WIN32
 # ifdef EXDEV
 		if (errno == EXDEV) {
-			struct stat sb;
+			php_stat_t sb;
 			if (php_copy_file(url_from, url_to TSRMLS_CC) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
 #  if !defined(TSRM_WIN32) && !defined(NETWARE)
@@ -1163,8 +1169,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	} else {
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
-		struct stat sb;
-		int dir_len = strlen(dir);
+		php_stat_t sb;
+		zend_str_size_int dir_len = strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];
 
@@ -1238,7 +1244,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 #if PHP_WIN32
-	int url_len = strlen(url);
+	zend_str_size_int url_len = strlen(url);
 #endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
@@ -1273,7 +1279,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 	mode_t mode;
 	int ret = 0;
 #if PHP_WIN32
-	int url_len = strlen(url);
+	zend_str_size_int url_len = strlen(url);
 #endif
 
 #if PHP_WIN32
@@ -1379,9 +1385,9 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	int path_length;
-	int filename_length;
-	int exec_fname_length;
+	zend_str_size_int path_length;
+	zend_str_size_int filename_length;
+	zend_str_size_int exec_fname_length;
 
 	if (opened_path) {
 		*opened_path = NULL;

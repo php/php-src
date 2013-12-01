@@ -286,8 +286,8 @@ PHP_FUNCTION(abs)
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_PP(value)));
 	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		if (Z_LVAL_PP(value) == LONG_MIN) {
-			RETURN_DOUBLE(-(double)LONG_MIN);
+		if (Z_LVAL_PP(value) == ZEND_INT_MIN) {
+			RETURN_DOUBLE(-(double)ZEND_INT_MIN);
 		} else {
 			RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
 		}
@@ -344,11 +344,11 @@ PHP_FUNCTION(round)
 {
 	zval **value;
 	int places = 0;
-	long precision = 0;
-	long mode = PHP_ROUND_HALF_UP;
+	php_int_t precision = 0;
+	php_int_t mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ll", &value, &precision, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ii", &value, &precision, &mode) == FAILURE) {
 		return;
 	}
 
@@ -526,7 +526,7 @@ PHP_FUNCTION(asinh)
 PHP_FUNCTION(acosh)
 {
 	double num;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &num) == FAILURE) {
 		return;
 	}
@@ -610,7 +610,7 @@ PHP_FUNCTION(pow)
 
 	/* if both base and exponent were longs, we'll try to get a long out */
 	if (Z_TYPE_P(zbase) == IS_LONG && Z_TYPE_P(zexp) == IS_LONG && Z_LVAL_P(zexp) >= 0) {
-		long l1 = 1, l2 = Z_LVAL_P(zbase), i = Z_LVAL_P(zexp);
+		php_int_t l1 = 1, l2 = Z_LVAL_P(zbase), i = Z_LVAL_P(zexp);
 		
 		if (i == 0) {
 			RETURN_LONG(1L);
@@ -620,7 +620,7 @@ PHP_FUNCTION(pow)
 
 		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
 		while (i >= 1) {
-			long overflow;
+			php_int_t overflow;
 			double dval = 0.0;
 
 			if (i % 2) {
@@ -791,10 +791,10 @@ PHP_FUNCTION(rad2deg)
 /*
  * Convert a string representation of a base(2-36) number to a long.
  */
-PHPAPI long _php_math_basetolong(zval *arg, int base)
+PHPAPI php_int_t _php_math_basetolong(zval *arg, int base)
 {
-	long num = 0, digit, onum;
-	int i;
+	php_int_t num = 0, digit, onum;
+	zend_str_size_int i;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -803,7 +803,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 		
 		digit = (c >= '0' && c <= '9') ? c - '0'
@@ -824,7 +824,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 			TSRMLS_FETCH();
 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-			return LONG_MAX;
+			return ZEND_INT_MAX;
 		}
 	}
 
@@ -838,12 +838,12 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
  */
 PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
-	long num = 0;
+	php_int_t num = 0;
 	double fnum = 0;
-	int i;
+	zend_str_size_int i;
 	int mode = 0;
 	char c, *s;
-	long cutoff;
+	php_int_t cutoff;
 	int cutlim;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -852,10 +852,10 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 
 	s = Z_STRVAL_P(arg);
 
-	cutoff = LONG_MAX / base;
-	cutlim = LONG_MAX % base;
+	cutoff = ZEND_INT_MAX / base;
+	cutlim = ZEND_INT_MAX % base;
 	
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -903,9 +903,9 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 PHPAPI char * _php_math_longtobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-	char buf[(sizeof(unsigned long) << 3) + 1];
+	char buf[(sizeof(php_uint_t) << 3) + 1];
 	char *ptr, *end;
-	unsigned long value;
+	php_uint_t value;
 
 	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
@@ -1065,10 +1065,10 @@ PHP_FUNCTION(dechex)
 PHP_FUNCTION(base_convert)
 {
 	zval **number, temp;
-	long frombase, tobase;
+	php_int_t frombase, tobase;
 	char *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zll", &number, &frombase, &tobase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zii", &number, &frombase, &tobase) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(number);
@@ -1092,20 +1092,20 @@ PHP_FUNCTION(base_convert)
 
 /* {{{ _php_math_number_format 
 */
-PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
+PHPAPI char *_php_math_number_format(double d, php_int_t dec, char dec_point, char thousand_sep)
 {
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len,
-		int *result_len)
+static char *_php_math_number_format_ex_len(double d, php_int_t dec, char *dec_point,
+		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len,
+		zend_str_size_int *result_len)
 {
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
-	int integral;
-	int tmplen, reslen=0;
+	zend_str_size_int integral;
+	zend_str_size_int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
 
@@ -1171,8 +1171,8 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		int declen = dp ? s - dp : 0;
-		int topad = dec > declen ? dec - declen : 0;
+		zend_str_size_int declen = dp ? s - dp : 0;
+		zend_str_size_int topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
@@ -1218,8 +1218,8 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	return resbuf;
 }
 
-PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+PHPAPI char *_php_math_number_format_ex(double d, php_int_t dec, char *dec_point,
+		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len)
 {
 	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
 			thousand_sep, thousand_sep_len, NULL);
@@ -1231,12 +1231,12 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
 PHP_FUNCTION(number_format)
 {
 	double num;
-	long dec = 0;
+	php_int_t dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	int thousand_sep_len = 0, dec_point_len = 0;
+	zend_str_size thousand_sep_len = 0, dec_point_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|iS!S!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;
 	}
 
@@ -1261,7 +1261,7 @@ PHP_FUNCTION(number_format)
 		Z_TYPE_P(return_value) = IS_STRING;
 		Z_STRVAL_P(return_value) = _php_math_number_format_ex_len(num, dec,
 				dec_point, dec_point_len, thousand_sep, thousand_sep_len,
-				&Z_STRLEN_P(return_value));
+				&Z_STRSIZE_P(return_value));
 		break;
 	default:
 		WRONG_PARAM_COUNT;

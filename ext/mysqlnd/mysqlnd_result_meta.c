@@ -52,7 +52,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
   and modified for the needs of mysqlnd.
 */
 static zend_bool
-mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
+mysqlnd_is_key_numeric(const char * key, size_t length, php_int_t *idx)
 {
 	register const char * tmp = key;
 
@@ -74,13 +74,13 @@ mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
 			}
 			if (tmp==end && *tmp=='\0') { /* a numeric index */
 				if (*key=='-') {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MIN) {
+					*idx = ZEND_STRTOL(key, NULL, 10);
+					if (*idx!=PHP_INT_MIN) {
 						return TRUE;
 					}
 				} else {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MAX) {
+					*idx = ZEND_STRTOL(key, NULL, 10);
+					if (*idx!=PHP_INT_MAX) {
 						return TRUE;
 					}
 				}
@@ -108,7 +108,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	}
 	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
-		long idx;
+		php_int_t idx;
 
 		if (meta->fields[i].root) {
 			/* We re-read metadata for PS */

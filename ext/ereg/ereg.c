@@ -291,7 +291,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	zval **regex,			/* Regular expression */
 		**array = NULL;		/* Optional register array */
 	char *findin;		/* String to apply expression to */
-	int findin_len;
+	zend_str_size_int findin_len;
 	regex_t re;
 	regmatch_t *subs;
 	int err, match_len, string_len;
@@ -302,7 +302,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *string = NULL;
 	int   argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "Zs|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ZS|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
 		return;
 	}
 
@@ -555,15 +555,15 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *string;
 	char *replace;
 	char *ret;
-	int arg_string_len;
+	zend_str_size_int arg_string_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZs", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZS", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
 		return;
 	}
 
 	if (Z_TYPE_PP(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern)) {
-			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern));
+		if (Z_STRVAL_PP(arg_pattern) && Z_STRSIZE_PP(arg_pattern)) {
+			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRSIZE_PP(arg_pattern));
 		} else {
 			pattern = STR_EMPTY_ALLOC();
 		}
@@ -575,8 +575,8 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_PP(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace)) {
-			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRLEN_PP(arg_replace));
+		if (Z_STRVAL_PP(arg_replace) && Z_STRSIZE_PP(arg_replace)) {
+			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRSIZE_PP(arg_replace));
 		} else {
 			replace = STR_EMPTY_ALLOC();
 		}
@@ -628,14 +628,14 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	long count = -1;
+	php_int_t count = -1;
 	regex_t re;
 	regmatch_t subs[1];
 	char *spliton, *str, *strp, *endp;
-	int spliton_len, str_len;
+	zend_str_size_int spliton_len, str_len;
 	int err, size, copts = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
 		return;
 	}
 
@@ -731,11 +731,11 @@ PHP_FUNCTION(spliti)
 PHP_EREG_API PHP_FUNCTION(sql_regcase)
 {
 	char *string, *tmp;
-	int string_len;
+	zend_str_size_int string_len;
 	unsigned char c;
 	register int i, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &string, &string_len) == FAILURE) {
 		return;
 	}
 	

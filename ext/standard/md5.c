@@ -47,13 +47,13 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	int arg_len;
+	zend_str_size arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -76,16 +76,16 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	int           arg_len;
+	zend_str_size  arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n;
+	zend_str_size_int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	

@@ -25,8 +25,8 @@
 
 typedef struct {
 	char *c;
-	size_t len;
-	size_t a;
+	zend_str_size len;
+	zend_str_size a;
 } smart_str;
 
 #endif

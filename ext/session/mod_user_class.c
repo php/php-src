@@ -39,11 +39,11 @@
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
-	int save_path_len, session_name_len;
+	zend_str_size_int save_path_len, session_name_len;
 
 	PS_SANITY_CHECK;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
 		return;
 	}
 
@@ -72,11 +72,11 @@ PHP_METHOD(SessionHandler, close)
 PHP_METHOD(SessionHandler, read)
 {
 	char *key, *val;
-	int key_len, val_len;
+	zend_str_size_int key_len, val_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &key, &key_len) == FAILURE) {
 		return;
 	}
 
@@ -96,11 +96,11 @@ PHP_METHOD(SessionHandler, read)
 PHP_METHOD(SessionHandler, write)
 {
 	char *key, *val;
-	int key_len, val_len;
+	zend_str_size_int key_len, val_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &val, &val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &key, &key_len, &val, &val_len) == FAILURE) {
 		return;
 	}
 
@@ -113,11 +113,11 @@ PHP_METHOD(SessionHandler, write)
 PHP_METHOD(SessionHandler, destroy)
 {
 	char *key;
-	int key_len;
+	zend_str_size_int key_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &key, &key_len) == FAILURE) {
 		return;
 	}
 	
@@ -129,12 +129,12 @@ PHP_METHOD(SessionHandler, destroy)
    Wraps the old gc handler */
 PHP_METHOD(SessionHandler, gc)
 {
-	long maxlifetime;
-	int nrdels;
+	php_int_t maxlifetime;
+	php_int_t nrdels;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &maxlifetime) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &maxlifetime) == FAILURE) {
 		return;
 	}
 	
