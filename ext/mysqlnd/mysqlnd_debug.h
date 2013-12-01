@@ -121,10 +121,10 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					zend_bool dbg_skip_trace = TRUE; \
 					if ((dbg_obj1)) { \
-						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
+						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, (unsigned int)strlen(func_name)); \
 					} \
 					if ((dbg_obj2)) { \
-						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
+						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, (unsigned int)strlen(func_name)); \
 					} \
 					if (dbg_skip_trace); /* shut compiler's mouth */\
 					do { \

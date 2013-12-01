@@ -48,7 +48,7 @@ static zval *com_property_read(zval *object, zval *member, int type, const zend_
 
 		convert_to_string_ex(&member);
 
-		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
+		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member),
 				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC);
 
 		if (res == SUCCESS) {
@@ -75,7 +75,7 @@ static void com_property_write(zval *object, zval *member, zval *value, const ze
 		VariantInit(&v);
 
 		convert_to_string_ex(&member);
-		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
+		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member),
 				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, &value, 0 TSRMLS_CC)) {
 			VariantClear(&v);
 		}
@@ -205,7 +205,7 @@ static int com_property_exists(zval *object, zval *member, int check_empty, cons
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		convert_to_string_ex(&member);
-		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid TSRMLS_CC))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRSIZE_P(member), &dispid TSRMLS_CC))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -259,7 +259,7 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zval **object_ptr, char *name, int len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *com_method_get(zval **object_ptr, char *name, zend_str_size_int len, const zend_literal *key TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
@@ -442,7 +442,7 @@ static zend_class_entry *com_class_entry_get(const zval *object TSRMLS_DC)
 	return obj->ce;
 }
 
-static int com_class_name_get(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int com_class_name_get(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);
@@ -540,7 +540,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
 }
 
-static int com_object_count(zval *object, long *count TSRMLS_DC)
+static int com_object_count(zval *object, php_int_t *count TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;

@@ -355,7 +355,7 @@ ZEND_API const char *zend_get_executed_filename(TSRMLS_D);
 ZEND_API zend_str_size_uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 
-ZEND_API void zend_set_timeout(long seconds, int reset_signals);
+ZEND_API void zend_set_timeout(zend_int_t seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, zend_str_size_uint class_name_len, int fetch_type TSRMLS_DC);

@@ -486,6 +486,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 	ret = mysqlnd_query_read_result_set_header(stmt->conn, s TSRMLS_CC);
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
+		memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 		stmt->upsert_status->affected_rows = conn->upsert_status->affected_rows;
 		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
@@ -497,7 +498,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 		  stmt->send_types_to_server has already been set to 0 in
 		  mysqlnd_stmt_execute_generate_request / mysqlnd_stmt_execute_store_params
 		  In case there is a situation in which binding was done for integer and the
-		  value is > LONG_MAX or < LONG_MIN, there is string conversion and we have
+		  value is > PHP_INT_MAX or < PHP_INT_MIN, there is string conversion and we have
 		  to resend the types. Next execution will also need to resend the type.
 		*/
 		SET_EMPTY_ERROR(*stmt->error_info);
@@ -749,7 +750,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 						  Thus for NULL and zero-length we are quite efficient.
 						*/
 						if (Z_TYPE_P(current_row[i]) >= IS_STRING) {
-							unsigned long len = Z_STRLEN_P(current_row[i]);
+							php_uint_t len = Z_STRSIZE_P(current_row[i]);
 							if (meta->fields[i].max_length < len) {
 								meta->fields[i].max_length = len;
 							}
@@ -870,8 +871,8 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 					zval_dtor(stmt->result_bind[i].zv);
 #endif
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data)) ) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							result->meta->fields[i].max_length = Z_STRLEN_P(data);
+						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (php_uint_t) Z_STRSIZE_P(data))) {
+							result->meta->fields[i].max_length = Z_STRSIZE_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
 						/* copied data, thus also the ownership. Thus null data */
@@ -905,6 +906,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1014,6 +1016,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	row_packet->skip_extraction = stmt->result_bind? FALSE:TRUE;
 
+	memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
 
@@ -1049,8 +1052,8 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 					DBG_INF_FMT("i=%u bound_var=%p type=%u refc=%u", i, stmt->result_bind[i].zv,
 								Z_TYPE_P(data), Z_REFCOUNT_P(stmt->result_bind[i].zv));
 					if (IS_NULL != (Z_TYPE_P(stmt->result_bind[i].zv) = Z_TYPE_P(data))) {
-						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (unsigned long) Z_STRLEN_P(data))) {
-							result->meta->fields[i].max_length = Z_STRLEN_P(data);
+						if ((Z_TYPE_P(data) == IS_STRING) && (result->meta->fields[i].max_length < (php_uint_t) Z_STRSIZE_P(data))) {
+							result->meta->fields[i].max_length = Z_STRSIZE_P(data);
 						}
 						stmt->result_bind[i].zv->value = data->value;
 						/* copied data, thus also the ownership. Thus null data */
@@ -1256,7 +1259,7 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s TSRMLS_DC)
 /* {{{ mysqlnd_stmt::send_long_data */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned int param_no,
-							 				 const char * const data, unsigned long length TSRMLS_DC)
+							 				 const char * const data, php_uint_t length TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	enum_func_status ret = FAIL;
@@ -1835,7 +1838,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
 			unsigned int ival = *(unsigned int *) value;
-			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
+			if (ival > (php_uint_t) CURSOR_TYPE_READ_ONLY) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
@@ -1883,10 +1886,10 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			*(zend_bool *) value= stmt->update_max_length;
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
-			*(unsigned long *) value= stmt->flags;
+			*(php_uint_t *) value= stmt->flags;
 			break;
 		case STMT_ATTR_PREFETCH_ROWS:
-			*(unsigned long *) value= stmt->prefetch_rows;
+			*(php_uint_t *) value= stmt->prefetch_rows;
 			break;
 		default:
 			DBG_RETURN(FAIL);

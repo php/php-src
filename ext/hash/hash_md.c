@@ -106,13 +106,13 @@ PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	int arg_len;
+	zend_str_size_int arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -135,16 +135,16 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	int           arg_len;
+	zend_str_size_int           arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	int           n;
+	zend_str_size_int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -541,9 +541,9 @@ PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
-	unsigned int i, index, partLen;
+	zend_str_size_uint i, index, partLen;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -654,7 +654,7 @@ static void MD2_Transform(PHP_MD2_CTX *context, const unsigned char *block)
 	}
 }
 
-PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, unsigned int len)
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, zend_str_size_uint len)
 {
 	const unsigned char *p = buf, *e = buf + len;
 

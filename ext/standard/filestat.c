@@ -1217,7 +1217,7 @@ PHP_FUNCTION(realpath_cache_get)
 			array_init(entry);
 
 			/* bucket->key is unsigned long */
-			if (LONG_MAX >= bucket->key) {
+			if (ZEND_INT_MAX >= bucket->key) {
 				add_assoc_long(entry, "key", bucket->key);
 			} else {
 				add_assoc_double(entry, "key", (double)bucket->key);

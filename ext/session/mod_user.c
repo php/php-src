@@ -136,8 +136,8 @@ PS_READ_FUNC(user)
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_STRING) {
-			*val = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*vallen = Z_STRLEN_P(retval);
+			*val = estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+			*vallen = Z_STRSIZE_P(retval);
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);
@@ -194,7 +194,7 @@ PS_CREATE_SID_FUNC(user)
 
 		if (retval) {
 			if (Z_TYPE_P(retval) == IS_STRING) {
-				id = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+				id = estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
 			}
 			zval_ptr_dtor(&retval);
 		}

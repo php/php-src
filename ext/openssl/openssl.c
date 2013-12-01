@@ -2907,7 +2907,7 @@ PHP_FUNCTION(openssl_csr_sign)
 {
 	zval ** zcert = NULL, **zcsr, **zpkey, *args = NULL;
 	php_int_t num_days;
-	php_int_t serial = 0L;
+	php_int_t serial = 0;
 	X509 * cert = NULL, *new_cert = NULL;
 	X509_REQ * csr;
 	EVP_PKEY * key = NULL, *priv_key = NULL;
@@ -5200,12 +5200,12 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 
     GET_VER_OPT_STRING("passphrase", passphrase);
 
-	if (passphrase) {
-		if (Z_STRSIZE_PP(val) < num - 1) {
-			memcpy(buf, Z_STRVAL_PP(val), Z_STRSIZE_PP(val)+1);
-			return (int) Z_STRSIZE_PP(val);
-		}
-	}
+    if (passphrase) {
+        if (Z_STRSIZE_PP(val) < num - 1) {
+            memcpy(buf, Z_STRVAL_PP(val), Z_STRSIZE_PP(val)+1);
+            return Z_STRSIZE_PP(val);
+        }
+    }
 	return 0;
 }
 /* }}} */

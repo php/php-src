@@ -38,10 +38,10 @@
 
 /* Structure for SQLite Statement Parameter. */
 struct php_sqlite3_bound_param  {
-	long param_number;
+	php_int_t param_number;
 	char *name;
-	int name_len;
-	long type;
+	zend_str_size_int name_len;
+	php_int_t type;
 
 	zval *parameter;
 };
@@ -87,7 +87,7 @@ typedef struct _php_sqlite3_db_object  {
 /* Structure for SQLite Database object. */
 typedef struct _php_sqlite3_agg_context  {
 	zval *zval_context;
-	long row_count;
+	php_int_t row_count;
 } php_sqlite3_agg_context;
 
 typedef struct _php_sqlite3_stmt_object php_sqlite3_stmt;

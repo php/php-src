@@ -57,7 +57,7 @@ typedef struct {
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
-	int filemode;
+	php_int_t filemode;
 } ps_files;
 
 ps_module ps_mod_files = {
@@ -69,8 +69,8 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 {
 	size_t key_len;
 	const char *p;
-	int i;
-	int n;
+	size_t i;
+	size_t n;
 
 	key_len = strlen(key);
 	if (key_len <= data->dirdepth ||
@@ -169,12 +169,12 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 	}
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
+static int ps_files_cleanup_dir(const char *dirname, php_int_t maxlifetime TSRMLS_DC)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
-	struct stat sbuf;
+	php_stat_t sbuf;
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -225,7 +225,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-	struct stat sbuf;
+	php_stat_t sbuf;
 
 	if (!key || !ps_files_path_create(buf, sizeof(buf), data, key)) {
 		return FAILURE;
@@ -246,7 +246,7 @@ PS_OPEN_FUNC(files)
 	const char *argv[3];
 	int argc = 0;
 	size_t dirdepth = 0;
-	int filemode = 0600;
+	php_int_t filemode = 0600;
 
 	if (*save_path == '\0') {
 		/* if save path is an empty string, determine the temporary dir */
@@ -270,7 +270,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) strtol(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -279,7 +279,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = strtol(argv[1], NULL, 8);
+		filemode = ZEND_STRTOL(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;
@@ -322,7 +322,7 @@ PS_CLOSE_FUNC(files)
 
 PS_READ_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
@@ -384,7 +384,7 @@ PS_READ_FUNC(files)
 
 PS_WRITE_FUNC(files)
 {
-	long n;
+	php_int_t n;
 	PS_FILES_DATA;
 
 	ps_files_open(data, key TSRMLS_CC);

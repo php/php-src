@@ -502,7 +502,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len;
+	ptrdiff_t  len;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {

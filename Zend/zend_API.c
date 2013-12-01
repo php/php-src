@@ -1041,7 +1041,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
 {
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));
 
-	_zend_hash_init(Z_ARRVAL_P(arg), size, NULL, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init(Z_ARRVAL_P(arg), size, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
 	Z_TYPE_P(arg) = IS_ARRAY;
 	return SUCCESS;
 }
@@ -1084,8 +1084,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 static int zval_update_class_constant(zval **pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
-	if ((Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
-	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {	    
+	if (IS_CONSTANT_TYPE(Z_TYPE_PP(pp))) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
 		if ((*scope)->parent) {
@@ -1109,7 +1108,7 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 				}				
 				ce = ce->parent;
 			} while (ce);
-			
+
 		}
 		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
 	}
@@ -1580,7 +1579,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_symtable_update(ht, "", 1, &value, sizeof(zval *), NULL);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(key), Z_LVAL_P(key));
+			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (" ZEND_INT_FMT ")", Z_LVAL_P(key), Z_LVAL_P(key));
 			/* break missing intentionally */
 		case IS_BOOL:
 		case IS_LONG:
@@ -2169,6 +2168,19 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			str_efree(lowercase_name);
 			break;
 		}
+
+		/* If types of arguments have to be checked */
+		if (reg_function->common.arg_info && reg_function->common.num_args) {
+			int i;
+			for (i = 0; i < reg_function->common.num_args; i++) {
+				if (reg_function->common.arg_info[i].class_name ||
+				    reg_function->common.arg_info[i].type_hint) {
+				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+					break;
+				}
+			}
+		}
+
 		if (scope) {
 			/* Look for ctor, dtor, clone
 			 * If it's an old-style constructor, store it only if we don't have

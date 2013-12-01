@@ -40,12 +40,12 @@ ZEND_API void zend_register_default_classes(TSRMLS_D);
 
 /* exception_ce   NULL or zend_exception_get_default() or a derived class
  * message        NULL or the message of the exception */
-ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char *message, long code TSRMLS_DC);
-ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, const char *format, ...);
+ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_int_t code TSRMLS_DC);
+ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, zend_int_t code TSRMLS_DC, const char *format, ...);
 ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC);
 ZEND_API void zend_clear_exception(TSRMLS_D);
 
-ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, long code, int severity TSRMLS_DC);
+ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_int_t code, int severity TSRMLS_DC);
 
 extern ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 

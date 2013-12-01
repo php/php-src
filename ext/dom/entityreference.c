@@ -53,11 +53,12 @@ PHP_METHOD(domentityreference, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name;
-	int name_len, name_valid;
+	zend_str_size_int name_len;
+	int name_valid;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}

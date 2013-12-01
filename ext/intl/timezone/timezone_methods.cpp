@@ -161,8 +161,8 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 		se = TimeZone::createEnumeration();
 	} else if (Z_TYPE_PP(arg) == IS_LONG) {
 int_offset:
-		if (Z_LVAL_PP(arg) < (long)INT32_MIN ||
-				Z_LVAL_PP(arg) > (long)INT32_MAX) {
+		if (Z_LVAL_PP(arg) < (php_int_t)INT32_MIN ||
+				Z_LVAL_PP(arg) > (php_int_t)INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_enumeration: value is out of range", 0 TSRMLS_CC);
 			RETURN_FALSE;
@@ -174,7 +174,7 @@ double_offset:
 		convert_to_long_ex(arg);
 		goto int_offset;
 	} else if (Z_TYPE_PP(arg) == IS_OBJECT || Z_TYPE_PP(arg) == IS_STRING) {
-		long lval;
+		php_int_t lval;
 		double dval;
 		convert_to_string_ex(arg);
 		switch (is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), &lval, &dval, 0)) {
@@ -230,13 +230,13 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	}
 
 	int32_t result = TimeZone::countEquivalentIDs(id);
-	RETURN_LONG((long)result);
+	RETURN_LONG((php_int_t)result);
 }
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 {
-	long	zoneType,
+	php_int_t	zoneType,
 			offset_arg;
 	char	*region		= NULL;
 	zend_str_size_int		region_len	= 0;
@@ -252,7 +252,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 				!= FAILURE && Z_TYPE_PP(zvoffset) == IS_NULL;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|S!l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|S!i",
 			&zoneType, &region, &region_len, &offset_arg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone_id_enumeration: bad arguments", 0 TSRMLS_CC);
@@ -267,7 +267,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	}
 
 	if (ZEND_NUM_ARGS() == 3) {
-		if (offset_arg < (long)INT32_MIN || offset_arg > (long)INT32_MAX) {
+		if (offset_arg < (php_int_t)INT32_MIN || offset_arg > (php_int_t)INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_time_zone_id_enumeration: offset out of bounds", 0 TSRMLS_CC);
 			RETURN_FALSE;
@@ -381,12 +381,12 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 {
 	char	*str_id;
 	zend_str_size_int		str_id_len;
-	long	index;
+	php_int_t	index;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si",
 			&str_id, &str_id_len, &index) == FAILURE ||
-			index < (long)INT32_MIN || index > (long)INT32_MAX) {
+			index < (php_int_t)INT32_MIN || index > (php_int_t)INT32_MAX) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_equivalent_id: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -535,13 +535,13 @@ static const TimeZone::EDisplayType display_types[] = {
 U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 {
 	zend_bool	daylight		= 0;
-	long		display_type	= TimeZone::LONG;
+	php_int_t		display_type	= TimeZone::LONG;
 	const char	*locale_str		= NULL;
 	zend_str_size_int			dummy			= 0;
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"O|blS!", &object, TimeZone_ce_ptr, &daylight, &display_type,
+			"O|biS!", &object, TimeZone_ce_ptr, &daylight, &display_type,
 			&locale_str, &dummy) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_display_name: bad arguments", 0 TSRMLS_CC);
@@ -590,7 +590,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG((long)to->utimezone->getDSTSavings());
+	RETURN_LONG((php_int_t)to->utimezone->getDSTSavings());
 }
 
 U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
@@ -632,7 +632,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_code)
 	if (to == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((long)TIMEZONE_ERROR_CODE(to));
+	RETURN_LONG((php_int_t)TIMEZONE_ERROR_CODE(to));
 }
 
 U_CFUNC PHP_FUNCTION(intltz_get_error_message)

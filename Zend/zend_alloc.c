@@ -1231,9 +1231,9 @@ ZEND_API zend_mm_heap *zend_mm_startup(void)
 }
 
 #if ZEND_DEBUG
-static long zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
+static zend_int_t zend_mm_find_leaks(zend_mm_segment *segment, zend_mm_block *b)
 {
-	long leaks = 0;
+	zend_int_t leaks = 0;
 	zend_mm_block *p, *q;
 
 	p = ZEND_MM_NEXT_BLOCK(b);
@@ -1291,7 +1291,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		}
 		if (!ZEND_MM_IS_FREE_BLOCK(p)) {
 			if (p->magic == MEM_BLOCK_VALID) {
-				long repeated;
+				zend_int_t repeated;
 				zend_leak_info leak;
 
 				ZEND_MM_SET_MAGIC(p, MEM_BLOCK_LEAK);

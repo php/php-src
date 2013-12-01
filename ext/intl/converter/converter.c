@@ -56,7 +56,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 /* }}} */
 
 /* {{{ php_converter_default_callback */
-static void php_converter_default_callback(zval *return_value, zval *zobj, long reason, zval *error TSRMLS_DC) {
+static void php_converter_default_callback(zval *return_value, zval *zobj, php_int_t reason, zval *error TSRMLS_DC) {
 	/* Basic functionality so children can call parent::toUCallback() */
 	switch (reason) {
 		case UCNV_UNASSIGNED:
@@ -100,10 +100,10 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 
 	ZEND_ARG_INFO(1, error)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, toUCallback) {
-	long reason;
+	php_int_t reason;
 	zval *source, *codeUnits, *error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzzz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "izzz",
 		&reason, &source, &codeUnits, &error) == FAILURE) {
 		return;
 	}
@@ -122,10 +122,10 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE
 	ZEND_ARG_INFO(1, error)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, fromUCallback) {
-	long reason;
+	php_int_t reason;
 	zval *source, *codePoint, *error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzzz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "izzz",
 		&reason, &source, &codePoint, &error) == FAILURE) {
 		return;
 	}
@@ -135,7 +135,7 @@ static PHP_METHOD(UConverter, fromUCallback) {
 /* }}} */
 
 /* {{{ php_converter_check_limits */
-static inline zend_bool php_converter_check_limits(php_converter_object *objval, long available, long needed TSRMLS_DC) {
+static inline zend_bool php_converter_check_limits(php_converter_object *objval, php_int_t available, php_int_t needed TSRMLS_DC) {
 	if (available < needed) {
 		php_converter_throw_failure(objval, U_BUFFER_OVERFLOW_ERROR TSRMLS_CC, "Buffer overrun %ld bytes needed, %ld available", needed, available);
 		return 0;
@@ -154,7 +154,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 			return;
 		case IS_LONG:
 		{
-			long lval = Z_LVAL_P(val);
+			php_int_t lval = Z_LVAL_P(val);
 			if ((lval < 0) || (lval > 0x10FFFF)) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC, "Invalid codepoint U+%04lx", lval);
 				return;
@@ -738,9 +738,9 @@ ZEND_BEGIN_ARG_INFO_EX(php_converter_reasontext_arginfo, 0, ZEND_RETURN_VALUE, 0
 	ZEND_ARG_INFO(0, reason)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, reasonText) {
-	long reason;
+	php_int_t reason;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &reason) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &reason) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::reasonText(): bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;

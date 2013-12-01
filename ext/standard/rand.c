@@ -319,7 +319,7 @@ PHP_FUNCTION(mt_rand)
 		if (zend_parse_parameters(argc TSRMLS_CC, "ii", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%ld) is smaller than min(%ld)", max, min);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_INT_FMT ") is smaller than min(" ZEND_INT_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}
@@ -336,7 +336,7 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (long) (php_mt_rand(TSRMLS_C) >> 1);
+	number = (php_int_t) (php_mt_rand(TSRMLS_C) >> 1);
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}

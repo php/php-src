@@ -57,11 +57,11 @@ typedef smart_str wddx_packet;
 wddx_packet* php_wddx_constructor(void);
 void		 php_wddx_destructor(wddx_packet *packet);
 
-void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
+void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, zend_str_size_int comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
-void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name_len TSRMLS_DC);
-int 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
+void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, zend_str_size_int name_len TSRMLS_DC);
+int 		 php_wddx_deserialize_ex(char *, zend_str_size_int, zval *return_value);
 #define php_wddx_gather(packet) estrndup(packet->c, packet->len)
 
 #endif /* PHP_WDDX_API_H */

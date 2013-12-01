@@ -1362,7 +1362,8 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	int				 limit_val = -1;
 	php_int_t			limit = -1;
 	char			*string_key;
-	zend_uint_t			 num_key;
+	zend_str_size_uint			 string_key_len;
+	php_uint_t			 num_key;
 	char			*callback_name;
 	int				 replace_count=0, old_replace_count;
 	
@@ -1417,10 +1418,10 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 			if ((result = php_replace_in_subject(*regex, *replace, subject_entry, &result_len, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
-					switch(zend_hash_get_current_key(Z_ARRVAL_PP(subject), &string_key, &num_key, 0))
+					switch(zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key, &string_key_len, &num_key, 0, NULL))
 					{
 					case HASH_KEY_IS_STRING:
-						add_assoc_stringl(return_value, string_key, result, (zend_str_size) result_len, 0);
+						add_assoc_stringl_ex(return_value, string_key, string_key_len, result, result_len, 0);
 						break;
 
 					case HASH_KEY_IS_LONG:
@@ -1798,7 +1799,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	char			*string_key;
-	zend_uint_t			 num_key;
+	zend_str_size_uint			 string_key_len;
+	php_uint_t			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
 	int				 rc;
@@ -1862,11 +1864,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			Z_ADDREF_PP(entry);
 
 			/* Add to return array */
-			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, NULL))
 			{
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(Z_ARRVAL_P(return_value), string_key,
-									 strlen(string_key)+1, entry, sizeof(zval *), NULL);
+									 string_key_len, entry, sizeof(zval *), NULL);
 					break;
 
 				case HASH_KEY_IS_LONG:

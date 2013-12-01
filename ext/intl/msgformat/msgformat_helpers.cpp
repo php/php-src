@@ -392,7 +392,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	int				key_type;
 	char			*str_index;
 	zend_str_size_uint			str_len;
-	ulong			num_index;
+	php_uint_t			num_index;
 
 	for (zend_hash_internal_pointer_reset_ex(args, &pos);
 		U_SUCCESS(err.code) &&
@@ -676,7 +676,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 			if(aInt64 > LONG_MAX || aInt64 < -LONG_MAX) {
 				ZVAL_DOUBLE((*args)[i], (double)aInt64);
 			} else {
-				ZVAL_LONG((*args)[i], (long)aInt64);
+				ZVAL_LONG((*args)[i], (php_int_t)aInt64);
 			}
             break;
 

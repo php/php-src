@@ -42,13 +42,13 @@ FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
 #include "magic.h"
 
 #ifdef	ELFCORE
-private int dophn_core(struct magic_set *, int, int, int, off_t, int, size_t,
-    off_t, int *);
+private int dophn_core(struct magic_set *, int, int, int, zend_off_t, int, size_t,
+    zend_off_t, int *);
 #endif
-private int dophn_exec(struct magic_set *, int, int, int, off_t, int, size_t,
-    off_t, int *, int);
-private int doshn(struct magic_set *, int, int, int, off_t, int, size_t,
-    off_t, int *, int);
+private int dophn_exec(struct magic_set *, int, int, int, zend_off_t, int, size_t,
+    zend_off_t, int *, int);
+private int doshn(struct magic_set *, int, int, int, zend_off_t, int, size_t,
+    zend_off_t, int *, int);
 private size_t donote(struct magic_set *, unsigned char *, size_t, size_t, int,
     int, size_t, int *);
 
@@ -144,7 +144,7 @@ getu64(int swap, uint64_t value)
 #define xsh_size	(size_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, sh32.sh_size)	\
 			 : elf_getu64(swap, sh64.sh_size))
-#define xsh_offset	(off_t)(clazz == ELFCLASS32		\
+#define xsh_offset	(zend_off_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, sh32.sh_offset)	\
 			 : elf_getu64(swap, sh64.sh_offset))
 #define xsh_type	(clazz == ELFCLASS32			\
@@ -162,13 +162,13 @@ getu64(int swap, uint64_t value)
 #define xph_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, ph32.p_type)	\
 			 : elf_getu32(swap, ph64.p_type))
-#define xph_offset	(off_t)(clazz == ELFCLASS32		\
+#define xph_offset	(zend_off_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_offset)	\
 			 : elf_getu64(swap, ph64.p_offset))
 #define xph_align	(size_t)((clazz == ELFCLASS32		\
-			 ? (off_t) (ph32.p_align ? 		\
+			 ? (zend_off_t) (ph32.p_align ? 		\
 			    elf_getu32(swap, ph32.p_align) : 4) \
-			 : (off_t) (ph64.p_align ?		\
+			 : (zend_off_t) (ph64.p_align ?		\
 			    elf_getu64(swap, ph64.p_align) : 4)))
 #define xph_filesz	(size_t)((clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, ph32.p_filesz)	\
@@ -293,8 +293,8 @@ private const char os_style_names[][8] = {
 #define FLAGS_IS_CORE		0x10
 
 private int
-dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
-    int num, size_t size, off_t fsize, int *flags)
+dophn_core(struct magic_set *ms, int clazz, int swap, int fd, zend_off_t off,
+    int num, size_t size, zend_off_t fsize, int *flags)
 {
 	Elf32_Phdr ph32;
 	Elf64_Phdr ph64;
@@ -312,7 +312,7 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	 * Loop through all the program headers.
 	 */
 	for ( ; num; num--) {
-		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (zend_off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
@@ -334,7 +334,7 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 		 * This is a PT_NOTE section; loop through all the notes
 		 * in the section.
 		 */
-		if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (zend_off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
@@ -849,14 +849,14 @@ static const cap_desc_t cap_desc_386[] = {
 };
 
 private int
-doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
-    size_t size, off_t fsize, int *flags, int mach, int strtab)
+doshn(struct magic_set *ms, int clazz, int swap, int fd, zend_off_t off, int num,
+    size_t size, zend_off_t fsize, int *flags, int mach, int strtab)
 {
 	Elf32_Shdr sh32;
 	Elf64_Shdr sh64;
 	int stripped = 1;
 	void *nbuf;
-	off_t noff, coff, name_off;
+	zend_off_t noff, coff, name_off;
 	uint64_t cap_hw1 = 0;	/* SunOS 5.x hardware capabilites */
 	uint64_t cap_sf1 = 0;	/* SunOS 5.x software capabilites */
 	char name[50];
@@ -868,7 +868,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 	}
 
 	for ( ; num; num--) {
-		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (zend_off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
@@ -898,8 +898,8 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 		switch (xsh_type) {
 		case SHT_NOTE:
 			nbuf = emalloc((size_t)xsh_size);
-			if ((noff = FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET)) ==
-			    (off_t)-1) {
+			if ((noff = FINFO_LSEEK_FUNC(fd, (zend_off_t)xsh_offset, SEEK_SET)) ==
+			    (zend_off_t)-1) {
 				file_badread(ms);
 				efree(nbuf);
 				return -1;
@@ -913,7 +913,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 
 			noff = 0;
 			for (;;) {
-				if (noff >= (off_t)xsh_size)
+				if (noff >= (zend_off_t)xsh_size)
 					break;
 				noff = donote(ms, nbuf, (size_t)noff,
 				    (size_t)xsh_size, clazz, swap, 4,
@@ -924,8 +924,8 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 			efree(nbuf);
 			break;
 		case SHT_SUNW_cap:
-			if (FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET) ==
-			    (off_t)-1) {
+			if (FINFO_LSEEK_FUNC(fd, (zend_off_t)xsh_offset, SEEK_SET) ==
+			    (zend_off_t)-1) {
 				file_badseek(ms);
 				return -1;
 			}
@@ -935,7 +935,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 				Elf64_Cap cap64;
 				char cbuf[/*CONSTCOND*/
 				    MAX(sizeof cap32, sizeof cap64)];
-				if ((coff += xcap_sizeof) > (off_t)xsh_size)
+				if ((coff += xcap_sizeof) > (zend_off_t)xsh_size)
 					break;
 				if (FINFO_READ_FUNC(fd, cbuf, (size_t)xcap_sizeof) !=
 				    (ssize_t)xcap_sizeof) {
@@ -1038,8 +1038,8 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
  * otherwise it's statically linked.
  */
 private int
-dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
-    int num, size_t size, off_t fsize, int *flags, int sh_num)
+dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, zend_off_t off,
+    int num, size_t size, zend_off_t fsize, int *flags, int sh_num)
 {
 	Elf32_Phdr ph32;
 	Elf64_Phdr ph64;
@@ -1056,7 +1056,7 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	}
 
   	for ( ; num; num--) {
-		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (zend_off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
@@ -1100,7 +1100,7 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 			 * This is a PT_NOTE section; loop through all the notes
 			 * in the section.
 			 */
-			if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+			if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (zend_off_t)-1) {
 				file_badseek(ms);
 				return -1;
 			}
@@ -1143,7 +1143,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 	int clazz;
 	int swap;
 	struct stat st;
-	off_t fsize;
+	zend_off_t fsize;
 	int flags = 0;
 	Elf32_Ehdr elf32hdr;
 	Elf64_Ehdr elf64hdr;
@@ -1166,7 +1166,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 	/*
 	 * If we cannot seek, it must be a pipe, socket or fifo.
 	 */
-	if((FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
+	if((FINFO_LSEEK_FUNC(fd, (zend_off_t)0, SEEK_SET) == (zend_off_t)-1) && (errno == ESPIPE))
 		fd = file_pipe2file(ms, fd, buf, nbytes);
 
 	if (fstat(fd, &st) == -1) {

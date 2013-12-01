@@ -266,7 +266,7 @@ SAPI_API zend_str_size_int sapi_read_post_block(char *buffer, size_t buflen TSRM
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of " ZEND_INT_FMT " bytes exceeds the limit of " ZEND_INT_FMT " bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
@@ -287,7 +287,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			}
 
 			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_INT_FMT " bytes", SG(post_max_size));
 				break;
 			}
 

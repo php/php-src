@@ -616,7 +616,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
-			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #%ld", tmp);
+			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #" ZEND_INT_FMT, tmp);
 			break;
 		}
 		case IS_LONG:
@@ -927,7 +927,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG): {
-				long overflow;
+				zend_int_t overflow;
 
 				ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1),Z_LVAL_P(op2), Z_LVAL_P(result),Z_DVAL_P(result),overflow);
 				Z_TYPE_P(result) = overflow ? IS_DOUBLE : IS_LONG;

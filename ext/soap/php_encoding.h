@@ -205,7 +205,7 @@ void encode_finish();
 void encode_reset_ns();
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
 
-encodePtr get_conversion(int encode);
+encodePtr get_conversion(php_int_t encode);
 
 void delete_encoder(void *handle);
 void delete_encoder_persistent(void *handle);

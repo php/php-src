@@ -656,9 +656,9 @@ static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const cha
 
 	/* don't allow strange buffer overruns due to bogus return */
 	if (didwrite > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote %ld bytes more data than requested (%ld written, %ld max)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_WRITE " wrote " ZEND_INT_FMT " bytes more data than requested (" ZEND_INT_FMT " written, " ZEND_INT_FMT " max)",
 				us->wrapper->classname,
-				(long)(didwrite - count), (long)didwrite, (long)count);
+				(php_int_t)(didwrite - count), (php_int_t)didwrite, (php_int_t)count);
 		didwrite = count;
 	}
 
@@ -697,8 +697,8 @@ static zend_str_size_size_t php_userstreamop_read(php_stream *stream, char *buf,
 		convert_to_string(retval);
 		didread = Z_STRSIZE_P(retval);
 		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
-					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_INT_FMT " bytes more data than requested (" ZEND_INT_FMT " read, " ZEND_INT_FMT " max) - excess data will be lost",
+					us->wrapper->classname, (php_int_t)(didread - count), (php_int_t)didread, (php_int_t)count);
 			didread = count;
 		}
 		if (didread > 0)

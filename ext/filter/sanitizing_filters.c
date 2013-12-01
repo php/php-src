@@ -30,18 +30,18 @@ typedef unsigned long filter_map[256];
 static void php_filter_encode_html(zval *value, const unsigned char *chars)
 {
 	smart_str str = {0};
-	int len = Z_STRLEN_P(value);
+	zend_str_size_int len = Z_STRSIZE_P(value);
 	unsigned char *s = (unsigned char *)Z_STRVAL_P(value);
 	unsigned char *e = s + len;
 
-	if (Z_STRLEN_P(value) == 0) {
+	if (Z_STRSIZE_P(value) == 0) {
 		return;
 	}
 
 	while (s < e) {
 		if (chars[*s]) {
 			smart_str_appendl(&str, "&#", 2);
-			smart_str_append_unsigned(&str, (unsigned long)*s);
+			smart_str_append_unsigned(&str, (php_uint_t)*s);
 			smart_str_appendc(&str, ';');
 		} else {
 			/* XXX: this needs to be optimized to work with blocks of 'safe' chars */
@@ -53,7 +53,7 @@ static void php_filter_encode_html(zval *value, const unsigned char *chars)
 	smart_str_0(&str);
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = str.c;
-	Z_STRLEN_P(value) = str.len;
+	Z_STRSIZE_P(value) = str.len;
 }
 
 static const unsigned char hexchars[] = "0123456789ABCDEF";
@@ -64,7 +64,7 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, const unsigned char* chars, const int char_len, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const unsigned char* chars, const zend_str_size_int char_len, int high, int low, int encode_nul)
 {
 	unsigned char *str, *p;
 	unsigned char tmp[256];
@@ -87,9 +87,9 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 		memset(tmp, 1, 32);
 	}
 */
-	p = str = (unsigned char *) safe_emalloc(3, Z_STRLEN_P(value), 1);
+	p = str = (unsigned char *) safe_emalloc(3, Z_STRSIZE_P(value), 1);
 	s = (unsigned char *)Z_STRVAL_P(value);
-	e = s + Z_STRLEN_P(value);
+	e = s + Z_STRSIZE_P(value);
 
 	while (s < e) {
 		if (tmp[*s]) {
@@ -104,10 +104,10 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	*p = '\0';
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)str;
-	Z_STRLEN_P(value) = p - str;
+	Z_STRSIZE_P(value) = p - str;
 }
 
-static void php_filter_strip(zval *value, long flags)
+static void php_filter_strip(zval *value, php_int_t flags)
 {
 	unsigned char *buf, *str;
 	int   i, c;
@@ -118,9 +118,9 @@ static void php_filter_strip(zval *value, long flags)
 	}
 
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = safe_emalloc(1, Z_STRLEN_P(value) + 1, 1);
+	buf = safe_emalloc(1, Z_STRSIZE_P(value) + 1, 1);
 	c = 0;
-	for (i = 0; i < Z_STRLEN_P(value); i++) {
+	for (i = 0; i < Z_STRSIZE_P(value); i++) {
 		if ((str[i] > 127) && (flags & FILTER_FLAG_STRIP_HIGH)) {
 		} else if ((str[i] < 32) && (flags & FILTER_FLAG_STRIP_LOW)) {
 		} else if ((str[i] == '`') && (flags & FILTER_FLAG_STRIP_BACKTICK)) {
@@ -133,7 +133,7 @@ static void php_filter_strip(zval *value, long flags)
 	buf[c] = '\0';
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
-	Z_STRLEN_P(value) = c;
+	Z_STRSIZE_P(value) = c;
 }
 /* }}} */
 
@@ -145,7 +145,7 @@ static void filter_map_init(filter_map *map)
 
 static void filter_map_update(filter_map *map, int flag, const unsigned char *allowed_list)
 {
-	int l, i;
+	zend_str_size_int l, i;
 
 	l = strlen((const char*)allowed_list);
 	for (i = 0; i < l; ++i) {
@@ -159,9 +159,9 @@ static void filter_map_apply(zval *value, filter_map *map)
 	int   i, c;
 	
 	str = (unsigned char *)Z_STRVAL_P(value);
-	buf = safe_emalloc(1, Z_STRLEN_P(value) + 1, 1);
+	buf = safe_emalloc(1, Z_STRSIZE_P(value) + 1, 1);
 	c = 0;
-	for (i = 0; i < Z_STRLEN_P(value); i++) {
+	for (i = 0; i < Z_STRSIZE_P(value); i++) {
 		if ((*map)[str[i]]) {
 			buf[c] = str[i];
 			++c;
@@ -171,7 +171,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	buf[c] = '\0';
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = (char *)buf;
-	Z_STRLEN_P(value) = c;
+	Z_STRSIZE_P(value) = c;
 }
 /* }}} */
 
@@ -200,8 +200,8 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	php_filter_encode_html(value, enc);
 
 	/* strip tags, implicitly also removes \0 chars */
-	new_len = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), NULL, NULL, 0, 1);
-	Z_STRLEN_P(value) = new_len;
+	new_len = php_strip_tags_ex(Z_STRVAL_P(value), Z_STRSIZE_P(value), NULL, NULL, 0, 1);
+	Z_STRSIZE_P(value) = new_len;
 
 	if (new_len == 0) {
 		zval_dtor(value);
@@ -258,10 +258,10 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	} else {
 		quotes = ENT_NOQUOTES;
 	}
-	buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
+	buf = php_escape_html_entities_ex(Z_STRVAL_P(value), Z_STRSIZE_P(value), &len, 1, quotes, SG(default_charset), 0 TSRMLS_CC);
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = buf;
-	Z_STRLEN_P(value) = len;
+	Z_STRSIZE_P(value) = len;
 }
 /* }}} */
 
@@ -269,7 +269,7 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	/* Only if no flags are set (optimization) */
-	if (flags != 0 && Z_STRLEN_P(value) > 0) {
+	if (flags != 0 && Z_STRSIZE_P(value) > 0) {
 		unsigned char enc[256] = {0};
 
 		php_filter_strip(value, flags);
@@ -285,7 +285,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 		}
 
 		php_filter_encode_html(value, enc);	
-	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
+	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRSIZE_P(value) == 0) {
 		zval_dtor(value);
 		ZVAL_NULL(value);
 	}
@@ -368,14 +368,14 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	char *buf;
-	int   len;
+	zend_str_size_int   len;
 	
 	/* just call php_addslashes quotes */
-	buf = php_addslashes(Z_STRVAL_P(value), Z_STRLEN_P(value), &len, 0 TSRMLS_CC);
+	buf = php_addslashes(Z_STRVAL_P(value), Z_STRSIZE_P(value), &len, 0 TSRMLS_CC);
 
 	str_efree(Z_STRVAL_P(value));
 	Z_STRVAL_P(value) = buf;
-	Z_STRLEN_P(value) = len;
+	Z_STRSIZE_P(value) = len;
 }
 /* }}} */
 

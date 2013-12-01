@@ -70,10 +70,10 @@ Since:
 */
 PHP_METHOD(domimplementation, hasFeature)
 {
-	int feature_len, version_len;
+	zend_str_size_int feature_len, version_len;
 	char *feature, *version;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &feature, &feature_len, &version, &version_len) == FAILURE) {
 		return;
 	}
 
@@ -92,12 +92,13 @@ Since: DOM Level 2
 PHP_METHOD(domimplementation, createDocumentType)
 {
 	xmlDtd *doctype;
-	int ret, name_len = 0, publicid_len = 0, systemid_len = 0;
+	zend_str_size_int name_len = 0, publicid_len = 0, systemid_len = 0;
+	int ret;
 	char *name = NULL, *publicid = NULL, *systemid = NULL;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
 	xmlURIPtr uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SSS", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
 		return;
 	}
 
@@ -155,12 +156,13 @@ PHP_METHOD(domimplementation, createDocument)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, uri_len = 0, name_len = 0, errorcode = 0;
+	zend_str_size_int uri_len = 0, name_len = 0;
+	int ret, errorcode = 0;
 	char *uri = NULL, *name = NULL;
 	char *prefix = NULL, *localname = NULL;
 	dom_object *doctobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SSO", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
 		return;
 	}
 

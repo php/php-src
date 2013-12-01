@@ -43,7 +43,7 @@ bool(true)
 string(40) "%s"
 bool(true)
 
-Warning: ini_set(): session.configuration 'session.hash_function' must be existing hash function. none does not exist. in %s/session_hash_function_basic.php on line 17
+Warning: ini_set(): session.configuration 'session.hash_function' must be existing hash function. none does not exist. in %s%esession_hash_function_basic.php on line 17
 bool(false)
 bool(true)
 bool(true)

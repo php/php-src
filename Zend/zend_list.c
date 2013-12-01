@@ -139,7 +139,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, zend_int_t defaul
 	if (!resource) {
 		if (resource_type_name) {
 			class_name = get_active_class_name(&space TSRMLS_CC);
-			zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
+			zend_error(E_WARNING, "%s%s%s(): " ZEND_INT_FMT " is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
 		}
 		return NULL;
 	}

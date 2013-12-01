@@ -874,7 +874,7 @@ PHPAPI zval *cfg_get_entry(const char *name, zend_str_size_uint name_length)
 
 /* {{{ cfg_get_long
  */
-PHPAPI int cfg_get_long(const char *varname, long *result)
+PHPAPI int cfg_get_long(const char *varname, zend_int_t *result)
 {
 	zval *tmp, var;
 

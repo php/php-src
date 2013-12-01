@@ -3,7 +3,14 @@
  * - perform compile-time evaluation of constant binary and unary operations
  * - optimize series of ADD_STRING and/or ADD_CHAR
  * - convert CAST(IS_BOOL,x) into BOOL(x)
+ * - pre-evaluate constant function calls
  */
+
+#if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
+# define ZEND_IS_CONSTANT_TYPE(t)	(((t) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT)
+#else
+# define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
+#endif
 
 if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 	int i = 0;
@@ -219,15 +226,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				EG(in_execution) = 1;
 				EG(active_op_array) = op_array;
 				if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
+					zend_uint tv = ZEND_RESULT(opline).var;
+
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
-					ZEND_OP1_TYPE(opline) = IS_CONST;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-					opline->op1.constant = zend_optimizer_add_literal(op_array, &offset TSRMLS_CC);
-#else
-					ZEND_OP1_LITERAL(opline) = offset;
-#endif
-					SET_UNUSED(opline->op2);
-					opline->opcode = ZEND_QM_ASSIGN;
+					MAKE_NOP(opline);
+					replace_tmp_by_const(op_array, opline, tv, &offset TSRMLS_CC);
 				}
 				EG(active_op_array) = orig_op_array;
 				EG(in_execution) = orig_in_execution;
@@ -238,6 +241,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
 				/* substitute persistent constants */
+				zend_uint tv = ZEND_RESULT(opline).var;
 				zval c;
 
 				if (!zend_get_persistent_constant(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
@@ -246,18 +250,187 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					}
 				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
-				ZEND_OP1_TYPE(opline) = IS_CONST;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-				opline->op1.constant = zend_optimizer_add_literal(op_array, &c TSRMLS_CC);
-#else
-				ZEND_OP1_LITERAL(opline) = c;
-#endif
-				SET_UNUSED(opline->op2);
-				opline->opcode = ZEND_QM_ASSIGN;
+				MAKE_NOP(opline);
+				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
 			}
+
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+			/* class constant */
+			if (ZEND_OP1_TYPE(opline) != IS_UNUSED &&
+			    ZEND_OP2_TYPE(opline) == IS_CONST &&
+				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
+
+				zend_class_entry **pce = NULL;
+
+				if (ZEND_OP1_TYPE(opline) == IS_CONST &&
+			        ZEND_OP1_LITERAL(opline).type == IS_STRING) {
+					/* for A::B */
+					if (op_array->scope && 
+						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						op_array->scope->name, Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						pce = &op_array->scope;
+					} else { 
+						if (zend_hash_quick_find(EG(class_table), 
+								Z_STRVAL(op_array->literals[opline->op1.constant + 1].constant), 
+								Z_STRLEN(op_array->literals[opline->op1.constant].constant) + 1, 
+								Z_HASH_P(&op_array->literals[opline->op1.constant + 1].constant),
+								(void **)&pce) == FAILURE) {
+							break;
+						}
+					}
+				} else if (op_array->scope &&
+					ZEND_OP1_TYPE(opline) == IS_VAR &&
+					(opline - 1)->opcode == ZEND_FETCH_CLASS && 
+					(ZEND_OP1_TYPE(opline - 1) == IS_UNUSED &&
+					((opline - 1)->extended_value & ~ZEND_FETCH_CLASS_NO_AUTOLOAD) == ZEND_FETCH_CLASS_SELF) &&
+					ZEND_RESULT((opline - 1)).var == ZEND_OP1(opline).var) {
+					/* for self::B */
+					pce = &op_array->scope;
+				}
+
+				if (pce) {
+					zend_uint tv = ZEND_RESULT(opline).var;
+					zval **c, t;
+
+					if (zend_hash_find(&(*pce)->constants_table,
+							Z_STRVAL(ZEND_OP2_LITERAL(opline)),
+							Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1,
+							(void **) &c) == SUCCESS) {
+						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_PP(c))) { 
+							if (!zend_get_persistent_constant(Z_STRVAL_PP(c), Z_STRLEN_PP(c), &t, 1 TSRMLS_CC) ||
+							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
+								break;
+							}
+						} else {
+							t = **c;
+							zval_copy_ctor(&t);
+						}
+
+						if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+							literal_dtor(&ZEND_OP1_LITERAL(opline));
+						} else {
+							MAKE_NOP((opline - 1));
+						}
+						literal_dtor(&ZEND_OP2_LITERAL(opline));
+						MAKE_NOP(opline);
+						replace_tmp_by_const(op_array, opline, tv, &t TSRMLS_CC);
+					}
+				}
+			}
+#endif
 			break;
 
 		case ZEND_DO_FCALL:
+			/* pre-evaluate constant functions:
+			   defined(x)
+			   constant(x)
+			   function_exists(x)
+			   is_callable(x)
+			   extension_loaded(x)
+			*/
+			if (opline->extended_value == 1 && (opline - 1)->opcode == ZEND_SEND_VAL &&
+				ZEND_OP1_TYPE(opline - 1) == IS_CONST && ZEND_OP1_LITERAL(opline - 1).type == IS_STRING &&
+				ZEND_OP1_TYPE(opline) == IS_CONST && ZEND_OP1_LITERAL(opline).type == IS_STRING) {
+				if ((Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("function_exists")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"function_exists", sizeof("function_exists")-1)) ||
+					(Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("is_callable")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"is_callable", sizeof("is_callable")))) {
+					zend_internal_function *func;
+					char *lc_name = zend_str_tolower_dup(
+							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+					
+					if (zend_hash_find(EG(function_table), lc_name, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)) + 1,
+								(void *)&func) == SUCCESS &&
+							func->type == ZEND_INTERNAL_FUNCTION &&
+							func->module->type == MODULE_PERSISTENT) {
+						zval t;
+						ZVAL_BOOL(&t, 1);
+						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
+							literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
+							MAKE_NOP((opline - 1));
+							literal_dtor(&ZEND_OP1_LITERAL(opline));
+							MAKE_NOP(opline);
+						}
+					}
+					efree(lc_name);
+				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("extension_loaded")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"extension_loaded", sizeof("extension_loaded")-1)) {
+					zval t;
+					zend_module_entry *m;
+					char *lc_name = zend_str_tolower_dup(
+							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+
+					if (zend_hash_find(&module_registry,
+							lc_name, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)) + 1, (void *)&m) == FAILURE) {
+						if (!PG(enable_dl)) {
+							break;
+						} else {
+							ZVAL_BOOL(&t, 0);
+						}
+					} else {
+						if (m->type == MODULE_PERSISTENT) {
+							ZVAL_BOOL(&t, 1);
+						} else {
+							break;
+						}
+					} 
+
+					if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
+						literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
+						MAKE_NOP((opline - 1));
+						literal_dtor(&ZEND_OP1_LITERAL(opline));
+						MAKE_NOP(opline);
+					}
+					efree(lc_name);
+				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("defined")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"defined", sizeof("defined")-1)) {
+					zval t;
+
+					if (zend_get_persistent_constant(Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)),
+						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
+
+						ZVAL_BOOL(&t, 1);
+						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
+							literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
+							MAKE_NOP((opline - 1));
+							literal_dtor(&ZEND_OP1_LITERAL(opline));
+							MAKE_NOP(opline);
+						}
+					}
+				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("constant")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"constant", sizeof("constant")-1)) {
+					zval t;
+					
+					if (zend_get_persistent_constant(Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)),
+						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
+						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
+							literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
+							MAKE_NOP((opline - 1));
+							literal_dtor(&ZEND_OP1_LITERAL(opline));
+							MAKE_NOP(opline);
+						}
+					}
+				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("strlen")-1 &&
+					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+						"strlen", sizeof("strlen")-1)) {
+					zval t;
+
+					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+					if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
+						literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
+						MAKE_NOP((opline - 1));
+						literal_dtor(&ZEND_OP1_LITERAL(opline));
+						MAKE_NOP(opline);
+					}
+				}
+				break;
+			}
+			
 			/* define("name", scalar); */
 			if (collect_constants &&
 			    opline->extended_value == 2 &&

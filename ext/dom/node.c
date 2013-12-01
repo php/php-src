@@ -360,7 +360,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 				}
 				convert_to_string(newval);
 			}
-			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRSIZE_P(newval) + 1);
 			if (newval == &value_copy) {
 				zval_dtor(newval);
 			}
@@ -1431,9 +1431,9 @@ PHP_FUNCTION(dom_node_clone_node)
 	xmlNode *n, *node;
 	int ret;
 	dom_object *intern;
-	long recursive = 0;
+	php_int_t recursive = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &id, dom_node_class_entry, &recursive) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|i", &id, dom_node_class_entry, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -1510,10 +1510,10 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_node_is_supported)
 {
 	zval *id;
-	int feature_len, version_len;
+	zend_str_size_int feature_len, version_len;
 	char *feature, *version;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss", &id, dom_node_class_entry, &feature, &feature_len, &version, &version_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OSS", &id, dom_node_class_entry, &feature, &feature_len, &version, &version_len) == FAILURE) {
 		return;
 	}
 
@@ -1598,10 +1598,10 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	xmlNodePtr nodep, lookupp = NULL;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int uri_len = 0;
+	zend_str_size_int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1648,10 +1648,10 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int uri_len = 0;
+	zend_str_size_int uri_len = 0;
 	char *uri;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1681,10 +1681,10 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	int prefix_len = 0;
+	zend_str_size_int prefix_len = 0;
 	char *prefix=NULL;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
@@ -1756,7 +1756,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	zend_bool exclusive=0, with_comments=0;
 	xmlChar **inclusive_ns_prefixes = NULL;
 	char *file = NULL;
-	int ret = -1, file_len = 0;
+	int ret = -1;
+	zend_str_size_int file_len = 0;
 	xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
@@ -1769,7 +1770,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		}
 	} else {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), 
-			"Os|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive, 
+			"OS|bba!a!", &id, dom_node_class_entry, &file, &file_len, &exclusive, 
 			&with_comments, &xpath_array, &ns_prefixes) == FAILURE) {
 			return;
 		}
@@ -1824,8 +1825,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			while (zend_hash_get_current_data(Z_ARRVAL_PP(tmp), (void **)&tmpns) == SUCCESS) {
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
 					char *prefix;
-					ulong idx;
-					uint prefix_key_len;
+					php_uint_t idx;
+					zend_str_size_uint prefix_key_len;
 
 					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
 						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {

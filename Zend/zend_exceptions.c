@@ -413,9 +413,9 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 			TRACE_APPEND_STR("Resource id #");
 			/* break; */
 		case IS_LONG: {
-			long lval = Z_LVAL_PP(arg);
+			zend_int_t lval = Z_LVAL_PP(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];
-			zend_str_size l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
+			zend_str_size l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
 			break;
@@ -464,7 +464,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 {
 	char *s_tmp, **str;
 	zend_str_size *len, *num;
-	long line;
+	zend_int_t line;
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
 
@@ -478,7 +478,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	num = va_arg(args, zend_str_size*);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
-	sprintf(s_tmp, "#%d ", (*num)++);
+	sprintf(s_tmp, "#" ZEND_INT_FMT " ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
 	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
@@ -497,7 +497,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 				line = 0;
 			}
 			s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-			sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+			sprintf(s_tmp, "%s(" ZEND_INT_FMT "): ", Z_STRVAL_PP(file), line);
 			TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 			efree(s_tmp);
 		}
@@ -541,7 +541,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 3, str, len, &num);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
-	sprintf(s_tmp, "#%d {main}", num);
+	sprintf(s_tmp, "#" ZEND_INT_FMT " {main}", num);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
 
@@ -619,12 +619,12 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (Z_STRSIZE(message) > 0) {
-			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
+			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		} else {
-			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
+			len = zend_spprintf(&str, 0, "exception '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
@@ -734,7 +734,7 @@ ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char *message, long code TSRMLS_DC) /* {{{ */
+ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char *message, zend_int_t code TSRMLS_DC) /* {{{ */
 {
 	zval *ex;
 
@@ -762,7 +762,7 @@ ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char 
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, const char *format, ...) /* {{{ */
+ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, zend_int_t code TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	char *message;
@@ -777,7 +777,7 @@ ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long cod
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, long code, int severity TSRMLS_DC) /* {{{ */
+ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_int_t code, int severity TSRMLS_DC) /* {{{ */
 {
 	zval *ex = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);

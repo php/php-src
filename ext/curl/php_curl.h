@@ -130,7 +130,7 @@ typedef struct {
 	zval            *func_name;
 	zend_fcall_info_cache fci_cache;
 	FILE            *fp;
-	long            fd;
+	php_int_t            fd;
 	int             method;
 	zval		*stream;
 } php_curl_read;
@@ -178,7 +178,7 @@ typedef struct {
 	void ***thread_ctx;
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
-	long                     id;
+	php_int_t                id;
 	zend_bool                in_callback;
 	zval                     *clone;
 	zend_bool                safe_upload;

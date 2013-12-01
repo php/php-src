@@ -45,7 +45,7 @@
 # else /* ! (CRAY || __arm) */
 
 # define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_int_t) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 # endif /* !CRAY */
 
@@ -99,7 +99,7 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, zend_str_size_uint name_length,
 ZEND_API int zend_restore_ini_entry(char *name, zend_str_size_uint name_length, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API long zend_ini_long(char *name, zend_str_size_uint name_length, int orig);
+ZEND_API zend_int_t zend_ini_long(char *name, zend_str_size_uint name_length, int orig);
 ZEND_API double zend_ini_double(char *name, zend_str_size_uint name_length, int orig);
 ZEND_API char *zend_ini_string(char *name, zend_str_size_uint name_length, int orig);
 ZEND_API char *zend_ini_string_ex(char *name, zend_str_size_uint name_length, int orig, zend_bool *exists);

@@ -87,7 +87,7 @@ typedef struct _ze_zip_object {
 	char **buffers;
 	HashTable *prop_handler;
 	char *filename;
-	int filename_len;
+	zend_str_size_int filename_len;
 } ze_zip_object;
 
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);

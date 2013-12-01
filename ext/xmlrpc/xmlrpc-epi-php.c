@@ -485,7 +485,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 {
 	int bArray = 0, bStruct = 0, bMixed = 0;
-	unsigned long num_index, last_num = 0;
+	php_uint_t num_index, last_num = 0;
 	char* my_key;
 
 	zend_hash_internal_pointer_reset(ht);
@@ -532,7 +532,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						xReturn = XMLRPC_CreateValueEmpty();
 						XMLRPC_SetValueID(xReturn, key, 0);
 					} else {
-						xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL_P(val), Z_STRLEN_P(val));
+						xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL_P(val), Z_STRSIZE_P(val));
 					}
 					break;
 				case xmlrpc_datetime:
@@ -553,11 +553,11 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 					break;
 				case xmlrpc_string:
 					convert_to_string(val);
-					xReturn = XMLRPC_CreateValueString(key, Z_STRVAL_P(val), Z_STRLEN_P(val));
+					xReturn = XMLRPC_CreateValueString(key, Z_STRVAL_P(val), Z_STRSIZE_P(val));
 					break;
 				case xmlrpc_vector:
 					{
-						unsigned long num_index;
+						php_uint_t num_index;
 						zval** pIter;
 						char* my_key;
 						HashTable *ht = NULL;
@@ -644,8 +644,8 @@ static zval* XMLRPC_to_PHP(XMLRPC_VALUE el)
 			case xmlrpc_string:
 				pStr = XMLRPC_GetValueString(el);
 				if (pStr) {
-					Z_STRLEN_P(elem) = XMLRPC_GetValueStringLen(el);
-					Z_STRVAL_P(elem) = estrndup(pStr, Z_STRLEN_P(elem));
+					Z_STRSIZE_P(elem) = XMLRPC_GetValueStringLen(el);
+					Z_STRVAL_P(elem) = estrndup(pStr, Z_STRSIZE_P(elem));
 					Z_TYPE_P(elem) = IS_STRING;
 				}
 				break;
@@ -662,15 +662,15 @@ static zval* XMLRPC_to_PHP(XMLRPC_VALUE el)
 				Z_TYPE_P(elem) = IS_DOUBLE;
 				break;
 			case xmlrpc_datetime:
-				Z_STRLEN_P(elem) = XMLRPC_GetValueStringLen(el);
-				Z_STRVAL_P(elem) = estrndup(XMLRPC_GetValueDateTime_ISO8601(el), Z_STRLEN_P(elem));
+				Z_STRSIZE_P(elem) = XMLRPC_GetValueStringLen(el);
+				Z_STRVAL_P(elem) = estrndup(XMLRPC_GetValueDateTime_ISO8601(el), Z_STRSIZE_P(elem));
 				Z_TYPE_P(elem) = IS_STRING;
 				break;
 			case xmlrpc_base64:
 				pStr = XMLRPC_GetValueBase64(el);
 				if (pStr) {
-					Z_STRLEN_P(elem) = XMLRPC_GetValueStringLen(el);
-					Z_STRVAL_P(elem) = estrndup(pStr, Z_STRLEN_P(elem));
+					Z_STRSIZE_P(elem) = XMLRPC_GetValueStringLen(el);
+					Z_STRVAL_P(elem) = estrndup(pStr, Z_STRSIZE_P(elem));
 					Z_TYPE_P(elem) = IS_STRING;
 				}
 				break;
@@ -704,10 +704,10 @@ PHP_FUNCTION(xmlrpc_encode_request)
 	char *outBuf;
 	zval *vals, *out_opts = NULL;
 	char *method = NULL;
-	int method_len;
+	zend_str_size_int method_len;
 	php_output_options out;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
 		return;
 	}
 
@@ -795,7 +795,7 @@ zval* decode_request_worker(char *xml_in, int xml_in_len, char *encoding_in, zva
 					zval_dtor(method_name_out);
 					Z_TYPE_P(method_name_out) = IS_STRING;
 					Z_STRVAL_P(method_name_out) = estrdup(method_name);
-					Z_STRLEN_P(method_name_out) = strlen(Z_STRVAL_P(method_name_out));
+					Z_STRSIZE_P(method_name_out) = strlen(Z_STRVAL_P(method_name_out));
 				} else if (retval) {
 					zval_ptr_dtor(&retval);
 					retval = NULL;
@@ -816,9 +816,9 @@ PHP_FUNCTION(xmlrpc_decode_request)
 {
 	char *xml, *encoding = NULL;
 	zval **method;
-	int xml_len, encoding_len = 0;
+	zend_str_size_int xml_len, encoding_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SZ|S", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -838,9 +838,9 @@ PHP_FUNCTION(xmlrpc_decode_request)
 PHP_FUNCTION(xmlrpc_decode)
 {
 	char *arg1, *arg2 = NULL;
-	int arg1_len, arg2_len = 0;
+	zend_str_size_int arg1_len, arg2_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
 		return;
 	}
 
@@ -934,7 +934,7 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	/* check if the called method has been previous registered */
 	if(zend_hash_find(Z_ARRVAL_P(pData->server->method_map),
                       Z_STRVAL_P(pData->xmlrpc_method), 
-                      Z_STRLEN_P(pData->xmlrpc_method) + 1, 
+                      Z_STRSIZE_P(pData->xmlrpc_method) + 1, 
                       (void**)&php_function) == SUCCESS) {
 
 		pData->php_function = *php_function;
@@ -1026,12 +1026,12 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 PHP_FUNCTION(xmlrpc_server_register_method)
 {
 	char *method_key;
-	int method_key_len;
+	zend_str_size_int method_key_len;
 	zval *handle, *method_name_save, **method_name;
 	int type;
 	xmlrpc_server_data* server;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZ", &handle, &method_key, &method_key_len, &method_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSZ", &handle, &method_key, &method_key_len, &method_name) == FAILURE) {
 		return;
 	}
 
@@ -1096,11 +1096,12 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	xmlrpc_server_data* server;
 	zval **caller_params, *handle, *output_opts = NULL;
 	char *rawxml;
-	int rawxml_len, type;
+	zend_str_size_int rawxml_len;
+	int type;
 	php_output_options out;
 	int argc =ZEND_NUM_ARGS();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZ|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSZ|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
 	/* user output options */
@@ -1227,9 +1228,9 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 {
 	zval *retval;
 	char *arg1;
-	int arg1_len;
+	zend_str_size_int arg1_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1, &arg1_len) == FAILURE) {
 		return;
 	}
 
@@ -1361,7 +1362,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 
 			Z_TYPE_P(type) = IS_STRING;
 			Z_STRVAL_P(type) = estrdup(typestr);
-			Z_STRLEN_P(type) = strlen(typestr);
+			Z_STRSIZE_P(type) = strlen(typestr);
 
 			if (newtype == xmlrpc_datetime) {
 				XMLRPC_VALUE v = XMLRPC_CreateValueDateTime_ISO8601(NULL, value->value.str.val);
@@ -1472,10 +1473,10 @@ PHP_FUNCTION(xmlrpc_set_type)
 {
 	zval **arg;
 	char *type;
-	int type_len;
+	zend_str_size_int type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &arg, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZS", &arg, &type, &type_len) == FAILURE) {
 		return;
 	}
 

@@ -32,16 +32,16 @@
  * Only creates a single-dimensional array of variants.
  * The keys of the PHP hash MUST be numeric.  If the array
  * is sparse, then the gaps will be filled with NULL variants */
-static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
+static void safe_array_from_zval(VARIANT *v, zval *z, php_int_t codepage TSRMLS_DC)
 {
 	SAFEARRAY *sa = NULL;
 	SAFEARRAYBOUND bound;
 	HashPosition pos;
 	int keytype;
 	char *strindex;
-	int strindexlen;
-	long intindex = -1;
-	long max_index = 0;
+	zend_str_size_int strindexlen;
+	php_int_t intindex = -1;
+	php_int_t max_index = 0;
 	VARIANT *va;
 	zval **item;
 		
@@ -98,7 +98,7 @@ bogus:
 	}
 }
 
-PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, php_int_t codepage TSRMLS_DC)
 {
 	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
@@ -153,8 +153,8 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 
 		case IS_STRING:
 			V_VT(v) = VT_BSTR;
-			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage TSRMLS_CC);
-			V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRSIZE_P(z), codepage TSRMLS_CC);
+			V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRSIZE_P(z) * sizeof(OLECHAR));
 			efree(olestring);
 			break;
 
@@ -167,7 +167,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 	}
 }
 
-PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, php_int_t codepage TSRMLS_DC)
 {
 	OLECHAR *olestring = NULL;
 	int ret = SUCCESS;
@@ -179,28 +179,28 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 			ZVAL_NULL(z);
 			break;
 		case VT_UI1:
-			ZVAL_LONG(z, (long)V_UI1(v));
+			ZVAL_LONG(z, (php_int_t)V_UI1(v));
 			break;
 		case VT_I1:
-			ZVAL_LONG(z, (long)V_I1(v));
+			ZVAL_LONG(z, (php_int_t)V_I1(v));
 			break;
 		case VT_UI2:
-			ZVAL_LONG(z, (long)V_UI2(v));
+			ZVAL_LONG(z, (php_int_t)V_UI2(v));
 			break;
 		case VT_I2:
-			ZVAL_LONG(z, (long)V_I2(v));
+			ZVAL_LONG(z, (php_int_t)V_I2(v));
 			break;
 		case VT_UI4:  /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UI4(v));
+			ZVAL_LONG(z, (php_int_t)V_UI4(v));
 			break;
 		case VT_I4:
-			ZVAL_LONG(z, (long)V_I4(v));
+			ZVAL_LONG(z, (php_int_t)V_I4(v));
 			break;
 		case VT_INT:
 			ZVAL_LONG(z, V_INT(v));
 			break;
 		case VT_UINT: /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (long)V_UINT(v));
+			ZVAL_LONG(z, (php_int_t)V_UINT(v));
 			break;
 		case VT_R4:
 			ZVAL_DOUBLE(z, (double)V_R4(v));
@@ -216,7 +216,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 			if (olestring) {
 				Z_TYPE_P(z) = IS_STRING;
 				Z_STRVAL_P(z) = php_com_olestring_to_string(olestring,
-					&Z_STRLEN_P(z), codepage TSRMLS_CC);
+					&Z_STRSIZE_P(z), codepage TSRMLS_CC);
 				olestring = NULL;
 			}
 			break;
@@ -395,8 +395,8 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSR
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
 PHP_FUNCTION(com_variant_create_instance)
 {
-	/* VARTYPE == unsigned short */ long vt = VT_EMPTY;
-	long codepage = CP_ACP;
+	/* VARTYPE == unsigned short */ php_int_t vt = VT_EMPTY;
+	php_int_t codepage = CP_ACP;
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
 	zval *zvalue = NULL;
@@ -410,7 +410,7 @@ PHP_FUNCTION(com_variant_create_instance)
 	obj = CDNO_FETCH(object);
 	
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"z!|ll", &zvalue, &vt, &codepage)) {
+		"z!|ii", &zvalue, &vt, &codepage)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
 	}
@@ -433,7 +433,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			  but will probably fail (original behavior)
 		*/
 		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
-			long orig_vt = vt;
+			php_int_t orig_vt = vt;
 
 			vt &= ~VT_ARRAY;
 			if (vt) {
@@ -515,7 +515,7 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 	zval *zleft = NULL, *zright = NULL;
 	php_com_dotnet_object *obj;
 	HRESULT result;
-	int codepage = CP_ACP;
+	php_int_t codepage = CP_ACP;
 
 	VariantInit(&left_val);
 	VariantInit(&right_val);
@@ -723,7 +723,7 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 	zval *zleft = NULL;
 	php_com_dotnet_object *obj;
 	HRESULT result;
-	int codepage = CP_ACP;
+	php_int_t codepage = CP_ACP;
 
 	VariantInit(&left_val);
 	VariantInit(&vres);
@@ -820,18 +820,18 @@ PHP_FUNCTION(variant_round)
 	VARIANT *vleft = NULL;
 	zval *zleft = NULL;
 	php_com_dotnet_object *obj;
-	int codepage = CP_ACP;
-	long decimals = 0;
+	php_int_t codepage = CP_ACP;
+	php_int_t decimals = 0;
 
 	VariantInit(&left_val);
 	VariantInit(&vres);
 
 	if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "Ol", &zleft, php_com_variant_class_entry, &decimals)) {
+			ZEND_NUM_ARGS() TSRMLS_CC, "Oi", &zleft, php_com_variant_class_entry, &decimals)) {
 		obj = CDNO_FETCH(zleft);
 		vleft = &obj->v;
 	} else if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			"z!l", &zleft, &decimals)) {
+			"z!i", &zleft, &decimals)) {
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage TSRMLS_CC);
 	} else {
@@ -855,9 +855,9 @@ PHP_FUNCTION(variant_cmp)
 	VARIANT *vleft = NULL, *vright = NULL;
 	zval *zleft = NULL, *zright = NULL;
 	php_com_dotnet_object *obj;
-	int codepage = CP_ACP;
-	long lcid = LOCALE_SYSTEM_DEFAULT;
-	long flags = 0;
+	php_int_t codepage = CP_ACP;
+	php_int_t lcid = LOCALE_SYSTEM_DEFAULT;
+	php_int_t flags = 0;
 	/* it is safe to ignore the warning for this line; see the comments in com_handlers.c */
 	STDAPI VarCmp(LPVARIANT pvarLeft, LPVARIANT pvarRight, LCID lcid, DWORD flags);
 
@@ -865,28 +865,28 @@ PHP_FUNCTION(variant_cmp)
 	VariantInit(&right_val);
 
 	if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "OO|ll", &zleft, php_com_variant_class_entry,
+			ZEND_NUM_ARGS() TSRMLS_CC, "OO|ii", &zleft, php_com_variant_class_entry,
 			&zright, php_com_variant_class_entry, &lcid, &flags)) {
 		obj = CDNO_FETCH(zleft);
 		vleft = &obj->v;
 		obj = CDNO_FETCH(zright);
 		vright = &obj->v;
 	} else if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "Oz!|ll", &zleft, php_com_variant_class_entry,
+			ZEND_NUM_ARGS() TSRMLS_CC, "Oz!|ii", &zleft, php_com_variant_class_entry,
 			&zright, &lcid, &flags)) {
 		obj = CDNO_FETCH(zleft);
 		vleft = &obj->v;
 		vright = &right_val;
 		php_com_variant_from_zval(vright, zright, codepage TSRMLS_CC);
 	} else if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
-			ZEND_NUM_ARGS() TSRMLS_CC, "z!O|ll", &zleft, &zright, php_com_variant_class_entry,
+			ZEND_NUM_ARGS() TSRMLS_CC, "z!O|ii", &zleft, &zright, php_com_variant_class_entry,
 			&lcid, &flags)) {
 		obj = CDNO_FETCH(zright);
 		vright = &obj->v;
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage TSRMLS_CC);
 	} else if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			"z!z!|ll", &zleft, &zright, &lcid, &flags)) {
+			"z!z!|ii", &zleft, &zright, &lcid, &flags)) {
 
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage TSRMLS_CC);
@@ -948,13 +948,13 @@ PHP_FUNCTION(variant_date_to_timestamp)
    Returns a variant date representation of a unix timestamp */
 PHP_FUNCTION(variant_date_from_timestamp)
 {
-	long timestamp;
+	php_int_t timestamp;
 	time_t ttstamp;
 	SYSTEMTIME systime;
 	struct tm *tmv;
 	VARIANT res;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i",
 			&timestamp)) {
 		return;
 	}
@@ -1009,11 +1009,11 @@ PHP_FUNCTION(variant_set_type)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	/* VARTYPE == unsigned short */ long vt;
+	/* VARTYPE == unsigned short */ php_int_t vt;
 	HRESULT res;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
+		"Oi", &zobj, php_com_variant_class_entry, &vt)) {
 		return;
 	}
 	obj = CDNO_FETCH(zobj);
@@ -1044,12 +1044,12 @@ PHP_FUNCTION(variant_cast)
 {
 	zval *zobj;
 	php_com_dotnet_object *obj;
-	/* VARTYPE == unsigned short */ long vt;
+	/* VARTYPE == unsigned short */ php_int_t vt;
 	VARIANT vres;
 	HRESULT res;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
+		"Oi", &zobj, php_com_variant_class_entry, &vt)) {
 		return;
 	}
 	obj = CDNO_FETCH(zobj);

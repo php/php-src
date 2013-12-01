@@ -89,13 +89,13 @@ PHP_HASH_API void make_sha1_digest(char *sha1str, unsigned char *digest)
 PHP_FUNCTION(sha1)
 {
 	char *arg;
-	int arg_len;
+	zend_str_size_int arg_len;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -119,7 +119,7 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	int           arg_len;
+	zend_str_size_int           arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
@@ -128,7 +128,7 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -539,7 +539,7 @@ PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -616,7 +616,7 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -830,7 +830,7 @@ static void SHA512Transform(php_hash_uint64 state[8], const unsigned char block[
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 
@@ -944,7 +944,7 @@ PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
 {
 	unsigned int i, index, partLen;
 

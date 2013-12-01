@@ -322,7 +322,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member, int type, con
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
@@ -357,7 +357,7 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry TSRMLS_CC)) {
 		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", obj->std.ce->name);
 	}
@@ -402,7 +402,7 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
@@ -437,7 +437,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
 
 	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
 		zval *tmp;
@@ -502,8 +502,8 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 			zend_hash_move_forward_ex(prop_handlers, &pos)) {
 		zval	*value;
 		char	*string_key		= NULL;
-		uint	string_length	= 0;
-		ulong	num_key;
+		zend_str_size_uint	string_length	= 0;
+		php_uint_t	num_key;
 
 		if (entry->read_func(obj, &value TSRMLS_CC) == FAILURE) {
 			continue;

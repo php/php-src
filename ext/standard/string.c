@@ -696,7 +696,7 @@ PHP_FUNCTION(nl_langinfo)
 #endif
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '%ld' is not valid", item);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Item '" ZEND_INT_FMT "' is not valid", item);
 			RETURN_FALSE;
 	}
 	/* }}} */
@@ -1146,7 +1146,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 
 			case IS_LONG: {
 				char stmp[MAX_LENGTH_OF_LONG + 1];
-				str_len = slprintf(stmp, sizeof(stmp), "%ld", Z_LVAL_PP(tmp));
+				str_len = slprintf(stmp, sizeof(stmp), ZEND_INT_FMT, Z_LVAL_PP(tmp));
 				smart_str_appendl(&implstr, stmp, str_len);
 			}
 				break;
@@ -2900,7 +2900,7 @@ static PATNREPL *php_strtr_array_prepare_repls(zend_str_size_int slen, HashTable
 
 		switch (zend_hash_get_current_key_ex(pats, &string_key, &string_key_len, &num_key, 0, &hpos)) {
 		case HASH_KEY_IS_LONG:
-			string_key_len = 1 + zend_spprintf(&string_key, 0, "%ld", (long)num_key);
+			string_key_len = 1 + zend_spprintf(&string_key, 0, ZEND_INT_FMT, (php_int_t)num_key);
 			zend_llist_add_element(*allocs, &string_key);
 			/* break missing intentionally */
 
@@ -5160,7 +5160,7 @@ PHP_FUNCTION(substr_count)
 	}
 
 	if (offset > haystack_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value %ld exceeds string length", offset);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value " ZEND_INT_FMT " exceeds string length", offset);
 		RETURN_FALSE;
 	}
 	p += offset;
@@ -5172,7 +5172,7 @@ PHP_FUNCTION(substr_count)
 			RETURN_FALSE;
 		}
 		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value %ld exceeds string length", length);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length value " ZEND_INT_FMT " exceeds string length", length);
 			RETURN_FALSE;
 		}
 		endp = p + length;
@@ -5403,7 +5403,7 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format value " ZEND_INT_FMT, type);
 			RETURN_FALSE;
 	}
 

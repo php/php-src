@@ -22,7 +22,7 @@
 #include "php.h"
 #include <wincrypt.h>
 
-PHPAPI char *php_win32_error_to_msg(int error)
+PHPAPI char *php_win32_error_to_msg(HRESULT error)
 {
 	char *buf = NULL;
 

@@ -1335,7 +1335,9 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 #endif
 
-	if (ZCG(accel_directives).validate_timestamps || ZCG(accel_directives).max_file_size > 0) {
+	if (ZCG(accel_directives).validate_timestamps ||
+	    ZCG(accel_directives).file_update_protection ||
+	    ZCG(accel_directives).max_file_size > 0) {
 		size_t size = 0;
 
 		/* Obtain the file timestamps, *before* actually compiling them,
@@ -1347,6 +1349,13 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 *  we won't cache it
 		 */
 		if (timestamp == 0) {
+			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
+			return NULL;
+		}
+
+		/* check if file is too new (may be it's not written completely yet) */
+		if (ZCG(accel_directives).file_update_protection &&
+		    (ZCG(request_time) - ZCG(accel_directives).file_update_protection < timestamp)) {
 			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 			return NULL;
 		}
@@ -2725,6 +2734,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	}
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
 
+	SHM_UNPROTECT();
 	ZCSG(restart_pending) = 1;
 	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
@@ -2735,6 +2745,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	} else {
 		ZCSG(force_restart_time) = 0;
 	}
+	SHM_PROTECT();
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
