@@ -80,7 +80,7 @@ static int le_result, le_link, le_plink;
 #define SAFE_STRING(s) ((s)?(s):"")
 
 #if MYSQL_VERSION_ID > 32199 || defined(MYSQL_USE_MYSQLND)
-# define mysql_row_length_type unsigned long
+# define mysql_row_length_type php_uint_t
 # define HAVE_MYSQL_ERRNO
 #else
 # define mysql_row_length_type unsigned int
@@ -720,16 +720,16 @@ PHP_MINFO_FUNCTION(mysql)
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
-	int  user_len = 0, passwd_len = 0, host_len = 0;
+	zend_str_size_int  user_len = 0, passwd_len = 0, host_len = 0;
 	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
-	long client_flags = 0;
+	php_int_t client_flags = 0;
 	php_mysql_conn *mysql=NULL;
 #if MYSQL_VERSION_ID <= 32230
 	void (*handler) (int);
 #endif
 	zend_bool free_host=0, new_link=0;
-	long connect_timeout;
+	php_int_t connect_timeout;
 
     php_error_docref(NULL TSRMLS_CC,
                      E_DEPRECATED,
@@ -775,13 +775,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else {
 		/* mysql_pconnect does not support new_link parameter */
 		if (persistent) {
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!l", &host_and_port, &host_len,
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!S!S!i", &host_and_port, &host_len,
 									&user, &user_len, &passwd, &passwd_len,
 									&client_flags)==FAILURE) {
 				return;
         	}
 		} else {
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!S!S!bi", &host_and_port, &host_len,
 										&user, &user_len, &passwd, &passwd_len,
 										&new_link, &client_flags)==FAILURE) {
 				return;
@@ -961,13 +961,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		 */
 		if (!new_link && zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
 			int type;
-			long link;
+			php_int_t link;
 			void *ptr;
 
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
-			link = (long) index_ptr->ptr;
+			link = (php_int_t) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
@@ -1130,12 +1130,12 @@ PHP_FUNCTION(mysql_close)
 PHP_FUNCTION(mysql_select_db)
 {
 	char *db;
-	int db_len;
+	zend_str_size_int db_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &db_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(mysql_thread_id)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG((long) mysql_thread_id(mysql->conn));
+	RETURN_LONG((php_int_t) mysql_thread_id(mysql->conn));
 }
 /* }}} */
 
@@ -1353,10 +1353,11 @@ PHP_FUNCTION(mysql_set_charset)
 {
 	zval *mysql_link = NULL;
 	char *csname;
-	int id = -1, csname_len;
+	int id = -1;
+	zend_str_size_int csname_len;
 	php_mysql_conn *mysql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &csname, &csname_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &csname, &csname_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1383,12 +1384,12 @@ PHP_FUNCTION(mysql_set_charset)
 PHP_FUNCTION(mysql_create_db)
 {
 	char *db;
-	int db_len;
+	zend_str_size_int db_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &db_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1414,12 +1415,12 @@ PHP_FUNCTION(mysql_create_db)
 PHP_FUNCTION(mysql_drop_db)
 {
 	char *db;
-	int db_len;
+	zend_str_size_int db_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &db_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1536,11 +1537,11 @@ static void php_mysql_do_query_general(char *query, int query_len, zval *mysql_l
 static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 {
 	char *query;
-	int query_len;
+	zend_str_size_int query_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &query, &query_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &query, &query_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1576,11 +1577,11 @@ PHP_FUNCTION(mysql_unbuffered_query)
 PHP_FUNCTION(mysql_db_query)
 {
 	char *db, *query;
-	int db_len, query_len;
+	zend_str_size_int db_len, query_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &db, &db_len, &query, &query_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|r", &db, &db_len, &query, &query_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1635,13 +1636,13 @@ PHP_FUNCTION(mysql_list_dbs)
 PHP_FUNCTION(mysql_list_tables)
 {
 	char *db;
-	int db_len;
+	zend_str_size_int db_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &db_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1673,13 +1674,13 @@ PHP_FUNCTION(mysql_list_tables)
 PHP_FUNCTION(mysql_list_fields)
 {
 	char *db, *table;
-	int db_len, table_len;
+	zend_str_size_int db_len, table_len;
 	zval *mysql_link = NULL;
 	int id = -1;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|r", &db, &db_len, &table, &table_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|r", &db, &db_len, &table, &table_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1821,7 +1822,7 @@ PHP_FUNCTION(mysql_affected_rows)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (long) mysql_affected_rows(mysql->conn);
+	Z_LVAL_P(return_value) = (php_int_t) mysql_affected_rows(mysql->conn);
 	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
@@ -1832,9 +1833,9 @@ PHP_FUNCTION(mysql_affected_rows)
 PHP_FUNCTION(mysql_escape_string)
 {
 	char *str;
-	int str_len;
+	zend_str_size_int str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -1844,7 +1845,7 @@ PHP_FUNCTION(mysql_escape_string)
 	 */
 
 	Z_STRVAL_P(return_value) = (char *) safe_emalloc(str_len, 2, 1);
-	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), str, str_len);
+	Z_STRSIZE_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), str, str_len);
 	Z_TYPE_P(return_value) = IS_STRING;
 
 	php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_real_escape_string() instead.");
@@ -1858,11 +1859,12 @@ PHP_FUNCTION(mysql_real_escape_string)
 	zval *mysql_link = NULL;
 	char *str;
 	char *new_str;
-	int id = -1, str_len, new_str_len;
+	int id = -1;
+	zend_str_size_int str_len, new_str_len;
 	php_mysql_conn *mysql;
 
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &str, &str_len, &mysql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &str, &str_len, &mysql_link) == FAILURE) {
 		return;
 	}
 
@@ -1901,7 +1903,7 @@ PHP_FUNCTION(mysql_insert_id)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (long) mysql_insert_id(mysql->conn);
+	Z_LVAL_P(return_value) = (php_int_t) mysql_insert_id(mysql->conn);
 	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
@@ -1912,7 +1914,7 @@ PHP_FUNCTION(mysql_insert_id)
 PHP_FUNCTION(mysql_result)
 {
 	zval *result, *field=NULL;
-	long row;
+	php_int_t row;
 	MYSQL_RES *mysql_result;
 #ifndef MYSQL_USE_MYSQLND
 	MYSQL_ROW sql_row;
@@ -1925,7 +1927,7 @@ johannes TODO:
 Do 2 zend_parse_parameters calls instead of type "z" and switch below
 Q: String or long first?
 */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &result, &row, &field) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|z", &result, &row, &field) == FAILURE) {
 		return;
 	}
 
@@ -1949,7 +1951,7 @@ Q: String or long first?
 						field_name = estrdup(tmp+1);
 					} else {
 						table_name = NULL;
-						field_name = estrndup(Z_STRVAL_P(field),Z_STRLEN_P(field));
+						field_name = estrndup(Z_STRVAL_P(field),Z_STRSIZE_P(field));
 					}
 					mysql_field_seek(mysql_result, 0);
 					while ((tmp_field=mysql_fetch_field(mysql_result))) {
@@ -1995,11 +1997,11 @@ Q: String or long first?
 
 #if PHP_API_VERSION < 20100412
 		if (PG(magic_quotes_runtime)) {
-			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset],&Z_STRLEN_P(return_value), 0 TSRMLS_CC);
+			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset],&Z_STRSIZE_P(return_value), 0 TSRMLS_CC);
 		} else {
 #endif
-			Z_STRLEN_P(return_value) = sql_row_lengths[field_offset];
-			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRLEN_P(return_value));
+			Z_STRSIZE_P(return_value) = sql_row_lengths[field_offset];
+			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRSIZE_P(return_value));
 #if PHP_API_VERSION < 20100412
 		}
 #endif
@@ -2027,7 +2029,7 @@ PHP_FUNCTION(mysql_num_rows)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (long) mysql_num_rows(mysql_result);
+	Z_LVAL_P(return_value) = (php_int_t) mysql_num_rows(mysql_result);
 	Z_TYPE_P(return_value) = IS_LONG;
 }
 /* }}} */
@@ -2052,7 +2054,7 @@ PHP_FUNCTION(mysql_num_fields)
 
 /* {{{ php_mysql_fetch_hash
  */
-static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int expected_args, int into_object)
+static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_type, int expected_args, int into_object)
 {
 	MYSQL_RES *mysql_result;
 	zval            *res, *ctor_params = NULL;
@@ -2067,9 +2069,9 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 #ifdef ZEND_ENGINE_2
 	if (into_object) {
 		char *class_name = NULL;
-		int class_name_len = 0;
+		zend_str_size_int class_name_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sz", &res, &class_name, &class_name_len, &ctor_params) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|Sz", &res, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
 		}
 
@@ -2086,7 +2088,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 	} else
 #endif
 	{
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &res, &result_type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &res, &result_type) == FAILURE) {
 			return;
 		}
 		if (!result_type) {
@@ -2123,7 +2125,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 #if PHP_API_VERSION < 20100412
 			if (PG(magic_quotes_runtime)) {
 				Z_TYPE_P(data) = IS_STRING;
-				Z_STRVAL_P(data) = php_addslashes(mysql_row[i], mysql_row_lengths[i], &Z_STRLEN_P(data), 0 TSRMLS_CC);
+				Z_STRVAL_P(data) = php_addslashes(mysql_row[i], mysql_row_lengths[i], &Z_STRSIZE_P(data), 0 TSRMLS_CC);
 			} else {
 #endif
 				ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
@@ -2270,10 +2272,10 @@ PHP_FUNCTION(mysql_fetch_assoc)
 PHP_FUNCTION(mysql_data_seek)
 {
 	zval *result;
-	long offset;
+	php_int_t offset;
 	MYSQL_RES *mysql_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &offset)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &result, &offset)) {
 		return;
 	}
 
@@ -2398,11 +2400,11 @@ static char *php_mysql_get_field_name(int field_type)
 PHP_FUNCTION(mysql_fetch_field)
 {
 	zval *result;
-	long field=0;
+	php_int_t field=0;
 	MYSQL_RES *mysql_result;
 	const MYSQL_FIELD *mysql_field;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &result, &field) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &result, &field) == FAILURE) {
 		return;
 	}
 
@@ -2442,10 +2444,10 @@ PHP_FUNCTION(mysql_fetch_field)
 PHP_FUNCTION(mysql_field_seek)
 {
 	zval *result;
-	long offset;
+	php_int_t offset;
 	MYSQL_RES *mysql_result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &result, &offset) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
@@ -2471,13 +2473,13 @@ PHP_FUNCTION(mysql_field_seek)
 static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 {
 	zval *result;
-	long field;
+	php_int_t field;
 	MYSQL_RES *mysql_result;
 	const MYSQL_FIELD *mysql_field = {0};
 	char buf[512];
 	int  len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &result, &field) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &result, &field) == FAILURE) {
 		return;
 	}
 
@@ -2494,13 +2496,13 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	switch (entry_type) {
 		case PHP_MYSQL_FIELD_NAME:
-			Z_STRLEN_P(return_value) = strlen(mysql_field->name);
-			Z_STRVAL_P(return_value) = estrndup(mysql_field->name, Z_STRLEN_P(return_value));
+			Z_STRSIZE_P(return_value) = strlen(mysql_field->name);
+			Z_STRVAL_P(return_value) = estrndup(mysql_field->name, Z_STRSIZE_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_TABLE:
-			Z_STRLEN_P(return_value) = strlen(mysql_field->table);
-			Z_STRVAL_P(return_value) = estrndup(mysql_field->table, Z_STRLEN_P(return_value));
+			Z_STRSIZE_P(return_value) = strlen(mysql_field->table);
+			Z_STRVAL_P(return_value) = estrndup(mysql_field->table, Z_STRSIZE_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_LEN:
@@ -2509,8 +2511,8 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			break;
 		case PHP_MYSQL_FIELD_TYPE:
 			Z_STRVAL_P(return_value) = php_mysql_get_field_name(Z_TYPE_P(mysql_field));
-			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
-			Z_STRVAL_P(return_value) = estrndup(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value));
+			Z_STRSIZE_P(return_value) = strlen(Z_STRVAL_P(return_value));
+			Z_STRVAL_P(return_value) = estrndup(Z_STRVAL_P(return_value), Z_STRSIZE_P(return_value));
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_FLAGS:
@@ -2582,7 +2584,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 				len--;
 			}
 
-	   		Z_STRLEN_P(return_value) = len;
+	   		Z_STRSIZE_P(return_value) = len;
    			Z_STRVAL_P(return_value) = estrndup(buf, len);
    			Z_TYPE_P(return_value) = IS_STRING;
 			break;
