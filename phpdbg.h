@@ -146,21 +146,8 @@
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
 /* {{{ structs */
-typedef union _phpdbg_btree phpdbg_btree;
-union _phpdbg_btree {
-	phpdbg_btree *branches[2];
-	struct {
-		char *func_name;
-		zend_uint func_len;
-		char *class_name;
-		zend_uint class_len;
-		zend_uint last;
-	} info;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
-	phpdbg_btree *opline_btree;                  /* opline root -> op_array */
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */

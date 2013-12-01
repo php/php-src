@@ -142,7 +142,6 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
-	PHPDBG_G(opline_btree) = NULL;
 
 	return SUCCESS;
 } /* }}} */
@@ -471,7 +470,6 @@ static sapi_module_struct phpdbg_sapi_module = {
 void phpdbg_op_array_handler(zend_op_array *op_array) {
 	TSRMLS_FETCH();
 
-	phpdbg_save_oplines(op_array TSRMLS_CC);
 	phpdbg_resolve_op_array_breaks(op_array TSRMLS_CC);
 }
 
