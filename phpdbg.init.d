@@ -1,0 +1,88 @@
+################################################################
+# File:         /etc/init.d/phpdbg                             #
+# Author:       krakjoe                                        #
+# Purpose:      Daemonize phpdbg automatically on boot         #
+# chkconfig:    2345    07 09                                  #
+# description:Starts, stops and restarts phpdbg daemon         #
+################################################################
+LOCKFILE=/var/lock/subsys/phpdbg
+PIDFILE=/var/run/phpdbg.pid
+STDIN=4000
+STDOUT=8000
+################################################################
+# Either set path to phpdbg here or rely on phpdbg in PATH	   #
+################################################################
+if [ "x$PHPDBG" == "x" ]; then
+	PHPDBG=$(which phpdbg)
+fi
+################################################################
+# Options to pass to phpdbg upon boot						   #
+################################################################
+OPTIONS=
+LOGFILE=/var/log/phpdbg.log
+################################################################
+#     STOP EDITING STOP EDITING STOP EDITING STOP EDITING      #
+################################################################
+. /etc/rc.d/init.d/functions
+RETVAL=1
+################################################################
+
+start()
+{
+        echo -n $"Starting: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
+        nohup ${PHPDBG} -l${STDIN}/${STDOUT} ${OPTIONS} 2>>${LOGFILE} 1>/dev/null </dev/null &
+        PID=$!
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ]; then
+                echo $PID > $PIDFILE
+                echo_success
+        else
+                echo_failure
+        fi
+        echo
+        [ $RETVAL = 0 ] && touch ${LOCKFILE}
+       return $RETVAL
+}
+stop()
+{
+        if [ -f ${LOCKFILE} ] && [ -f ${PIDFILE} ]
+        then
+                echo -n $"Stopping: phpdbg ${OPTIONS} on ${STDIN}/${STDOUT} "
+                kill -s TERM $(cat $PIDFILE)
+                RETVAL=$?
+                if [ $RETVAL -eq 0 ]; then
+                        echo_success
+                else
+                        echo_failure
+                fi
+                echo
+                [ $RETVAL = 0 ] && rm -f ${LOCKFILE} ${PIDFILE}
+        else
+                echo -n $"Error: phpdbg not running"
+                echo_failure
+                echo
+                [ $RETVAL = 1 ]
+        fi
+        return $RETVAL
+}
+##################################################################
+case "$1" in
+        start)
+        start
+        ;;
+        stop)
+        stop
+        ;;
+        status)
+        status $PHPDBG
+        ;;
+        restart)
+        $0 stop
+        $0 start
+        ;;
+        *)
+        echo "usage: $0 start|stop|restart|status"
+        ;;
+esac
+###################################################################
+exit $RETVAL
