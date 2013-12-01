@@ -127,11 +127,12 @@ PHPDBG_SET(colors) /* {{{ */
 				goto done;
 			}
 		}
+		
+		default:
+			phpdbg_error(
+					"set colors used incorrectly: set colors <on|off>");
 	}
 	
-usage:
-	phpdbg_error(
-			"set colors used incorrectly: set colors <on|off>");
 
 done:
 	return SUCCESS;
