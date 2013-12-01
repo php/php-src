@@ -246,12 +246,10 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	int rc = 0;
 	
 	va_list args;
-	time_t now;
 	struct timeval tp;
 	
 	va_start(args, fmt);
-	if (gettimeofday(&tp, NULL) == SUCCESS)
-	{
+	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
 		char *format = NULL, *buffer = NULL;
 		
