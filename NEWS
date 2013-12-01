@@ -4,8 +4,10 @@ PHP                                                                        NEWS
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
-  . Fixed buf #66041 (list() fails to unpack yielded ArrayAccess object).
+  . Fixed bug #66041 (list() fails to unpack yielded ArrayAccess object).
     (Nikita)
+  . Fixed bug #65764 (generators/throw_rethrow FAIL with
+    ZEND_COMPILE_EXTENDED_INFO). (Nikita)
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
