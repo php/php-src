@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     1600). (Derick, T. Carter)
   . Fixed bug #61599 (Wrong Day of Week). (Derick, T. Carter)
 
+- DOM:
+  . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
+    Produces invalid Markup). (Mike)
+
 - XSL
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)

@@ -2324,7 +2324,22 @@ PHP_FUNCTION(dom_document_save_html)
 			RETURN_FALSE;
 		}
 		
-		size = htmlNodeDump(buf, docp, node);
+		if (node->type == XML_DOCUMENT_FRAG_NODE) {
+			int one_size;
+
+			for (node = node->children; node; node = node->next) {
+				one_size = htmlNodeDump(buf, docp, node);
+
+				if (one_size >= 0) {
+					size += one_size;
+				} else {
+					size = -1;
+					break;
+				}
+			}
+		} else {
+			size = htmlNodeDump(buf, docp, node);
+		}
 		if (size >= 0) {
 			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {
