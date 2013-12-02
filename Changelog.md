@@ -1,9 +1,13 @@
 ChangeLog for phpdbg
 ====================
 
-Version 0.2.0 2013-00-00
+Version 0.3.0 2013-00-00
 ------------------------
-(this needs tidying before release)
+
+1. Added ability to disable an enable a single breakpoint
+
+Version 0.2.0 2013-11-31
+------------------------
 
 1. Added "break delete <id>" command
 2. Added "break opcode <opcode>" command

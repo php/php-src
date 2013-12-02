@@ -21,6 +21,7 @@
 #include "phpdbg_cmd.h"
 #include "phpdbg_set.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_bp.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -51,15 +52,33 @@ PHPDBG_SET(break) /* {{{ */
 
 		case STR_PARAM:
 			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
-				PHPDBG_G(flags) |= PHPDBG_IS_BP_ENABLED;
+				phpdbg_enable_breakpoints(TSRMLS_C);
 			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
-				PHPDBG_G(flags) &= ~PHPDBG_IS_BP_ENABLED;
+				phpdbg_disable_breakpoints(TSRMLS_C);
 			}
 			break;
+			
+		case NUMERIC_PARAM: {
+			if (input->argc > 2) {
+					if (phpdbg_argv_is(2, "on")) {
+						phpdbg_enable_breakpoint(param->num TSRMLS_CC);
+					} else if (phpdbg_argv_is(2, "off")) {
+						phpdbg_disable_breakpoint(param->num TSRMLS_CC);
+					}
+			} else {
+				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
+				if (brake) {
+					phpdbg_writeln(
+						"%s", brake->disabled ? "off" : "on");
+				} else {
+					phpdbg_error("Failed to find breakpoint #%lx", param->num);
+				}
+			}
+		} break;
 
 		default:
 			phpdbg_error(
-				"set break used incorrectly: set break <on|off>");
+				"set break used incorrectly: set break [id] <on|off>");
 	}
 
 	return SUCCESS;
@@ -127,12 +146,12 @@ PHPDBG_SET(colors) /* {{{ */
 				goto done;
 			}
 		}
+		
+		default:
+			phpdbg_error(
+				"set colors used incorrectly: set colors <on|off>");
 	}
 	
-usage:
-	phpdbg_error(
-			"set colors used incorrectly: set colors <on|off>");
-
 done:
 	return SUCCESS;
 } /* }}} */

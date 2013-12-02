@@ -39,7 +39,7 @@ static const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_COMMAND_D_EX(colors,       "usage: set colors <on|off>",			 'C', set_colors,       NULL, 1),
 #endif
 	PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          'O', set_oplog,        NULL, 0),
-	PHPDBG_COMMAND_D_EX(break,        "usage: set break  <on|off>",       	 'b', set_break,        NULL, 0),
+	PHPDBG_COMMAND_D_EX(break,        "usage: set break [id] <on|off>",      'b', set_break,        NULL, 0),
 	PHPDBG_END_COMMAND
 };
 
