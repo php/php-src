@@ -5,6 +5,7 @@ Version 0.3.0 2013-00-00
 ------------------------
 
 1. Added ability to disable an enable a single breakpoint
+2. Added ability to override SAPI name
 
 Version 0.2.0 2013-11-31
 ------------------------

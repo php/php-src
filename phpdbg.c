@@ -487,6 +487,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
 	{'E', 0, "step-through-eval"},
+	{'S', 1, "sapi-name"},
 #ifndef _WIN32
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
@@ -716,6 +717,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
+	char *sapi_name;
 	char *bp_tmp_file;
 #ifndef _WIN32
 	char *address;
@@ -779,6 +781,7 @@ phpdbg_main:
 	opt = 0;
 	run = 0;
 	step = 0;
+	sapi_name = NULL;
 	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
@@ -832,8 +835,18 @@ phpdbg_main:
 			case 'e': { /* set execution context */
 				exec_len = strlen(php_optarg);
 				if (exec_len) {
+					if (exec) {
+						free(exec);
+					}
 					exec = strdup(php_optarg);
 				}
+			} break;
+			
+			case 'S': { /* set SAPI name */
+				if (sapi_name) {
+					free(sapi_name);
+				}
+				sapi_name = strdup(php_optarg);
 			} break;
 
 			case 'I': { /* ignore .phpdbginit */
@@ -913,6 +926,10 @@ phpdbg_main:
 	}
 #endif
 
+	if (sapi_name) {
+		phpdbg->name = sapi_name;
+	}
+	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
@@ -1142,6 +1159,10 @@ phpdbg_out:
 		free(address);	
 	}
 #endif
+
+	if (sapi_name) {
+		free(sapi_name);
+	}
 	
 	free(bp_tmp_file);
 

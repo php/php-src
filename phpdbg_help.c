@@ -564,6 +564,7 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
 	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
+	phpdbg_writeln(" -S\t-Scli\t\t\tOverride SAPI name, careful !");
 #ifndef _WIN32
 	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console ports");
 	phpdbg_writeln(" -a\t-a192.168.0.3\t\tSetup remote console bind address");
