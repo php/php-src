@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
   . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
   
+- DOM:
+  . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
+    Produces invalid Markup). (Mike)
+
 - Sockets:
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
