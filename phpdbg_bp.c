@@ -592,70 +592,59 @@ result:
 PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 {
 	HashTable **table;
+	HashPosition position;
+	phpdbg_breakbase_t *brake;
+	
+	if ((brake  = phpdbg_find_breakbase_ex(num, &table, &position TSRMLS_CC))) {
+		char *key;
+		zend_uint klen;
+		zend_ulong idx;
+		int type = brake->type;
+		char *name = NULL;
+		size_t name_len = 0L;
 
-	if (zend_hash_index_find(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], num, (void**)&table) == SUCCESS) {
-		HashPosition position;
-		phpdbg_breakbase_t *brake;
-
-		for (zend_hash_internal_pointer_reset_ex((*table), &position);
-			zend_hash_get_current_data_ex((*table), (void**)&brake, &position) == SUCCESS;
-			zend_hash_move_forward_ex((*table), &position)) {
-			char *key;
-			zend_uint klen;
-			zend_ulong idx;
-
-			if (brake->id == num) {
-				int type = brake->type;
-				char *name = NULL;
-				size_t name_len = 0L;
-
-				switch (type) {
-					case PHPDBG_BREAK_FILE:
-					case PHPDBG_BREAK_METHOD:
-						if (zend_hash_num_elements((*table)) == 1) {
-							name = estrdup(brake->name);
-							name_len = strlen(name);
-							if (zend_hash_num_elements(&PHPDBG_G(bp)[type]) == 1) {
-								PHPDBG_G(flags) &= ~(1<<(brake->type+1));
-							}
-						}
-					break;
-
-					default: {
-						if (zend_hash_num_elements((*table)) == 1) {
-							PHPDBG_G(flags) &= ~(1<<(brake->type+1));
-						}
+		switch (type) {
+			case PHPDBG_BREAK_FILE:
+			case PHPDBG_BREAK_METHOD:
+				if (zend_hash_num_elements((*table)) == 1) {
+					name = estrdup(brake->name);
+					name_len = strlen(name);
+					if (zend_hash_num_elements(&PHPDBG_G(bp)[type]) == 1) {
+						PHPDBG_G(flags) &= ~(1<<(brake->type+1));
 					}
 				}
+			break;
 
-				switch (zend_hash_get_current_key_ex(
-					(*table), &key, &klen, &idx, 0, &position)) {
-
-					case HASH_KEY_IS_STRING:
-						zend_hash_del((*table), key, klen);
-					break;
-
-					default:
-						zend_hash_index_del((*table), idx);
+			default: {
+				if (zend_hash_num_elements((*table)) == 1) {
+					PHPDBG_G(flags) &= ~(1<<(brake->type+1));
 				}
-
-				switch (type) {
-					case PHPDBG_BREAK_FILE:
-					case PHPDBG_BREAK_METHOD:
-						if (name) {
-							zend_hash_del(&PHPDBG_G(bp)[type], name, name_len);
-							efree(name);
-						}
-					break;
-				}
-
-				phpdbg_notice("Deleted breakpoint #%ld", num);
-				PHPDBG_BREAK_UNMAPPING(num);
-				return;
 			}
 		}
 
-		phpdbg_error("Failed to delete breakpoint #%ld", num);
+		switch (zend_hash_get_current_key_ex(
+			(*table), &key, &klen, &idx, 0, &position)) {
+
+			case HASH_KEY_IS_STRING:
+				zend_hash_del((*table), key, klen);
+			break;
+
+			default:
+				zend_hash_index_del((*table), idx);
+		}
+
+		switch (type) {
+			case PHPDBG_BREAK_FILE:
+			case PHPDBG_BREAK_METHOD:
+				if (name) {
+					zend_hash_del(&PHPDBG_G(bp)[type], name, name_len);
+					efree(name);
+				}
+			break;
+		}
+
+		phpdbg_notice("Deleted breakpoint #%ld", num);
+		PHPDBG_BREAK_UNMAPPING(num);	
 	} else {
 		phpdbg_error("Failed to find breakpoint #%ld", num);
 	}
