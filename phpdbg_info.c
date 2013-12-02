@@ -31,6 +31,9 @@ PHPDBG_INFO(break) /* {{{ */
 	phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
 	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
 	phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE_OPLINE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FUNCTION_OPLINE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD_OPLINE TSRMLS_CC);
 	phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
 	phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
 

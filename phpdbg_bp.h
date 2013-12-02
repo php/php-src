@@ -104,6 +104,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, int opline TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int opline TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, int opline TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_expression(const char*, size_t TSRMLS_DC);
 
 int phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
