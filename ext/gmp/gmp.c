@@ -204,9 +204,12 @@ typedef struct _gmp_temp {
 #define GMP_ROUND_PLUSINF   1
 #define GMP_ROUND_MINUSINF  2
 
+#define GMP_42_OR_NEWER \
+	((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
+
 /* The maximum base for input and output conversions is 62 from GMP 4.2
  * onwards. */
-#if (__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2)
+#if GMP_42_OR_NEWER
 #	define MAX_BASE 62
 #else
 #	define MAX_BASE 36
@@ -1455,7 +1458,15 @@ ZEND_FUNCTION(gmp_rootrem)
 	add_index_zval(return_value, 0, gmp_create(&gmpnum_result1 TSRMLS_CC));
 	add_index_zval(return_value, 1, gmp_create(&gmpnum_result2 TSRMLS_CC));
 
+#if GMP_42_OR_NEWER
 	mpz_rootrem(gmpnum_result1, gmpnum_result2, gmpnum_a, (unsigned long) nth);
+#else
+	mpz_root(gmpnum_result1, gmpnum_a, (unsigned long) nth);
+	mpz_pow_ui(gmpnum_result2, gmpnum_result1, (unsigned long) nth);
+	mpz_sub(gmpnum_result2, gmpnum_a, gmpnum_result2);
+	mpz_abs(gmpnum_result2, gmpnum_result2);
+#endif
+	
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
