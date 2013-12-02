@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.7.0 
 
+- XSL:
+  . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
