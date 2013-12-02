@@ -1695,12 +1695,12 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
-	zend_str_size_int n;
+	unsigned int n;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
 		return FAILURE;
-	} else if (!X509_digest(peer, mdtype, md, (unsigned int *)&n)) {
+	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not generate signature");
 		return FAILURE;
 	}
@@ -4716,6 +4716,14 @@ PHP_FUNCTION(openssl_sign)
 		return;
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x0090800fL
+	if (data_len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				UINT_MAX, data_len);
+		RETURN_FALSE;
+	}
+#endif
+
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param cannot be coerced into a private key");
@@ -4742,7 +4750,7 @@ PHP_FUNCTION(openssl_sign)
 	sigbuf = emalloc(siglen + 1);
 
 	EVP_SignInit(&md_ctx, mdtype);
-	EVP_SignUpdate(&md_ctx, data, data_len);
+	EVP_SignUpdate(&md_ctx, data, data_len);INT_MAX;
 	if (EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, pkey)) {
 		zval_dtor(signature);
 		sigbuf[siglen] = '\0';
@@ -4778,6 +4786,19 @@ PHP_FUNCTION(openssl_verify)
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSZ|z", &data, &data_len, &signature, &signature_len, &key, &method) == FAILURE) {
 		return;
+	}
+
+#if OPENSSL_VERSION_NUMBER < 0x0090800fL
+	if (data_len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				UINT_MAX, data_len);
+		RETURN_FALSE;
+	}
+#endif
+	if (signature_len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Signature is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				UINT_MAX, signature_len);
+		RETURN_FALSE;
 	}
 
 	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
@@ -5384,6 +5405,15 @@ PHP_FUNCTION(openssl_digest)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|b", &data, &data_len, &method, &method_len, &raw_output) == FAILURE) {
 		return;
 	}
+
+#if OPENSSL_VERSION_NUMBER < 0x0090800fL
+	if (data_len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				UINT_MAX, data_len);
+		RETURN_FALSE;
+	}
+#endif
+
 	mdtype = EVP_get_digestbyname(method);
 	if (!mdtype) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
