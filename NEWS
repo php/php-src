@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     1600). (Derick, T. Carter)
   . Fixed bug #61599 (Wrong Day of Week). (Derick, T. Carter)
 
+- XSL
+  . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
+    function). (Mike)
+
 ?? ??? 2013, PHP 5.4.23
 
 - Core:
