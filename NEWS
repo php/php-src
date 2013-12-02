@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
+- XSL
+  . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
+    function). (Mike)
+
 ?? ??? 2013, PHP 5.5.7
 
 - CLI server:
