@@ -64,6 +64,9 @@ The following switches change the default behaviour of phpdbg:
  - -q do not print banner on startup
  - -r jump straight to run
  - -E enable step through eval()
+ - -l listen ports for remote mode
+ - -a listen address for remote mode
+ - -S override SAPI name
 
 *Note: passing -rr will cause phpdbg to quit after execution, rather than returning to the console*
 
