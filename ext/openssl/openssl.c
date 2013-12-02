@@ -4750,7 +4750,7 @@ PHP_FUNCTION(openssl_sign)
 	sigbuf = emalloc(siglen + 1);
 
 	EVP_SignInit(&md_ctx, mdtype);
-	EVP_SignUpdate(&md_ctx, data, data_len);INT_MAX;
+	EVP_SignUpdate(&md_ctx, data, data_len);
 	if (EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, pkey)) {
 		zval_dtor(signature);
 		sigbuf[siglen] = '\0';
