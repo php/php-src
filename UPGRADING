@@ -42,6 +42,9 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Added constant scalar expressions syntax
+  (https://wiki.php.net/rfc/const_scalar_exprs)
+
 - Added dedicated syntax for variadic functions.
   (https://wiki.php.net/rfc/variadics)
 
