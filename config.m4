@@ -17,7 +17,7 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_DEFINE(PHPDBG_DEBUG, 0, [ ])
   fi
 
-  PHP_PHPDBG_CFLAGS="-I$abc_srcdir"
+  PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
   PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c"
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)

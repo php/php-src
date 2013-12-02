@@ -394,7 +394,7 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 					int arg;
 					for (arg=1; arg<input->argc; arg++) {
 						phpdbg_debug(
-							"\t#%d: [%s=%d]",
+							"\t#%d: [%s=%zu]",
 							arg,
 							input->argv[arg]->string,
 							input->argv[arg]->length);

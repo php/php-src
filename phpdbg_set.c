@@ -151,7 +151,7 @@ PHPDBG_SET(colors) /* {{{ */
 			phpdbg_error(
 				"set colors used incorrectly: set colors <on|off>");
 	}
-	
+
 done:
 	return SUCCESS;
 } /* }}} */
