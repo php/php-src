@@ -46,6 +46,9 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
+#ifdef PHP_WIN32
+# include "win32/time.h"
+#endif
 
 #if HAVE_PGSQL
 
@@ -2609,9 +2612,9 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_
 			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
 			if (element) {
 				char *data;
-				int data_len;
+				zend_str_size_int data_len;
 				int should_copy=0;
-				const uint element_len = strlen(element);
+				const zend_str_size_uint element_len = strlen(element);
 
 				data = safe_estrndup(element, element_len);
 				data_len = element_len;
@@ -3367,7 +3370,7 @@ PHP_FUNCTION(pg_lo_write)
   	php_int_t z_len;
 	zend_str_size_int str_len;
 	int nbytes;
-	int len;
+	zend_str_size_int len;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -4332,7 +4335,7 @@ static char* php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 	char *result, *rp;
 	const char *s;
 	size_t tmp_len;
-	int input_len = len;
+	php_int_t input_len = len;
 	char quote_char = escape_literal ? '\'' : '"';
 
 	if (!conn) {
