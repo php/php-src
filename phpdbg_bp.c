@@ -128,8 +128,95 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 					noted = 1;
 				}
 
-				fprintf(
-					handle, "break %s::%s\n", brake->class_name, brake->func_name);
+				fprintf(handle, "break %s::%s\n", brake->class_name, brake->func_name);
+			}
+		}
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_METHOD_OPLINE_BP) {
+		HashTable *class, *method;
+		phpdbg_breakopline_t *brake;
+		HashPosition mposition[2];
+		zend_bool noted = 0;
+
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE];
+
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+		     zend_hash_get_current_data_ex(table, (void**) &class, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(table, &position)) {
+			for (zend_hash_internal_pointer_reset_ex(class, &mposition[0]);
+			     zend_hash_get_current_data_ex(class, (void**) &method, &mposition[0]) == SUCCESS;
+			     zend_hash_move_forward_ex(class, &mposition[0])) {
+				noted = 0;
+
+				for (zend_hash_internal_pointer_reset_ex(method, &mposition[1]);
+				     zend_hash_get_current_data_ex(method, (void**) &brake, &mposition[1]) == SUCCESS;
+				     zend_hash_move_forward_ex(method, &mposition[1])) {
+					if (!noted) {
+						phpdbg_notice(
+							"Exporting method opline breakpoints in %s::%s (%d)",
+							brake->class_name, brake->func_name, zend_hash_num_elements(method));
+						noted = 1;
+					}
+
+					fprintf(handle, "break %s::%s#%d\n", brake->class_name, brake->func_name, brake->opline);
+				}
+			}
+		}
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_FUNCTION_OPLINE_BP) {
+		HashTable *function;
+		phpdbg_breakopline_t *brake;
+		HashPosition fposition;
+		zend_bool noted = 0;
+
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE];
+
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void**) &function, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+			noted = 0;
+
+			for (zend_hash_internal_pointer_reset_ex(function, &fposition);
+				zend_hash_get_current_data_ex(function, (void**) &brake, &fposition) == SUCCESS;
+				zend_hash_move_forward_ex(function, &fposition)) {
+				if (!noted) {
+					phpdbg_notice(
+						"Exporting function opline breakpoints in %s (%d)",
+						brake->func_name, zend_hash_num_elements(function));
+					noted = 1;
+				}
+
+				fprintf(handle, "break %s#%d\n", brake->func_name, brake->opline);
+			}
+		}
+	}
+
+	if (PHPDBG_G(flags) & PHPDBG_HAS_FILE_OPLINE_BP) {
+		HashTable *file;
+		phpdbg_breakopline_t *brake;
+		HashPosition fposition;
+		zend_bool noted = 0;
+
+		table = &PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE];
+
+		for (zend_hash_internal_pointer_reset_ex(table, &position);
+			zend_hash_get_current_data_ex(table, (void**) &file, &position) == SUCCESS;
+			zend_hash_move_forward_ex(table, &position)) {
+			noted = 0;
+
+			for (zend_hash_internal_pointer_reset_ex(file, &fposition);
+				zend_hash_get_current_data_ex(file, (void**) &brake, &fposition) == SUCCESS;
+				zend_hash_move_forward_ex(file, &fposition)) {
+				if (!noted) {
+					phpdbg_notice(
+						"Exporting file opline breakpoints in %s (%d)",
+						brake->class_name, zend_hash_num_elements(file));
+					noted = 1;
+				}
+
+				fprintf(handle, "break a %s#%d\n", brake->func_name, brake->opline);
 			}
 		}
 	}
@@ -146,8 +233,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 			zend_hash_get_current_data_ex(table, (void**) &brake, &position) == SUCCESS;
 			zend_hash_move_forward_ex(table, &position)) {
 
-			fprintf(
-				handle, "break op %s\n", brake->name);
+			fprintf(handle, "break op %s\n", brake->name);
 		}
 	}
 
@@ -163,8 +249,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 			zend_hash_get_current_data_ex(table, (void**) &brake, &position) == SUCCESS;
 			zend_hash_move_forward_ex(table, &position)) {
 
-			fprintf(
-				handle, "break on %s\n", Z_STRVAL(brake->code));
+			fprintf(handle, "break on %s\n", Z_STRVAL(brake->code));
 		}
 	}
 } /* }}} */
@@ -333,7 +418,11 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 		return;
 	}
 
-	if (zend_hash_find(func_table, op_array->function_name?op_array->function_name:"", op_array->function_name?strlen(op_array->function_name):0, (void **)&oplines_table) == FAILURE) {
+	if (op_array->function_name == NULL) {
+		if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE], op_array->filename, strlen(op_array->filename), (void **)&oplines_table) == FAILURE) {
+			return;
+		}
+	} else if (zend_hash_find(func_table, op_array->function_name?op_array->function_name:"", op_array->function_name?strlen(op_array->function_name):0, (void **)&oplines_table) == FAILURE) {
 		return;
 	}
 
@@ -346,7 +435,7 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 			zend_hash_internal_pointer_end(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
 			zend_hash_get_current_data(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (void **)&opline_break);
 
-			phpdbg_notice("Breakpoint #%d resolved at %s%s%s:%d (opline %#lx)", brake->id, brake->class_name?brake->class_name:"", brake->class_name?"::":"", brake->func_name, brake->opline, opline_break->opline);
+			phpdbg_notice("Breakpoint #%d resolved at %s%s%s#%d (opline %#lx)", brake->id, brake->class_name?brake->class_name:"", brake->class_name&&brake->func_name?"::":"", brake->func_name?brake->func_name:"", brake->opline, opline_break->opline);
 		}
 	}
 }
@@ -406,11 +495,11 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 
 	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
 		case FAILURE:
-			phpdbg_notice("Pending breakpoint #%d at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
+			phpdbg_notice("Pending breakpoint #%d at %s::%s#%d", new_break.id, new_break.class_name, new_break.func_name, opline);
 			break;
 
 		case SUCCESS:
-			phpdbg_notice("Breakpoint #%d added at %s::%s:%d", new_break.id, new_break.class_name, new_break.func_name, opline);
+			phpdbg_notice("Breakpoint #%d added at %s::%s#%d", new_break.id, new_break.class_name, new_break.func_name, opline);
 			break;
 
 		case 2:
@@ -436,7 +525,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 	}
 
 	if (zend_hash_index_exists(method_table, opline)) {
-		phpdbg_notice("Breakpoint already exists for %s::%s:%d", new_break.class_name, new_break.func_name, opline);
+		phpdbg_notice("Breakpoint already exists for %s::%s#%d", new_break.class_name, new_break.func_name, opline);
 		efree(new_break.func_name);
 		efree(new_break.class_name);
 		PHPDBG_G(bp_count)--;
@@ -462,11 +551,11 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int 
 
 	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
 		case FAILURE:
-			phpdbg_notice("Pending breakpoint #%d at %s:%d", new_break.id, new_break.func_name, new_break.opline);
+			phpdbg_notice("Pending breakpoint #%d at %s#%d", new_break.id, new_break.func_name, new_break.opline);
 			break;
 
 		case SUCCESS:
-			phpdbg_notice("Breakpoint #%d added at %s:%d", new_break.id, new_break.func_name, new_break.opline);
+			phpdbg_notice("Breakpoint #%d added at %s#%d", new_break.id, new_break.func_name, new_break.opline);
 			break;
 
 		case 2:
@@ -483,7 +572,7 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, int 
 	}
 
 	if (zend_hash_index_exists(func_table, opline)) {
-		phpdbg_notice("Breakpoint already exists for %s:%d", new_break.func_name, opline);
+		phpdbg_notice("Breakpoint already exists for %s#%d", new_break.func_name, opline);
 		efree(new_break.func_name);
 		PHPDBG_G(bp_count)--;
 		return;

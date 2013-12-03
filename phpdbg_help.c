@@ -238,6 +238,18 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("\t%sb [a] 0x7ff68f570e08", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break at the opline with the address provided");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak [address] my_function#1", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sb [a] my_function#1", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at the opline number 1 of the function my_function");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak [address] \\my\\class::method#2", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sb [a] \\my\\class::method#2", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at the opline number 2 of the method \\my\\class::method");
+	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak address test.php:3", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\t%sb a test.php:3", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at the opline number 3 of test.php");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak [lineno] 200", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb [l] 200", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break at line 200 of the currently executing file");

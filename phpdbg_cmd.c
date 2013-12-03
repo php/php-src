@@ -35,10 +35,12 @@ PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_
 			return "numeric";
 		case METHOD_PARAM:
 			return "method";
+		case NUMERIC_FUNCTION_PARAM:
+			return "function opline";
 		case NUMERIC_METHOD_PARAM:
 			return "method opline";
 		case FILE_PARAM:
-			return "file or function opline";
+			return "file or file opline";
 		case STR_PARAM:
 			return "string";
 		default: /* this is bad */
@@ -74,27 +76,39 @@ PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, php
 		char *line_pos = strrchr(str, ':');
 
 		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
-			param->len = line_pos - str;
-			param->str = estrndup(str, param->len);
-
 			if (strchr(str, ':') == line_pos) {
+				char path[MAXPATHLEN];
+
+				memcpy(path, str, line_pos - str);
+				path[line_pos - str] = 0;
 				*line_pos = 0;
-				param->file.name = phpdbg_resolve_path(param->str TSRMLS_CC);
-				param->num = param->file.line = strtol(line_pos+1, NULL, 0);
+				param->file.name = phpdbg_resolve_path(path TSRMLS_CC);
+				param->file.line = strtol(line_pos+1, NULL, 0);
 				param->type = FILE_PARAM;
-			} else {
+
+				goto parsed;
+			}
+		}
+
+		line_pos = strrchr(str, '#');
+
+		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
+			if (strchr(str, '#') == line_pos) {
 				*line_pos = 0;
-				 if (phpdbg_is_class_method(str, line_pos - str, &class_name, &func_name)) {
-					param->num = strtol(str, NULL, 0);
+				param->num = strtol(line_pos + 1, NULL, 0);
+
+				if (phpdbg_is_class_method(str, line_pos - str, &class_name, &func_name)) {
 					param->method.class = class_name;
 					param->method.name = func_name;
 					param->type = NUMERIC_METHOD_PARAM;
 				} else {
-					phpdbg_error("Impossible to parse %s", str);
+					param->len = line_pos - str;
+					param->str = estrndup(str, param->len);
+					param->type = NUMERIC_FUNCTION_PARAM;
 				}
-			}
 
-			goto parsed;
+				goto parsed;
+			}
 		}
 	}
 

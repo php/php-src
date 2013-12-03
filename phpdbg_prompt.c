@@ -817,6 +817,12 @@ PHPDBG_COMMAND(break) /* {{{ */
 		case METHOD_PARAM:
 			phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
 			break;
+		case NUMERIC_METHOD_PARAM:
+			phpdbg_set_breakpoint_method_opline(param->method.class, param->method.name, param->num TSRMLS_CC);
+			break;
+		case NUMERIC_FUNCTION_PARAM:
+			phpdbg_set_breakpoint_function_opline(param->str, param->num TSRMLS_CC);
+			break;
 		case FILE_PARAM:
 			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
 			break;

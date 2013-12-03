@@ -38,6 +38,7 @@ typedef enum {
 	METHOD_PARAM,
 	STR_PARAM,
 	NUMERIC_PARAM,
+	NUMERIC_FUNCTION_PARAM,
 	NUMERIC_METHOD_PARAM
 } phpdbg_param_type;
 
