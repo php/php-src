@@ -12,6 +12,10 @@ DBA INIFILE handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
+?>
 --EXPECT--
 database handler: inifile
 3NYNYY
