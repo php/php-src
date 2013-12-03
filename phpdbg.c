@@ -699,8 +699,11 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+	char *sapi_name;
 	char *ini_entries;
 	int   ini_entries_len;
+	char **zend_extensions = NULL;
+	zend_ulong zend_extensions_len = 0L;
 	zend_bool ini_ignore;
 	char *ini_override;
 	char *exec;
@@ -717,7 +720,6 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
-	char *sapi_name;
 	char *bp_tmp_file;
 #ifndef _WIN32
 	char *address;
@@ -768,6 +770,8 @@ phpdbg_main:
 	ini_entries_len = 0;
 	ini_ignore = 0;
 	ini_override = NULL;
+	zend_extensions = NULL;
+	zend_extensions_len = 0L;
 	exec = NULL;
 	exec_len = 0;
 	init_file = NULL;
@@ -782,6 +786,7 @@ phpdbg_main:
 	run = 0;
 	step = 0;
 	sapi_name = NULL;
+	
 	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
@@ -826,8 +831,13 @@ phpdbg_main:
 				  ini_entries_len += len + sizeof("=1\n\0") - 2;
 				}
 			} break;
+			
 			case 'z':
-				zend_load_extension(php_optarg);
+				zend_extensions_len++;
+				if (zend_extensions) {
+					zend_extensions = realloc(zend_extensions, sizeof(char*) * zend_extensions_len);
+				} else zend_extensions = malloc(sizeof(char*) * zend_extensions_len);
+				zend_extensions[zend_extensions_len-1] = strdup(php_optarg);
 			break;
 
 			/* begin phpdbg options */
@@ -950,12 +960,35 @@ phpdbg_main:
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
 	}
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
+	
+	if (zend_extensions_len) {
+		zend_ulong zend_extension = 0L;
+		
+		while (zend_extension < zend_extensions_len) {
+			const char *ze = zend_extensions[zend_extension];
+			size_t ze_len = strlen(ze);
+			
+			ini_entries = realloc(
+				ini_entries, ini_entries_len + (ze_len + (sizeof("zend_extension=\n"))));
+			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (sizeof("zend_extension=\n")-1));
+			ini_entries_len += (sizeof("zend_extension=")-1);
+			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
+			ini_entries_len += ze_len;
+			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
+			
+			free(zend_extensions[zend_extension]);
+			zend_extension++;
+		}
+		
+		free(zend_extensions);
+	}
 
 	phpdbg->ini_entries = ini_entries;
-
+		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+	
 		zend_activate(TSRMLS_C);
-
+		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifdef ZEND_SIGNALS
