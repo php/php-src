@@ -1069,9 +1069,47 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position);
 			     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void**) &brake, &position) == SUCCESS;
 			     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
-				phpdbg_writeln("#%d\t\t%s%s",	
-				 	brake->id, brake->code, 
-				 	((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+				if (brake->paramed) {
+					switch (brake->param.type) {
+						case STR_PARAM:
+							phpdbg_writeln("#%d\t\tat %s if %s%s",	
+				 				brake->id, 
+				 				brake->param.str,
+				 				brake->code, 
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+						
+						case METHOD_PARAM:
+							phpdbg_writeln("#%d\t\tat %s::%s if %s%s",	
+				 				brake->id, 
+				 				brake->param.method.class,
+				 				brake->param.method.name,
+				 				brake->code, 
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+						
+						case FILE_PARAM:
+							phpdbg_writeln("#%d\t\tat %s:%lu if %s%s",	
+				 				brake->id, 
+				 				brake->param.file.name,
+				 				brake->param.file.line,
+				 				brake->code,
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+						
+						case ADDR_PARAM:
+							phpdbg_writeln("#%d\t\tat #%lx if %s%s",	
+				 				brake->id, 
+				 				brake->param.addr,
+				 				brake->code, 
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+					}
+				} else {
+					phpdbg_writeln("#%d\t\tif %s%s",	
+				 		brake->id, brake->code, 
+				 		((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+				}
 			}
 		} break;
 
