@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	unsigned long datalen;
+	php_uint_t datalen;
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
@@ -150,14 +150,14 @@ typedef struct {
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
-	unsigned long convbufsize;
+	php_uint_t convbufsize;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	unsigned _spare:30;
 } pdo_odbc_stmt;
 
 typedef struct {
-	SQLINTEGER len;
+	SQLLEN len;
 	SQLSMALLINT paramtype;
 	char *outbuf;
 	unsigned is_unicode:1;
