@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
     Produces invalid Markup). (Mike)
 
+- Filter:
+  . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
+
 - Sockets:
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
