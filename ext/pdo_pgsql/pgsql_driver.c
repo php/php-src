@@ -45,7 +45,7 @@
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	register int i = strlen(message)-1;
+	register zend_str_size_int i = strlen(message)-1;
 	char *tmp;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
@@ -156,7 +156,7 @@ static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
 		zend_off_t *newoffset TSRMLS_DC)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
-	int pos = lo_lseek(self->conn, self->lfd, offset, whence);
+	zend_off_t pos = lo_lseek(self->conn, self->lfd, offset, whence);
 	*newoffset = pos;
 	return pos >= 0 ? 0 : -1;
 }
@@ -572,7 +572,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 
 	if (status == PGRES_COPY_IN && pgsql_result) {
 		int command_failed = 0;
-		int buffer_len = 0;
+		zend_str_size_int buffer_len = 0;
 		zval **tmp;
 		HashPosition pos;
 

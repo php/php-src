@@ -576,8 +576,8 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 			break;
 			
 		case PDO_PARAM_INT:
-			if (value && value_len == sizeof(long)) {
-				ZVAL_LONG(dest, *(long*)value);
+			if (value && value_len == sizeof(php_int_t)) {
+				ZVAL_LONG(dest, *(php_int_t*)value);
 				break;
 			}
 			ZVAL_NULL(dest);
