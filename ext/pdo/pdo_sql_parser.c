@@ -426,23 +426,23 @@ yy45:
 
 struct placeholder {
 	char *pos;
-	int len;
+	zend_str_size_int len;
 	int bindno;
-	int qlen;		/* quoted length of value */
+	zend_str_size_int qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	struct placeholder *next;
 };
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
-	char **outquery, int *outquery_len TSRMLS_DC)
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, zend_str_size_int inquery_len, 
+	char **outquery, zend_str_size_int *outquery_len TSRMLS_DC)
 {
 	Scanner s;
 	char *ptr, *newbuffer;
 	int t;
 	int bindno = 0;
 	int ret = 0;
-	int newbuffer_len;
+	zend_str_size_int newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;
@@ -456,7 +456,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
-				int len = s.cur - s.tok;
+				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
@@ -601,7 +601,7 @@ safe:
 						case IS_LONG:
 						case IS_DOUBLE:
 							convert_to_string(&tmp_param);
-							plc->qlen = Z_STRLEN(tmp_param);
+							plc->qlen = Z_STRSIZE(tmp_param);
 							plc->quoted = estrdup(Z_STRVAL(tmp_param));
 							plc->freeq = 1;
 							break;
@@ -609,7 +609,7 @@ safe:
 						default:
 							convert_to_string(&tmp_param);
 							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
-									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
+									Z_STRSIZE(tmp_param), &plc->quoted, &plc->qlen,
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
@@ -622,7 +622,7 @@ safe:
 				}
 			} else {
 				plc->quoted = Z_STRVAL_P(param->parameter);
-				plc->qlen = Z_STRLEN_P(param->parameter);
+				plc->qlen = Z_STRSIZE_P(param->parameter);
 			}
 			newbuffer_len += plc->qlen;
 		}
@@ -773,7 +773,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
                    bind placeholders are at least 2 characters, so
                    the accommodate their own "'s
                 */
-				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
+				newbuffer_len += padding * Z_STRSIZE_P(param->parameter);
 			}
 			zend_hash_move_forward(params);
 		}
@@ -809,16 +809,16 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 				
 				/* quote the bind value if necessary */
 				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
+					Z_STRSIZE_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
 				{
 					memcpy(ptr, quotedstr, quotedstrlen);
 					ptr += quotedstrlen;
 					*outquery_len += quotedstrlen;
 					efree(quotedstr);
 				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
+					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRSIZE_P(param->parameter));
+					ptr += Z_STRSIZE_P(param->parameter);
+					*outquery_len += (Z_STRSIZE_P(param->parameter));
 				}
 			}
 			else {
@@ -845,16 +845,16 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 				
 				/* quote the bind value if necessary */
 				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
-					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
+					Z_STRSIZE_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
 				{
 					memcpy(ptr, quotedstr, quotedstrlen);
 					ptr += quotedstrlen;
 					*outquery_len += quotedstrlen;
 					efree(quotedstr);
 				} else {
-					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRLEN_P(param->parameter));
-					ptr += Z_STRLEN_P(param->parameter);
-					*outquery_len += (Z_STRLEN_P(param->parameter));
+					memcpy(ptr, Z_STRVAL_P(param->parameter), Z_STRSIZE_P(param->parameter));
+					ptr += Z_STRSIZE_P(param->parameter);
+					*outquery_len += (Z_STRSIZE_P(param->parameter));
 				}
 			}
 			else {

@@ -203,7 +203,7 @@ PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 	zend_hash_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
 }
 
-pdo_driver_t *pdo_find_driver(const char *name, int namelen)
+pdo_driver_t *pdo_find_driver(const char *name, zend_str_size_int namelen)
 {
 	pdo_driver_t **driver = NULL;
 	
@@ -213,7 +213,7 @@ pdo_driver_t *pdo_find_driver(const char *name, int namelen)
 }
 
 PDO_API int php_pdo_parse_data_source(const char *data_source,
-		unsigned long data_source_len, struct pdo_data_src_parser *parsed,
+		php_uint_t data_source_len, struct pdo_data_src_parser *parsed,
 		int nparams)
 {
 	int i, j;
@@ -319,7 +319,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 	char buffer[65];
 	char outbuf[65] = "";
 	register char *p;
-	long long_val;
+	php_int_t long_val;
 	char *dst = outbuf;
 
 	if (i64 < 0) {
@@ -336,15 +336,15 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
 	p = &buffer[sizeof(buffer)-1];
 	*p = '\0';
 
-	while ((pdo_uint64_t)i64 > (pdo_uint64_t)LONG_MAX) {
+	while ((pdo_uint64_t)i64 > (pdo_uint64_t)PHP_INT_MAX) {
 		pdo_uint64_t quo = (pdo_uint64_t)i64 / (unsigned int)10;
 		unsigned int rem = (unsigned int)(i64 - quo*10U);
 		*--p = digit_vec[rem];
 		i64 = (pdo_int64_t)quo;
 	}
-	long_val = (long)i64;
+	long_val = (php_int_t)i64;
 	while (long_val != 0) {
-		long quo = long_val / 10;
+		php_int_t quo = long_val / 10;
 		*--p = digit_vec[(unsigned int)(long_val - quo * 10)];
 		long_val = quo;
 	}
