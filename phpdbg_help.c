@@ -246,6 +246,13 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("\t%sb on ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break when the condition evaluates to true");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak at phpdbg::isGreat if ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at every opcode in phpdbg::isGreat when the condition evaluates to true");
+	phpdbg_writeln("\t%sbreak at test.php:20 if ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at every opcode on line 20 of test.php when the condition evaluates to true");
+	phpdbg_write("\t");
+	phpdbg_notice("The location can be anything accepted by file, func, method, or address break commands");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak op ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb O ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break on every occurence of the opcode provided");

@@ -78,6 +78,13 @@ PHPDBG_BREAK(on) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_BREAK(at) /* {{{ */
+{
+	phpdbg_set_breakpoint_at(param, input TSRMLS_CC);
+
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_BREAK(lineno) /* {{{ */
 {
 	switch (param->type) {

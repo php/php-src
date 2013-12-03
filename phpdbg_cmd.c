@@ -119,6 +119,120 @@ PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
+PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest TSRMLS_DC) /* {{{ */
+{
+	switch ((dest->type = src->type)) {
+		case STR_PARAM:
+			dest->str = estrndup(src->str, src->len);
+			dest->len = src->len;
+		break;
+		
+		case ADDR_PARAM:
+			dest->addr = src->addr;
+		break;
+		
+		case NUMERIC_PARAM:
+			dest->num = src->num;
+		break;
+		
+		case METHOD_PARAM:
+			dest->method.class = estrdup(src->method.class);
+			dest->method.name = estrdup(src->method.name);
+		break;
+		
+		case FILE_PARAM:
+			dest->file.name = estrdup(src->file.name);
+			dest->file.line = src->file.line;
+		break;
+		
+		case EMPTY_PARAM: { /* do nothing */ } break;
+	}
+} /* }}} */
+
+PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+{
+	zend_ulong hash = param->type;
+	
+	switch (param->type) {
+		case STR_PARAM:
+			hash += zend_inline_hash_func(param->str, param->len);
+		break;
+		
+		case METHOD_PARAM:
+			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
+			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
+		break;
+		
+		case FILE_PARAM:
+			hash += zend_inline_hash_func(param->file.name, strlen(param->file.name));
+			hash += param->file.line;
+		break;
+		
+		case ADDR_PARAM:
+			hash += param->addr;
+		break;
+		
+		case NUMERIC_PARAM:
+			hash += param->num;
+		break;
+		
+		case EMPTY_PARAM: { /* do nothing */ } break;
+	}
+	
+	return hash;
+} /* }}} */
+
+PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r TSRMLS_DC) /* {{{ */
+{
+	if (l && r) {
+		if (l->type == r->type) {
+			switch (l->type) {
+				case STR_PARAM:
+					return (l->len == r->len) && 
+							(memcmp(l->str, r->str, l->len) == SUCCESS);
+							
+				case NUMERIC_PARAM:
+					return (l->num == r->num);
+					
+				case ADDR_PARAM:
+					return (l->addr == r->addr);
+					
+				case FILE_PARAM: {
+					if (l->file.line == r->file.line) {
+						size_t lengths[2] = {
+							strlen(l->file.name), strlen(r->file.name)};
+						
+						if (lengths[0] == lengths[1]) {
+							return (memcmp(
+								l->file.name, r->file.name, lengths[0]) == SUCCESS);
+						}
+					}
+				} break;	
+				
+				case METHOD_PARAM: {
+					size_t lengths[2] = {
+						strlen(l->method.class), strlen(r->method.class)};
+					if (lengths[0] == lengths[1]) {
+						if (memcmp(l->method.class, r->method.class, lengths[0]) == SUCCESS) {
+							lengths[0] = strlen(l->method.name);
+							lengths[1] = strlen(r->method.name);
+							
+							if (lengths[0] == lengths[1]) {
+								return (memcmp(
+									l->method.name, r->method.name, lengths[0]) == SUCCESS);
+							}
+						}
+					}
+				} break;
+				
+				case EMPTY_PARAM:
+					return 1;
+			}
+		}
+	}
+	return 0;
+} /* }}} */
+
 PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) /* {{{ */
 {
 	char *p;

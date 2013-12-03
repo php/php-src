@@ -83,6 +83,8 @@ typedef struct _phpdbg_breakop_t {
 typedef struct _phpdbg_breakcond_t {
 	phpdbg_breakbase(code);
 	size_t			code_len;
+	zend_bool       paramed;
+	phpdbg_param_t  param;
 	zend_ulong      hash;
 	zend_op_array  *ops;
 } phpdbg_breakcond_t;
@@ -94,7 +96,8 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char*
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char* opname, size_t opname_len TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_expression(const char* expression, size_t expression_len TSRMLS_DC); /* }}} */
+PHPDBG_API void phpdbg_set_breakpoint_expression(const char* expression, size_t expression_len TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Detection API */
 PHPDBG_API phpdbg_breakbase_t* phpdbg_find_breakpoint(zend_execute_data* TSRMLS_DC); /* }}} */
