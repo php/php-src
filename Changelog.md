@@ -7,6 +7,7 @@ Version 0.3.0 2013-00-00
 1. Added ability to disable an enable a single breakpoint
 2. Added ability to override SAPI name
 3. Added extended conditional breakpoint support "break at"
+4. Fix loading of zend extnsions with -z
 
 Version 0.2.0 2013-11-31
 ------------------------
