@@ -445,8 +445,28 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 	zend_function *func;
 
 	if (new_break->func_name == NULL) {
-		/* no idea yet ...; currently only settable before including of file */
-		return FAILURE;
+		if (EG(current_execute_data) == NULL) {
+			if (PHPDBG_G(ops) != NULL && !memcmp(PHPDBG_G(ops)->filename, new_break->class_name, new_break->class_len)) {
+				if (phpdbg_resolve_op_array_break(new_break, PHPDBG_G(ops) TSRMLS_CC) == SUCCESS) {
+					return SUCCESS;
+				} else {
+					return 2;
+				}
+			}
+			return FAILURE;
+		} else {
+			zend_execute_data *execute_data = EG(current_execute_data);
+			do {
+				if (execute_data->op_array->function_name == NULL && execute_data->op_array->scope == NULL && !memcmp(execute_data->op_array->filename, new_break->class_name, new_break->class_len)) {
+					if (phpdbg_resolve_op_array_break(new_break, execute_data->op_array TSRMLS_CC) == SUCCESS) {
+						return SUCCESS;
+					} else {
+						return 2;
+					}
+				}
+			} while ((execute_data = execute_data->prev_execute_data) != NULL);
+			return FAILURE;
+		}
 	}
 
 	if (new_break->class_name != NULL) {
@@ -624,7 +644,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, int opline T
 		return;
 	}
 
-	PHPDBG_G(flags) |= PHPDBG_HAS_FUNCTION_OPLINE_BP;
+	PHPDBG_G(flags) |= PHPDBG_HAS_FILE_OPLINE_BP;
 
 	zend_hash_index_update(file_table, new_break.opline, &new_break, sizeof(phpdbg_breakopline_t), NULL);
 }
