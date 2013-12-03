@@ -287,13 +287,13 @@ static void birdstep_del_result(HashTable *list,int ind)
 PHP_FUNCTION(birdstep_connect)
 {
 	char *serv, *user, *pass;
-	int serv_len, user_len, pass_len;
+	zend_str_size_int serv_len, user_len, pass_len;
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
-	long ind;
+	php_int_t ind;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
 	}
 	
@@ -324,10 +324,10 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	long id;
+	php_int_t id;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -346,8 +346,9 @@ PHP_FUNCTION(birdstep_close)
 PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
-	long ind;
-	int query_len, indx;
+	php_int_t ind;
+	zend_str_size_int query_len;
+	int indx;
 	VConn *conn;
 	Vresult *res;
 	RETCODE stat;
@@ -426,13 +427,13 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
 	UWORD   RowStat[1];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 
@@ -460,7 +461,7 @@ PHP_FUNCTION(birdstep_fetch)
 PHP_FUNCTION(birdstep_result)
 {
 	zval **col;
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -469,7 +470,7 @@ PHP_FUNCTION(birdstep_result)
 	SWORD indx = -1;
 	char *field = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lZ", &ind, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iZ", &ind, &col) == FAILURE) {
 		return;
 	}
 
@@ -553,10 +554,10 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 
@@ -572,11 +573,11 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -595,11 +596,11 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -618,11 +619,11 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -641,11 +642,11 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	long id;
+	php_int_t id;
 	RETCODE stat;
 	VConn *conn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &id) == FAILURE) {
 		return;
 	}
 
@@ -664,11 +665,11 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	long ind, col;
+	php_int_t ind, col;
 	Vresult *res;
 	SWORD indx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &ind, &col) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &ind, &col) == FAILURE) {
 		return;
 	}
 
@@ -687,10 +688,10 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	long ind;
+	php_int_t ind;
 	Vresult *res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &ind) == FAILURE) {
 		return;
 	}
 

@@ -28,28 +28,28 @@
 
 typedef struct VConn {
 	HDBC    hdbc;
-	long    index;
+	php_int_t    index;
 } VConn;
 
 typedef struct {
 	char name[32];
 	char *value;
-	long vallen;
+	php_int_t vallen;
 	SDWORD valtype;
 } VResVal;
 
 typedef struct Vresult {
 	HSTMT   hstmt;
 	VConn   *conn; 
-	long    index;
+	php_int_t    index;
 	VResVal *values;
-	long    numcols;
+	php_int_t    numcols;
 	int     fetched;
 } Vresult;
 
 typedef struct {
-	long num_links;
-	long max_links;
+	php_int_t num_links;
+	php_int_t max_links;
 	int le_link,le_result;
 } birdstep_module;
 
