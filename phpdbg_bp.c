@@ -142,9 +142,35 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 						} break;
 
 						case PHPDBG_BREAK_COND: {
-							fprintf(handle,
-								"break on %s\n",
-								((phpdbg_breakcond_t*)brake)->code);
+							phpdbg_breakcond_t *conditional = (phpdbg_breakcond_t*) brake;
+							
+							if (conditional->paramed) {
+								switch (conditional->param.type) {
+									case STR_PARAM:
+										fprintf(handle, 
+											"break at %s if %s\n", conditional->param.str, conditional->code);
+									break;
+									
+									case METHOD_PARAM:
+										fprintf(handle, 
+											"break at %s::%s if %s\n", 
+											conditional->param.method.class, conditional->param.method.name,
+											conditional->code);
+									break;
+									
+									case FILE_PARAM:
+										fprintf(handle, 
+											"break at %s:%lu if %s\n", 
+											conditional->param.file.name, conditional->param.file.line,
+											conditional->code);
+									break;
+									
+									default: { /* do nothing */ } break;
+								}
+							} else {
+								fprintf(
+									handle, "break on %s\n", conditional->code);
+							}
 						} break;
 					}
 				}
@@ -427,6 +453,8 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpd
 					phpdbg_clear_param(
 						&new_param TSRMLS_CC);
 					goto usage;
+					
+				default: { /* do nothing */ } break;
 			}
 			
 			expr_hash += phpdbg_hash_param(&new_param TSRMLS_CC);
