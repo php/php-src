@@ -907,12 +907,26 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 		} break;
 
 		case PHPDBG_BREAK_COND: {
-			phpdbg_notice("Conditional breakpoint #%d: (%s) %s:%u, hits: %lu",
-				((phpdbg_breakcond_t*)brake)->id,
-				((phpdbg_breakcond_t*)brake)->code,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
-				((phpdbg_breakcond_t*)brake)->hits);
+			if (((phpdbg_breakcond_t*)brake)->paramed) {
+				char *param;
+				phpdbg_notice("Conditional breakpoint #%d: at %s if %s %s:%u, hits: %lu",
+					((phpdbg_breakcond_t*)brake)->id,
+					phpdbg_param_tostring(&((phpdbg_breakcond_t*)brake)->param, &param TSRMLS_CC),
+					((phpdbg_breakcond_t*)brake)->code,
+					zend_get_executed_filename(TSRMLS_C),
+					zend_get_executed_lineno(TSRMLS_C),
+					((phpdbg_breakcond_t*)brake)->hits);
+				if (param) 
+					free(param);
+			} else {
+				phpdbg_notice("Conditional breakpoint #%d: on %s == true %s:%u, hits: %lu",
+					((phpdbg_breakcond_t*)brake)->id,
+					((phpdbg_breakcond_t*)brake)->code,
+					zend_get_executed_filename(TSRMLS_C),
+					zend_get_executed_lineno(TSRMLS_C),
+					((phpdbg_breakcond_t*)brake)->hits);
+			}
+			
 		} break;
 
 		default: {
