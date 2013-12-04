@@ -797,6 +797,14 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
+/*
+ * This comes from various sources that like to contradict. I'm going with the
+ * format here because of:
+ * http://msdn.microsoft.com/en-us/library/windows/desktop/aa384321%28v=vs.85%29.aspx
+ * and http://curl.haxx.se/rfc/cookie_spec.html
+ */
+#define DATE_FORMAT_COOKIE   "l, d-M-Y H:i:s T"
+
 #define DATE_TZ_ERRMSG \
 	"It is not safe to rely on the system's timezone settings. You are " \
 	"*required* to use the date.timezone setting or the " \
@@ -827,7 +835,7 @@ PHP_MINIT_FUNCTION(date)
  *   with the variations that the only legal time zone is GMT
  *   and the separators between the elements of the date must be dashes."
  */
-	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_RFC850,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_COOKIE,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC822,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC850,  CONST_CS | CONST_PERSISTENT);
@@ -1981,12 +1989,25 @@ zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval
 	return (zend_object_iterator*)iterator;
 }
 
+static int implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor TSRMLS_DC)
+{
+	if (implementor->type == ZEND_USER_CLASS &&
+		!instanceof_function(implementor, date_ce_date TSRMLS_CC) &&
+		!instanceof_function(implementor, date_ce_immutable TSRMLS_CC)
+	) {
+		zend_error(E_ERROR, "DateTimeInterface can't be implemented by user classes");
+	}
+
+	return SUCCESS;
+}
+
 static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_immutable, ce_timezone, ce_interval, ce_period, ce_interface;
 
 	INIT_CLASS_ENTRY(ce_interface, "DateTimeInterface", date_funcs_interface);
 	date_ce_interface = zend_register_internal_interface(&ce_interface TSRMLS_CC);
+	date_ce_interface->interface_gets_implemented = implement_date_interface_handler;
 
 	INIT_CLASS_ENTRY(ce_date, "DateTime", date_funcs_date);
 	ce_date.create_object = date_object_new_date;
@@ -2002,7 +2023,7 @@ static void date_register_classes(TSRMLS_D)
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
 
 	REGISTER_DATE_CLASS_CONST_STRING("ATOM",    DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",  DATE_FORMAT_RFC850);
+	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",  DATE_FORMAT_COOKIE);
 	REGISTER_DATE_CLASS_CONST_STRING("ISO8601", DATE_FORMAT_ISO8601);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC822",  DATE_FORMAT_RFC822);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC850",  DATE_FORMAT_RFC850);
@@ -2602,6 +2623,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 
 	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
+	timelib_update_from_sse(dateobj->time);
 
 	dateobj->time->have_relative = 0;
 
@@ -3603,13 +3625,13 @@ PHP_FUNCTION(date_diff)
 	php_interval_obj *interval;
 	long          absolute = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_date, &object2, date_ce_date, &absolute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj1 = (php_date_obj *) zend_object_store_get_object(object1 TSRMLS_CC);
 	dateobj2 = (php_date_obj *) zend_object_store_get_object(object2 TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(dateobj1->time, DateTime);
-	DATE_CHECK_INITIALIZED(dateobj2->time, DateTime);
+	DATE_CHECK_INITIALIZED(dateobj1->time, DateTimeInterface);
+	DATE_CHECK_INITIALIZED(dateobj2->time, DateTimeInterface);
 	timelib_update_ts(dateobj1->time, NULL);
 	timelib_update_ts(dateobj2->time, NULL);
 
@@ -4387,7 +4409,7 @@ PHP_METHOD(DatePeriod, __construct)
 	
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
-		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_date, &options) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &isostr, &isostr_len, &options) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
 				zend_restore_error_handling(&error_handling TSRMLS_CC);

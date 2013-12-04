@@ -592,7 +592,10 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
+			if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
+				zend_ast_evaluate(&const_value, *(zend_ast **)str_index TSRMLS_CC);
+				zend_ast_destroy(*(zend_ast **)str_index);
+			} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
 				char *actual;
 				const char *save = str_index;
 				if ((colon = (char*)zend_memrchr(str_index, ':', str_index_len - 3))) {
@@ -660,6 +663,15 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		}
 		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
+	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		SEPARATE_ZVAL_IF_NOT_REF(pp);
+		p = *pp;
+
+		zend_ast_evaluate(&const_value, Z_AST_P(p) TSRMLS_CC);
+		if (inline_change) {
+			zend_ast_destroy(Z_AST_P(p));
+		}
+		ZVAL_COPY_VALUE(p, &const_value);
 	}
 	return 0;
 }
@@ -1064,6 +1076,14 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 		return FAILURE;
 	}
 
+	/* Verify class name before passing it to __autoload() */
+	if (strspn(name, "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\") != name_length) {
+		if (!key) {
+			free_alloca(lc_free, use_heap);
+		}
+		return FAILURE;
+	}
+	
 	if (EG(in_autoload) == NULL) {
 		ALLOC_HASHTABLE(EG(in_autoload));
 		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);

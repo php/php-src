@@ -29,6 +29,73 @@ static zend_object_handlers zend_generator_handlers;
 
 static zend_object_value zend_generator_create(zend_class_entry *class_type TSRMLS_DC);
 
+static void zend_generator_cleanup_unfinished_execution(zend_generator *generator TSRMLS_DC) /* {{{ */
+{
+	zend_execute_data *execute_data = generator->execute_data;
+	zend_op_array *op_array = execute_data->op_array;
+
+	if (generator->send_target) {
+		Z_DELREF_PP(generator->send_target);
+		generator->send_target = NULL;
+	}
+
+	/* Manually free loop variables, as execution couldn't reach their
+	 * SWITCH_FREE / FREE opcodes. */
+	{
+		/* -1 required because we want the last run opcode, not the
+		 * next to-be-run one. */
+		zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
+
+		int i;
+		for (i = 0; i < op_array->last_brk_cont; ++i) {
+			zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
+
+			if (brk_cont->start < 0) {
+				continue;
+			} else if (brk_cont->start > op_num) {
+				break;
+			} else if (brk_cont->brk > op_num) {
+				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
+
+				switch (brk_opline->opcode) {
+					case ZEND_SWITCH_FREE:
+						{
+							temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
+							zval_ptr_dtor(&var->var.ptr);
+						}
+						break;
+					case ZEND_FREE:
+						{
+							temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
+							zval_dtor(&var->tmp_var);
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	/* Clear any backed up stack arguments */
+	{
+		void **ptr = generator->stack->top - 1;
+		void **end = zend_vm_stack_frame_base(execute_data);
+
+		for (; ptr >= end; --ptr) {
+			zval_ptr_dtor((zval **) ptr);
+		}
+	}
+
+	/* If yield was used as a function argument there may be active
+	 * method calls those objects need to be freed */
+	while (execute_data->call >= execute_data->call_slots) {
+		if (execute_data->call->object) {
+			zval_ptr_dtor(&execute_data->call->object);
+		}
+		execute_data->call--;
+	}
+}
+/* }}} */
+
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
 	if (generator->value) {
@@ -61,65 +128,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			return;
 		}
 
-		/* If the generator is closed before it can finish execution (reach
-		 * a return statement) we have to free loop variables manually, as
-		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */
-		if (!finished_execution) {
-			/* -1 required because we want the last run opcode, not the
-			 * next to-be-run one. */
-			zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
-
-			int i;
-			for (i = 0; i < op_array->last_brk_cont; ++i) {
-				zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
-
-				if (brk_cont->start < 0) {
-					continue;
-				} else if (brk_cont->start > op_num) {
-					break;
-				} else if (brk_cont->brk > op_num) {
-					zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
-
-					switch (brk_opline->opcode) {
-						case ZEND_SWITCH_FREE:
-							{
-								temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
-								zval_ptr_dtor(&var->var.ptr);
-							}
-							break;
-						case ZEND_FREE:
-							{
-								temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
-								zval_dtor(&var->tmp_var);
-							}
-							break;
-					}
-				}
-			}
-		}
-
-		/* Clear any backed up stack arguments */
-		if (generator->stack != EG(argument_stack)) {
-			void **ptr = generator->stack->top - 1;
-			void **end = zend_vm_stack_frame_base(execute_data);
-
-			/* If the top stack element is the argument count, skip it */
-			if (execute_data->function_state.arguments) {
-				ptr--;
-			}
-
-			for (; ptr >= end; --ptr) {
-				zval_ptr_dtor((zval**) ptr);
-			}
-		}
-
-		while (execute_data->call >= execute_data->call_slots) {
-			if (execute_data->call->object) {
-				zval_ptr_dtor(&execute_data->call->object);
-			}
-			execute_data->call--;
-		}
-
 		/* We have added an additional stack frame in prev_execute_data, so we
 		 * have to free it. It also contains the arguments passed to the
 		 * generator (for func_get_args) so those have to be freed too. */
@@ -138,6 +146,12 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			}
 		}
 
+		/* Some cleanups are only necessary if the generator was closued
+		 * before it could finish execution (reach a return statement). */
+		if (!finished_execution) {
+			zend_generator_cleanup_unfinished_execution(generator TSRMLS_CC);
+		}
+
 		/* Free a clone of closure */
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			destroy_op_array(op_array TSRMLS_CC);
@@ -145,10 +159,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		efree(generator->stack);
-		if (generator->stack == EG(argument_stack)) {
-			/* abnormal exit for running generator */
-			EG(argument_stack) = NULL;
-		}
 		generator->execute_data = NULL;
 	}
 }
@@ -519,8 +529,12 @@ ZEND_METHOD(Generator, send)
 		return;
 	}
 
-	/* Put sent value into the TMP_VAR slot */
-	MAKE_COPY_ZVAL(&value, &generator->send_target->tmp_var);
+	/* Put sent value in the target VAR slot, if it is used */
+	if (generator->send_target) {
+		Z_DELREF_PP(generator->send_target);
+		Z_ADDREF_P(value);
+		*generator->send_target = value;
+	}
 
 	zend_generator_resume(generator TSRMLS_CC);
 
@@ -545,6 +559,8 @@ ZEND_METHOD(Generator, throw)
 	MAKE_COPY_ZVAL(&exception, exception_copy);
 
 	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_generator_ensure_initialized(generator TSRMLS_CC); 
 
 	if (generator->execute_data) {
 		/* Throw the exception in the context of the generator */
