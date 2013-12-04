@@ -864,9 +864,13 @@ phpdbg_main:
 			} break;
 
 			case 'i': { /* set init file */
+				if (init_file) {
+					free(init_file);
+				}
+				
 				init_file_len = strlen(php_optarg);
 				if (init_file_len) {
-					init_file = estrdup(php_optarg);
+					init_file = strdup(php_optarg);
 				}
 			} break;
 
@@ -975,7 +979,7 @@ phpdbg_main:
 			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
 			ini_entries_len += ze_len;
 			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
-			
+
 			free(zend_extensions[zend_extension]);
 			zend_extension++;
 		}
