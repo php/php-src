@@ -355,7 +355,7 @@ static uint zend_accel_persist_class_table_calc(HashTable *class_table TSRMLS_DC
 	return zend_hash_persist_calc(class_table, (int (*)(void* TSRMLS_DC)) zend_persist_class_entry_calc, sizeof(zend_class_entry*) TSRMLS_CC);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length TSRMLS_DC)
+uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, zend_str_size_uint key_length TSRMLS_DC)
 {
 	START_SIZE();
 

@@ -300,10 +300,10 @@ static int ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 }
 #endif
 
-static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
+static int filename_is_in_cache(char *filename, zend_str_size_int filename_len TSRMLS_DC)
 {
 	char *key;
-	int key_length;
+	zend_str_size_int key_length;
 	zend_file_handle handle = {0};
 	zend_persistent_script *persistent_script;
 

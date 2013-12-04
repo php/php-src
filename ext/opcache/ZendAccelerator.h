@@ -203,7 +203,11 @@ typedef struct _zend_persistent_script {
 	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
-		zend_uint_t        hits;
+#ifndef ZEND_WIN32
+		zend_uint_t  hits;
+#else
+		LONG         hits;
+#endif
 		unsigned int memory_consumption;
 		unsigned int checksum;
 		time_t       revalidate;
@@ -256,10 +260,10 @@ typedef struct _zend_accel_globals {
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	char                   *cwd;              /* current working directory or NULL */
-	int                     cwd_len;          /* "cwd" string length */
+	zend_str_size_int                     cwd_len;          /* "cwd" string length */
 	char                   *include_path_key; /* one letter key of current "include_path" */
 	char                   *include_path;     /* current section of "include_path" directive */
-	int                     include_path_len; /* "include_path" string length */
+	zend_str_size_int                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
@@ -268,13 +272,17 @@ typedef struct _zend_accel_globals {
 	zend_op                *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	int                     key_len;
+	zend_str_size_int                     key_len;
 	char                    key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
-	zend_uint_t   hits;
+#ifndef ZEND_WIN32
+	zend_uint_t  hits;
+#else
+	LONG         hits;
+#endif
 	zend_uint_t   misses;
 	zend_uint_t   blacklist_misses;
 	zend_uint_t   oom_restarts;     /* number of restarts because of out of memory */
@@ -292,8 +300,8 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_restart_reason restart_reason;
 	zend_bool       cache_status_before_restart;
 #ifdef ZEND_WIN32
-    zend_uint_t   mem_usage;
-    zend_uint_t   restart_in;
+	LONG mem_usage;
+	LONG restart_in;
 #endif
 	zend_bool       restart_in_progress;
     time_t          revalidate_at;
@@ -330,12 +338,12 @@ extern char *zps_api_failure_reason;
 void accel_shutdown(TSRMLS_D);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
-int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC);
+int  zend_accel_invalidate(const char *filename, zend_str_size_int filename_len, zend_bool force TSRMLS_DC);
 int  zend_accel_script_optimize(zend_persistent_script *persistent_script TSRMLS_DC);
 int  accelerator_shm_read_lock(TSRMLS_D);
 void accelerator_shm_read_unlock(TSRMLS_D);
 
-char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len TSRMLS_DC);
+char *accel_make_persistent_key_ex(zend_file_handle *file_handle, zend_str_size_int path_length, zend_str_size_int *key_len TSRMLS_DC);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)

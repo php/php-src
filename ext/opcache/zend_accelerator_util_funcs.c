@@ -1016,7 +1016,8 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		    persistent_script->full_path) {
 			char *name, *cfilename;
 			char haltoff[] = "__COMPILER_HALT_OFFSET__";
-			int len, clen;
+			zend_str_size_int len;
+			int clen;
 
 			cfilename = persistent_script->full_path;
 			clen = strlen(cfilename);

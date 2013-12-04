@@ -167,7 +167,7 @@ static ZEND_FUNCTION(accel_chdir)
 	}
 }
 
-static inline char* accel_getcwd(int *cwd_len TSRMLS_DC)
+static inline char* accel_getcwd(zend_str_size_int *cwd_len TSRMLS_DC)
 {
 	if (ZCG(cwd)) {
 		*cwd_len = ZCG(cwd_len);
@@ -916,20 +916,20 @@ static unsigned int zend_accel_script_checksum(zend_persistent_script *persisten
 /* Instead of resolving full real path name each time we need to identify file,
  * we create a key that consist from requested file name, current working
  * directory, current include_path, etc */
-char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len TSRMLS_DC)
+char *accel_make_persistent_key_ex(zend_file_handle *file_handle, zend_str_size_int path_length, zend_str_size_int *key_len TSRMLS_DC)
 {
-    int key_length;
+    zend_str_size_int key_length;
 
     /* CWD and include_path don't matter for absolute file names and streams */
     if (ZCG(accel_directives).use_cwd &&
         !IS_ABSOLUTE_PATH(file_handle->filename, path_length) &&
         !is_stream_path(file_handle->filename)) {
         char *include_path = NULL;
-        int include_path_len = 0;
+        zend_str_size_int include_path_len = 0;
         const char *parent_script = NULL;
-        int parent_script_len = 0;
-        int cur_len = 0;
-        int cwd_len;
+        zend_str_size_int parent_script_len = 0;
+        zend_str_size_int cur_len = 0;
+        zend_str_size_int cwd_len;
         char *cwd;
 
         if ((cwd = accel_getcwd(&cwd_len TSRMLS_CC)) == NULL) {
@@ -1042,12 +1042,12 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
 	return ZCG(key);
 }
 
-static inline char *accel_make_persistent_key(zend_file_handle *file_handle, int *key_len TSRMLS_DC)
+static inline char *accel_make_persistent_key(zend_file_handle *file_handle, zend_str_size_int *key_len TSRMLS_DC)
 {
 	return accel_make_persistent_key_ex(file_handle, strlen(file_handle->filename), key_len TSRMLS_CC);
 }
 
-int zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC)
+int zend_accel_invalidate(const char *filename, zend_str_size_int filename_len, zend_bool force TSRMLS_DC)
 {
 	char *realpath;
 	zend_persistent_script *persistent_script;
@@ -1101,7 +1101,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 }
 
 /* Adds another key for existing cached script */
-static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_hash_entry *bucket TSRMLS_DC)
+static void zend_accel_add_key(char *key, zend_str_size_uint key_length, zend_accel_hash_entry *bucket TSRMLS_DC)
 {
 	if (!zend_accel_hash_find(&ZCSG(hash), key, key_length + 1)) {
 		if (zend_accel_hash_is_full(&ZCSG(hash))) {
@@ -1120,7 +1120,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 	}
 }
 
-static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int *from_shared_memory TSRMLS_DC)
+static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_script *new_persistent_script, char *key, zend_str_size_uint key_length, int *from_shared_memory TSRMLS_DC)
 {
 	zend_accel_hash_entry *bucket;
 	uint memory_used;
@@ -1271,7 +1271,7 @@ static void zend_accel_set_auto_globals(int mask TSRMLS_DC)
 	}
 }
 
-static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_handle, int type, char *key, unsigned int key_length, zend_op_array **op_array_p, int *from_shared_memory TSRMLS_DC)
+static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_handle, int type, char *key, zend_str_size_uint key_length, zend_op_array **op_array_p, int *from_shared_memory TSRMLS_DC)
 {
 	zend_persistent_script *new_persistent_script;
 	zend_op_array *orig_active_op_array;
@@ -1465,7 +1465,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 {
 	zend_persistent_script *persistent_script = NULL;
 	char *key = NULL;
-	int key_length;
+	zend_str_size_int key_length;
 	int from_shared_memory; /* if the script we've got is stored in SHM */
 
 	if (!file_handle->filename ||
@@ -1995,7 +1995,7 @@ static char* persistent_zend_resolve_path(const char *filename, zend_str_size_in
 			/* we are in include_once or FastCGI request */
 			zend_file_handle handle;
 			char *key = NULL;
-			int key_length;
+			zend_str_size_int key_length;
 			char *resolved_path;
 			zend_accel_hash_entry *bucket;
 			zend_persistent_script *persistent_script;

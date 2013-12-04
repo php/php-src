@@ -38,7 +38,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 #define ADLER32_INIT 1     /* initial Adler-32 value */
 
-unsigned int zend_adler32(unsigned int checksum, signed char *buf, zend_str_size_uint len);
+unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len);
 
 #endif /* ZEND_ACCELERATOR_UTIL_FUNCS_H */
 
