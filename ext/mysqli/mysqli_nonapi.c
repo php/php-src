@@ -775,7 +775,7 @@ PHP_FUNCTION(mysqli_poll)
 	MYSQLND			**new_r_array = NULL, **new_e_array = NULL, **new_dont_poll_array = NULL;
 	long			sec = 0, usec = 0;
 	enum_func_status ret;
-	uint 			desc_num;
+	int 			desc_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!al|l", &r_array, &e_array, &dont_poll_array, &sec, &usec) == FAILURE) {
 		return;
