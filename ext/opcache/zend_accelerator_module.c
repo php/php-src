@@ -94,8 +94,8 @@ static int validate_api_restriction(TSRMLS_D)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	long *p;
-	long memsize;
+	php_int_t *p;
+	php_int_t memsize;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -105,7 +105,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	memsize = atoi(new_value);
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -132,8 +132,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	long *p;
-	long size;
+	php_int_t *p;
+	php_int_t size;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -143,7 +143,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	size = atoi(new_value);
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
@@ -179,7 +179,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
 	double *p;
-	long percentage;
+	php_int_t percentage;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -290,8 +290,8 @@ static int ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_class_entry **pce, **pce_orig;
 
-	if (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op2.u.constant), Z_STRLEN(EX(opline)->op2.u.constant) + 1, (void **)&pce) == FAILURE ||
-	    (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op1.u.constant), Z_STRLEN(EX(opline)->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
+	if (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op2.u.constant), Z_STRSIZE(EX(opline)->op2.u.constant) + 1, (void **)&pce) == FAILURE ||
+	    (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op1.u.constant), Z_STRSIZE(EX(opline)->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
 	     *pce != *pce_orig)) {
 		do_bind_inherited_class(EX(opline), EG(class_table), EX_T(EX(opline)->extended_value).class_entry, 0 TSRMLS_CC);
 	}
@@ -332,10 +332,10 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_array_ex(1, &zfilename) == FAILURE ||
 	    Z_TYPE_PP(zfilename) != IS_STRING ||
-	    Z_STRLEN_PP(zfilename) == 0) {
+	    Z_STRSIZE_PP(zfilename) == 0) {
 		return 0;
 	}
-	return filename_is_in_cache(Z_STRVAL_PP(zfilename), Z_STRLEN_PP(zfilename) TSRMLS_CC);
+	return filename_is_in_cache(Z_STRVAL_PP(zfilename), Z_STRSIZE_PP(zfilename) TSRMLS_CC);
 }
 
 static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
@@ -512,7 +512,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 			add_assoc_stringl(persistent_script_report, "last_used", str, len, 1);
 			add_assoc_long(persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
 			if (ZCG(accel_directives).validate_timestamps) {
-				add_assoc_long(persistent_script_report, "timestamp", (long)script->timestamp);
+				add_assoc_long(persistent_script_report, "timestamp", (php_int_t)script->timestamp);
 			}
 			timerclear(&exec_time);
 			timerclear(&fetch_time);
@@ -529,7 +529,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
    Obtain statistics information regarding code acceleration */
 static ZEND_FUNCTION(opcache_get_status)
 {
-	long reqs;
+	php_int_t reqs;
 	zval *memory_usage,*statistics,*scripts;
 	zend_bool fetch_scripts = 1;
 
@@ -699,10 +699,10 @@ static ZEND_FUNCTION(opcache_reset)
 static ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
-	int script_name_len;
+	zend_str_size_int script_name_len;
 	zend_bool force = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &script_name, &script_name_len, &force) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &script_name, &script_name_len, &force) == FAILURE) {
 		return;
 	}
 
@@ -720,12 +720,12 @@ static ZEND_FUNCTION(opcache_invalidate)
 static ZEND_FUNCTION(opcache_compile_file)
 {
 	char *script_name;
-	int script_name_len;
+	zend_str_size_int script_name_len;
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &script_name, &script_name_len) == FAILURE) {
 		return;
 	}
 

@@ -740,7 +740,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				int flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
 				if(flen == sizeof("defined")-1 && zend_binary_strcasecmp(fname, flen, "defined", sizeof("defined")-1) == 0) {
 					zval c;
-					if(zend_get_persistent_constant(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &c, 0 TSRMLS_CC ELS_CC) != 0) {
+					if(zend_get_persistent_constant(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), &c, 0 TSRMLS_CC ELS_CC) != 0) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -751,7 +751,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 						  (flen == sizeof("is_callable")-1 && zend_binary_strcasecmp(fname, flen, "is_callable", sizeof("is_callable")-1) == 0)
 						  ) {
 					zend_function *function;
-					if(zend_hash_find(EG(function_table), Z_STRVAL_P(arg), Z_STRLEN_P(arg)+1, (void **)&function) == SUCCESS) {
+					if(zend_hash_find(EG(function_table), Z_STRVAL_P(arg), Z_STRSIZE_P(arg)+1, (void **)&function) == SUCCESS) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -760,7 +760,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					}
 				} else if(flen == sizeof("constant")-1 && zend_binary_strcasecmp(fname, flen, "constant", sizeof("constant")-1) == 0) {
 					zval c;
-					if(zend_get_persistent_constant(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &c, 1 TSRMLS_CC ELS_CC) != 0) {
+					if(zend_get_persistent_constant(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), &c, 1 TSRMLS_CC ELS_CC) != 0) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -769,7 +769,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 						ZEND_OP1_TYPE(opline) = IS_CONST;
 					}
 				} else if(flen == sizeof("extension_loaded")-1 && zend_binary_strcasecmp(fname, flen, "extension_loaded", sizeof("extension_loaded")-1) == 0) {
-					if(zend_hash_exists(&module_registry, Z_STRVAL_P(arg), Z_STRLEN_P(arg)+1)) {
+					if(zend_hash_exists(&module_registry, Z_STRVAL_P(arg), Z_STRSIZE_P(arg)+1)) {
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
@@ -915,7 +915,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_STRING) {
 				convert_to_string_safe(&ZEND_OP1_LITERAL(last_op));
 			}
-			l = Z_STRLEN(ZEND_OP1_LITERAL(opline)) + Z_STRLEN(ZEND_OP1_LITERAL(last_op));
+			l = Z_STRSIZE(ZEND_OP1_LITERAL(opline)) + Z_STRSIZE(ZEND_OP1_LITERAL(last_op));
 			if (IS_INTERNED(Z_STRVAL(ZEND_OP1_LITERAL(last_op)))) {
 				char *tmp = emalloc(l + 1);
 				memcpy(tmp, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), l + 1);
@@ -923,7 +923,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			} else {
 				Z_STRVAL(ZEND_OP1_LITERAL(last_op)) = erealloc(Z_STRVAL(ZEND_OP1_LITERAL(last_op)), l + 1);
 			}
-			memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op))+Z_STRLEN(ZEND_OP1_LITERAL(last_op)), Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+			memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op))+Z_STRSIZE(ZEND_OP1_LITERAL(last_op)), Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
 			zval_dtor(&ZEND_OP1_LITERAL(opline));
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
@@ -932,7 +932,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 #else
 			Z_STRVAL(ZEND_OP1_LITERAL(opline)) = Z_STRVAL(ZEND_OP1_LITERAL(last_op));
 #endif
-			Z_STRLEN(ZEND_OP1_LITERAL(opline)) = l;
+			Z_STRSIZE(ZEND_OP1_LITERAL(opline)) = l;
 			MAKE_NOP(last_op);
 		} else if (opline->opcode == ZEND_CONCAT &&
 				  ZEND_OP2_TYPE(opline) == IS_CONST &&
@@ -959,7 +959,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				opline->opcode = ZEND_ADD_STRING;
 			}
 			COPY_NODE(opline->op1, src->op1);
-			l = Z_STRLEN(ZEND_OP2_LITERAL(opline)) + Z_STRLEN(ZEND_OP2_LITERAL(src));
+			l = Z_STRSIZE(ZEND_OP2_LITERAL(opline)) + Z_STRSIZE(ZEND_OP2_LITERAL(src));
 			if (IS_INTERNED(Z_STRVAL(ZEND_OP2_LITERAL(src)))) {
 				char *tmp = emalloc(l + 1);
 				memcpy(tmp, Z_STRVAL(ZEND_OP2_LITERAL(src)), l + 1);
@@ -967,7 +967,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			} else {
 				Z_STRVAL(ZEND_OP2_LITERAL(src)) = erealloc(Z_STRVAL(ZEND_OP2_LITERAL(src)), l + 1);
 			}
-			memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src))+Z_STRLEN(ZEND_OP2_LITERAL(src)), Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
+			memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src))+Z_STRSIZE(ZEND_OP2_LITERAL(src)), Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRSIZE(ZEND_OP2_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
 			if (!IS_INTERNED(Z_STRVAL(ZEND_OP2_LITERAL(opline)))) {
 				efree(Z_STRVAL(ZEND_OP2_LITERAL(opline)));
@@ -978,7 +978,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 #else
 			Z_STRVAL(ZEND_OP2_LITERAL(opline)) = Z_STRVAL(ZEND_OP2_LITERAL(src));
 #endif
-			Z_STRLEN(ZEND_OP2_LITERAL(opline)) = l;
+			Z_STRSIZE(ZEND_OP2_LITERAL(opline)) = l;
 			MAKE_NOP(src);
 		} else if ((opline->opcode == ZEND_ADD_STRING || opline->opcode == ZEND_ADD_VAR) && ZEND_OP1_TYPE(opline) == IS_CONST) {
 			/* convert ADD_STRING(C1, C2) to CONCAT(C1, C2) */
@@ -1099,7 +1099,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				  	VAR_SOURCE(opline->op1)->opcode == ZEND_CONCAT &&
 				  	ZEND_OP2_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 				  	Z_TYPE(ZEND_OP2_LITERAL(VAR_SOURCE(opline->op1))) == IS_STRING &&
-				  	Z_STRLEN(ZEND_OP2_LITERAL(VAR_SOURCE(opline->op1))) == 0) {
+				  	Z_STRSIZE(ZEND_OP2_LITERAL(VAR_SOURCE(opline->op1))) == 0) {
 			/* convert T = CONCAT(X,''), T = ADD_STRING(T, Y) to T = CONCAT(X,Y) */
 			zend_op *src = VAR_SOURCE(opline->op1);
 			VAR_UNSET(opline->op1);

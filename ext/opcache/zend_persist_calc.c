@@ -124,7 +124,7 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
-			ADD_INTERNED_STRING(Z_STRVAL_P(z), Z_STRLEN_P(z) + 1);
+			ADD_INTERNED_STRING(Z_STRVAL_P(z), Z_STRSIZE_P(z) + 1);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:

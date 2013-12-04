@@ -103,13 +103,13 @@ char *zps_api_failure_reason = NULL;
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle  TSRMLS_DC);
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-static char *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
+static char *(*accelerator_orig_zend_resolve_path)(const char *filename, zend_str_size_int filename_len TSRMLS_DC);
 #endif
 static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-static char *accel_php_resolve_path(const char *filename, int filename_length, const char *path TSRMLS_DC);
+static char *accel_php_resolve_path(const char *filename, zend_str_size_int filename_length, const char *path TSRMLS_DC);
 #endif
 
 #ifdef ZEND_WIN32
@@ -249,7 +249,7 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 /* Interned strings support */
 static char *orig_interned_strings_start;
 static char *orig_interned_strings_end;
-static const char *(*orig_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
+static const char *(*orig_new_interned_string)(const char *str, zend_str_size_int len, int free_src TSRMLS_DC);
 static void (*orig_interned_strings_snapshot)(TSRMLS_D);
 static void (*orig_interned_strings_restore)(TSRMLS_D);
 
@@ -257,7 +257,7 @@ static void (*orig_interned_strings_restore)(TSRMLS_D);
  * it creates interned strings in shared memory when saves a script.
  * Such interned strings are shared across all PHP processes
  */
-static const char *accel_new_interned_string_for_php(const char *str, int len, int free_src TSRMLS_DC)
+static const char *accel_new_interned_string_for_php(const char *str, zend_str_size_int len, int free_src TSRMLS_DC)
 {
 	return str;
 }
@@ -309,8 +309,8 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
-	ulong h;
-	uint nIndex;
+	zend_uint_t h;
+	zend_str_size_uint nIndex;
 	Bucket *p;
 
 	if (arKey >= ZCSG(interned_strings_start) && arKey < ZCSG(interned_strings_end)) {
@@ -637,7 +637,7 @@ static inline int accel_is_inactive(TSRMLS_D)
 	return FAILURE;
 }
 
-static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf TSRMLS_DC)
+static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
@@ -720,7 +720,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 
 static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size TSRMLS_DC)
 {
-	struct stat statbuf;
+	zend_stat_t statbuf;
 #ifdef ZEND_WIN32
 	accel_time_t res;
 #endif
@@ -729,7 +729,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 	    !EG(opline_ptr) &&
 	    file_handle->filename == SG(request_info).path_translated) {
 
-		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
+		zend_stat_t *tmpbuf = sapi_module.get_stat(TSRMLS_C);
 
 		if (tmpbuf) {
 			if (size) {
@@ -748,12 +748,12 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
-			if (fstat(file_handle->handle.fd, &statbuf) == -1) {
+			if (zend_fstat(file_handle->handle.fd, &statbuf) == -1) {
 				return 0;
 			}
 			break;
 		case ZEND_HANDLE_FP:
-			if (fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
+			if (zend_fstat(fileno(file_handle->handle.fp), &statbuf) == -1) {
 				if (zend_get_stream_timestamp(file_handle->filename, &statbuf TSRMLS_CC) != SUCCESS) {
 					return 0;
 				}
@@ -1832,7 +1832,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 				int filename_len;
 
 				if (opline->op1.op_type == IS_CONST) {
-					filename_len = Z_STRLEN(opline->op1.u.constant);
+					filename_len = Z_STRSIZE(opline->op1.u.constant);
 				} else {
 					filename_len = strlen(filename);
 				}
@@ -1971,7 +1971,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 }
 
 /* zend_resolve_path() replacement for PHP 5.3 and above */
-static char* persistent_zend_resolve_path(const char *filename, int filename_len TSRMLS_DC)
+static char* persistent_zend_resolve_path(const char *filename, zend_str_size_int filename_len TSRMLS_DC)
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&

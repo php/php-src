@@ -31,11 +31,11 @@ static zend_uint zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 
 #if SIZEOF_SIZE_T <= SIZEOF_LONG
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
-# define accel_xlat_set(old, new)	zend_hash_index_update(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old), &(new), sizeof(void*), NULL)
-# define accel_xlat_get(old, new)	zend_hash_index_find(&ZCG(bind_hash), (ulong)(zend_uintptr_t)(old), (void**)&(new))
+# define accel_xlat_set(old, new)	zend_hash_index_update(&ZCG(bind_hash), (zend_uint_t)(zend_uintptr_t)(old), &(new), sizeof(void*), NULL)
+# define accel_xlat_get(old, new)	zend_hash_index_find(&ZCG(bind_hash), (zend_uint_t)(zend_uintptr_t)(old), (void**)&(new))
 #else
-# define accel_xlat_set(old, new)	zend_hash_quick_add(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (ulong)(zend_uintptr_t)(old), (void**)&(new), sizeof(void*), NULL)
-# define accel_xlat_get(old, new)	zend_hash_quick_find(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (ulong)(zend_uintptr_t)(old), (void**)&(new))
+# define accel_xlat_set(old, new)	zend_hash_quick_add(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_uint_t)(zend_uintptr_t)(old), (void**)&(new), sizeof(void*), NULL)
+# define accel_xlat_get(old, new)	zend_hash_quick_find(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_uint_t)(zend_uintptr_t)(old), (void**)&(new))
 #endif
 
 typedef int (*id_function_t)(void *, void *);
@@ -238,7 +238,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 			switch ((Z_TYPE_P(ast->u.val) & IS_CONSTANT_TYPE_MASK)) {
 				case IS_STRING:
 			    case IS_CONSTANT:
-					Z_STRVAL_P(node->u.val) = (char *) interned_estrndup(Z_STRVAL_P(ast->u.val), Z_STRLEN_P(ast->u.val));
+					Z_STRVAL_P(node->u.val) = (char *) interned_estrndup(Z_STRVAL_P(ast->u.val), Z_STRSIZE_P(ast->u.val));
 					break;
 				case IS_ARRAY:
 			    case IS_CONSTANT_ARRAY:
@@ -296,7 +296,7 @@ static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 #endif
 			case IS_STRING:
 		    case IS_CONSTANT:
-				Z_STRVAL_P(ret) = (char *) interned_estrndup(Z_STRVAL_P(ret), Z_STRLEN_P(ret));
+				Z_STRVAL_P(ret) = (char *) interned_estrndup(Z_STRVAL_P(ret), Z_STRSIZE_P(ret));
 				break;
 			case IS_ARRAY:
 		    case IS_CONSTANT_ARRAY:
@@ -318,7 +318,7 @@ static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 {
 	Bucket *p, *q, **prev;
-	ulong nIndex;
+	zend_uint_t nIndex;
 	zval *ppz;
 	TSRMLS_FETCH();
 
@@ -418,7 +418,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 #endif
 				case IS_STRING:
 			    case IS_CONSTANT:
-					Z_STRVAL_P(ppz) = (char *) interned_estrndup(Z_STRVAL_P((zval*)p->pDataPtr), Z_STRLEN_P((zval*)p->pDataPtr));
+					Z_STRVAL_P(ppz) = (char *) interned_estrndup(Z_STRVAL_P((zval*)p->pDataPtr), Z_STRSIZE_P((zval*)p->pDataPtr));
 					break;
 				case IS_ARRAY:
 			    case IS_CONSTANT_ARRAY:
@@ -443,7 +443,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce TSRMLS_DC)
 {
 	Bucket *p, *q, **prev;
-	ulong nIndex;
+	zend_uint_t nIndex;
 	zend_class_entry **new_ce;
 	zend_function** new_prototype;
 	zend_op_array *new_entry;
@@ -555,7 +555,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce TSRMLS_DC)
 {
 	Bucket *p, *q, **prev;
-	ulong nIndex;
+	zend_uint_t nIndex;
 	zend_class_entry **new_ce;
 	zend_property_info *prop_info;
 
@@ -978,7 +978,7 @@ static void zend_do_delayed_early_binding(zend_op_array *op_array, zend_uint ear
 
 		CG(in_compilation) = 1;
 		while ((int)opline_num != -1) {
-			if (zend_lookup_class(Z_STRVAL(op_array->opcodes[opline_num - 1].op2.u.constant), Z_STRLEN(op_array->opcodes[opline_num - 1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
+			if (zend_lookup_class(Z_STRVAL(op_array->opcodes[opline_num - 1].op2.u.constant), Z_STRSIZE(op_array->opcodes[opline_num - 1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
 				do_bind_inherited_class(&op_array->opcodes[opline_num], EG(class_table), *pce, 1 TSRMLS_CC);
 			}
 			opline_num = op_array->opcodes[opline_num].result.u.opline_num;

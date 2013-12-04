@@ -181,12 +181,12 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					opline->opcode = ZEND_ADD_STRING;
 					ptr++;
 				} else { /* ZEND_ADD_STRING */
-					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
+					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRSIZE(ZEND_OP2_LITERAL(opline)));
 					if (!IS_INTERNED(Z_STRVAL(ZEND_OP2_LITERAL(opline)))) {
 						efree(Z_STRVAL(ZEND_OP2_LITERAL(opline)));
 					}
 					Z_STRVAL(ZEND_OP2_LITERAL(opline)) = ptr;
-					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
+					ptr += Z_STRSIZE(ZEND_OP2_LITERAL(opline));
 				}
 				ZEND_OP2_LITERAL(opline).value.str.len = final_length;
 				next_op = opline + 1;
@@ -216,7 +216,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
-				Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__") - 1 &&
+				Z_STRSIZE(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__") - 1 &&
 				memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) {
 				/* substitute __COMPILER_HALT_OFFSET__ constant */
 				zend_bool orig_in_execution = EG(in_execution);
@@ -244,7 +244,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zend_uint tv = ZEND_RESULT(opline).var;
 				zval c;
 
-				if (!zend_get_persistent_constant(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
+				if (!zend_get_persistent_constant(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRSIZE(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
 					if (!*constants || !zend_optimizer_get_collected_constant(*constants, &ZEND_OP2_LITERAL(opline), &c)) {
 						break;
 					}
@@ -267,12 +267,12 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					/* for A::B */
 					if (op_array->scope && 
 						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						op_array->scope->name, Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1)) {
+						op_array->scope->name, Z_STRSIZE(ZEND_OP1_LITERAL(opline)) + 1)) {
 						pce = &op_array->scope;
 					} else { 
 						if (zend_hash_quick_find(EG(class_table), 
 								Z_STRVAL(op_array->literals[opline->op1.constant + 1].constant), 
-								Z_STRLEN(op_array->literals[opline->op1.constant].constant) + 1, 
+								Z_STRSIZE(op_array->literals[opline->op1.constant].constant) + 1, 
 								Z_HASH_P(&op_array->literals[opline->op1.constant + 1].constant),
 								(void **)&pce) == FAILURE) {
 							break;
@@ -294,10 +294,10 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 					if (zend_hash_find(&(*pce)->constants_table,
 							Z_STRVAL(ZEND_OP2_LITERAL(opline)),
-							Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1,
+							Z_STRSIZE(ZEND_OP2_LITERAL(opline)) + 1,
 							(void **) &c) == SUCCESS) {
 						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_PP(c))) { 
-							if (!zend_get_persistent_constant(Z_STRVAL_PP(c), Z_STRLEN_PP(c), &t, 1 TSRMLS_CC) ||
+							if (!zend_get_persistent_constant(Z_STRVAL_PP(c), Z_STRSIZE_PP(c), &t, 1 TSRMLS_CC) ||
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
 								break;
 							}
@@ -331,17 +331,17 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			if (opline->extended_value == 1 && (opline - 1)->opcode == ZEND_SEND_VAL &&
 				ZEND_OP1_TYPE(opline - 1) == IS_CONST && ZEND_OP1_LITERAL(opline - 1).type == IS_STRING &&
 				ZEND_OP1_TYPE(opline) == IS_CONST && ZEND_OP1_LITERAL(opline).type == IS_STRING) {
-				if ((Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("function_exists")-1 &&
+				if ((Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("function_exists")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"function_exists", sizeof("function_exists")-1)) ||
-					(Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("is_callable")-1 &&
+					(Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("is_callable")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"is_callable", sizeof("is_callable")))) {
 					zend_internal_function *func;
 					char *lc_name = zend_str_tolower_dup(
-							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)));
 					
-					if (zend_hash_find(EG(function_table), lc_name, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)) + 1,
+					if (zend_hash_find(EG(function_table), lc_name, Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)) + 1,
 								(void *)&func) == SUCCESS &&
 							func->type == ZEND_INTERNAL_FUNCTION &&
 							func->module->type == MODULE_PERSISTENT) {
@@ -355,16 +355,16 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						}
 					}
 					efree(lc_name);
-				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("extension_loaded")-1 &&
+				} else if (Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"extension_loaded", sizeof("extension_loaded")-1)) {
 					zval t;
 					zend_module_entry *m;
 					char *lc_name = zend_str_tolower_dup(
-							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+							Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)), Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)));
 
 					if (zend_hash_find(&module_registry,
-							lc_name, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)) + 1, (void *)&m) == FAILURE) {
+							lc_name, Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)) + 1, (void *)&m) == FAILURE) {
 						if (!PG(enable_dl)) {
 							break;
 						} else {
@@ -385,13 +385,13 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						MAKE_NOP(opline);
 					}
 					efree(lc_name);
-				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("defined")-1 &&
+				} else if (Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("defined")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"defined", sizeof("defined")-1)) {
 					zval t;
 
 					if (zend_get_persistent_constant(Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)),
-						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
+						Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
 
 						ZVAL_BOOL(&t, 1);
 						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
@@ -401,13 +401,13 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							MAKE_NOP(opline);
 						}
 					}
-				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("constant")-1 &&
+				} else if (Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("constant")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"constant", sizeof("constant")-1)) {
 					zval t;
 					
 					if (zend_get_persistent_constant(Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)),
-						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
+						Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
 						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
 							literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
 							MAKE_NOP((opline - 1));
@@ -415,12 +415,12 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							MAKE_NOP(opline);
 						}
 					}
-				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("strlen")-1 &&
+				} else if (Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("strlen")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"strlen", sizeof("strlen")-1)) {
 					zval t;
 
-					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));
+					ZVAL_LONG(&t, Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)));
 					if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
 						literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
 						MAKE_NOP((opline - 1));
@@ -436,8 +436,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			    opline->extended_value == 2 &&
 			    ZEND_OP1_TYPE(opline) == IS_CONST &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("define")-1 &&
-			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
+			    Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("define")-1 &&
+			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
 			    (opline-1)->opcode == ZEND_SEND_VAL &&
 			    ZEND_OP1_TYPE(opline-1) == IS_CONST &&
 			    (Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_BOOL ||
@@ -509,7 +509,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				opline->op1_type == IS_CONST &&
 			    opline->op2_type == IS_UNUSED &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    (Z_STRLEN(ZEND_OP1_LITERAL(opline)) != sizeof("this")-1 ||
+			    (Z_STRSIZE(ZEND_OP1_LITERAL(opline)) != sizeof("this")-1 ||
 			     memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "this", sizeof("this")) != 0)) {
 
 			    int var = opline->result.var;
@@ -549,13 +549,13 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						use->op1_type = IS_CV;
 						use->op1.var = zend_optimizer_lookup_cv(op_array,
 							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+							Z_STRSIZE(ZEND_OP1_LITERAL(opline)));
 						MAKE_NOP(opline);
 					} else if (use->op2_type == IS_VAR && use->op2.var == var) {
 						use->op2_type = IS_CV;
 						use->op2.var = zend_optimizer_lookup_cv(op_array,
 							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+							Z_STRSIZE(ZEND_OP1_LITERAL(opline)));
 						MAKE_NOP(opline);
 					}
 				}
