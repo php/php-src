@@ -4856,6 +4856,12 @@ PHP_FUNCTION(openssl_seal)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Szza/|S", &data, &data_len, &sealdata, &ekeys, &pubkeys, &method, &method_len) == FAILURE) {
 		return;
 	}
+
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, data_len);
+		RETURN_FALSE;
+	}
 	
 	pubkeysht = HASH_OF(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
@@ -4922,7 +4928,7 @@ PHP_FUNCTION(openssl_seal)
 		zval_dtor(sealdata);
 		buf[len1 + len2] = '\0';
 		buf = erealloc(buf, len1 + len2 + 1);
-		ZVAL_STRINGL(sealdata, (char *)buf, (zend_str_size_int)(len1 + len2), 0);
+		ZVAL_STRINGL(sealdata, (char *)buf, len1 + len2, 0);
 
 		zval_dtor(ekeys);
 		array_init(ekeys);
@@ -4984,6 +4990,17 @@ PHP_FUNCTION(openssl_open)
 		return;
 	}
 
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, data_len);
+		RETURN_FALSE;
+	}
+	if (ekey_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Envelope key is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, ekey_len);
+		RETURN_FALSE;
+	}
+
 	pkey = php_openssl_evp_from_zval(privkey, 0, "", 0, &keyresource TSRMLS_CC);
 	if (pkey == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 4 into a private key");
@@ -5022,7 +5039,7 @@ PHP_FUNCTION(openssl_open)
 	}
 	zval_dtor(opendata);
 	buf[len1 + len2] = '\0';
-	ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), (zend_str_size_int)(len1 + len2), 0);
+	ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -5455,7 +5472,7 @@ static zend_bool php_openssl_validate_iv(char **piv, zend_str_size_int *piv_len,
 
 	iv_new = ecalloc(1, iv_required_len + 1);
 
-	if (*piv_len <= 0) {
+	if (*piv_len == 0) {
 		/* BC behavior */
 		*piv_len = iv_required_len;
 		*piv     = iv_new;
@@ -5494,6 +5511,18 @@ PHP_FUNCTION(openssl_encrypt)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS|iS", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
 	}
+
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, data_len);
+		RETURN_FALSE;
+	}
+	if (password_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, password_len);
+		RETURN_FALSE;
+	}
+
 	cipher_type = EVP_get_cipherbyname(method);
 	if (!cipher_type) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm");
@@ -5509,8 +5538,8 @@ PHP_FUNCTION(openssl_encrypt)
 		key = (unsigned char*)password;
 	}
 
-	max_iv_len = (zend_str_size_int)EVP_CIPHER_iv_length(cipher_type);
-	if (iv_len <= 0 && max_iv_len > 0) {
+	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
+	if (iv_len == 0 && max_iv_len > 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len TSRMLS_CC);
@@ -5574,6 +5603,17 @@ PHP_FUNCTION(openssl_decrypt)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS|iS", &data, &data_len, &method, &method_len, &password, &password_len, &options, &iv, &iv_len) == FAILURE) {
 		return;
+	}
+
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, data_len);
+		RETURN_FALSE;
+	}
+	if (password_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, password_len);
+		RETURN_FALSE;
 	}
 
 	if (!method_len) {
@@ -5684,6 +5724,13 @@ PHP_FUNCTION(openssl_dh_compute_key)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sr", &pub_str, &pub_len, &key) == FAILURE) {
 		return;
 	}
+
+	if (pub_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Public key is too long; it needs to be at most %d bytes, not " ZEND_UINT_FMT,
+				INT_MAX, pub_len);
+		RETURN_FALSE;
+	}
+
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, &key, -1, "OpenSSL key", le_key);
 	if (!pkey || EVP_PKEY_type(pkey->type) != EVP_PKEY_DH || !pkey->pkey.dh) {
 		RETURN_FALSE;
@@ -5720,6 +5767,11 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 
 	if (buffer_length <= 0) {
+		RETURN_FALSE;
+	}
+	if (buffer_length > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Public key is too long; it needs to be at most %d bytes, not " ZEND_INT_FMT,
+				INT_MAX, buffer_length);
 		RETURN_FALSE;
 	}
 
