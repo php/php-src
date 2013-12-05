@@ -4,23 +4,25 @@
 # expect: TEST::FORMAT
 # options: -rr
 #################################################
-#[Set execution context: %s%eclass.php]
-#[Attempting compilation of %s%eclass.php]
-#[Success]
 #[User Class: test]
 #Methods (3):
-#L%d-%d test::testMethod() %s%eclass.php
+#L%d-%d test::testMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
-#	L%d-%d test::testPrivateMethod() %s%eclass.php
+#	L%d-%d test::testPrivateMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
-#	L%d-%d test::testProtectedMethod() %s%eclass.php
+#	L%d-%d test::testProtectedMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
 #[User Method testMethod]
-#	L%d-%d test::testMethod() %s%eclass.php
+#	L%d-%d test::testMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>   
 #################################################
-exec sapi/phpdbg/tests/code/class.php
-compile
+<:
+class test {
+        public function testMethod(){}
+        private function testPrivateMethod(){}
+        protected function testProtectedMethod(){}
+}
+:>
 print class test
 print method test::testMethod
 q
