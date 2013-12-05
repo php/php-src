@@ -137,7 +137,8 @@ typedef enum {
 #endif
 	LM_SIZE_T,
 	LM_LONG,
-	LM_LONG_DOUBLE
+	LM_LONG_DOUBLE,
+	LM_PHP_INT_T
 } length_modifier_e;
 
 #ifdef PHP_WIN32
