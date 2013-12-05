@@ -1,17 +1,19 @@
 #################################################
 # name: info
 # purpose: test info commands
-# expect: TEST::CISTRING
+# expect: TEST::FORMAT
 # options: -rr
 #################################################
-# set execution context
-# attempting compilation
-# success
-# user classes
-# user class test
-# |---- in
+#[User Classes (%d)]
+#User Class test (3)
+#|---- in phpdbginit code on line %d
 #################################################
-exec sapi/phpdbg/tests/code/class.php
-compile
+<:
+class test {
+        public function testMethod(){}
+        private function testPrivateMethod(){}
+        protected function testProtectedMethod(){}
+}
+:>
 info classes
 q
