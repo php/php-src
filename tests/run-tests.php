@@ -1,6 +1,12 @@
 <?php
 namespace phpdbg\testing {
-	
+
+	/* 
+	* Workaround ...
+	*/
+	if (!defined('DIR_SEP'))
+		define('DIR_SEP', '\\' . DIRECTORY_SEPARATOR);
+		
 	/**
 	* TestConfigurationExceptions are thrown 
 	* when the configuration prohibits tests executing
@@ -303,6 +309,42 @@ namespace phpdbg\testing {
 		* Formatted output
 		*/
 		const FORMAT =		0x00001000;
+		
+		/**
+		* Format specifiers
+		*/
+		private static $format = array(
+			'search' => array(
+				'%e',
+				'%s',
+				'%S',
+				'%a',
+				'%A',
+				'%w',
+				'%i',
+				'%d',
+				'%x',
+				'%f',
+				'%c',
+				'%t',
+				'$T'
+			),
+			'replace' => array(
+				DIR_SEP,
+				'[^\r\n]+',
+				'[^\r\n]*',
+				'.+',
+				'.*',
+				'\s*',
+				'[+-]?\d+',
+				'\d+',
+				'[0-9a-fA-F]+',
+				'[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
+				'.',
+				'\t',
+				'\t+'
+			)
+		);
  		
 		/**
 		* Constructs a new Test object given a specilized phpdbginit file
@@ -356,35 +398,9 @@ namespace phpdbg\testing {
 									
 									switch ($this->expect) {
 										case TEST::FORMAT:
-											$this->match[] = str_replace(array(
-												'%e',
-												'%s',
-												'%S',
-												'%a',
-												'%A',
-												'%w',
-												'%i',
-												'%d',
-												'%x',
-												'%f',
-												'%c',
-												'%t',
-												'$T'
-											), array(
-												'\\' . DIRECTORY_SEPARATOR,
-												'[^\r\n]+',
-												'[^\r\n]*',
-												'.+',
-												'.*',
-												'\s*',
-												'[+-]?\d+',
-												'\d+',
-												'[0-9a-fA-F]+',
-												'[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
-												'.',
-												'\t',
-												'\t+'
-											), preg_quote($line));
+											$this->match[] = str_replace(
+												self::$format['search'], 
+												self::$format['replace'], preg_quote($line));
 										break;
 										
 										default: $this->match[] = $line;
