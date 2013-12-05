@@ -29,20 +29,19 @@ namespace phpdbg\testing {
 	}
 	
 	/**
-	* Tests is the console programming API for the test suite
 	*
 	* @package phpdbg
 	* @subpackage testing
 	*/
-	class Tests {
+	class TestsConfiguration implements \ArrayAccess {
 	
 		/**
-		* Construct the console object
 		*
-		* @param array basic configuration 
-		* @param array command line
+		* @param array basic configuration
+		* @param array argv
 		*/
-		public function __construct(&$config, $cmd) {
+		public function __construct($config, $cmd) {
+			$this->options = $config;
 			while (($key = array_shift($cmd))) {
 				switch (substr($key, 0, 1)) {
 					case '-': switch(substr($key, 1, 1)) {
@@ -60,18 +59,18 @@ namespace phpdbg\testing {
 								switch ($key) {
 									case 'phpdbg':
 									case 'width':
-										$config[$key] = $value;
+										$this->options[$key] = $value;
 									break;
 									
 									default: {
 										if (isset($config[$key])) {
 											if (is_array($config[$key])) {
-												$config[$key][] = $value;
+												$this->options[$key][] = $value;
 											} else {
-												$config[$key] = array($config[$key], $value);
+												$this->options[$key] = array($config[$key], $value);
 											}
 										} else {
-											$config[$key] = $value;
+											$this->options[$key] = $value;
 										}
 									}	
 								}
@@ -80,32 +79,62 @@ namespace phpdbg\testing {
 						} break;
 				
 						default:
-							$config['flags'][] = substr($key, 1);
+							$this->flags[] = substr($key, 1);
 					} break;
 				}
 			}
 			
-			if (!is_executable($config['phpdbg'])) {
+			if (!is_executable($this->options['phpdbg'])) {
 				throw new TestConfigurationException(
-					$config, 'phpdbg could not be found at the specified path (%s)', $config['phpdbg']);
-			} else $config['phpdbg'] = realpath($config['phpdbg']);
+					$this->options, 'phpdbg could not be found at the specified path (%s)', $this->options['phpdbg']);
+			} else $this->options['phpdbg'] = realpath($this->options['phpdbg']);
 			
-			$conifg['width'] = (integer) $config['width'];
+			$this->options['width'] = (integer) $this->options['width'];
 			
 			/* display properly, all the time */
-			if ($config['width'] < 50) {
-				$config['width'] = 50;
+			if ($this->options['width'] < 50) {
+				$this->options['width'] = 50;
 			}
 			
 			/* calculate column widths */
-			$config['lwidth'] = ceil($config['width'] / 3);
-			$config['rwidth'] = ceil($config['width'] - $config['lwidth']) - 5;
-			
+			$this->options['lwidth'] = ceil($this->options['width'] / 3);
+			$this->options['rwidth'] = ceil($this->options['width'] - $this->options['lwidth']) - 5;
+		}
+		
+		public function hasFlag($flag) { 
+			return in_array(
+				$flag, $this->flags); 
+		}
+		
+		public function offsetExists($offset) 		{ return isset($this->options[$offset]); }
+		public function offsetGet($offset)			{ return $this->options[$offset]; }
+		public function offsetUnset($offset)		{ unset($this->options[$offset]); }
+		public function offsetSet($offset, $data) 	{ $this->options[$offset] = $data; }
+		
+		protected $options = array();
+		protected $flags = array();
+	}
+	
+	/**
+	* Tests is the console programming API for the test suite
+	*
+	* @package phpdbg
+	* @subpackage testing
+	*/
+	class Tests {
+	
+		/**
+		* Construct the console object
+		*
+		* @param array basic configuration 
+		* @param array command line
+		*/
+		public function __construct(TestsConfiguration &$config) {
 			$this->config = &$config;
 			
-			if (in_array('help',	$this->config['flags'])||
-				in_array('h',		$this->config['flags'])) {
-				$this->logUsage();
+			if ($this->config->hasFlag('help') ||
+				$this->config->hasFlag('h')) {
+				$this->showUsage();
 				exit;
 			}
 		}
@@ -200,7 +229,7 @@ namespace phpdbg\testing {
 		/**
 		*
 		*/
-		protected function logUsage() {
+		protected function showUsage() {
 			printf('usage: php %s [flags] [options]%s', $this->config['exec'], PHP_EOL);
 			printf('[options]:%s', PHP_EOL);
 			printf("\t--path\t\tadd a path to scan outside of tests directory%s", PHP_EOL);
@@ -276,7 +305,7 @@ namespace phpdbg\testing {
 		* @param array configuration
 		* @param string file
 		*/
-		public function __construct(&$config, &$file) {
+		public function __construct(TestsConfiguration &$config, &$file) {
 			if (($handle = fopen($file, 'r'))) {
 				while (($line = fgets($handle))) {
 					$trim = trim($line);
@@ -437,8 +466,8 @@ namespace phpdbg\testing {
 		public $file;
 		public $options;
 		public $expect;
-		public $match;
 		
+		protected $match;
 		protected $diff;
 		protected $stats;
 		protected $totals;
@@ -448,11 +477,12 @@ namespace phpdbg\testing {
 namespace {
 	use \phpdbg\Testing\Test;
 	use \phpdbg\Testing\Tests;
-	
+	use \phpdbg\Testing\TestsConfiguration;
+
 	$cwd = dirname(__FILE__);
 	$cmd = $_SERVER['argv'];
 	{
-		$config = array(
+		$config = new TestsConfiguration(array(
 			'exec' => realpath(array_shift($cmd)),
 			'phpdbg' => realpath(sprintf(
 				'%s/../phpdbg', $cwd
@@ -462,17 +492,17 @@ namespace {
 			),
 			'flags' => array(),
 			'width' => 75
-		);
-		
-		$tests = new Tests($config, $cmd);
-		
+		), $cmd);
+
+		$tests = new Tests($config);
+
 		foreach ($tests->findPaths() as $path) {	
 			$tests->logPath($path);
-			
+
 			foreach ($tests->findTests($path) as $test) {
 				$tests->logTest($path, $test);
 			}
-			
+		
 			$tests->logPathStats($path);
 		}
 		
