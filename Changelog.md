@@ -9,6 +9,7 @@ Version 0.3.0 2013-00-00
 3. Added extended conditional breakpoint support "break at"
 4. Fix loading of zend extnsions with -z
 5. Fix crash when loading .phpdbginit with command line switch
+6. Fix crash on startup errors
 
 Version 0.2.0 2013-11-31
 ------------------------
