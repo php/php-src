@@ -152,25 +152,31 @@ namespace phpdbg\testing {
 		* @param string the path to log
 		*/
 		public function logPathStats($path) {
+			if (!isset($this->stats[$path])) {
+				return;
+			}
+			
 			$total = array_sum($this->stats[$path]);
 			
-			@$this->totals[true] += $this->stats[$path][true];
-			@$this->totals[false] += $this->stats[$path][false];
+			if ($total) {
+				@$this->totals[true] += $this->stats[$path][true];
+				@$this->totals[false] += $this->stats[$path][false];
 			
-			$stats = @sprintf(
-				"%d/%d %%%d", 
-				$this->stats[$path][true],
-				$this->stats[$path][false],
-				(100 / $total) * $this->stats[$path][true]);
+				$stats = @sprintf(
+					"%d/%d %%%d", 
+					$this->stats[$path][true],
+					$this->stats[$path][false],
+					(100 / $total) * $this->stats[$path][true]);
 			
-			printf(
-				'%s [%s]%s',
-				str_repeat(
-					' ', $this->config['width'] - strlen($stats)), 
-				$stats, PHP_EOL);
+				printf(
+					'%s [%s]%s',
+					str_repeat(
+						' ', $this->config['width'] - strlen($stats)), 
+					$stats, PHP_EOL);
 			
-			printf("%s%s", str_repeat('-', $this->config['width']+3), PHP_EOL);
-			printf("%s", PHP_EOL);
+				printf("%s%s", str_repeat('-', $this->config['width']+3), PHP_EOL);
+				printf("%s", PHP_EOL);
+			}
 		}
 		
 		/**

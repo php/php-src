@@ -1,0 +1,17 @@
+#################################################
+# name: info
+# purpose: test info commands
+# expect: TEST::CISTRING
+# options: -rr
+#################################################
+# set execution context
+# attempting compilation
+# success
+# user classes
+# user class test
+# |---- in
+#################################################
+exec sapi/phpdbg/tests/code/class.php
+compile
+info classes
+q
