@@ -298,6 +298,11 @@ namespace phpdbg\testing {
 		* Expect stripos() !== false
 		*/
 		const CISTRING =	0x00000100;
+		
+		/*
+		* Formatted output
+		*/
+		const FORMAT =		0x00001000;
  		
 		/**
 		* Constructs a new Test object given a specilized phpdbginit file
@@ -326,6 +331,9 @@ namespace phpdbg\testing {
 												case 'TEST::CISTRING':
 												case 'CISTRING': { $this->expect = TEST::CISTRING; } break;
 												
+												case 'TEST::FORMAT':
+												case 'FORMAT': { $this->expect = TEST::FORMAT; } break;
+												
 												default: 
 													throw new TestConfigurationException(
 														$this->config, "unknown type of expectation (%s)", $chunks[1]);
@@ -341,7 +349,46 @@ namespace phpdbg\testing {
 								case '#': { /* do nothing */ } break;
 								
 								default: {
-									$this->match[] = ltrim(substr($trim, 1));
+									$line = preg_replace(
+										"~(\r\n)~", "\n", substr($trim, 1));
+									
+									$line = trim($line);
+									
+									switch ($this->expect) {
+										case TEST::FORMAT:
+											$this->match[] = str_replace(array(
+												'%e',
+												'%s',
+												'%S',
+												'%a',
+												'%A',
+												'%w',
+												'%i',
+												'%d',
+												'%x',
+												'%f',
+												'%c',
+												'%t',
+												'$T'
+											), array(
+												'\\' . DIRECTORY_SEPARATOR,
+												'[^\r\n]+',
+												'[^\r\n]*',
+												'.+',
+												'.*',
+												'\s*',
+												'[+-]?\d+',
+												'\d+',
+												'[0-9a-fA-F]+',
+												'[+-]?\.?\d+\.?\d*(?:[Ee][+-]?\d+)?',
+												'.',
+												'\t',
+												'\t+'
+											), preg_quote($line));
+										break;
+										
+										default: $this->match[] = $line;
+									}
 								}
 							}
 						} break;
@@ -402,6 +449,14 @@ namespace phpdbg\testing {
 						
 						case TEST::CISTRING: {
 							if (stripos($line, $this->match[$num]) === false) {
+								$this->diff['wants'][$num] = &$this->match[$num];
+								$this->diff['gets'][$num] = $line;
+							}
+						} continue 2;
+						
+						case TEST::FORMAT: {
+							$line = trim($line);
+							if (!preg_match("/^{$this->match[$num]}\$/s", $line)) {
 								$this->diff['wants'][$num] = &$this->match[$num];
 								$this->diff['gets'][$num] = $line;
 							}
