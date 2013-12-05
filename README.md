@@ -5,6 +5,8 @@ Implemented as a SAPI module, phpdbg can excert complete control over the enviro
 
 phpdbg aims to be a lightweight, powerful, easy to use debugging platform for PHP5.4+
 
+[![phpdbg on travis-ci](https://travis-ci.org/krakjoe/phpdbg.png?branch=master)](https://travis-ci.org/krakjoe/phpdbg)
+
 Features
 ========
 
