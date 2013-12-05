@@ -39,6 +39,8 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+static zend_bool phpdbg_booted = 0;
+
 #if PHP_VERSION_ID >= 50500
 void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
 #else
@@ -338,6 +340,9 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
+	
+	phpdbg_booted=1;
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -367,7 +372,12 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 
 static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 {
-	phpdbg_error("%s", message);
+	/*
+	* We must not request TSRM before being boot
+	*/
+	if (phpdbg_booted) {
+		phpdbg_error("%s", message);
+	} else fprintf(stdout, "%s\n", message);
 }
 /* }}} */
 
@@ -988,9 +998,9 @@ phpdbg_main:
 	}
 
 	phpdbg->ini_entries = ini_entries;
-		
-	if (phpdbg->startup(phpdbg) == SUCCESS) {
 	
+	if (phpdbg->startup(phpdbg) == SUCCESS) {
+		
 		zend_activate(TSRMLS_C);
 		
 		/* do not install sigint handlers for remote consoles */
