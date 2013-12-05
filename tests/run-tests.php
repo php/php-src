@@ -327,7 +327,7 @@ namespace phpdbg\testing {
 				'%f',
 				'%c',
 				'%t',
-				'$T'
+				'%T'
 			),
 			'replace' => array(
 				DIR_SEP,
