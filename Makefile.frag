@@ -21,7 +21,7 @@ clean-phpdbg:
 
 test-phpdbg:
 	@echo "Running phpdbg tests ..."
-	@php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
+	@$(top_builddir)/sapi/cli/php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
 
 .PHONY: clean-phpdbg test-phpdbg
 
