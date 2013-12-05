@@ -2,6 +2,7 @@
 # name: set
 # purpose: tests for set commands
 # expect: TEST::CISTRING
+# options: -rr
 #################################################
 # setting prompt color
 # setting error color

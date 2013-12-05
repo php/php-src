@@ -328,7 +328,7 @@ namespace phpdbg\testing {
 		*/
 		public function getResult() {
 			$options = sprintf(
-				'-i%s -rrqb', $this->file);
+				'-i%s -qb', $this->file);
 			
 			if ($this->options) {
 				$options = sprintf(
