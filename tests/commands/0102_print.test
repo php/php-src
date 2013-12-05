@@ -15,8 +15,12 @@
 #		ZEND_RETURN
 #	test::testProtectedMethod()
 #		ZEND_RETURN
+# User Method testMethod
+#	test::testMethod()
+#		ZEND_RETURN
 #################################################
 exec sapi/phpdbg/tests/code/class.php
 compile
 print class test
+print method test::testMethod
 q
