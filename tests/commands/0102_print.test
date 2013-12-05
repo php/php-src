@@ -1,0 +1,22 @@
+#################################################
+# name: print
+# purpose: test print commands
+# expect: TEST::CISTRING
+# options: -rr
+#################################################
+# Set execution context
+# Attempting compilation
+# Success
+# User Class: test
+# Methods (3):
+#	test::testMethod()
+#		ZEND_RETURN
+#	test::testPrivateMethod()
+#		ZEND_RETURN
+#	test::testProtectedMethod()
+#		ZEND_RETURN
+#################################################
+exec sapi/phpdbg/tests/code/class.php
+compile
+print class test
+q
