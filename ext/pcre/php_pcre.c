@@ -121,7 +121,6 @@ static PHP_INI_MH(OnChangeBacktrackLimit)
 	ZEND_ATOI(i, new_value);
 
 	if (i > (unsigned long)-1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Value '%pd' is too big for pcre.backtrack_limit", i);
 		return FAILURE;
 	}
 
@@ -137,7 +136,6 @@ static PHP_INI_MH(OnChangeRecursionLimit)
 	ZEND_ATOI(i, new_value);
 
 	if (i > (unsigned long)-1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Value '%pd' is too big for pcre.recursion_limit", i);
 		return FAILURE;
 	}
 
