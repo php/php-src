@@ -1761,7 +1761,7 @@ PHP_FUNCTION(snmp_set_valueretrieval)
 			SNMP_G(valueretrieval) = method;
 			RETURN_TRUE;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", method);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%pd'", method);
 		RETURN_FALSE;
 	}
 }
@@ -2218,7 +2218,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval TS
 	if (Z_LVAL_P(newval) > 0) {
 		snmp_object->max_oids = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %ld", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "max_oids should be positive integer or NULL, got %pd", Z_LVAL_P(newval));
 	}
 	
 	if (newval == &ztmp) {
@@ -2245,7 +2245,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
 		snmp_object->valueretrieval = Z_LVAL_P(newval);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%ld'", Z_LVAL_P(newval));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP value retrieval method '%pd'", Z_LVAL_P(newval));
 		ret = FAILURE;
 	}
 	
@@ -2302,7 +2302,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 			snmp_object->oid_output_format = Z_LVAL_P(newval);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%ld'", Z_LVAL_P(newval));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown SNMP output print format '%pd'", Z_LVAL_P(newval));
 			ret = FAILURE;
 			break;
 	}

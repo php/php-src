@@ -3,6 +3,6 @@
 putenv('ODBCINI=/etc/odbc.ini');
 putenv('ODBCSYSINI=/etc');
 
-$dsn = 'myodbc3';
-$user = 'root';
+$dsn = 'Driver={Microsoft Access Driver (*.mdb, *.accdb)};Dbq=d:\php_test.accdb;';
+$user = '';
 $pass = '';

@@ -428,25 +428,25 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hits));
 			php_info_print_table_row(2, "Cache hits", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+			snprintf(buf, sizeof(buf), "%pd", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
 			php_info_print_table_row(2, "Cache misses", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Used memory", buf);
-			snprintf(buf, sizeof(buf), "%ld", zend_shared_alloc_get_free_memory());
+			snprintf(buf, sizeof(buf), "%pd", zend_shared_alloc_get_free_memory());
 			php_info_print_table_row(2, "Free memory", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
+			snprintf(buf, sizeof(buf), "%pd", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
 			php_info_print_table_row(2, "Cached keys", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).max_num_entries);
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash).max_num_entries);
 			php_info_print_table_row(2, "Max keys", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(oom_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(hash_restarts));
 			php_info_print_table_row(2, "Hash keys restarts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(manual_restarts));
+			snprintf(buf, sizeof(buf), "%pd", ZCSG(manual_restarts));
 			php_info_print_table_row(2, "Manual restarts", buf);
 		}
 	}

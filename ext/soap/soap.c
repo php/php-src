@@ -925,7 +925,7 @@ PHP_METHOD(SoapFault, __toString)
 
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	len = spprintf(&str, 0, "SoapFault exception: [%s] %s in %s:%ld\nStack trace:\n%s",
+	len = spprintf(&str, 0, "SoapFault exception: [%s] %s in %s:%pd\nStack trace:\n%s",
 	               Z_STRVAL_P(faultcode), Z_STRVAL_P(faultstring), Z_STRVAL_P(file), Z_LVAL_P(line),
 	               Z_STRSIZE_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 
@@ -1240,7 +1240,7 @@ PHP_METHOD(SoapServer, setPersistence)
 				value == SOAP_PERSISTENCE_REQUEST) {
 				service->soap_class.persistance = value;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%ld)", value);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%pd)", value);
 				return;
 			}
 		} else {

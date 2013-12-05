@@ -714,7 +714,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 			packet->message_len = 0;
 		}
 
-		DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%ld server_status=%u warnings=%u",
+		DBG_INF_FMT("OK packet: aff_rows=%lld last_ins_id=%pd server_status=%u warnings=%u",
 					packet->affected_rows, packet->last_insert_id, packet->server_status,
 					packet->warning_count);
 	}

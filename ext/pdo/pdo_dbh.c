@@ -144,7 +144,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 	}
 
 	if (supp) {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s: %ld %s", *pdo_err, msg, native_code, supp);
+		spprintf(&message, 0, "SQLSTATE[%s]: %s: %pd %s", *pdo_err, msg, native_code, supp);
 	} else {
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}

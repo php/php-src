@@ -101,7 +101,7 @@ void zend_shared_alloc_create_lock(void)
 
 static void no_memory_bailout(size_t allocate_size, char *error)
 {
-	zend_accel_error(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %ld bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
+	zend_accel_error(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %zd bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
 }
 
 static void copy_shared_segments(void *to, void *from, int count, int size)
@@ -288,7 +288,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 #define MIN_FREE_MEMORY 64*1024
 
 #define SHARED_ALLOC_FAILED() do {		\
-		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %pd bytes (%pd bytes free)", (zend_int_t)size, (zend_int_t)ZSMMG(shared_free)); \
 		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
 			ZSMMG(memory_exhausted) = 1; \
 		} \

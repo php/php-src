@@ -202,14 +202,14 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 		}
 	}
 	if (MyG(max_links) != -1 && MyG(num_links) >= MyG(max_links)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MyG(num_links));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%pd)", MyG(num_links));
 		goto err;
 	}
 
 	if (persistent && MyG(max_persistent) != -1 &&
 		(MyG(num_active_persistent) + MyG(num_inactive_persistent))>= MyG(max_persistent))
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%ld)",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open persistent links (%pd)",
 								MyG(num_active_persistent) + MyG(num_inactive_persistent));
 		goto err;
 	}
@@ -1108,7 +1108,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 	if (flags < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%ld)", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%pd)", flags);
 		err = TRUE;
 	}
 	if (!name_len) {
