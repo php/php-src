@@ -18,10 +18,10 @@ install-phpdbg: $(BUILD_BINARY)
 clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."
 	find sapi/phpdbg/ -name *.lo -o -name *.o | xargs rm -f
-	
+
 test-phpdbg:
-	@echo "Running tests ..."
-	@php sapi/phpdbg/tests/phpdbg.php --phpdbg sapi/phpdbg/phpdbg
+	@echo "Running phpdbg tests ..."
+	@php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
 
 .PHONY: clean-phpdbg test-phpdbg
 
