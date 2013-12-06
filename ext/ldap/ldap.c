@@ -1284,15 +1284,17 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
 	zval *link, *entry, **value, **ivalue;
 	ldap_linkdata *ld;
-	char *dn;
+	char *dn, *assertion;
 	LDAPMod **ldap_mods;
-	int i, j, num_attribs, num_values, dn_len;
+	int i, j, num_attribs, num_values, dn_len, assertion_len;
 	int *num_berval;
 	char *attribute;
 	ulong index;
+	LDAPControl **ctrls;
+
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa", &link, &dn, &dn_len, &entry) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa|s", &link, &dn, &dn_len, &entry, &assertion, &assertion_len) != SUCCESS) {
 		return;
 	}	
 
@@ -1369,17 +1371,36 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	}
 	ldap_mods[num_attribs] = NULL;
 
+	if (assertion_len > 0) {
+		ctrls = safe_emalloc(2, sizeof(*ctrls), 0);
+		*ctrls = *(ctrls+1) = NULL;
+		char *assertion_berstr = ber_strdup(assertion);
+		i = ldap_create_assertion_control(ld->link, assertion_berstr, 0, ctrls);
+		ber_memfree(assertion_berstr);
+		if (i != LDAP_SUCCESS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion control creation: %s", ldap_err2string(i));
+			RETVAL_FALSE;
+			goto errexit;
+		}
+	} else {
+		ctrls = NULL;
+	}
+
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
 	if (is_full_add == 1) {
-		if ((i = ldap_add_s(ld->link, dn, ldap_mods)) != LDAP_SUCCESS) {
+		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, ctrls, NULL)) != LDAP_SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Add: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
 	} else {
-		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {
+		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, ctrls, NULL)) != LDAP_SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Modify: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;	
+	}
+
+	if (ctrls) {
+		efree(*ctrls);
 	}
 
 errexit:
@@ -1392,7 +1413,8 @@ errexit:
 		efree(ldap_mods[i]);
 	}
 	efree(num_berval);
-	efree(ldap_mods);	
+	efree(ldap_mods);
+	efree(ctrls);
 
 	return;
 }
@@ -2954,6 +2976,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, assertion)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
@@ -2977,18 +3000,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, assertion)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, assertion)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, assertion)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_err2str, 0, 0, 1)
