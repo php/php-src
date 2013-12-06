@@ -2296,7 +2296,7 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size, format;
+	int size = 0, format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
