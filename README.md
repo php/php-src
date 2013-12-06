@@ -45,7 +45,7 @@ make install-phpdbg
 Where the source directory has been used previously to build PHP, there exists a file named *config.nice* which can be used to invoke configure with the same
 parameters as were used by the last execution of *configure*.
 
-**Note:** PHP must be configured with the switch --with-readline or --with-libedit for phpdbg to support history, autocompletion, tab-listing etc.
+**Note:** PHP must be configured with the switch --with-readline for phpdbg to support history, autocompletion, tab-listing etc.
 
 Command Line Options
 ====================
