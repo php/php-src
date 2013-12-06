@@ -39,7 +39,7 @@
 
 /* {{{ php_srand
  */
-PHPAPI void php_srand(long seed TSRMLS_DC)
+PHPAPI void php_srand(php_int_t seed TSRMLS_DC)
 {
 #ifdef ZTS
 	BG(rand_seed) = (unsigned int) seed;
@@ -60,9 +60,9 @@ PHPAPI void php_srand(long seed TSRMLS_DC)
 
 /* {{{ php_rand
  */
-PHPAPI long php_rand(TSRMLS_D)
+PHPAPI php_int_t php_rand(TSRMLS_D)
 {
-	long ret;
+	php_int_t ret;
 
 	if (!BG(rand_is_seeded)) {
 		php_srand(GENERATE_SEED() TSRMLS_CC);
