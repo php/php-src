@@ -1,0 +1,15 @@
+#################################################
+# name: clear
+# purpose: test clearing breakpoints
+# expect: TEST::FORMAT
+# options: -rr
+#################################################
+#[Clearing Breakpoints]
+#File			0
+#Functions		0
+#Methods			0
+#Oplines			0
+#Conditionals		0
+#################################################
+clear
+quit
