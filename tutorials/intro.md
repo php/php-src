@@ -4,6 +4,11 @@ Getting started with phpdbg
 
 phpdbg provides an interactive environment to debug PHP; it is implemented and distributed as a SAPI module - just as the CLI interface.
 
+```
+cd /usr/src/php-src/sapi/phpdbg
+./phpdbg -e test.php
+```
+
 ![Welcome to phpdbg](https://raw.github.com/krakjoe/phpdbg/master/tutorials/welcome.png)
 
 phpdbg integrates with, and initializes, the Zend environment; from the moment the console is open you can start to manipulate the environment in order to prepare your debugging session. If you have used other debuggers, phpdbg should hopefully feel familiar, but you can always ask for `help`:
