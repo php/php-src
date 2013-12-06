@@ -141,7 +141,7 @@ PHP_FUNCTION(dns_check_record)
 static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw, zval **subarray)
 {
 	int type;
-	u_long ttl;
+	php_uint_t ttl;
 
 	type = pRec->wType;
 	ttl = pRec->dwTtl;
@@ -163,7 +163,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	if (raw) {
 		add_assoc_long(*subarray, "type", type);
-		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength, 1);
+		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (zend_str_size_uint) pRec->wDataLength, 1);
 		return;
 	}
 
@@ -208,7 +208,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
 				char *txt, *txt_dst;
-				long txt_len = 0;
+				php_int_t txt_len = 0;
 				zval *entries;
 
 				add_assoc_string(*subarray, "type", "TXT", 1);
@@ -223,7 +223,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				txt = ecalloc(txt_len * 2, 1);
 				txt_dst = txt;
 				for (i = 0; i < count; i++) {
-					int len = strlen(data_txt->pStringArray[i]);
+					zend_str_size_int len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
 					add_next_index_stringl(entries, data_txt->pStringArray[i], len, 1);
 					txt_dst += len;

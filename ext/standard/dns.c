@@ -416,8 +416,8 @@ PHP_FUNCTION(dns_check_record)
 static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int store, int raw, zval **subarray)
 {
 	u_short type, class, dlen;
-	u_long ttl;
-	long n, i;
+	php_uint_t ttl;
+	php_int_t n, i;
 	u_short s;
 	u_char *tp, *p;
 	char name[MAXHOSTNAMELEN];
@@ -454,7 +454,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 
 	if (raw) {
 		add_assoc_long(*subarray, "type", type);
-		add_assoc_stringl(*subarray, "data", (char*) cp, (uint) dlen, 1);
+		add_assoc_stringl(*subarray, "data", (char*) cp, (zend_str_size_uint) dlen, 1);
 		cp += dlen;
 		return cp;
 	}

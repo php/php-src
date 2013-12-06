@@ -329,8 +329,8 @@ PHP_FUNCTION(iptcparse)
 		recnum = buffer[ inx++ ];
 
 		if (buffer[ inx ] & (unsigned char) 0x80) { /* long tag */
-			len = (((long) buffer[ inx + 2 ]) << 24) + (((long) buffer[ inx + 3 ]) << 16) + 
-				  (((long) buffer[ inx + 4 ]) <<  8) + (((long) buffer[ inx + 5 ]));
+			len = (((php_int_t) buffer[ inx + 2 ]) << 24) + (((php_int_t) buffer[ inx + 3 ]) << 16) + 
+				  (((php_int_t) buffer[ inx + 4 ]) <<  8) + (((php_int_t) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];

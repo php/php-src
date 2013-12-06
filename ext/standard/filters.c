@@ -1252,7 +1252,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 }
 
 #if IT_WAS_USED
-static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
 
@@ -1275,7 +1275,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretv
 }
 #endif
 
-static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned long *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
 
@@ -1327,7 +1327,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 #if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	long l;
+	php_int_t l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1341,7 +1341,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	long l;
+	php_int_t l;
 	php_conv_err_t err;
 
 	*pretval = 0;

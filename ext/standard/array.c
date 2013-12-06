@@ -274,9 +274,9 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-static int php_count_recursive(zval *array, php_int_t mode TSRMLS_DC) /* {{{ */
+static php_int_t php_count_recursive(zval *array, php_int_t mode TSRMLS_DC) /* {{{ */
 {
-	long cnt = 0;
+	php_int_t cnt = 0;
 	zval **element;
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
@@ -1843,7 +1843,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, php_int_t offset, php_int_t len
 	/* ..and the length */
 	if (length < 0) {
 		length = num_in - offset + length;
-	} else if (((unsigned)offset + (unsigned)length) > (unsigned)num_in) {
+	} else if (((php_uint_t)offset + (php_uint_t)length) > (php_uint_t)num_in) {
 		length = num_in - offset;
 	}
 
@@ -2060,11 +2060,11 @@ PHP_FUNCTION(array_splice)
 	         **rem_hash = NULL;	/* Removed elements' hash */
 	HashTable  old_hash;
 	Bucket *p;					/* Bucket used for traversing hash */
-	long	i;
+	php_int_t	i;
 	php_int_t	offset,
 			length = 0;
-	long	repl_num = 0;		/* Number of replacement elements */
-	int		num_in;				/* Number of elements in the input array */
+	php_int_t	repl_num = 0;		/* Number of replacement elements */
+	php_int_t	num_in;				/* Number of elements in the input array */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ai|iz/", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
@@ -2103,7 +2103,7 @@ PHP_FUNCTION(array_splice)
 		/* ..and the length */
 		if (length < 0) {
 			size = num_in - offset + length;
-		} else if (((unsigned long) offset + (unsigned long) length) > (unsigned) num_in) {
+		} else if (((php_uint_t) offset + (php_uint_t) length) > (php_uint_t) num_in) {
 			size = num_in - offset;
 		}
 

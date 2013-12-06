@@ -169,7 +169,7 @@ typedef struct _php_basic_globals {
 	char *locale_string;
 	char *strtok_last;
 	char strtok_table[256];
-	ulong strtok_len;
+	php_uint_t strtok_len;
 	char str_ebuf[40];
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;

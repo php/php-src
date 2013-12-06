@@ -30,7 +30,7 @@
 
 typedef struct {
 	zval *data[VAR_ENTRIES_MAX];
-	long used_slots;
+	php_int_t used_slots;
 	void *next;
 } var_entries;
 
@@ -38,7 +38,7 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+	fprintf(stderr, "var_push(%pd): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -62,7 +62,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
 	var_entries *var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+	fprintf(stderr, "var_push_dtor(%pd): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -87,7 +87,7 @@ PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval **rv
 {
 	var_entries *var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_push_dtor_no_addref(%ld): %d (%d)\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
+	fprintf(stderr, "var_push_dtor_no_addref(%pd): %d (%d)\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval), Z_REFCOUNT_PP(rval));
 #endif
 
 	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -112,7 +112,7 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 	php_int_t i;
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
+	fprintf(stderr, "var_replace(%pd): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
 #endif
 	
 	while (var_hash) {
@@ -130,7 +130,7 @@ static int var_access(php_unserialize_data_t *var_hashx, php_int_t id, zval ***s
 {
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_access(%ld): %ld\n", var_hash?var_hash->used_slots:-1L, id);
+	fprintf(stderr, "var_access(%pd): %pd\n", var_hash?var_hash->used_slots:-1L, id);
 #endif
 		
 	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
@@ -153,7 +153,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	php_int_t i;
 	var_entries *var_hash = (*var_hashx)->first;
 #if VAR_ENTRIES_DBG
-	fprintf(stderr, "var_destroy(%ld)\n", var_hash?var_hash->used_slots:-1L);
+	fprintf(stderr, "var_destroy(%pd)\n", var_hash?var_hash->used_slots:-1L);
 #endif
 	
 	while (var_hash) {

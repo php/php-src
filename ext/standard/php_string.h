@@ -138,7 +138,7 @@ PHPAPI zend_str_size_size_t php_strip_tags_ex(char *rbuf, zend_str_size_int len,
 PHPAPI zend_str_size_int php_char_to_str_ex(char *str, zend_str_size_uint len, char from, char *to, zend_str_size_int to_len, zval *result, int case_sensitivity, zend_str_size_int *replace_count);
 PHPAPI zend_str_size_int php_char_to_str(char *str, zend_str_size_uint len, char from, char *to, zend_str_size_int to_len, zval *result);
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC);
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit);
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, php_int_t limit);
 
 PHPAPI zend_str_size_size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI zend_str_size_size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 

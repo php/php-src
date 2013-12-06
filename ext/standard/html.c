@@ -778,7 +778,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  */
 static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 {
-	long code_l;
+	php_int_t code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
@@ -792,7 +792,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 		return FAILURE;
 	}
 
-	code_l = strtol(*buf, &endptr, hexadecimal ? 16 : 10);
+	code_l = ZEND_STRTOL(*buf, &endptr, hexadecimal ? 16 : 10);
 	/* we're guaranteed there were valid digits, so *endptr > buf */
 	*buf = endptr;
 
@@ -801,7 +801,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	/* many more are invalid, but that depends on whether it's HTML
 	 * (and which version) or XML. */
-	if (code_l > 0x10FFFFL)
+	if (code_l > Z_I(0x10FFFF))
 		return FAILURE;
 
 	if (code_point != NULL)
