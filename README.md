@@ -37,10 +37,13 @@ cd /usr/src/php-src/sapi
 git clone https://github.com/krakjoe/phpdbg
 cd ../
 ./buildconf --force
-./config.nice
+./configure --enable-phpdbg
 make -j8
 make install-phpdbg
 ```
+
+Where the source directory has been used previously to build PHP, there exists a file named *config.nice* which can be used to invoke configure with the same
+parameters as were used by the last execution of *configure*.
 
 *Note: php must be configured with the switch --with-readline for phpdbg to support history, autocompletion, tab-listing etc*
 
