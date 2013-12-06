@@ -124,14 +124,15 @@ DBA_EXISTS_FUNC(inifile)
 DBA_DELETE_FUNC(inifile)
 {
 	int res;
+	zend_bool found = 0;
 
 	INIFILE_DATA;
 	INIFILE_GKEY;
 
-	res =  inifile_delete(dba, &ini_key TSRMLS_CC);
+	res =  inifile_delete_ex(dba, &ini_key, &found TSRMLS_CC);
 
 	INIFILE_DONE;
-	return (res == -1 ? FAILURE : SUCCESS);
+	return (res == -1 || !found ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(inifile)
