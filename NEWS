@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
