@@ -606,7 +606,7 @@ static PHP_FUNCTION(readgzfile)
 	zend_str_size_int filename_len;
 	int flags = REPORT_ERRORS;
 	php_stream *stream;
-	int size;
+	zend_str_size_int size;
 	php_int_t use_include_path = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &filename, &filename_len, &use_include_path) == FAILURE) {
@@ -633,7 +633,7 @@ static PHP_FUNCTION(name) \
 { \
 	char *in_buf, *out_buf; \
 	zend_str_size_int in_len; \
-	size_t out_len; \
+	zend_str_size_size_t out_len; \
 	php_int_t level = -1; \
 	php_int_t encoding = default_encoding; \
 	if (default_encoding) { \
@@ -646,7 +646,7 @@ static PHP_FUNCTION(name) \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level (%ld) must be within -1..9", level); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level (%pd) must be within -1..9", level); \
 		RETURN_FALSE; \
 	} \
 	switch (encoding) { \
@@ -675,7 +675,7 @@ static PHP_FUNCTION(name) \
 		return; \
 	} \
 	if (max_len < 0) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length (%ld) must be greater or equal zero", max_len); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length (%pd) must be greater or equal zero", max_len); \
 		RETURN_FALSE; \
 	} \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len TSRMLS_CC)) { \
