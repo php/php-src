@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #65764 (generators/throw_rethrow FAIL with
     ZEND_COMPILE_EXTENDED_INFO). (Nikita)
+  . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
