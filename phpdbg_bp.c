@@ -351,7 +351,8 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 	}
 } /* }}} */
 
-PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) {
+PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
 	phpdbg_breakline_t opline_break;
 	if (op_array->last < brake->opline_num) {
 		if (brake->class_name == NULL) {
@@ -384,9 +385,10 @@ PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_o
 	zend_hash_index_update(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline_break.opline, &opline_break, sizeof(phpdbg_breakline_t), NULL);
 
 	return SUCCESS;
-}
+} /* }}} */
 
-PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC) {
+PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
 	HashTable *func_table = &PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE];
 	HashTable *oplines_table;
 	HashPosition position;
@@ -423,9 +425,10 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 				brake->opline);
 		}
 	}
-}
+} /* }}} */
 
-PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC) {
+PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC) /* {{{ */
+{
 	HashTable *func_table = EG(function_table);
 	zend_function *func;
 
@@ -484,7 +487,7 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 	}
 
 	return SUCCESS;
-}
+} /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, zend_ulong opline TSRMLS_DC) /* {{{ */
 {
@@ -969,7 +972,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 		case ADDR_PARAM: {
 			return ((zend_ulong)(phpdbg_opline_ptr_t)execute_data->opline == param->addr);
 		} break;
-		
+
 		default: {
 			/* do nothing */
 		} break;
@@ -1102,7 +1105,7 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 	HashTable **table;
 	HashPosition position;
 	phpdbg_breakbase_t *brake;
-	
+
 	if ((brake = phpdbg_find_breakbase_ex(num, &table, &position TSRMLS_CC))) {
 		char *key;
 		zend_uint klen;
