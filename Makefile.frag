@@ -19,6 +19,10 @@ clean-phpdbg:
 	@echo "Cleaning phpdbg object files ..."
 	find sapi/phpdbg/ -name *.lo -o -name *.o | xargs rm -f
 
-.PHONY: clean-phpdbg
+test-phpdbg:
+	@echo "Running phpdbg tests ..."
+	@$(top_builddir)/sapi/cli/php sapi/phpdbg/tests/run-tests.php --phpdbg sapi/phpdbg/phpdbg
+
+.PHONY: clean-phpdbg test-phpdbg
 
 

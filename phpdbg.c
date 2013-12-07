@@ -39,6 +39,8 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+static zend_bool phpdbg_booted = 0;
+
 #if PHP_VERSION_ID >= 50500
 void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
 #else
@@ -203,6 +205,51 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+/* {{{ proto mixed phpdbg_exec(string context) 
+	Attempt to set the execution context for phpdbg
+	If the execution context was set previously it is returned
+	If the execution context was not set previously boolean true is returned 
+	If the request to set the context fails, boolean false is returned, and an E_WARNING raised */
+static PHP_FUNCTION(phpdbg_exec) 
+{
+	char *exec = NULL;
+	zend_ulong exec_len = 0L;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &exec, &exec_len) == FAILURE) {
+		return;
+	}
+	
+	{
+		struct stat sb;
+		zend_bool result = 1;
+		
+		if (VCWD_STAT(exec, &sb) != FAILURE) {
+			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
+				if (PHPDBG_G(exec)) {
+					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len), 1);
+					efree(PHPDBG_G(exec));
+					result = 0;
+				}
+			
+				PHPDBG_G(exec) = estrndup(exec, exec_len);
+				PHPDBG_G(exec_len) = exec_len;
+			
+				if (result) 
+					ZVAL_BOOL(return_value, 1);
+			} else {
+				zend_error(
+					E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", exec);
+				ZVAL_BOOL(return_value, 0);
+			}
+		} else {
+			zend_error(
+				E_WARNING, "Failed to set execution context (%s) the file does not exist", exec);
+
+			ZVAL_BOOL(return_value, 0);
+		}
+	}
+} /* }}} */
+
 /* {{{ proto void phpdbg_break([integer type, string expression])
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break)
@@ -314,12 +361,17 @@ ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 0)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_exec_arginfo, 0, 0, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
 	PHP_FE(phpdbg_break, phpdbg_break_arginfo)
+	PHP_FE(phpdbg_exec,  phpdbg_exec_arginfo)
 	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
 	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
 #ifdef  PHP_FE_END
@@ -347,6 +399,9 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
+	
+	phpdbg_booted=1;
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -376,7 +431,12 @@ static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *s
 
 static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 {
-	phpdbg_error("%s", message);
+	/*
+	* We must not request TSRM before being boot
+	*/
+	if (phpdbg_booted) {
+		phpdbg_error("%s", message);
+	} else fprintf(stdout, "%s\n", message);
 }
 /* }}} */
 
@@ -904,9 +964,13 @@ phpdbg_main:
 			} break;
 
 			case 'i': { /* set init file */
+				if (init_file) {
+					free(init_file);
+				}
+				
 				init_file_len = strlen(php_optarg);
 				if (init_file_len) {
-					init_file = estrdup(php_optarg);
+					init_file = strdup(php_optarg);
 				}
 			} break;
 
@@ -1015,7 +1079,7 @@ phpdbg_main:
 			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
 			ini_entries_len += ze_len;
 			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
-			
+
 			free(zend_extensions[zend_extension]);
 			zend_extension++;
 		}

@@ -143,6 +143,47 @@ PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
+PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM:
+			asprintf(pointer, 
+				"%s", param->str);
+		break;
+		
+		case ADDR_PARAM:
+			asprintf(pointer, 
+				"%#lx", param->addr);
+		break;
+		
+		case NUMERIC_PARAM:
+			asprintf(pointer, 
+				"%li",
+				param->num);
+		break;
+		
+		case METHOD_PARAM:
+			asprintf(pointer,
+				"%s::%s",
+				param->method.class,
+				param->method.name);
+		break;
+		
+		case FILE_PARAM:
+			asprintf(pointer,
+				"%s:%u",
+				param->file.name,
+				param->file.line);
+		break;
+		
+		default:
+			asprintf(pointer, 
+				"%s", "unknown");
+	}
+	
+	return *pointer;
+} /* }}} */
+
 PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest TSRMLS_DC) /* {{{ */
 {
 	switch ((dest->type = src->type)) {

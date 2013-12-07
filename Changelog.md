@@ -8,6 +8,11 @@ Version 0.3.0 2013-00-00
 2. Added ability to override SAPI name
 3. Added extended conditional breakpoint support "break at"
 4. Fix loading of zend extnsions with -z
+5. Fix crash when loading .phpdbginit with command line switch
+6. Fix crash on startup errors
+7. Added init.d for remote console (redhat)
+8. Added phpdbg_exec userland function
+9. Added testing facilities
 
 Version 0.2.0 2013-11-31
 ------------------------

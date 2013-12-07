@@ -3,7 +3,9 @@ The interactive PHP debugger
 
 Implemented as a SAPI module, phpdbg can excert complete control over the environment without impacting the functionality or performance of your code.
 
-phpdbg aims to be a lightweight, powerful, easy to use debugging platform for PHP5.4+
+phpdbg aims to be a lightweight, powerful, easy to use debugging platform for PHP 5.4+
+
+[![phpdbg on travis-ci](https://travis-ci.org/krakjoe/phpdbg.png?branch=master)](https://travis-ci.org/krakjoe/phpdbg)
 
 Features
 ========
@@ -35,12 +37,15 @@ cd /usr/src/php-src/sapi
 git clone https://github.com/krakjoe/phpdbg
 cd ../
 ./buildconf --force
-./config.nice
+./configure --enable-phpdbg
 make -j8
 make install-phpdbg
 ```
 
-*Note: php must be configured with the switch --with-readline for phpdbg to support history, autocompletion, tab-listing etc*
+Where the source directory has been used previously to build PHP, there exists a file named *config.nice* which can be used to invoke configure with the same
+parameters as were used by the last execution of *configure*.
+
+**Note:** PHP must be configured with the switch --with-readline for phpdbg to support history, autocompletion, tab-listing etc.
 
 Command Line Options
 ====================
@@ -68,14 +73,13 @@ The following switches change the default behaviour of phpdbg:
  - -a listen address for remote mode
  - -S override SAPI name
 
-*Note: passing -rr will cause phpdbg to quit after execution, rather than returning to the console*
-
-Screeny
-=======
-
-<img src="https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png" alt="screenshot"/>
+**Note:** Passing -rr will cause phpdbg to quit after execution, rather than returning to the console.
 
 Getting Started
 ===============
 
-See the tutorials for help getting started with phpdbg: https://github.com/krakjoe/phpdbg/blob/master/tutorials/intro.md
+See the tutorials for help [getting started with phpdbg][1].
+
+<img src="https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png" alt="screenshot"/>
+
+  [1]: https://github.com/krakjoe/phpdbg/blob/master/tutorials/intro.md

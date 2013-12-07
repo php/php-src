@@ -67,6 +67,71 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+{
+	phpdbg_input_t *function = input->argv[0];
+
+	if (zend_hash_exists(
+		&PHPDBG_G(registered), function->string, function->length+1)) {
+
+		zval fname, *fretval;
+		zend_fcall_info fci;
+
+		ZVAL_STRINGL(&fname, function->string, function->length, 1);
+
+		memset(&fci, 0, sizeof(zend_fcall_info));
+
+		fci.size = sizeof(zend_fcall_info);
+		fci.function_table = &PHPDBG_G(registered);
+		fci.function_name = &fname;
+		fci.symbol_table = EG(active_symbol_table);
+		fci.object_ptr = NULL;
+		fci.retval_ptr_ptr = &fretval;
+		fci.no_separation = 1;
+
+		if (input->argc > 1) {
+			int param;
+			zval params;
+
+			array_init(&params);
+
+			for (param = 0; param < (input->argc-1); param++) {
+				add_next_index_stringl(
+					&params,
+					input->argv[param+1]->string,
+					input->argv[param+1]->length, 1);
+
+				phpdbg_debug(
+					"created param[%d] from argv[%d]: %s",
+					param, param+1, input->argv[param+1]->string);
+			}
+
+			zend_fcall_info_args(&fci, &params TSRMLS_CC);
+		} else {
+			fci.params = NULL;
+			fci.param_count = 0;
+		}
+
+		phpdbg_debug(
+			"created %d params from %d arguments",
+			fci.param_count, input->argc);
+
+		zend_call_function(&fci, NULL TSRMLS_CC);
+
+		if (fretval) {
+			zend_print_zval_r(
+				fretval, 0 TSRMLS_CC);
+			phpdbg_writeln(EMPTY);
+		}
+
+		zval_dtor(&fname);
+
+		return SUCCESS;
+	}
+
+	return FAILURE;
+} /* }}} */
+
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) {
 	struct stat sb;
 
@@ -125,9 +190,12 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 					{
 						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
 						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
-							case FAILURE:
-								phpdbg_error(
-									"Unrecognized command in %s:%d: %s!", init_file, line, cmd);
+							case FAILURE:	
+								if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+									if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
+										phpdbg_error("Unrecognized command in %s:%d: %s!",  init_file, line, input->string);
+									}
+								}
 							break;
 						}
 						phpdbg_destroy_input(&input TSRMLS_CC);
@@ -149,7 +217,7 @@ next_line:
 		}
 
 		if (free_init) {
-			efree(init_file);
+			free(init_file);
 		}
 	}
 } /* }}} */
@@ -176,8 +244,9 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 			if (i != -1) {
 				scan_dir[i] = 0;
 			}
-			init_file = emalloc(strlen(scan_dir) + sizeof(PHPDBG_INIT_FILENAME));
-			sprintf(init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME);
+			
+			asprintf(
+				&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME);
 			phpdbg_try_file_init(init_file, strlen(init_file), 1 TSRMLS_CC);
 			if (i == -1) {
 				break;
@@ -1076,71 +1145,6 @@ PHPDBG_COMMAND(list) /* {{{ */
 	}
 
 	return SUCCESS;
-} /* }}} */
-
-static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
-{
-	phpdbg_input_t *function = input->argv[0];
-
-	if (zend_hash_exists(
-		&PHPDBG_G(registered), function->string, function->length+1)) {
-
-		zval fname, *fretval;
-		zend_fcall_info fci;
-
-		ZVAL_STRINGL(&fname, function->string, function->length, 1);
-
-		memset(&fci, 0, sizeof(zend_fcall_info));
-
-		fci.size = sizeof(zend_fcall_info);
-		fci.function_table = &PHPDBG_G(registered);
-		fci.function_name = &fname;
-		fci.symbol_table = EG(active_symbol_table);
-		fci.object_ptr = NULL;
-		fci.retval_ptr_ptr = &fretval;
-		fci.no_separation = 1;
-
-		if (input->argc > 1) {
-			int param;
-			zval params;
-
-			array_init(&params);
-
-			for (param = 0; param < (input->argc-1); param++) {
-				add_next_index_stringl(
-					&params,
-					input->argv[param+1]->string,
-					input->argv[param+1]->length, 1);
-
-				phpdbg_debug(
-					"created param[%d] from argv[%d]: %s",
-					param, param+1, input->argv[param+1]->string);
-			}
-
-			zend_fcall_info_args(&fci, &params TSRMLS_CC);
-		} else {
-			fci.params = NULL;
-			fci.param_count = 0;
-		}
-
-		phpdbg_debug(
-			"created %d params from %d arguments",
-			fci.param_count, input->argc);
-
-		zend_call_function(&fci, NULL TSRMLS_CC);
-
-		if (fretval) {
-			zend_print_zval_r(
-				fretval, 0 TSRMLS_CC);
-			phpdbg_writeln(EMPTY);
-		}
-
-		zval_dtor(&fname);
-
-		return SUCCESS;
-	}
-
-	return FAILURE;
 } /* }}} */
 
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
