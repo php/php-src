@@ -69,7 +69,7 @@ PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
 #endif
 
 /* {{{ For writing blank lines */
-#define EMPTY "" /* }}} */
+#define EMPTY NULL /* }}} */
 
 /* {{{ For prompt lines */
 #define PROMPT "phpdbg>" /* }}} */
