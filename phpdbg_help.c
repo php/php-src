@@ -258,6 +258,13 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln("\t%sb on ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break when the condition evaluates to true");
 	phpdbg_writeln(EMPTY);
+	phpdbg_writeln("\t%sbreak at phpdbg::isGreat if ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at every opcode in phpdbg::isGreat when the condition evaluates to true");
+	phpdbg_writeln("\t%sbreak at test.php:20 if ($expression == true)", phpdbg_get_prompt(TSRMLS_C));
+	phpdbg_writeln("\tWill break at every opcode on line 20 of test.php when the condition evaluates to true");
+	phpdbg_write("\t");
+	phpdbg_notice("The location can be anything accepted by file, func, method, or address break commands");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak op ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb O ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill break on every occurence of the opcode provided");
@@ -576,7 +583,19 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
 	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
+	phpdbg_writeln(" -S\t-Scli\t\t\tOverride SAPI name, careful !");
+#ifndef _WIN32
+	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console ports");
+	phpdbg_writeln(" -a\t-a192.168.0.3\t\tSetup remote console bind address");
+#endif
 	phpdbg_notice("Passing -rr will quit automatically after execution");
+#ifndef _WIN32
+	phpdbg_writeln("Remote Console Mode");
+	phpdbg_notice("For security, phpdbg will bind only to the loopback interface by default");
+	phpdbg_writeln("-a without an argument implies all; phpdbg will bind to all available interfaces.");
+	phpdbg_writeln("specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2.");
+	phpdbg_notice("Steps should be taken to secure this service if bound to a public interface/port");
+#endif
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */

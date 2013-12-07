@@ -573,6 +573,9 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_hash_clean(
 			&PHPDBG_G(seek));
 
+		/* reset hit counters */
+		phpdbg_reset_breakpoints(TSRMLS_C);
+
 		zend_try {
 			php_output_activate(TSRMLS_C);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
@@ -766,11 +769,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
 			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
 			phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
-			phpdbg_writeln(
-				"Memory\t\t%.3f/%.3f (kB)",
-				(float) (zend_memory_usage(1 TSRMLS_CC)/1024),
-				(float) (zend_memory_usage(0 TSRMLS_CC)/1024));
-
+			
 			phpdbg_writeln(SEPARATE);
 		} break;
 
@@ -957,6 +956,9 @@ PHPDBG_COMMAND(clear) /* {{{ */
 	phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
 	phpdbg_writeln("Methods\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
 	phpdbg_writeln("Oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
+	phpdbg_writeln("File oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_OPLINE]));
+	phpdbg_writeln("Function oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]));
+	phpdbg_writeln("Method oplines\t\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]));
 	phpdbg_writeln("Conditionals\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
 
 	phpdbg_clear_breakpoints(TSRMLS_C);
@@ -1400,9 +1402,16 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
-		if (PHPDBG_G(flags) & PHPDBG_BP_MASK
-			&& phpdbg_find_breakpoint(execute_data TSRMLS_CC) == SUCCESS) {
-			DO_INTERACTIVE();
+		/* search for breakpoints */
+		{
+			phpdbg_breakbase_t *brake;
+			
+			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) && 
+				(brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))) {
+				phpdbg_hit_breakpoint(
+					brake, 1 TSRMLS_CC);
+				DO_INTERACTIVE();
+			}
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {

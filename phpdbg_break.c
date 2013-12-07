@@ -48,7 +48,7 @@ PHPDBG_BREAK(method) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
-
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -86,6 +86,13 @@ PHPDBG_BREAK(on) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_BREAK(at) /* {{{ */
+{
+	phpdbg_set_breakpoint_at(param, input TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

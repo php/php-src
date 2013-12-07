@@ -79,6 +79,10 @@
 #define PHPDBG_FINISH 4
 #define PHPDBG_LEAVE  5
 
+/*
+ BEGIN: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
+*/
+
 /* {{{ tables */
 #define PHPDBG_BREAK_FILE            0
 #define PHPDBG_BREAK_SYM             1
@@ -89,7 +93,8 @@
 #define PHPDBG_BREAK_FUNCTION_OPLINE 6
 #define PHPDBG_BREAK_METHOD_OPLINE   7
 #define PHPDBG_BREAK_FILE_OPLINE     8
-#define PHPDBG_BREAK_TABLES          9 /* }}} */
+#define PHPDBG_BREAK_MAP             9
+#define PHPDBG_BREAK_TABLES          10 /* }}} */
 
 /* {{{ flags */
 #define PHPDBG_HAS_FILE_BP            (1<<1)
@@ -102,6 +107,10 @@
 #define PHPDBG_HAS_METHOD_OPLINE_BP   (1<<8)
 #define PHPDBG_HAS_FILE_OPLINE_BP     (1<<9)
 #define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP|PHPDBG_HAS_OPCODE_BP|PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
+
+/*
+ END: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
+*/
 
 #define PHPDBG_IN_COND_BP             (1<<8)
 #define PHPDBG_IN_EVAL                (1<<9)
@@ -123,6 +132,8 @@
 #define PHPDBG_IS_SIGNALED            (1<<21)
 #define PHPDBG_IS_INTERACTIVE         (1<<22)
 #define PHPDBG_IS_BP_ENABLED          (1<<23)
+#define PHPDBG_IS_REMOTE              (1<<24)
+#define PHPDBG_IS_DISCONNECTED        (1<<25)
 
 #ifndef _WIN32
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED|PHPDBG_IS_BP_ENABLED)
@@ -135,7 +146,7 @@
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
 #define PHPDBG_URL "http://phpdbg.com"
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.2.0-dev"
+#define PHPDBG_VERSION "0.3.0-dev"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 /* }}} */
 
@@ -157,7 +168,6 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_op_array *ops;                 	     /* op_array */
 	zval *retval;                                /* return value */
 	int bp_count;                                /* breakpoint count */
-	int del_bp_num;                              /* breakpoint to delete */
 	int vmret;                                   /* return from last opcode handler execution */
 
 	FILE *oplog;                                 /* opline log */

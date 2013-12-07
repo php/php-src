@@ -32,7 +32,7 @@ PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
 
 /**
- * Error/notice/formatting helper
+ * Error/notice/formatting helpers
  */
 enum {
 	P_ERROR  = 1,
@@ -47,6 +47,8 @@ PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUT
 #else
 PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #endif
+
+PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
 
 #define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
 #define phpdbg_notice(fmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)

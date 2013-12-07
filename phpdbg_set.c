@@ -21,6 +21,7 @@
 #include "phpdbg_cmd.h"
 #include "phpdbg_set.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_bp.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -51,13 +52,33 @@ PHPDBG_SET(break) /* {{{ */
 
 		case STR_PARAM:
 			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
-				PHPDBG_G(flags) |= PHPDBG_IS_BP_ENABLED;
+				phpdbg_enable_breakpoints(TSRMLS_C);
 			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
-				PHPDBG_G(flags) &= ~PHPDBG_IS_BP_ENABLED;
+				phpdbg_disable_breakpoints(TSRMLS_C);
 			}
 			break;
+			
+		case NUMERIC_PARAM: {
+			if (input->argc > 2) {
+					if (phpdbg_argv_is(2, "on")) {
+						phpdbg_enable_breakpoint(param->num TSRMLS_CC);
+					} else if (phpdbg_argv_is(2, "off")) {
+						phpdbg_disable_breakpoint(param->num TSRMLS_CC);
+					}
+			} else {
+				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
+				if (brake) {
+					phpdbg_writeln(
+						"%s", brake->disabled ? "off" : "on");
+				} else {
+					phpdbg_error("Failed to find breakpoint #%lx", param->num);
+				}
+			}
+		} break;
 
-		phpdbg_default_switch_case();
+		default:
+			phpdbg_error(
+				"set break used incorrectly: set break [id] <on|off>");
 	}
 
 	return SUCCESS;
@@ -71,6 +92,7 @@ PHPDBG_SET(color) /* {{{ */
 			input->argv[2]->string, input->argv[2]->length TSRMLS_CC);
 		int element = PHPDBG_COLOR_INVALID;
 
+		/* @TODO(anyone) make this consistent with other set commands */
 		if (color) {
 			if (phpdbg_argv_is(1, "prompt")) {
 				phpdbg_notice(
@@ -103,6 +125,34 @@ usage:
 		phpdbg_error(
 			"set color used incorrectly: set color <prompt|error|notice> <color>");
 	}
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(colors) /* {{{ */
+{
+	switch (param->type) {
+		case EMPTY_PARAM: {
+			phpdbg_writeln(
+				"%s", PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "on" : "off");
+			goto done;
+		}
+		
+		case STR_PARAM: {
+			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
+				PHPDBG_G(flags) |= PHPDBG_IS_COLOURED;
+				goto done;
+			} else if (strncasecmp(param->str, PHPDBG_STRL("off")) == 0) {
+				PHPDBG_G(flags) &= ~PHPDBG_IS_COLOURED;
+				goto done;
+			}
+		}
+		
+		default:
+			phpdbg_error(
+				"set colors used incorrectly: set colors <on|off>");
+	}
+
+done:
 	return SUCCESS;
 } /* }}} */
 #endif

@@ -27,6 +27,16 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
+/* {{{ remote console headers */
+#ifndef _WIN32
+#	include <sys/socket.h>
+#	include <sys/select.h>
+#	include <sys/time.h>
+#	include <sys/types.h>
+#	include <unistd.h>
+#	include <arpa/inet.h>
+#endif /* }}} */
+
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
 #if PHP_VERSION_ID >= 50500
@@ -84,7 +94,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 
 static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
 {
-	zend_llist_destroy((zend_llist*)brake);
+	zend_hash_destroy((HashTable*)brake);
 } /* }}} */
 
 static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
@@ -115,11 +125,11 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 					brake->ops TSRMLS_CC);
 			efree(brake->ops);
 		}
-		zval_dtor(&brake->code);
+		efree((char*)brake->code);
 	}
 } /* }}} */
 
-static void php_phpdbg_destroy_registered(void *data)
+static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -127,7 +137,7 @@ static void php_phpdbg_destroy_registered(void *data)
 
 	destroy_zend_function(
 		function TSRMLS_CC);
-}
+} /* }}} */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
@@ -140,6 +150,8 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], 8, NULL, php_phpdbg_destroy_bp_opcode, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
+	
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
 
@@ -157,6 +169,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
+	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 
@@ -514,6 +527,11 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'O', 1, "opline log"},
 	{'r', 0, "run"},
 	{'E', 0, "step-through-eval"},
+	{'S', 1, "sapi-name"},
+#ifndef _WIN32
+	{'l', 1, "listen"},
+	{'a', 1, "address-or-any"},
+#endif
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -572,11 +590,160 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	}
 } /* }}} */
 
+#ifndef _WIN32
+int phpdbg_open_socket(const char *interface, short port) /* {{{ */
+{
+	int fd = socket(AF_INET, SOCK_STREAM, 0);
+	
+	switch (fd) {
+		case -1:
+			return -1;
+			
+		default: {
+			int reuse = 1;
+
+			switch (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse))) {
+				case -1:
+					close(fd);
+					return -2;
+				
+				default: {
+					struct sockaddr_in address;
+					
+					memset(&address, 0, sizeof(address));
+					
+					address.sin_port = htons(port);
+					address.sin_family = AF_INET;
+					
+					if ((*interface == '*')) {
+						address.sin_addr.s_addr = htonl(INADDR_ANY);						
+					} else if (!inet_pton(AF_INET, interface, &address.sin_addr)) {
+						close(fd);
+						return -3;
+					}
+					
+					switch (bind(fd, (struct sockaddr *)&address, sizeof(address))) {
+						case -1:
+							close(fd);
+							return -4;
+							
+						default: {
+							listen(fd, 5);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	return fd;
+} /* }}} */
+
+static inline void phpdbg_close_sockets(int (*socket)[2], FILE *streams[2]) /* {{{ */
+{	
+	if ((*socket)[0] >= 0) {
+		shutdown(
+			(*socket)[0], SHUT_RDWR);
+		close((*socket)[0]);
+	}
+	
+	if (streams[0]) {
+		fclose(streams[0]);
+	}
+	
+	if ((*socket)[1] >= 0) {
+		shutdown(
+			(*socket)[1], SHUT_RDWR);
+		close((*socket)[1]);
+	}
+	
+	if (streams[1]) {
+		fclose(streams[1]);
+	}
+} /* }}} */
+
+/* don't inline this, want to debug it easily, will inline when done */
+
+int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*socket)[2], FILE* streams[2]) /* {{{ */
+{
+	if (((*listen)[0]) < 0 && ((*listen)[1]) < 0) {
+		((*listen)[0]) = phpdbg_open_socket(address, (short)port[0]);
+		((*listen)[1]) = phpdbg_open_socket(address, (short)port[1]);
+	}
+
+	streams[0] = NULL;
+	streams[1] = NULL;
+
+	if ((*listen)[0] < 0 || (*listen)[1] < 0) {
+		if ((*listen)[0] < 0) {
+			phpdbg_rlog(stderr,
+				"console failed to initialize (stdin) on %s:%d", address, port[0]);
+		}
+
+		if ((*listen)[1] < 0) {
+			phpdbg_rlog(stderr,
+				"console failed to initialize (stdout) on %s:%d", address, port[1]);
+		}
+
+		if ((*listen)[0] >= 0) {
+			close((*listen)[0]);
+		}
+
+		if ((*listen)[1] >= 0) {
+			close((*listen)[1]);
+		}
+
+		return FAILURE;
+	}
+
+	phpdbg_close_sockets(socket, streams);
+
+	phpdbg_rlog(stderr,
+		"accepting connections on %s:%d/%d", address, port[0], port[1]);
+	{
+		struct sockaddr_in address;
+		socklen_t size = sizeof(address);
+		char buffer[20] = {0};
+
+		{
+			memset(&address, 0, size);
+			(*socket)[0] = accept(
+				(*listen)[0], (struct sockaddr *) &address, &size);
+			inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+
+			phpdbg_rlog(stderr, "connection (stdin) from %s", buffer);
+		}
+
+		{
+			memset(&address, 0, size);
+			(*socket)[1] = accept(
+				(*listen)[1], (struct sockaddr *) &address, &size);
+		    inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+
+			phpdbg_rlog(stderr, "connection (stdout) from %s", buffer);
+		}
+	}
+
+	dup2((*socket)[0], fileno(stdin));
+	dup2((*socket)[1], fileno(stdout));
+	
+	setbuf(stdout, NULL);
+
+	streams[0] = fdopen((*socket)[0], "r");
+	streams[1] = fdopen((*socket)[1], "w");
+	
+	return SUCCESS;
+} /* }}} */
+#endif
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+	char *sapi_name;
 	char *ini_entries;
 	int   ini_entries_len;
+	char **zend_extensions = NULL;
+	zend_ulong zend_extensions_len = 0L;
 	zend_bool ini_ignore;
 	char *ini_override;
 	char *exec;
@@ -590,12 +757,32 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
+	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
 	char *bp_tmp_file;
+#ifndef _WIN32
+	char *address;
+	int listen[2];
+	int server[2];
+	int socket[2];
+	FILE* streams[2] = {NULL, NULL};
+#endif
 
 #ifdef ZTS
 	void ***tsrm_ls;
+#endif
+
+#ifndef _WIN32
+	address = strdup("127.0.0.1");
+	socket[0] = -1;
+	socket[1] = -1;
+	listen[0] = -1;
+	listen[1] = -1;
+	server[0] = -1;
+	server[1] = -1;
+	streams[0] = NULL;
+	streams[1] = NULL;
 #endif
 
 #ifdef PHP_WIN32
@@ -623,6 +810,8 @@ phpdbg_main:
 	ini_entries_len = 0;
 	ini_ignore = 0;
 	ini_override = NULL;
+	zend_extensions = NULL;
+	zend_extensions_len = 0L;
 	exec = NULL;
 	exec_len = 0;
 	init_file = NULL;
@@ -636,7 +825,9 @@ phpdbg_main:
 	opt = 0;
 	run = 0;
 	step = 0;
-
+	sapi_name = NULL;
+	
+	
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
@@ -680,8 +871,13 @@ phpdbg_main:
 				  ini_entries_len += len + sizeof("=1\n\0") - 2;
 				}
 			} break;
+			
 			case 'z':
-				zend_load_extension(php_optarg);
+				zend_extensions_len++;
+				if (zend_extensions) {
+					zend_extensions = realloc(zend_extensions, sizeof(char*) * zend_extensions_len);
+				} else zend_extensions = malloc(sizeof(char*) * zend_extensions_len);
+				zend_extensions[zend_extensions_len-1] = strdup(php_optarg);
 			break;
 
 			/* begin phpdbg options */
@@ -689,8 +885,18 @@ phpdbg_main:
 			case 'e': { /* set execution context */
 				exec_len = strlen(php_optarg);
 				if (exec_len) {
+					if (exec) {
+						free(exec);
+					}
 					exec = strdup(php_optarg);
 				}
+			} break;
+			
+			case 'S': { /* set SAPI name */
+				if (sapi_name) {
+					free(sapi_name);
+				}
+				sapi_name = strdup(php_optarg);
 			} break;
 
 			case 'I': { /* ignore .phpdbginit */
@@ -730,9 +936,50 @@ phpdbg_main:
 			case 'q': /* hide banner */
 				show_banner = 0;
 			break;
+
+#ifndef _WIN32
+			/* if you pass a listen port, we will accept input on listen port */
+			/* and write output to listen port * 2 */
+			
+			case 'l': { /* set listen ports */
+				if (sscanf(php_optarg, "%d/%d", &listen[0], &listen[1]) != 2) {
+					if (sscanf(php_optarg, "%d", &listen[0]) != 1) {
+						/* default to hardcoded ports */
+						listen[0] = 4000;
+						listen[1] = 8000;
+					} else {
+						listen[1] = (listen[0] * 2);
+					}
+				}
+			} break;
+			
+			case 'a': { /* set bind address */
+				free(address);
+				if (!php_optarg) {
+					address = strdup("*");
+				} else address = strdup(php_optarg);
+			} break;
+#endif
 		}
 	}
 
+#ifndef _WIN32
+	/* setup remote server if necessary */
+	if (!cleaning &&
+		(listen[0] > 0 && listen[1] > 0)) {
+		if (phpdbg_open_sockets(address, listen, &server, &socket, streams) == FAILURE) {
+			remote = 0;
+			exit(0);
+		}
+		/* set remote flag to stop service shutting down upon quit */
+		remote = 1;
+	}
+#endif
+
+	if (sapi_name) {
+		phpdbg->name = sapi_name;
+	}
+	
 	phpdbg->ini_defaults = phpdbg_ini_defaults;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
@@ -753,30 +1000,77 @@ phpdbg_main:
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
 	}
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
+	
+	if (zend_extensions_len) {
+		zend_ulong zend_extension = 0L;
+		
+		while (zend_extension < zend_extensions_len) {
+			const char *ze = zend_extensions[zend_extension];
+			size_t ze_len = strlen(ze);
+			
+			ini_entries = realloc(
+				ini_entries, ini_entries_len + (ze_len + (sizeof("zend_extension=\n"))));
+			memcpy(&ini_entries[ini_entries_len], "zend_extension=", (sizeof("zend_extension=\n")-1));
+			ini_entries_len += (sizeof("zend_extension=")-1);
+			memcpy(&ini_entries[ini_entries_len], ze, ze_len);
+			ini_entries_len += ze_len;
+			memcpy(&ini_entries[ini_entries_len], "\n", (sizeof("\n") - 1));
+			
+			free(zend_extensions[zend_extension]);
+			zend_extension++;
+		}
+		
+		free(zend_extensions);
+	}
 
 	phpdbg->ini_entries = ini_entries;
-
+		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_register_extension(&zend_extension_entry, NULL);
 
 		zend_activate(TSRMLS_C);
-
+		
+		/* do not install sigint handlers for remote consoles */
+		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifdef ZEND_SIGNALS
-		zend_try {
-			zend_signal_activate(TSRMLS_C);
-			zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
-		} zend_end_try();
+# ifndef _WIN32
+		if (listen[0] < 0) {
+# endif
+			zend_try {
+				zend_signal_activate(TSRMLS_C);
+				zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
+			} zend_end_try();
+# ifndef _WIN32
+		}
+# endif
 #else
-		signal(SIGINT, phpdbg_sigint_handler);
+# ifndef _WIN32
+		if (listen[0] < 0) {
+# endif
+			signal(SIGINT, phpdbg_sigint_handler);
+#ifndef _WIN32
+		}
+#endif
 #endif
 
 		PG(modules_activated) = 0;
+		
+		/* set flags from command line */
+		PHPDBG_G(flags) = flags;
 
-		/* set up basic io here */
+#ifndef _WIN32
+		/* setup io here */
+		if (streams[0] && streams[1]) {
+			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
+
+			signal(SIGPIPE, SIG_IGN);
+		}
+#endif
+
 		PHPDBG_G(io)[PHPDBG_STDIN] = stdin;
 		PHPDBG_G(io)[PHPDBG_STDOUT] = stdout;
 		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
-
+		
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(
 					exec TSRMLS_CC);
@@ -793,9 +1087,6 @@ phpdbg_main:
 			}
 			free(oplog_file);
 		}
-
-		/* set flags from command line */
-		PHPDBG_G(flags) = flags;
 
 		/* set default colors */
 		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold") TSRMLS_CC);
@@ -846,6 +1137,7 @@ phpdbg_main:
 			}
 		}
 
+phpdbg_interact:
 		/* phpdbg main() */
 		do {
 			zend_try {
@@ -860,14 +1152,40 @@ phpdbg_main:
 				} else {
 					cleaning = 0;
 				}
+#ifndef _WIN32
+				/* remote client disconnected */
+				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 
+					/* renegociate connections */
+					phpdbg_open_sockets(
+						address, listen, &server, &socket, streams);
+					
+					/* set streams */
+					if (streams[0] && streams[1]) {
+						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+					}
+					
+					/* this must be forced */
+					CG(unclean_shutdown) = 0;
+				}
+#endif
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
 					goto phpdbg_out;
 				}
 			} zend_end_try();
 		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
-
+		
+		/* this must be forced */
+		CG(unclean_shutdown) = 0;
+		
 phpdbg_out:
+#ifndef _WIN32
+		if (PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED) {
+			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
+			goto phpdbg_interact;
+		}
+#endif
+		
 		if (ini_entries) {
 			free(ini_entries);
 		}
@@ -901,7 +1219,7 @@ phpdbg_out:
 		sapi_shutdown();
 	}
 
-	if (cleaning) {
+	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
 
@@ -909,6 +1227,16 @@ phpdbg_out:
 	/* bugggy */
 	/* tsrm_shutdown(); */
 #endif
+
+#ifndef _WIN32
+	if (address) {
+		free(address);	
+	}
+#endif
+
+	if (sapi_name) {
+		free(sapi_name);
+	}
 	
 	free(bp_tmp_file);
 

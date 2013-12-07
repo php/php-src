@@ -1,15 +1,24 @@
 ChangeLog for phpdbg
 ====================
 
-Version 0.2.0 2013-00-00
+Version 0.3.0 2013-00-00
 ------------------------
-(this needs tidying before release)
+
+1. Added ability to disable an enable a single breakpoint
+2. Added ability to override SAPI name
+3. Added extended conditional breakpoint support "break at"
+4. Fix loading of zend extnsions with -z
+
+Version 0.2.0 2013-11-31
+------------------------
 
 1. Added "break delete <id>" command
 2. Added "break opcode <opcode>" command
 3. Added "set" command - control prompt and console colors
 4. .phpdbginit now searched in (additional) ini dirs
 5. Added source command - load additional .phpdbginit script during session
+6. Added remote console mode
+7. Added info memory command
 
 Version 0.1.0 2013-11-23
 ------------------------
