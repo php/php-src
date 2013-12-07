@@ -544,6 +544,8 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 
 	PHPDBG_G(flags) |= PHPDBG_HAS_METHOD_OPLINE_BP;
 
+	PHPDBG_BREAK_MAPPING(new_break.id, method_table);
+
 	zend_hash_index_update(method_table, opline, &new_break, sizeof(phpdbg_breakopline_t), NULL);
 }
 
@@ -588,6 +590,8 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend
 		PHPDBG_G(bp_count)--;
 		return;
 	}
+
+	PHPDBG_BREAK_MAPPING(new_break.id, func_table);
 
 	PHPDBG_G(flags) |= PHPDBG_HAS_FUNCTION_OPLINE_BP;
 
@@ -635,6 +639,8 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong o
 		PHPDBG_G(bp_count)--;
 		return;
 	}
+
+	PHPDBG_BREAK_MAPPING(new_break.id, file_table);
 
 	PHPDBG_G(flags) |= PHPDBG_HAS_FILE_OPLINE_BP;
 
