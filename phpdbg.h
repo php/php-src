@@ -112,28 +112,28 @@
  END: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
 */
 
-#define PHPDBG_IN_COND_BP             (1<<8)
-#define PHPDBG_IN_EVAL                (1<<9)
+#define PHPDBG_IN_COND_BP             (1<<10)
+#define PHPDBG_IN_EVAL                (1<<11)
 
-#define PHPDBG_IS_STEPPING            (1<<10)
-#define PHPDBG_IS_QUIET               (1<<11)
-#define PHPDBG_IS_QUITTING            (1<<12)
-#define PHPDBG_IS_COLOURED            (1<<13)
-#define PHPDBG_IS_CLEANING            (1<<14)
+#define PHPDBG_IS_STEPPING            (1<<12)
+#define PHPDBG_IS_QUIET               (1<<13)
+#define PHPDBG_IS_QUITTING            (1<<14)
+#define PHPDBG_IS_COLOURED            (1<<15)
+#define PHPDBG_IS_CLEANING            (1<<16)
 
-#define PHPDBG_IN_UNTIL               (1<<15)
-#define PHPDBG_IN_FINISH              (1<<16)
-#define PHPDBG_IN_LEAVE               (1<<17)
+#define PHPDBG_IN_UNTIL               (1<<17)
+#define PHPDBG_IN_FINISH              (1<<18)
+#define PHPDBG_IN_LEAVE               (1<<19)
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 
-#define PHPDBG_IS_REGISTERED          (1<<18)
-#define PHPDBG_IS_STEPONEVAL          (1<<19)
-#define PHPDBG_IS_INITIALIZING        (1<<20)
-#define PHPDBG_IS_SIGNALED            (1<<21)
-#define PHPDBG_IS_INTERACTIVE         (1<<22)
-#define PHPDBG_IS_BP_ENABLED          (1<<23)
-#define PHPDBG_IS_REMOTE              (1<<24)
-#define PHPDBG_IS_DISCONNECTED        (1<<25)
+#define PHPDBG_IS_REGISTERED          (1<<20)
+#define PHPDBG_IS_STEPONEVAL          (1<<21)
+#define PHPDBG_IS_INITIALIZING        (1<<22)
+#define PHPDBG_IS_SIGNALED            (1<<23)
+#define PHPDBG_IS_INTERACTIVE         (1<<24)
+#define PHPDBG_IS_BP_ENABLED          (1<<25)
+#define PHPDBG_IS_REMOTE              (1<<26)
+#define PHPDBG_IS_DISCONNECTED        (1<<27)
 
 #ifndef _WIN32
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED|PHPDBG_IS_BP_ENABLED)
