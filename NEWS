@@ -1,10 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.28
+12 Dec 2013, PHP 5.3.28
 
 - Openssl:
   . Fixed handling null bytes in subjectAltName (CVE-2013-4073).
     (Christian Heimes)
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
 
 11 Jul 2013, PHP 5.3.27
 
