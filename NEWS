@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
 
+- GD:
+  . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
+    (Adam)
+
 - XSL
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)
