@@ -167,7 +167,8 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	zval **tmp;
 	zval **file, **line;
 	HashPosition position;
-	int i = 0, limit = num;
+	int i = 1, limit = num;
+	int user_defined;
 
 	if (limit < 0) {
 		phpdbg_error("Invalid backtrace size %d", limit);
@@ -179,20 +180,25 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
 	zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position);
 	while (1) {
-		zend_hash_find(Z_ARRVAL_PP(tmp), "file", sizeof("file"), (void **)&file);
+		user_defined = zend_hash_find(Z_ARRVAL_PP(tmp), "file", sizeof("file"), (void **)&file);
 		zend_hash_find(Z_ARRVAL_PP(tmp), "line", sizeof("line"), (void **)&line);
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 
-		phpdbg_write("frame #%d: ", i++);
-
 		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
 			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("{main} at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_write("frame #0: {main} at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			break;
 		}
 
-		phpdbg_dump_prototype(tmp TSRMLS_CC);
-		phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+		if (user_defined == SUCCESS) {
+			phpdbg_write("frame #%d: ", i++);
+			phpdbg_dump_prototype(tmp TSRMLS_CC);
+			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+		} else {
+			phpdbg_write(" => ");
+			phpdbg_dump_prototype(tmp TSRMLS_CC);
+			phpdbg_writeln(" (internal function)");
+		}
 	}
 
 	phpdbg_writeln(EMPTY);
