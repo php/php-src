@@ -130,11 +130,19 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 	if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"),
 		(void **)&args) == SUCCESS) {
 		HashPosition iterator;
-		int j = 0;
+		const zend_function *func = phpdbg_get_function(
+			Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC);
+		const zend_arg_info *arginfo = func ? func->common.arg_info : NULL;
+		int j = 0, m = func ? func->common.num_args : 0;
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
 			(void **) &argstmp, &iterator) == SUCCESS) {
+
+			if (m && j < m) {
+				phpdbg_write("%s=", arginfo[j].name);
+			}
+
 			if (j++) {
 				phpdbg_write(", ");
 			}

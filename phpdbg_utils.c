@@ -144,6 +144,33 @@ PHPDBG_API const char *phpdbg_current_file(TSRMLS_D) /* {{{ */
 	return file;
 } /* }}} */
 
+PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const char *cname TSRMLS_DC) /* {{{ */
+{
+	zend_function *func = NULL;
+	size_t fname_len = strlen(fname);
+	char *lcname = zend_str_tolower_dup(fname, fname_len);
+
+	if (cname) {
+		zend_class_entry **ce;
+		size_t cname_len = strlen(cname);
+		char *lc_cname = zend_str_tolower_dup(cname, cname_len);
+		int ret = zend_lookup_class(lc_cname, cname_len, &ce TSRMLS_CC);
+
+		efree(lc_cname);
+
+		if (ret == SUCCESS) {
+			zend_hash_find(&(*ce)->function_table, lcname, fname_len+1,
+				(void**)&func);
+		}
+	} else {
+		zend_hash_find(EG(function_table), lcname, fname_len+1,
+			(void**)&func);
+	}
+
+	efree(lcname);
+	return func;
+} /* }}} */
+
 PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{{ */
 {
 	const char *p = str;
@@ -245,18 +272,18 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 
 PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	int rc = 0;
-	
+
 	va_list args;
 	struct timeval tp;
-	
+
 	va_start(args, fmt);
 	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
 		char *format = NULL, *buffer = NULL;
-		
+
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tp.tv_sec));
 		asprintf(
-			&buffer, friendly, tp.tv_usec/1000);	
+			&buffer, friendly, tp.tv_usec/1000);
 		asprintf(
 			&format, "[%s]: %s\n", buffer, fmt);
 		rc = vfprintf(
@@ -266,7 +293,7 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 		free(buffer);
 	}
 	va_end(args);
-	
+
 	return rc;
 } /* }}} */
 
@@ -327,7 +354,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 } /* }}} */
 
 PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
-{	
+{
 	/* find cached prompt */
 	if (PHPDBG_G(prompt)[1]) {
 		return PHPDBG_G(prompt)[1];
