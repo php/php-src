@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #66141 (mysqlnd quote function is wrong with NO_BACKSLASH_ESCAPES
     after failed query). (Andrey)
 
+- OpenSSL:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420). 
+    (Stefan Esser).
+
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
