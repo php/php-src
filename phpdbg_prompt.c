@@ -656,7 +656,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 	switch (param->type) {
 		case EMPTY_PARAM:
 		case NUMERIC_PARAM:
-			phpdbg_dump_backtrace(TSRMLS_C);
+			phpdbg_dump_backtrace(param TSRMLS_CC);
 		break;
 
 		phpdbg_default_switch_case();
