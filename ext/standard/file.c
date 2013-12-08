@@ -701,7 +701,7 @@ PHP_FUNCTION(file_put_contents)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG((long) numbytes);
+	RETURN_LONG((php_int_t) numbytes);
 }
 /* }}} */
 
@@ -1294,7 +1294,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, php_int_t mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1309,7 +1309,7 @@ PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, php_int_t mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1377,7 +1377,7 @@ PHP_FUNCTION(readfile)
 	if (stream) {
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
-		RETURN_LONG((long) size);
+		RETURN_LONG((php_int_t) size);
 	}
 
 	RETURN_FALSE;
@@ -1426,7 +1426,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
 	size = php_stream_passthru(stream);
-	RETURN_LONG((long) size);
+	RETURN_LONG((php_int_t) size);
 }
 /* }}} */
 

@@ -426,7 +426,7 @@ static int php_skip_variable(php_stream * stream TSRMLS_DC)
 		return 0;
 	}
 	length = length - 2;
-	php_stream_seek(stream, (long)length, SEEK_CUR);
+	php_stream_seek(stream, (zend_str_size_long)length, SEEK_CUR);
 	return 1;
 }
 /* }}} */
@@ -448,7 +448,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (zend_str_size_long) length) <= 0) {
 		efree(buffer);
 		return 0;
 	}

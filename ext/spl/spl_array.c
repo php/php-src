@@ -339,7 +339,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(offset), Z_LVAL_P(offset));
+		zend_error(E_STRICT, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_LVAL_P(offset), Z_LVAL_P(offset));
 	case IS_DOUBLE:
 	case IS_BOOL:
 	case IS_LONG:
@@ -351,13 +351,13 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %pd", index);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %pd", index);
 				case BP_VAR_W: {
 				    zval *value;
 				    ALLOC_INIT_ZVAL(value);
@@ -574,7 +574,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset: %ld", Z_LVAL_P(offset));
+			zend_error(E_NOTICE,"Undefined offset: %pd", Z_LVAL_P(offset));
 		}
 		break;
 	default:
@@ -1361,7 +1361,7 @@ SPL_METHOD(Array, seek)
 			return; /* ok */
 		}
 	}
-	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
+	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %pd is out of range", opos);
 } /* }}} */
 
 int static spl_array_object_count_elements_helper(spl_array_object *intern, php_int_t *count TSRMLS_DC) /* {{{ */
@@ -1808,7 +1808,7 @@ SPL_METHOD(Array, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset " ZEND_INT_FMT " of " ZEND_UINT_FMT " bytes", (php_int_t)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %pd of %pu bytes", (php_int_t)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */

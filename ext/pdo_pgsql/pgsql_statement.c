@@ -226,10 +226,10 @@ stmt_retry:
 	}
 
 	if (status == PGRES_COMMAND_OK) {
-		stmt->row_count = (long)atoi(PQcmdTuples(S->result));
+		ZEND_ATOI(stmt->row_count, PQcmdTuples(S->result));
 		H->pgoid = PQoidValue(S->result);
 	} else {
-		stmt->row_count = (long)PQntuples(S->result);
+		stmt->row_count = (php_int_t)PQntuples(S->result);
 	}
 
 	return 1;
@@ -253,13 +253,14 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (param->name[0] == '$') {
-						param->paramno = atoi(param->name + 1);
+						ZEND_ATOI(param->paramno, param->name + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						char *nameptr;
 						if (stmt->bound_param_map && SUCCESS == zend_hash_find(stmt->bound_param_map,
 								param->name, param->namelen + 1, (void**)&nameptr)) {
-							param->paramno = atoi(nameptr + 1) - 1;
+							ZEND_ATOI(param->paramno, nameptr + 1);
+							param->paramno--;
 						} else {
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name TSRMLS_CC);
 							return 0;
@@ -325,7 +326,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 								Z_TYPE_P(param->parameter) = IS_STRING;
 								
 								if ((len = php_stream_copy_to_mem(stm, &Z_STRVAL_P(param->parameter), PHP_STREAM_COPY_ALL, 0)) > 0) {
-									Z_STRLEN_P(param->parameter) = len;
+									Z_STRSIZE_P(param->parameter) = len;
 								} else {
 									ZVAL_EMPTY_STRING(param->parameter);
 								}
@@ -349,7 +350,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
 						convert_to_string(param->parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(param->parameter);
-						S->param_lengths[param->paramno] = Z_STRLEN_P(param->parameter);
+						S->param_lengths[param->paramno] = Z_STRSIZE_P(param->parameter);
 						S->param_formats[param->paramno] = 0;
 					}
 
@@ -380,7 +381,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 }
 
 static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -394,8 +395,8 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			case PDO_FETCH_ORI_PRIOR:	spprintf(&ori_str, 0, "BACKWARD"); break;
 			case PDO_FETCH_ORI_FIRST:	spprintf(&ori_str, 0, "FIRST"); break;
 			case PDO_FETCH_ORI_LAST:	spprintf(&ori_str, 0, "LAST"); break;
-			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE %ld", offset); break;
-			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE %ld", offset); break;
+			case PDO_FETCH_ORI_ABS:		spprintf(&ori_str, 0, "ABSOLUTE %pd", offset); break;
+			case PDO_FETCH_ORI_REL:		spprintf(&ori_str, 0, "RELATIVE %pd", offset); break;
 			default:
 				return 0;
 		}
@@ -471,7 +472,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 			break;
 
 		case INT8OID:
-			if (sizeof(long)>=8) {
+			if (sizeof(php_int_t)>=8) {
 				cols[colno].param_type = PDO_PARAM_INT;
 			} else {
 				cols[colno].param_type = PDO_PARAM_STR;
@@ -489,7 +490,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees  TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -510,9 +511,9 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 		switch(cols[colno].param_type) {
 
 			case PDO_PARAM_INT:
-				S->cols[colno].intval = atol(*ptr);
+				ZEND_ATOI(S->cols[colno].intval, *ptr);
 				*ptr = (char *) &(S->cols[colno].intval);
-				*len = sizeof(long);
+				*len = sizeof(php_int_t);
 				break;
 
 			case PDO_PARAM_BOOL:
@@ -568,7 +569,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 	return 1;
 }
 
-static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC)
+static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, php_int_t colno, zval *return_value TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;

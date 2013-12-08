@@ -316,7 +316,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 			switch (hash_type) {
 				case HASH_KEY_IS_LONG:
-					key_length = slprintf(tmp, sizeof(tmp), "%ld", idx) + 1;
+					key_length = slprintf(tmp, sizeof(tmp), ZEND_UINT_FMT, idx) + 1;
 					key = tmp;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
@@ -534,7 +534,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 				php_wddx_serialize_var(packet, *ent, prop_name, strlen(prop_name)+1 TSRMLS_CC);
 			} else {
-				key_len = slprintf(tmp_buf, sizeof(tmp_buf), "%ld", idx);
+				key_len = slprintf(tmp_buf, sizeof(tmp_buf), ZEND_UINT_FMT, idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf, key_len TSRMLS_CC);
 			}
 		}
@@ -606,7 +606,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 			if (ent_type == HASH_KEY_IS_STRING) {
 				php_wddx_serialize_var(packet, *ent, key, key_len TSRMLS_CC);
 			} else {
-				key_len = slprintf(tmp_buf, sizeof(tmp_buf), "%ld", idx);
+				key_len = slprintf(tmp_buf, sizeof(tmp_buf), ZEND_UINT_FMT, idx);
 				php_wddx_serialize_var(packet, *ent, tmp_buf, key_len TSRMLS_CC);
 			}
 		} else {

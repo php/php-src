@@ -343,11 +343,11 @@ PHP_FUNCTION(ftp_connect)
 {
 	ftpbuf_t	*ftp;
 	char		*host;
-	int		host_len;
-	long 		port = 0;
-	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
+	zend_str_size_int		host_len;
+	php_int_t 		port = 0;
+	php_int_t		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ii", &host, &host_len, &port, &timeout_sec) == FAILURE) {
 		return;
 	}
 
@@ -379,11 +379,11 @@ PHP_FUNCTION(ftp_ssl_connect)
 {
 	ftpbuf_t	*ftp;
 	char		*host;
-	int		host_len;
-	long		port = 0;
-	long		timeout_sec = FTP_DEFAULT_TIMEOUT;
+	zend_str_size_int		host_len;
+	php_int_t		port = 0;
+	php_int_t		timeout_sec = FTP_DEFAULT_TIMEOUT;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ii", &host, &host_len, &port, &timeout_sec) == FAILURE) {
 		return;
 	}
 
@@ -414,9 +414,9 @@ PHP_FUNCTION(ftp_login)
 	zval 		*z_ftp;
 	ftpbuf_t	*ftp;
 	char *user, *pass;
-	int user_len, pass_len;
+	zend_str_size_int user_len, pass_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &z_ftp, &user, &user_len, &pass, &pass_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSS", &z_ftp, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
 	}
 
@@ -484,9 +484,9 @@ PHP_FUNCTION(ftp_chdir)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*dir;
-	int			dir_len;
+	zend_str_size_int			dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -509,9 +509,9 @@ PHP_FUNCTION(ftp_exec)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*cmd;
-	int			cmd_len;
+	zend_str_size_int			cmd_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &cmd, &cmd_len) == FAILURE) {
 		return;
 	}
 
@@ -534,9 +534,9 @@ PHP_FUNCTION(ftp_raw)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*cmd;
-	int			cmd_len;
+	zend_str_size_int			cmd_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &cmd, &cmd_len) == FAILURE) {
 		return;
 	}
 
@@ -554,9 +554,9 @@ PHP_FUNCTION(ftp_mkdir)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*dir, *tmp;
-	int		dir_len;
+	zend_str_size_int		dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -579,9 +579,9 @@ PHP_FUNCTION(ftp_rmdir)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*dir;
-	int		dir_len;
+	zend_str_size_int		dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -604,10 +604,10 @@ PHP_FUNCTION(ftp_chmod)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*filename;
-	int		filename_len;
-	long		mode;
+	zend_str_size_int		filename_len;
+	php_int_t		mode;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlp", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riP", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -628,10 +628,10 @@ PHP_FUNCTION(ftp_alloc)
 {
 	zval		*z_ftp, *zresponse = NULL;
 	ftpbuf_t	*ftp;
-	long		size, ret;
+	php_int_t		size, ret;
 	char		*response = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &z_ftp, &size, &zresponse) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|z", &z_ftp, &size, &zresponse) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -658,9 +658,9 @@ PHP_FUNCTION(ftp_nlist)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**nlist, **ptr, *dir;
-	int		dir_len;
+	zend_str_size_int		dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rP", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -686,10 +686,10 @@ PHP_FUNCTION(ftp_rawlist)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		**llist, **ptr, *dir;
-	int		dir_len;
+	zend_str_size_int		dir_len;
 	zend_bool	recursive = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|b", &z_ftp, &dir, &dir_len, &recursive) == FAILURE) {
 		return;
 	}
 
@@ -740,10 +740,10 @@ PHP_FUNCTION(ftp_fget)
 	ftptype_t	xtype;
 	php_stream	*stream;
 	char		*file;
-	int		file_len;
-	long		mode, resumepos=0;
+	zend_str_size_int		file_len;
+	php_int_t		mode, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsl|l", &z_ftp, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrSi|i", &z_ftp, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
 		return;
 	}
 
@@ -784,10 +784,10 @@ PHP_FUNCTION(ftp_nb_fget)
 	ftptype_t	xtype;
 	php_stream	*stream;
 	char		*file;
-	int		file_len;
-	long		mode, resumepos=0, ret;
+	zend_str_size_int		file_len;
+	php_int_t		mode, resumepos=0, ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrsl|l", &z_ftp, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrSi|i", &z_ftp, &z_file, &file, &file_len, &mode, &resumepos) == FAILURE) {
 		return;
 	}
 
@@ -854,10 +854,10 @@ PHP_FUNCTION(ftp_get)
 	ftptype_t	xtype;
 	php_stream	*outstream;
 	char		*local, *remote;
-	int		local_len, remote_len;
-	long		mode, resumepos=0;
+	zend_str_size_int		local_len, remote_len;
+	php_int_t		mode, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rPPi|i", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
 		return;
 	}
 
@@ -917,10 +917,10 @@ PHP_FUNCTION(ftp_nb_get)
 	ftptype_t	xtype;
 	php_stream	*outstream;
 	char		*local, *remote;
-	int		local_len, remote_len, ret;
-	long		mode, resumepos=0;
+	zend_str_size_int		local_len, remote_len, ret;
+	php_int_t		mode, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl|l", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSSi|i", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
 		return;
 	}
 
@@ -982,7 +982,7 @@ PHP_FUNCTION(ftp_nb_continue)
 {
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
-	long		ret;
+	php_int_t		ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_ftp) == FAILURE) {
 		return;
@@ -1020,12 +1020,12 @@ PHP_FUNCTION(ftp_fput)
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	int		remote_len;
-	long		mode, startpos=0;
+	zend_str_size_int		remote_len;
+	php_int_t		mode, startpos=0;
 	php_stream	*stream;
 	char		*remote;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrl|l", &z_ftp, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSri|i", &z_ftp, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
@@ -1067,12 +1067,13 @@ PHP_FUNCTION(ftp_nb_fput)
 	zval		*z_ftp, *z_file;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	int		remote_len, ret;
-	long		mode, startpos=0;
+	zend_str_size_int		remote_len;
+	int ret;
+	php_int_t		mode, startpos=0;
 	php_stream	*stream;
 	char		*remote;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsrl|l", &z_ftp, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSri|i", &z_ftp, &remote, &remote_len, &z_file, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
@@ -1120,11 +1121,11 @@ PHP_FUNCTION(ftp_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	long		remote_len, local_len;
-	long		mode, startpos=0;
+	zend_str_size		remote_len, local_len;
+	php_int_t		mode, startpos=0;
 	php_stream 	*instream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rPPi|i", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
@@ -1173,11 +1174,11 @@ PHP_FUNCTION(ftp_nb_put)
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
 	char		*remote, *local;
-	int		remote_len, local_len;
-	long		mode, startpos=0, ret;
+	zend_str_size_int		remote_len, local_len;
+	php_int_t		mode, startpos=0, ret;
 	php_stream 	*instream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rPPi|i", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
@@ -1231,9 +1232,9 @@ PHP_FUNCTION(ftp_size)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*file;
-	int		file_len;
+	zend_str_size_int		file_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rP", &z_ftp, &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1251,9 +1252,9 @@ PHP_FUNCTION(ftp_mdtm)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*file;
-	int		file_len;
+	zend_str_size_int		file_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rP", &z_ftp, &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1271,9 +1272,9 @@ PHP_FUNCTION(ftp_rename)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*src, *dest;
-	int		src_len, dest_len;
+	zend_str_size_int		src_len, dest_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss", &z_ftp, &src, &src_len, &dest, &dest_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSS", &z_ftp, &src, &src_len, &dest, &dest_len) == FAILURE) {
 		return;
 	}
 
@@ -1296,9 +1297,9 @@ PHP_FUNCTION(ftp_delete)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*file;
-	int		file_len;
+	zend_str_size_int		file_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1321,9 +1322,9 @@ PHP_FUNCTION(ftp_site)
 	zval		*z_ftp;
 	ftpbuf_t	*ftp;
 	char		*cmd;
-	int		cmd_len;
+	zend_str_size_int		cmd_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &cmd, &cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_ftp, &cmd, &cmd_len) == FAILURE) {
 		return;
 	}
 
@@ -1363,10 +1364,10 @@ PHP_FUNCTION(ftp_close)
 PHP_FUNCTION(ftp_set_option)
 {
 	zval		*z_ftp, *z_value;
-	long		option;
+	php_int_t		option;
 	ftpbuf_t	*ftp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &z_ftp, &option, &z_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz", &z_ftp, &option, &z_value) == FAILURE) {
 		return;
 	}
 
@@ -1408,10 +1409,10 @@ PHP_FUNCTION(ftp_set_option)
 PHP_FUNCTION(ftp_get_option)
 {
 	zval		*z_ftp;
-	long		option;
+	php_int_t		option;
 	ftpbuf_t	*ftp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &z_ftp, &option) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &z_ftp, &option) == FAILURE) {
 		return;
 	}
 

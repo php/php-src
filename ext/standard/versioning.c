@@ -129,7 +129,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	char *ver1;
 	char *ver2;
 	char *p1, *p2, *n1, *n2;
-	long l1, l2;
+	php_int_t l1, l2;
 	int compare = 0;
 
 	if (!*orig_ver1 || !*orig_ver2) {

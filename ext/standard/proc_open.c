@@ -341,7 +341,7 @@ PHP_FUNCTION(proc_get_status)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "command", proc->command, 1);
-	add_assoc_long(return_value, "pid", (long) proc->child);
+	add_assoc_long(return_value, "pid", (php_int_t) proc->child);
 
 #ifdef PHP_WIN32
 

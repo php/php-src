@@ -2,4 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.7.0 
 
+- DBA:
+  . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
+- XSL:
+  . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

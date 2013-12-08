@@ -114,9 +114,39 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 }
 /* }}} */
 
+static PHP_INI_MH(OnChangeBacktrackLimit)
+{/*{{{*/
+	php_int_t i;
+
+	ZEND_ATOI(i, new_value);
+
+	if (i > (unsigned long)-1) {
+		return FAILURE;
+	}
+
+	PCRE_G(backtrack_limit) = i;
+
+	return SUCCESS;
+}/*}}}*/
+
+static PHP_INI_MH(OnChangeRecursionLimit)
+{/*{{{*/
+	php_int_t i;
+
+	ZEND_ATOI(i, new_value);
+
+	if (i > (unsigned long)-1) {
+		return FAILURE;
+	}
+
+	PCRE_G(recursion_limit) = i;
+
+	return SUCCESS;
+}/*}}}*/
+
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateLong, backtrack_limit, zend_pcre_globals, pcre_globals)
-	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnUpdateLong, recursion_limit, zend_pcre_globals, pcre_globals)
+	PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnChangeBacktrackLimit)
+	PHP_INI_ENTRY("pcre.recursion_limit", "100000", PHP_INI_ALL, OnChangeRecursionLimit)
 PHP_INI_END()
 
 

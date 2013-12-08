@@ -785,7 +785,7 @@ static inline int php_charmask(unsigned char *input, zend_str_size_int len, char
  */
 PHPAPI char *php_trim(char *c, zend_str_size_int len, char *what, zend_str_size_int what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	register int i;
+	register php_int_t i;
 	int trimmed = 0;
 	char mask[256];
 
@@ -1557,7 +1557,7 @@ PHP_FUNCTION(pathinfo)
 
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
 		const char *p;
-		int idx;
+		ptrdiff_t idx;
 
 		if (!have_basename) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
@@ -1573,7 +1573,7 @@ PHP_FUNCTION(pathinfo)
 
 	if ((opt & PHP_PATHINFO_FILENAME) == PHP_PATHINFO_FILENAME) {
 		const char *p;
-		int idx;
+		ptrdiff_t idx;
 
 		/* Have we already looked up the basename? */
 		if (!have_basename && !ret) {
@@ -2086,7 +2086,7 @@ PHP_FUNCTION(strrchr)
 	zval *needle;
 	char *haystack;
 	const char *found = NULL;
-	long found_offset;
+	php_int_t found_offset;
 	zend_str_size  haystack_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &haystack, &haystack_len, &needle) == FAILURE) {
@@ -2240,7 +2240,7 @@ PHP_FUNCTION(substr)
 		f = 0;
 	}
 
-	if (l < 0 && (l + (long)str_len - f) < 0) {
+	if (l < 0 && (l + (php_int_t)str_len - f) < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2286,8 +2286,8 @@ PHP_FUNCTION(substr_replace)
 	zval **repl;
 	char *result;
 	zend_str_size result_len;
-	int l = 0; /* l and f should be size_t, however this needs much closer below logic investigation.*/
-	int f;
+	php_int_t l = 0; /* l and f should be size_t, however this needs much closer below logic investigation.*/
+	php_int_t f;
 	int argc = ZEND_NUM_ARGS();
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
@@ -3998,7 +3998,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	}
 	if (argc > 3) {
 		zval_dtor(*zcount);
-		ZVAL_LONG(*zcount, (long) count);
+		ZVAL_LONG(*zcount, (php_int_t) count);
 	}
 }
 /* }}} */
@@ -4881,7 +4881,7 @@ PHP_FUNCTION(str_repeat)
 		memset(result, *(input_str), mult);
 	} else {
 		char *s, *e, *ee;
-		int l=0;
+		ptrdiff_t l=0;
 		memcpy(result, input_str, input_len);
 		s = result;
 		e = result + input_len;
@@ -5323,9 +5323,9 @@ PHP_FUNCTION(str_rot13)
 }
 /* }}} */
 
-static void php_string_shuffle(char *str, long len TSRMLS_DC) /* {{{ */
+static void php_string_shuffle(char *str, php_int_t len TSRMLS_DC) /* {{{ */
 {
-	long n_elems, rnd_idx, n_left;
+	php_int_t n_elems, rnd_idx, n_left;
 	char temp;
 	/* The implementation is stolen from array_data_shuffle       */
 	/* Thus the characteristics of the randomization are the same */
@@ -5362,7 +5362,7 @@ PHP_FUNCTION(str_shuffle)
 
 	RETVAL_STRINGL(arg, arglen, 1);
 	if (Z_STRSIZE_P(return_value) > 1) {
-		php_string_shuffle(Z_STRVAL_P(return_value), (long) Z_STRSIZE_P(return_value) TSRMLS_CC);
+		php_string_shuffle(Z_STRVAL_P(return_value), (php_int_t) Z_STRSIZE_P(return_value) TSRMLS_CC);
 	}
 }
 /* }}} */

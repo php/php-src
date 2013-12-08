@@ -135,7 +135,7 @@ static zend_always_inline int i_zend_is_true(zval *op)
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
 					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL TSRMLS_CC) == SUCCESS) {
-						result = Z_LVAL(tmp);
+						result = (int)Z_LVAL(tmp);
 						break;
 					}
 				} else if (Z_OBJ_HT_P(op)->get) {
@@ -143,7 +143,7 @@ static zend_always_inline int i_zend_is_true(zval *op)
 					if(Z_TYPE_P(tmp) != IS_OBJECT) {
 						/* for safety - avoid loop */
 						convert_to_boolean(tmp);
-						result = Z_LVAL_P(tmp);
+						result = (int)Z_LVAL_P(tmp);
 						zval_ptr_dtor(&tmp);
 						break;
 					}
@@ -183,7 +183,7 @@ struct _zend_vm_stack {
 		}															\
 	} while (0)
 
-static zend_always_inline zend_vm_stack zend_vm_stack_new_page(int count) {
+static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t count) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(ZEND_MM_ALIGNED_SIZE(sizeof(*page)) + sizeof(void*) * count);
 
 	page->top = ZEND_VM_STACK_ELEMETS(page);

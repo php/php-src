@@ -313,7 +313,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld.", cal);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %pd.", cal);
 		RETURN_FALSE;
 	}
 
@@ -335,7 +335,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld.", cal);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %pd.", cal);
 		RETURN_FALSE;
 	}
 
@@ -377,7 +377,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld.", cal);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %pd.", cal);
 		RETURN_FALSE;
 	}
 
@@ -399,7 +399,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld", cal);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %pd", cal);
 		RETURN_FALSE;
 	}
 	calendar = &cal_conversion_table[cal];

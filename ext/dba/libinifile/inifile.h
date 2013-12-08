@@ -49,7 +49,9 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC);
 int inifile_firstkey(inifile *dba TSRMLS_DC);
 int inifile_nextkey(inifile *dba TSRMLS_DC);
 int inifile_delete(inifile *dba, const key_type *key TSRMLS_DC);
+int inifile_delete_ex(inifile *dba, const key_type *key, zend_bool *found TSRMLS_DC);
 int inifile_replace(inifile *dba, const key_type *key, const val_type *val TSRMLS_DC);
+int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *val, zend_bool *found TSRMLS_DC);
 int inifile_append(inifile *dba, const key_type *key, const val_type *val TSRMLS_DC);
 char *inifile_version();
 

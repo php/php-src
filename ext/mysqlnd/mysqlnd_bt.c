@@ -177,7 +177,7 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 			line = 0;
 		}
 		s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+		sprintf(s_tmp, "%s(%pd): ", Z_STRVAL_PP(file), line);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);
 	} else {

@@ -20,6 +20,9 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DBA
+  . dba_delete() now returns false if the key was not found for the inifile 
+    handler, too.
 
 ========================================
 2. New Features

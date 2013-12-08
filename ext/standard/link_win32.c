@@ -101,7 +101,7 @@ PHP_FUNCTION(linkinfo)
 		RETURN_LONG(-1L);
 	}
 
-	RETURN_LONG((long) sb.st_dev);
+	RETURN_LONG((php_int_t) sb.st_dev);
 }
 /* }}} */
 

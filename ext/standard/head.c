@@ -138,7 +138,7 @@ PHPAPI int php_setcookie(char *name, zend_str_size_int name_len, char *value, ze
 			strlcat(cookie, dt, len + 100);
 			efree(dt);
 
-			snprintf(tsdelta, sizeof(tsdelta), "%li", (long) difftime(expires, time(NULL)));
+			snprintf(tsdelta, sizeof(tsdelta), "%pd", (php_int_t) difftime(expires, time(NULL)));
 			strlcat(cookie, "; Max-Age=", len + 100);
 			strlcat(cookie, tsdelta, len + 100);
 		}
@@ -297,7 +297,7 @@ PHP_FUNCTION(http_response_code)
 
 	if (response_code)
 	{
-		long old_response_code;
+		php_int_t old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
 		SG(sapi_headers).http_response_code = response_code;

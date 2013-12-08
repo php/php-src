@@ -1483,7 +1483,7 @@ ZEND_FUNCTION(crash)
 ZEND_FUNCTION(get_included_files)
 {
 	char *entry;
-	uint entry_len;
+	zend_str_size_uint entry_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

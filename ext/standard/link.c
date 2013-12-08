@@ -110,7 +110,7 @@ PHP_FUNCTION(linkinfo)
 	}
 
 	efree(dirname);
-	RETURN_LONG((long) sb.st_dev);
+	RETURN_LONG((php_int_t) sb.st_dev);
 }
 /* }}} */
 

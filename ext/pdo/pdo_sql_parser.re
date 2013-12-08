@@ -76,15 +76,15 @@ struct placeholder {
 	struct placeholder *next;
 };
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
-	char **outquery, int *outquery_len TSRMLS_DC)
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, zend_str_size_int inquery_len, 
+	char **outquery, zend_str_size_int *outquery_len TSRMLS_DC)
 {
 	Scanner s;
 	char *ptr, *newbuffer;
-	int t;
+	ptrdiff_t t;
 	int bindno = 0;
 	int ret = 0;
-	int newbuffer_len;
+	zend_str_size_int newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;

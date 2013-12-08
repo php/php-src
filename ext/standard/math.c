@@ -1074,11 +1074,11 @@ PHP_FUNCTION(base_convert)
 	convert_to_string_ex(number);
 	
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%ld)", frombase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `from base' (%pd)", frombase);
 		RETURN_FALSE;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%ld)", tobase);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid `to base' (%pd)", tobase);
 		RETURN_FALSE;
 	}
 
