@@ -134,21 +134,28 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC);
 		const zend_arg_info *arginfo = func ? func->common.arg_info : NULL;
 		int j = 0, m = func ? func->common.num_args : 0;
+		zend_bool is_variadic = 0;
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
 			(void **) &argstmp, &iterator) == SUCCESS) {
-
 			if (j) {
 				phpdbg_write(", ");
 			}
 			if (m && j < m) {
-				phpdbg_write("%s=", arginfo[j].name);
+#if PHP_VERSION_ID >= 50600
+				is_variadic = arginfo[j].is_variadic;
+#endif
+				phpdbg_write("%s=%s",
+					arginfo[j].name, is_variadic ? "[": "");
 			}
 			++j;
 
 			zend_print_flat_zval_r(*argstmp TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
+		}
+		if (is_variadic) {
+			phpdbg_write("]");
 		}
 	}
 	phpdbg_write(")");
