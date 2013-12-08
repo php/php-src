@@ -132,7 +132,8 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 	return FAILURE;
 } /* }}} */
 
-void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) {
+void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) /* {{{ */
+{
 	struct stat sb;
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
@@ -190,7 +191,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 					{
 						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
 						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
-							case FAILURE:	
+							case FAILURE:
 								if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 									if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
 										phpdbg_error("Unrecognized command in %s:%d: %s!",  init_file, line, input->string);
@@ -244,7 +245,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 			if (i != -1) {
 				scan_dir[i] = 0;
 			}
-			
+
 			asprintf(
 				&init_file, "%s/%s", scan_dir, PHPDBG_INIT_FILENAME);
 			phpdbg_try_file_init(init_file, strlen(init_file), 1 TSRMLS_CC);
@@ -838,7 +839,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
 			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
 			phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
-			
+
 			phpdbg_writeln(SEPARATE);
 		} break;
 
@@ -923,7 +924,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 	switch (param->type) {
 		case STR_PARAM: {
 			if (input->argc > 2) {
-				if (phpdbg_argv_is(1, "export")) {	
+				if (phpdbg_argv_is(1, "export")) {
 					FILE *h = VCWD_FOPEN(input->argv[2]->string, "w+");
 					if (h) {
 						phpdbg_export_breakpoints(h TSRMLS_CC);
@@ -1400,8 +1401,8 @@ zend_vm_enter:
 		/* search for breakpoints */
 		{
 			phpdbg_breakbase_t *brake;
-			
-			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) && 
+
+			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) &&
 				(brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))) {
 				phpdbg_hit_breakpoint(
 					brake, 1 TSRMLS_CC);
