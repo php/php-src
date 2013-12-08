@@ -22,7 +22,6 @@
 #define PHPDBG_FRAME_H
 
 #include "TSRM.h"
-#include "phpdbg_cmd.h"
 
 void phpdbg_restore_frame(TSRMLS_D);
 void phpdbg_switch_frame(int TSRMLS_DC);
