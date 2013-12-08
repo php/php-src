@@ -147,7 +147,7 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 		
 		case FILE_PARAM:
 			asprintf(pointer,
-				"%s:%u",
+				"%s:%lu",
 				param->file.name,
 				param->file.line);
 		break;

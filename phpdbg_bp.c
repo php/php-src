@@ -601,7 +601,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 		} break;
 
 		case FILE_PARAM: {
-			if ((param->file.line == zend_get_executed_lineno(TSRMLS_C))) {
+			if (param->file.line == zend_get_executed_lineno(TSRMLS_C)) {
 				const char *str = zend_get_executed_filename(TSRMLS_C);
 				size_t lengths[2] = {strlen(param->file.name), strlen(str)};
 
@@ -640,7 +640,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 		} break;
 
 		case ADDR_PARAM: {
-			return ((phpdbg_opline_ptr_t)execute_data->opline == param->addr);
+			return ((zend_ulong)(phpdbg_opline_ptr_t)execute_data->opline == param->addr);
 		} break;
 
 		case NUMERIC_PARAM:
