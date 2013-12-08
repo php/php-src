@@ -139,13 +139,14 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
 			(void **) &argstmp, &iterator) == SUCCESS) {
 
+			if (j) {
+				phpdbg_write(", ");
+			}
 			if (m && j < m) {
 				phpdbg_write("%s=", arginfo[j].name);
 			}
+			++j;
 
-			if (j++) {
-				phpdbg_write(", ");
-			}
 			zend_print_flat_zval_r(*argstmp TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
 		}
