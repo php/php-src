@@ -100,13 +100,13 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	);
 } /* }}} */
 
-void phpdbg_dump_backtrace(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 {
 	zval zbacktrace;
 	zval **tmp, **argstmp;
 	zval **file, **line, **funcname, **class, **type, **args;
 	HashPosition position;
-	int i = 0, limit = (param->type == NUMERIC_PARAM) ? param->num : 0;
+	int i = 0, limit = num;
 	char is_class;
 
 	if (limit < 0) {
