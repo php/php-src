@@ -3,7 +3,7 @@
 # Author:       krakjoe                                        #
 # Purpose:      Daemonize phpdbg automatically on boot         #
 # chkconfig:    2345    07 09                                  #
-# description:Starts, stops and restarts phpdbg daemon         #
+# description:  Starts, stops and restarts phpdbg daemon       #
 ################################################################
 LOCKFILE=/var/lock/subsys/phpdbg
 PIDFILE=/var/run/phpdbg.pid
@@ -16,7 +16,7 @@ if [ "x${PHPDBG}" == "x" ]; then
 	PHPDBG=$(which phpdbg 2>/dev/null)
 fi
 ################################################################
-# Options to pass to phpdbg upon boot						   #
+# Options to pass to phpdbg upon boot                          #
 ################################################################
 OPTIONS=
 LOGFILE=/var/log/phpdbg.log

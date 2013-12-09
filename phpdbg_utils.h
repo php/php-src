@@ -30,6 +30,7 @@ PHPDBG_API int phpdbg_is_class_method(const char*, size_t, char**, char**);
 PHPDBG_API const char *phpdbg_current_file(TSRMLS_D);
 PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
+PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char* TSRMLS_DC);
 
 /**
  * Error/notice/formatting helpers
