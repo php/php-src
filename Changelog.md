@@ -13,6 +13,8 @@ Version 0.3.0 2013-00-00
 7. Added init.d for remote console (redhat)
 8. Added phpdbg_exec userland function
 9. Added testing facilities
+10. Added break on n-th opline support
+11. Improved trace output
 
 Version 0.2.0 2013-11-31
 ------------------------
