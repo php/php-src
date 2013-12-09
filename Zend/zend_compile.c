@@ -421,7 +421,7 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 	lc_literal = zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
 	CALCULATE_LITERAL_HASH(lc_literal);
 
-	ns_separator = (const char*)zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv));
+	ns_separator = (const char*)zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRSIZE_P(zv));
 
 	if (ns_separator != NULL) {
 		ns_separator += 1;
@@ -1710,12 +1710,12 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		/* Function name must not conflict with import names */
 		if (CG(current_import_function) &&
-		    zend_hash_find(CG(current_import_function), lcname, Z_STRLEN(function_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+		    zend_hash_find(CG(current_import_function), lcname, Z_STRSIZE(function_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 
-			char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+			char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRSIZE_PP(ns_name));
 
-			if (Z_STRLEN_PP(ns_name) != Z_STRLEN(function_name->u.constant) ||
-				memcmp(tmp, lcname, Z_STRLEN(function_name->u.constant))) {
+			if (Z_STRSIZE_PP(ns_name) != Z_STRSIZE(function_name->u.constant) ||
+				memcmp(tmp, lcname, Z_STRSIZE(function_name->u.constant))) {
 				zend_error(E_COMPILE_ERROR, "Cannot declare function %s because the name is already in use", Z_STRVAL(function_name->u.constant));
 			}
 			efree(tmp);
@@ -2112,7 +2112,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace
 	}
 
 	if (current_import_sub) {
-		len = Z_STRLEN(element_name->u.constant)+1;
+		len = Z_STRSIZE(element_name->u.constant)+1;
 		if (case_sensitive) {
 			lookup_name = estrndup(Z_STRVAL(element_name->u.constant), len);
 		} else {
@@ -7156,7 +7156,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 		/* The form "use A\B" is eqivalent to "use A\B as B".
 		   So we extract the last part of compound name to use as a new_name */
 		name = &tmp;
-		p = zend_memrchr(Z_STRVAL_P(ns), '\\', Z_STRLEN_P(ns));
+		p = zend_memrchr(Z_STRVAL_P(ns), '\\', Z_STRSIZE_P(ns));
 		if (p) {
 			ZVAL_STRING(name, p+1, 1);
 		} else {
@@ -7166,23 +7166,23 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	}
 
 	if (case_sensitive) {
-		lookup_name = estrndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+		lookup_name = estrndup(Z_STRVAL_P(name), Z_STRSIZE_P(name));
 	} else {
-		lookup_name = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+		lookup_name = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRSIZE_P(name));
 	}
 
 	if (CG(current_namespace)) {
 		/* Prefix import name with current namespace name to avoid conflicts with functions/consts */
-		char *c_ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) + 1);
+		char *c_ns_name = emalloc(Z_STRSIZE_P(CG(current_namespace)) + 1 + Z_STRSIZE_P(name) + 1);
 
-		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
-		c_ns_name[Z_STRLEN_P(CG(current_namespace))] = '\\';
-		memcpy(c_ns_name+Z_STRLEN_P(CG(current_namespace))+1, lookup_name, Z_STRLEN_P(name)+1);
-		if (zend_hash_exists(lookup_table, c_ns_name, Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name)+1)) {
-			char *tmp2 = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRSIZE_P(CG(current_namespace)));
+		c_ns_name[Z_STRSIZE_P(CG(current_namespace))] = '\\';
+		memcpy(c_ns_name+Z_STRSIZE_P(CG(current_namespace))+1, lookup_name, Z_STRSIZE_P(name)+1);
+		if (zend_hash_exists(lookup_table, c_ns_name, Z_STRSIZE_P(CG(current_namespace)) + 1 + Z_STRSIZE_P(name)+1)) {
+			char *tmp2 = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRSIZE_P(ns));
 
-			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
-				memcmp(tmp2, c_ns_name, Z_STRLEN_P(ns))) {
+			if (Z_STRSIZE_P(ns) != Z_STRSIZE_P(CG(current_namespace)) + 1 + Z_STRSIZE_P(name) ||
+				memcmp(tmp2, c_ns_name, Z_STRSIZE_P(ns))) {
 				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(tmp2);
@@ -7191,11 +7191,11 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	} else if (is_function) {
 		zend_function *function;
 
-		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && function->type == ZEND_USER_FUNCTION && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
-			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRSIZE_P(name)+1, (void **) &function) == SUCCESS && function->type == ZEND_USER_FUNCTION && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRSIZE_P(ns));
 
-			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
-				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+			if (Z_STRSIZE_P(ns) != Z_STRSIZE_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRSIZE_P(ns))) {
 				zend_error(E_COMPILE_ERROR, "Cannot use function %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(c_tmp);
@@ -7203,18 +7203,18 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	} else {
 		const char *filename;
 
-		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
-			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRSIZE_P(name)+1, (void **) &filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRSIZE_P(ns));
 
-			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
-				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+			if (Z_STRSIZE_P(ns) != Z_STRSIZE_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRSIZE_P(ns))) {
 				zend_error(E_COMPILE_ERROR, "Cannot use const %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(c_tmp);
 		}
 	}
 
-	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
+	if (zend_hash_add(current_import_sub, lookup_name, Z_STRSIZE_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
@@ -7273,12 +7273,12 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 
 	/* Constant name must not conflict with import names */
 	if (CG(current_import_const) &&
-	    zend_hash_find(CG(current_import_const), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+	    zend_hash_find(CG(current_import_const), Z_STRVAL(name->u.constant), Z_STRSIZE(name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 
-		char *tmp = estrndup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+		char *tmp = estrndup(Z_STRVAL_PP(ns_name), Z_STRSIZE_PP(ns_name));
 
-		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(name->u.constant) ||
-			memcmp(tmp, Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant))) {
+		if (Z_STRSIZE_PP(ns_name) != Z_STRSIZE(name->u.constant) ||
+			memcmp(tmp, Z_STRVAL(name->u.constant), Z_STRSIZE(name->u.constant))) {
 			zend_error(E_COMPILE_ERROR, "Cannot declare const %s because the name is already in use", Z_STRVAL(name->u.constant));
 		}
 		efree(tmp);
@@ -7290,7 +7290,7 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 	SET_NODE(opline->op1, name);
 	SET_NODE(opline->op2, value);
 
-	zend_hash_add(&CG(const_filenames), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
+	zend_hash_add(&CG(const_filenames), Z_STRVAL(name->u.constant), Z_STRSIZE(name->u.constant)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 }
 /* }}} */
 
