@@ -9,7 +9,7 @@ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 	$(BUILD_PHPDBG)
 
 install-phpdbg: $(BUILD_BINARY)
-	@echo "Installing phpdbg binary:        $(INSTALL_ROOT)$(bindir)/"
+	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/log
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(localstatedir)/run
