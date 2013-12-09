@@ -170,10 +170,31 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 		break;
 		
 		case FILE_PARAM:
+			if (param->num) {
+				asprintf(pointer,
+					"%s:%lu#%lu",
+					param->file.name,
+					param->file.line,
+					param->num);
+			} else {
+				asprintf(pointer,
+					"%s:%lu",
+					param->file.name,
+					param->file.line);
+			}
+		break;
+		
+		case NUMERIC_FUNCTION_PARAM:
+			asprintf(pointer, 
+				"%s#%lu", param->str, param->num);	
+		break;
+		
+		case NUMERIC_METHOD_PARAM:
 			asprintf(pointer,
-				"%s:%lu",
-				param->file.name,
-				param->file.line);
+				"%s::%s#%lu",
+				param->method.class,
+				param->method.name,
+				param->num);
 		break;
 		
 		default:
@@ -208,6 +229,20 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 		case FILE_PARAM:
 			dest->file.name = estrdup(src->file.name);
 			dest->file.line = src->file.line;
+			if (src->num)
+				dest->num   = src->num;
+		break;
+		
+		case NUMERIC_FUNCTION_PARAM:
+			dest->str = estrndup(src->str, src->len);
+			dest->num = src->num;
+			dest->len = src->len;
+		break;
+		
+		case NUMERIC_METHOD_PARAM:
+			dest->method.class = estrdup(src->method.class);
+			dest->method.name = estrdup(src->method.name);
+			dest->num = src->num;
 		break;
 		
 		case EMPTY_PARAM: { /* do nothing */ } break;
@@ -231,6 +266,8 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 		case FILE_PARAM:
 			hash += zend_inline_hash_func(param->file.name, strlen(param->file.name));
 			hash += param->file.line;
+			if (param->num)
+				hash += param->num;
 		break;
 		
 		case ADDR_PARAM:
@@ -239,6 +276,18 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 		
 		case NUMERIC_PARAM:
 			hash += param->num;
+		break;
+		
+		case NUMERIC_FUNCTION_PARAM:
+			hash += zend_inline_hash_func(param->str, param->len);
+			hash += param->num;
+		break;
+		
+		case NUMERIC_METHOD_PARAM:
+			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
+			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
+			if (param->num)
+				hash+= param->num;
 		break;
 		
 		case EMPTY_PARAM: { /* do nothing */ } break;
@@ -252,6 +301,13 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 	if (l && r) {
 		if (l->type == r->type) {
 			switch (l->type) {
+				
+				case NUMERIC_FUNCTION_PARAM:
+					if (l->num != r->num) {
+						break;
+					}
+				/* break intentionally omitted */
+				
 				case STR_PARAM:
 					return (l->len == r->len) && 
 							(memcmp(l->str, r->str, l->len) == SUCCESS);
@@ -268,11 +324,19 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 							strlen(l->file.name), strlen(r->file.name)};
 						
 						if (lengths[0] == lengths[1]) {
-							return (memcmp(
-								l->file.name, r->file.name, lengths[0]) == SUCCESS);
+							if ((!l->num && !r->num) || (l->num == r->num)) {
+								return (memcmp(
+									l->file.name, r->file.name, lengths[0]) == SUCCESS);
+							}
 						}
 					}
 				} break;	
+				
+				case NUMERIC_METHOD_PARAM:
+					if (l->num != r->num) {
+						break;
+					}
+				/* break intentionally omitted */
 				
 				case METHOD_PARAM: {
 					size_t lengths[2] = {

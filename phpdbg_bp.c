@@ -536,8 +536,8 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 
 	if (zend_hash_index_exists(method_table, opline)) {
 		phpdbg_notice("Breakpoint already exists for %s::%s#%ld", new_break.class_name, new_break.func_name, opline);
-		efree(new_break.func_name);
-		efree(new_break.class_name);
+		efree((char*)new_break.func_name);
+		efree((char*)new_break.class_name);
 		PHPDBG_G(bp_count)--;
 		return;
 	}
@@ -586,7 +586,7 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend
 
 	if (zend_hash_index_exists(func_table, opline)) {
 		phpdbg_notice("Breakpoint already exists for %s#%ld", new_break.func_name, opline);
-		efree(new_break.func_name);
+		efree((char*)new_break.func_name);
 		PHPDBG_G(bp_count)--;
 		return;
 	}
@@ -635,7 +635,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong o
 
 	if (zend_hash_index_exists(file_table, opline)) {
 		phpdbg_notice("Breakpoint already exists for %s:%ld", new_break.class_name, opline);
-		efree(new_break.class_name);
+		efree((char*)new_break.class_name);
 		PHPDBG_G(bp_count)--;
 		return;
 	}
