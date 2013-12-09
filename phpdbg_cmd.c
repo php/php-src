@@ -94,7 +94,6 @@ PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, php
 
 		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
 			if (strchr(str, '#') == line_pos) {
-				*line_pos = 0;
 				param->num = strtol(line_pos + 1, NULL, 0);
 
 				if (phpdbg_is_class_method(str, line_pos - str, &class_name, &func_name)) {
