@@ -1318,6 +1318,9 @@ zend_vm_enter:
 #endif
 
 	while (1) {
+		/* resolve nth opline breakpoints */
+		phpdbg_resolve_op_array_breaks(EG(active_op_array) TSRMLS_CC);
+		
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);

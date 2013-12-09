@@ -540,37 +540,6 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
-void phpdbg_op_array_handler(zend_op_array *op_array) {
-	TSRMLS_FETCH();
-
-	phpdbg_resolve_op_array_breaks(op_array TSRMLS_CC);
-}
-
-#ifndef ZEND_EXT_API
-#define ZEND_EXT_API ZEND_DLEXPORT
-#endif
-ZEND_EXTENSION();
-
-ZEND_DLEXPORT zend_extension zend_extension_entry = {
-	PHPDBG_NAME,
-	PHPDBG_VERSION,
-	PHPDBG_AUTHORS,
-	PHPDBG_URL,
-	"(c) 2013",
-	NULL,                    /* startup_func_t */
-	NULL,                    /* shutdown_func_t */
-	NULL,                    /* activate_func_t */
-	NULL,                    /* deactivate_func_t */
-	NULL,                    /* message_handler_func_t */
-	phpdbg_op_array_handler, /* op_array_handler_func_t */
-	NULL,                    /* statement_handler_func_t */
-	NULL,                    /* fcall_begin_handler_func_t */
-	NULL,                    /* fcall_end_handler_func_t */
-	NULL,                    /* op_array_ctor_func_t */
-	NULL,                    /* op_array_dtor_func_t */
-	STANDARD_ZEND_EXTENSION_PROPERTIES
-};
-
 const opt_struct OPTIONS[] = { /* {{{ */
 	{'c', 1, "ini path override"},
 	{'d', 1, "define ini entry on command line"},
@@ -1090,8 +1059,7 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
-		zend_register_extension(&zend_extension_entry, NULL);
-
+		
 		zend_activate(TSRMLS_C);
 		
 		/* do not install sigint handlers for remote consoles */
