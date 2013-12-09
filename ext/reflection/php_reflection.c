@@ -4040,14 +4040,19 @@ ZEND_METHOD(reflection_class, getConstants)
 {
 	zval *tmp_copy;
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
+
+	old_scope = EG(scope);
+	EG(scope) = ce;
 	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce TSRMLS_CC);
+	EG(scope) = old_scope;
 	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 }
 /* }}} */
@@ -4057,7 +4062,7 @@ ZEND_METHOD(reflection_class, getConstants)
 ZEND_METHOD(reflection_class, getConstant)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	zval **value;
 	char *name;
 	int name_len;
@@ -4068,7 +4073,11 @@ ZEND_METHOD(reflection_class, getConstant)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
+
+	old_scope = EG(scope);
+	EG(scope) = ce;
 	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce TSRMLS_CC);
+	EG(scope) = old_scope;
 	if (zend_hash_find(&ce->constants_table, name, name_len + 1, (void **) &value) == FAILURE) {
 		RETURN_FALSE;
 	}
