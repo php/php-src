@@ -146,28 +146,28 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 {
 	switch (param->type) {
 		case STR_PARAM:
-			asprintf(pointer, 
+			asprintf(pointer,
 				"%s", param->str);
 		break;
-		
+
 		case ADDR_PARAM:
-			asprintf(pointer, 
+			asprintf(pointer,
 				"%#lx", param->addr);
 		break;
-		
+
 		case NUMERIC_PARAM:
-			asprintf(pointer, 
+			asprintf(pointer,
 				"%li",
 				param->num);
 		break;
-		
+
 		case METHOD_PARAM:
 			asprintf(pointer,
 				"%s::%s",
 				param->method.class,
 				param->method.name);
 		break;
-		
+
 		case FILE_PARAM:
 			if (param->num) {
 				asprintf(pointer,
@@ -182,12 +182,12 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 					param->file.line);
 			}
 		break;
-		
+
 		case NUMERIC_FUNCTION_PARAM:
-			asprintf(pointer, 
-				"%s#%lu", param->str, param->num);	
+			asprintf(pointer,
+				"%s#%lu", param->str, param->num);
 		break;
-		
+
 		case NUMERIC_METHOD_PARAM:
 			asprintf(pointer,
 				"%s::%s#%lu",
@@ -195,12 +195,12 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 				param->method.name,
 				param->num);
 		break;
-		
+
 		default:
-			asprintf(pointer, 
+			asprintf(pointer,
 				"%s", "unknown");
 	}
-	
+
 	return *pointer;
 } /* }}} */
 
@@ -211,39 +211,39 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 			dest->str = estrndup(src->str, src->len);
 			dest->len = src->len;
 		break;
-		
+
 		case ADDR_PARAM:
 			dest->addr = src->addr;
 		break;
-		
+
 		case NUMERIC_PARAM:
 			dest->num = src->num;
 		break;
-		
+
 		case METHOD_PARAM:
 			dest->method.class = estrdup(src->method.class);
 			dest->method.name = estrdup(src->method.name);
 		break;
-		
+
 		case FILE_PARAM:
 			dest->file.name = estrdup(src->file.name);
 			dest->file.line = src->file.line;
 			if (src->num)
 				dest->num   = src->num;
 		break;
-		
+
 		case NUMERIC_FUNCTION_PARAM:
 			dest->str = estrndup(src->str, src->len);
 			dest->num = src->num;
 			dest->len = src->len;
 		break;
-		
+
 		case NUMERIC_METHOD_PARAM:
 			dest->method.class = estrdup(src->method.class);
 			dest->method.name = estrdup(src->method.name);
 			dest->num = src->num;
 		break;
-		
+
 		case EMPTY_PARAM: { /* do nothing */ } break;
 	}
 } /* }}} */
@@ -251,47 +251,47 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	zend_ulong hash = param->type;
-	
+
 	switch (param->type) {
 		case STR_PARAM:
 			hash += zend_inline_hash_func(param->str, param->len);
 		break;
-		
+
 		case METHOD_PARAM:
 			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
 			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
 		break;
-		
+
 		case FILE_PARAM:
 			hash += zend_inline_hash_func(param->file.name, strlen(param->file.name));
 			hash += param->file.line;
 			if (param->num)
 				hash += param->num;
 		break;
-		
+
 		case ADDR_PARAM:
 			hash += param->addr;
 		break;
-		
+
 		case NUMERIC_PARAM:
 			hash += param->num;
 		break;
-		
+
 		case NUMERIC_FUNCTION_PARAM:
 			hash += zend_inline_hash_func(param->str, param->len);
 			hash += param->num;
 		break;
-		
+
 		case NUMERIC_METHOD_PARAM:
 			hash += zend_inline_hash_func(param->method.class, strlen(param->method.class));
 			hash += zend_inline_hash_func(param->method.name, strlen(param->method.name));
 			if (param->num)
 				hash+= param->num;
 		break;
-		
+
 		case EMPTY_PARAM: { /* do nothing */ } break;
 	}
-	
+
 	return hash;
 } /* }}} */
 
@@ -300,28 +300,28 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 	if (l && r) {
 		if (l->type == r->type) {
 			switch (l->type) {
-				
+
 				case NUMERIC_FUNCTION_PARAM:
 					if (l->num != r->num) {
 						break;
 					}
 				/* break intentionally omitted */
-				
+
 				case STR_PARAM:
-					return (l->len == r->len) && 
+					return (l->len == r->len) &&
 							(memcmp(l->str, r->str, l->len) == SUCCESS);
-							
+
 				case NUMERIC_PARAM:
 					return (l->num == r->num);
-					
+
 				case ADDR_PARAM:
 					return (l->addr == r->addr);
-					
+
 				case FILE_PARAM: {
 					if (l->file.line == r->file.line) {
 						size_t lengths[2] = {
 							strlen(l->file.name), strlen(r->file.name)};
-						
+
 						if (lengths[0] == lengths[1]) {
 							if ((!l->num && !r->num) || (l->num == r->num)) {
 								return (memcmp(
@@ -329,14 +329,14 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 							}
 						}
 					}
-				} break;	
-				
+				} break;
+
 				case NUMERIC_METHOD_PARAM:
 					if (l->num != r->num) {
 						break;
 					}
 				/* break intentionally omitted */
-				
+
 				case METHOD_PARAM: {
 					size_t lengths[2] = {
 						strlen(l->method.class), strlen(r->method.class)};
@@ -344,7 +344,7 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 						if (memcmp(l->method.class, r->method.class, lengths[0]) == SUCCESS) {
 							lengths[0] = strlen(l->method.name);
 							lengths[1] = strlen(r->method.name);
-							
+
 							if (lengths[0] == lengths[1]) {
 								return (memcmp(
 									l->method.name, r->method.name, lengths[0]) == SUCCESS);
@@ -352,7 +352,7 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 						}
 					}
 				} break;
-				
+
 				case EMPTY_PARAM:
 					return 1;
 			}
@@ -435,7 +435,7 @@ PHPDBG_API phpdbg_input_t **phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC) 
 
 		case IN_STRING:
 			phpdbg_error(
-				"Malformed command line (unclosed quote) @ %ld: %s!",
+				"Malformed command line (unclosed quote) @ %d: %s!",
 				(p - buffer)-1, &buffer[(p - buffer)-1]);
 		break;
 
@@ -461,11 +461,11 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) &&
-			(buffered == NULL)) {	
+			(buffered == NULL)) {
 			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 		}
-		
-		if (buffered == NULL) {	
+
+		if (buffered == NULL) {
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if ((!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && !phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) ||
@@ -476,7 +476,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 				zend_bailout();
 				return NULL;
 			}
-			
+
 			cmd = buf;
 #else
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
@@ -485,7 +485,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 					cmd = buf;
 				} else cmd = NULL;
 			} else cmd = readline(phpdbg_get_prompt(TSRMLS_C));
-			
+
 			if (!cmd) {
 				/* the user has gone away */
 				phpdbg_error("Failed to read console !");
@@ -527,7 +527,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 #endif
 
 #ifdef HAVE_LIBREADLINE
-		if (!buffered && cmd && 
+		if (!buffered && cmd &&
 			!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 			free(cmd);
 		}
@@ -551,7 +551,7 @@ PHPDBG_API void phpdbg_destroy_argv(phpdbg_input_t **argv, int argc TSRMLS_DC) /
 		}
 		efree(argv);
 	}
-	
+
 } /* }}} */
 
 PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t **input TSRMLS_DC) /*{{{ */
