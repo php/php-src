@@ -5,11 +5,14 @@
 # options: -rr
 #################################################
 #[Clearing Breakpoints]
-#File			0
-#Functions		0
-#Methods			0
-#Oplines			0
-#Conditionals		0
+#File%w%d
+#Functions%w%d
+#Methods%w%d
+#Oplines%w%d
+#File oplines%w%d
+#Function oplines%w%d
+#Method oplines%w%d
+#Conditionals%w%d
 #################################################
 clear
 quit
