@@ -916,6 +916,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 	zend_function *function = (zend_function*) execute_data->function_state.function;
 
 	switch (param->type) {
+		case NUMERIC_FUNCTION_PARAM:
 		case STR_PARAM: {
 			/* function breakpoint */
 
@@ -926,12 +927,12 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 			{
 				const char *str = NULL;
 				size_t len = 0L;
-				zend_op_array *ops  = (zend_op_array*)function;
+				zend_op_array *ops = (zend_op_array*)function;
 				str = ops->function_name ? ops->function_name : "main";
 				len = strlen(str);
 
-				if (len == param->len) {
-					return (memcmp(param->str, str, len) == SUCCESS);
+				if (len == param->len && memcmp(param->str, str, len) == SUCCESS) {
+					return param->type == STR_PARAM || execute_data->opline - ops->opcodes == param->num;
 				}
 			}
 		} break;
@@ -948,6 +949,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 			}
 		} break;
 
+		case NUMERIC_METHOD_PARAM:
 		case METHOD_PARAM: {
 			if (function->type != ZEND_USER_FUNCTION) {
 				return 0;
@@ -957,18 +959,13 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 				zend_op_array *ops = (zend_op_array*) function;
 
 				if (ops->scope) {
-					size_t lengths[2] = {
-						strlen(param->method.class), ops->scope->name_length};
-					if (lengths[0] == lengths[1]) {
-						if (memcmp(param->method.class,
-							ops->scope->name, lengths[0]) == SUCCESS) {
-							lengths[0] = strlen(param->method.name);
-							lengths[1] = strlen(ops->function_name);
+					size_t lengths[2] = {strlen(param->method.class), ops->scope->name_length};
+					if (lengths[0] == lengths[1] && memcmp(param->method.class, ops->scope->name, lengths[0]) == SUCCESS) {
+						lengths[0] = strlen(param->method.name);
+						lengths[1] = strlen(ops->function_name);
 
-							if (lengths[0] == lengths[1]) {
-								return (memcmp(param->method.name,
-									ops->function_name, lengths[0]) == SUCCESS);
-							}
+						if (lengths[0] == lengths[1] && memcmp(param->method.name, ops->function_name, lengths[0]) == SUCCESS) {
+							return param->type == METHOD_PARAM || (execute_data->opline - ops->opcodes) == param->num;
 						}
 					}
 				}
@@ -1584,11 +1581,30 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
 						break;
 
+						case NUMERIC_FUNCTION_PARAM:
+							phpdbg_writeln("#%d\t\tat %s#%ld if %s%s",
+				 				brake->id,
+				 				brake->param.str,
+								brake->param.num,
+				 				brake->code,
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+
 						case METHOD_PARAM:
 							phpdbg_writeln("#%d\t\tat %s::%s if %s%s",
 				 				brake->id,
 				 				brake->param.method.class,
 				 				brake->param.method.name,
+				 				brake->code,
+				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
+						break;
+
+						case NUMERIC_METHOD_PARAM:
+							phpdbg_writeln("#%d\t\tat %s::%s#%ld if %s%s",
+				 				brake->id,
+				 				brake->param.method.class,
+				 				brake->param.method.name,
+								brake->param.num,
 				 				brake->code,
 				 				((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
 						break;
