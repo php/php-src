@@ -2546,7 +2546,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	int    ret = TRUE;
 	char  *buf;
 	int    buf_size;
-	zval   func, param0, param1, param2, param3, param4;
+	zval   func;
 	zval  *params[5];
 	zval **trace;
 	zval **fault;
@@ -2566,29 +2566,24 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 	INIT_ZVAL(func);
 	ZVAL_STRINGL(&func,"__doRequest",sizeof("__doRequest")-1,0);
-	INIT_ZVAL(param0);
-	params[0] = &param0;
-	ZVAL_STRINGL(params[0], buf, buf_size, 0);
-	INIT_ZVAL(param1);
-	params[1] = &param1;
+	ALLOC_INIT_ZVAL(params[0]);
+	ZVAL_STRINGL(params[0], buf, buf_size, 1);
+	ALLOC_INIT_ZVAL(params[1]);
 	if (location == NULL) {
 		ZVAL_NULL(params[1]);
 	} else {
-		ZVAL_STRING(params[1], location, 0);
+		ZVAL_STRING(params[1], location, 1);
 	}
-	INIT_ZVAL(param2);
-	params[2] = &param2;
+	ALLOC_INIT_ZVAL(params[2]);
 	if (action == NULL) {
 		ZVAL_NULL(params[2]);
 	} else {
-		ZVAL_STRING(params[2], action, 0);
+		ZVAL_STRING(params[2], action, 1);
 	}
-	INIT_ZVAL(param3);
-	params[3] = &param3;
+	ALLOC_INIT_ZVAL(params[3]);
 	ZVAL_LONG(params[3], version);
 
-	INIT_ZVAL(param4);
-	params[4] = &param4;
+	ALLOC_INIT_ZVAL(params[4]);
 	ZVAL_LONG(params[4], one_way);
 
 	if (call_user_function(NULL, &this_ptr, &func, response, 5, params TSRMLS_CC) != SUCCESS) {
@@ -2603,6 +2598,11 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	    Z_LVAL_PP(trace) > 0) {
 		add_property_stringl(this_ptr, "__last_response", Z_STRVAL_P(response), Z_STRLEN_P(response), 1);
 	}
+	zval_ptr_dtor(&params[4]);
+	zval_ptr_dtor(&params[3]);
+	zval_ptr_dtor(&params[2]);
+	zval_ptr_dtor(&params[1]);
+	zval_ptr_dtor(&params[0]);
 	xmlFree(buf);
 	if (ret && zend_hash_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
 	  return FALSE;
