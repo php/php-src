@@ -984,13 +984,13 @@ static_scalar: /* compile-time evaluated scalars */
 ;
 
 static_scalar_value:
-		common_scalar	{ $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
-	|	static_class_name_scalar	{ $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
-	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	static_class_constant { $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
-	|	T_CLASS_C			{ $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
+		common_scalar	{ $$.u.ast = zend_ast_create_constant(&$1.u.constant, CG(active_class_entry)); }
+	|	static_class_name_scalar	{ $$.u.ast = zend_ast_create_constant(&$1.u.constant, CG(active_class_entry)); }
+	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant, CG(active_class_entry)); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant, CG(active_class_entry)); }
+	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant, CG(active_class_entry)); }
+	|	static_class_constant { $$.u.ast = zend_ast_create_constant(&$1.u.constant, CG(active_class_entry)); }
+	|	T_CLASS_C			{ $$.u.ast = zend_ast_create_constant(&$1.u.constant, CG(active_class_entry)); }
 	|	static_operation { $$ = $1; }
 ;
 

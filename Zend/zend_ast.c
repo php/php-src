@@ -23,12 +23,13 @@
 #include "zend_API.h"
 #include "zend_operators.h"
 
-ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
+ZEND_API zend_ast *zend_ast_create_constant(zval *zv, zend_class_entry *scope)
 {
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zval));
 	ast->kind = ZEND_CONST;
 	ast->children = 0;
 	ast->u.val = (zval*)(ast + 1);
+	ast->context = (void *)scope;
 	INIT_PZVAL_COPY(ast->u.val, zv);
 	return ast;
 }
@@ -226,7 +227,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
 			*result = *ast->u.val;
 			zval_copy_ctor(result);
 			if (IS_CONSTANT_TYPE(Z_TYPE_P(result))) {
-				zval_update_constant(&result, (void *) 1 TSRMLS_CC);
+				zval_update_constant_ex(&result, (void *) 1, (zend_class_entry *) ast->context TSRMLS_CC);
 			}
 			break;
 		case ZEND_BOOL_AND:
@@ -287,7 +288,7 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	if (ast == NULL) {
 		return NULL;
 	} else if (ast->kind == ZEND_CONST) {
-		zend_ast *copy = zend_ast_create_constant(ast->u.val);
+		zend_ast *copy = zend_ast_create_constant(ast->u.val, (zend_class_entry *) ast->context);
 		zval_copy_ctor(copy->u.val);
 		return copy;
 	} else {
