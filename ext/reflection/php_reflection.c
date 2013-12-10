@@ -1108,29 +1108,26 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_free(&str_constants);
 	}
 
-	if (module->functions && module->functions->fname) {
+	{
+		HashPosition iterator;
 		zend_function *fptr;
-		const zend_function_entry *func = module->functions;
+		int first = 1;
 
-		string_printf(str, "\n  - Functions {\n");
-
-		/* Is there a better way of doing this? */
-		while (func->fname) {
-			int fname_len = strlen(func->fname);
-			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-		
-			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
-				func++;
-				efree(lc_name);
-				continue;
+		zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
+		while (zend_hash_get_current_data_ex(CG(function_table), (void **) &fptr, &iterator) == SUCCESS) {
+			if (fptr->common.type==ZEND_INTERNAL_FUNCTION
+				&& fptr->internal_function.module == module) {
+				if (first) {
+					string_printf(str, "\n  - Functions {\n");
+					first = 0;
+				}
+				_function_string(str, fptr, NULL, "    " TSRMLS_CC);
 			}
-
-			_function_string(str, fptr, NULL, "    " TSRMLS_CC);
-			efree(lc_name);
-			func++;
+			zend_hash_move_forward_ex(CG(function_table), &iterator);
 		}
-		string_printf(str, "%s  }\n", indent);
+		if (!first) {
+			string_printf(str, "%s  }\n", indent);
+		}
 	}
 
 	{
@@ -5290,6 +5287,9 @@ ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;
 	zend_module_entry *module;
+	HashPosition iterator;
+	zval *function;
+	zend_function *fptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -5297,29 +5297,15 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	if (module->functions) {
-		zval *function;
-		zend_function *fptr;
-		const zend_function_entry *func = module->functions;
-
-		/* Is there a better way of doing this? */
-		while (func->fname) {
-			int fname_len = strlen(func->fname);
-			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-			
-			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
-				func++;
-				efree(lc_name);
-				continue;
-			}
-
+	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
+	while (zend_hash_get_current_data_ex(CG(function_table), (void **) &fptr, &iterator) == SUCCESS) {
+		if (fptr->common.type==ZEND_INTERNAL_FUNCTION
+			&& fptr->internal_function.module == module) {
 			ALLOC_ZVAL(function);
 			reflection_function_factory(fptr, NULL, function TSRMLS_CC);
-			add_assoc_zval_ex(return_value, func->fname, fname_len+1, function);
-			func++;
-			efree(lc_name);
+			add_assoc_zval(return_value, fptr->common.function_name, function);
 		}
+		zend_hash_move_forward_ex(CG(function_table), &iterator);
 	}
 }
 /* }}} */
