@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 Nov 2013, PHP 5.5.7RC1
+12 Dec 2013, PHP 5.5.7
 
 - CLI server:
   . Added some MIME types to the CLI web server (Chris Jones)
@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #65915 (Inconsistent results with require return value). (Dmitry)
   . Fixed bug #65559 (Opcache: cache not cleared if changes occur while
     running). (Dmitry)
+
+- OpenSSL:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
 
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
