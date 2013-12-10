@@ -391,7 +391,7 @@ static zval *_xml_resource_zval(php_int_t value)
 static zval *_xml_string_zval(const char *str)
 {
 	zval *ret;
-	int len = strlen(str);
+	size_t len = strlen(str);
 	MAKE_STD_ZVAL(ret);
 
 	Z_TYPE_P(ret) = IS_STRING;
@@ -973,7 +973,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						if (zend_hash_find(Z_ARRVAL_PP(curtag),"type",sizeof("type"),(void **) &mytype) == SUCCESS) {
 							if (!strcmp(Z_STRVAL_PP(mytype), "cdata")) {
 								if (zend_hash_find(Z_ARRVAL_PP(curtag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
-									int newlen = Z_STRSIZE_PP(myval) + decoded_len;
+									zend_str_size_int newlen = Z_STRSIZE_PP(myval) + decoded_len;
 									Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
 									strncpy(Z_STRVAL_PP(myval) + Z_STRSIZE_PP(myval), decoded_value, decoded_len + 1);
 									Z_STRSIZE_PP(myval) += decoded_len;
@@ -1115,7 +1115,7 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr,
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		if ((retval = xml_call_handler(parser, parser->externalEntityRefHandler, parser->externalEntityRefPtr, 5, args))) {
 			convert_to_long(retval);
-			ret = Z_LVAL_P(retval);
+			ret = (0 == Z_LVAL_P(retval) ? 0 : 1) ;
 			efree(retval);
 		} else {
 			ret = 0;
@@ -1449,6 +1449,12 @@ PHP_FUNCTION(xml_parse)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|i", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
+
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input data is too long.");
+		RETURN_LONG(0);
+	}
+
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, &pind, -1, "XML Parser", le_xml_parser);
 
 	parser->isparsing = 1;
@@ -1474,6 +1480,11 @@ PHP_FUNCTION(xml_parse_into_struct)
 		return;
 	}
 	
+	if (data_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input data is too long.");
+		RETURN_LONG(0);
+	}
+
 	if (info) {	
 		zval_dtor(*info);
 		array_init(*info);
@@ -1629,15 +1640,19 @@ PHP_FUNCTION(xml_parser_set_option)
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
 			convert_to_long_ex(val);
-			parser->case_folding = Z_LVAL_PP(val);
+			parser->case_folding = (0 == Z_LVAL_PP(val) ? 0 : 1);
 			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
 			convert_to_long_ex(val);
+			if (Z_LVAL_PP(val) > INT_MAX) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Character count is too big");
+				RETURN_FALSE;
+			}
 			parser->toffset = Z_LVAL_PP(val);
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
 			convert_to_long_ex(val);
-			parser->skipwhite = Z_LVAL_PP(val);
+			parser->skipwhite = (0 == Z_LVAL_PP(val) ? 0 : 1);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			xml_encoding *enc;
