@@ -2452,7 +2452,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	zend_module_entry *module;
 	HashPosition iterator;
 	zend_function *zif;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &extension_name, &extension_name_len) == FAILURE) {
 		return;
 	}
 	if (strncasecmp(extension_name, "zend", sizeof("zend"))) {
