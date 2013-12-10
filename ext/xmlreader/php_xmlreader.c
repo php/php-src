@@ -584,6 +584,10 @@ PHP_METHOD(xmlreader, getAttributeNo)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
+		if (attr_pos > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute position out of range.");
+			return;
+		}
 		retchar = (char *)xmlTextReaderGetAttributeNo(intern->ptr, attr_pos);
 	}
 	if (retchar) {
@@ -641,6 +645,10 @@ PHP_METHOD(xmlreader, getParserProperty)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
+		if (property > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute position out of range.");
+			return;
+		}
 		retval = xmlTextReaderGetParserProp(intern->ptr,property);
 	}
 	if (retval == -1) {
@@ -721,6 +729,10 @@ PHP_METHOD(xmlreader, moveToAttributeNo)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
+		if (attr_pos > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attribute position out of range.");
+			return;
+		}
 		retval = xmlTextReaderMoveToAttributeNo(intern->ptr, attr_pos);
 		if (retval == 1) {
 			RETURN_TRUE;
@@ -1006,7 +1018,7 @@ PHP_METHOD(xmlreader, setParserProperty)
 
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern && intern->ptr) {
-		retval = xmlTextReaderSetParserProp(intern->ptr,property, value);
+		retval = xmlTextReaderSetParserProp(intern->ptr, property, value);
 	}
 	if (retval == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parser property");
@@ -1069,6 +1081,10 @@ PHP_METHOD(xmlreader, XML)
 
 	if (!source_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty string supplied as input");
+		RETURN_FALSE;
+	}
+	if (source_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied input string is too long");
 		RETURN_FALSE;
 	}
 
