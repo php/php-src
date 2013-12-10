@@ -43,9 +43,10 @@ struct _zend_ast {
 		zval     *val;
 		zend_ast *child;
 	} u;
+	void *context;
 };
 
-ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
+ZEND_API zend_ast *zend_ast_create_constant(zval *zv, zend_class_entry *scope);
 
 ZEND_API zend_ast *zend_ast_create_unary(uint kind, zend_ast *op0);
 ZEND_API zend_ast *zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1);

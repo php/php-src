@@ -4,6 +4,7 @@ ReflectionClass::getConstants()
 <?php
 class C {
 	const a = 'hello from C';
+	const b = self::a . ' - const expr';
 }
 class D extends C {
 }
@@ -24,24 +25,32 @@ foreach($classes as $class) {
 ?>
 --EXPECTF--
 Constants from class C: 
-array(1) {
+array(2) {
   ["a"]=>
   string(12) "hello from C"
+  ["b"]=>
+  string(25) "hello from C - const expr"
 }
 Constants from class D: 
-array(1) {
+array(2) {
   ["a"]=>
   string(12) "hello from C"
+  ["b"]=>
+  string(25) "hello from C - const expr"
 }
 Constants from class E: 
-array(1) {
+array(2) {
   ["a"]=>
   string(12) "hello from C"
+  ["b"]=>
+  string(25) "hello from C - const expr"
 }
 Constants from class F: 
-array(1) {
+array(2) {
   ["a"]=>
   string(12) "hello from F"
+  ["b"]=>
+  string(25) "hello from C - const expr"
 }
 Constants from class X: 
 array(0) {
