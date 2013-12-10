@@ -472,6 +472,11 @@ PHP_METHOD(sqlite3, prepare)
 	stmt_obj->db_obj = db_obj;
 	stmt_obj->db_obj_zval = getThis();
 
+	if (sql_len > INT_MAX) {
+		php_sqlite3_error(stmt_obj->db_obj, "SQL statement is too long.");
+		RETURN_FALSE;
+	}
+
 	Z_ADDREF_P(object);
 
 	errcode = sqlite3_prepare_v2(db_obj->db, sql, sql_len, &(stmt_obj->stmt), NULL);
@@ -530,6 +535,11 @@ PHP_METHOD(sqlite3, query)
 	stmt_obj = (php_sqlite3_stmt *)zend_object_store_get_object(stmt TSRMLS_CC);
 	stmt_obj->db_obj = db_obj;
 	stmt_obj->db_obj_zval = getThis();
+
+	if (sql_len > INT_MAX) {
+		php_sqlite3_error(stmt_obj->db_obj, "SQL statement is too long.");
+		RETURN_FALSE;
+	}
 
 	Z_ADDREF_P(object);
 
@@ -625,6 +635,11 @@ PHP_METHOD(sqlite3, querySingle)
 	}
 
 	if (!sql_len) {
+		RETURN_FALSE;
+	}
+
+	if (sql_len > INT_MAX) {
+		php_sqlite3_error(db_obj, "SQL statement is too long.");
 		RETURN_FALSE;
 	}
 
@@ -1519,12 +1534,12 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_BLOB:
 				{
 					php_stream *stream = NULL;
-					int blength;
+					zend_str_size_int blength;
 					char *buffer = NULL;
 					if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 						php_stream_from_zval_no_verify(stream, &param->parameter);
 						if (stream == NULL) {
-							php_sqlite3_error(stmt_obj->db_obj, "Unable to read stream for parameter %ld", param->param_number);
+							php_sqlite3_error(stmt_obj->db_obj, "Unable to read stream for parameter %pd", param->param_number);
 							RETURN_FALSE;
 						}
 						blength = php_stream_copy_to_mem(stream, (void *)&buffer, PHP_STREAM_COPY_ALL, 0);
@@ -1532,6 +1547,11 @@ PHP_METHOD(sqlite3stmt, execute)
 						convert_to_string(param->parameter);
 						blength =  Z_STRSIZE_P(param->parameter);
 						buffer = Z_STRVAL_P(param->parameter);
+					}
+
+					if (blength > INT_MAX) {
+						php_sqlite3_error(stmt_obj->db_obj, "Input is too long for parameter %pd", param->param_number);
+						RETURN_FALSE;
 					}
 
 					sqlite3_bind_blob(stmt_obj->stmt, param->param_number, buffer, blength, SQLITE_TRANSIENT);
@@ -1552,7 +1572,7 @@ PHP_METHOD(sqlite3stmt, execute)
 					break;
 
 				default:
-					php_sqlite3_error(stmt_obj->db_obj, "Unknown parameter type: %ld for parameter %ld", param->type, param->param_number);
+					php_sqlite3_error(stmt_obj->db_obj, "Unknown parameter type: %pd for parameter %pd", param->type, param->param_number);
 					RETURN_FALSE;
 			}
 			zend_hash_move_forward(stmt_obj->bound_params);
@@ -1611,6 +1631,11 @@ PHP_METHOD(sqlite3stmt, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS", &db_zval, php_sqlite3_sc_entry, &sql, &sql_len) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
+	}
+
+	if (sql_len > INT_MAX) {
+		php_sqlite3_error(stmt_obj->db_obj, "SQL string is too long");
+		RETURN_FALSE;
 	}
 
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(db_zval TSRMLS_CC);
