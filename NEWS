@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 Nov 2013, PHP 5.4.23 RC1
+28 Nov 2013, PHP 5.4.23
 
 - Core:
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
