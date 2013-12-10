@@ -654,13 +654,18 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
 #else
-			Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
+			/*
+			 * 'result' may alias with op1 or op2, so we need to
+			 * ensure that 'result' is not updated until after we
+			 * have read the values of op1 and op2.
+			 */
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
 				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2);
 				Z_TYPE_P(result) = IS_DOUBLE;
 			} else {
+				Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
 				Z_TYPE_P(result) = IS_LONG;
 			}
 #endif

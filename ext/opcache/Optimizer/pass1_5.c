@@ -321,6 +321,27 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			break;
 
 		case ZEND_DO_FCALL:
+			/* define("name", scalar); */
+			if (collect_constants &&
+			    opline->extended_value == 2 &&
+			    ZEND_OP1_TYPE(opline) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("define")-1 &&
+			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
+			    (opline-1)->opcode == ZEND_SEND_VAL &&
+			    ZEND_OP1_TYPE(opline-1) == IS_CONST &&
+			    (Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_BOOL ||
+			     Z_TYPE(ZEND_OP1_LITERAL(opline-1)) == IS_STRING) &&
+			    (opline-2)->opcode == ZEND_SEND_VAL &&
+			    ZEND_OP1_TYPE(opline-2) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline-2)) == IS_STRING) {
+				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline-2), &ZEND_OP1_LITERAL(opline-1));
+				break;
+			} else {
+				/* don't colllect constants after any other function call */
+				collect_constants = 0;
+			}
+
 			/* pre-evaluate constant functions:
 			   defined(x)
 			   constant(x)
@@ -428,25 +449,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						MAKE_NOP(opline);
 					}
 				}
-				break;
-			}
-			
-			/* define("name", scalar); */
-			if (collect_constants &&
-			    opline->extended_value == 2 &&
-			    ZEND_OP1_TYPE(opline) == IS_CONST &&
-			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
-			    Z_STRSIZE(ZEND_OP1_LITERAL(opline)) == sizeof("define")-1 &&
-			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
-			    (opline-1)->opcode == ZEND_SEND_VAL &&
-			    ZEND_OP1_TYPE(opline-1) == IS_CONST &&
-			    (Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_BOOL ||
-			     Z_TYPE(ZEND_OP1_LITERAL(opline-1)) == IS_STRING) &&
-			    (opline-2)->opcode == ZEND_SEND_VAL &&
-			    ZEND_OP1_TYPE(opline-2) == IS_CONST &&
-			    Z_TYPE(ZEND_OP1_LITERAL(opline-2)) == IS_STRING) {
-				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline-2), &ZEND_OP1_LITERAL(opline-1));
-			}
+			}			
 			break;
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 		case ZEND_DECLARE_CONST:
@@ -487,6 +490,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 		case ZEND_FE_RESET:
 		case ZEND_FE_FETCH:
 		case ZEND_NEW:
+		case ZEND_DO_FCALL_BY_NAME:
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		case ZEND_JMP_SET:
 #endif

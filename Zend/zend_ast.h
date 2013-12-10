@@ -53,7 +53,7 @@ ZEND_API zend_ast *zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *o
 
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
 
-ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC);
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC);
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);

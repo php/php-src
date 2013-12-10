@@ -593,7 +593,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				continue;
 			}
 			if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
-				zend_ast_evaluate(&const_value, *(zend_ast **)str_index TSRMLS_CC);
+				zend_ast_evaluate(&const_value, *(zend_ast **)str_index, scope TSRMLS_CC);
 				zend_ast_destroy(*(zend_ast **)str_index);
 			} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
 				char *actual;
@@ -667,7 +667,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
 		p = *pp;
 
-		zend_ast_evaluate(&const_value, Z_AST_P(p) TSRMLS_CC);
+		zend_ast_evaluate(&const_value, Z_AST_P(p), scope TSRMLS_CC);
 		if (inline_change) {
 			zend_ast_destroy(Z_AST_P(p));
 		}
