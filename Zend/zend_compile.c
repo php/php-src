@@ -7069,7 +7069,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		zend_hash_init(CG(current_import), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	ALLOC_ZVAL(ns);
+	MAKE_STD_ZVAL(ns);
 	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
 	if (new_name) {
 		name = &new_name->u.constant;
@@ -7146,7 +7146,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
 
-	ALLOC_ZVAL(ns);
+	MAKE_STD_ZVAL(ns);
 	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
 	if (new_name) {
 		name = &new_name->u.constant;
