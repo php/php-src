@@ -81,143 +81,143 @@ ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 	}
 }
 
-ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC)
 {
 	zval op1, op2;
 
 	switch (ast->kind) {
 		case ZEND_ADD:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			add_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_SUB:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_MUL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			mul_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_DIV:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			div_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_MOD:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			mod_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_SL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			shift_left_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_SR:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			shift_right_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_CONCAT:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			concat_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_BW_OR:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			bitwise_or_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_BW_AND:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			bitwise_and_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_BW_XOR:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			bitwise_xor_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_BW_NOT:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			bitwise_not_function(result, &op1 TSRMLS_CC);
 			zval_dtor(&op1);
 			break;
 		case ZEND_BOOL_NOT:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			boolean_not_function(result, &op1 TSRMLS_CC);
 			zval_dtor(&op1);
 			break;
 		case ZEND_BOOL_XOR:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			boolean_xor_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_IDENTICAL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_identical_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_not_identical_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_EQUAL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_equal_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_NOT_EQUAL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_not_equal_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_SMALLER:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_smaller_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
-			zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 			is_smaller_or_equal_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
@@ -226,13 +226,13 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
 			*result = *ast->u.val;
 			zval_copy_ctor(result);
 			if (IS_CONSTANT_TYPE(Z_TYPE_P(result))) {
-				zval_update_constant(&result, (void *) 1 TSRMLS_CC);
+				zval_update_constant_ex(&result, (void *) 1, scope TSRMLS_CC);
 			}
 			break;
 		case ZEND_BOOL_AND:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			if (zend_is_true(&op1)) {
-				zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+				zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			} else {
@@ -241,39 +241,39 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
 			zval_dtor(&op1);
 			break;
 		case ZEND_BOOL_OR:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			if (zend_is_true(&op1)) {
 				ZVAL_BOOL(result, 1);
 			} else {
-				zend_ast_evaluate(&op2, (&ast->u.child)[1] TSRMLS_CC);
+				zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
 				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			}
 			zval_dtor(&op1);
 			break;
 		case ZEND_SELECT:
-			zend_ast_evaluate(&op1, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
 			if (zend_is_true(&op1)) {
 				if (!(&ast->u.child)[1]) {
 					*result = op1;
 				} else {
-					zend_ast_evaluate(result, (&ast->u.child)[1] TSRMLS_CC);
+					zend_ast_evaluate(result, (&ast->u.child)[1], scope TSRMLS_CC);
 					zval_dtor(&op1);
 				}
 			} else {
-				zend_ast_evaluate(result, (&ast->u.child)[2] TSRMLS_CC);
+				zend_ast_evaluate(result, (&ast->u.child)[2], scope TSRMLS_CC);
 				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_UNARY_PLUS:
 			ZVAL_LONG(&op1, 0);
-			zend_ast_evaluate(&op2, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[0], scope TSRMLS_CC);
 			add_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
 		case ZEND_UNARY_MINUS:
 			ZVAL_LONG(&op1, 0);
-			zend_ast_evaluate(&op2, (&ast->u.child)[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, (&ast->u.child)[0], scope TSRMLS_CC);
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;

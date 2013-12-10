@@ -7341,7 +7341,7 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 		result->u.constant = *ast->u.val;
 		efree(ast);
 	} else if (zend_ast_is_ct_constant(ast)) {
-		zend_ast_evaluate(&result->u.constant, ast TSRMLS_CC);
+		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
 		zend_ast_destroy(ast);
 	} else {
 		Z_TYPE(result->u.constant) = IS_CONSTANT_AST;
