@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Filter:
   . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
 
+- SOAP
+  . Fixed bug #66112 (Use after free condition in SOAP extension).
+    (martin dot koegler at brz dot gv dot at)
+
 - Sockets:
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
