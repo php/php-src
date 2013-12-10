@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)
 
-?? ??? 2013, PHP 5.4.23
+12 Dec 2013, PHP 5.4.23
 
 - Core:
   . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
@@ -45,6 +45,10 @@ PHP                                                                        NEWS
     with 'i'). (Andrey)
   . Fixed bug #66141 (mysqlnd quote function is wrong with NO_BACKSLASH_ESCAPES
     after failed query). (Andrey)
+
+- Openssl:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
 
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
