@@ -444,7 +444,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	cloneDocu = std_hnd->read_property(id, member, BP_VAR_IS, NULL TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
 		convert_to_long(cloneDocu);
-		clone_docu = Z_LVAL_P(cloneDocu);
+		clone_docu = (0 == Z_LVAL_P(cloneDocu) ? 0 : 1) ;
 	}
 	efree(member);
 	if (clone_docu == 0) {
@@ -490,7 +490,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
-	int secPrefsValue, secPrefsIni;
+	php_int_t secPrefsValue, secPrefsIni;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp TSRMLS_CC);
@@ -544,7 +544,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	doXInclude = std_hnd->read_property(id, member, BP_VAR_IS, NULL TSRMLS_CC);
 	if (Z_TYPE_P(doXInclude) != IS_NULL) {
 		convert_to_long(doXInclude);
-		ctxt->xinclude = Z_LVAL_P(doXInclude);
+		ctxt->xinclude = (0 == Z_LVAL_P(doXInclude) ? 0 : 1);
 	}
 	efree(member);
 
@@ -665,7 +665,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	if (newdocp) {
 		if (ret_class) {
 			int found;
-			char *curclass_name;
+			const char *curclass_name;
 			zend_class_entry *curce, **ce;
 			php_libxml_node_object *interndoc;
 
