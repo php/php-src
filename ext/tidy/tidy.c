@@ -606,7 +606,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 
 		if (data_len > UINT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input data is too long");
-			RETVAL_FALSE;
+			RETURN_FALSE;
 		}
 
 		tidyBufInit(&buf);
