@@ -604,6 +604,11 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	if (data) {
 		TidyBuffer buf;
 
+		if (data_len > UINT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input data is too long");
+			RETVAL_FALSE;
+		}
+
 		tidyBufInit(&buf);
 		tidyBufAttach(&buf, (byte *) data, data_len);
 
@@ -1042,6 +1047,11 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 static int php_tidy_parse_string(PHPTidyObj *obj, char *string, zend_str_size_int len, char *enc TSRMLS_DC)
 {
 	TidyBuffer buf;
+
+	if (len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string is too long");
+		return FAILURE;
+	}
 
 	if(enc) {
 		if (tidySetCharEncoding(obj->ptdoc->doc, enc) < 0) {
