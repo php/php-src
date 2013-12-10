@@ -2447,36 +2447,49 @@ ZEND_FUNCTION(extension_loaded)
    Returns an array with the names of functions belonging to the named extension */
 ZEND_FUNCTION(get_extension_funcs)
 {
-	char *extension_name;
-	int extension_name_len;
+	char *extension_name, *lcname;
+	int extension_name_len, array;
 	zend_module_entry *module;
-	const zend_function_entry *func;
-
+	HashPosition iterator;
+	zend_function *zif;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
 		return;
 	}
-
 	if (strncasecmp(extension_name, "zend", sizeof("zend"))) {
-		char *lcname = zend_str_tolower_dup(extension_name, extension_name_len);
-		if (zend_hash_find(&module_registry, lcname,
-			extension_name_len+1, (void**)&module) == FAILURE) {
-			efree(lcname);
-			RETURN_FALSE;
-		}
-		efree(lcname);
-
-		if (!(func = module->functions)) {
-			RETURN_FALSE;
-		}
+		lcname = zend_str_tolower_dup(extension_name, extension_name_len);
 	} else {
-		func = builtin_functions;
+		lcname = estrdup("core");
+	}
+	if (zend_hash_find(&module_registry, lcname,
+		extension_name_len+1, (void**)&module) == FAILURE) {
+		efree(lcname);
+		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
+	if (module->functions) {
+		/* avoid BC break, if functions list is empty, will return an empty array */
+		array_init(return_value);
+		array = 1;
+	} else {
+		array = 0;
+	}
+	while (zend_hash_get_current_data_ex(CG(function_table), (void **) &zif, &iterator) == SUCCESS) {
+		if (zif->common.type==ZEND_INTERNAL_FUNCTION
+			&& zif->internal_function.module == module) {
+			if (!array) {
+				array_init(return_value);
+				array = 1;
+			}
+			add_next_index_string(return_value, zif->common.function_name, 1);
+		}
+		zend_hash_move_forward_ex(CG(function_table), &iterator);
+	}
 
-	while (func->fname) {
-		add_next_index_string(return_value, func->fname, 1);
-		func++;
+	efree(lcname);
+
+	if (!array) {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
