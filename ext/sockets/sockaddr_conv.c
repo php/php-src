@@ -9,6 +9,8 @@
 #include <arpa/inet.h>
 #endif
 
+extern int php_string_to_if_index(const char *val, unsigned *out TSRMLS_DC);
+
 #if HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
 int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock TSRMLS_DC) /* {{{ */
