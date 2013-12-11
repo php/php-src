@@ -25,8 +25,8 @@
 #include "ext/standard/php_rand.h"
 
 static char *get_http_header_value(char *headers, char *type);
-static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, int *out_size TSRMLS_DC);
-static int get_http_headers(php_stream *socketd,char **response, int *out_size TSRMLS_DC);
+static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, zend_str_size_int *out_size TSRMLS_DC);
+static int get_http_headers(php_stream *socketd,char **response, zend_str_size_int *out_size TSRMLS_DC);
 
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
@@ -165,7 +165,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	char *protocol;
 	php_int_t namelen;
 	int port;
-	int old_error_reporting;
+	php_int_t old_error_reporting;
 	struct timeval tv;
 	struct timeval *timeout = NULL;
 
@@ -239,7 +239,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	if (stream && *use_proxy && use_ssl) {
 		smart_str soap_headers = {0};
 		char *http_headers;
-		int http_header_size;
+		zend_str_size_int http_header_size;
 
 		smart_str_append_const(&soap_headers, "CONNECT ");
 		smart_str_appends(&soap_headers, phpurl->host);
@@ -314,8 +314,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 static int in_domain(const char *host, const char *domain)
 {
   if (domain[0] == '.') {
-    int l1 = strlen(host);
-    int l2 = strlen(domain);
+    zend_str_size_int l1 = strlen(host);
+    zend_str_size_int l2 = strlen(domain);
     if (l1 > l2) {
     	return strcmp(host+l1-l2,domain) == 0;
     } else {
@@ -331,21 +331,22 @@ int make_http_soap_request(zval  *this_ptr,
                            zend_str_size_int    buf_size,
                            char  *location,
                            char  *soapaction,
-                           int    soap_version,
+                           php_int_t    soap_version,
                            char **buffer,
                            zend_str_size_int   *buffer_len TSRMLS_DC)
 {
 	char *request;
 	smart_str soap_headers = {0};
 	smart_str soap_headers_z = {0};
-	int request_size, err;
+	php_int_t request_size, err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval **trace, **tmp;
 	int use_proxy = 0;
 	int use_ssl;
 	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
-	int http_header_size, http_body_size, http_close;
+	zend_str_size_int http_header_size, http_body_size;
+	int http_close;
 	char *connection;
 	int http_1_1;
 	int http_status;
@@ -523,7 +524,7 @@ try_again:
 
 	if (stream) {
 		zval **cookies, **login, **password;
-	  int ret = zend_list_insert(phpurl, le_url TSRMLS_CC);
+		php_int_t ret = zend_list_insert(phpurl, le_url TSRMLS_CC);
 
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
@@ -1359,10 +1360,11 @@ static char *get_http_header_value(char *headers, char *type)
 	return NULL;
 }
 
-static int get_http_body(php_stream *stream, int close, char *headers,  char **response, int *out_size TSRMLS_DC)
+static int get_http_body(php_stream *stream, int close, char *headers,  char **response, zend_str_size_int *out_size TSRMLS_DC)
 {
 	char *header, *http_buf = NULL;
-	int header_close = close, header_chunked = 0, header_length = 0, http_buf_size = 0;
+	int header_close = close, header_chunked = 0;
+	zend_str_size_int header_length = 0, http_buf_size = 0;
 
 	if (!close) {
 		header = get_http_header_value(headers, "Connection: ");
@@ -1396,12 +1398,12 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		done = FALSE;
 
 		while (!done) {
-			int buf_size = 0;
+			zend_str_size_int buf_size = 0;
 
 			php_stream_gets(stream, headerbuf, sizeof(headerbuf));
 			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
-					int len_size = 0;
+					zend_str_size_int len_size = 0;
 
 					if (http_buf_size + buf_size + 1 < 0) {
 						efree(http_buf);
@@ -1410,8 +1412,8 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 					http_buf = erealloc(http_buf, http_buf_size + buf_size + 1);
 
 					while (len_size < buf_size) {
-						int len_read = php_stream_read(stream, http_buf + http_buf_size, buf_size - len_size);
-						if (len_read <= 0) {
+						zend_str_size_int len_read = php_stream_read(stream, http_buf + http_buf_size, buf_size - len_size);
+						if (len_read == 0) {
 							/* Error or EOF */
 							done = TRUE;
 						  break;
@@ -1468,15 +1470,15 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		}
 		http_buf = safe_emalloc(1, header_length, 1);
 		while (http_buf_size < header_length) {
-			int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
-			if (len_read <= 0) {
+			zend_str_size_int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
+			if (len_read == 0) {
 				break;
 			}
 			http_buf_size += len_read;
 		}
 	} else if (header_close) {
 		do {
-			int len_read;
+			zend_str_size_int len_read;
 			http_buf = erealloc(http_buf, http_buf_size + 4096 + 1);
 			len_read = php_stream_read(stream, http_buf + http_buf_size, 4096);
 			if (len_read > 0) {
@@ -1493,7 +1495,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	return TRUE;
 }
 
-static int get_http_headers(php_stream *stream, char **response, int *out_size TSRMLS_DC)
+static int get_http_headers(php_stream *stream, char **response, zend_str_size_int *out_size TSRMLS_DC)
 {
 	int done = FALSE;
 	smart_str tmp_response = {0};

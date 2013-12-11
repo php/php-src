@@ -54,13 +54,13 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 static void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name TSRMLS_DC);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr TSRMLS_DC);
 
-static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
+static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, php_uint_t index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
 static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr node);
 
-static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval **parameters[], int *version, soapHeader **headers TSRMLS_DC);
-static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, soapHeader *headers, int version TSRMLS_DC);
-static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version, HashTable *soap_headers TSRMLS_DC);
+static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval **parameters[], php_int_t *version, soapHeader **headers TSRMLS_DC);
+static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, soapHeader *headers, php_int_t version TSRMLS_DC);
+static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, php_int_t version, HashTable *soap_headers TSRMLS_DC);
 static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style, xmlNodePtr parent TSRMLS_DC);
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent TSRMLS_DC);
 
@@ -74,7 +74,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
 	zval* _old_error_object = SOAP_GLOBAL(error_object);\
-	int _old_soap_version = SOAP_GLOBAL(soap_version);\
+	php_int_t _old_soap_version = SOAP_GLOBAL(soap_version);\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Server";\
 	SOAP_GLOBAL(error_object) = this_ptr;
@@ -89,7 +89,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
 	char* _old_error_code = SOAP_GLOBAL(error_code);\
 	zval* _old_error_object = SOAP_GLOBAL(error_object);\
-	int _old_soap_version = SOAP_GLOBAL(soap_version);\
+	php_int_t _old_soap_version = SOAP_GLOBAL(soap_version);\
 	zend_bool _old_in_compilation = CG(in_compilation); \
 	zend_bool _old_in_execution = EG(in_execution); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
@@ -898,7 +898,7 @@ PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, *trace;
 	char *str;
-	int len;
+	zend_str_size_int len;
 	zend_fcall_info fci;
 	zval fname;
 
@@ -1101,8 +1101,8 @@ PHP_METHOD(SoapServer, SoapServer)
 {
 	soapServicePtr service;
 	zval *wsdl = NULL, *options = NULL;
-	int ret;
-	int version = SOAP_1_1;
+	php_int_t ret;
+	php_int_t version = SOAP_1_1;
 	php_int_t cache_wsdl;
 	HashTable *typemap_ht = NULL;
 
@@ -1409,7 +1409,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(function_name), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(function_name), (void **)&tmp_function, &pos) != FAILURE) {
 				char *key;
-				int   key_len;
+				zend_str_size_int   key_len;
 				zend_function *f;
 
 				if (Z_TYPE_PP(tmp_function) != IS_STRING) {
@@ -1436,7 +1436,7 @@ PHP_METHOD(SoapServer, addFunction)
 		}
 	} else if (function_name->type == IS_STRING) {
 		char *key;
-		int   key_len;
+		zend_str_size_int   key_len;
 		zend_function *f;
 
 		key_len = Z_STRSIZE_P(function_name);
@@ -1480,7 +1480,7 @@ PHP_METHOD(SoapServer, addFunction)
    Handles a SOAP request */
 PHP_METHOD(SoapServer, handle)
 {
-	int soap_version, old_soap_version;
+	php_int_t soap_version, old_soap_version;
 	sdlPtr old_sdl = NULL;
 	soapServicePtr service;
 	xmlDocPtr doc_request=NULL, doc_return;
@@ -1495,7 +1495,7 @@ PHP_METHOD(SoapServer, handle)
 	zend_str_size_int arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
-	int old_features;
+	php_int_t old_features;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -2050,7 +2050,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader *hdr TSRMLS_DC)
 {
-	int soap_version;
+	php_int_t soap_version;
 	xmlChar *buf;
 	char cont_len[30];
 	int size;
@@ -2318,7 +2318,7 @@ PHP_METHOD(SoapClient, SoapClient)
 {
 
 	zval *wsdl, *options = NULL;
-	int  soap_version = SOAP_1_1;
+	php_int_t  soap_version = SOAP_1_1;
 	php_stream_context *context = NULL;
 	php_int_t cache_wsdl;
 	sdlPtr sdl = NULL;
@@ -2513,7 +2513,8 @@ PHP_METHOD(SoapClient, SoapClient)
 	add_property_long(this_ptr, "_soap_version", soap_version);
 
 	if (Z_TYPE_P(wsdl) != IS_NULL) {
-		int    old_soap_version, ret;
+		php_int_t   old_soap_version;
+		php_int_t ret;
 
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
@@ -2529,7 +2530,7 @@ PHP_METHOD(SoapClient, SoapClient)
 	if (typemap_ht) {
 		HashTable *typemap = soap_create_typemap(sdl, typemap_ht TSRMLS_CC);
 		if (typemap) {
-			int ret;
+			php_int_t ret;
 
 			ret = zend_list_insert(typemap, le_typemap TSRMLS_CC);
 			add_property_resource(this_ptr, "typemap", ret);
@@ -2539,7 +2540,7 @@ PHP_METHOD(SoapClient, SoapClient)
 }
 /* }}} */
 
-static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, int version, int one_way, zval *response TSRMLS_DC)
+static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *action, php_int_t version, int one_way, zval *response TSRMLS_DC)
 {
 	int    ret = TRUE;
 	char  *buf;
@@ -2610,7 +2611,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 static void do_soap_call(zval* this_ptr,
                          char* function,
-                         int function_len,
+                         zend_str_size_int function_len,
                          int arg_count,
                          zval** real_args,
                          zval* return_value,
@@ -2628,11 +2629,11 @@ static void do_soap_call(zval* this_ptr,
  	sdlFunctionPtr fn;
 	xmlDocPtr request = NULL;
 	int ret = FALSE;
-	int soap_version;
+	php_int_t soap_version;
 	zval response;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map;
-	int old_features;
+	php_int_t old_features;
 	HashTable *old_typemap, *typemap = NULL;
 
 	SOAP_CLIENT_BEGIN_CODE();
@@ -3248,7 +3249,7 @@ static void set_soap_fault(zval *obj, char *fault_code_ns, char *fault_code, cha
 	zend_update_property_string(zend_exception_get_default(TSRMLS_C), obj, "message", sizeof("message")-1, (fault_string ? fault_string : "") TSRMLS_CC);
 	
 	if (fault_code != NULL) {
-		int soap_version = SOAP_GLOBAL(soap_version);
+		php_int_t soap_version = SOAP_GLOBAL(soap_version);
 
 		if (fault_code_ns) {
 			add_property_string(obj, "faultcode", fault_code, 1);
@@ -3415,7 +3416,7 @@ static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_
 	return function;
 }
 
-static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval ***parameters, int *version, soapHeader **headers TSRMLS_DC)
+static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval ***parameters, php_int_t *version, soapHeader **headers TSRMLS_DC)
 {
 	char* envelope_ns = NULL;
 	xmlNodePtr trav,env,head,body,func;
@@ -3677,7 +3678,7 @@ ignore_header:
 	return function;
 }
 
-static void set_soap_header_attributes(xmlNodePtr h, HashTable *ht, int version)
+static void set_soap_header_attributes(xmlNodePtr h, HashTable *ht, php_int_t version)
 {
 	zval **tmp;
 
@@ -3714,7 +3715,7 @@ static void set_soap_header_attributes(xmlNodePtr h, HashTable *ht, int version)
 	}
 }
 
-static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version, int main, xmlNodePtr *node TSRMLS_DC)
+static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, char *function_name, char *uri, zval *ret, php_int_t version, int main, xmlNodePtr *node TSRMLS_DC)
 {
 	xmlNodePtr method = NULL, param;
 	sdlParamPtr parameter = NULL;
@@ -3820,7 +3821,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 	return use;
 }
 
-static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, soapHeader* headers, int version TSRMLS_DC)
+static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, soapHeader* headers, php_int_t version TSRMLS_DC)
 {
 	xmlDocPtr doc;
 	xmlNodePtr envelope = NULL, body, param;
@@ -4182,7 +4183,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 	return doc;
 }
 
-static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version, HashTable *soap_headers TSRMLS_DC)
+static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, php_int_t version, HashTable *soap_headers TSRMLS_DC)
 {
 	xmlDoc *doc;
 	xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
@@ -4436,7 +4437,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 	return xmlParam;
 }
 
-static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int response)
+static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, php_uint_t index, int response)
 {
 	sdlParamPtr *tmp;
 	HashTable   *ht;

@@ -79,9 +79,9 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 		parse_namespace(type, &cptype, &ns);
 		nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			int ns_len = xmlStrlen(nsptr->href);
-			int type_len = strlen(cptype);
-			int len = ns_len + type_len + 1;
+			zend_str_size_int ns_len = xmlStrlen(nsptr->href);
+			zend_str_size_int type_len = strlen(cptype);
+			zend_str_size_int len = ns_len + type_len + 1;
 			char *nscat = emalloc(len + 1);
 
 			memcpy(nscat, nsptr->href, ns_len);
@@ -111,9 +111,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	int ns_len = strlen(ns);
-	int type_len = strlen(type);
-	int len = ns_len + type_len + 1;
+	zend_str_size_int ns_len = strlen(ns);
+	zend_str_size_int type_len = strlen(type);
+	zend_str_size_int len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
 	memcpy(nscat, ns, ns_len);
@@ -129,8 +129,8 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 	      memcmp(ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 		char *enc_nscat;
-		int enc_ns_len;
-		int enc_len;
+		zend_str_size_int enc_ns_len;
+		zend_str_size_int enc_len;
 
 		enc_ns_len = sizeof(XSD_NAMESPACE)-1;
 		enc_len = enc_ns_len + type_len + 1;
@@ -229,7 +229,7 @@ static int is_wsdl_element(xmlNodePtr node)
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 {
 	char *s;
-	int l1, l2;
+	php_int_t l1, l2;
 	zval *context = NULL;
 	zval **header = NULL;
 
@@ -1028,7 +1028,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						} else {
 */
 						{
-							int len = strlen(function->functionName);
+							zend_str_size_int len = strlen(function->functionName);
 							function->responseName = emalloc(len + sizeof("Response"));
 							memcpy(function->responseName, function->functionName, len);
 							memcpy(function->responseName+len, "Response", sizeof("Response"));
@@ -1132,7 +1132,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					{
 						char *tmp = estrdup(function->functionName);
-						int  len = strlen(tmp);
+						zend_str_size_int  len = strlen(tmp);
 
 						if (zend_hash_add(&ctx.sdl->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL) != SUCCESS) {
 							zend_hash_next_index_insert(&ctx.sdl->functions, &function, sizeof(sdlFunctionPtr), NULL);
@@ -1418,16 +1418,16 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	enc->to_zval = sdl_guess_convert_zval;
 
 	if (enc->details.sdl_type == NULL) {
-		int ns_len = strlen(enc->details.ns);
-		int type_len = strlen(enc->details.type_str);
+		zend_str_size_int ns_len = strlen(enc->details.ns);
+		zend_str_size_int type_len = strlen(enc->details.type_str);
 
 		if (((ns_len == sizeof(SOAP_1_1_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1) == 0) ||
 		     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 			char *enc_nscat;
-			int enc_ns_len;
-			int enc_len;
+			zend_str_size_int enc_ns_len;
+			zend_str_size_int enc_len;
 			encodePtr real_enc;
 
 			enc_ns_len = sizeof(XSD_NAMESPACE)-1;
@@ -1784,7 +1784,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 
 static void sdl_serialize_string(const char *str, smart_str *out)
 {
-	int i;
+	size_t i;
 
 	if (str) {
 		i = strlen(str);
@@ -3191,7 +3191,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
-	int uri_len = 0;
+	zend_str_size_int uri_len = 0;
 	php_stream_context *context=NULL;
 	zval **tmp, **proxy_host, **proxy_port, *orig_context = NULL, *new_context = NULL;
 	smart_str headers = {0};
@@ -3227,10 +3227,10 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 		char md5str[33];
 		PHP_MD5_CTX context;
 		unsigned char digest[16];
-		int len = strlen(SOAP_GLOBAL(cache_dir));
+		zend_str_size_int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
 		char *user = php_get_current_user(TSRMLS_C);
-		int user_len = user ? strlen(user) + 1 : 0;
+		zend_str_size_int user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
 		PHP_MD5Init(&context);

@@ -98,13 +98,13 @@ struct _soapService {
 	zval *soap_object;
 
 	HashTable *typemap;
-	int        version;
+	php_int_t        version;
 	int        type;
 	char      *actor;
 	char      *uri;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
-	int        features;
+	php_int_t       features;
 	struct _soapHeader **soap_headers_ptr;
 	int send_errors;
 };
@@ -162,7 +162,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncIndex;
 	HashTable *typemap;
 	int        cur_uniq_ns;
-	int        soap_version;
+	php_int_t        soap_version;
 	sdlPtr     sdl;
 	zend_bool  use_soap_error_handler;
 	char*      error_code;
@@ -176,7 +176,7 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *mem_cache;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
-	int        features;
+	php_int_t        features;
 	HashTable  wsdl_cache;
 	int        cur_uniq_ref;
 	HashTable *ref_map;

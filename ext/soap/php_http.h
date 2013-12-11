@@ -27,7 +27,7 @@ int make_http_soap_request(zval  *this_ptr,
                            zend_str_size_int    request_size, 
                            char  *location, 
                            char  *soapaction, 
-                           int    soap_version,
+                           php_int_t    soap_version,
                            char **response, 
                            zend_str_size_int   *response_len TSRMLS_DC);
 

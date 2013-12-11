@@ -863,7 +863,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 {
 	xmlNodePtr ret, text;
 	char *str;
-	int new_len;
+	zend_str_size_int new_len;
 
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, ret);
@@ -2271,7 +2271,7 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
  	}
 }
 
-static inline int array_num_elements(HashTable* ht)
+static inline php_uint_t array_num_elements(HashTable* ht)
 {
 	if (ht->pListTail && ht->pListTail->nKeyLength == 0) {
 		return ht->pListTail->h-1;
@@ -2289,7 +2289,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 	encodePtr enc = NULL;
 	int dimension = 1;
 	int* dims;
-	int soap_version;
+	php_int_t soap_version;
 	zval *array_copy = NULL;
 
 	soap_version = SOAP_GLOBAL(soap_version);
