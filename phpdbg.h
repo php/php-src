@@ -38,6 +38,7 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
+#include "zend_signal.h"
 #include "SAPI.h"
 #include <fcntl.h>
 #include <sys/types.h>
@@ -67,6 +68,7 @@
 
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_watch.h"
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
@@ -159,11 +161,22 @@
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
 /* {{{ structs */
+typedef union _phpdbg_btree phpdbg_btree;
+union _phpdbg_btree {
+	phpdbg_btree *branches[2];
+	phpdbg_watchpoint_t *watchpoint;
+};
+
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
+
+	struct sigaction old_sigsegv_signal;         /* segv signal handler */
+
+	phpdbg_btree *watchpoint_tree;               /* tree with watchpoints */
+	HashTable watchpoints;                       /* watchpoints */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */

@@ -63,6 +63,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, 1),
 	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
+	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -1005,6 +1006,19 @@ PHPDBG_COMMAND(list) /* {{{ */
 
 		case METHOD_PARAM:
 			return PHPDBG_LIST_HANDLER(method)(PHPDBG_COMMAND_ARGS);
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_COMMAND(watch) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM:
+			phpdbg_create_var_watchpoint(param->str, param->len TSRMLS_CC);
+			break;
 
 		phpdbg_default_switch_case();
 	}

@@ -765,6 +765,26 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 } /* }}} */
 #endif
 
+void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
+	int is_handled = FAILURE;
+	TSRMLS_FETCH();
+
+	switch (sig) {
+		case SIGBUS:
+		case SIGSEGV:
+			is_handled = phpdbg_watchpoint_segfault_handler(info, context TSRMLS_CC);
+			if (is_handled == FAILURE) {
+#ifdef ZEND_SIGNALS
+				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL TSRMLS_CC);
+#else
+				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
+#endif
+			}
+			break;
+	}
+
+}
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -802,6 +822,10 @@ int main(int argc, char **argv) /* {{{ */
 	void ***tsrm_ls;
 #endif
 
+	struct sigaction signal_struct;
+	signal_struct.sa_sigaction = phpdbg_signal_handler;
+	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
+
 #ifndef _WIN32
 	address = strdup("127.0.0.1");
 	socket[0] = -1;
@@ -825,7 +849,9 @@ int main(int argc, char **argv) /* {{{ */
 	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
-#endif
+#endif	
+
+	phpdbg_setup_watchpoints();
 
 phpdbg_main:
 	if (!cleaning) {
@@ -1061,17 +1087,28 @@ phpdbg_main:
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		
 		zend_activate(TSRMLS_C);
-		
+
+#ifdef ZEND_SIGNALS
+		zend_try {
+			zend_signal_activate(TSRMLS_C);
+		} zend_end_try();
+#endif
+
+#ifdef ZEND_SIGNALS
+		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
+		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
+#else
+		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
+#endif
+
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifdef ZEND_SIGNALS
 # ifndef _WIN32
 		if (listen[0] < 0) {
 # endif
-			zend_try {
-				zend_signal_activate(TSRMLS_C);
-				zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC);
-			} zend_end_try();
+			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
 # ifndef _WIN32
 		}
 # endif
