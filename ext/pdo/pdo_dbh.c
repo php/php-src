@@ -275,7 +275,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
 		zval **v;
-		int plen = 0;
+		zend_str_size_int plen = 0;
 		char *hashkey = NULL;
 		zend_rsrc_list_entry *le;
 		pdo_dbh_t *pdbh = NULL;
@@ -369,8 +369,10 @@ static PHP_METHOD(PDO, dbh_constructor)
 		dbh->default_fetch_type = PDO_FETCH_BOTH;
 	}	
 
-	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
-
+	{
+		php_int_t __tmp = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
+		dbh->auto_commit = (0 == __tmp) ? 0 : 1;
+	}
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
@@ -1291,7 +1293,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	const zend_function_entry *funcs;
 	zend_function func;
 	zend_internal_function *ifunc = (zend_internal_function*)&func;
-	int namelen;
+	zend_str_size_int namelen;
 	char *lc_name;
 
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {

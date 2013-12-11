@@ -339,7 +339,7 @@ typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno TSRMLS_DC)
  * If the driver sets caller_frees, ptr should point to emalloc'd memory
  * and PDO will free it as soon as it is done using it.
  */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC);
+typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC);
 
 /* hook for bound params */
 enum pdo_param_event {
@@ -512,7 +512,7 @@ struct _pdo_dbh_t {
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	int namelen;
+	zend_str_size_int namelen;
 	php_uint_t maxlen;
 	enum pdo_param_type param_type;
 	php_uint_t precision;
@@ -604,7 +604,7 @@ struct _pdo_stmt_t {
 	/* defaults for fetches */
 	enum pdo_fetch_type default_fetch_type;
 	union {
-		int column;
+		php_int_t column;
 		struct {
 			zend_class_entry *ce;	
 			zval *ctor_args;            /* freed */

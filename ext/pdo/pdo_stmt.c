@@ -320,7 +320,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && ! ZVAL_IS_NULL(param->parameter)) {
 		if (Z_TYPE_P(param->parameter) == IS_DOUBLE) {
 			char *p;
-			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(param->parameter));
+			zend_str_size_int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(param->parameter));
 			ZVAL_STRINGL(param->parameter, p, len, 0);
 		} else {
 			convert_to_string(param->parameter);
@@ -543,7 +543,7 @@ static PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *type_override TSRMLS_DC) /* {{{ */
+static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, php_int_t colno, int *type_override TSRMLS_DC) /* {{{ */
 {
 	struct pdo_column_data *col;
 	char *value = NULL;
@@ -856,7 +856,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
 	zval grp_val, *grp, **pgrp, *retval, *old_ctor_args = NULL;
-	int colno;
+	php_int_t colno;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
 		how = stmt->default_fetch_type;
@@ -1770,7 +1770,7 @@ fail:
 /* {{{ proto mixed PDOStatement::getAttribute(long attribute)
    Get an attribute */
 
-static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, long attr)
+static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, php_int_t attr)
 {
 	switch (attr) {
 		case PDO_ATTR_EMULATE_PREPARES:
@@ -2460,7 +2460,7 @@ zend_object_value pdo_dbstmt_new(zend_class_entry *ce TSRMLS_DC)
 struct php_pdo_iterator {
 	zend_object_iterator iter;
 	pdo_stmt_t *stmt;
-	ulong key;
+	php_uint_t key;
 	zval *fetch_ahead;
 };
 
