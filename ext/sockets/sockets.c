@@ -1145,6 +1145,13 @@ PHP_FUNCTION(socket_read)
 	if (type == PHP_NORMAL_READ) {
 		retval = php_read(php_sock, tmpbuf, length, 0);
 	} else {
+#ifdef _WIN64
+		if (length > INT_MAX) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Receive length is too big");
+				efree(tmpbuf);
+				RETURN_FALSE;
+		}
+#endif
 		retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
 	}
 
@@ -1582,6 +1589,13 @@ PHP_FUNCTION(socket_recv)
 		RETURN_FALSE;
 	}
 
+#ifdef _WIN64
+	if ((len + 1) > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Receive length is too big");
+			RETURN_FALSE;
+	}
+#endif
+
 	recv_buf = emalloc(len + 1);
 	memset(recv_buf, 0, len + 1);
 
@@ -1620,14 +1634,24 @@ PHP_FUNCTION(socket_send)
 	int retval;
 	php_int_t		len, flags;
 	char		*buf;
+	zend_str_size send_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSii", &arg1, &buf, &buf_len, &len, &flags) == FAILURE) {
 		return;
 	}
 
+	send_len = (buf_len < len ? buf_len : len);
+
+#ifdef _WIN64
+	if (send_len > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+	}
+#endif
+
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
-	retval = send(php_sock->bsd_socket, buf, (buf_len < len ? buf_len : len), flags);
+	retval = send(php_sock->bsd_socket, buf, send_len, flags);
 
 	if (retval == -1) {
 		PHP_SOCKET_ERROR(php_sock, "unable to write to socket", errno);
@@ -1665,6 +1689,13 @@ PHP_FUNCTION(socket_recvfrom)
 	if ((arg3 + 2) < 3) {
 		RETURN_FALSE;
 	}
+
+#ifdef _WIN64
+	if ((arg3 + 2) > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Receive length is too big");
+			RETURN_FALSE;
+	}
+#endif
 
 	recv_buf = emalloc(arg3 + 2);
 	memset(recv_buf, 0, arg3 + 2);
@@ -1772,10 +1803,19 @@ PHP_FUNCTION(socket_sendto)
 	php_int_t				len, flags, port = 0;
 	char				*buf, *addr;
 	int					argc = ZEND_NUM_ARGS();
+	zend_str_size       send_len;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rSiiS|i", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
 		return;
 	}
+
+	send_len = (len > buf_len) ? buf_len : len;
+#ifdef _WIN64
+	if (send_len > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string is too long");
+			RETURN_FALSE;
+	}
+#endif
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, &arg1, -1, le_socket_name, le_socket);
 
@@ -1785,7 +1825,7 @@ PHP_FUNCTION(socket_sendto)
 			s_un.sun_family = AF_UNIX;
 			snprintf(s_un.sun_path, 108, "%s", addr);
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
+			retval = sendto(php_sock->bsd_socket, buf, send_len, flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 			break;
 
 		case AF_INET:
@@ -1801,7 +1841,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin, sizeof(sin));
+			retval = sendto(php_sock->bsd_socket, buf, send_len, flags, (struct sockaddr *) &sin, sizeof(sin));
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1817,7 +1857,7 @@ PHP_FUNCTION(socket_sendto)
 				RETURN_FALSE;
 			}
 
-			retval = sendto(php_sock->bsd_socket, buf, (len > buf_len) ? buf_len : len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
+			retval = sendto(php_sock->bsd_socket, buf, send_len, flags, (struct sockaddr *) &sin6, sizeof(sin6));
 			break;
 #endif
 		default:

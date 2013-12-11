@@ -145,7 +145,7 @@ static void do_from_to_zval_err(struct err_s *err,
 	smart_str			path = {0};
 	const char			**node;
 	char				*user_msg;
-	int					user_msg_size;
+	zend_str_size_int					user_msg_size;
 	zend_llist_position	pos;
 
 	if (err->has_error) {
