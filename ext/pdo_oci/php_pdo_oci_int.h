@@ -37,6 +37,7 @@ typedef struct {
 	/* OCI9; 0 == use NLS_LANG */
 	ub2			charset;
 	sword		last_err;
+	sb4		max_char_width;
 
 	unsigned	attached:1;
 	unsigned	_reserved:31;
