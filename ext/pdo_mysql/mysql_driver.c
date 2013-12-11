@@ -168,7 +168,7 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size 
 	char *nsql = NULL;
 	zend_str_size_int nsql_len = 0;
 	int ret;
-	int server_version;
+	php_uint_t server_version;
 	
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
