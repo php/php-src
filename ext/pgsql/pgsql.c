@@ -749,9 +749,9 @@ ZEND_GET_MODULE(pgsql)
 static int le_link, le_plink, le_result, le_lofp, le_string;
 
 /* {{{ _php_pgsql_trim_message */
-static char * _php_pgsql_trim_message(const char *message, int *len)
+static char * _php_pgsql_trim_message(const char *message, zend_str_size_int *len)
 {
-	register int i = strlen(message)-1;
+	register zend_str_size_int i = strlen(message)-1;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
 		--i;
@@ -836,7 +836,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 	TSRMLS_FETCH();
 	if (! PGG(ignore_notices)) {
 		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
-		notice->message = _php_pgsql_trim_message(message, (int *)&notice->len);
+		notice->message = _php_pgsql_trim_message(message, &notice->len);
 		if (PGG(log_notices)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s", notice->message);
 		}
@@ -1162,9 +1162,9 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_row(2, "SSL support", "disabled");
 #endif
 #endif /* HAVE_PG_CONFIG_H */	
-	snprintf(buf, sizeof(buf), "%ld", PGG(num_persistent));
+	snprintf(buf, sizeof(buf), "%pd", PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
-	snprintf(buf, sizeof(buf), "%ld", PGG(num_links));
+	snprintf(buf, sizeof(buf), "%pd", PGG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_end();
 
@@ -1240,12 +1240,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			
 			if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-								 "Cannot create new link. Too many open links (%ld)", PGG(num_links));
+								 "Cannot create new link. Too many open links (%pd)", PGG(num_links));
 				goto err;
 			}
 			if (PGG(max_persistent)!=-1 && PGG(num_persistent)>=PGG(max_persistent)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-								 "Cannot create new link. Too many open persistent links (%ld)", PGG(num_persistent));
+								 "Cannot create new link. Too many open persistent links (%pd)", PGG(num_persistent));
 				goto err;
 			}
 
@@ -1341,7 +1341,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 		}
 		if (PGG(max_links)!=-1 && PGG(num_links)>=PGG(max_links)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create new link. Too many open links (%ld)", PGG(num_links));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create new link. Too many open links (%pd)", PGG(num_links));
 			goto err;
 		}
 		if (connstring) {
@@ -2497,7 +2497,7 @@ PHP_FUNCTION(pg_fetch_result)
 	} else {
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2585,7 +2585,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_
 		pgsql_row = row;
 		pg_result->row = pgsql_row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -2781,7 +2781,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 
 	num_fields = PQnfields(pgsql_result);
 	if (colno >= num_fields || colno < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%ld'", colno);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%pd'", colno);
 		RETURN_FALSE;
 	}
 
@@ -2863,7 +2863,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	} else {
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
@@ -3336,7 +3336,8 @@ PHP_FUNCTION(pg_lo_read)
 {
   	zval *pgsql_id;
   	php_int_t len;
-	int buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes, argc = ZEND_NUM_ARGS();
+	zend_str_size_int buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes;
+	int argc = ZEND_NUM_ARGS();
 	char *buf;
 	pgLofp *pgsql;
 
@@ -3380,11 +3381,11 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		if (z_len > str_len) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %ld", str_len, z_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %pu. Tried to write %pd", str_len, z_len);
 			RETURN_FALSE;
 		}
 		if (z_len < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %ld was specified", z_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %pd was specified", z_len);
 			RETURN_FALSE;
 		}
 		len = z_len;
