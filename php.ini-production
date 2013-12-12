@@ -692,12 +692,6 @@ default_mimetype = "text/html"
 ; http://php.net/default-charset
 ;default_charset = "UTF-8"
 
-; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature. If post reading is disabled through
-; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
-; http://php.net/always-populate-raw-post-data
-;always_populate_raw_post_data = On
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
