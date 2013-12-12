@@ -419,7 +419,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	zval value_copy;
 	xmlDoc *docp;
-	int standalone;
+	php_int_t standalone;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
@@ -553,7 +553,7 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->stricterror = Z_LVAL_P(newval);
+		doc_prop->stricterror = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -596,7 +596,7 @@ int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->formatoutput = Z_LVAL_P(newval);
+		doc_prop->formatoutput = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -638,7 +638,7 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->validateonparse = Z_LVAL_P(newval);
+		doc_prop->validateonparse = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -680,7 +680,7 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->resolveexternals = Z_LVAL_P(newval);
+		doc_prop->resolveexternals = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -722,7 +722,7 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->preservewhitespace = Z_LVAL_P(newval);
+		doc_prop->preservewhitespace = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -764,7 +764,7 @@ int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->recover = Z_LVAL_P(newval);
+		doc_prop->recover = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -806,7 +806,7 @@ int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_D
 
 	if (obj->document) {
 		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->substituteentities = Z_LVAL_P(newval);
+		doc_prop->substituteentities = Z_BVAL_P(newval);
 	}
 
 	if (newval == &value_copy) {
@@ -1030,6 +1030,11 @@ PHP_FUNCTION(dom_document_create_cdatasection)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_document_class_entry, &value, &value_len) == FAILURE) {
 		return;
+	}
+
+	if (value_len > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input value is too long");
+		RETURN_FALSE;
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1562,8 +1567,8 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int sourc
 	dom_object *intern;
 	php_libxml_ref_obj *document = NULL;
 	int validate, recover, resolve_externals, keep_blanks, substitute_ent;
-	int resolved_path_len;
-	int old_error_reporting = 0;
+	zend_str_size_int resolved_path_len;
+	php_int_t old_error_reporting = 0;
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 
 	if (id != NULL) {
