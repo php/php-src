@@ -1016,7 +1016,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 {
 	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;
 	int i;
-	zend_uint catch_op_num = 0, finally_op_num = 0;
+	zend_uint catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
 	void **stack_frame;
 
 	/* Figure out where the next stack frame (which maybe contains pushed
@@ -1040,6 +1040,10 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		}
 		if (op_num < EG(active_op_array)->try_catch_array[i].finally_op) {
 			finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
+		}
+		if (op_num >= EG(active_op_array)->try_catch_array[i].finally_op &&
+				op_num < EG(active_op_array)->try_catch_array[i].finally_end) {
+			finally_op_end = EG(active_op_array)->try_catch_array[i].finally_end;
 		}
 	}
 
@@ -1102,14 +1106,29 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	EX(old_error_reporting) = NULL;
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
-		zend_exception_save(TSRMLS_C);
+		if (EX(delayed_exception)) {
+			zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
+		}
+		EX(delayed_exception) = EG(exception);
+		EG(exception) = NULL;
 		EX(fast_ret) = NULL;
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 		ZEND_VM_CONTINUE();
 	} else if (catch_op_num) {
+		if (finally_op_end && catch_op_num > finally_op_end) {
+			/* we are going out of current finally scope */
+			if (EX(delayed_exception)) {
+				zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
+				EX(delayed_exception) = NULL;
+			}
+		}
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
+		if (EX(delayed_exception)) {
+			zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
+			EX(delayed_exception) = NULL;
+		}
 		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		} else {
@@ -1159,10 +1178,10 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EG(prev_exception) != NULL) {
+	if (EX(delayed_exception) != NULL) {
 		/* discard the previously thrown exception */
-		zval_ptr_dtor(&EG(prev_exception));
-		EG(prev_exception) = NULL;
+		zval_ptr_dtor(&EX(delayed_exception));
+		EX(delayed_exception) = NULL;
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1179,6 +1198,7 @@ static int ZEND_FASTCALL  ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		ZEND_VM_CONTINUE();
 	}
 	EX(fast_ret) = opline + 1;
+	EX(delayed_exception) = NULL;
 	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
 	ZEND_VM_CONTINUE();
 }
@@ -1195,16 +1215,17 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
 			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
 			ZEND_VM_CONTINUE();
-		} else if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
-			zend_exception_restore(TSRMLS_C);
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
-			ZEND_VM_CONTINUE();
-		} else if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			zend_exception_restore(TSRMLS_C);
-			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		} else {
-			zend_exception_restore(TSRMLS_C);
-			return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			EG(exception) = EX(delayed_exception);
+			EX(delayed_exception) = NULL;
+			if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
+				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+				ZEND_VM_CONTINUE();
+			} else if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+				return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			} else {
+				return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			}
 		}
 	}
 }
