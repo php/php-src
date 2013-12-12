@@ -41,11 +41,11 @@ array(3) {
   [2]=>
   int(3)
 }
-int(-1)
+string(2) "-1"
 int(0)
 float(1.5)
 int(-1)
-string(6) "string"
+string(6) "strinf"
 int(122)
 float(1.5)
 NULL
