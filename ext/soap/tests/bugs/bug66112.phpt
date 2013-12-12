@@ -27,9 +27,10 @@ $HTTP_RAW_POST_DATA=<<<EOF
    </soapenv:Body>
 </soapenv:Envelope>
 EOF;
-echo "OK\n";
 $s->handle($HTTP_RAW_POST_DATA);
-echo "BUG\n";
+echo "OK\n";
 ?>
 --EXPECT--
+<?xml version="1.0" encoding="UTF-8"?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="uri:mist"><SOAP-ENV:Body><ns1:Response><A>ABC</A><B>sss</B></ns1:Response></SOAP-ENV:Body></SOAP-ENV:Envelope>
 OK

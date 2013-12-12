@@ -2816,6 +2816,7 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_GLOBAL(encoding) = old_encoding;
 	SOAP_GLOBAL(sdl) = old_sdl;
 	if (_bailout) {
+		_bailout = 0;
 		zend_bailout();
 	}
 	SOAP_CLIENT_END_CODE();
