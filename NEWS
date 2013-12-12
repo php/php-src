@@ -23,6 +23,7 @@ PHP                                                                        NEWS
     emalloc/efree/estrdup (Anatol, Dmitry)
   . Implemented constant scalar expressions (with support for constants)
     (RFC: https://wiki.php.net/rfc/const_scalar_exprs). (Bob)
+  . Fixed bug #65784 (Segfault with finally). (Laruence, Dmitry)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir

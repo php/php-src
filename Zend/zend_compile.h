@@ -401,6 +401,7 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	zval *delayed_exception;
 	call_slot *call_slots;
 	call_slot *call;
 };
