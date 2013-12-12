@@ -1024,7 +1024,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			/* Zeev might want to do something with this one day */
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
-			zend_indent();
+			zend_indent(TSRMLS_C);
 			zend_file_handle_dtor(file_handle.handle TSRMLS_CC);
 			goto out;
 			break;
