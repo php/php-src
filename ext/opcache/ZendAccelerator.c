@@ -2528,7 +2528,11 @@ static int accel_startup(zend_extension *extension)
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
 #endif
 
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+	if (start_accel_module(TSRMLS_C) == FAILURE) {
+#else
 	if (start_accel_module() == FAILURE) {
+#endif
 		accel_startup_ok = 0;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
 		return FAILURE;

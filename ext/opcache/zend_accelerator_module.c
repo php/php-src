@@ -468,10 +468,17 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+int start_accel_module(TSRMLS_D)
+{
+	return zend_startup_module(&accel_module_entry TSRMLS_CC);
+}
+#else
 int start_accel_module(void)
 {
 	return zend_startup_module(&accel_module_entry);
 }
+#endif
 
 /* {{{ proto array accelerator_get_scripts()
    Get the scripts which are accelerated by ZendAccelerator */
