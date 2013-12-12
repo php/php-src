@@ -426,7 +426,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (ret)
-				*(int*)ret = sock->socket;
+				*(php_socket_t *)ret = sock->socket;
 			return SUCCESS;
 		default:
 			return FAILURE;

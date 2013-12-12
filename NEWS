@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
 
+- MySQLi:
+  . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
+
 - SOAP
   . Fixed bug #66112 (Use after free condition in SOAP extension).
     (martin dot koegler at brz dot gv dot at)
