@@ -2132,6 +2132,9 @@ try_again:
 		case IS_NULL:
 			ZVAL_LONG(op1, 1);
 			break;
+		case IS_BOOL:
+			ZVAL_BOOL(op1, 1);
+			break;
 		case IS_STRING: {
 				zend_long lval;
 				double dval;
@@ -2152,8 +2155,8 @@ try_again:
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
-						/* Perl style string increment */
-						increment_string(op1);
+						str_efree(Z_STRVAL_P(op1));
+						ZVAL_LONG(op1, 1);
 						break;
 				}
 			}
@@ -2199,6 +2202,12 @@ try_again:
 		case IS_DOUBLE:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
 			break;
+		case IS_BOOL:
+			ZVAL_BOOL(op1, 0);
+			break;
+		case IS_NULL:
+			ZVAL_LONG(op1, -1);
+			break;
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
 				zend_string_release(Z_STR_P(op1));
@@ -2219,6 +2228,9 @@ try_again:
 					zend_string_release(Z_STR_P(op1));
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
+				default:
+					str_efree(Z_STRVAL_P(op1));
+					ZVAL_LONG(op1, -1);
 			}
 			break;
 		case IS_OBJECT:
