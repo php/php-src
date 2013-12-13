@@ -29,21 +29,21 @@ float(0.2)
 --- testing: '-7.7' ---
 float(-8.7)
 --- testing: 'abc' ---
-string(3) "abc"
+int(-1)
 --- testing: '123abc' ---
-string(6) "123abc"
+int(122)
 --- testing: '123e5' ---
 float(12299999)
 --- testing: '123e5xyz' ---
-string(8) "123e5xyz"
+float(12299999)
 --- testing: ' 123abc' ---
-string(7) " 123abc"
+int(122)
 --- testing: '123 abc' ---
-string(7) "123 abc"
+int(122)
 --- testing: '123abc ' ---
-string(7) "123abc "
+int(122)
 --- testing: '3.4a' ---
-string(4) "3.4a"
+float(2.4)
 --- testing: 'a5.9' ---
-string(4) "a5.9"
+int(-1)
 ===DONE===

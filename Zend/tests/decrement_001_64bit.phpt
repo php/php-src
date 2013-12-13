@@ -45,12 +45,12 @@ int(-1)
 int(0)
 float(1.5)
 int(-1)
-string(6) "string"
+int(-1)
 int(122)
 float(1.5)
-NULL
-bool(true)
-bool(false)
+int(-1)
+int(0)
+int(-1)
 object(stdClass)#%d (0) {
 }
 array(0) {
