@@ -857,7 +857,7 @@ static int php_cli_server_poller_ctor(php_cli_server_poller *poller) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, int fd) /* {{{ */
+static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
 {
 	if (mode & POLLIN) {
 		PHP_SAFE_FD_SET(fd, &poller->rfds);
@@ -870,7 +870,7 @@ static void php_cli_server_poller_add(php_cli_server_poller *poller, int mode, i
 	}
 } /* }}} */
 
-static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode, int fd) /* {{{ */
+static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode, php_socket_t fd) /* {{{ */
 {
 	if (mode & POLLIN) {
 		PHP_SAFE_FD_CLR(fd, &poller->rfds);
@@ -900,7 +900,7 @@ static int php_cli_server_poller_poll(php_cli_server_poller *poller, const struc
 	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, &t);
 } /* }}} */
 
-static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, int fd, int events)) /* {{{ */
+static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, php_socket_t fd, int events)) /* {{{ */
 {
 	int retval = SUCCESS;
 #ifdef PHP_WIN32
@@ -1278,9 +1278,9 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...) /* {{{ */
 	efree(buf);
 } /* }}} */
 
-static int php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, char **errstr TSRMLS_DC) /* {{{ */
+static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, char **errstr TSRMLS_DC) /* {{{ */
 {
-	int retval = SOCK_ERR;
+	php_socket_t retval = SOCK_ERR;
 	int err = 0;
 	struct sockaddr *sa = NULL, **p, **sal;
 
@@ -1853,7 +1853,7 @@ static void destroy_request_info(sapi_request_info *request_info) /* {{{ */
 {
 } /* }}} */
 
-static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, int client_sock, struct sockaddr *addr, socklen_t addr_len TSRMLS_DC) /* {{{ */
+static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, php_socket_t client_sock, struct sockaddr *addr, socklen_t addr_len TSRMLS_DC) /* {{{ */
 {
 	client->server = server;
 	client->sock = client_sock;
@@ -2402,7 +2402,7 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 	int(*whandler)(php_cli_server*, php_cli_server_client* TSRMLS_DC);
 } php_cli_server_do_event_for_each_fd_callback_params;
 
-static int php_cli_server_do_event_for_each_fd_callback(void *_params, int fd, int event) /* {{{ */
+static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
 #ifdef ZTS
