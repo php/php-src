@@ -266,7 +266,7 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, 
 
 ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
-ZEND_API int zend_startup_module(zend_module_entry *module_entry);
+ZEND_API int zend_startup_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC);
