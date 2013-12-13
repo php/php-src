@@ -204,64 +204,64 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 
 	/* Wait Constants */
 #ifdef WNOHANG
-	REGISTER_LONG_CONSTANT("WNOHANG",  (long) WNOHANG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("WNOHANG",  (php_int_t) WNOHANG, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef WUNTRACED
-	REGISTER_LONG_CONSTANT("WUNTRACED",  (long) WUNTRACED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("WUNTRACED",  (php_int_t) WUNTRACED, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* Signal Constants */
-	REGISTER_LONG_CONSTANT("SIG_IGN",  (long) SIG_IGN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIG_DFL",  (long) SIG_DFL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIG_ERR",  (long) SIG_ERR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGHUP",   (long) SIGHUP,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGINT",   (long) SIGINT,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGQUIT",  (long) SIGQUIT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGILL",   (long) SIGILL,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGTRAP",  (long) SIGTRAP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGABRT",  (long) SIGABRT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIG_IGN",  (php_int_t) SIG_IGN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIG_DFL",  (php_int_t) SIG_DFL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIG_ERR",  (php_int_t) SIG_ERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGHUP",   (php_int_t) SIGHUP,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGINT",   (php_int_t) SIGINT,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGQUIT",  (php_int_t) SIGQUIT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGILL",   (php_int_t) SIGILL,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGTRAP",  (php_int_t) SIGTRAP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGABRT",  (php_int_t) SIGABRT, CONST_CS | CONST_PERSISTENT);
 #ifdef SIGIOT
-	REGISTER_LONG_CONSTANT("SIGIOT",   (long) SIGIOT,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGIOT",   (php_int_t) SIGIOT,  CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("SIGBUS",   (long) SIGBUS,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGFPE",   (long) SIGFPE,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGKILL",  (long) SIGKILL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGUSR1",  (long) SIGUSR1, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGSEGV",  (long) SIGSEGV, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGUSR2",  (long) SIGUSR2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGPIPE",  (long) SIGPIPE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGALRM",  (long) SIGALRM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGTERM",  (long) SIGTERM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGBUS",   (php_int_t) SIGBUS,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGFPE",   (php_int_t) SIGFPE,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGKILL",  (php_int_t) SIGKILL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGUSR1",  (php_int_t) SIGUSR1, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGSEGV",  (php_int_t) SIGSEGV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGUSR2",  (php_int_t) SIGUSR2, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGPIPE",  (php_int_t) SIGPIPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGALRM",  (php_int_t) SIGALRM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGTERM",  (php_int_t) SIGTERM, CONST_CS | CONST_PERSISTENT);
 #ifdef SIGSTKFLT
-	REGISTER_LONG_CONSTANT("SIGSTKFLT",(long) SIGSTKFLT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGSTKFLT",(php_int_t) SIGSTKFLT, CONST_CS | CONST_PERSISTENT);
 #endif 
 #ifdef SIGCLD
-	REGISTER_LONG_CONSTANT("SIGCLD",   (long) SIGCLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGCLD",   (php_int_t) SIGCLD, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SIGCHLD
-	REGISTER_LONG_CONSTANT("SIGCHLD",  (long) SIGCHLD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGCHLD",  (php_int_t) SIGCHLD, CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("SIGCONT",  (long) SIGCONT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGSTOP",  (long) SIGSTOP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGTSTP",  (long) SIGTSTP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGTTIN",  (long) SIGTTIN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGTTOU",  (long) SIGTTOU, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGURG",   (long) SIGURG , CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGXCPU",  (long) SIGXCPU, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGXFSZ",  (long) SIGXFSZ, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGVTALRM",(long) SIGVTALRM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGPROF",  (long) SIGPROF, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGWINCH", (long) SIGWINCH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGCONT",  (php_int_t) SIGCONT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGSTOP",  (php_int_t) SIGSTOP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGTSTP",  (php_int_t) SIGTSTP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGTTIN",  (php_int_t) SIGTTIN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGTTOU",  (php_int_t) SIGTTOU, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGURG",   (php_int_t) SIGURG , CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGXCPU",  (php_int_t) SIGXCPU, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGXFSZ",  (php_int_t) SIGXFSZ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGVTALRM",(php_int_t) SIGVTALRM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGPROF",  (php_int_t) SIGPROF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGWINCH", (php_int_t) SIGWINCH, CONST_CS | CONST_PERSISTENT);
 #ifdef SIGPOLL
-	REGISTER_LONG_CONSTANT("SIGPOLL",  (long) SIGPOLL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGPOLL",  (php_int_t) SIGPOLL, CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("SIGIO",    (long) SIGIO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGIO",    (php_int_t) SIGIO, CONST_CS | CONST_PERSISTENT);
 #ifdef SIGPWR
-	REGISTER_LONG_CONSTANT("SIGPWR",   (long) SIGPWR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGPWR",   (php_int_t) SIGPWR, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef SIGSYS
-	REGISTER_LONG_CONSTANT("SIGSYS",   (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SIGBABY",  (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGSYS",   (php_int_t) SIGSYS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SIGBABY",  (php_int_t) SIGSYS, CONST_CS | CONST_PERSISTENT);
 #endif
 
 #if HAVE_GETPRIORITY || HAVE_SETPRIORITY
@@ -548,7 +548,7 @@ PHP_FUNCTION(pcntl_fork)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error %d", errno);
 	}
 	
-	RETURN_LONG((long) id);
+	RETURN_LONG((php_int_t) id);
 }
 /* }}} */
 
@@ -556,12 +556,12 @@ PHP_FUNCTION(pcntl_fork)
    Set an alarm clock for delivery of a signal*/
 PHP_FUNCTION(pcntl_alarm)
 {
-	long seconds;
+	php_int_t seconds;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &seconds) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &seconds) == FAILURE)
 		return;
 	
-	RETURN_LONG ((long) alarm(seconds));
+	RETURN_LONG ((php_int_t) alarm(seconds));
 }
 /* }}} */
 
@@ -569,12 +569,12 @@ PHP_FUNCTION(pcntl_alarm)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
-	long pid, options = 0;
+	php_int_t pid, options = 0;
 	zval *z_status = NULL;
 	int status;
 	pid_t child_id;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &pid, &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iz|i", &pid, &z_status, &options) == FAILURE)
 		return;
 	
 	convert_to_long_ex(&z_status);
@@ -589,7 +589,7 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	Z_LVAL_P(z_status) = status;
 
-	RETURN_LONG((long) child_id);
+	RETURN_LONG((php_int_t) child_id);
 }
 /* }}} */
 
@@ -597,12 +597,12 @@ PHP_FUNCTION(pcntl_waitpid)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
 {
-	long options = 0;
+	php_int_t options = 0;
 	zval *z_status = NULL;
 	int status;
 	pid_t child_id;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &z_status, &options) == FAILURE)
 		return;
 	
 	convert_to_long_ex(&z_status);
@@ -624,7 +624,7 @@ PHP_FUNCTION(pcntl_wait)
 
 	Z_LVAL_P(z_status) = status;
 
-	RETURN_LONG((long) child_id);
+	RETURN_LONG((php_int_t) child_id);
 }
 /* }}} */
 
@@ -633,9 +633,9 @@ PHP_FUNCTION(pcntl_wait)
 PHP_FUNCTION(pcntl_wifexited)
 {
 #ifdef WIFEXITED
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -651,9 +651,9 @@ PHP_FUNCTION(pcntl_wifexited)
 PHP_FUNCTION(pcntl_wifstopped)
 {
 #ifdef WIFSTOPPED
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -669,9 +669,9 @@ PHP_FUNCTION(pcntl_wifstopped)
 PHP_FUNCTION(pcntl_wifsignaled)
 {
 #ifdef WIFSIGNALED
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -687,9 +687,9 @@ PHP_FUNCTION(pcntl_wifsignaled)
 PHP_FUNCTION(pcntl_wexitstatus)
 {
 #ifdef WEXITSTATUS
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -705,9 +705,9 @@ PHP_FUNCTION(pcntl_wexitstatus)
 PHP_FUNCTION(pcntl_wtermsig)
 {
 #ifdef WTERMSIG
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -723,9 +723,9 @@ PHP_FUNCTION(pcntl_wtermsig)
 PHP_FUNCTION(pcntl_wstopsig)
 {
 #ifdef WSTOPSIG
-	long status_word;
+	php_int_t status_word;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &status_word) == FAILURE) {
 	       return;
 	}
 
@@ -750,12 +750,12 @@ PHP_FUNCTION(pcntl_exec)
 	char **current_arg, **pair;
 	int pair_length;
 	char *key;
-	uint key_length;
+	zend_str_size_uint key_length;
 	char *path;
-	int path_len;
-	ulong key_num;
+	zend_str_size_int path_len;
+	php_uint_t key_num;
 		
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|aa", &path, &path_len, &args, &envs) == FAILURE) {
 		return;
 	}
 	
@@ -803,7 +803,7 @@ PHP_FUNCTION(pcntl_exec)
 			convert_to_string_ex(element);
 
 			/* Length of element + equal sign + length of key + null */ 
-			pair_length = Z_STRLEN_PP(element) + key_length + 2;
+			pair_length = Z_STRSIZE_PP(element) + key_length + 2;
 			*pair = emalloc(pair_length);
 			strlcpy(*pair, key, key_length); 
 			strlcat(*pair, "=", pair_length);
@@ -842,10 +842,10 @@ PHP_FUNCTION(pcntl_signal)
 {
 	zval *handle, **dest_handle = NULL;
 	char *func_name;
-	long signo;
+	php_int_t signo;
 	zend_bool restart_syscalls = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
 		return;
 	}
 
@@ -869,7 +869,7 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_P(handle) == IS_LONG) {
-		if (Z_LVAL_P(handle) != (long) SIG_DFL && Z_LVAL_P(handle) != (long) SIG_IGN) {
+		if (Z_LVAL_P(handle) != (php_int_t) SIG_DFL && Z_LVAL_P(handle) != (php_int_t) SIG_IGN) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for handle argument specified");
 			RETURN_FALSE;
 		}
@@ -916,12 +916,12 @@ PHP_FUNCTION(pcntl_signal_dispatch)
    Examine and change blocked signals */
 PHP_FUNCTION(pcntl_sigprocmask)
 {
-	long          how, signo;
+	php_int_t          how, signo;
 	zval         *user_set, *user_oldset = NULL, **user_signo;
 	sigset_t      set, oldset;
 	HashPosition  pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "la|z", &how, &user_set, &user_oldset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ia|z", &how, &user_set, &user_oldset) == FAILURE) {
 		return;
 	}
 
@@ -977,7 +977,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{{ */
 {
 	zval            *user_set, **user_signo, *user_siginfo = NULL;
-	long             tv_sec = 0, tv_nsec = 0;
+	php_int_t             tv_sec = 0, tv_nsec = 0;
 	sigset_t         set;
 	HashPosition     pos;
 	int              signo;
@@ -985,7 +985,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	struct timespec  timeout;
 
 	if (timedwait) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|zll", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|zii", &user_set, &user_siginfo, &tv_sec, &tv_nsec) == FAILURE) {
 			return;
 		}
 	} else {
@@ -1064,7 +1064,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 			case SIGFPE:
 			case SIGSEGV:
 			case SIGBUS:
-				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr"), (long)siginfo.si_addr);
+				add_assoc_double_ex(user_siginfo, "addr", sizeof("addr"), (php_int_t)siginfo.si_addr);
 				break;
 #ifdef SIGPOLL
 			case SIGPOLL:
@@ -1104,11 +1104,11 @@ PHP_FUNCTION(pcntl_sigtimedwait)
    Get the priority of any process */
 PHP_FUNCTION(pcntl_getpriority)
 {
-	long who = PRIO_PROCESS;
-	long pid = getpid();
+	php_int_t who = PRIO_PROCESS;
+	php_int_t pid = getpid();
 	int pri;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ii", &pid, &who) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1143,11 +1143,11 @@ PHP_FUNCTION(pcntl_getpriority)
    Change the priority of any process */
 PHP_FUNCTION(pcntl_setpriority)
 {
-	long who = PRIO_PROCESS;
-	long pid = getpid();
-	long pri;
+	php_int_t who = PRIO_PROCESS;
+	php_int_t pid = getpid();
+	php_int_t pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &pri, &pid, &who) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|ii", &pri, &pid, &who) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1190,9 +1190,9 @@ PHP_FUNCTION(pcntl_get_last_error)
    Retrieve the system error message associated with the given errno. */
 PHP_FUNCTION(pcntl_strerror)
 {
-        long error;
+        php_int_t error;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &error) == FAILURE) {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &error) == FAILURE) {
                 RETURN_FALSE;
         }
 
