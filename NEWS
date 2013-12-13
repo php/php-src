@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.6.0 
 
 - CLI server:
-  . Added some MIME types to the CLI web server (Chris Jones)
+  . Added some MIME types to the CLI web server. (Chris Jones)
 
 - Core:
   . Improved IS_VAR operands fetching. (Laruence, Dmitry)
