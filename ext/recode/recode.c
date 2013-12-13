@@ -146,10 +146,10 @@ PHP_FUNCTION(recode_string)
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
 	size_t r_len = 0, r_alen = 0;
-	int req_len, str_len;
+	zend_str_size_int req_len, str_len;
 	char *req, *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &req, &req_len, &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -187,12 +187,12 @@ PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
 	char *req;
-	int req_len;
+	zend_str_size_int req_len;
 	zval *input, *output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srr", &req, &req_len, &input, &output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Srr", &req, &req_len, &input, &output) == FAILURE) {
 	 	return;
 	}
 
