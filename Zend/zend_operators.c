@@ -2133,7 +2133,7 @@ try_again:
 			ZVAL_LONG(op1, 1);
 			break;
 		case IS_BOOL:
-			ZVAL_BOOL(op1, 1);
+			ZVAL_LONG(op1, Z_LVAL_P(op1) + 1);
 			break;
 		case IS_STRING: {
 				zend_long lval;
@@ -2203,7 +2203,7 @@ try_again:
 			Z_DVAL_P(op1) = Z_DVAL_P(op1) - 1;
 			break;
 		case IS_BOOL:
-			ZVAL_BOOL(op1, 0);
+			ZVAL_LONG(op1, Z_LVAL_P(op1) - 1);
 			break;
 		case IS_NULL:
 			ZVAL_LONG(op1, -1);
