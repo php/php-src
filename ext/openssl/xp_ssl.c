@@ -39,6 +39,7 @@
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
+php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 int php_openssl_get_x509_list_id(void);
 
 /* This implementation is very closely tied to the that of the native
@@ -58,6 +59,9 @@ typedef struct _php_openssl_netstream_data_t {
 	char *sni;
 	unsigned state_set:1;
 	unsigned _spare:31;
+	struct timeval *handshake_history;
+	int handshake_status;
+	int handshake_limit;
 } php_openssl_netstream_data_t;
 
 php_stream_ops php_openssl_socket_ops;
@@ -215,7 +219,13 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		do {
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
 
-			if (nr_bytes <= 0) {
+			if (sslsock->handshake_status < 0) {
+				/* renegotiation rate limiting triggered */
+				php_stream_xport_shutdown(stream, (stream_shutdown_t)SHUT_RDWR TSRMLS_CC);
+				nr_bytes = 0;
+				stream->eof = 1;
+				break;
+			} else if (nr_bytes <= 0) {
 				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
 				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
 				
@@ -288,6 +298,9 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 	if (sslsock->sni) {
 		pefree(sslsock->sni, php_stream_is_persistent(stream));
 	}
+	if (sslsock->handshake_history) {
+		pefree(sslsock->handshake_history, php_stream_is_persistent(stream));
+	}
 	pefree(sslsock, php_stream_is_persistent(stream));
 	
 	return 0;
@@ -303,6 +316,63 @@ static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb T
 	return php_stream_socket_ops.stat(stream, ssb TSRMLS_CC);
 }
 
+static void php_openssl_info_callback(const SSL *ssl, int where, int ret)
+{
+	zend_bool is_limit_reached = 0;
+	php_stream *stream;
+	php_openssl_netstream_data_t *sslsock;
+
+	stream = php_openssl_get_stream_from_ssl_handle(ssl);
+	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	if (!(where & SSL_CB_HANDSHAKE_START) || sslsock->is_client) {
+		return;
+	} else if (sslsock->handshake_limit == 0) {
+		if (sslsock->handshake_status == 0) {
+			sslsock->handshake_status = 1;
+		} else {
+			is_limit_reached = 1;
+		}
+	} else {
+		int i;
+		struct timeval now;
+		zend_bool carry = 0;
+
+		gettimeofday(&now, NULL);
+		for (i = sslsock->handshake_status - 1; i >= 0; i--) {
+			time_t secsago = now.tv_sec - sslsock->handshake_history[i].tv_sec;
+			if (secsago > 1 || (secsago == 1 && sslsock->handshake_history[i].tv_usec <= now.tv_usec)) {
+				sslsock->handshake_status -= 1;
+			} else if (i < sslsock->handshake_limit - 1) {
+				carry = 1;
+			} else {
+				is_limit_reached = 1;
+				break;
+			}
+
+			if (carry) {
+				sslsock->handshake_history[i + 1] = sslsock->handshake_history[i];
+			}
+		}
+
+		if (!is_limit_reached) {
+			sslsock->handshake_history[0] = now;
+			sslsock->handshake_status += 1;
+		}
+	}
+
+	if (is_limit_reached) {
+		zval *data, *arr;
+		MAKE_STD_ZVAL(data);
+		ZVAL_BOOL(data, 1);
+		MAKE_STD_ZVAL(arr);
+		array_init(arr);
+		add_assoc_zval(arr, "handshake_limit_exceeded", data);
+		stream->wrapperdata = arr;
+		sslsock->handshake_status = -1;
+	}
+}
+/* }}} */
 
 static inline int php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
@@ -311,6 +381,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 {
 	const SSL_METHOD *method;
 	long ssl_ctx_options = SSL_OP_ALL;
+	zval **handshake_limit_val;
 	
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -449,6 +520,19 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		SSL_CTX_free(sslsock->ctx);
 		sslsock->ctx = NULL;
 		return -1;
+	}
+
+	/* Enable callback for client renegotiation DoS protection */
+	if (stream->context && SUCCESS == php_stream_context_get_option(stream->context, "ssl", "max_handshake_rate", &handshake_limit_val	)) {
+		sslsock->handshake_limit = Z_LVAL_PP(handshake_limit_val);
+		if (sslsock->handshake_limit >= 0) {
+			sslsock->handshake_history = (struct timeval*)pemalloc(
+				(size_t)(sslsock->handshake_limit * sizeof(struct timeval)),
+				php_stream_is_persistent(stream)
+			);
+			sslsock->handshake_status = 0;
+			SSL_CTX_set_info_callback(sslsock->ctx, php_openssl_info_callback);
+		}
 	}
 
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
