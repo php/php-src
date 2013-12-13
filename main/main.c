@@ -2647,9 +2647,9 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 #ifdef PHP_WIN32
 /* {{{ dummy_indent
    just so that this symbol gets exported... */
-PHPAPI void dummy_indent(void)
+PHPAPI void dummy_indent(TSRMLS_D)
 {
-	zend_indent();
+	zend_indent(TSRMLS_C);
 }
 /* }}} */
 #endif

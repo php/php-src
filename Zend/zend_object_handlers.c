@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
+#include "zend_hash.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
