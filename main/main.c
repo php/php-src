@@ -1392,7 +1392,7 @@ static int php_get_configuration_directive_for_zend(const char *name, zend_str_s
 
 /* {{{ php_message_handler_for_zend
  */
-static void php_message_handler_for_zend(long message, const void *data TSRMLS_DC)
+static void php_message_handler_for_zend(php_int_t message, const void *data TSRMLS_DC)
 {
 	switch (message) {
 		case ZMSG_FAILED_INCLUDE_FOPEN:
