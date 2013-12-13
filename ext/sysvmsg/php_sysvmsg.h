@@ -52,11 +52,11 @@ PHP_FUNCTION(msg_queue_exists);
 
 typedef struct {
 	key_t key;
-	long id;
+	php_int_t id;
 } sysvmsg_queue_t;
 
 struct php_msgbuf {
-	long mtype;
+	php_int_t mtype;
 	char mtext[1];
 };
 
