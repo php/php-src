@@ -2027,7 +2027,7 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 #define UPPER_CASE 2
 #define NUMERIC 3
 
-static void increment_string(zval *str) /* {{{ */
+ZEND_API void increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
 	size_t pos=Z_STRLEN_P(str)-1;
@@ -2139,7 +2139,7 @@ try_again:
 				zend_long lval;
 				double dval;
 
-				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 1)) {
+				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
 						zend_string_release(Z_STR_P(op1));
 						if (lval == ZEND_LONG_MAX) {
@@ -2155,8 +2155,10 @@ try_again:
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
-						str_efree(Z_STRVAL_P(op1));
-						ZVAL_LONG(op1, 1);
+						zend_error(E_NOTICE, "String increment is deprecated, use str_inc() instead");
+						/* Perl style string increment */
+						increment_string(op1);
+						break;
 				}
 			}
 			break;
