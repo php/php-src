@@ -11,7 +11,7 @@ var_dump(${${$a}}('foo') == 'FOO');
 
 $a = 'b';
 $b = 'c';
-$c = 'strtoupper';
+${"1"} = 'strtoupper';
 $strtoupper = 'strtolower';
 
 var_dump(${${++$a}}('FOO') == 'foo');
