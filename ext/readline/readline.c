@@ -211,10 +211,10 @@ PHP_MINFO_FUNCTION(readline)
 PHP_FUNCTION(readline)
 {
 	char *prompt = NULL;
-	int prompt_len;
+	zend_str_size_int prompt_len;
 	char *result;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &prompt, &prompt_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!", &prompt, &prompt_len)) {
 		RETURN_FALSE;
 	}
 
@@ -238,10 +238,11 @@ PHP_FUNCTION(readline_info)
 {
 	char *what = NULL;
 	zval **value = NULL;
-	int what_len, oldval;
+	zend_str_size_int what_len;
+	int oldval;
 	char *oldstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sZ", &what, &what_len, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SZ", &what, &what_len, &value) == FAILURE) {
 		return;
 	}
 
@@ -334,9 +335,9 @@ PHP_FUNCTION(readline_info)
 PHP_FUNCTION(readline_add_history)
 {
 	char *arg;
-	int arg_len;
+	zend_str_size_int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -389,9 +390,9 @@ PHP_FUNCTION(readline_list_history)
 PHP_FUNCTION(readline_read_history)
 {
 	char *arg = NULL;
-	int arg_len;
+	zend_str_size_int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|P", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -413,9 +414,9 @@ PHP_FUNCTION(readline_read_history)
 PHP_FUNCTION(readline_write_history)
 {
 	char *arg = NULL;
-	int arg_len;
+	zend_str_size_int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|P", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -576,9 +577,9 @@ PHP_FUNCTION(readline_callback_handler_install)
 	zval *callback;
 	char *name = NULL;
 	char *prompt;
-	int prompt_len;
+	zend_str_size_int prompt_len;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &prompt, &prompt_len, &callback)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &prompt, &prompt_len, &callback)) {
 		return;
 	}
 
