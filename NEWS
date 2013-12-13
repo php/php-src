@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.8
 
 - Core:
+  . Disallowed JMP into a finally block. (Laruence)
   . Added validation of class names in the autoload process. (Dmitry)
   . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
   . Fixed bug #66041 (list() fails to unpack yielded ArrayAccess object).
@@ -41,7 +42,7 @@ PHP                                                                        NEWS
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)
 
-?? ??? 2013, PHP 5.5.7
+12 Dec 2013, PHP 5.5.7
 
 - CLI server:
   . Added some MIME types to the CLI web server (Chris Jones)
@@ -61,6 +62,10 @@ PHP                                                                        NEWS
 
 - readline
   . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
+
+- Openssl:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
 
 14 Nov 2013, PHP 5.5.6
 
