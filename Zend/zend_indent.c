@@ -47,7 +47,7 @@ static void handle_whitespace(int *emit_whitespace)
 }
 
 
-ZEND_API void zend_indent()
+ZEND_API void zend_indent(TSRMLS_D)
 {
 	zval token;
 	int token_type;
@@ -55,7 +55,6 @@ ZEND_API void zend_indent()
 	int nest_level=0;
 	int emit_whitespace[256];
 	int i;
-	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
