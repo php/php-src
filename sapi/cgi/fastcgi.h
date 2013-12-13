@@ -31,7 +31,7 @@
  */
 
 #define FCGI_HASH_FUNC(var, var_len) \
-	(UNEXPECTED(var_len < 3) ? var_len : \
+	(UNEXPECTED(var_len < 3) ? ((unsigned int)var_len) : \
 		(((unsigned int)var[3]) << 2) + \
 		(((unsigned int)var[var_len-2]) << 4) + \
 		(((unsigned int)var[var_len-1]) << 2) + \
@@ -117,16 +117,16 @@ void fcgi_shutdown(void);
 int fcgi_is_fastcgi(void);
 int fcgi_in_shutdown(void);
 void fcgi_terminate(void);
-int fcgi_listen(const char *path, int backlog);
+php_socket_t fcgi_listen(const char *path, int backlog);
 fcgi_request* fcgi_init_request(int listen_socket);
 void fcgi_destroy_request(fcgi_request *req);
-int fcgi_accept_request(fcgi_request *req);
+php_socket_t fcgi_accept_request(fcgi_request *req);
 int fcgi_finish_request(fcgi_request *req, int force_close);
 
 char* fcgi_getenv(fcgi_request *req, const char* var, zend_str_size_int var_len);
-char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
-char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
-char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
+char* fcgi_putenv(fcgi_request *req, char* var, zend_str_size_int var_len, char* val);
+char* fcgi_quick_getenv(fcgi_request *req, const char* var, zend_str_size_int var_len, unsigned int hash_value);
+char* fcgi_quick_putenv(fcgi_request *req, char* var, zend_str_size_int var_len, unsigned int hash_value, char* val);
 void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
 
 int fcgi_read(fcgi_request *req, char *str, zend_str_size_int len);

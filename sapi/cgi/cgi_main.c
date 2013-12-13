@@ -1732,7 +1732,8 @@ int main(int argc, char *argv[])
 {
 	int free_query_string = 0;
 	int exit_status = SUCCESS;
-	int cgi = 0, c, i, len;
+	int cgi = 0, c, i;
+	zend_str_size_int len;
 	zend_file_handle file_handle;
 	char *s;
 
