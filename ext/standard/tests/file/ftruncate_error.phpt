@@ -114,7 +114,7 @@ Warning: ftruncate() expects parameter 1 to be resource, object given in %s on l
 bool(false)
 -- Testing ftruncate() with closed/unset file handle --
 
-Warning: ftruncate(): 5 is not a valid stream resource in %s on line %d
+Warning: ftruncate(): %d is not a valid stream resource in %s on line %d
 bool(false)
 int(36)
 
