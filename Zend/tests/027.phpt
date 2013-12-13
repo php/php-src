@@ -17,6 +17,8 @@ $strtoupper = 'strtolower';
 var_dump(${${++$a}}('FOO') == 'foo');
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 14
 bool(true)

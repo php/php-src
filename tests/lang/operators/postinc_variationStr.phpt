@@ -17,7 +17,7 @@ foreach ($strVals as $strVal) {
    
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 --- testing: '0' ---
 int(1)
 --- testing: '65' ---
@@ -29,21 +29,37 @@ float(2.2)
 --- testing: '-7.7' ---
 float(-6.7)
 --- testing: 'abc' ---
-int(1)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(3) "abd"
 --- testing: '123abc' ---
-int(124)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(6) "123abd"
 --- testing: '123e5' ---
 float(12300001)
 --- testing: '123e5xyz' ---
-float(12300001)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(8) "123e5xza"
 --- testing: ' 123abc' ---
-int(124)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(7) " 123abd"
 --- testing: '123 abc' ---
-int(124)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(7) "123 abd"
 --- testing: '123abc ' ---
-int(124)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(7) "123abc "
 --- testing: '3.4a' ---
-float(4.4)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(4) "3.4b"
 --- testing: 'a5.9' ---
-int(1)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 11
+string(4) "a5.0"
 ===DONE===
