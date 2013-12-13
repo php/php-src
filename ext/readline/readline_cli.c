@@ -406,7 +406,7 @@ static int cli_is_valid_code(char *code, int len, char **prompt TSRMLS_DC) /* {{
 static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
 {
 	char *name;
-	ulong number;
+	php_uint_t number;
 
 	if (!(*state % 2)) {
 		zend_hash_internal_pointer_reset(ht);

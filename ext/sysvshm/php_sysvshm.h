@@ -34,13 +34,13 @@ extern zend_module_entry sysvshm_module_entry;
 
 typedef struct {
 	int le_shm;
-	long init_mem;
+	php_int_t init_mem;
 } sysvshm_module;
 
 typedef struct {
-	long key;
-	long length;
-	long next;
+	php_int_t key;
+	php_int_t length;
+	php_int_t next;
 	char mem;
 } sysvshm_chunk;
 
@@ -54,7 +54,7 @@ typedef struct {
 
 typedef struct {
 	key_t key;               /* key set by user */
-	long id;                 /* returned by shmget */
+	php_int_t id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
 } sysvshm_shm;
 

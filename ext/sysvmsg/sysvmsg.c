@@ -231,9 +231,9 @@ PHP_FUNCTION(msg_stat_queue)
    Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
-	long key;
+	php_int_t key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &key) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &key) == FAILURE)	{
 		return;
 	}
 
@@ -250,11 +250,11 @@ PHP_FUNCTION(msg_queue_exists)
    Attach to a message queue */
 PHP_FUNCTION(msg_get_queue)
 {
-	long key;
-	long perms = 0666;
+	php_int_t key;
+	php_int_t perms = 0666;
 	sysvmsg_queue_t *mq;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &key, &perms) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &key, &perms) == FAILURE)	{
 		return;
 	}
 
@@ -301,8 +301,8 @@ PHP_FUNCTION(msg_remove_queue)
 PHP_FUNCTION(msg_receive)
 {
 	zval *out_message, *queue, *out_msgtype, *zerrcode = NULL;
-	long desiredmsgtype, maxsize, flags = 0;
-	long realflags = 0;
+	php_int_t desiredmsgtype, maxsize, flags = 0;
+	php_int_t realflags = 0;
 	zend_bool do_unserialize = 1;
 	sysvmsg_queue_t *mq = NULL;
 	struct php_msgbuf *messagebuffer = NULL; /* buffer to transmit */
@@ -310,7 +310,7 @@ PHP_FUNCTION(msg_receive)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlzlz|blz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riziz|biz",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
 		return;
@@ -389,12 +389,12 @@ PHP_FUNCTION(msg_receive)
 PHP_FUNCTION(msg_send)
 {
 	zval *message, *queue, *zerror=NULL;
-	long msgtype;
+	php_int_t msgtype;
 	zend_bool do_serialize = 1, blocking = 1;
 	sysvmsg_queue_t * mq = NULL;
 	struct php_msgbuf * messagebuffer = NULL; /* buffer to transmit */
 	int result;
-	int message_len = 0;
+	php_int_t message_len = 0;
 
 	RETVAL_FALSE;
 
@@ -424,12 +424,12 @@ PHP_FUNCTION(msg_send)
 		switch (Z_TYPE_P(message)) {
 			case IS_STRING:
 				p = Z_STRVAL_P(message);
-				message_len = Z_STRLEN_P(message);
+				message_len = Z_STRSIZE_P(message);
 				break;
 
 			case IS_LONG:
 			case IS_BOOL:
-				message_len = spprintf(&p, 0, "%ld", Z_LVAL_P(message));
+				message_len = spprintf(&p, 0, "%pd", Z_LVAL_P(message));
 				break;
 
 			case IS_DOUBLE:
