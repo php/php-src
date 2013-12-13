@@ -1650,6 +1650,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	EX(call) = NULL;
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
+	EX(delayed_exception) = NULL;
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
