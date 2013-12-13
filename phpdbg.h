@@ -177,6 +177,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	phpdbg_btree *watchpoint_tree;               /* tree with watchpoints */
 	HashTable watchpoints;                       /* watchpoints */
+	zend_llist watchlist_mem;                    /* triggered watchpoints */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */

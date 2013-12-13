@@ -1291,6 +1291,13 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
+		/* check if some watchpoint was hit */
+		{
+			if (phpdbg_print_changed_zvals(TSRMLS_C) == SUCCESS) {
+				DO_INTERACTIVE();
+			}
+		}
+
 		/* search for breakpoints */
 		{
 			phpdbg_breakbase_t *brake;
