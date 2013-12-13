@@ -74,24 +74,24 @@ typedef enum {
 
 typedef struct php_imap_le_struct {
 	MAILSTREAM *imap_stream;
-	long flags;
+	php_int_t flags;
 } pils;
 
 typedef struct php_imap_mailbox_struct {
 	SIZEDTEXT text;
 	DTYPE delimiter;
-	long attributes;
+	php_int_t attributes;
 	struct php_imap_mailbox_struct *next;
 } FOBJECTLIST;
 
 typedef struct php_imap_error_struct {
 	SIZEDTEXT text;
-	long errflg;
+	php_int_t errflg;
 	struct php_imap_error_struct *next;
 } ERRORLIST;
 
 typedef struct _php_imap_message_struct {
-	unsigned long msgid;
+	php_uint_t msgid;
 	struct _php_imap_message_struct *next;
 } MESSAGELIST;
  
@@ -202,12 +202,12 @@ ZEND_BEGIN_MODULE_GLOBALS(imap)
 	FOBJECTLIST *imap_sfolder_objects_tail;
 
 	folderlist_style_t folderlist_style;
-	long status_flags;
-	unsigned long status_messages;
-	unsigned long status_recent;
-	unsigned long status_unseen;
-	unsigned long status_uidnext;
-	unsigned long status_uidvalidity;
+	php_int_t status_flags;
+	php_uint_t status_messages;
+	php_uint_t status_recent;
+	php_uint_t status_unseen;
+	php_uint_t status_uidnext;
+	php_uint_t status_uidvalidity;
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
 	zval **quota_return;
 	zval *imap_acl_list;
