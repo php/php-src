@@ -154,6 +154,8 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
 
+	zend_hash_init(&PHPDBG_G(watchpoints), 8, NULL, NULL, 0); /* TODO: dtor */
+
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
 
