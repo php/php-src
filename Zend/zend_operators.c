@@ -2155,9 +2155,14 @@ try_again:
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
-						zend_error(E_NOTICE, "String increment is deprecated, use str_inc() instead");
-						/* Perl style string increment */
-						increment_string(op1);
+						if (Z_STRLEN_P(op1)) {
+							zend_error(E_NOTICE, "String increment is deprecated, use str_inc() instead");
+							/* Perl style string increment */
+							increment_string(op1);
+						} else {
+							str_efree(Z_STRVAL_P(op1));
+							ZVAL_LONG(op1, 1);
+						}
 						break;
 				}
 			}
