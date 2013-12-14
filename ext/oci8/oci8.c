@@ -137,10 +137,10 @@ static int php_oci_connection_close(php_oci_connection * TSRMLS_DC);
 static void php_oci_spool_close(php_oci_spool *session_pool TSRMLS_DC);
 
 static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC);
-static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC);
-static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC);
-static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid TSRMLS_DC);
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, char *hash_key, int hash_key_len, int charsetid TSRMLS_DC);
+static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, zend_str_size_int dbname_len, char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *new_password, zend_str_size_int new_password_len, php_int_t session_mode TSRMLS_DC);
+static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, zend_str_size_int dbname_len, char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *new_password, zend_str_size_int new_password_len, php_int_t session_mode TSRMLS_DC);
+static php_oci_spool *php_oci_get_spool(char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *dbname, zend_str_size_int dbname_len, int charsetid TSRMLS_DC);
+static php_oci_spool *php_oci_create_spool(char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *dbname, zend_str_size_int dbname_len, char *hash_key, zend_str_size_int hash_key_len, int charsetid TSRMLS_DC);
 static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TSRMLS_DC);
 /* }}} */
 
@@ -1129,7 +1129,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 		OCIErrorGet(OCI_G(env), (ub4)1, NULL, &ora_error_code, tmp_buf, (ub4)OCI_ERROR_MAXMSG_SIZE, (ub4)OCI_HTYPE_ERROR);
 
 		if (ora_error_code) {
-			int tmp_buf_len = strlen((char *)tmp_buf);
+			zend_str_size_int tmp_buf_len = strlen((char *)tmp_buf);
 			
 			if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 				tmp_buf[tmp_buf_len - 1] = '\0';
@@ -1699,7 +1699,7 @@ sb4 php_oci_fetch_errmsg(OCIError *error_handle, text **error_buf TSRMLS_DC)
 	PHP_OCI_CALL(OCIErrorGet, (error_handle, (ub4)1, NULL, &error_code, err_buf, (ub4)PHP_OCI_ERRBUF_LEN, (ub4)OCI_HTYPE_ERROR));
 
 	if (error_code) {
-		int err_buf_len = strlen((char *)err_buf);
+		zend_str_size_int err_buf_len = strlen((char *)err_buf);
 
 		if (err_buf_len && err_buf[err_buf_len - 1] == '\n') {
 			err_buf[err_buf_len - 1] = '\0';
@@ -1751,12 +1751,12 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	php_oci_connection *connection;
 	char *username, *password;
 	char *dbname = NULL, *charset = NULL;
-	int username_len = 0, password_len = 0;
-	int dbname_len = 0, charset_len = 0;
-	long session_mode = OCI_DEFAULT;
+	zend_str_size_int username_len = 0, password_len = 0;
+	zend_str_size_int dbname_len = 0, charset_len = 0;
+	php_int_t session_mode = OCI_DEFAULT;
 
 	/* if a fourth parameter is handed over, it is the charset identifier (but is only used in Oracle 9i+) */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ssl", &username, &username_len, &password, &password_len, &dbname, &dbname_len, &charset, &charset_len, &session_mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|SSi", &username, &username_len, &password, &password_len, &dbname, &dbname_len, &charset, &charset_len, &session_mode) == FAILURE) {
 		return;
 	}
 
@@ -1792,7 +1792,7 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
  * The real connect function. Allocates all the resources needed, establishes the connection and
  * returns the result handle (or NULL)
  */
-php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, char *dbname, int dbname_len, char *charset, long session_mode, int persistent, int exclusive TSRMLS_DC)
+php_oci_connection *php_oci_do_connect_ex(char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *new_password, zend_str_size_int new_password_len, char *dbname, zend_str_size_int dbname_len, char *charset, php_int_t session_mode, int persistent, int exclusive TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
 	zend_rsrc_list_entry new_le;
@@ -1881,7 +1881,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 	smart_str_appendl_ex(&hashed_details, "**", sizeof("**") - 1, 0);
 
 	if (password_len) {
-		ulong password_hash;
+		php_uint_t password_hash;
 		password_hash = zend_inline_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&hashed_details, password_hash, 0);
 	}
@@ -2471,7 +2471,7 @@ int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC)
  *
  * Change password for the user with the username given
  */
-int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len TSRMLS_DC)
+int php_oci_password_change(php_oci_connection *connection, char *user, zend_str_size_int user_len, char *pass_old, zend_str_size_int pass_old_len, char *pass_new, zend_str_size_int pass_new_len TSRMLS_DC)
 {
 	sword errstatus;
 
@@ -2537,7 +2537,7 @@ int php_oci_server_get_version(php_oci_connection *connection, char **version TS
  *
  * Convert php_oci_out_column struct into zval
  */
-int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSRMLS_DC)
+int php_oci_column_to_zval(php_oci_out_column *column, zval *value, php_int_t mode TSRMLS_DC)
 {
 	php_oci_descriptor *descriptor;
 	ub4 lob_length;
@@ -2631,12 +2631,12 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	php_oci_out_column *column;
 	ub4 nrows = 1;
 	int i;
-	long fetch_mode = 0;
+	php_int_t fetch_mode = 0;
 
 	if (expected_args > 2) {
 		/* only for ocifetchinto BC */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|l", &z_statement, &array, &fetch_mode) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz|i", &z_statement, &array, &fetch_mode) == FAILURE) {
 			return;
 		}
 
@@ -2646,7 +2646,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	} else if (expected_args == 2) {
 		/* only for oci_fetch_array() */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_statement, &fetch_mode) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &z_statement, &fetch_mode) == FAILURE) {
 			return;
 		}
 
@@ -2815,7 +2815,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
  *
  *	 Create(alloc + Init) Session pool for the given dbname and charsetid
  */
-static php_oci_spool *php_oci_create_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, char *hash_key, int hash_key_len, int charsetid TSRMLS_DC)
+static php_oci_spool *php_oci_create_spool(char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *dbname, zend_str_size_int dbname_len, char *hash_key, zend_str_size_int hash_key_len, int charsetid TSRMLS_DC)
 {
 	php_oci_spool *session_pool = NULL;
 	zend_bool iserror = 0;
@@ -2952,7 +2952,7 @@ exit_create_spool:
  * Get Session pool for the given dbname and charsetid from the persistent list. Function called for
  * non-persistent connections.
  */
-static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *password, int password_len, char *dbname, int dbname_len, int charsetid TSRMLS_DC)
+static php_oci_spool *php_oci_get_spool(char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *dbname, zend_str_size_int dbname_len, int charsetid TSRMLS_DC)
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
@@ -2970,7 +2970,7 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 	}
 	smart_str_appendl_ex(&spool_hashed_details, "**", sizeof("**") - 1, 0);
 	if (password_len) {
-		ulong password_hash;
+		php_uint_t password_hash;
 		password_hash = zend_inline_hash_func(password, password_len);
 		smart_str_append_unsigned_ex(&spool_hashed_details, password_hash, 0);
 	}
@@ -3057,7 +3057,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
  * This function is to be deprecated in future in favour of OCISessionGet which is used in
  * php_oci_do_connect_ex
  */
-static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC)
+static int php_oci_old_create_session(php_oci_connection *connection, char *dbname, zend_str_size_int dbname_len, char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *new_password, zend_str_size_int new_password_len, php_int_t session_mode TSRMLS_DC)
 {
 	ub4 statement_cache_size = (OCI_G(statement_cache_size) > 0) ? OCI_G(statement_cache_size) : 0;
 
@@ -3240,7 +3240,7 @@ static int php_oci_old_create_session(php_oci_connection *connection, char *dbna
  *
  * Create session using client-side session pool - new norm
  */
-static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, int dbname_len, char *username, int username_len, char *password, int password_len, char *new_password, int new_password_len, int session_mode TSRMLS_DC)
+static int php_oci_create_session(php_oci_connection *connection, php_oci_spool *session_pool, char *dbname, zend_str_size_int dbname_len, char *username, zend_str_size_int username_len, char *password, zend_str_size_int password_len, char *new_password, zend_str_size_int new_password_len, php_int_t session_mode TSRMLS_DC)
 {
 	php_oci_spool *actual_spool = NULL;
 #if (OCI_MAJOR_VERSION > 10)

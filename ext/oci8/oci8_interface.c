@@ -51,12 +51,12 @@ PHP_FUNCTION(oci_define_by_name)
 {
 	zval *stmt, *var;
 	char *name;
-	int name_len;
-	long type = 0;
+	zend_str_size_int name_len;
+	php_int_t type = 0;
 	php_oci_statement *statement;
 	php_oci_define *define, *tmp_define;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSz/|i", &stmt, &name, &name_len, &var, &type) == FAILURE) {
 		return;
 	}
 
@@ -98,14 +98,14 @@ PHP_FUNCTION(oci_define_by_name)
 PHP_FUNCTION(oci_bind_by_name)
 {
 	ub2	bind_type = SQLT_CHR; /* unterminated string */
-	int name_len;
-	long maxlen = -1, type = 0;
+	zend_str_size_int name_len;
+	php_int_t maxlen = -1, type = 0;
 	char *name;
 	zval *z_statement;
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/|ll", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSz/|ii", &z_statement, &name, &name_len, &bind_var, &maxlen, &type) == FAILURE) {
 		return;
 	}
 
@@ -126,16 +126,16 @@ PHP_FUNCTION(oci_bind_by_name)
    Bind a PHP array to an Oracle PL/SQL type by name */
 PHP_FUNCTION(oci_bind_array_by_name)
 {
-	int name_len;
-	long max_item_len = -1;
-	long max_array_len = 0;
-	long type = SQLT_AFC;
+	zend_str_size_int name_len;
+	php_int_t max_item_len = -1;
+	php_int_t max_array_len = 0;
+	php_int_t type = SQLT_AFC;
 	char *name;
 	zval *z_statement;
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz/l|ll", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSz/i|ii", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
 		return;
 	}
 
@@ -189,17 +189,17 @@ PHP_FUNCTION(oci_lob_save)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *data;
-	int data_len;
-	long offset = 0;
+	zend_str_size_int data_len;
+	php_int_t offset = 0;
 	ub4 bytes_written;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &offset) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &data, &data_len, &offset) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|l", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &offset) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS|i", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &offset) == FAILURE) {
 			return;
 		}
 	}
@@ -230,22 +230,22 @@ PHP_FUNCTION(oci_lob_import)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *filename;
-	int filename_len;
+	zend_str_size_int filename_len;
 
 	if (getThis()) {
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename, &filename_len) == FAILURE) {
 #else
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &filename, &filename_len) == FAILURE) {
 #endif
 			return;
 		}
 	}
 	else {
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OP", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
 #else
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len) == FAILURE) {
 #endif
 			return;
 		}	
@@ -313,17 +313,17 @@ PHP_FUNCTION(oci_lob_read)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	long length;
+	php_int_t length;
 	char *buffer;
 	ub4 buffer_len;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &length) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol", &z_descriptor, oci_lob_class_entry_ptr, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi", &z_descriptor, oci_lob_class_entry_ptr, &length) == FAILURE) {
 			return;
 		}	
 	}
@@ -438,16 +438,16 @@ PHP_FUNCTION(oci_lob_seek)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	long offset, whence = PHP_OCI_SEEK_SET;
+	php_int_t offset, whence = PHP_OCI_SEEK_SET;
 	ub4 lob_length;
 	
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &offset, &whence) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|i", &offset, &whence) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol|l", &z_descriptor, oci_lob_class_entry_ptr, &offset, &whence) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi|i", &z_descriptor, oci_lob_class_entry_ptr, &offset, &whence) == FAILURE) {
 			return;
 		}	
 	}
@@ -518,13 +518,13 @@ PHP_FUNCTION(oci_lob_write)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	int data_len;
-	long write_len = 0;
+	zend_str_size_int data_len;
+	php_int_t write_len = 0;
 	ub4 bytes_written;
 	char *data;
 	
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &write_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &data, &data_len, &write_len) == FAILURE) {
 			return;
 		}
 		
@@ -533,7 +533,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|l", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &write_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS|i", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &write_len) == FAILURE) {
 			return;
 		}
 
@@ -605,16 +605,16 @@ PHP_FUNCTION(oci_lob_truncate)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	long trim_length = 0;
+	php_int_t trim_length = 0;
 	ub4 ub_trim_length;
 	
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &trim_length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &trim_length) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &z_descriptor, oci_lob_class_entry_ptr, &trim_length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|i", &z_descriptor, oci_lob_class_entry_ptr, &trim_length) == FAILURE) {
 			return;
 		}	
 	}
@@ -646,10 +646,10 @@ PHP_FUNCTION(oci_lob_erase)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	ub4 bytes_erased;
-	long offset = -1, length = -1;
+	php_int_t offset = -1, length = -1;
 	
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &offset, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &offset, &length) == FAILURE) {
 			return;
 		}
 
@@ -664,7 +664,7 @@ PHP_FUNCTION(oci_lob_erase)
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ll", &z_descriptor, oci_lob_class_entry_ptr, &offset, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ii", &z_descriptor, oci_lob_class_entry_ptr, &offset, &length) == FAILURE) {
 			return;
 		}
 
@@ -699,15 +699,15 @@ PHP_FUNCTION(oci_lob_flush)
 {
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
-	long flush_flag = 0;
+	php_int_t flush_flag = 0;
 	
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flush_flag) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flush_flag) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|l", &z_descriptor, oci_lob_class_entry_ptr, &flush_flag) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|i", &z_descriptor, oci_lob_class_entry_ptr, &flush_flag) == FAILURE) {
 			return;
 		}
 	}
@@ -797,9 +797,9 @@ PHP_FUNCTION(oci_lob_copy)
 {
 	zval **tmp_dest, **tmp_from, *z_descriptor_dest, *z_descriptor_from;
 	php_oci_descriptor *descriptor_dest, *descriptor_from;
-	long length = 0;
+	php_int_t length = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OO|l", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OO|i", &z_descriptor_dest, oci_lob_class_entry_ptr, &z_descriptor_from, oci_lob_class_entry_ptr, &length) == FAILURE) {
 		return;
 	}
 	
@@ -877,16 +877,16 @@ PHP_FUNCTION(oci_lob_export)
 	php_oci_descriptor *descriptor;
 	char *filename;
 	char *buffer;
-	int filename_len;
-	long start = -1, length = -1, block_length;
+	zend_str_size_int filename_len;
+	php_int_t start = -1, length = -1, block_length;
 	php_stream *stream;
 	ub4 lob_length;
 
 	if (getThis()) {
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ll", &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|ii", &filename, &filename_len, &start, &length) == FAILURE) {
 #else
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ii", &filename, &filename_len, &start, &length) == FAILURE) {
 #endif
 			return;
 		}
@@ -902,9 +902,9 @@ PHP_FUNCTION(oci_lob_export)
 	}
 	else {
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Op|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OP|ii", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
 #else
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|ll", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS|ii", &z_descriptor, oci_lob_class_entry_ptr, &filename, &filename_len, &start, &length) == FAILURE) {
 #endif
 			return;
 		}
@@ -1009,16 +1009,16 @@ PHP_FUNCTION(oci_lob_write_temporary)
 	zval **tmp, *z_descriptor = getThis();
 	php_oci_descriptor *descriptor;
 	char *data;
-	int data_len;
-	long type = OCI_TEMP_CLOB;
+	zend_str_size_int data_len;
+	php_int_t type = OCI_TEMP_CLOB;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &data, &data_len, &type) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|l", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS|i", &z_descriptor, oci_lob_class_entry_ptr, &data, &data_len, &type) == FAILURE) {
 			return;
 		}	
 	}
@@ -1071,9 +1071,9 @@ PHP_FUNCTION(oci_new_descriptor)
 	zval *z_connection;
 	php_oci_connection *connection;
 	php_oci_descriptor *descriptor;
-	long type = OCI_DTYPE_LOB;
+	php_int_t type = OCI_DTYPE_LOB;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_connection, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &z_connection, &type) == FAILURE) {
 		return;
 	}
 
@@ -1318,9 +1318,9 @@ PHP_FUNCTION(oci_execute)
 {
 	zval *z_statement;
 	php_oci_statement *statement;
-	long mode = OCI_COMMIT_ON_SUCCESS;
+	php_int_t mode = OCI_COMMIT_ON_SUCCESS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &z_statement, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &z_statement, &mode) == FAILURE) {
 		return;
 	}
 
@@ -1392,9 +1392,9 @@ PHP_FUNCTION(oci_fetch_all)
 	zval ***outarrs;
 	ub4 nrows = 1;
 	int i;
-	long rows = 0, flags = 0, skip = 0, maxrows = -1;
+	php_int_t rows = 0, flags = 0, skip = 0, maxrows = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|lll", &z_statement, &array, &skip, &maxrows, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz/|iii", &z_statement, &array, &skip, &maxrows, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1694,9 +1694,9 @@ PHP_FUNCTION(oci_parse)
 	php_oci_connection *connection;
 	php_oci_statement *statement;
 	char *query;
-	int query_len;
+	zend_str_size_int query_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &query, &query_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &query, &query_len) == FAILURE) {
 		return;
 	}
 
@@ -1717,9 +1717,9 @@ PHP_FUNCTION(oci_set_prefetch)
 {
 	zval *z_statement;
 	php_oci_statement *statement;
-	long size;
+	php_int_t size;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &z_statement, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &z_statement, &size) == FAILURE) {
 		return;
 	}
 
@@ -1744,10 +1744,10 @@ PHP_FUNCTION(oci_set_client_identifier)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *client_id;
-	int client_id_len;
+	zend_str_size_int client_id_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_id, &client_id_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &client_id, &client_id_len) == FAILURE) {
 		return;
 	}
 
@@ -1794,9 +1794,9 @@ PHP_FUNCTION(oci_set_edition)
 {
 #if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	char *edition;
-	int edition_len;
+	zend_str_size_int edition_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &edition, &edition_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &edition, &edition_len) == FAILURE) {
 		return;
 	}
 
@@ -1828,10 +1828,10 @@ PHP_FUNCTION(oci_set_module_name)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *module;
-	int module_len;
+	zend_str_size_int module_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &module, &module_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &module, &module_len) == FAILURE) {
 		return;
 	}
 
@@ -1860,10 +1860,10 @@ PHP_FUNCTION(oci_set_action)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *action;
-	int action_len;
+	zend_str_size_int action_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &action, &action_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &action, &action_len) == FAILURE) {
 		return;
 	}
 
@@ -1892,10 +1892,10 @@ PHP_FUNCTION(oci_set_client_info)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *client_info;
-	int client_info_len;
+	zend_str_size_int client_info_len;
 	sword errstatus;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_info, &client_info_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &client_info, &client_info_len) == FAILURE) {
 		return;
 	}
 
@@ -1925,9 +1925,9 @@ PHP_FUNCTION(oci_set_db_operation)
 	zval *z_connection;
 	php_oci_connection *connection;
 	char *dbop_name;
-	int dbop_name_len;
+	zend_str_size_int dbop_name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
 		return;
 	}
 
@@ -1954,7 +1954,7 @@ PHP_FUNCTION(oci_password_change)
 {
 	zval *z_connection;
 	char *user, *pass_old, *pass_new, *dbname;
-	int user_len, pass_old_len, pass_new_len, dbname_len;
+	zend_str_size_int user_len, pass_old_len, pass_new_len, dbname_len;
 	php_oci_connection *connection;
 
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || (PHP_MAJOR_VERSION < 5)
@@ -1965,7 +1965,7 @@ PHP_FUNCTION(oci_password_change)
 	}
 #endif
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rsss", &z_connection, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "rSSS", &z_connection, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
 		if (!user_len) {
@@ -1985,7 +1985,7 @@ PHP_FUNCTION(oci_password_change)
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
-	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "ssss", &dbname, &dbname_len, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
+	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "SSSS", &dbname, &dbname_len, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 
 		if (!user_len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "username cannot be empty");
@@ -2190,15 +2190,15 @@ PHP_FUNCTION(oci_collection_append)
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
 	char *value;
-	int value_len;
+	zend_str_size_int value_len;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &value, &value_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &value, &value_len) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os", &z_collection, oci_coll_class_entry_ptr, &value, &value_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS", &z_collection, oci_coll_class_entry_ptr, &value, &value_len) == FAILURE) {
 			return;
 		}	
 	}
@@ -2223,16 +2223,16 @@ PHP_FUNCTION(oci_collection_element_get)
 {
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
-	long element_index;
+	php_int_t element_index;
 	zval *value;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &element_index) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &element_index) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol", &z_collection, oci_coll_class_entry_ptr, &element_index) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi", &z_collection, oci_coll_class_entry_ptr, &element_index) == FAILURE) {
 			return;
 		}	
 	}
@@ -2298,17 +2298,17 @@ PHP_FUNCTION(oci_collection_element_assign)
 {
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
-	int value_len;
-	long element_index;
+	zend_str_size_int value_len;
+	php_int_t element_index;
 	char *value;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element_index, &value, &value_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS", &element_index, &value, &value_len) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ols", &z_collection, oci_coll_class_entry_ptr, &element_index, &value, &value_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OiS", &z_collection, oci_coll_class_entry_ptr, &element_index, &value, &value_len) == FAILURE) {
 			return;
 		}	
 	}
@@ -2361,7 +2361,7 @@ PHP_FUNCTION(oci_collection_max)
 {
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
-	long max;
+	php_int_t max;
 	
 	if (!getThis()) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &z_collection, oci_coll_class_entry_ptr) == FAILURE) {
@@ -2389,15 +2389,15 @@ PHP_FUNCTION(oci_collection_trim)
 {
 	zval **tmp, *z_collection = getThis();
 	php_oci_collection *collection;
-	long trim_size;
+	php_int_t trim_size;
 
 	if (getThis()) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &trim_size) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &trim_size) == FAILURE) {
 			return;
 		}
 	}
 	else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol", &z_collection, oci_coll_class_entry_ptr, &trim_size) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Oi", &z_collection, oci_coll_class_entry_ptr, &trim_size) == FAILURE) {
 			return;
 		}	
 	}
@@ -2424,9 +2424,9 @@ PHP_FUNCTION(oci_new_collection)
 	php_oci_connection *connection;
 	php_oci_collection *collection;
 	char *tdo, *schema = NULL;
-	int tdo_len, schema_len = 0;
+	zend_str_size_int tdo_len, schema_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &z_connection, &tdo, &tdo_len, &schema, &schema_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|S", &z_connection, &tdo, &tdo_len, &schema, &schema_len) == FAILURE) {
 		return;
 	}
 	
