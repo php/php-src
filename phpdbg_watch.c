@@ -41,7 +41,7 @@ typedef struct {
 	addr = (addr << 1) + !!(n); \
 	branch = branch->branches[!!(n)];
 
-void phpdbg_watch_mem_dtor(void *llist_data) {
+static void phpdbg_watch_mem_dtor(void *llist_data) {
 	void *page = (*(phpdbg_watch_memdump **)llist_data)->page;
 	size_t size = (*(phpdbg_watch_memdump **)llist_data)->size;
 
@@ -65,15 +65,15 @@ void phpdbg_setup_watchpoints(TSRMLS_D) {
 	zend_llist_init(&PHPDBG_G(watchlist_mem), sizeof(void *), phpdbg_watch_mem_dtor, 0);
 }
 
-void *phpdbg_get_page_boundary(void *addr) {
+static inline void *phpdbg_get_page_boundary(void *addr) {
 	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
 }
 
-size_t phpdbg_get_total_page_size(void *addr, size_t size) {
+static inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
 	return (size_t)phpdbg_get_page_boundary(addr + size - 1) - (size_t)phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
 }
 
-phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *watch_addr TSRMLS_DC) {
+static phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *watch_addr TSRMLS_DC) {
 	phpdbg_watchpoint_t *watch;
 	phpdbg_btree *branch = PHPDBG_G(watchpoint_tree);
 	int i = sizeof(void *) * 8 - 1, last_superior_i = -1;
@@ -159,7 +159,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 	return SUCCESS;
 }
 
-int phpdbg_print_changed_zval(void *llist_data) {
+static int phpdbg_print_changed_zval(void *llist_data) {
 	phpdbg_watch_memdump *dump = *(phpdbg_watch_memdump **)llist_data;
 	void *oldPtr;
 	size_t opline;
@@ -249,7 +249,7 @@ int phpdbg_print_changed_zvals(TSRMLS_D) {
 	return PHPDBG_G(watchpoint_hit)?SUCCESS:FAILURE;
 }
 
-void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+static void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_btree **branch = &PHPDBG_G(watchpoint_tree);
 	int i = sizeof(void *) * 8 - 1;
 
@@ -272,7 +272,7 @@ void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	(*branch)->watchpoint = watch;
 }
 
-void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch TSRMLS_DC) {
+static void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	int m;
 
 	watch->addr.ptr = addr;
@@ -288,7 +288,7 @@ void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t 
 	}
 }
 
-void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch TSRMLS_DC) {
+static void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_create_addr_watchpoint(zv, sizeof(zval), watch TSRMLS_CC);
 	watch->type = WATCH_ON_ZVAL;
 }
