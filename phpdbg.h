@@ -68,6 +68,7 @@
 
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 
 #ifdef ZTS
@@ -161,12 +162,6 @@
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
 /* {{{ structs */
-typedef union _phpdbg_btree phpdbg_btree;
-union _phpdbg_btree {
-	phpdbg_btree *branches[2];
-	phpdbg_watchpoint_t *watchpoint;
-};
-
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
 	HashTable registered;                        /* registered */
@@ -175,7 +170,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
 
-	phpdbg_btree *watchpoint_tree;               /* tree with watchpoints */
+	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	HashTable watchpoints;                       /* watchpoints */
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */

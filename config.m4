@@ -18,7 +18,7 @@ if test "$PHP_PHPDBG" != "no"; then
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c"
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
