@@ -182,12 +182,12 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	php_int_t         cwd_len;
 	int         cwd_init;
 	char        *openssl_privatekey;
-	int         openssl_privatekey_len;
+	zend_str_size_int         openssl_privatekey_len;
 	/* phar_get_archive cache */
 	char*       last_phar_name;
-	int         last_phar_name_len;
+	zend_str_size_int         last_phar_name_len;
 	char*       last_alias;
-	int         last_alias_len;
+	zend_str_size_int         last_alias_len;
 	phar_archive_data* last_phar;
 	HashTable mime_types;
 ZEND_END_MODULE_GLOBALS(phar)
@@ -292,7 +292,7 @@ struct _phar_archive_data {
 	char                     *ext;
 	zend_str_size_int                      ext_len;
 	char                     *alias;
-	int                      alias_len;
+	zend_str_size_int                      alias_len;
 	char                     version[12];
 	size_t                   internal_file_start;
 	size_t                   halt_offset;
@@ -500,7 +500,7 @@ union _phar_entry_object {
 #endif
 
 #ifndef PHAR_MAIN
-extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
+extern char *(*phar_save_resolve_path)(const char *filename, zend_str_size_int filename_len TSRMLS_DC);
 #endif
 
 BEGIN_EXTERN_C()

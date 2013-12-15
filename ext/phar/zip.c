@@ -45,7 +45,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
 		phar_zip_extra_field_header header;
 		phar_zip_unix3 unix3;
 	} h;
-	int read;
+	zend_str_size_int read;
 
 	do {
 		if (sizeof(h.header) != php_stream_read(fp, (char *) &h.header, sizeof(h.header))) {

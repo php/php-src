@@ -62,7 +62,7 @@ static void phar_mung_server_vars(char *fname, char *entry, zend_str_size_int en
 	zval **stuff;
 	char *path_info;
 	zend_str_size_int basename_len = strlen(basename);
-	int code;
+	zend_str_size_int code;
 	zval *temp;
 
 	/* "tweak" $_SERVER variables requested in earlier call to Phar::mungServer() */
@@ -1413,7 +1413,7 @@ struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
 	char *b;
-	uint l;
+	zend_str_size_uint l;
 	zval *ret;
 	int count;
 	php_stream *fp;
@@ -3091,7 +3091,7 @@ PHP_METHOD(Phar, getSignature)
 
 	if (phar_obj->arc.archive->signature) {
 		char *unknown;
-		int unknown_len;
+		zend_str_size_int unknown_len;
 
 		array_init(return_value);
 		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len, 1);
@@ -3623,7 +3623,7 @@ PHP_METHOD(Phar, offsetGet)
 
 /* {{{ add a file within the phar archive from a string or resource
  */
-static void phar_add_file(phar_archive_data **pphar, char *filename, int filename_len, char *cont_str, int cont_len, zval *zresource TSRMLS_DC)
+static void phar_add_file(phar_archive_data **pphar, char *filename, zend_str_size_int filename_len, char *cont_str, zend_str_size_int cont_len, zval *zresource TSRMLS_DC)
 {
 	char *error;
 	size_t contents_len;
@@ -4110,10 +4110,10 @@ PHP_METHOD(Phar, delMetadata)
 	php_check_open_basedir(filename TSRMLS_CC)
 #endif
 
-static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, int dest_len, char **error TSRMLS_DC) /* {{{ */
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, zend_str_size_int dest_len, char **error TSRMLS_DC) /* {{{ */
 {
 	php_stream_statbuf ssb;
-	int len;
+	zend_str_size_int len;
 	php_stream *fp;
 	char *fullpath;
 	const char *slash;
