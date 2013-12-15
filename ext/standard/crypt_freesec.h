@@ -4,25 +4,12 @@
 #define _CRYPT_FREESEC_H
 
 #if PHP_WIN32
-# include "win32/php_stdint.h"
 # ifndef inline
 # define inline __inline
 # endif
-#else
-# include "php_config.h"
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# elif HAVE_STDINT_H
-#  include <stdint.h>
-# endif
-# ifndef HAVE_UINT32_T
-#  if SIZEOF_INT == 4
-typedef unsigned int uint32_t;
-#  elif SIZEOF_LONG == 4
-typedef unsigned long int uint32_t;
-#  endif
-# endif
 #endif
+
+#include "php_stdint.h"
 
 #define MD5_HASH_MAX_LEN 120
 

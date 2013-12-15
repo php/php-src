@@ -119,6 +119,10 @@ SOURCE=.\zend_API.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ast.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_builtin_functions.c
 # End Source File
 # Begin Source File
@@ -428,6 +432,10 @@ SOURCE=.\zend_ts_hash.h
 # Begin Source File
 
 SOURCE=.\zend_variables.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_virtual_cwd.c
 # End Source File
 # End Group
 # Begin Group "Parsers"

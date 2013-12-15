@@ -849,8 +849,7 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor);
 gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor);
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor);
-
-
+gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 typedef enum {
 	GD_AFFINE_TRANSLATE = 0,

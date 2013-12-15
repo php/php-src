@@ -423,7 +423,8 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC);
+	TSRMLS_FETCH();
+	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 /* }}} */
 
@@ -533,13 +534,13 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (fix_save) {
 						save--;
 					}
-					if (inline_change && !IS_INTERNED(save)) {
-						efree(save);
+					if (inline_change) {
+						str_efree(save);
 					}
 					save = NULL;
 				}
-				if (inline_change && save && save != actual && !IS_INTERNED(save)) {
-					efree(save);
+				if (inline_change && save && save != actual) {
+					str_efree(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 				p->type = IS_STRING;
@@ -551,7 +552,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			}
 		} else {
 			if (inline_change) {
-				STR_FREE(Z_STRVAL_P(p));
+				str_efree(Z_STRVAL_P(p));
 			}
 			*p = const_value;
 		}
@@ -591,7 +592,10 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
+			if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
+				zend_ast_evaluate(&const_value, *(zend_ast **)str_index, scope TSRMLS_CC);
+				zend_ast_destroy(*(zend_ast **)str_index);
+			} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
 				char *actual;
 				const char *save = str_index;
 				if ((colon = (char*)zend_memrchr(str_index, ':', str_index_len - 3))) {
@@ -659,6 +663,15 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		}
 		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
+	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		SEPARATE_ZVAL_IF_NOT_REF(pp);
+		p = *pp;
+
+		zend_ast_evaluate(&const_value, Z_AST_P(p), scope TSRMLS_CC);
+		if (inline_change) {
+			zend_ast_destroy(Z_AST_P(p));
+		}
+		ZVAL_COPY_VALUE(p, &const_value);
 	}
 	return 0;
 }
@@ -952,9 +965,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-		if(EXPECTED(zend_execute_internal == NULL)) {
+		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
-			((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+			EX(function_state).function->internal_function.handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		} else {
 			zend_execute_internal(&execute_data, fci, 1 TSRMLS_CC);
 		}

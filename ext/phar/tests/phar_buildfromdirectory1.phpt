@@ -7,7 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory.phar');
+$phar = new Phar(dirname(__FILE__) . '/buildfromdirectory1.phar');
 try {
 	ini_set('phar.readonly', 1);
 	$phar->buildFromDirectory(1);
@@ -19,7 +19,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/buildfromdirectory.phar');
+unlink(dirname(__FILE__) . '/buildfromdirectory1.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

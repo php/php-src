@@ -365,7 +365,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(iodbc,,
-[  --with-iodbc[=DIR]        Include iODBC support [/usr/local]])
+[  --with-iodbc[=DIR]        Include iODBC support])
 
   if test "$PHP_IODBC" != "no"; then
     AC_MSG_CHECKING(for iODBC support)

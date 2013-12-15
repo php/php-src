@@ -893,9 +893,11 @@ static void php_cli_server_poller_remove(php_cli_server_poller *poller, int mode
 
 static int php_cli_server_poller_poll(php_cli_server_poller *poller, const struct timeval *tv) /* {{{ */
 {
+	struct timeval t = *tv;
+
 	memmove(&poller->active.rfds, &poller->rfds, sizeof(poller->rfds));
 	memmove(&poller->active.wfds, &poller->wfds, sizeof(poller->wfds));
-	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, (struct timeval *)tv);
+	return php_select(poller->max_fd + 1, &poller->active.rfds, &poller->active.wfds, NULL, &t);
 } /* }}} */
 
 static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, void *opaque, int(*callback)(void *, int fd, int events)) /* {{{ */
@@ -1840,8 +1842,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->request_uri = client->request.request_uri;
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
-	request_info->post_data = client->request.content;
-	request_info->content_length = request_info->post_data_length = client->request.content_len;
+	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
 	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
 		request_info->content_type = *val;

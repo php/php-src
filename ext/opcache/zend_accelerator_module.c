@@ -28,7 +28,7 @@
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
 #include "SAPI.h"
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 

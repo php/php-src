@@ -56,6 +56,7 @@ $handler = new MySession(2);
 session_set_save_handler($handler);
 session_start();
 
+$_SESSION['abc'] = 'xyz';
 // implicit close (called by shutdown function)
 echo "done\n";
 ob_end_flush();
@@ -69,6 +70,6 @@ ob_end_flush();
 (#2) constructor called
 (#1) destructor called
 done
-(#2) writing %s = foo|s:3:"bar";
+(#2) writing %s = foo|s:3:"bar";abc|s:3:"xyz";
 (#2) closing %s
 (#2) destructor called

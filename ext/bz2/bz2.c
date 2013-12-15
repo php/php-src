@@ -192,7 +192,7 @@ php_stream_ops php_stream_bz2io_ops = {
 
 /* {{{ Bzip2 stream openers */
 PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, 
-														char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC)
+														const char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC)
 {
 	struct php_bz2_stream_data_t *self;
 	
@@ -205,8 +205,8 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 }
 
 PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
-											char *path,
-											char *mode,
+											const char *path,
+											const char *mode,
 											int options,
 											char **opened_path,
 											php_stream_context *context STREAMS_DC TSRMLS_DC)

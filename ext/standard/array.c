@@ -127,6 +127,9 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("COUNT_NORMAL", COUNT_NORMAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("COUNT_RECURSIVE", COUNT_RECURSIVE, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -830,7 +833,7 @@ PHP_FUNCTION(end)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -853,7 +856,7 @@ PHP_FUNCTION(prev)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -876,7 +879,7 @@ PHP_FUNCTION(next)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -899,7 +902,7 @@ PHP_FUNCTION(reset)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -918,7 +921,8 @@ PHP_FUNCTION(current)
 	if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
-	RETURN_ZVAL(*entry, 1, 0);
+
+	RETURN_ZVAL_FAST(*entry);
 }
 /* }}} */
 
@@ -958,7 +962,7 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
-				RETVAL_ZVAL(*result, 1, 0);
+				RETVAL_ZVAL_FAST(*result);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -978,7 +982,7 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		RETVAL_ZVAL(*min, 1, 0);	
+		RETVAL_ZVAL_FAST(*min);
 	}
 
 	if (args) {
@@ -1009,7 +1013,7 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
-				RETVAL_ZVAL(*result, 1, 0);
+				RETVAL_ZVAL_FAST(*result);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1029,7 +1033,7 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		RETVAL_ZVAL(*max, 1, 0);
+		RETVAL_ZVAL_FAST(*max);
 	}
 	
 	if (args) {
@@ -1517,13 +1521,17 @@ PHP_FUNCTION(array_fill)
 		return;
 	}
 
-	if (num < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
+	if (num < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements can't be negative");
 		RETURN_FALSE;
 	}
 
 	/* allocate an array for return */
 	array_init_size(return_value, num);
+
+	if (num == 0) {
+		return;
+	}
 
 	num--;
 	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
@@ -1955,7 +1963,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 	}
 	zend_hash_get_current_data(Z_ARRVAL_P(stack), (void **)&val);
-	RETVAL_ZVAL(*val, 1, 0);
+	RETVAL_ZVAL_FAST(*val);
 
 	/* Delete the first or last value */
 	zend_hash_get_current_key_ex(Z_ARRVAL_P(stack), &key, &key_len, &index, 0, NULL);
@@ -4204,9 +4212,11 @@ PHP_FUNCTION(array_filter)
 {
 	zval *array;
 	zval **operand;
-	zval **args[1];
+	zval **args[2];
 	zval *retval = NULL;
+    zval *key = NULL;
 	zend_bool have_callback = 0;
+	long use_type = 0;
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -4214,7 +4224,7 @@ PHP_FUNCTION(array_filter)
 	ulong num_key;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fl", &array, &fci, &fci_cache, &use_type) == FAILURE) {
 		return;
 	}
 
@@ -4227,23 +4237,54 @@ PHP_FUNCTION(array_filter)
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval_ptr_ptr = &retval;
-		fci.param_count = 1;
+
+		if (use_type == ARRAY_FILTER_USE_BOTH) {
+			fci.param_count = 2;
+			args[1] = &key;
+		} else {
+			fci.param_count = 1;
+			if (use_type == ARRAY_FILTER_USE_KEY) {
+				args[0] = &key;
+			}
+		}
 	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&operand, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 	) {
+		int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos);
+
 		if (have_callback) {
-			args[0] = operand;
+			if (use_type) {
+				MAKE_STD_ZVAL(key);
+				/* Set up the key */
+				switch (key_type) {
+					case HASH_KEY_IS_LONG:
+						Z_TYPE_P(key) = IS_LONG;
+						Z_LVAL_P(key) = num_key;
+						break;
+
+					case HASH_KEY_IS_STRING:
+						ZVAL_STRINGL(key, string_key, string_key_len - 1, 1);
+						break;
+				}
+			}
+
+			if (use_type != ARRAY_FILTER_USE_KEY) {
+				args[0] = operand;
+			}
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-				if (!zend_is_true(retval)) {
-					zval_ptr_dtor(&retval);
+				int retval_true = zend_is_true(retval);
+
+				zval_ptr_dtor(&retval);
+				if (use_type) {
+					zval_ptr_dtor(&key);
+				}
+				if (!retval_true) {
 					continue;
-				} else {
-					zval_ptr_dtor(&retval);
 				}
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
@@ -4254,7 +4295,7 @@ PHP_FUNCTION(array_filter)
 		}
 
 		zval_add_ref(operand);
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos)) {
+		switch (key_type) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, operand, sizeof(zval *), NULL);
 				break;

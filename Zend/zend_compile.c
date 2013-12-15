@@ -26,7 +26,7 @@
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
 
@@ -61,11 +61,8 @@
 	} while (0)
 
 #define CALCULATE_LITERAL_HASH(num) do { \
-		if (IS_INTERNED(Z_STRVAL(CONSTANT(num)))) { \
-			Z_HASH_P(&CONSTANT(num)) = INTERNED_HASH(Z_STRVAL(CONSTANT(num))); \
-		} else { \
-			Z_HASH_P(&CONSTANT(num)) = zend_hash_func(Z_STRVAL(CONSTANT(num)), Z_STRLEN(CONSTANT(num))+1); \
-		} \
+		zval *c = &CONSTANT(num); \
+		Z_HASH_P(c) = str_hash(Z_STRVAL_P(c), Z_STRLEN_P(c)); \
 	} while (0)
 
 #define GET_CACHE_SLOT(literal) do { \
@@ -107,9 +104,7 @@ ZEND_API zend_executor_globals executor_globals;
 
 static void zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
-	if (!IS_INTERNED(property_info->name)) {
-		property_info->name = estrndup(property_info->name, property_info->name_length);
-	}
+	property_info->name = str_estrndup(property_info->name, property_info->name_length);
 	if (property_info->doc_comment) {
 		property_info->doc_comment = estrndup(property_info->doc_comment, property_info->doc_comment_len);
 	}
@@ -118,9 +113,7 @@ static void zend_duplicate_property_info(zend_property_info *property_info) /* {
 
 static void zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
-	if (!IS_INTERNED(property_info->name)) {
-		property_info->name = zend_strndup(property_info->name, property_info->name_length);
-	}
+	property_info->name = str_strndup(property_info->name, property_info->name_length);
 }
 /* }}} */
 
@@ -153,12 +146,12 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 	}
 
 	/* NULL, name length, filename length, last accepting char position length */
-	result->value.str.len = 1+name_length+strlen(filename)+char_pos_len;
+	Z_STRLEN_P(result) = 1+name_length+strlen(filename)+char_pos_len;
 
  	/* must be binary safe */
- 	result->value.str.val = (char *) safe_emalloc(result->value.str.len, 1, 1);
- 	result->value.str.val[0] = '\0';
- 	sprintf(result->value.str.val+1, "%s%s%s", name, filename, char_pos_buf);
+ 	Z_STRVAL_P(result) = (char *) safe_emalloc(Z_STRLEN_P(result), 1, 1);
+ 	Z_STRVAL_P(result)[0] = '\0';
+ 	sprintf(Z_STRVAL_P(result)+1, "%s%s%s", name, filename, char_pos_buf);
 
 	result->type = IS_STRING;
 	Z_SET_REFCOUNT_P(result, 1);
@@ -204,6 +197,9 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(in_namespace) = 0;
 	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
+	CG(current_import_function) = NULL;
+	CG(current_import_const) = NULL;
+	zend_hash_init(&CG(const_filenames), 0, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
@@ -242,6 +238,7 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
+	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
 }
 /* }}} */
@@ -424,12 +421,16 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 	lc_literal = zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
 	CALCULATE_LITERAL_HASH(lc_literal);
 
-	ns_separator = (const char*)zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv)) + 1;
-	lc_len = Z_STRLEN_P(zv) - (ns_separator - Z_STRVAL_P(zv));
-	lc_name = zend_str_tolower_dup(ns_separator, lc_len);
-	ZVAL_STRINGL(&c, lc_name, lc_len, 0);
-	lc_literal = zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
-	CALCULATE_LITERAL_HASH(lc_literal);
+	ns_separator = (const char*)zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv));
+
+	if (ns_separator != NULL) {
+		ns_separator += 1;
+		lc_len = Z_STRLEN_P(zv) - (ns_separator - Z_STRVAL_P(zv));
+		lc_name = zend_str_tolower_dup(ns_separator, lc_len);
+		ZVAL_STRINGL(&c, lc_name, lc_len, 0);
+		lc_literal = zend_add_literal(CG(active_op_array), &c TSRMLS_CC);
+		CALCULATE_LITERAL_HASH(lc_literal);
+	}
 
 	return ret;
 }
@@ -657,21 +658,21 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_llist *fetch_list_ptr;
 
 	if (varname->op_type == IS_CONST) {
-		ulong hash = 0;
+		ulong hash;
 
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
 			convert_to_string(&varname->u.constant);
-		} else if (IS_INTERNED(Z_STRVAL(varname->u.constant))) {
-			hash = INTERNED_HASH(Z_STRVAL(varname->u.constant));
 		}
-		if (!zend_is_auto_global_quick(varname->u.constant.value.str.val, varname->u.constant.value.str.len, hash TSRMLS_CC) &&
-		    !(varname->u.constant.value.str.len == (sizeof("this")-1) &&
-		      !memcmp(varname->u.constant.value.str.val, "this", sizeof("this"))) &&
+
+		hash = str_hash(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant));
+		if (!zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), hash TSRMLS_CC) &&
+		    !(Z_STRLEN(varname->u.constant) == (sizeof("this")-1) &&
+		      !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this"))) &&
 		    (CG(active_op_array)->last == 0 ||
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
-			result->u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, hash TSRMLS_CC);
-			varname->u.constant.value.str.val = (char*)CG(active_op_array)->vars[result->u.op.var].name;
+			result->u.op.var = lookup_cv(CG(active_op_array), Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), hash TSRMLS_CC);
+			Z_STRVAL(varname->u.constant) = (char*)CG(active_op_array)->vars[result->u.op.var].name;
 			result->EA = 0;
 			return;
 		}
@@ -694,7 +695,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	if (varname->op_type == IS_CONST) {
 		CALCULATE_LITERAL_HASH(opline_ptr->op1.constant);
-		if (zend_is_auto_global_quick(varname->u.constant.value.str.val, varname->u.constant.value.str.len, Z_HASH_P(&CONSTANT(opline_ptr->op1.constant)) TSRMLS_CC)) {
+		if (zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), Z_HASH_P(&CONSTANT(opline_ptr->op1.constant)) TSRMLS_CC)) {
 			opline_ptr->extended_value = ZEND_FETCH_GLOBAL;
 		}
 	}
@@ -723,7 +724,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name TSRMLS_CC);
 		class_node = *class_name;
 	} else {
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
@@ -882,9 +883,9 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 		method_type = "Abstract";
 	}
 
-	if (modifiers->u.constant.value.lval & ZEND_ACC_ABSTRACT) {
-		if(modifiers->u.constant.value.lval & ZEND_ACC_PRIVATE) {
-			zend_error(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+	if (Z_LVAL(modifiers->u.constant) & ZEND_ACC_ABSTRACT) {
+		if(Z_LVAL(modifiers->u.constant) & ZEND_ACC_PRIVATE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
 		}
 		if (Z_LVAL(body->u.constant) == ZEND_ACC_ABSTRACT) {
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -894,11 +895,11 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 			SET_UNUSED(opline->op2);
 		} else {
 			/* we had code in the function body */
-			zend_error(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body", method_type, CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
 		}
 	} else {
-		if (body->u.constant.value.lval == ZEND_ACC_ABSTRACT) {
-			zend_error(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+		if (Z_LVAL(body->u.constant) == ZEND_ACC_ABSTRACT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body", CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
 		}
 	}
 }
@@ -958,7 +959,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 
 	if (variable->op_type == IS_CV) {
 		if (variable->u.op.var == CG(active_op_array)->this_var) {
-			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 		}
 	} else if (variable->op_type == IS_VAR) {
 		int n = 0;
@@ -1004,7 +1005,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 					GET_NODE(result, last_op->result);
 					return;
 				} else if (opline_is_fetch_this(last_op TSRMLS_CC)) {
-					zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 				} else {
 					break;
 				}
@@ -1028,7 +1029,7 @@ void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRM
 
 	if (lvar->op_type == IS_CV) {
 		if (lvar->u.op.var == CG(active_op_array)->this_var) {
- 			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+ 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 		}
 	} else if (lvar->op_type == IS_VAR) {
 		int last_op_number = get_next_op_number(CG(active_op_array));
@@ -1036,7 +1037,7 @@ void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRM
 		if (last_op_number > 0) {
 			opline = &CG(active_op_array)->opcodes[last_op_number-1];
 			if (opline_is_fetch_this(opline TSRMLS_CC)) {
-	 			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+	 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
  		}
  	}
@@ -1278,10 +1279,10 @@ void zend_check_writable_variable(const znode *variable) /* {{{ */
 	zend_uint type = variable->EA;
 
 	if (type & ZEND_PARSED_METHOD_CALL) {
-		zend_error(E_COMPILE_ERROR, "Can't use method return value in write context");
+		zend_error_noreturn(E_COMPILE_ERROR, "Can't use method return value in write context");
 	}
 	if (type == ZEND_PARSED_FUNCTION_CALL) {
-		zend_error(E_COMPILE_ERROR, "Can't use function return value in write context");
+		zend_error_noreturn(E_COMPILE_ERROR, "Can't use function return value in write context");
 	}
 }
 /* }}} */
@@ -1354,7 +1355,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 			switch (type) {
 				case BP_VAR_R:
 					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2_type == IS_UNUSED) {
-						zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 					}
 					opline->opcode -= 3;
 					break;
@@ -1365,7 +1366,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 					break;
 				case BP_VAR_IS:
 					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2_type == IS_UNUSED) {
-						zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 					}
 					opline->opcode += 6; /* 3+3 */
 					break;
@@ -1375,7 +1376,7 @@ void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS
 					break;
 				case BP_VAR_UNSET:
 					if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2_type == IS_UNUSED) {
-						zend_error(E_COMPILE_ERROR, "Cannot use [] for unsetting");
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for unsetting");
 					}
 					opline->opcode += 12; /* 3+3+3+3 */
 					break;
@@ -1503,22 +1504,22 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 {
 	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_PPP_MASK)
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_PPP_MASK)) {
-		zend_error(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
 	}
 	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_ABSTRACT)
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_ABSTRACT)) {
-		zend_error(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
 	}
 	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_STATIC)
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_STATIC)) {
-		zend_error(E_COMPILE_ERROR, "Multiple static modifiers are not allowed");
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple static modifiers are not allowed");
 	}
 	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_FINAL)
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_FINAL)) {
-		zend_error(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
 	}
 	if (((Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant)) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
-		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
 	return (Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant));
 }
@@ -1527,8 +1528,8 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC) /* {{{ */
 {
 	zend_op_array op_array;
-	char *name = function_name->u.constant.value.str.val;
-	int name_len = function_name->u.constant.value.str.len;
+	char *name = Z_STRVAL(function_name->u.constant);
+	int name_len = Z_STRLEN(function_name->u.constant);
 	int function_begin_line = function_token->u.op.opline_num;
 	zend_uint fn_flags;
 	const char *lcname;
@@ -1538,7 +1539,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	if (is_method) {
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 			if ((Z_LVAL(fn_flags_znode->u.constant) & ~(ZEND_ACC_STATIC|ZEND_ACC_PUBLIC))) {
-				zend_error(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+				zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted", CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
 			}
 			Z_LVAL(fn_flags_znode->u.constant) |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
 		}
@@ -1569,17 +1570,12 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
 
 	if (is_method) {
-		int result;
+		zend_ulong hash;
 
 		lcname = zend_new_interned_string(zend_str_tolower_dup(name, name_len), name_len + 1, 1 TSRMLS_CC);
-
-		if (IS_INTERNED(lcname)) {
-			result = zend_hash_quick_add(&CG(active_class_entry)->function_table, lcname, name_len+1, INTERNED_HASH(lcname), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-		} else {
-			result = zend_hash_add(&CG(active_class_entry)->function_table, lcname, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-		}
-		if (result == FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name, name);
+		hash = str_hash(lcname, name_len);
+		if (zend_hash_quick_add(&CG(active_class_entry)->function_table, lcname, name_len+1, hash, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name, name);
 		}
 
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
@@ -1696,6 +1692,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		zval key;
+		zval **ns_name;
 
 		if (CG(current_namespace)) {
 			/* Prefix function name with current namespace name */
@@ -1711,18 +1708,32 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			lcname = zend_str_tolower_dup(name, name_len);
 		}
 
+		/* Function name must not conflict with import names */
+		if (CG(current_import_function) &&
+		    zend_hash_find(CG(current_import_function), lcname, Z_STRLEN(function_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+
+			char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+
+			if (Z_STRLEN_PP(ns_name) != Z_STRLEN(function_name->u.constant) ||
+				memcmp(tmp, lcname, Z_STRLEN(function_name->u.constant))) {
+				zend_error(E_COMPILE_ERROR, "Cannot declare function %s because the name is already in use", Z_STRVAL(function_name->u.constant));
+			}
+			efree(tmp);
+		}
+
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1_type = IS_CONST;
 		build_runtime_defined_function_key(&key, lcname, name_len TSRMLS_CC);
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
 		Z_HASH_P(&CONSTANT(opline->op1.constant)) = zend_hash_func(Z_STRVAL(CONSTANT(opline->op1.constant)), Z_STRLEN(CONSTANT(opline->op1.constant)));
 		opline->op2_type = IS_CONST;
-		LITERAL_STRINGL(opline->op2, lcname, name_len, 0);
+		LITERAL_STRINGL(opline->op2, lcname, name_len, 1);
 		CALCULATE_LITERAL_HASH(opline->op2.constant);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_quick_update(CG(function_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
+		str_efree(lcname);
 	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
@@ -1820,7 +1831,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 		zend_str_tolower_copy(lcname, CG(active_op_array)->function_name, MIN(name_len, sizeof(lcname)-1));
 		lcname[sizeof(lcname)-1] = '\0'; /* zend_str_tolower_copy won't necessarily set the zero byte */
 		if (name_len == sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)) && CG(active_op_array)->num_args != 1) {
-			zend_error(E_COMPILE_ERROR, "%s() must take exactly 1 argument", ZEND_AUTOLOAD_FUNC_NAME);
+			zend_error_noreturn(E_COMPILE_ERROR, "%s() must take exactly 1 argument", ZEND_AUTOLOAD_FUNC_NAME);
 		}
 	}
 
@@ -1834,26 +1845,17 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_uchar pass_by_reference TSRMLS_DC) /* {{{ */
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
 	znode var;
 
-	if (class_type->op_type == IS_CONST &&
-	    Z_TYPE(class_type->u.constant) == IS_STRING &&
-	    Z_STRLEN(class_type->u.constant) == 0) {
-		/* Usage of namespace as class name not in namespace */
-		zval_dtor(&class_type->u.constant);
-		zend_error(E_COMPILE_ERROR, "Cannot use 'namespace' as a class name");
-		return;
-	}
-
-	if (zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 0 TSRMLS_CC)) {
-		zend_error(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
+	if (zend_is_auto_global(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant) TSRMLS_CC)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
 	} else {
 		var.op_type = IS_CV;
-		var.u.op.var = lookup_cv(CG(active_op_array), varname->u.constant.value.str.val, varname->u.constant.value.str.len, 0 TSRMLS_CC);
+		var.u.op.var = lookup_cv(CG(active_op_array), Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 0 TSRMLS_CC);
 		Z_STRVAL(varname->u.constant) = (char*)CG(active_op_array)->vars[var.u.op.var].name;
 		var.EA = 0;
 		if (CG(active_op_array)->vars[var.u.op.var].hash_value == THIS_HASHVAL &&
@@ -1861,30 +1863,47 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
 			if (CG(active_op_array)->scope &&
 			    (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) {
-				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
 			CG(active_op_array)->this_var = var.u.op.var;
 		}
+	}
+
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_VARIADIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
+	}
+
+	if (is_variadic) {
+		if (op == ZEND_RECV_INIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Variadic parameter cannot have a default value");
+		}
+
+		op = ZEND_RECV_VARIADIC;
+		CG(active_op_array)->fn_flags |= ZEND_ACC_VARIADIC;
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	SET_NODE(opline->result, &var);
-	SET_NODE(opline->op1, offset);
+	opline->op1_type = IS_UNUSED;
+	opline->op1.num = CG(active_op_array)->num_args;
 	if (op == ZEND_RECV_INIT) {
 		SET_NODE(opline->op2, initialization);
 	} else {
-		CG(active_op_array)->required_num_args = CG(active_op_array)->num_args;
 		SET_UNUSED(opline->op2);
+		if (!is_variadic) {
+			CG(active_op_array)->required_num_args = CG(active_op_array)->num_args;
+		}
 	}
 	CG(active_op_array)->arg_info = erealloc(CG(active_op_array)->arg_info, sizeof(zend_arg_info)*(CG(active_op_array)->num_args));
 	cur_arg_info = &CG(active_op_array)->arg_info[CG(active_op_array)->num_args-1];
-	cur_arg_info->name = zend_new_interned_string(estrndup(varname->u.constant.value.str.val, varname->u.constant.value.str.len), varname->u.constant.value.str.len + 1, 1 TSRMLS_CC);
-	cur_arg_info->name_len = varname->u.constant.value.str.len;
+	cur_arg_info->name = zend_new_interned_string(estrndup(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant)), Z_STRLEN(varname->u.constant) + 1, 1 TSRMLS_CC);
+	cur_arg_info->name_len = Z_STRLEN(varname->u.constant);
 	cur_arg_info->type_hint = 0;
-	cur_arg_info->allow_null = 1;
 	cur_arg_info->pass_by_reference = pass_by_reference;
+	cur_arg_info->allow_null = 1;
+	cur_arg_info->is_variadic = is_variadic;
 	cur_arg_info->class_name = NULL;
 	cur_arg_info->class_name_len = 0;
 
@@ -1895,34 +1914,34 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 			if (class_type->u.constant.type == IS_ARRAY) {
 				cur_arg_info->type_hint = IS_ARRAY;
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
 					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
-						zend_error(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 					}
 				}
 			} else if (class_type->u.constant.type == IS_CALLABLE) {
 				cur_arg_info->type_hint = IS_CALLABLE;
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
 					} else {
-						zend_error(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
 			} else {
 				cur_arg_info->type_hint = IS_OBJECT;
 				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
-					zend_resolve_class_name(class_type, opline->extended_value, 1 TSRMLS_CC);
+					zend_resolve_class_name(class_type TSRMLS_CC);
 				}
-				Z_STRVAL(class_type->u.constant) = (char*)zend_new_interned_string(class_type->u.constant.value.str.val, class_type->u.constant.value.str.len + 1, 1 TSRMLS_CC);
-				cur_arg_info->class_name = class_type->u.constant.value.str.val;
-				cur_arg_info->class_name_len = class_type->u.constant.value.str.len;
+				Z_STRVAL(class_type->u.constant) = (char*)zend_new_interned_string(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant) + 1, 1 TSRMLS_CC);
+				cur_arg_info->class_name = Z_STRVAL(class_type->u.constant);
+				cur_arg_info->class_name_len = Z_STRLEN(class_type->u.constant);
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL"))) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
 					} else {
-						zend_error(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
 					}
 				}
 			}
@@ -1937,7 +1956,7 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	char *lcname;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
 
-	zend_resolve_non_class_name(function_name, check_namespace TSRMLS_CC);
+	zend_resolve_function_name(function_name, &check_namespace TSRMLS_CC);
 
 	if (check_namespace && CG(current_namespace) && !is_compound) {
 			/* We assume we call function from the current namespace
@@ -1949,16 +1968,16 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 			return 1;
 	}
 
-	lcname = zend_str_tolower_dup(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
-	if ((zend_hash_find(CG(function_table), lcname, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) ||
+	lcname = zend_str_tolower_dup(Z_STRVAL(function_name->u.constant), Z_STRLEN(function_name->u.constant));
+	if ((zend_hash_find(CG(function_table), lcname, Z_STRLEN(function_name->u.constant)+1, (void **) &function)==FAILURE) ||
 	 	((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
  		(function->type == ZEND_INTERNAL_FUNCTION))) {
  			zend_do_begin_dynamic_function_call(function_name, 0 TSRMLS_CC);
  			efree(lcname);
  			return 1; /* Dynamic */
  	}
-	efree(function_name->u.constant.value.str.val);
-	function_name->u.constant.value.str.val = lcname;
+	efree(Z_STRVAL(function_name->u.constant));
+	Z_STRVAL(function_name->u.constant) = lcname;
 
 	zend_stack_push(&CG(function_call_stack), (void *) &function, sizeof(zend_function *));
 	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
@@ -1983,7 +2002,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 
 	if ((last_op->op2_type == IS_CONST) && (Z_TYPE(CONSTANT(last_op->op2.constant)) == IS_STRING) && (Z_STRLEN(CONSTANT(last_op->op2.constant)) == sizeof(ZEND_CLONE_FUNC_NAME)-1)
 		&& !zend_binary_strcasecmp(Z_STRVAL(CONSTANT(last_op->op2.constant)), Z_STRLEN(CONSTANT(last_op->op2.constant)), ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1)) {
-		zend_error(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
 	}
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
@@ -1991,11 +2010,9 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 			zval name;
 			name = CONSTANT(last_op->op2.constant);
 			if (Z_TYPE(name) != IS_STRING) {
-				zend_error(E_COMPILE_ERROR, "Method name must be a string");
+				zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
 			}
-			if (!IS_INTERNED(Z_STRVAL(name))) {
-				Z_STRVAL(name) = estrndup(Z_STRVAL(name), Z_STRLEN(name));
-			}
+			Z_STRVAL(name) = str_estrndup(Z_STRVAL(name), Z_STRLEN(name));
 			FREE_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
 			last_op->op2.constant =
 				zend_add_func_name_literal(CG(active_op_array), &name TSRMLS_CC);
@@ -2076,12 +2093,12 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 }
 /* }}} */
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	znode tmp;
 	int len;
 	zval **ns;
-	char *lcname, *compound = memchr(Z_STRVAL(element_name->u.constant), '\\', Z_STRLEN(element_name->u.constant));
+	char *lookup_name, *compound = memchr(Z_STRVAL(element_name->u.constant), '\\', Z_STRLEN(element_name->u.constant));
 
 	if (Z_STRVAL(element_name->u.constant)[0] == '\\') {
 		/* name starts with \ so it is known and unambiguos, nothing to do here but shorten it */
@@ -2090,15 +2107,35 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 		return;
 	}
 
-	if(!check_namespace) {
+	if(!*check_namespace) {
 		return;
+	}
+
+	if (current_import_sub) {
+		len = Z_STRLEN(element_name->u.constant)+1;
+		if (case_sensitive) {
+			lookup_name = estrndup(Z_STRVAL(element_name->u.constant), len);
+		} else {
+			lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		}
+		/* Check if function/const matches imported name */
+		if (zend_hash_find(current_import_sub, lookup_name, len, (void**)&ns) == SUCCESS) {
+			zval_dtor(&element_name->u.constant);
+			element_name->u.constant = **ns;
+			zval_copy_ctor(&element_name->u.constant);
+			efree(lookup_name);
+			*check_namespace = 0;
+			return;
+		}
+		efree(lookup_name);
 	}
 
 	if (compound && CG(current_import)) {
 		len = compound - Z_STRVAL(element_name->u.constant);
-		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		/* namespace is always lowercase */
+		lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
 		/* Check if first part of compound name is an import name */
-		if (zend_hash_find(CG(current_import), lcname, len+1, (void**)&ns) == SUCCESS) {
+		if (zend_hash_find(CG(current_import), lookup_name, len+1, (void**)&ns) == SUCCESS) {
 			/* Substitute import name */
 			tmp.op_type = IS_CONST;
 			tmp.u.constant = **ns;
@@ -2108,10 +2145,11 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 			memmove(Z_STRVAL(element_name->u.constant), Z_STRVAL(element_name->u.constant)+len, Z_STRLEN(element_name->u.constant)+1);
 			zend_do_build_namespace_name(&tmp, &tmp, element_name TSRMLS_CC);
 			*element_name = tmp;
-			efree(lcname);
+			efree(lookup_name);
+			*check_namespace = 0;
 			return;
 		}
-		efree(lcname);
+		efree(lookup_name);
 	}
 
 	if (CG(current_namespace)) {
@@ -2121,9 +2159,21 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 		memcpy(Z_STRVAL(tmp.u.constant), Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
 		memcpy(&(Z_STRVAL(tmp.u.constant)[Z_STRLEN_P(CG(current_namespace))]), "\\", sizeof("\\")-1);
 		memcpy(&(Z_STRVAL(tmp.u.constant)[Z_STRLEN_P(CG(current_namespace)) + sizeof("\\")-1]), Z_STRVAL(element_name->u.constant), Z_STRLEN(element_name->u.constant)+1);
-		STR_FREE(Z_STRVAL(element_name->u.constant));
+		str_efree(Z_STRVAL(element_name->u.constant));
 		*element_name = tmp;
 	}
+}
+/* }}} */
+
+void zend_resolve_function_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC) /* {{{ */
+{
+	zend_resolve_non_class_name(element_name, check_namespace, 0, CG(current_import_function) TSRMLS_CC);
+}
+/* }}} */
+
+void zend_resolve_const_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC) /* {{{ */
+{
+	zend_resolve_non_class_name(element_name, check_namespace, 1, CG(current_import_const) TSRMLS_CC);
 }
 /* }}} */
 
@@ -2133,12 +2183,12 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 	int lctype;
 	znode constant_name;
 
-	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), class_name->u.constant.value.str.len);
+	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 	lctype = zend_get_class_fetch_type(lcname, strlen(lcname));
 	switch (lctype) {
 		case ZEND_FETCH_CLASS_SELF:
 			if (!CG(active_class_entry)) {
-				zend_error(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
 			}
 			zval_dtor(&class_name->u.constant);
 			class_name->op_type = IS_CONST;
@@ -2148,13 +2198,13 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
         case ZEND_FETCH_CLASS_STATIC:
         case ZEND_FETCH_CLASS_PARENT:
 			if (is_static) {
-				zend_error(E_COMPILE_ERROR,
+				zend_error_noreturn(E_COMPILE_ERROR,
 					"%s::class cannot be used for compile-time class name resolution",
 					lctype == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
 					);
 			}
 			if (!CG(active_class_entry)) {
-				zend_error(E_COMPILE_ERROR,
+				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot access %s::class when no class scope is active",
 					lctype == ZEND_FETCH_CLASS_STATIC ? "static" : "parent"
 					);
@@ -2164,7 +2214,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 			zend_do_fetch_constant(result, class_name, &constant_name, ZEND_RT, 1 TSRMLS_CC);
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
-			zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
+			zend_resolve_class_name(class_name TSRMLS_CC);
 			*result = *class_name;
 			break;
 	}
@@ -2174,7 +2224,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 }
 /* }}} */
 
-void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC) /* {{{ */
+void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 {
 	char *compound;
 	char *lcname;
@@ -2194,7 +2244,7 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 			Z_STRLEN(class_name->u.constant) + 1);
 
 			if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-				zend_error(E_COMPILE_ERROR, "'\\%s' is an invalid class name", Z_STRVAL(class_name->u.constant));
+				zend_error_noreturn(E_COMPILE_ERROR, "'\\%s' is an invalid class name", Z_STRVAL(class_name->u.constant));
 			}
 		} else {
 			if (CG(current_import)) {
@@ -2253,26 +2303,17 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 	long fetch_class_op_number;
 	zend_op *opline;
 
-	if (class_name->op_type == IS_CONST &&
-	    Z_TYPE(class_name->u.constant) == IS_STRING &&
-	    Z_STRLEN(class_name->u.constant) == 0) {
-		/* Usage of namespace as class name not in namespace */
-		zval_dtor(&class_name->u.constant);
-		zend_error(E_COMPILE_ERROR, "Cannot use 'namespace' as a class name");
-		return;
-	}
-
 	fetch_class_op_number = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_FETCH_CLASS;
 	SET_UNUSED(opline->op1);
-	opline->extended_value = ZEND_FETCH_CLASS_GLOBAL;
+	opline->extended_value = ZEND_FETCH_CLASS_DEFAULT;
 	CG(catch_begin) = fetch_class_op_number;
 	if (class_name->op_type == IS_CONST) {
 		int fetch_type;
 
-		fetch_type = zend_get_class_fetch_type(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+		fetch_type = zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 		switch (fetch_type) {
 			case ZEND_FETCH_CLASS_SELF:
 			case ZEND_FETCH_CLASS_PARENT:
@@ -2282,7 +2323,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 				zval_dtor(&class_name->u.constant);
 				break;
 			default:
-				zend_resolve_class_name(class_name, opline->extended_value, 0 TSRMLS_CC);
+				zend_resolve_class_name(class_name TSRMLS_CC);
 				opline->op2_type = IS_CONST;
 				opline->op2.constant =
 					zend_add_class_name_literal(CG(active_op_array), &class_name->u.constant TSRMLS_CC);
@@ -2311,7 +2352,7 @@ void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
 	dest.opline_num = get_next_op_number(CG(active_op_array));
 
 	if (zend_hash_add(CG(context).labels, Z_STRVAL(label->u.constant), Z_STRLEN(label->u.constant) + 1, (void**)&dest, sizeof(zend_label), NULL) == FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Label '%s' already defined", Z_STRVAL(label->u.constant));
+		zend_error_noreturn(E_COMPILE_ERROR, "Label '%s' already defined", Z_STRVAL(label->u.constant));
 	}
 
 	/* Done with label now */
@@ -2337,7 +2378,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = opline->lineno;
-			zend_error(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' to undefined label '%s'", Z_STRVAL_P(label));
 		} else {
 			/* Label is not defined. Delay to pass 2. */
 			INC_BPC(op_array);
@@ -2358,7 +2399,7 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 				CG(active_op_array) = op_array;
 				CG(zend_lineno) = opline->lineno;
 			}
-			zend_error(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
+			zend_error_noreturn(E_COMPILE_ERROR, "'goto' into loop or switch statement is disallowed");
 		}
 		current = op_array->brk_cont_array[current].parent;
 	}
@@ -2419,19 +2460,19 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 	}
 
 	if (is_class_member) {
-		length = sizeof("::")-1 + result->u.constant.value.str.len + name->u.constant.value.str.len;
-		result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
-		memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], "::", sizeof("::")-1);
-		memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len + sizeof("::")-1], name->u.constant.value.str.val, name->u.constant.value.str.len+1);
-		STR_FREE(name->u.constant.value.str.val);
-		result->u.constant.value.str.len = length;
+		length = sizeof("::")-1 + Z_STRLEN(result->u.constant) + Z_STRLEN(name->u.constant);
+		Z_STRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), length+1);
+		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)], "::", sizeof("::")-1);
+		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
+		str_efree(Z_STRVAL(name->u.constant));
+		Z_STRLEN(result->u.constant) = length;
 	} else {
-		length = sizeof("\\")-1 + result->u.constant.value.str.len + name->u.constant.value.str.len;
-		result->u.constant.value.str.val = erealloc(result->u.constant.value.str.val, length+1);
-		memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len], "\\", sizeof("\\")-1);
-		memcpy(&result->u.constant.value.str.val[result->u.constant.value.str.len + sizeof("\\")-1], name->u.constant.value.str.val, name->u.constant.value.str.len+1);
-		STR_FREE(name->u.constant.value.str.val);
-		result->u.constant.value.str.len = length;
+		length = sizeof("\\")-1 + Z_STRLEN(result->u.constant) + Z_STRLEN(name->u.constant);
+		Z_STRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), length+1);
+		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)], "\\", sizeof("\\")-1);
+		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("\\")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
+		str_efree(Z_STRVAL(name->u.constant));
+		Z_STRLEN(result->u.constant) = length;
 	}
 }
 /* }}} */
@@ -2445,7 +2486,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	if (method_name->op_type == IS_CONST) {
 		char *lcname;
 		if (Z_TYPE(method_name->u.constant) != IS_STRING) {
-			zend_error(E_COMPILE_ERROR, "Method name must be a string");
+			zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
 		}
 		lcname = zend_str_tolower_dup(Z_STRVAL(method_name->u.constant), Z_STRLEN(method_name->u.constant));
 		if ((sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) == Z_STRLEN(method_name->u.constant) &&
@@ -2458,7 +2499,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name TSRMLS_CC);
 		class_node = *class_name;
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	} else {
@@ -2554,12 +2595,12 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 		    function_ptr->common.function_name &&
 		    function_ptr->common.type == ZEND_USER_FUNCTION &&
 		    !ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
-			zend_error(E_COMPILE_ERROR,
+			zend_error_noreturn(E_COMPILE_ERROR,
 						"Call-time pass-by-reference has been removed; "
 						"If you would like to pass argument by reference, modify the declaration of %s().",
 						function_ptr->common.function_name);
 		} else {
-			zend_error(E_COMPILE_ERROR, "Call-time pass-by-reference has been removed");
+			zend_error_noreturn(E_COMPILE_ERROR, "Call-time pass-by-reference has been removed");
 		}
 		return;
 	}
@@ -2600,7 +2641,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 				op = ZEND_SEND_REF;
 				break;
 			default:
-				zend_error(E_COMPILE_ERROR, "Only variables can be passed by reference");
+				zend_error_noreturn(E_COMPILE_ERROR, "Only variables can be passed by reference");
 				break;
 		}
 	}
@@ -2732,7 +2773,9 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	if (expr) {
 		SET_NODE(opline->op1, expr);
 
-		if (do_end_vparse && zend_is_function_or_method_call(expr)) {
+		if (!do_end_vparse) {
+			opline->extended_value = ZEND_RETURNS_VALUE;
+		} else if (zend_is_function_or_method_call(expr)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
 		}
 	} else {
@@ -2749,7 +2792,7 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 	zend_op *opline;
 
 	if (!CG(active_op_array)->function_name) {
-		zend_error(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
+		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
@@ -2886,10 +2929,10 @@ void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var
 
 	if (class_name->op_type == IS_CONST &&
 	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant))) {
-		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name TSRMLS_CC);
 		catch_class = *class_name;
 	} else {
-		zend_error(E_COMPILE_ERROR, "Bad class name in the catch statement");
+		zend_error_noreturn(E_COMPILE_ERROR, "Bad class name in the catch statement");
 	}
 
 	catch_op_number = get_next_op_number(CG(active_op_array));
@@ -2902,7 +2945,7 @@ void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var
 	opline->op1_type = IS_CONST;
 	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
-	opline->op2.var = lookup_cv(CG(active_op_array), catch_var->u.constant.value.str.val, catch_var->u.constant.value.str.len, 0 TSRMLS_CC);
+	opline->op2.var = lookup_cv(CG(active_op_array), Z_STRVAL(catch_var->u.constant), Z_STRLEN(catch_var->u.constant), 0 TSRMLS_CC);
 	Z_STRVAL(catch_var->u.constant) = (char*)CG(active_op_array)->vars[opline->op2.var].name;
 	opline->result.num = 0; /* 1 means it's the last catch in the block */
 
@@ -2938,7 +2981,7 @@ void zend_do_bind_catch(znode *try_token, znode *catch_token TSRMLS_DC) /* {{{ *
 void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC) /* {{{ */
 {
 	if (catch_token->op_type == IS_UNUSED && finally_token->op_type == IS_UNUSED) {
-		zend_error(E_COMPILE_ERROR, "Cannot use try without catch or finally");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use try without catch or finally");
 	}
 	if (finally_token->op_type != IS_UNUSED) {
 		zend_op *opline;
@@ -3105,7 +3148,7 @@ static void do_inherit_method(zend_function *function) /* {{{ */
 
 static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	zend_uint i, num_args;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -3135,48 +3178,66 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 0;
 	}
 
-	if (fe->common.type != ZEND_USER_FUNCTION
-		&& (proto->common.fn_flags & ZEND_ACC_PASS_REST_BY_REFERENCE) != 0
-		&& (fe->common.fn_flags & ZEND_ACC_PASS_REST_BY_REFERENCE) == 0) {
-		return 0;
-	}
-
 	/* by-ref constraints on return values are covariant */
 	if ((proto->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 		&& !(fe->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 		return 0;
 	}
 
-	for (i=0; i < proto->common.num_args; i++) {
-		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)) {
+	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
+		&& !(fe->common.fn_flags & ZEND_ACC_VARIADIC)) {
+		return 0;
+	}
+
+	/* For variadic functions any additional (optional) arguments that were added must be
+	 * checked against the signature of the variadic argument, so in this case we have to
+	 * go through all the parameters of the function and not just those present in the
+	 * prototype. */
+	num_args = proto->common.num_args;
+	if ((fe->common.fn_flags & ZEND_ACC_VARIADIC)
+		&& fe->common.num_args > proto->common.num_args) {
+		num_args = fe->common.num_args;
+	}
+
+	for (i = 0; i < num_args; i++) {
+		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
+
+		zend_arg_info *proto_arg_info;
+		if (i < proto->common.num_args) {
+			proto_arg_info = &proto->common.arg_info[i];
+		} else {
+			proto_arg_info = &proto->common.arg_info[proto->common.num_args-1];
+		}
+
+		if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
 			/* Only one has a type hint and the other one doesn't */
 			return 0;
 		}
 
-		if (fe->common.arg_info[i].class_name) {
+		if (fe_arg_info->class_name) {
 			const char *fe_class_name, *proto_class_name;
 			zend_uint fe_class_name_len, proto_class_name_len;
 
-			if (!strcasecmp(fe->common.arg_info[i].class_name, "parent") && proto->common.scope) {
+			if (!strcasecmp(fe_arg_info->class_name, "parent") && proto->common.scope) {
 				fe_class_name = proto->common.scope->name;
 				fe_class_name_len = proto->common.scope->name_length;
-			} else if (!strcasecmp(fe->common.arg_info[i].class_name, "self") && fe->common.scope) {
+			} else if (!strcasecmp(fe_arg_info->class_name, "self") && fe->common.scope) {
 				fe_class_name = fe->common.scope->name;
 				fe_class_name_len = fe->common.scope->name_length;
 			} else {
-				fe_class_name = fe->common.arg_info[i].class_name;
-				fe_class_name_len = fe->common.arg_info[i].class_name_len;
+				fe_class_name = fe_arg_info->class_name;
+				fe_class_name_len = fe_arg_info->class_name_len;
 			}
 
-			if (!strcasecmp(proto->common.arg_info[i].class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+			if (!strcasecmp(proto_arg_info->class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
 				proto_class_name = proto->common.scope->parent->name;
 				proto_class_name_len = proto->common.scope->parent->name_length;
-			} else if (!strcasecmp(proto->common.arg_info[i].class_name, "self") && proto->common.scope) {
+			} else if (!strcasecmp(proto_arg_info->class_name, "self") && proto->common.scope) {
 				proto_class_name = proto->common.scope->name;
 				proto_class_name_len = proto->common.scope->name_length;
 			} else {
-				proto_class_name = proto->common.arg_info[i].class_name;
-				proto_class_name_len = proto->common.arg_info[i].class_name_len;
+				proto_class_name = proto_arg_info->class_name;
+				proto_class_name_len = proto_arg_info->class_name_len;
 			}
 
 			if (strcasecmp(fe_class_name, proto_class_name)!=0) {
@@ -3203,24 +3264,17 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 				}
 			}
 		}
-		if (fe->common.arg_info[i].type_hint != proto->common.arg_info[i].type_hint) {
+		if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
 			/* Incompatible type hint */
 			return 0;
 		}
 
 		/* by-ref constraints on arguments are invariant */
-		if (fe->common.arg_info[i].pass_by_reference != proto->common.arg_info[i].pass_by_reference) {
+		if (fe_arg_info->pass_by_reference != proto_arg_info->pass_by_reference) {
 			return 0;
 		}
 	}
 
-	if (proto->common.fn_flags & ZEND_ACC_PASS_REST_BY_REFERENCE) {
-		for (i=proto->common.num_args; i < fe->common.num_args; i++) {
-			if (!fe->common.arg_info[i].pass_by_reference) {
-				return 0;
-			}
-		}
-	}
 	return 1;
 }
 /* }}} */
@@ -3293,6 +3347,13 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 			if (arg_info->pass_by_reference) {
 				*(offset++) = '&';
 			}
+
+			if (arg_info->is_variadic) {
+				*(offset++) = '.';
+				*(offset++) = '.';
+				*(offset++) = '.';
+			}
+
 			*(offset++) = '$';
 
 			if (arg_info->name) {
@@ -3308,7 +3369,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 					idx /= 10;
 				} while (idx > 0);
 			}
-			if (i >= required) {
+			if (i >= required && !arg_info->is_variadic) {
 				*(offset++) = ' ';
 				*(offset++) = '=';
 				*(offset++) = ' ';
@@ -3403,14 +3464,14 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		&& parent->common.fn_flags & ZEND_ACC_ABSTRACT
 		&& parent->common.scope != (child->common.prototype ? child->common.prototype->common.scope : child->common.scope)
 		&& child->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_IMPLEMENTED_ABSTRACT)) {
-		zend_error(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)",
+		zend_error_noreturn(E_COMPILE_ERROR, "Can't inherit abstract function %s::%s() (previously declared abstract in %s)",
 			parent->common.scope->name,
 			child->common.function_name,
 			child->common.prototype ? child->common.prototype->common.scope->name : child->common.scope->name);
 	}
 
 	if (parent_flags & ZEND_ACC_FINAL) {
-		zend_error(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -3418,15 +3479,15 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	 */
 	if ((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC)) {
 		if (child->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 		}
 	}
 
 	/* Disallow making an inherited method abstract. */
 	if ((child_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
-		zend_error(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot make non abstract method %s::%s() abstract in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 	}
 
 	if (parent_flags & ZEND_ACC_CHANGED) {
@@ -3435,7 +3496,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		/* Prevent derived classes from restricting access that was available in parent classes
 		 */
 		if ((child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-			zend_error(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if (((child_flags & ZEND_ACC_PPP_MASK) < (parent_flags & ZEND_ACC_PPP_MASK))
 			&& ((parent_flags & ZEND_ACC_PPP_MASK) & ZEND_ACC_PRIVATE)) {
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
@@ -3454,7 +3515,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
+			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
@@ -3508,7 +3569,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 
 	if (zend_hash_quick_find(&ce->properties_info, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **) &child_info)==SUCCESS) {
 		if ((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC)) {
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
 				(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name, hash_key->arKey,
 				(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name, hash_key->arKey);
 
@@ -3519,7 +3580,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		}
 
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
-			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
 			zval_ptr_dtor(&(ce->default_properties_table[parent_info->offset]));
 			ce->default_properties_table[parent_info->offset] = ce->default_properties_table[child_info->offset];
@@ -3604,10 +3665,10 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name, parent_ce->name);
 	}
 	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
-		zend_error(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name, parent_ce->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name, parent_ce->name);
 	}
 
 	ce->parent = parent_ce;
@@ -3729,7 +3790,7 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, con
 
 	if (zend_hash_quick_find(child_constants_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void**)&old_constant) == SUCCESS) {
 		if (*old_constant != *parent_constant) {
-			zend_error(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->arKey, iface->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->arKey, iface->name);
 		}
 		return 0;
 	}
@@ -3761,7 +3822,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			if (i < parent_iface_num) {
 				ignore = 1;
 			} else {
-				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
+				zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
 			}
 		}
 	}
@@ -3834,7 +3895,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
 		if (ce->constructor) {
-			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
 	} else if (!strncmp(mname, ZEND_DESTRUCTOR_FUNC_NAME,  mname_len)) {
@@ -3859,7 +3920,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, ce->name_length + 1, 1 TSRMLS_CC);
 		if (!memcmp(mname, lowercase_name, mname_len)) {
 			if (ce->constructor) {
-				zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 			}
 			ce->constructor = fe;
 			fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -3883,14 +3944,14 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the trait method is compatible with previosly declared abstract method */
 						if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
-							zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								zend_get_function_declaration(fn TSRMLS_CC),
 								zend_get_function_declaration(existing_fn TSRMLS_CC));
 						}
 					} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 						/* Make sure the abstract declaration is compatible with previous declaration */
 						if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
-							zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+							zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								zend_get_function_declaration(fn TSRMLS_CC),
 								zend_get_function_declaration(existing_fn TSRMLS_CC));
 						}
@@ -3906,25 +3967,25 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the trait method is compatible with previosly declared abstract method */
 			if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
-				zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					zend_get_function_declaration(fn TSRMLS_CC),
 					zend_get_function_declaration(existing_fn TSRMLS_CC));
 			}
 		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			if (!zend_traits_method_compatibility_check(existing_fn, fn TSRMLS_CC)) {
-				zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+				zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					zend_get_function_declaration(fn TSRMLS_CC),
 					zend_get_function_declaration(existing_fn TSRMLS_CC));
 			}
 			return;
 		} else if ((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-			/* two trais can't define the same non-abstract method */
+			/* two traits can't define the same non-abstract method */
 #if 1
-			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
+			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
 				name, ce->name);
-#else		/* TODO: better errot message */
-			zend_error(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
+#else		/* TODO: better error message */
+			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
 				fn->common.scope->name, fn->common.function_name,
 				ce->name, name,
 				existing_fn->common.scope->name, existing_fn->common.function_name);
@@ -4007,7 +4068,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		}
 	}
 
-	lcname = hash_key->arKey;
+	lcname = (char *) hash_key->arKey;
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
@@ -4048,7 +4109,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 	zend_uint i;
 
 	if ((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) {
-		zend_error(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name);
 	}
 
 	for (i = 0; i < ce->num_traits; i++) {
@@ -4056,7 +4117,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 			return;
 		}
 	}
-	zend_error(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", trait->name, ce->name);
+	zend_error_noreturn(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", trait->name, ce->name);
 }
 /* }}} */
 
@@ -4077,7 +4138,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				cur_method_ref = cur_precedence->trait_method;
 				if (!(cur_precedence->trait_method->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len,
 								ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
-					zend_error(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
+					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
 				}
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce TSRMLS_CC);
 
@@ -4089,7 +4150,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 												 cur_method_ref->mname_len + 1);
 				efree(lcname);
 				if (!method_exists) {
-					zend_error(E_COMPILE_ERROR,
+					zend_error_noreturn(E_COMPILE_ERROR,
 							   "A precedence rule was defined for %s::%s but this method does not exist",
 							   cur_method_ref->ce->name,
 							   cur_method_ref->method_name);
@@ -4107,14 +4168,14 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 					zend_uint name_length = strlen(class_name);
 
 					if (!(cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
-						zend_error(E_COMPILE_ERROR, "Could not find trait %s", class_name);
+						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name);
 					}
 					zend_check_trait_usage(ce, cur_precedence->exclude_from_classes[j] TSRMLS_CC);
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
 					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i]) {
-						zend_error(E_COMPILE_ERROR,
+						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
 								   cur_method_ref->method_name,
@@ -4137,7 +4198,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 			if (ce->trait_aliases[i]->trait_method->class_name) {
 				cur_method_ref = ce->trait_aliases[i]->trait_method;
 				if (!(cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
-					zend_error(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
+					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
 				}
 				zend_check_trait_usage(ce, cur_method_ref->ce TSRMLS_CC);
 
@@ -4149,7 +4210,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				efree(lcname);
 
 				if (!method_exists) {
-					zend_error(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name, cur_method_ref->method_name);
+					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name, cur_method_ref->method_name);
 				}
 			}
 			i++;
@@ -4175,7 +4236,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 
 					if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL) == FAILURE) {
 						efree(lcname);
-						zend_error(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
+						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
 					}
 					efree(lcname);
 				}
@@ -4300,7 +4361,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 					}
 
 					if (not_compatible) {
-						zend_error(E_COMPILE_ERROR,
+						zend_error_noreturn(E_COMPILE_ERROR,
 							   "%s and %s define the same property ($%s) in the composition of %s. However, the definition differs and is considered incompatible. Class was composed",
 								find_first_definition(ce, i, prop_name, prop_name_length, prop_hash, coliding_prop->ce)->name,
 								property_info->ce->name,
@@ -4349,7 +4410,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 			if (!cur_alias->trait_method->ce) {
 				if (cur_alias->alias) {
 					/** Plain old inconsistency/typo/bug */
-					zend_error(E_COMPILE_ERROR,
+					zend_error_noreturn(E_COMPILE_ERROR,
 							   "An alias (%s) was defined for method %s(), but this method does not exist",
 							   cur_alias->alias,
 							   cur_alias->trait_method->method_name);
@@ -4368,12 +4429,12 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 										 lc_method_name,
 										 cur_alias->trait_method->mname_len+1)) {
 						efree(lc_method_name);
-						zend_error(E_COMPILE_ERROR,
+						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name);
 					} else {
 						efree(lc_method_name);
-						zend_error(E_COMPILE_ERROR,
+						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
 								   cur_alias->trait_method->method_name);
 
@@ -4460,7 +4521,7 @@ void zend_prepare_reference(znode *result, znode *class_name, znode *method_name
 	/* REM: There should not be a need for copying,
 	   zend_do_begin_class_declaration is also just using that string */
 	if (class_name) {
-		zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
+		zend_resolve_class_name(class_name TSRMLS_CC);
 		method_ref->class_name = Z_STRVAL(class_name->u.constant);
 		method_ref->cname_len  = Z_STRLEN(class_name->u.constant);
 	} else {
@@ -4482,13 +4543,13 @@ void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alia
 	zend_trait_alias *trait_alias;
 
 	if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_STATIC) {
-		zend_error(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
 		return;
 	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_ABSTRACT) {
-		zend_error(E_COMPILE_ERROR, "Cannot use 'abstract' as method modifier");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as method modifier");
 		return;
 	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_FINAL) {
-		zend_error(E_COMPILE_ERROR, "Cannot use 'final' as method modifier");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as method modifier");
 		return;
 	}
 
@@ -4530,7 +4591,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		op2 = opline->op2.zv;
 	}
 	if (zend_hash_quick_find(class_table, Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_HASH_P(op1), (void **) &pce)==FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
+		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	} else {
 		ce = *pce;
@@ -4544,7 +4605,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
 		}
 		return NULL;
 	} else {
@@ -4579,7 +4640,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
 			 * approach to work.
 			 */
-			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", Z_STRVAL_P(op2));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", Z_STRVAL_P(op2));
 		}
 		return NULL;
 	} else {
@@ -4587,9 +4648,9 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	}
 
 	if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name, parent_ce->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name, parent_ce->name);
 	} else if ((parent_ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name, parent_ce->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name, parent_ce->name);
 	}
 
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
@@ -4598,7 +4659,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 
 	/* Register the derived class */
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
 	}
 	return ce;
 }
@@ -4667,7 +4728,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 			/* Classes with traits are handled exactly the same, no early-bind here */
 			return;
 		default:
-			zend_error(E_COMPILE_ERROR, "Invalid binding type");
+			zend_error_noreturn(E_COMPILE_ERROR, "Invalid binding type");
 			return;
 	}
 
@@ -4798,9 +4859,9 @@ void zend_do_brk_cont(zend_uchar op, const znode *expr TSRMLS_DC) /* {{{ */
 	SET_UNUSED(opline->op1);
 	if (expr) {
 		if (expr->op_type != IS_CONST) {
-			zend_error(E_COMPILE_ERROR, "'%s' operator with non-constant operand is no longer supported", op == ZEND_BRK ? "break" : "continue");
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator with non-constant operand is no longer supported", op == ZEND_BRK ? "break" : "continue");
 		} else if (Z_TYPE(expr->u.constant) != IS_LONG || Z_LVAL(expr->u.constant) < 1) {
-			zend_error(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers", op == ZEND_BRK ? "break" : "continue");
+			zend_error_noreturn(E_COMPILE_ERROR, "'%s' operator accepts only positive numbers", op == ZEND_BRK ? "break" : "continue");
 		}
 		SET_NODE(opline->op2, expr);
 	} else {
@@ -4959,15 +5020,15 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	zval **ns_name, key;
 
 	if (CG(active_class_entry)) {
-		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
 		return;
 	}
 
-	lcname = zend_str_tolower_dup(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
+	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
 	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent"))) {
 		efree(lcname);
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", Z_STRVAL(class_name->u.constant));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", Z_STRVAL(class_name->u.constant));
 	}
 
 	/* Class name must not conflict with import names */
@@ -4994,7 +5055,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(class_name->u.constant) ||
 			memcmp(tmp, lcname, Z_STRLEN(class_name->u.constant))) {
-			zend_error(E_COMPILE_ERROR, "Cannot declare class %s because the name is already in use", Z_STRVAL(class_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s because the name is already in use", Z_STRVAL(class_name->u.constant));
 		}
 		efree(tmp);
 	}
@@ -5012,13 +5073,13 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		switch (parent_class_name->EA) {
 			case ZEND_FETCH_CLASS_SELF:
-				zend_error(E_COMPILE_ERROR, "Cannot use 'self' as class name as it is reserved");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'self' as class name as it is reserved");
 				break;
 			case ZEND_FETCH_CLASS_PARENT:
-				zend_error(E_COMPILE_ERROR, "Cannot use 'parent' as class name as it is reserved");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'parent' as class name as it is reserved");
 				break;
 			case ZEND_FETCH_CLASS_STATIC:
-				zend_error(E_COMPILE_ERROR, "Cannot use 'static' as class name as it is reserved");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'static' as class name as it is reserved");
 				break;
 			default:
 				break;
@@ -5037,7 +5098,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	if (doing_inheritance) {
 		/* Make sure a trait does not try to extend a class */
 		if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-			zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
 		}
 
 		opline->extended_value = parent_class_name->u.op.var;
@@ -5082,19 +5143,19 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
 		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
 		}
 	}
 	if (ce->clone) {
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
 		}
 	}
 
@@ -5143,7 +5204,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 
 	/* Traits can not implement interfaces */
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' since it is a Trait",
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' since it is a Trait",
 							 Z_STRVAL(interface_name->u.constant),
 							 CG(active_class_entry)->name);
 	}
@@ -5152,7 +5213,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 		case ZEND_FETCH_CLASS_SELF:
 		case ZEND_FETCH_CLASS_PARENT:
 		case ZEND_FETCH_CLASS_STATIC:
-			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as interface name as it is reserved", Z_STRVAL(interface_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface name as it is reserved", Z_STRVAL(interface_name->u.constant));
 			break;
 		default:
 			break;
@@ -5161,7 +5222,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_INTERFACE;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(interface_name, opline->extended_value, 0 TSRMLS_CC);
+	zend_resolve_class_name(interface_name TSRMLS_CC);
 	opline->extended_value = (opline->extended_value & ~ZEND_FETCH_CLASS_MASK) | ZEND_FETCH_CLASS_INTERFACE;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &interface_name->u.constant TSRMLS_CC);
@@ -5174,7 +5235,7 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 	zend_op *opline;
 
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error(E_COMPILE_ERROR,
+		zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use traits inside of interfaces. %s is used in %s",
 				Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name);
 	}
@@ -5184,7 +5245,7 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 		case ZEND_FETCH_CLASS_SELF:
 		case ZEND_FETCH_CLASS_PARENT:
 		case ZEND_FETCH_CLASS_STATIC:
-			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as trait name as it is reserved", Z_STRVAL(trait_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as trait name as it is reserved", Z_STRVAL(trait_name->u.constant));
 			break;
 		default:
 			break;
@@ -5193,7 +5254,7 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_ADD_TRAIT;
 	SET_NODE(opline->op1, &CG(implementing_class));
-	zend_resolve_class_name(trait_name, opline->extended_value, 0 TSRMLS_CC);
+	zend_resolve_class_name(trait_name TSRMLS_CC);
 	opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_class_name_literal(CG(active_op_array), &trait_name->u.constant TSRMLS_CC);
@@ -5273,20 +5334,20 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 	int comment_len = 0;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error(E_COMPILE_ERROR, "Interfaces may not include member variables");
+		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
 	}
 
 	if (access_type & ZEND_ACC_ABSTRACT) {
-		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
 	if (access_type & ZEND_ACC_FINAL) {
-		zend_error(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods and classes",
-				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods and classes",
+				   CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
 	}
 
-	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::$%s", CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+	if (zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, (void **) &existing_property_info)==SUCCESS) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
 	}
 	ALLOC_ZVAL(property);
 
@@ -5304,8 +5365,8 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 		CG(doc_comment_len) = 0;
 	}
 
-	zend_declare_property_ex(CG(active_class_entry), zend_new_interned_string(var_name->u.constant.value.str.val, var_name->u.constant.value.str.len + 1, 0 TSRMLS_CC), var_name->u.constant.value.str.len, property, access_type, comment, comment_len TSRMLS_CC);
-	efree(var_name->u.constant.value.str.val);
+	zend_declare_property_ex(CG(active_class_entry), zend_new_interned_string(Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) + 1, 0 TSRMLS_CC), Z_STRLEN(var_name->u.constant), property, access_type, comment, comment_len TSRMLS_CC);
+	efree(Z_STRVAL(var_name->u.constant));
 }
 /* }}} */
 
@@ -5313,30 +5374,25 @@ void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_D
 {
 	zval *property;
 	const char *cname = NULL;
-	int result;
+	zend_ulong hash;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
-		zend_error(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
+		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
 		return;
 	}
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-		zend_error(E_COMPILE_ERROR, "Traits cannot have constants");
+		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 		return;
 	}
 
 	ALLOC_ZVAL(property);
 	*property = value->u.constant;
 
-	cname = zend_new_interned_string(var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, 0 TSRMLS_CC);
-
-	if (IS_INTERNED(cname)) {
-		result = zend_hash_quick_add(&CG(active_class_entry)->constants_table, cname, var_name->u.constant.value.str.len+1, INTERNED_HASH(cname), &property, sizeof(zval *), NULL);
-	} else {
-		result = zend_hash_add(&CG(active_class_entry)->constants_table, cname, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-	}
-	if (result == FAILURE) {
+	cname = zend_new_interned_string(Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, 0 TSRMLS_CC);
+	hash = str_hash(cname, Z_STRLEN(var_name->u.constant));
+	if (zend_hash_quick_add(&CG(active_class_entry)->constants_table, cname, Z_STRLEN(var_name->u.constant)+1, hash, &property, sizeof(zval *), NULL) == FAILURE) {
 		FREE_ZVAL(property);
-		zend_error(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s", CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
 	}
 	FREE_PNODE(var_name);
 
@@ -5430,7 +5486,7 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 	int len, clen;
 
 	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
-		zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
+		zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
 	}
 
 	cfilename = zend_get_compiled_filename(TSRMLS_C);
@@ -5531,8 +5587,7 @@ static zend_constant* zend_get_ct_const(const zval *const_name, int all_internal
 	if (all_internal_constants_substitution &&
 	    (c->flags & CONST_PERSISTENT) &&
 	    !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION) &&
-	    Z_TYPE(c->value) != IS_CONSTANT &&
-	    Z_TYPE(c->value) != IS_CONSTANT_ARRAY) {
+	    !IS_CONSTANT_TYPE(Z_TYPE(c->value))) {
 		return c;
 	}
 	return NULL;
@@ -5572,7 +5627,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				if (ZEND_FETCH_CLASS_STATIC == type) {
 					zend_error(E_ERROR, "\"static::\" is not allowed in compile-time constants");
 				} else if (ZEND_FETCH_CLASS_DEFAULT == type) {
-					zend_resolve_class_name(constant_container, fetch_type, 1 TSRMLS_CC);
+					zend_resolve_class_name(constant_container TSRMLS_CC);
 				}
 				zend_do_build_full_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
@@ -5581,7 +5636,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 			case ZEND_RT:
 				if (constant_container->op_type == IS_CONST &&
 				ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(constant_container->u.constant), Z_STRLEN(constant_container->u.constant))) {
-					zend_resolve_class_name(constant_container, fetch_type, 1 TSRMLS_CC);
+					zend_resolve_class_name(constant_container TSRMLS_CC);
 				} else {
 					zend_do_fetch_class(&tmp, constant_container TSRMLS_CC);
 					constant_container = &tmp;
@@ -5619,7 +5674,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				break;
 			}
 
-			zend_resolve_non_class_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, &check_namespace TSRMLS_CC);
 
 			if(!compound) {
 				fetch_type |= IS_CONSTANT_UNQUALIFIED;
@@ -5631,7 +5686,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 		case ZEND_RT:
 			compound = memchr(Z_STRVAL(constant_name->u.constant), '\\', Z_STRLEN(constant_name->u.constant));
 
-			zend_resolve_non_class_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, &check_namespace TSRMLS_CC);
 
 			if(zend_constant_ct_subst(result, &constant_name->u.constant, 1 TSRMLS_CC)) {
 				break;
@@ -5774,18 +5829,32 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 	ALLOC_ZVAL(element);
 	*element = expr->u.constant;
 	if (offset) {
-		switch (offset->u.constant.type & IS_CONSTANT_TYPE_MASK) {
+		switch (Z_TYPE(offset->u.constant) & IS_CONSTANT_TYPE_MASK) {
 			case IS_CONSTANT:
 				/* Ugly hack to denote that this value has a constant index */
 				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
 				Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
 				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
 				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+2] = 0;
-				zend_symtable_update(result->u.constant.value.ht, Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3, &element, sizeof(zval *), NULL);
+				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
 				break;
+			case IS_CONSTANT_AST: {
+				/* Another ugly hack to store the data about the AST in the array */
+				char* key;
+				int len = sizeof(zend_ast *);
+				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
+
+				key = emalloc(len + 2);
+				*(zend_ast **)key = Z_AST(offset->u.constant);
+				key[len] = Z_TYPE(offset->u.constant);
+				key[len + 1] = 0;
+				zend_symtable_update(Z_ARRVAL(result->u.constant), key, len + 2, &element, sizeof(zval *), NULL);
+				efree(key);
+				break;
+			}
 			case IS_STRING:
-				zend_symtable_update(result->u.constant.value.ht, offset->u.constant.value.str.val, offset->u.constant.value.str.len+1, &element, sizeof(zval *), NULL);
+				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
 				break;
 			case IS_NULL:
@@ -5962,7 +6031,7 @@ void zend_do_fetch_static_variable(znode *varname, const znode *static_assignmen
 		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
 		zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 	}
-	zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
+	zend_hash_update(CG(active_op_array)->static_variables, Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant)+1, &tmp, sizeof(zval *), NULL);
 
 	if (varname->op_type == IS_CONST) {
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
@@ -6006,7 +6075,7 @@ void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC) 
 
 	if (Z_STRLEN(varname->u.constant) == sizeof("this") - 1 &&
 	    memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this") - 1) == 0) {
-		zend_error(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use $this as lexical variable");
 		return;
 	}
 
@@ -6091,7 +6160,7 @@ void zend_do_indirect_references(znode *result, const znode *num_references, zno
 	int i;
 
 	zend_do_end_variable_parse(variable, BP_VAR_R, 0 TSRMLS_CC);
-	for (i=1; i<num_references->u.constant.value.lval; i++) {
+	for (i=1; i<Z_LVAL(num_references->u.constant); i++) {
 		fetch_simple_variable_ex(result, variable, 0, ZEND_FETCH_R TSRMLS_CC);
 		*variable = *result;
 	}
@@ -6150,7 +6219,7 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 			/* empty(func()) can be transformed to !func() */
 			zend_do_unary_op(ZEND_BOOL_NOT, result, variable TSRMLS_CC);
 		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot use isset() on the result of a function call (you can use \"null !== func()\" instead)");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use isset() on the result of a function call (you can use \"null !== func()\" instead)");
 		}
 
 		return;
@@ -6198,7 +6267,7 @@ void zend_do_instanceof(znode *result, const znode *expr, const znode *class_zno
 	}
 
 	if (expr->op_type == IS_CONST) {
-		zend_error(E_COMPILE_ERROR, "instanceof expects an object instance, constant given");
+		zend_error_noreturn(E_COMPILE_ERROR, "instanceof expects an object instance, constant given");
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -6289,10 +6358,10 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 
 	if ((key->op_type != IS_UNUSED)) {
 		if (key->EA & ZEND_PARSED_REFERENCE_VARIABLE) {
-			zend_error(E_COMPILE_ERROR, "Key element cannot be a reference");
+			zend_error_noreturn(E_COMPILE_ERROR, "Key element cannot be a reference");
 		}
 		if (key->EA & ZEND_PARSED_LIST_EXPR) {
-			zend_error(E_COMPILE_ERROR, "Cannot use list as key element");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use list as key element");
 		}
 	}
 
@@ -6311,7 +6380,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 		while (fetch != end) {
 			--fetch;
 			if (fetch->opcode == ZEND_FETCH_DIM_W && fetch->op2_type == IS_UNUSED) {
-				zend_error(E_COMPILE_ERROR, "Cannot use [] for reading");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use [] for reading");
 			}
 			if (fetch->opcode == ZEND_SEPARATE) {
 				MAKE_NOP(fetch);
@@ -6325,7 +6394,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 
 	if (value->EA & ZEND_PARSED_LIST_EXPR) {
 		if (!CG(list_llist).head) {
-			zend_error(E_COMPILE_ERROR, "Cannot use empty list");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 		}
 		zend_do_list_end(&dummy, &value_node TSRMLS_CC);
 		zend_do_free(&dummy TSRMLS_CC);
@@ -6388,12 +6457,12 @@ void zend_do_declare_begin(TSRMLS_D) /* {{{ */
 
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 {
-	if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "ticks", sizeof("ticks")-1)) {
+	if (!zend_binary_strcasecmp(Z_STRVAL(var->u.constant), Z_STRLEN(var->u.constant), "ticks", sizeof("ticks")-1)) {
 		convert_to_long(&val->u.constant);
 		CG(declarables).ticks = val->u.constant;
-	} else if (!zend_binary_strcasecmp(var->u.constant.value.str.val, var->u.constant.value.str.len, "encoding", sizeof("encoding")-1)) {
+	} else if (!zend_binary_strcasecmp(Z_STRVAL(var->u.constant), Z_STRLEN(var->u.constant), "encoding", sizeof("encoding")-1)) {
 		if ((Z_TYPE(val->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-			zend_error(E_COMPILE_ERROR, "Cannot use constants as encoding");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use constants as encoding");
 		}
 
 		/*
@@ -6412,7 +6481,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 			}
 
 			if (num > 0) {
-				zend_error(E_COMPILE_ERROR, "Encoding declaration pragma must be the very first statement in the script");
+				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be the very first statement in the script");
 			}
 		}
 
@@ -6423,9 +6492,9 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 			CG(encoding_declared) = 1;
 
 			convert_to_string(&val->u.constant);
-			new_encoding = zend_multibyte_fetch_encoding(val->u.constant.value.str.val TSRMLS_CC);
+			new_encoding = zend_multibyte_fetch_encoding(Z_STRVAL(val->u.constant) TSRMLS_CC);
 			if (!new_encoding) {
-				zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", val->u.constant.value.str.val);
+				zend_error(E_COMPILE_WARNING, "Unsupported encoding [%s]", Z_STRVAL(val->u.constant));
 			} else {
 				old_input_filter = LANG_SCNG(input_filter);
 				old_encoding = LANG_SCNG(script_encoding);
@@ -6442,7 +6511,7 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC) /* {{{ */
 		}
 		zval_dtor(&val->u.constant);
 	} else {
-		zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", var->u.constant.value.str.val);
+		zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", Z_STRVAL(var->u.constant));
 		zval_dtor(&val->u.constant);
 	}
 	zval_dtor(&var->u.constant);
@@ -6682,10 +6751,9 @@ void zend_do_ticks(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashval TSRMLS_DC) /* {{{ */
+zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hash TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
-	ulong hash = hashval ? hashval : zend_hash_func(name, name_len+1);
 
 	if (zend_hash_quick_find(CG(auto_globals), name, name_len+1, hash, (void **) &auto_global)==SUCCESS) {
 		if (auto_global->armed) {
@@ -6699,7 +6767,7 @@ zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashv
 
 zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC) /* {{{ */
 {
-	return zend_is_auto_global_quick(name, name_len, 0 TSRMLS_CC);
+	return zend_is_auto_global_quick(name, name_len, zend_hash_func(name, name_len+1) TSRMLS_CC);
 }
 /* }}} */
 
@@ -6909,15 +6977,15 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 		if (CG(current_namespace)) {
 			/* previous namespace declarations were unbracketed */
 			if (with_bracket) {
-				zend_error(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
 			}
 		}
 	} else {
 		/* previous namespace declarations were bracketed */
 		if (!with_bracket) {
-			zend_error(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot mix bracketed namespace declarations with unbracketed namespace declarations");
 		} else if (CG(current_namespace) || CG(in_namespace)) {
-			zend_error(E_COMPILE_ERROR, "Namespace declarations cannot be nested");
+			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declarations cannot be nested");
 		}
 	}
 
@@ -6930,7 +6998,7 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 			--num;
 		}
 		if (num > 0) {
-			zend_error(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
+			zend_error_noreturn(E_COMPILE_ERROR, "Namespace declaration statement has to be the very first statement in the script");
 		}
 	}
 
@@ -6945,7 +7013,7 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 		      !memcmp(lcname, "self", sizeof("self")-1)) ||
 		    ((Z_STRLEN(name->u.constant) == sizeof("parent")-1) &&
 	          !memcmp(lcname, "parent", sizeof("parent")-1))) {
-			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", Z_STRVAL(name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", Z_STRVAL(name->u.constant));
 		}
 		efree(lcname);
 
@@ -6969,6 +7037,18 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 		CG(current_import) = NULL;
 	}
 
+	if (CG(current_import_function)) {
+		zend_hash_destroy(CG(current_import_function));
+		efree(CG(current_import_function));
+		CG(current_import_function) = NULL;
+	}
+
+	if (CG(current_import_const)) {
+		zend_hash_destroy(CG(current_import_const));
+		efree(CG(current_import_const));
+		CG(current_import_const) = NULL;
+	}
+
 	if (CG(doc_comment)) {
 		efree(CG(doc_comment));
 		CG(doc_comment) = NULL;
@@ -6989,8 +7069,8 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		zend_hash_init(CG(current_import), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	ALLOC_ZVAL(ns);
-	*ns = ns_name->u.constant;
+	MAKE_STD_ZVAL(ns);
+	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
 	if (new_name) {
 		name = &new_name->u.constant;
 	} else {
@@ -7003,8 +7083,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		if (p) {
 			ZVAL_STRING(name, p+1, 1);
 		} else {
-			*name = *ns;
-			zval_copy_ctor(name);
+			ZVAL_ZVAL(name, ns, 1, 0);
 			warn = !is_global && !CG(current_namespace);
 		}
 	}
@@ -7015,7 +7094,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 				!memcmp(lcname, "self", sizeof("self")-1)) ||
 			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
 	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 
 	if (CG(current_namespace)) {
@@ -7030,7 +7109,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 
 			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
 				memcmp(tmp2, c_ns_name, Z_STRLEN_P(ns))) {
-				zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(tmp2);
 		}
@@ -7042,17 +7121,17 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 
 		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
 			memcmp(c_tmp, lcname, Z_STRLEN_P(ns))) {
-			zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 		}
 		efree(c_tmp);
 	}
 
 	if (zend_hash_add(CG(current_import), lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
 		if (!strcmp(Z_STRVAL_P(name), "strict")) {
-			zend_error(E_COMPILE_ERROR, "You seem to be trying to use a different language...");
+			zend_error_noreturn(E_COMPILE_ERROR, "You seem to be trying to use a different language...");
 		}
 		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
 	}
@@ -7061,16 +7140,124 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int is_function, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
+{
+	char *lookup_name;
+	zval *name, *ns, tmp;
+	zend_bool warn = 0;
+
+	MAKE_STD_ZVAL(ns);
+	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
+	if (new_name) {
+		name = &new_name->u.constant;
+	} else {
+		const char *p;
+
+		/* The form "use A\B" is eqivalent to "use A\B as B".
+		   So we extract the last part of compound name to use as a new_name */
+		name = &tmp;
+		p = zend_memrchr(Z_STRVAL_P(ns), '\\', Z_STRLEN_P(ns));
+		if (p) {
+			ZVAL_STRING(name, p+1, 1);
+		} else {
+			ZVAL_ZVAL(name, ns, 1, 0);
+			warn = !is_global && !CG(current_namespace);
+		}
+	}
+
+	if (case_sensitive) {
+		lookup_name = estrndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	} else {
+		lookup_name = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	}
+
+	if (CG(current_namespace)) {
+		/* Prefix import name with current namespace name to avoid conflicts with functions/consts */
+		char *c_ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) + 1);
+
+		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
+		c_ns_name[Z_STRLEN_P(CG(current_namespace))] = '\\';
+		memcpy(c_ns_name+Z_STRLEN_P(CG(current_namespace))+1, lookup_name, Z_STRLEN_P(name)+1);
+		if (zend_hash_exists(lookup_table, c_ns_name, Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name)+1)) {
+			char *tmp2 = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
+				memcmp(tmp2, c_ns_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(tmp2);
+		}
+		efree(c_ns_name);
+	} else if (is_function) {
+		zend_function *function;
+
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && function->type == ZEND_USER_FUNCTION && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use function %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(c_tmp);
+		}
+	} else {
+		const char *filename;
+
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use const %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(c_tmp);
+		}
+	}
+
+	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
+		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+	}
+	if (warn) {
+		zend_error(E_WARNING, "The use %s statement with non-compound name '%s' has no effect", is_function ? "function" : "const", Z_STRVAL_P(name));
+	}
+	efree(lookup_name);
+	zval_dtor(name);
+}
+/* }}} */
+
+void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+{
+	if (!CG(current_import_function)) {
+		CG(current_import_function) = emalloc(sizeof(HashTable));
+		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zend_do_use_non_class(ns_name, new_name, is_global, 1, 0, CG(current_import_function), CG(function_table) TSRMLS_CC);
+}
+/* }}} */
+
+void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+{
+	if (!CG(current_import_const)) {
+		CG(current_import_const) = emalloc(sizeof(HashTable));
+		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zend_do_use_non_class(ns_name, new_name, is_global, 0, 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
+}
+/* }}} */
+
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+	zval **ns_name;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
-		zend_error(E_COMPILE_ERROR, "Arrays are not allowed as constants");
+		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed as constants");
 	}
 
 	if (zend_get_ct_const(&name->u.constant, 0 TSRMLS_CC)) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare constant '%s'", Z_STRVAL(name->u.constant));
 	}
 
 	if (CG(current_namespace)) {
@@ -7084,18 +7271,33 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 		*name = tmp;
 	}
 
+	/* Constant name must not conflict with import names */
+	if (CG(current_import_const) &&
+	    zend_hash_find(CG(current_import_const), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+
+		char *tmp = estrndup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+
+		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(name->u.constant) ||
+			memcmp(tmp, Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant))) {
+			zend_error(E_COMPILE_ERROR, "Cannot declare const %s because the name is already in use", Z_STRVAL(name->u.constant));
+		}
+		efree(tmp);
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_DECLARE_CONST;
 	SET_UNUSED(opline->result);
 	SET_NODE(opline->op1, name);
 	SET_NODE(opline->op2, value);
+
+	zend_hash_add(&CG(const_filenames), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 }
 /* }}} */
 
 void zend_verify_namespace(TSRMLS_D) /* {{{ */
 {
 	if (CG(has_bracketed_namespaces) && !CG(in_namespace)) {
-		zend_error(E_COMPILE_ERROR, "No code may exist outside of namespace {}");
+		zend_error_noreturn(E_COMPILE_ERROR, "No code may exist outside of namespace {}");
 	}
 }
 /* }}} */
@@ -7113,6 +7315,16 @@ void zend_do_end_namespace(TSRMLS_D) /* {{{ */
 		efree(CG(current_import));
 		CG(current_import) = NULL;
 	}
+	if (CG(current_import_function)) {
+		zend_hash_destroy(CG(current_import_function));
+		efree(CG(current_import_function));
+		CG(current_import_function) = NULL;
+	}
+	if (CG(current_import_const)) {
+		zend_hash_destroy(CG(current_import_const));
+		efree(CG(current_import_const));
+		CG(current_import_const) = NULL;
+	}
 }
 /* }}} */
 
@@ -7120,6 +7332,21 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 {
 	CG(has_bracketed_namespaces) = 0;
 	zend_do_end_namespace(TSRMLS_C);
+}
+/* }}} */
+
+void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
+{
+	if (ast->kind == ZEND_CONST) {
+		result->u.constant = *ast->u.val;
+		efree(ast);
+	} else if (zend_ast_is_ct_constant(ast)) {
+		zend_ast_evaluate(&result->u.constant, ast, NULL TSRMLS_CC);
+		zend_ast_destroy(ast);
+	} else {
+		Z_TYPE(result->u.constant) = IS_CONSTANT_AST;
+		Z_AST(result->u.constant) = ast;
+	}
 }
 /* }}} */
 

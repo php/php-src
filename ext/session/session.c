@@ -505,8 +505,17 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		*/
 	}
 	if (val) {
+		PHP_MD5_CTX context;
+
+		/* Store read data's MD5 hash */
+		PHP_MD5Init(&context);
+		PHP_MD5Update(&context, val, vallen);
+		PHP_MD5Final(PS(session_data_hash), &context);
+
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
+	} else {
+			memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
@@ -529,7 +538,19 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
-				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				PHP_MD5_CTX context;
+				unsigned char digest[16];
+
+				/* Generate data's MD5 hash */
+				PHP_MD5Init(&context);
+				PHP_MD5Update(&context, val, vallen);
+				PHP_MD5Final(digest, &context);
+				/* Write only when save is required */
+				if (memcmp(digest, PS(session_data_hash), 16)) {
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				} else {
+					ret = SUCCESS;
+				}
 				efree(val);
 			} else {
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
@@ -727,6 +748,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 }
 #endif /* HAVE_HASH_EXT }}} */
 
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "session.configuration 'session.hash_function' must be existing hash function. %s does not exist.", new_value);
 	return FAILURE;
 }
 /* }}} */
@@ -1567,6 +1589,26 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+static void php_session_abort(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		PS(session_status) = php_session_none;
+		if (PS(mod_data) || PS(mod_user_implemented)) {
+			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
+static void php_session_reset(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		php_session_initialize(TSRMLS_C);
+	}
+}
+/* }}} */
+
+
 PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC) /* {{{ */
 {
 	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
@@ -1681,6 +1723,31 @@ static PHP_FUNCTION(session_module_name)
 		PS(mod_data) = NULL;
 
 		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed session_serializer_name([string newname])
+   Return the current serializer name used for encode/decode session data. If newname is given, the serialzer name is replaced with newname and return bool */
+static PHP_FUNCTION(session_serializer_name)
+{
+	char *name = NULL;
+	int name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+		return;
+	}
+
+	/* Return serializer name */
+	if (!name) {
+		RETURN_STRING(zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0), 1);
+	}
+
+	/* Set serializer name */
+	if (zend_alter_ini_entry("session.serialize_handler", sizeof("session.serialize_handler"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -2048,6 +2115,22 @@ static PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
+/* {{{ proto void session_abort(void)
+   Abort session and end session. Session data will not be written */
+static PHP_FUNCTION(session_abort)
+{
+	php_session_abort(TSRMLS_C);
+}
+/* }}} */
+
+/* {{{ proto void session_reset(void)
+   Reset session data from saved session data */
+static PHP_FUNCTION(session_reset)
+{
+	php_session_reset(TSRMLS_C);
+}
+/* }}} */
+
 /* {{{ proto int session_status(void)
    Returns the current session status */
 static PHP_FUNCTION(session_status)
@@ -2057,6 +2140,39 @@ static PHP_FUNCTION(session_status)
 	}
 
 	RETURN_LONG(PS(session_status));
+}
+/* }}} */
+
+/* {{{ proto int session_gc([int maxlifetime])
+   Execute garbage collection returns number of deleted data */
+static PHP_FUNCTION(session_gc)
+{
+	int nrdels = -1;
+	long maxlifetime = PS(gc_maxlifetime);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &maxlifetime) == FAILURE) {
+		return;
+	}
+
+	/* Session must be active to have PS(mod) */
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to garbage collect without active session");
+		RETURN_FALSE;
+	}
+
+	if (!PS(mod) || !PS(mod)->s_gc) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session save handler does not have gc()");
+		RETURN_FALSE;
+	}
+	PS(mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC);
+
+	if (nrdels < 0) {
+		/* Files save handler return -1 if there is not a permission to remove.
+		   Save handlder should return negative nrdels when something wrong. */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session gc failed. Check permission or session storage");
+		RETURN_FALSE;
+	}
+	RETURN_LONG((long)nrdels);
 }
 /* }}} */
 
@@ -2106,6 +2222,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_module_name, 0, 0, 0)
 	ZEND_ARG_INFO(0, module)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_serializer_name, 0, 0, 0)
+	ZEND_ARG_INFO(0, module)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_save_path, 0, 0, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -2151,6 +2271,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
 	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_session_gc, 0)
+	ZEND_ARG_INFO(0, maxlifetime)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
 	ZEND_ARG_INFO(0, save_path)
 	ZEND_ARG_INFO(0, session_name)
@@ -2185,6 +2309,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry session_functions[] = {
 	PHP_FE(session_name,              arginfo_session_name)
 	PHP_FE(session_module_name,       arginfo_session_module_name)
+	PHP_FE(session_serializer_name,   arginfo_session_serializer_name)
 	PHP_FE(session_save_path,         arginfo_session_save_path)
 	PHP_FE(session_id,                arginfo_session_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
@@ -2199,7 +2324,10 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
 	PHP_FE(session_get_cookie_params, arginfo_session_void)
 	PHP_FE(session_write_close,       arginfo_session_void)
+	PHP_FE(session_abort,             arginfo_session_void)
+	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
+	PHP_FE(session_gc,                arginfo_session_gc)
 	PHP_FE(session_register_shutdown, arginfo_session_void)
 	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
 	PHP_FE_END

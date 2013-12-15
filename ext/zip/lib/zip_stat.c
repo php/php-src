@@ -37,13 +37,13 @@
 
 
 
-ZIP_EXTERN(int)
-zip_stat(struct zip *za, const char *fname, int flags, struct zip_stat *st)
+ZIP_EXTERN int
+zip_stat(struct zip *za, const char *fname, zip_flags_t flags, struct zip_stat *st)
 {
-    int idx;
+    zip_int64_t idx;
 
     if ((idx=zip_name_locate(za, fname, flags)) < 0)
 	return -1;
 
-    return zip_stat_index(za, idx, flags, st);
+    return zip_stat_index(za, (zip_uint64_t)idx, flags, st);
 }

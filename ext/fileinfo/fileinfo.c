@@ -497,7 +497,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		case FILEINFO_MODE_FILE:
 		{
 			/* determine if the file is a local file or remote URL */
-			char *tmp2;
+			const char *tmp2;
 			php_stream_wrapper *wrap;
 			php_stream_statbuf ssb;
 

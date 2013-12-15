@@ -223,10 +223,14 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",		STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_CLIENT",	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",		STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",  STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,  CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",  STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,  CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",		STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",		STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_SERVER",	STREAM_CRYPTO_METHOD_SSLv23_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",		STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",  STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,  CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",  STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,  CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
@@ -1284,7 +1288,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1299,7 +1303,7 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1623,7 +1627,7 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1631,7 +1635,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 /* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1639,7 +1643,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 
 /* {{{ php_copy_file_ctx
  */
-PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;

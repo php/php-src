@@ -47,7 +47,7 @@ bool(false)
 Warning: gmp_strval() expects parameter 2 to be long, string given in %s on line %d
 NULL
 
-Warning: gmp_strval(): supplied resource is not a valid GMP integer resource in %s on line %d
+Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 string(7) "9765456"
 

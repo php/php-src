@@ -18,7 +18,10 @@ var_dump(gmp_strval(gmp_init("993247326237679187178",3)));
 echo "Done\n";
 ?>
 --EXPECTF--	
-resource(%d) of type (GMP integer)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(8) "98765678"
+}
 string(8) "98765678"
 
 Warning: gmp_init() expects at least 1 parameter, 0 given in %s on line %d

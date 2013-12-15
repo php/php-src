@@ -129,105 +129,105 @@ echo "Done\n";
 None
 int(4)
 array(2) {
-  [%u|b%"ID"]=>
+  ["ID"]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
-  [%u|b%"VALUE"]=>
+  ["VALUE"]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_ASSOC
 int(4)
 array(2) {
-  [%u|b%"ID"]=>
+  ["ID"]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
-  [%u|b%"VALUE"]=>
+  ["VALUE"]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_COLUMN
 int(4)
 array(2) {
-  [%u|b%"ID"]=>
+  ["ID"]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
-  [%u|b%"VALUE"]=>
+  ["VALUE"]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_COLUMN|OCI_ASSOC
 int(4)
 array(2) {
-  [%u|b%"ID"]=>
+  ["ID"]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
-  [%u|b%"VALUE"]=>
+  ["VALUE"]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_COLUMN|OCI_NUM
@@ -236,24 +236,24 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
   [1]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_COLUMN|OCI_NUM|OCI_ASSOC
@@ -262,24 +262,24 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
   [1]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW
@@ -287,31 +287,31 @@ int(4)
 array(4) {
   [0]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-1"
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(2) "-1"
   }
   [1]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-2"
+    ["ID"]=>
+    string(1) "2"
+    ["VALUE"]=>
+    string(2) "-2"
   }
   [2]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-3"
+    ["ID"]=>
+    string(1) "3"
+    ["VALUE"]=>
+    string(2) "-3"
   }
   [3]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "4"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-4"
+    ["ID"]=>
+    string(1) "4"
+    ["VALUE"]=>
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_ASSOC
@@ -319,31 +319,31 @@ int(4)
 array(4) {
   [0]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-1"
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(2) "-1"
   }
   [1]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-2"
+    ["ID"]=>
+    string(1) "2"
+    ["VALUE"]=>
+    string(2) "-2"
   }
   [2]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-3"
+    ["ID"]=>
+    string(1) "3"
+    ["VALUE"]=>
+    string(2) "-3"
   }
   [3]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "4"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-4"
+    ["ID"]=>
+    string(1) "4"
+    ["VALUE"]=>
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_FETCHSTATEMENT_BY_COLUMN
@@ -351,31 +351,31 @@ int(4)
 array(4) {
   [0]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-1"
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(2) "-1"
   }
   [1]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-2"
+    ["ID"]=>
+    string(1) "2"
+    ["VALUE"]=>
+    string(2) "-2"
   }
   [2]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-3"
+    ["ID"]=>
+    string(1) "3"
+    ["VALUE"]=>
+    string(2) "-3"
   }
   [3]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "4"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-4"
+    ["ID"]=>
+    string(1) "4"
+    ["VALUE"]=>
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_FETCHSTATEMENT_BY_COLUMN|OCI_ASSOC
@@ -383,31 +383,31 @@ int(4)
 array(4) {
   [0]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-1"
+    ["ID"]=>
+    string(1) "1"
+    ["VALUE"]=>
+    string(2) "-1"
   }
   [1]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-2"
+    ["ID"]=>
+    string(1) "2"
+    ["VALUE"]=>
+    string(2) "-2"
   }
   [2]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "3"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-3"
+    ["ID"]=>
+    string(1) "3"
+    ["VALUE"]=>
+    string(2) "-3"
   }
   [3]=>
   array(2) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "4"
-    [%u|b%"VALUE"]=>
-    %unicode|string%(2) "-4"
+    ["ID"]=>
+    string(1) "4"
+    ["VALUE"]=>
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_FETCHSTATEMENT_BY_COLUMN|OCI_NUM
@@ -416,30 +416,30 @@ array(4) {
   [0]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
   }
   [1]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
   }
   [2]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [1]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
   }
   [3]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
     [1]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_FETCHSTATEMENT_BY_COLUMN|OCI_NUM|OCI_ASSOC
@@ -448,30 +448,30 @@ array(4) {
   [0]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
   }
   [1]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
   }
   [2]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [1]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
   }
   [3]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
     [1]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_NUM
@@ -480,30 +480,30 @@ array(4) {
   [0]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
   }
   [1]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
   }
   [2]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [1]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
   }
   [3]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
     [1]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_FETCHSTATEMENT_BY_ROW|OCI_NUM|OCI_ASSOC
@@ -512,30 +512,30 @@ array(4) {
   [0]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
   }
   [1]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
   }
   [2]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [1]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
   }
   [3]=>
   array(2) {
     [0]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
     [1]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_NUM
@@ -544,24 +544,24 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
   [1]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 OCI_NUM|OCI_ASSOC
@@ -570,24 +570,24 @@ array(2) {
   [0]=>
   array(4) {
     [0]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
     [2]=>
-    %unicode|string%(1) "3"
+    string(1) "3"
     [3]=>
-    %unicode|string%(1) "4"
+    string(1) "4"
   }
   [1]=>
   array(4) {
     [0]=>
-    %unicode|string%(2) "-1"
+    string(2) "-1"
     [1]=>
-    %unicode|string%(2) "-2"
+    string(2) "-2"
     [2]=>
-    %unicode|string%(2) "-3"
+    string(2) "-3"
     [3]=>
-    %unicode|string%(2) "-4"
+    string(2) "-4"
   }
 }
 Done

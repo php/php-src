@@ -1010,7 +1010,7 @@ ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
 {
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));
 
-	_zend_hash_init(Z_ARRVAL_P(arg), size, NULL, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init(Z_ARRVAL_P(arg), size, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
 	Z_TYPE_P(arg) = IS_ARRAY;
 	return SUCCESS;
 }
@@ -1053,8 +1053,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 static int zval_update_class_constant(zval **pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
-	if ((Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
-	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {	    
+	if (IS_CONSTANT_TYPE(Z_TYPE_PP(pp))) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
 		if ((*scope)->parent) {
@@ -1078,7 +1077,7 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 				}				
 				ce = ce->parent;
 			} while (ce);
-			
+
 		}
 		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
 	}
@@ -2029,7 +2028,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	const zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
-	int count=0, unload=0, result=0;
+	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
@@ -2037,6 +2036,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int fname_len;
 	const char *lc_class_name = NULL;
 	int class_name_len = 0;
+	zend_ulong hash;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2089,15 +2089,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			} else {
 				internal_function->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (ptr->arg_info[ptr->num_args].is_variadic) {
+				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			internal_function->arg_info = NULL;
@@ -2135,16 +2131,25 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		fname_len = strlen(ptr->fname);
 		lowercase_name = zend_new_interned_string(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
-		if (IS_INTERNED(lowercase_name)) {
-			result = zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, INTERNED_HASH(lowercase_name), &function, sizeof(zend_function), (void**)&reg_function);
-		} else {
-			result = zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function);
-		}
-		if (result == FAILURE) {
+		hash = str_hash(lowercase_name, fname_len);
+		if (zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, hash, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			str_efree(lowercase_name);
 			break;
 		}
+
+		/* If types of arguments have to be checked */
+		if (reg_function->common.arg_info && reg_function->common.num_args) {
+			int i;
+			for (i = 0; i < reg_function->common.num_args; i++) {
+				if (reg_function->common.arg_info[i].class_name ||
+				    reg_function->common.arg_info[i].type_hint) {
+				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+					break;
+				}
+			}
+		}
+
 		if (scope) {
 			/* Look for ctor, dtor, clone
 			 * If it's an old-style constructor, store it only if we don't have
@@ -2388,7 +2393,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 }
 /* }}} */
 
-void zend_activate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_activate_modules(TSRMLS_D) /* {{{ */
 {
 	zend_module_entry **p = module_request_startup_handlers;
 
@@ -2417,7 +2422,7 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_deactivate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 {
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
@@ -2464,7 +2469,7 @@ static int exec_done_cb(zend_module_entry *module TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
+ZEND_API void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
 		zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
@@ -2493,6 +2498,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
 	char *lowercase_name = emalloc(orig_class_entry->name_length + 1);
+	zend_ulong hash;
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -2506,11 +2512,8 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
 	lowercase_name = (char*)zend_new_interned_string(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
-	if (IS_INTERNED(lowercase_name)) {
-		zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, INTERNED_HASH(lowercase_name), &class_entry, sizeof(zend_class_entry *), NULL);
-	} else {
-		zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
-	}
+	hash = str_hash(lowercase_name, class_entry->name_length);
+	zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, hash, &class_entry, sizeof(zend_class_entry *), NULL);
 	str_efree(lowercase_name);
 	return class_entry;
 }

@@ -2686,14 +2686,14 @@ EOF
   fi
   for arg in $ac_configure_args; do
     if test `expr -- $arg : "'.*"` = 0; then
-      if test `expr -- $arg : "--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "-.*"` = 0 && test `expr -- $arg : ".*=.*"` = 0; then
+        continue;
       fi
       echo "'[$]arg' \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
     else
-      if test `expr -- $arg : "'--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "'-.*"` = 0 && test `expr -- $arg : "'.*=.*"` = 0; then
+        continue;
       fi
       echo "[$]arg \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
@@ -3011,4 +3011,23 @@ $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
 EOF
     ;;
   esac
+])
+
+dnl
+dnl PHP_CHECK_STDINT_TYPES
+dnl
+AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
+  AC_CHECK_SIZEOF([short], 2)
+  AC_CHECK_SIZEOF([int], 4)
+  AC_CHECK_SIZEOF([long], 4)
+  AC_CHECK_SIZEOF([long long], 8)
+  AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
+#if HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+  ])
+  AC_DEFINE([PHP_HAVE_STDINT_TYPES], [1], [Checked for stdint types])
 ])

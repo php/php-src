@@ -1,486 +1,163 @@
 $Id$
 
-PHP 5.5 UPGRADE NOTES
+PHP X.Y UPGRADE NOTES
 
-1.  Backward Incompatible Changes
-2.  New Features
-2.  Changes in SAPI modules
-3.  Deprecated Functionality
-4.  Changed Functions
-5.  New Functions
-6.  New Classes and Interfaces
-7.  Removed Extensions
-8.  Other Changes to Extensions
-9.  New Global Constants
+1. Backward Incompatible Changes
+2. New Features
+2. Changes in SAPI modules
+3. Deprecated Functionality
+4. Changed Functions
+5. New Functions
+6. New Classes and Interfaces
+7. Removed Extensions
+8. Other Changes to Extensions
+9. New Global Constants
 10. Changes to INI File Handling
-11. Windows Support
-12. Other Changes
+11. Other Changes
 
 
 ========================================
 1. Backward Incompatible Changes
 ========================================
 
-- Dropped Windows XP and 2003 support. (Pierre)
+- Core:
+  Removed $HTTP_RAW_POST_DATA global variable. Restore backwards compatibility 
+  by:
+  <?php
+  global $HTTP_RAW_POST_DATA;
+  if (!isset($HTTP_RAW_POST_DATA)) {
+      $HTTP_RAW_POST_DATA = file_get_contents("php://input");
+  }
+  ?>
 
-- All internal case insensitivity handling for class, function and constant
-  names is done according to ASCII rules.  Current locale settings are ignored.
-
-- self, parent & static keywords now are always case-insensitive (see bug
-  #60833).
-
-- Removed Logo GUIDs: php_logo_guid(), php_egg_logo_guid(),
-  php_real_logo_guid() and zend_logo_guid()
+- JSON:
+  json_decode() no longer accepts non-lowercase variants of lone JSON true,
+  false or null values. For example, True or FALSE will now cause json_decode to
+  return NULL and set an error value you can fetch with json_last_error().
+  This affects JSON texts consisting solely of true, false or null. Text
+  containing non-lowercase values inside JSON arrays or objects has never been
+  accepted.
 
 ========================================
 2. New Features
 ========================================
 
-- Support list in foreach. (Laruence)
-  (http://php.net/foreach#control-structures.foreach.list,
-  http://wiki.php.net/rfc/foreachlist)
+- Added constant scalar expressions syntax
+  (https://wiki.php.net/rfc/const_scalar_exprs)
 
-- Support "finally" keyword. (Laruence)
-  (http://php.net/exceptions, http://wiki.php.net/rfc/finally)
+- Added dedicated syntax for variadic functions.
+  (https://wiki.php.net/rfc/variadics)
 
-- Support constant array/string dereferencing. (Laruence)
-  (http://php.net/manual/en/language.types.array.php,
-   https://wiki.php.net/rfc/constdereference)
+- The php://input stream is now re-usable and can be used concurrently with 
+  enable_post_data_reading=0.
 
-- Add support for using empty() on the result of function calls and
-  other expressions. Thus it is now possible to write empty(getArray()),
-  for example. (http://php.net/manual/en/function.empty.php,
-  https://wiki.php.net/rfc/empty_isset_exprs)
+- Added gost-crypto (CryptoPro S-box) hash algo.
 
-- Added generators.
-  (http://php.net/generators, https://wiki.php.net/rfc/generators)
+- Added openssl certificate fingerprint support (inclusive stream context 
+  option).
 
-- ClassName::class syntax returning full class name for a class as a
-  string constant.  (http://php.net/oop5.basic,
-  https://wiki.php.net/rfc/class_name_scalars)
-
-- Added support for non-scalar Iterator keys in foreach.
-  (http://php.net/manual/en/control-structures.foreach.php,
-  https://wiki.php.net/rfc/foreach-non-scalar-keys).
-
-- Bundled Zend OPcache extension to improve performance
-  (http://php.net/manual/en/book.opcache.php,
-  https://wiki.php.net/rfc/optimizerplus)
-
-- Added a simplified password hashing API
-  (http://php.net/password, https://wiki.php.net/rfc/password_hash)
+- Added openssl crypto method stream context option.
 
 ========================================
 2. Changes in SAPI modules
 ========================================
 
-- Support for changing the process's title in CLI/CLI-Server
-  SAPIs. (Keyur)
-  (http://php.net/manual/en/function.cli-set-process-title.php,
-  http://php.net/manual/en/function.cli-get-process-title.php,
-  https://wiki.php.net/rfc/cli_process_title)
-
-- Support for systemd in php-fpm: Add --with-fpm-systemd option to
-  report health to systemd, and add systemd_interval option to
-  configure this. The service can now use Type=notify in the systemd
-  unit file. (Remi)
 
 ========================================
 3. Deprecated Functionality
 ========================================
 
-- The original MySQL extension is now deprecated and will generate
-  deprecation warnings when connecting to a database through
-  mysql_connect(), mysql_pconnect() or by establishing an implicit
-  connection. Use MySQLi or PDO instead.
-
-- The preg_replace /e modifier is now deprecated.  Use
-  preg_replace_callback instead.
-  (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
-
-- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
-  deprecated. Use IntlDateFormatter::setTimeZone() or
-  datefmt_set_timezone() instead.
-
-- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
-  E_DEPRECATED. Their use was already previously discouraged in the
-  documentation, but that predated the existence of E_DEPRECATED.
+- Incompatible context calls:
+  Instance calls from an incompatible context are now deprecated and issue
+  E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
 ========================================
 4. Changed Functions
 ========================================
 
-- pack()/unpack() had the following changes, which bring it more in
-  line with Perl's behavior: - Implemented format character "Z": NULL
-  padded string, with trailing NULL bytes removed.  - Changed format
-  character "a": this no longer removes trailing NULL bytes.  -
-  Changed format character "A": all trailing ASCII whitespace is now
-  removed (defined as spaces, tabs, \r, \n and NULL).
+- cURL:
+  CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
+  do not work unless it is explicitly set to false.
 
-- MessageFormatter::format() and related functions now accepted named
-  arguments and mixed numeric/named arguments in ICU 4.8+.
+- Crypt:
+  crypt() will now raise an E_NOTICE error if the salt parameter is omitted.
+  See: https://wiki.php.net/rfc/crypt_function_salt
 
-- MessageFormatter::format() and related functions now don't error out
-  when an insufficient argument count is provided. Instead, the
-  placeholders will remain unsubstituted.
-
-- MessageFormatter::parse() and MessageFormat::format() (and their
-  static equivalents) now don't throw away better than second
-  precision in the arguments.
-
-- IntlDateFormatter::__construct and datefmt_create() now accept for
-  the $timezone argument time zone identifiers, IntlTimeZone objects,
-  DateTimeZone objects and NULL. It used to accept only time zone
-  identifiers and NULL.  Invalid time zone identifiers are no longer
-  accepted. Empty strings are no longer accepted.
-
-- The default time zone used in IntlDateFormatter::__construct and
-  datefmt_create() (when the corresponding argument is not passed or
-  NULL is passed) is now the one given by date_default_timezone_get(),
-  not the default ICU time zone.
-
-- The time zone passed to the IntlDateFormatter is ignored if it is
-  NULL and if the calendar passed is an IntlCalendar object -- in this
-  case, the IntlCalendar's time zone will be used instead. Otherwise,
-  the time zone specified in the $timezone argument is used
-  instead. This does not affect old code, as IntlCalendar was
-  introduced in this version.
-
-- IntlDateFormatter::__construct and datefmt_create() now accept for
-  the $calendar argument also IntlCalendar objects.
-
-- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return
-  false if the IntlDateFormatter was set up with an IntlCalendar
-  instead of the constants
-  IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not exist
-  before this version.
-
-- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also
-  accept an IntlCalendar object, in which case its time zone is
-  taken. Passing a constant is still allowed, and still keeps the time
-  zone.
-
-- IntlDateFormatter::format() and datefmt_format() now also accept an
-  IntlCalendar object for formatting.
-
-- set_error_handler(NULL) can now be used to reset the error handler.
-  Furthermore both set_error_handler(NULL) and
-  set_exception_handler(NULL) will now return the previously defined
-  error/exception handler. Previously bool(true) was returned.
-
-- setcookie(), setrawcookie() and ext/session now send Max-Age headers
-  alongside Expires headers. (see
-  https://wiki.php.net/rfc/cookie_max-age)
-
-- curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile
-  object for safer file uploads (see
-  https://wiki.php.net/rfc/curl-file-upload)
-
-- Functions in the socket extension now do not emit warnings when the
-  errno is EAGAIN, EWOULDBLOCK or EINPROGRESS.
-
-- Since 5.5.2, spl_autoload_functions() returns different names for 
-  different lambda functions registered via spl_autoload_register().
-
-- Since 5.5.3, DOMDocument::schemaValidateSource() and 
-  DOMDocument::schemaValidate() accept flag parameter. Only flag 
-  available now is LIBXML_SCHEMA_CREATE. Default is 0.
-
-- Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
-  specify escape char.
+- XMLReader:
+  XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
+  the attribute could not be found, just like XMLReader::getAttribute.
 
 ========================================
 5. New Functions
 ========================================
 
-- Core:
-  - array_column()
-  - boolval()
-  - password_get_info()
-  - password_hash()
-  - password_needs_rehash()
-  - password_verify()
+- GMP:
+  Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.
 
-- cURL:
-  - curl_file_create
+- Openssl:
+  Added string openssl_x509_fingerprint($x509, $type, $binary).
 
-- GD
-  - imageflip
-  - imagecrop
-  - imagecropauto
-  - imagesetinterpolation
-  - imageaffine
-  - imageaffinematrixget
-  - imageaffinematrixconcat
-  - imagescale
+- LDAP:
+  Added ldap_escape($value, $ignore = "", $flags = 0).
 
-- Hash:
-  - hash_pbkdf2()
-
-- Intl:
-  - datefmt_format_object()
-  - datefmt_get_calendar_object()
-  - datefmt_get_timezone()
-  - datefmt_set_timezone()
-  - datefmt_get_calendar_object()
-  - intlcal_create_instance()
-  - intlcal_get_keyword_values_for_locale()
-  - intlcal_get_now()
-  - intlcal_get_available_locales()
-  - intlcal_get()
-  - intlcal_get_time()
-  - intlcal_set_time()
-  - intlcal_add()
-  - intlcal_set_time_zone()
-  - intlcal_after()
-  - intlcal_before()
-  - intlcal_set()
-  - intlcal_roll()
-  - intlcal_clear()
-  - intlcal_field_difference()
-  - intlcal_get_actual_maximum()
-  - intlcal_get_actual_minimum()
-  - intlcal_get_day_of_week_type()
-  - intlcal_get_first_day_of_week()
-  - intlcal_get_greatest_minimum()
-  - intlcal_get_least_maximum()
-  - intlcal_get_locale()
-  - intlcal_get_maximum()
-  - intlcal_get_minimal_days_in_first_week()
-  - intlcal_get_minimum()
-  - intlcal_get_time_zone()
-  - intlcal_get_type()
-  - intlcal_get_weekend_transition()
-  - intlcal_in_daylight_time()
-  - intlcal_is_equivalent_to()
-  - intlcal_is_lenient()
-  - intlcal_is_set()
-  - intlcal_is_weekend()
-  - intlcal_set_first_day_of_week()
-  - intlcal_set_lenient()
-  - intlcal_equals()
-  - intlcal_get_repeated_wall_time_option()
-  - intlcal_get_skipped_wall_time_option()
-  - intlcal_set_repeated_wall_time_option()
-  - intlcal_set_skipped_wall_time_option()
-  - intlcal_from_date_time()
-  - intlcal_to_date_time()
-  - intlcal_get_error_code()
-  - intlcal_get_error_message()
-  - intlgregcal_create_instance()
-  - intlgregcal_set_gregorian_change()
-  - intlgregcal_get_gregorian_change()
-  - intlgregcal_is_leap_year()
-  - intltz_create_time_zone()
-  - intltz_create_default()
-  - intltz_get_id()
-  - intltz_get_gmt()
-  - intltz_get_unknown()
-  - intltz_create_enumeration()
-  - intltz_count_equivalent_ids()
-  - intltz_create_time_zone_id_enumeration()
-  - intltz_get_canonical_id()
-  - intltz_get_region()
-  - intltz_get_tz_data_version()
-  - intltz_get_equivalent_id()
-  - intltz_use_daylight_time()
-  - intltz_get_offset()
-  - intltz_get_raw_offset()
-  - intltz_has_same_rules()
-  - intltz_get_display_name()
-  - intltz_get_dst_savings()
-  - intltz_from_date_time_zone()
-  - intltz_to_date_time_zone()
-  - intltz_get_error_code()
-  - intltz_get_error_message()
-
-  - IntlDateFormatter::formatObject()
-  - IntlDateFormatter::getCalendarObject()
-  - IntlDateFormatter::getTimeZone()
-  - IntlDateFormatter::setTimeZone()
-
-- Sockets:
-  - socket_sendmsg()
-  - socket_recvmsg()
-  - socket_cmsg_space()
-
-- SPL:
-  - SplFixedArray::__wakeup()
-  - SplDoublyLinkedList::add()
-  - RecursiveTreeIterator::getPostfix() (5.5.2)
-  - RecursiveTreeIterator::setPostfix() (5.5.2)
-
-- Zend OPcache:
- - opcache_get_configuration()
- - opcache_get_status()
- - opcache_reset()
+- Zip:
+  Added ZipArchive::setPassword($password)
 
 ========================================
 6. New Classes and Interfaces
 ========================================
 
-- Intl:
-  - IntlCalendar
-  - IntlGregorianCalendar
-  - IntlTimeZone
-  - IntlBreakIterator
-  - IntlRuleBasedBreakIterator
-  - IntlCodePointBreakIterator
-  - UConverter
-
-- cURL:
-  - CURLFile
 
 ========================================
 7. Removed Extensions
 ========================================
 
-None
 
 ========================================
 8. Other Changes to Extensions
 ========================================
 
-- Intl:
-  - This extension now requires ICU 4.0+.
-- Phar:
-  - Added ability of resolving alias created by Phar::map
+- GMP:
+  The GMP extension now uses objects as the underlying data structure, rather
+  than resources. GMP instances now support dumping, serialization, cloning,
+  casts to primitive types and have overloaded operators.
+  (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
+
+- OCI8:
+  - Added Implicit Result Set support for Oracle Database 12c with a
+    new oci_get_implicit_resultset() function.
+  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
+    unnecessarily initiates an internal ROLLBACK during connection
+    close.
+  - Added DTrace probes enabled with PHP's generic --enable-dtrace
+  - The oci_internal_debug() function is now a no-op.
+  - The phpinfo() output format for OCI8 has changed.
 
 ========================================
 9. New Global Constants
 ========================================
 
-- mysqli:
-  - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
-
-- cURL:
-  - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
-  - Added CURL_WRAPPERS_ENABLED to reflect --with-curlwrappers.
-
-- GD
-  - Added constants for imageflip:
-    . IMG_FLIP_HORIZONTAL
-    . IMG_FLIP_VERTICAL
-    . IMG_FLIP_BOTH
-  - Added constants for imagecrop
-    . IMG_CROP_DEFAULT
-    . IMG_CROP_TRANSPARENT
-    . IMG_CROP_BLACK
-    . IMG_CROP_WHITE
-    . IMG_CROP_SIDES
-    . IMG_CROP_THRESHOLD
-  - Added constants for imagesetinterpolation, used by imagescale
-    imagerotate and imageaffine:
-    . IMG_BELL
-    . IMG_BESSEL
-    . IMG_BILINEAR_FIXED
-    . IMG_BICUBIC
-    . IMG_BICUBIC_FIXED
-    . IMG_BLACKMAN
-    . IMG_BOX
-    . IMG_BSPLINE
-    . IMG_CATMULLROM
-    . IMG_GAUSSIAN
-    . IMG_GENERALIZED_CUBIC
-    . IMG_HERMITE
-    . IMG_HAMMING
-    . IMG_HANNING
-    . IMG_MITCHELL
-    . IMG_POWER
-    . IMG_QUADRATIC
-    . IMG_SINC
-    . IMG_NEAREST_NEIGHBOUR
-    . IMG_WEIGHTED4
-    . IMG_TRIANGLE
-  - Added constants for imageaffinematrixget
-    . IMG_AFFINE_TRANSLATE
-    . IMG_AFFINE_SCALE
-    . IMG_AFFINE_ROTATE
-    . IMG_AFFINE_SHEAR_HORIZONTAL
-    . IMG_AFFINE_SHEAR_VERTICAL
+- LDAP:
+  LDAP_ESCAPE_FILTER int(1)
+  LDAP_ESCAPE_DN     int(2)
 
 ========================================
 10. Changes to INI File Handling
 ========================================
 
 - Core:
-  - Added sys_temp_dir INI directive, for specifying temporary
-    directory.
-
-- Intl:
-  - Added intl.use_exceptions INI directive, which controls what
-    happens when global errors are set together with intl.error_level.
-
-- MSSQL:
-  - mssql.compatability_mode renamed to mssql.compatibility_mode in 5.5.2,
-    old directive still supported for BC reasons.
-
-- mysqlnd:
-  - Added mysqlnd.sha256_server_public_key INI PERDIR setting that
-    affects all APIs which use(are built) for mysqlnd. This allows
-    ext/mysqli to be used with the new auth protocol, although at
-    coarser level.
-
-- Sessions:
-  - Added session.use_strict_mode in 5.5.3, which prevents session
-    fixation attacks and session collisions. 
-    See also https://wiki.php.net/rfc/strict_sessions
-
-- Zend OPcache (See http://php.net/manual/en/book.opcache.php)
-  - Added the following directives:
-    - opcache.enable (default "1")
-    - opcache.memory_consumption (default "64")
-    - opcache.interned_strings_buffer (default "4")
-    - opcache.max_accelerated_files (default "2000")
-    - opcache.max_wasted_percentage (default "5")
-    - opcache.use_cwd (default "1")
-    - opcache.validate_timestamps (default "1")
-    - opcache.revalidate_freq (default "2")
-    - opcache.revalidate_path (default "0")
-    - opcache.save_comments (default "1")
-    - opcache.load_comments (default "1")
-    - opcache.fast_shutdown (default "0")
-    - opcache.enable_file_override (default "0")
-    - opcache.optimization_level (default "0xffffffff")
-    - opcache.inherited_hack (default "1")
-    - opcache.blacklist_filename (default "")
-    - opcache.max_file_size (default "0")
-    - opcache.consistency_checks (default "0")
-    - opcache.force_restart_timeout (default "180")
-    - opcache.error_log (default "" which means stderr)
-    - opcache.log_verbosity_level (default "1")
-    - opcache.preferred_memory_model (default "")
-    - opcache.protect_memory (default "0")
-    - opcache.mmap_base (Windows-only)
+  Removed always_populate_raw_post_data.
 
 ========================================
-11. Windows Support
+11. Other Changes
 ========================================
 
-- The Apache 2.4 handler is supported as of PHP 5.5.0
+- File upload:
+  Uploads equal or greater than 2GB in size are now accepted.
 
-- OPcache: Errors like 'unable to reattach to base address' could
-  happen in many common setups.  It is due to some technical and
-  design restriction in the engine and could not be fixed easily
-  before 5.5.0 was released.
+- HTTP stream wrapper:
+  HTTP 1.1 requests now include a Connection: close header unless explicitly
+  overridden by setting a Connection header via the header context option.
 
-  A possible fix is to tweak the opcache.mmap_base INI setting by
-  forcing the first address to be tried.
-
-  For x86 version, the following addreses can be tried:
-        .  0x20000000, 0x21000000, 0x30000000, 0x31000000, 0x50000000
-  and for x64 (still experimental):
-        . 0x0000100000000000, 0x0000200000000000, 0x0000300000000000, 0x0000700000000000
-
-========================================
-12. Other Changes
-========================================
-
-- If the APC or WinCache user cache APIs were used before, consider
-   these alternatives for PHP 5.5:
-
-  - APCu
-      - all supported OSes: http://pecl.php.net/package/APCu
-      - Windows: http://windows.php.net/downloads/pecl/releases/apcu/
-
-  - WinCache, Windows only: http://pecl.php.net/package/WinCache
+- Zip:
+  New --with-libzip option allow to use system libzip. Version > 0.11 required.

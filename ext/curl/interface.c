@@ -1791,7 +1791,7 @@ static void alloc_curl_handle(php_curl **ch)
 
 	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
-	(*ch)->safe_upload = 0; /* for now, for BC reason we allow unsafe API */
+	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 
 	(*ch)->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init((*ch)->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -2504,6 +2504,7 @@ string_copy:
 
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
@@ -2511,6 +2512,7 @@ string_copy:
 					return 1;
 				}
 			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 

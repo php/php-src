@@ -498,8 +498,11 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
+	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	if (remaining < count_bytes) {
+		count_bytes = remaining;
+	}
 	while (read_bytes < count_bytes) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		if (request_body_fd == -1) {
@@ -1982,8 +1985,9 @@ fastcgi_request_done:
 out:
 
 	SG(server_context) = NULL;
+	php_module_shutdown(TSRMLS_C);
+
 	if (parent) {
-		php_module_shutdown(TSRMLS_C);
 		sapi_shutdown();
 	}
 

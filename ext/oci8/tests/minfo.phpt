@@ -8,12 +8,12 @@ Code coverage for PHP_MINFO_FUNCTION(oci)
 ob_start();
 phpinfo(INFO_MODULES);
 $v = ob_get_clean();
-$r = strpos($v, 'OCI8 Support => enabled');
-var_dump($r);
+$r = preg_match('/OCI8 Support .* enabled/', $v);
+if ($r !== 1)
+    var_dump($r);
 
 echo "Done\n";
 
 ?>
 --EXPECTF--
-int(%d)
 Done

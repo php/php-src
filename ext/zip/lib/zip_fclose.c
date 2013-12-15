@@ -39,20 +39,23 @@
 
 
 
-ZIP_EXTERN(int)
+ZIP_EXTERN int
 zip_fclose(struct zip_file *zf)
 {
-    int i, ret;
+    int ret;
+    unsigned int i;
     
     if (zf->src)
 	zip_source_free(zf->src);
 
-    for (i=0; i<zf->za->nfile; i++) {
-	if (zf->za->file[i] == zf) {
-	    zf->za->file[i] = zf->za->file[zf->za->nfile-1];
-	    zf->za->nfile--;
-	    break;
-	}
+    if (zf->za) {
+        for (i=0; i<zf->za->nfile; i++) {
+            if (zf->za->file[i] == zf) {
+                zf->za->file[i] = zf->za->file[zf->za->nfile-1];
+                zf->za->nfile--;
+                break;
+            }
+        }
     }
 
     ret = 0;
