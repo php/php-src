@@ -34,6 +34,10 @@ phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx) {
 	phpdbg_btree_branch *branch = tree->branch;
 	int i = tree->depth - 1;
 
+	if (branch == NULL) {
+		return NULL;
+	}
+
 	do {
 		if ((idx >> i) % 2 == 1) {
 		 	if (branch->branches[1]) {
