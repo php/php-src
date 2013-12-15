@@ -58,6 +58,8 @@ void phpdbg_setup_watchpoints(TSRMLS_D);
 
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC);
 
+void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch);
+void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch);
 int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC);
 
 int phpdbg_print_changed_zvals(TSRMLS_D);

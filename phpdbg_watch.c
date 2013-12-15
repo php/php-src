@@ -38,7 +38,7 @@ typedef struct {
 
 #define MEMDUMP_SIZE(size) (sizeof(phpdbg_watch_memdump) - sizeof(void *) + (size))
 
-void phpdbg_watch_mem_dtor(void *llist_data) {
+static void phpdbg_watch_mem_dtor(void *llist_data) {
 	void *page = (*(phpdbg_watch_memdump **)llist_data)->page;
 	size_t size = (*(phpdbg_watch_memdump **)llist_data)->size;
 
@@ -63,15 +63,15 @@ void phpdbg_setup_watchpoints(TSRMLS_D) {
 	phpdbg_btree_init(&PHPDBG_G(watchpoint_tree), sizeof(void *) * 8);
 }
 
-void *phpdbg_get_page_boundary(void *addr) {
+static inline void *phpdbg_get_page_boundary(void *addr) {
 	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
 }
 
-size_t phpdbg_get_total_page_size(void *addr, size_t size) {
+static inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
 	return (size_t)phpdbg_get_page_boundary(addr + size - 1) - (size_t)phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
 }
 
-phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *addr) {
+static phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *addr TSRMLS_DC) {
 	phpdbg_watchpoint_t *watch = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)phpdbg_get_page_boundary(addr) + phpdbg_pagesize - 1)->ptr;
 
 	/* check if that addr is in a mprotect()'ed memory area */
@@ -92,7 +92,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 
 	addr = info->si_addr;
 
-	watch = phpdbg_check_for_watchpoint(addr);
+	watch = phpdbg_check_for_watchpoint(addr TSRMLS_CC);
 
 	if (watch == NULL) {
 		return FAILURE;
@@ -115,7 +115,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 	return SUCCESS;
 }
 
-int phpdbg_print_changed_zval(void *llist_data) {
+static int phpdbg_print_changed_zval(void *llist_data) {
 	TSRMLS_FETCH();
 
 	phpdbg_watch_memdump *dump = *(phpdbg_watch_memdump **)llist_data;
@@ -158,11 +158,11 @@ int phpdbg_print_changed_zvals(TSRMLS_D) {
 	return PHPDBG_G(watchpoint_hit)?SUCCESS:FAILURE;
 }
 
-void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+static void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_btree_insert(&PHPDBG_G(watchpoint_tree), (zend_ulong)watch->addr.ptr, watch);
 }
 
-void phpdbg_activate_watchpoint (phpdbg_watchpoint_t *watch) {
+static void phpdbg_activate_watchpoint (phpdbg_watchpoint_t *watch) {
 	int m;
 
 	/* pagesize is assumed to be in the range of 2^x */
@@ -207,7 +207,7 @@ int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC) {
 
 	/* Lookup current symbol table */
 	if (zend_hash_find(EG(current_execute_data)->symbol_table, name, len + 1, (void **)&zv) == SUCCESS) {
-		phpdbg_create_zval_watchpoint(*zv, watch);
+		phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
 		zend_hash_add(&PHPDBG_G(watchpoints), name, len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
 		phpdbg_store_watchpoint(watch TSRMLS_CC);
 
