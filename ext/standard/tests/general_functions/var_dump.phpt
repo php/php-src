@@ -844,9 +844,9 @@ object(object_class)#13 (8) {
 
 *** Testing var_dump() on resources ***
 -- Iteration 1 --
-resource(5) of type (stream)
+resource(%d) of type (stream)
 -- Iteration 2 --
-resource(6) of type (stream)
+resource(%d) of type (stream)
 
 *** Testing var_dump() on different combinations of scalar 
             and non-scalar variables ***
@@ -1227,9 +1227,9 @@ array(4) {
 }
 array(2) {
   [0]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
   [1]=>
-  resource(6) of type (stream)
+  resource(%d) of type (stream)
 }
 array(9) {
   [0]=>
