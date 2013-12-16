@@ -44,10 +44,14 @@ typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
 
 struct _phpdbg_watchpoint_t {
 	phpdbg_watchpoint_t *parent;
+	HashTable *parent_container;
+	char *name_in_parent;
+	size_t name_in_parent_len;
 	char *str;
 	union {
 		zval *zv;
 		HashTable *ht;
+		zend_llist *llist;
 		void *ptr;
 	} addr;
 	size_t size;

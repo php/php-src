@@ -154,7 +154,7 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], 8, NULL, php_phpdbg_destroy_bp_condition, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], 8, NULL, NULL, 0);
 
-	zend_hash_init(&PHPDBG_G(watchpoints), 8, NULL, NULL, 0); /* TODO: dtor */
+	phpdbg_setup_watchpoints(TSRMLS_C);
 
 	zend_hash_init(&PHPDBG_G(seek), 8, NULL, NULL, 0);
 	zend_hash_init(&PHPDBG_G(registered), 8, NULL, php_phpdbg_destroy_registered, 0);
@@ -176,6 +176,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
+	zend_hash_destroy(&PHPDBG_G(watchpoints));
 
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
@@ -852,8 +853,6 @@ int main(int argc, char **argv) /* {{{ */
 
 	tsrm_ls = ts_resource(0);
 #endif
-
-	phpdbg_setup_watchpoints(TSRMLS_C);
 
 phpdbg_main:
 	if (!cleaning) {
