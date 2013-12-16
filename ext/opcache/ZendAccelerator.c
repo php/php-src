@@ -305,7 +305,7 @@ static void accel_interned_strings_save_state(TSRMLS_D)
 }
 #endif
 
-const char *accel_new_interned_string(const char *arKey, int nKeyLength, int free_src TSRMLS_DC)
+const char *accel_new_interned_string(const char *arKey, zend_str_size_int nKeyLength, int free_src TSRMLS_DC)
 {
 /* for now interned strings are supported only for non-ZTS build */
 #ifndef ZTS
