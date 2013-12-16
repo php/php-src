@@ -154,32 +154,32 @@ typedef struct {
 } mssql_bind;
 
 ZEND_BEGIN_MODULE_GLOBALS(mssql)
-	long default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
+	php_int_t default_link;
+	php_int_t num_links,num_persistent;
+	php_int_t max_links,max_persistent;
 	zend_bool allow_persistent;
 	char *appname;
 	char *server_message;
 #ifdef HAVE_FREETDS
 	char *charset;
 #endif
-	long min_error_severity, min_message_severity;
-	long cfg_min_error_severity, cfg_min_message_severity;
-	long connect_timeout, timeout;
+	php_int_t min_error_severity, min_message_severity;
+	php_int_t cfg_min_error_severity, cfg_min_message_severity;
+	php_int_t connect_timeout, timeout;
 	zend_bool compatibility_mode;
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,zval *result,int column_type  TSRMLS_DC);
-	long textsize, textlimit, batchsize;
+	php_int_t textsize, textlimit, batchsize;
 	zend_bool datetimeconvert;
 	HashTable *resource_list, *resource_plist;
 	zend_bool secure_connection;
-	long max_procs;
+	php_int_t max_procs;
 ZEND_END_MODULE_GLOBALS(mssql)
 
 #define MSSQL_ROWS_BLOCK 128
 
 typedef struct mssql_field {
 	char *name,*column_source;
-	long max_length; 
+	php_int_t max_length; 
 	int numeric;
 	int type;
 } mssql_field;

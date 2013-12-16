@@ -544,14 +544,14 @@ PHP_MINFO_FUNCTION(mssql)
 static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host = NULL, *user = NULL, *passwd = NULL;
-	int host_len = 0, user_len = 0, passwd_len = 0;
+	zend_str_size_int host_len = 0, user_len = 0, passwd_len = 0;
 	zend_bool new_link = 0;
 	char *hashed_details;
 	int hashed_details_length;
 	mssql_link mssql, *mssql_ptr;
 	char buffer[40];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssb", &host, &host_len, &user, &user_len, &passwd, &passwd_len, &new_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SSSb", &host, &host_len, &user, &user_len, &passwd, &passwd_len, &new_link) == FAILURE) {
 		return;
 	}
 
@@ -904,11 +904,11 @@ PHP_FUNCTION(mssql_select_db)
 {
 	char *db;
 	zval *mssql_link_index = NULL;
-	int db_len;
+	zend_str_size_int db_len;
 	int id = -1;
 	mssql_link  *mssql_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &db_len, &mssql_link_index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &db_len, &mssql_link_index) == FAILURE) {
 		return;
 	}
 
@@ -1179,8 +1179,8 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 							case SQLVARCHAR:
 							case SQLTEXT:
 								convert_to_string_ex(&bind->zval);
-								Z_STRLEN_P(bind->zval) = dbretlen(mssql_ptr->link,i);
-								Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRLEN_P(bind->zval));
+								Z_STRSIZE_P(bind->zval) = dbretlen(mssql_ptr->link,i);
+								Z_STRVAL_P(bind->zval) = estrndup(dbretdata(mssql_ptr->link,i),Z_STRSIZE_P(bind->zval));
 								break;
 							/* TODO binary */
 						}
@@ -1325,8 +1325,9 @@ PHP_FUNCTION(mssql_query)
 {
 	char *query;
 	zval *mssql_link_index = NULL;
-	int query_len, retvalue, batchsize, num_fields;
-	long zbatchsize = 0;
+	zend_str_size_int query_len;
+	int retvalue, batchsize, num_fields;
+	php_int_t zbatchsize = 0;
 	mssql_link *mssql_ptr;
 	mssql_result *result;
 	int id = -1;
@@ -1334,7 +1335,7 @@ PHP_FUNCTION(mssql_query)
 	dbsettime(MS_SQL_G(timeout));
 	batchsize = MS_SQL_G(batchsize);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|rl", &query, &query_len, &mssql_link_index, &zbatchsize) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ri", &query, &query_len, &mssql_link_index, &zbatchsize) == FAILURE) {
 		return;
 	}
 
@@ -1496,7 +1497,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zval *mssql_result_index;
 	mssql_result *result;
 	int i;
-	long resulttype = 0;
+	php_int_t resulttype = 0;
 
 	switch (result_type) {
 		case MSSQL_NUM:
@@ -1506,7 +1507,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			break;
 		case MSSQL_BOTH:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mssql_result_index, &resulttype) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &mssql_result_index, &resulttype) == FAILURE) {
 				return;
 			}
 			result_type = (resulttype > 0 && (resulttype & MSSQL_BOTH)) ? resulttype : result_type;
@@ -1535,7 +1536,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 			if (Z_TYPE(result->data[result->cur_row][i]) == IS_STRING) {
 				data = Z_STRVAL(result->data[result->cur_row][i]);
-				data_len = Z_STRLEN(result->data[result->cur_row][i]);
+				data_len = Z_STRSIZE(result->data[result->cur_row][i]);
 
 				if (result_type & MSSQL_NUM) {
 					add_index_stringl(return_value, i, data, data_len, 1);
@@ -1612,10 +1613,10 @@ PHP_FUNCTION(mssql_fetch_assoc)
 PHP_FUNCTION(mssql_data_seek)
 {
 	zval *mssql_result_index;
-	long offset;
+	php_int_t offset;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &mssql_result_index, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &mssql_result_index, &offset) == FAILURE) {
 		return;
 	}
 	
@@ -1695,10 +1696,10 @@ static char *php_mssql_get_field_name(int type)
 PHP_FUNCTION(mssql_fetch_field)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	php_int_t field_offset = -1;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mssql_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &mssql_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 
@@ -1731,10 +1732,10 @@ PHP_FUNCTION(mssql_fetch_field)
 PHP_FUNCTION(mssql_field_length)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	php_int_t field_offset = -1;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mssql_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &mssql_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	
@@ -1761,10 +1762,10 @@ PHP_FUNCTION(mssql_field_length)
 PHP_FUNCTION(mssql_field_name)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	php_int_t field_offset = -1;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mssql_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &mssql_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	
@@ -1791,10 +1792,10 @@ PHP_FUNCTION(mssql_field_name)
 PHP_FUNCTION(mssql_field_type)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	php_int_t field_offset = -1;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &mssql_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &mssql_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	
@@ -1821,10 +1822,10 @@ PHP_FUNCTION(mssql_field_type)
 PHP_FUNCTION(mssql_field_seek)
 {
 	zval *mssql_result_index;
-	long field_offset;
+	php_int_t field_offset;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &mssql_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &mssql_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	
@@ -1845,11 +1846,11 @@ PHP_FUNCTION(mssql_field_seek)
 PHP_FUNCTION(mssql_result)
 {
 	zval **field, *mssql_result_index;
-	long row;
+	php_int_t row;
 	int field_offset=0;
 	mssql_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &mssql_result_index, &row, &field) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riZ", &mssql_result_index, &row, &field) == FAILURE) {
 		return;
 	}
 
@@ -1943,9 +1944,9 @@ PHP_FUNCTION(mssql_next_result)
    Sets the lower error severity */
 PHP_FUNCTION(mssql_min_error_severity)
 {
-	long severity;
+	php_int_t severity;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &severity) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &severity) == FAILURE) {
 		return;
 	}
 
@@ -1958,9 +1959,9 @@ PHP_FUNCTION(mssql_min_error_severity)
    Sets the lower message severity */
 PHP_FUNCTION(mssql_min_message_severity)
 {
-	long severity;
+	php_int_t severity;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &severity) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &severity) == FAILURE) {
 		return;
 	}
 
@@ -1973,13 +1974,13 @@ PHP_FUNCTION(mssql_min_message_severity)
 PHP_FUNCTION(mssql_init)
 {
 	char *sp_name;
-	int sp_name_len;
+	zend_str_size_int sp_name_len;
 	zval *mssql_link_index = NULL;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	int id = -1;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &sp_name, &sp_name_len, &mssql_link_index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &sp_name, &sp_name_len, &mssql_link_index) == FAILURE) {
 		return;
 	}
 
@@ -2011,9 +2012,9 @@ PHP_FUNCTION(mssql_init)
 PHP_FUNCTION(mssql_bind)
 {
 	char *param_name;
-	int param_name_len, datalen;
+	zend_str_size_int param_name_len, datalen;
 	int status = 0;
-	long type = 0, maxlen = -1;
+	php_int_t type = 0, maxlen = -1;
 	zval *stmt, **var;
 	zend_bool is_output = 0, is_null = 0;
 	mssql_link *mssql_ptr;
@@ -2021,7 +2022,7 @@ PHP_FUNCTION(mssql_bind)
 	mssql_bind bind,*bindp;
 	LPBYTE value = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsZl|bbl", &stmt, &param_name, &param_name_len, &var, &type, &is_output, &is_null, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSZi|bbi", &stmt, &param_name, &param_name_len, &var, &type, &is_output, &is_null, &maxlen) == FAILURE) {
 		return;
 	}
 
@@ -2043,7 +2044,7 @@ PHP_FUNCTION(mssql_bind)
 			datalen=0;
 		} else {
 			convert_to_string_ex(var);
-			datalen=Z_STRLEN_PP(var);
+			datalen=Z_STRSIZE_PP(var);
 			value=(LPBYTE)Z_STRVAL_PP(var);
 		}
 	} else {
