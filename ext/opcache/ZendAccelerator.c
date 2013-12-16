@@ -641,7 +641,8 @@ static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf 
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
-	int ret, er;
+	int ret;
+	php_int_t er;
 
 	if (!filename) {
 		return FAILURE;
@@ -710,7 +711,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 		ftime /= 10000000L;
 
 		if (size) {
-			*size = (size_t)(((unsigned __int64)fdata.nFileSizeHigh) << 32 + (unsigned __int64)fdata.nFileSizeLow);
+			*size = (size_t)((((unsigned __int64)fdata.nFileSizeHigh) << 32) + (unsigned __int64)fdata.nFileSizeLow);
 		}
 		return (accel_time_t)ftime;
 	}
@@ -786,7 +787,8 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 			{
 				php_stream *stream = (php_stream *)file_handle->handle.stream.handle;
 				php_stream_statbuf sb;
-				int ret, er;
+				int ret;
+				php_int_t er;
 
 				if (!stream ||
 				    !stream->ops ||

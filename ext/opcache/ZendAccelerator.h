@@ -355,7 +355,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
-const char *accel_new_interned_string(const char *arKey, int nKeyLength, int free_src TSRMLS_DC);
+const char *accel_new_interned_string(const char *arKey, zend_str_size_int nKeyLength, int free_src TSRMLS_DC);
 
 # define interned_free(s) do { \
 		if (!IS_INTERNED(s)) { \

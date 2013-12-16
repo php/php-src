@@ -80,7 +80,7 @@ static zend_function_entry accel_functions[] = {
 static int validate_api_restriction(TSRMLS_D)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
-		int len = strlen(ZCG(accel_directives).restrict_api);
+		zend_str_size_int len = strlen(ZCG(accel_directives).restrict_api);
 
 		if (!SG(request_info).path_translated ||
 		    strlen(SG(request_info).path_translated) < len ||
