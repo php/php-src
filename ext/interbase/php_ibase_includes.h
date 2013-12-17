@@ -62,10 +62,10 @@ extern int le_link, le_plink, le_trans;
 
 ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	ISC_STATUS status[20];
-	long default_link;
-	long num_links, num_persistent;
+	php_int_t default_link;
+	php_int_t num_links, num_persistent;
 	char errmsg[MAX_ERRMSG];
-	long sql_code;
+	php_int_t sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
 
 ZEND_EXTERN_MODULE_GLOBALS(ibase)
@@ -80,7 +80,7 @@ typedef struct {
 typedef struct {
 	isc_tr_handle handle;
 	unsigned short link_cnt;
-	unsigned long affected_rows;
+	php_uint_t affected_rows;
 	ibase_db_link *db_link[1]; /* last member */
 } ibase_trans;
 
@@ -97,7 +97,7 @@ typedef struct {
 
 typedef struct event {
 	ibase_db_link *link;
-	long link_res_id;
+	php_int_t link_res_id;
 	ISC_LONG event_id;
 	unsigned short event_count;
 	char **events;
@@ -176,7 +176,7 @@ void php_ibase_query_minit(INIT_FUNC_ARGS);
 void php_ibase_blobs_minit(INIT_FUNC_ARGS);
 int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
 char *_php_ibase_quad_to_string(ISC_QUAD const qd);
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, php_uint_t max_len TSRMLS_DC);
 int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
 
 /* provided by ibase_events.c */

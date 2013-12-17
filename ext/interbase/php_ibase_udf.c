@@ -331,7 +331,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 			case IS_STRING:
 				r->dsc_dtype = dtype_varying;
 				memcpy(res->vary_string, Z_STRVAL(return_value),
-					(res->vary_length = min(r->dsc_length-2,Z_STRLEN(return_value))));
+					(res->vary_length = min(r->dsc_length-2,Z_STRSIZE(return_value))));
 				r->dsc_length = res->vary_length+2;
 				break;
 		}

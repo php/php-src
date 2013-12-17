@@ -33,7 +33,7 @@ typedef struct {
 	isc_svc_handle handle;
 	char *hostname;
 	char *username;
-	long res_id;
+	php_int_t res_id;
 } ibase_service;
 
 static int le_service;
@@ -139,7 +139,8 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 	static char const user_flags[] = { isc_spb_sec_username, isc_spb_sec_password, 
 	    isc_spb_sec_firstname, isc_spb_sec_middlename, isc_spb_sec_lastname };
 	char buf[128], *args[] = { NULL, NULL, NULL, NULL, NULL };
-	int i, args_len[] = { 0, 0, 0, 0, 0 };
+	int i;
+	zend_str_size_int args_len[] = { 0, 0, 0, 0, 0 };
 	unsigned short spb_len = 1;
 	zval *res;
 	ibase_service *svm;
@@ -147,7 +148,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 	RESET_ERRMSG;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-			(operation == isc_action_svc_delete_user) ? "rs" : "rss|sss",
+			(operation == isc_action_svc_delete_user) ? "rS" : "rSS|SSS",
 			&res, &args[0], &args_len[0], &args[1], &args_len[1], &args[2], &args_len[2],
 			&args[3], &args_len[3], &args[4], &args_len[4])) {
 		RETURN_FALSE;
@@ -210,14 +211,15 @@ PHP_FUNCTION(ibase_delete_user)
    Connect to the service manager */
 PHP_FUNCTION(ibase_service_attach)
 {
-	int hlen, ulen, plen, spb_len;
+	zend_str_size_int hlen, ulen, plen;
+	int spb_len;
 	ibase_service *svm;
 	char buf[128], *host, *user, *pass, *loc;
 	isc_svc_handle handle = NULL;
 
 	RESET_ERRMSG;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss",
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS",
 			&host, &hlen, &user, &ulen, &pass, &plen)) {
 
 		RETURN_FALSE;
@@ -276,7 +278,7 @@ static void _php_ibase_service_query(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	static char spb[] = { isc_info_svc_timeout, 10, 0, 0, 0 };
 
 	char res_buf[400], *result, *heap_buf = NULL, *heap_p;
-	long heap_buf_size = 200, line_len;
+	php_int_t heap_buf_size = 200, line_len;
 
 	/* info about users requires an action first */
 	if (info_action == isc_info_svc_get_users) {
@@ -312,7 +314,7 @@ query_loop:
 					}
 				}
 				if (!heap_buf || (heap_p - heap_buf + line_len +2) > heap_buf_size) {
-					long res_size = heap_buf ? heap_p - heap_buf : 0;
+					php_int_t res_size = heap_buf ? heap_p - heap_buf : 0;
 
 					while (heap_buf_size < (res_size + line_len +2)) {
 						heap_buf_size *= 2;
@@ -425,14 +427,15 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 	 */
 	zval *res;
 	char *db, *bk, buf[200];
-	int dblen, bklen, spb_len;
-	long opts = 0;
+	zend_str_size_int dblen, bklen;
+	int spb_len;
+	php_int_t opts = 0;
 	zend_bool verbose = 0;
 	ibase_service *svm;
 
 	RESET_ERRMSG;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rss|lb",
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSS|ib",
 			&res, &db, &dblen, &bk, &bklen, &opts, &verbose)) {
 		RETURN_FALSE;
 	}
@@ -489,13 +492,14 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 {
 	zval *res;
 	char buf[128], *db;
-	int dblen, spb_len;
-	long action, argument = 0;
+	zend_str_size_int dblen;
+	int spb_len;
+	php_int_t action, argument = 0;
 	ibase_service *svm;
 
 	RESET_ERRMSG;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsl|l",
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSi|i",
 			&res, &db, &dblen, &action, &argument)) {
 		RETURN_FALSE;
 	}
@@ -597,12 +601,12 @@ PHP_FUNCTION(ibase_db_info)
 PHP_FUNCTION(ibase_server_info)
 {
 	zval *res;
-	long action;
+	php_int_t action;
 	ibase_service *svm;
 
 	RESET_ERRMSG;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &res, &action)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &res, &action)) {
 		RETURN_FALSE;
 	}
 

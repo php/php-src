@@ -544,7 +544,7 @@ void _php_ibase_module_error(char *msg TSRMLS_DC, ...) /* {{{ */
 /* {{{ internal macros, functions and structures */
 typedef struct {
 	isc_db_handle *db_ptr;
-	long tpb_len;
+	php_int_t tpb_len;
 	char *tpb_ptr;
 } ISC_TEB;
 
@@ -859,7 +859,7 @@ static char const dpb_args[] = {
 	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
 	
-int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
+int _php_ibase_attach_db(char **args, int *len, php_int_t *largs, isc_db_handle *db TSRMLS_DC)
 {
 	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
 	char dpb_buffer[257] = { isc_dpb_version1, 0 }, *dpb;
@@ -895,8 +895,9 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* {{{ */
 {
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
-	int i, len[] = { 0, 0, 0, 0, 0 };
-	long largs[] = { 0, 0, 0 };
+	int i;
+	zend_str_size_int len[] = { 0, 0, 0, 0, 0 };
+	php_int_t largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_rsrc_list_entry new_index_ptr, *le;
 	isc_db_handle db_handle = NULL;
@@ -904,7 +905,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssllsl",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SSSSiiSi",
 			&args[DB], &len[DB], &args[USER], &len[USER], &args[PASS], &len[PASS],
 			&args[CSET], &len[CSET], &largs[BUF], &largs[DLECT], &args[ROLE], &len[ROLE],
 			&largs[SYNC])) {
@@ -941,7 +942,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	
 	/* try to reuse a connection */
 	if (SUCCESS == zend_hash_find(&EG(regular_list), hash, sizeof(hash), (void *) &le)) {
-		long xlink;
+		php_int_t xlink;
 		int type;
 
 		if (Z_TYPE_P(le) != le_index_ptr) {
@@ -959,7 +960,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	/* ... or a persistent one */
 	switch (zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
-		long l;
+		php_int_t l;
 		
 		static char info[] = { isc_info_base_level, isc_info_end };
 		char result[8];
@@ -1141,7 +1142,7 @@ PHP_FUNCTION(ibase_trans)
 	ib_link = (ibase_db_link **) safe_emalloc(sizeof(ibase_db_link *),1+argn,0);
 	
 	if (argn > 0) {
-		long trans_argl = 0;
+		php_int_t trans_argl = 0;
 		char *tpb;
 		ISC_TEB *teb;
 		zval ***args = NULL;
@@ -1415,8 +1416,8 @@ PHP_FUNCTION(ibase_gen_id)
 {
 	zval *link = NULL;
 	char query[128], *generator;
-	int gen_len;
-	long inc = 1;
+	zend_str_size_int gen_len;
+	php_int_t inc = 1;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
 	XSQLDA out_sqlda;
@@ -1424,7 +1425,7 @@ PHP_FUNCTION(ibase_gen_id)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &generator, &gen_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|ir", &generator, &gen_len,
 			&inc, &link)) {
 		RETURN_FALSE;
 	}
@@ -1456,8 +1457,8 @@ PHP_FUNCTION(ibase_gen_id)
 	}
 
 	/* don't return the generator value as a string unless it doesn't fit in a long */
-#if SIZEOF_LONG < 8
-	if (result < LONG_MIN || result > LONG_MAX) {
+#if SIZEOF_ZEND_INT < 8
+	if (result < PHP_INT_MIN || result > PHP_INT_MAX) {
 		char *res;
 		int l;
 

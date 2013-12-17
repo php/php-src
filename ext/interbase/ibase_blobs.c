@@ -95,13 +95,13 @@ typedef struct { /* {{{ */
 /* }}} */
 } IBASE_BLOBINFO;
 
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC) /* {{{ */
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, php_uint_t max_len TSRMLS_DC) /* {{{ */
 {
 	if (ib_blob->bl_qd.gds_quad_high || ib_blob->bl_qd.gds_quad_low) { /*not null ?*/
 
 		ISC_STATUS stat;
 		char *bl_data;
-		unsigned long cur_len;
+		php_uint_t cur_len;
 		unsigned short seg_len;
 
 		bl_data = safe_emalloc(1, max_len, 1);
@@ -130,12 +130,12 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 
 int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC) /* {{{ */
 {
-	unsigned long put_cnt = 0, rem_cnt;
+	php_uint_t put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 
 	convert_to_string_ex(string_arg);
 
-	for (rem_cnt = Z_STRLEN_PP(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
+	for (rem_cnt = Z_STRSIZE_PP(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
 
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
 
@@ -238,7 +238,7 @@ PHP_FUNCTION(ibase_blob_create)
 PHP_FUNCTION(ibase_blob_open)
 {
 	char *blob_id;
-	int blob_id_len;
+	zend_str_size_int blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -250,12 +250,12 @@ PHP_FUNCTION(ibase_blob_open)
 		default:
 			WRONG_PARAM_COUNT;
 		case 1:
-			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "S", &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rs", &link, &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rS", &link, &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
@@ -400,7 +400,7 @@ PHP_FUNCTION(ibase_blob_cancel)
 PHP_FUNCTION(ibase_blob_info)
 {
 	char *blob_id;
-	int blob_id_len;
+	zend_str_size_int blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -413,12 +413,12 @@ PHP_FUNCTION(ibase_blob_info)
 		default:
 			WRONG_PARAM_COUNT;
 		case 1:
-			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "S", &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rs", &link, &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rS", &link, &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
@@ -476,7 +476,7 @@ PHP_FUNCTION(ibase_blob_info)
 PHP_FUNCTION(ibase_blob_echo)
 {
 	char *blob_id;
-	int blob_id_len;
+	zend_str_size_int blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -490,12 +490,12 @@ PHP_FUNCTION(ibase_blob_echo)
 		default:
 			WRONG_PARAM_COUNT;
 		case 1:
-			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "s", &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(1 TSRMLS_CC, "S", &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rs", &link, &blob_id, &blob_id_len)) {
+			if (FAILURE == zend_parse_parameters(2 TSRMLS_CC, "rS", &link, &blob_id, &blob_id_len)) {
 				RETURN_FALSE;
 			}
 			break;
