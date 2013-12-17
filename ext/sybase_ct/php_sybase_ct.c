@@ -730,17 +730,17 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user = NULL, *passwd = NULL, *host = NULL, *charset = NULL, *appname = NULL;
 	char *hashed_details;
-	int hashed_details_length, len;
+	zend_str_size_int hashed_details_length, len;
 	zend_bool new = 0;
 	sybase_link *sybase_ptr;
 
 	host= user= passwd= charset= appname= NULL;
 	if (persistent) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!s!s!", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!S!S!S!S!", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!s!s!b", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len, &new) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!S!S!S!S!b", &host, &len, &user, &len, &passwd, &len, &charset, &len, &appname, &len, &new) == FAILURE) {
 			return;
 		}
 	}
@@ -1061,10 +1061,11 @@ PHP_FUNCTION(sybase_select_db)
 {
 	zval *sybase_link_index = NULL;
 	char *db, *cmdbuf;
-	int id, len;
+	int id;
+	zend_str_size_int len;
 	sybase_link *sybase_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &db, &len, &sybase_link_index) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &db, &len, &sybase_link_index) == FAILURE) {
 		return;
 	}
 
@@ -1426,7 +1427,8 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	zval *sybase_link_index = NULL;
 	zend_bool store = 1;
 	char *query;
-	int len, id, deadlock_count;
+	int len;
+	zend_str_size_int id, deadlock_count;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;
@@ -1437,7 +1439,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		Q_FAILURE,				/* Failure, no results. */
 	} status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|rb", &query, &len, &sybase_link_index, &store) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|rb", &query, &len, &sybase_link_index, &store) == FAILURE) {
 		return;
 	}
 
@@ -1867,7 +1869,7 @@ PHP_FUNCTION(sybase_fetch_object)
 				zend_class_entry **pce = NULL;
 				convert_to_string(object);
 
-				if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
+				if (zend_lookup_class(Z_STRVAL_P(object), Z_STRSIZE_P(object), &pce TSRMLS_CC) == FAILURE) {
 					php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Sybase:  Class %s has not been declared", Z_STRVAL_P(object));
 					/* Use default (ZEND_STANDARD_CLASS_DEF_PTR) */
 				} else {
@@ -1907,10 +1909,10 @@ PHP_FUNCTION(sybase_fetch_assoc)
 PHP_FUNCTION(sybase_data_seek)
 {
 	zval *sybase_result_index = NULL;
-	long offset;
+	php_int_t offset;
 	sybase_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &sybase_result_index, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &sybase_result_index, &offset) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
@@ -1979,10 +1981,10 @@ static char *php_sybase_get_field_name(CS_INT type)
 PHP_FUNCTION(sybase_fetch_field)
 {
 	zval *sybase_result_index = NULL;
-	long field_offset = -1;
+	php_int_t field_offset = -1;
 	sybase_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &sybase_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &sybase_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
@@ -2015,10 +2017,10 @@ PHP_FUNCTION(sybase_fetch_field)
 PHP_FUNCTION(sybase_field_seek)
 {
 	zval *sybase_result_index = NULL;
-	long field_offset;
+	php_int_t field_offset;
 	sybase_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &sybase_result_index, &field_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &sybase_result_index, &field_offset) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
@@ -2040,11 +2042,11 @@ PHP_FUNCTION(sybase_result)
 {
 	zval *field;
 	zval *sybase_result_index = NULL;
-	long row;
+	php_int_t row;
 	int field_offset = 0;
 	sybase_result *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &sybase_result_index, &row, &field) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz", &sybase_result_index, &row, &field) == FAILURE) {
 		return;
 	}
 	ZEND_FETCH_RESOURCE(result, sybase_result *, &sybase_result_index, -1, "Sybase result", le_result);
@@ -2143,9 +2145,9 @@ PHP_MINFO_FUNCTION(sybase)
    Sets minimum client severity */
 PHP_FUNCTION(sybase_min_client_severity)
 {
-	long severity;
+	php_int_t severity;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &severity) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &severity) == FAILURE) {
 		return;
 	}
 	
@@ -2158,9 +2160,9 @@ PHP_FUNCTION(sybase_min_client_severity)
    Sets minimum server severity */
 PHP_FUNCTION(sybase_min_server_severity)
 {
-	long severity;
+	php_int_t severity;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &severity) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &severity) == FAILURE) {
 		return;
 	}
 	
@@ -2172,9 +2174,9 @@ PHP_FUNCTION(sybase_min_server_severity)
    Sets deadlock retry count */
 PHP_FUNCTION(sybase_deadlock_retry_count)
 {
-	long retry_count;
+	php_int_t retry_count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &retry_count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &retry_count) == FAILURE) {
 		return;
 	}
 	

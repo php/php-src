@@ -62,16 +62,16 @@ PHP_FUNCTION(sybase_deadlock_retry_count);
 #include <ctpublic.h>
 
 ZEND_BEGIN_MODULE_GLOBALS(sybase)
-	long default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long login_timeout;
-	long allow_persistent;
+	php_int_t default_link;
+	php_int_t num_links,num_persistent;
+	php_int_t max_links,max_persistent;
+	php_int_t login_timeout;
+	php_int_t allow_persistent;
 	char *appname;
 	char *hostname;
 	char *server_message;
-	long min_server_severity, min_client_severity;
-	long deadlock_retry_count;
+	php_int_t min_server_severity, min_client_severity;
+	php_int_t deadlock_retry_count;
 	zval *callback_name;
 	CS_CONTEXT *context;
 ZEND_END_MODULE_GLOBALS(sybase)
@@ -83,7 +83,7 @@ typedef struct {
 	int deadlock;
 	int dead;
 	int active_result_index;
-	long affected_rows;
+	php_int_t affected_rows;
 	zval *callback_name;
 } sybase_link;
 
