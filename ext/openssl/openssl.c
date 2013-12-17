@@ -78,10 +78,6 @@
 #define OPENSSL_ALGO_RMD160 10
 #endif
 #define DEBUG_SMIME	0
-#define OPENSSL_BAD_CA_ERRMSG \
-	"Peer verification is enabled to protect against Man-in-the-Middle (MitM) attacks. To use " \
-	"encrypted streams you *must* specify the openssl.cafile php.ini directive, pass a cafile " \
-	"stream context value or disable peer verification."
 
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
@@ -5160,7 +5156,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		/* CA stuff */
 		GET_VER_OPT_STRING("cafile", cafile);
 		GET_VER_OPT_STRING("capath", capath);
-		
+
 		if (!cafile) {
 			zend_bool exists = 1;
 			cafile = zend_ini_string_ex("openssl.cafile", sizeof("openssl.cafile"), 0, &exists);
@@ -5179,8 +5175,9 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		} else {
 			php_openssl_netstream_data_t *sslsock;
 			sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-			if (sslsock->is_client) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, OPENSSL_BAD_CA_ERRMSG);
+			if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"Unable to set default verify locations and no CA settings specified");
 				return NULL;
 			}
 		}
