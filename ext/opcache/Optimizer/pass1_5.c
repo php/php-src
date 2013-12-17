@@ -514,7 +514,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			    opline->op2_type == IS_UNUSED &&
 			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
 			    (Z_STRLEN(ZEND_OP1_LITERAL(opline)) != sizeof("this")-1 ||
-			     memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "this", sizeof("this")) != 0)) {
+			     memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "this", sizeof("this") - 1) != 0)) {
 
 			    int var = opline->result.var;
 			    int level = 0;
