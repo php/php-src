@@ -667,7 +667,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		hash = str_hash(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant));
 		if (!zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), hash TSRMLS_CC) &&
 		    !(Z_STRLEN(varname->u.constant) == (sizeof("this")-1) &&
-		      !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this"))) &&
+		      !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this") - 1)) &&
 		    (CG(active_op_array)->last == 0 ||
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
@@ -912,7 +912,7 @@ static zend_bool opline_is_fetch_this(const zend_op *opline TSRMLS_DC) /* {{{ */
 		&& ((opline->extended_value & ZEND_FETCH_STATIC_MEMBER) != ZEND_FETCH_STATIC_MEMBER)
 		&& (Z_HASH_P(&CONSTANT(opline->op1.constant)) == THIS_HASHVAL)
 		&& (Z_STRLEN(CONSTANT(opline->op1.constant)) == (sizeof("this")-1))
-		&& !memcmp(Z_STRVAL(CONSTANT(opline->op1.constant)), "this", sizeof("this"))) {
+		&& !memcmp(Z_STRVAL(CONSTANT(opline->op1.constant)), "this", sizeof("this") - 1)) {
 		return 1;
 	} else {
 		return 0;
