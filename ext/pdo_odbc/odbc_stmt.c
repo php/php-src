@@ -473,7 +473,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					if (P->outbuf) {
 						php_uint_t ulen;
 						char *srcbuf;
-						php_uint_t srclen;
+						php_uint_t srclen = 0;
 
 						switch (P->len) {
 							case SQL_NULL_DATA:
