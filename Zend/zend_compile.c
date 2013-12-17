@@ -666,7 +666,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 		hash = str_hash(Z_STRVAL(varname->u.constant), Z_STRSIZE(varname->u.constant));
 		if (!zend_is_auto_global_quick(Z_STRVAL(varname->u.constant), Z_STRSIZE(varname->u.constant), hash TSRMLS_CC) &&
-		    !(Z_STRLEN(varname->u.constant) == (sizeof("this")-1) &&
+		    !(Z_STRSIZE(varname->u.constant) == (sizeof("this")-1) &&
 		      !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this") - 1)) &&
 		    (CG(active_op_array)->last == 0 ||
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
