@@ -35,7 +35,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, php_int_t, XSQLDA*, isc_stmt_handle*,
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, zend_str_size, XSQLDA*, isc_stmt_handle*,
 	HashTable* TSRMLS_DC);
 
 /* map driver specific error message to PDO error */
@@ -220,7 +220,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_si
 /* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static php_int_t firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len TSRMLS_DC) /* {{{ */
+static php_int_t firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len TSRMLS_DC) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = NULL;
@@ -274,8 +274,8 @@ static php_int_t firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t
 /* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, /* {{{ */
-	char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
+static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, /* {{{ */
+	char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
 	int qcount = 0;
 	char const *co, *l, *r;
