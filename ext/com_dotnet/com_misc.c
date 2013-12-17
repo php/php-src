@@ -47,7 +47,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 }
 
 PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
-		int codepage TSRMLS_DC)
+		php_int_t codepage TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 
@@ -70,7 +70,7 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 }
 
 PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
-		int codepage TSRMLS_DC)
+		php_int_t codepage TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 
