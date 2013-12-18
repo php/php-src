@@ -55,7 +55,7 @@
 #define yytext       ((char*)SCNG(yy_text))
 #define yyleng       SCNG(yy_leng)
 #define yyless(x)    do {	YYCURSOR = (unsigned char*)yytext + x; \
-							yyleng   = (zend_str_size)x; } while(0)
+							yyleng   = (zend_size_t)x; } while(0)
 
 /* #define yymore()     goto yymore_restart */
 
@@ -261,7 +261,7 @@ int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC)
 
 /* {{{ zend_ini_escape_string()
  */
-static void zend_ini_escape_string(zval *lval, char *str, zend_str_size_int len, char quote_type TSRMLS_DC)
+static void zend_ini_escape_string(zval *lval, char *str, zend_size_t len, char quote_type TSRMLS_DC)
 {
 	register char *s, *t;
 	char *end;
