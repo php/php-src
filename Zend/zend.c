@@ -58,7 +58,7 @@ ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
 ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args);
-int (*zend_vspprintf)(char **pbuf, zend_str_size_size_t max_len, const char *format, va_list ap);
+zend_str_size_int (*zend_vspprintf)(char **pbuf, zend_str_size_size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
 ZEND_API char *(*zend_resolve_path)(const char *filename, zend_str_size_int filename_len TSRMLS_DC);
 
