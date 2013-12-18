@@ -1024,7 +1024,11 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 		zend_try {
 			PHPDBG_G(flags) |= PHPDBG_IN_COND_BP;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
+#ifdef PHP_VERSION_ID >= 50700
+			if (zend_is_true(retval TSRMLS_CC)) {
+#else
 			if (zend_is_true(retval)) {
+#endif
 				breakpoint = SUCCESS;
 			}
 		} zend_catch {
