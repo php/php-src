@@ -1217,6 +1217,13 @@ phpdbg_out:
 			goto phpdbg_interact;
 		}
 #endif
+
+#ifndef ZTS
+		/* force cleanup of auto and core globals */
+		zend_hash_clean(CG(auto_globals));
+		memset(
+			&core_globals, 0, sizeof(php_core_globals));
+#endif
 		
 		if (ini_entries) {
 			free(ini_entries);
