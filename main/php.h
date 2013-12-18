@@ -446,13 +446,13 @@ END_EXTERN_C()
 #endif
 #endif /* !XtOffsetOf */
 
+#define php_size_t zend_size_t
 #define php_int_t zend_int_t
 #define php_uint_t zend_uint_t
 #define PHP_INT_MAX ZEND_INT_MAX
 #define PHP_INT_MIN ZEND_INT_MIN
 #define PHP_UINT_MAX ZEND_UINT_MAX
-#define PHP_SIZE_MAX_LONG ZEND_SIZE_MAX_LONG
-#define PHP_SIZE_MAX_INT ZEND_SIZE_MAX_INT
+#define PHP_SIZE_MAX ZEND_SIZE_MAX
 
 #endif
 
