@@ -20,13 +20,13 @@ function client($port, $method) {
 }
 
 function server($port, $transport) {
-        $context = stream_context_create();
+	$context = stream_context_create();
 
-        stream_context_set_option($context, 'ssl', 'local_cert', dirname(__FILE__) . '/streams_crypto_method.pem');
-        stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
-        stream_context_set_option($context, 'ssl', 'verify_peer', false);
+	stream_context_set_option($context, 'ssl', 'local_cert', dirname(__FILE__) . '/streams_crypto_method.pem');
+	stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
+	stream_context_set_option($context, 'ssl', 'verify_peer', false);
 
-        $server = stream_socket_server($transport . '127.0.0.1:' . $port, $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
+	$server = stream_socket_server($transport . '127.0.0.1:' . $port, $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 
 	$client = @stream_socket_accept($server);
 

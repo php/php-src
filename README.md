@@ -17,7 +17,7 @@ See https://wiki.php.net/rfc and https://wiki.php.net/rfc/voting for more
 information on the process.
 
 Bug fixes **do not** require an RFC, but require a bugtracker ticket. Always
-open a ticket at http://bugs.php.net and reference the bug id using #NNNNNN.
+open a ticket at https://bugs.php.net and reference the bug id using #NNNNNN.
 
     Fix #55371: get_magic_quotes_gpc() throws deprecation warning
 
@@ -28,3 +28,12 @@ open a ticket at http://bugs.php.net and reference the bug id using #NNNNNN.
 
 We do not merge pull requests directly on github. All PRs will be
 pulled and pushed through http://git.php.net.
+
+
+Guidelines for contributors
+===========================
+- [CODING_STANDARDS](/CODING_STANDARDS)
+- [README.GIT-RULES](/README.GIT-RULES)
+- [README.MAILINGLIST_RULES](/README.MAILINGLIST_RULES)
+- [README.RELEASE_PROCESS](/README.RELEASE_PROCESS)
+

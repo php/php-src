@@ -49,7 +49,7 @@ typedef struct _zend_generator {
 	/* Current key */
 	zval *key;
 	/* Variable to put sent value into */
-	temp_variable *send_target;
+	zval **send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	long largest_used_integer_key;
 

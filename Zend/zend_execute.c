@@ -40,7 +40,7 @@
 #include "zend_dtrace.h"
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #define _CONST_CODE  0
 #define _TMP_CODE    1
@@ -79,7 +79,6 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 		if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
 			Z_UNSET_ISREF_P(z);
 		}
-		GC_ZVAL_CHECK_POSSIBLE_ROOT(z);
 	}
 }
 
@@ -95,6 +94,7 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 
 #undef zval_ptr_dtor
 #define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv) ZEND_FILE_LINE_CC TSRMLS_CC)
+#define zval_ptr_dtor_nogc(pzv) i_zval_ptr_dtor_nogc(*(pzv) ZEND_FILE_LINE_CC TSRMLS_CC)
 
 #define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1 TSRMLS_CC)
 #define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u TSRMLS_CC)
@@ -102,16 +102,14 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 #define PZVAL_LOCK(z) Z_ADDREF_P((z))
 #define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
 
-#define EXTRACT_ZVAL_PTR(t) do {						\
-		temp_variable *__t = (t);					\
-		if (__t->var.ptr_ptr) {						\
-			__t->var.ptr = *__t->var.ptr_ptr;		\
-			__t->var.ptr_ptr = &__t->var.ptr;		\
-			if (!PZVAL_IS_REF(__t->var.ptr) && 		\
-			    Z_REFCOUNT_P(__t->var.ptr) > 2) {	\
-				SEPARATE_ZVAL(__t->var.ptr_ptr);	\
-			}										\
-		}											\
+#define EXTRACT_ZVAL_PTR(t) do {				\
+		temp_variable *__t = (t);				\
+		__t->var.ptr = *__t->var.ptr_ptr;		\
+		__t->var.ptr_ptr = &__t->var.ptr;		\
+		if (!PZVAL_IS_REF(__t->var.ptr) && 		\
+		    Z_REFCOUNT_P(__t->var.ptr) > 2) {	\
+			SEPARATE_ZVAL(__t->var.ptr_ptr);	\
+		}										\
 	} while (0)
 
 #define AI_SET_PTR(t, val) do {				\
@@ -125,18 +123,18 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 		if ((zend_uintptr_t)should_free.var & 1L) { \
 			zval_dtor((zval*)((zend_uintptr_t)should_free.var & ~1L)); \
 		} else { \
-			zval_ptr_dtor(&should_free.var); \
+			zval_ptr_dtor_nogc(&should_free.var); \
 		} \
 	}
 
 #define FREE_OP_IF_VAR(should_free) \
 	if (should_free.var != NULL && (((zend_uintptr_t)should_free.var & 1L) == 0)) { \
-		zval_ptr_dtor(&should_free.var); \
+		zval_ptr_dtor_nogc(&should_free.var); \
 	}
 
 #define FREE_OP_VAR_PTR(should_free) \
 	if (should_free.var) { \
-		zval_ptr_dtor(&should_free.var); \
+		zval_ptr_dtor_nogc(&should_free.var); \
 	}
 
 #define TMP_FREE(z) (zval*)(((zend_uintptr_t)(z)) | 1L)
@@ -1215,12 +1213,12 @@ convert_to_array:
 							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name);
 						}
 					}
-					retval = &overloaded_result;
+					AI_SET_PTR(result, overloaded_result);
+					PZVAL_LOCK(overloaded_result);
 				} else {
-					retval = &EG(error_zval_ptr);
+					result->var.ptr_ptr = &EG(error_zval_ptr);
+					PZVAL_LOCK(EG(error_zval_ptr));
 				}
-				AI_SET_PTR(result, *retval);
-				PZVAL_LOCK(*retval);
 				if (dim_type == IS_TMP_VAR) {
 					zval_ptr_dtor(&dim);
 				}
@@ -1237,8 +1235,8 @@ convert_to_array:
 		default:
 			if (type == BP_VAR_UNSET) {
 				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-				AI_SET_PTR(result, &EG(uninitialized_zval));
-				PZVAL_LOCK(&EG(uninitialized_zval));
+				result->var.ptr_ptr = &EG(uninitialized_zval_ptr);
+				PZVAL_LOCK(EG(uninitialized_zval_ptr));
 			} else {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				result->var.ptr_ptr = &EG(error_zval_ptr);
@@ -1248,21 +1246,20 @@ convert_to_array:
 	}
 }
 
-static void zend_fetch_dimension_address_read(temp_variable *result, zval **container_ptr, zval *dim, int dim_type, int type TSRMLS_DC)
+static void zend_fetch_dimension_address_read(temp_variable *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
 {
-	zval *container = *container_ptr;
 	zval **retval;
 
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
-			AI_SET_PTR(result, *retval);
+			result->var.ptr = *retval;
 			PZVAL_LOCK(*retval);
 			return;
 
 		case IS_NULL:
-			AI_SET_PTR(result, &EG(uninitialized_zval));
+			result->var.ptr = &EG(uninitialized_zval);
 			PZVAL_LOCK(&EG(uninitialized_zval));
 			return;
 
@@ -1315,7 +1312,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					Z_STRVAL_P(ptr)[1] = 0;
 					Z_STRLEN_P(ptr) = 1;
 				}
-				AI_SET_PTR(result, ptr);
+				result->var.ptr = ptr;
 				return;
 			}
 			break;
@@ -1333,12 +1330,14 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				}
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type TSRMLS_CC);
 
-				if (overloaded_result) {
-					AI_SET_PTR(result, overloaded_result);
-					PZVAL_LOCK(overloaded_result);
-				} else if (result) {
-					AI_SET_PTR(result, &EG(uninitialized_zval));
-					PZVAL_LOCK(&EG(uninitialized_zval));
+				if (result) {
+					if (overloaded_result) {
+						result->var.ptr = overloaded_result;
+						PZVAL_LOCK(overloaded_result);
+					} else {
+						result->var.ptr = &EG(uninitialized_zval);
+						PZVAL_LOCK(&EG(uninitialized_zval));
+					}
 				}
 				if (dim_type == IS_TMP_VAR) {
 					zval_ptr_dtor(&dim);
@@ -1347,7 +1346,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 			return;
 
 		default:
-			AI_SET_PTR(result, &EG(uninitialized_zval));
+			result->var.ptr = &EG(uninitialized_zval);
 			PZVAL_LOCK(&EG(uninitialized_zval));
 			return;
 	}
@@ -1651,6 +1650,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	EX(call) = NULL;
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
+	EX(delayed_exception) = NULL;
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
@@ -1678,7 +1678,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 }
 /* }}} */
 
-zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
 {
 	return i_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
 }

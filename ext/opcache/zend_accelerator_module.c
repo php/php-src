@@ -28,13 +28,13 @@
 #include "zend_accelerator_blacklist.h"
 #include "php_ini.h"
 #include "SAPI.h"
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
-#define MAX_ACCEL_FILES 100000
+#define MAX_ACCEL_FILES 1000000
 #define TOKENTOSTR(X) #X
 
 static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
@@ -259,7 +259,8 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.consistency_checks"    , "0"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.consistency_checks,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.force_restart_timeout" , "180" , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.force_restart_timeout,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.revalidate_freq"       , "2"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.revalidate_freq,           zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,        accel_directives.memory_model,              zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_update_protection", "2"   , PHP_INI_ALL   , OnUpdateLong,                accel_directives.file_update_protection,    zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,       accel_directives.memory_model,              zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateString,	             accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_file_size"         , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.max_file_size,             zend_accel_globals, accel_globals)
 
@@ -467,10 +468,17 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+int start_accel_module(TSRMLS_D)
+{
+	return zend_startup_module(&accel_module_entry TSRMLS_CC);
+}
+#else
 int start_accel_module(void)
 {
 	return zend_startup_module(&accel_module_entry);
 }
+#endif
 
 /* {{{ proto array accelerator_get_scripts()
    Get the scripts which are accelerated by ZendAccelerator */

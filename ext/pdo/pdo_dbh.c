@@ -460,7 +460,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
-		zval *retval;
+		zval *retval = NULL;
 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &dbstmt_ce->function_table;
@@ -495,7 +495,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 			zval_dtor(object);
 			ZVAL_NULL(object);
 			object = NULL; /* marks failure */
-		} else {
+		} else if (retval) {
 			zval_ptr_dtor(&retval);
 		}
 			

@@ -54,7 +54,7 @@
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "Zend/zend_virtual_cwd.h"
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"

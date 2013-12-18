@@ -92,6 +92,7 @@
 #define PHP_5_3_X_API_NO		220090626
 #define PHP_5_4_X_API_NO		220100525
 #define PHP_5_5_X_API_NO		220121212
+#define PHP_5_6_X_API_NO		220131106
 
 /*** file locking ***/
 #ifndef ZEND_WIN32
@@ -229,6 +230,7 @@ typedef struct _zend_accel_directives {
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	unsigned long  revalidate_freq;
+	unsigned long  file_update_protection;
 	char          *error_log;
 #ifdef ZEND_WIN32
 	char          *mmap_base;

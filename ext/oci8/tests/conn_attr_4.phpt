@@ -17,10 +17,6 @@ if (!(isset($matches[0]) &&
     // Bug fixed in 11.2 prevents client_info being reset
 	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
 }
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (isset($matches[0]) && $matches[0] < 10) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
-}
 ?>
 --FILE--
 <?php

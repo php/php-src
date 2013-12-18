@@ -827,6 +827,7 @@ php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
 										 TSRMLS_CC);
+		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
 	/* Everything was fine! */
@@ -1069,6 +1070,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
 										 TSRMLS_CC);
+		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
 

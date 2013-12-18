@@ -2639,7 +2639,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 					Bucket *p;
 	
 					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+					fci.params = safe_emalloc(sizeof(zval***), ht->nNumOfElements, 0);
 					p = ht->pListHead;
 					while (p != NULL) {
 						fci.params[fci.param_count++] = (zval**)p->pData;

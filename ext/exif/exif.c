@@ -2633,6 +2633,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			} else {
 				decode = ImageInfo->decode_unicode_le;
 			}
+			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 			if (zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr, 
 					&len, 
@@ -2640,7 +2641,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
 					zend_multibyte_fetch_encoding(decode TSRMLS_CC)
-					TSRMLS_CC) < 0) {
+					TSRMLS_CC) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2653,6 +2654,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
+			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 			if (zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr, 
 					&len, 
@@ -2660,7 +2662,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					zend_multibyte_fetch_encoding(ImageInfo->encode_jis TSRMLS_CC),
 					zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le TSRMLS_CC)
-					TSRMLS_CC) < 0) {
+					TSRMLS_CC) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2690,8 +2692,8 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_field, int tag, char *szValuePtr, int ByteCount TSRMLS_DC)
 {
 	xp_field->tag = tag;	
-
-	/* Copy the comment */
+	
+	/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 	if (zend_multibyte_encoding_converter(
 			(unsigned char**)&xp_field->value, 
 			&xp_field->size, 
@@ -2699,7 +2701,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 			ByteCount,
 			zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
 			zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le TSRMLS_CC)
-			TSRMLS_CC) < 0) {
+			TSRMLS_CC) == (size_t)-1) {
 		xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
 	}
 	return xp_field->size;
@@ -2840,7 +2842,12 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
 		value_ptr = offset_base+offset_val;
-		if (byte_count > IFDlength || offset_val > IFDlength-byte_count || value_ptr < dir_entry) {
+        /* 
+            dir_entry is ImageInfo->file.list[sn].data+2+i*12
+            offset_base is ImageInfo->file.list[sn].data-dir_offset 
+            dir_entry - offset_base is dir_offset+2+i*12
+        */
+		if (byte_count > IFDlength || offset_val > IFDlength-byte_count || value_ptr < dir_entry || offset_val < (size_t)(dir_entry-offset_base)) {
 			/* It is important to check for IMAGE_FILETYPE_TIFF
 			 * JPEG does not use absolute pointers instead its pointers are
 			 * relative to the start of the TIFF header in APP1 section. */

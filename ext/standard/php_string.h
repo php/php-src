@@ -156,7 +156,7 @@ PHPAPI char *php_strerror(int errnum);
 # define php_mblen(ptr, len) 1
 #else
 # if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
-#  define php_mblen(ptr, len) ((ptr) == NULL ? mbsinit(&BG(mblen_state)): (int)mbrlen(ptr, len, &BG(mblen_state)))
+#  define php_mblen(ptr, len) ((ptr) == NULL ? memset(&BG(mblen_state), 0, sizeof(BG(mblen_state))): (int)mbrlen(ptr, len, &BG(mblen_state)))
 # else
 #  define php_mblen(ptr, len) mblen(ptr, len)
 # endif

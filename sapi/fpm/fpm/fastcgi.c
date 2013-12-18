@@ -426,8 +426,9 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	char buf[128];
 	char *tmp = buf;
 	size_t buf_size = sizeof(buf);
-	int name_len, val_len;
-	uint eff_name_len;
+	int name_len = 0;
+	int val_len = 0;
+	uint eff_name_len = 0;
 	char *s;
 	int ret = 1;
 	size_t bytes_consumed;

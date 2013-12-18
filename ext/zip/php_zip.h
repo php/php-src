@@ -28,9 +28,17 @@ extern zend_module_entry zip_module_entry;
 #include "TSRM.h"
 #endif
 
+#if defined(HAVE_LIBZIP)
+#include <zip.h>
+#else
 #include "lib/zip.h"
+#endif
 
-#define PHP_ZIP_VERSION_STRING "1.11.0"
+#ifndef ZIP_OVERWRITE
+#define ZIP_OVERWRITE ZIP_TRUNCATE
+#endif
+
+#define PHP_ZIP_VERSION "1.12.3"
 
 #if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
 # define PHP_ZIP_USE_OO 1
@@ -67,8 +75,9 @@ typedef struct _ze_zip_read_rsrc {
 } zip_read_rsrc;
 
 #ifdef PHP_ZIP_USE_OO 
-#define ZIPARCHIVE_ME(name, arg_info, flags)	ZEND_FENTRY(name, c_ziparchive_ ##name, arg_info, flags)
-#define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_##name)
+#define ZIPARCHIVE_ME(name, arg_info, flags) {#name, c_ziparchive_ ##name, arg_info,(zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_ ##name)
+
 
 /* Extends zend object */
 typedef struct _ze_zip_object {

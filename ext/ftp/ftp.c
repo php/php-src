@@ -630,7 +630,7 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 		return 0;
 	}
 
-	if (response && ftp->inbuf) {
+	if (response) {
 		*response = estrdup(ftp->inbuf);
 	}
 
@@ -1638,7 +1638,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	if (ftp->resp == 226) {
 		ftp->data = data_close(ftp, data);
 		php_stream_close(tmpstream);
-		return ecalloc(1, sizeof(char**));
+		return ecalloc(1, sizeof(char*));
 	}
 
 	/* pull data buffer into tmpfile */
@@ -1666,11 +1666,11 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 		}
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	ftp->data = data_close(ftp, data);
 
 	php_stream_rewind(tmpstream);
 
-	ret = safe_emalloc((lines + 1), sizeof(char**), size * sizeof(char*));
+	ret = safe_emalloc((lines + 1), sizeof(char*), size);
 
 	entry = ret;
 	text = (char*) (ret + lines + 1);

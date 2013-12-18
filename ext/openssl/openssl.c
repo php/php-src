@@ -690,18 +690,28 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 	char * thestr;
 	long gmadjust = 0;
 
-	if (timestr->length < 13) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "extension author too lazy to parse %s correctly", timestr->data);
+	if (ASN1_STRING_type(timestr) != V_ASN1_UTCTIME) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal ASN1 data type for timestamp");
 		return (time_t)-1;
 	}
 
-	strbuf = estrdup((char *)timestr->data);
+	if (ASN1_STRING_length(timestr) != strlen(ASN1_STRING_data(timestr))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal length in timestamp");
+		return (time_t)-1;
+	}
+
+	if (ASN1_STRING_length(timestr) < 13) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to parse time string %s correctly", timestr->data);
+		return (time_t)-1;
+	}
+
+	strbuf = estrdup((char *)ASN1_STRING_data(timestr));
 
 	memset(&thetime, 0, sizeof(thetime));
 
 	/* we work backwards so that we can use atoi more easily */
 
-	thestr = strbuf + timestr->length - 3;
+	thestr = strbuf + ASN1_STRING_length(timestr) - 3;
 
 	thetime.tm_sec = atoi(thestr);
 	*thestr = '\0';
@@ -1192,6 +1202,10 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory TSRMLS_CC);
+#endif
 
 	/* override the default tcp socket provider */
 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory TSRMLS_CC);
@@ -1233,6 +1247,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #endif
 	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+	php_stream_xport_unregister("tlsv1.1" TSRMLS_CC);
+	php_stream_xport_unregister("tlsv1.2" TSRMLS_CC);
+#endif
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC);
@@ -1616,7 +1634,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING(ASN1_STRING_data(spki->spkac->challenge), 1);
+	RETVAL_STRING((char *) ASN1_STRING_data(spki->spkac->challenge), 1);
 	goto cleanup;
 
 cleanup:
@@ -1690,7 +1708,7 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
-	int n;
+	unsigned int n;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
@@ -1702,7 +1720,7 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 
 	if (raw) {
 		*out_len = n;
-		*out = estrndup(md, n);
+		*out = estrndup((char *) md, n);
 	} else {
 		*out_len = n * 2;
 		*out = emalloc(*out_len + 1);
@@ -4930,14 +4948,12 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 {
 	php_stream *stream;
 	SSL *ssl;
-	X509 *err_cert;
 	int err, depth, ret;
 	zval **val;
 
 	ret = preverify_ok;
 
 	/* determine the status for the current cert */
-	err_cert = X509_STORE_CTX_get_current_cert(ctx);
 	err = X509_STORE_CTX_get_error(ctx);
 	depth = X509_STORE_CTX_get_error_depth(ctx);
 
@@ -5011,7 +5027,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name)
 
 		if (GEN_DNS == san->type) {
 			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
-			is_match = matches_wildcard_name(subject_name, cert_name);
+			is_match = matches_wildcard_name(subject_name, (char *) cert_name);
 			OPENSSL_free(cert_name);
 		}
 

@@ -78,11 +78,7 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			/* unknown mode */
 			return FAILURE;
 	}
-#if defined(O_NONBLOCK)
-	if (strchr(mode, 'n')) {
-		flags |= O_NONBLOCK;
-	}
-#endif
+
 	if (strchr(mode, '+')) {
 		flags |= O_RDWR;
 	} else if (flags) {
@@ -90,6 +86,12 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 	} else {
 		flags |= O_RDONLY;
 	}
+
+#if defined(O_NONBLOCK)
+	if (strchr(mode, 'n')) {
+		flags |= O_NONBLOCK;
+	}
+#endif
 
 #if defined(_O_TEXT) && defined(O_BINARY)
 	if (strchr(mode, 't')) {
@@ -1436,7 +1438,7 @@ not_relative_path:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 		
-		free(cwd);
+		efree(cwd);
 		
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;

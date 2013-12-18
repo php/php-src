@@ -36,7 +36,7 @@
 #include "main/php_open_temporary_file.h"
 #include "zend_API.h"
 #include "zend_ini.h"
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -1200,6 +1200,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
 	if (bucket &&
+	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
+	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
 	    (new_persistent_script->full_path_len != key_length ||
 	     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
 		/* link key to the same persistent script in hash table */
@@ -1333,7 +1335,9 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 #endif
 
-	if (ZCG(accel_directives).validate_timestamps || ZCG(accel_directives).max_file_size > 0) {
+	if (ZCG(accel_directives).validate_timestamps ||
+	    ZCG(accel_directives).file_update_protection ||
+	    ZCG(accel_directives).max_file_size > 0) {
 		size_t size = 0;
 
 		/* Obtain the file timestamps, *before* actually compiling them,
@@ -1345,6 +1349,13 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 *  we won't cache it
 		 */
 		if (timestamp == 0) {
+			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
+			return NULL;
+		}
+
+		/* check if file is too new (may be it's not written completely yet) */
+		if (ZCG(accel_directives).file_update_protection &&
+		    (ZCG(request_time) - ZCG(accel_directives).file_update_protection < timestamp)) {
 			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 			return NULL;
 		}
@@ -1655,7 +1666,18 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 #endif
 				void *dummy = (void *) 1;
 
-				zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL);
+				if (zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL) == SUCCESS) {
+					/* ext/phar has to load phar's metadata into memory */
+					if (strstr(persistent_script->full_path, ".phar") && !strstr(persistent_script->full_path, "://")) {
+						php_stream_statbuf ssb;
+						char *fname = emalloc(sizeof("phar://") + persistent_script->full_path_len);
+
+						memcpy(fname, "phar://", sizeof("phar://") - 1);
+						memcpy(fname + sizeof("phar://") - 1, persistent_script->full_path, persistent_script->full_path_len + 1);
+						php_stream_stat_path(fname, &ssb);
+						efree(fname);
+					}
+				}
 			}
 		}
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
@@ -2506,7 +2528,11 @@ static int accel_startup(zend_extension *extension)
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
 #endif
 
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+	if (start_accel_module(TSRMLS_C) == FAILURE) {
+#else
 	if (start_accel_module() == FAILURE) {
+#endif
 		accel_startup_ok = 0;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME ": module registration failed!");
 		return FAILURE;
@@ -2712,6 +2738,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	}
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
 
+	SHM_UNPROTECT();
 	ZCSG(restart_pending) = 1;
 	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
@@ -2722,6 +2749,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 	} else {
 		ZCSG(force_restart_time) = 0;
 	}
+	SHM_PROTECT();
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */

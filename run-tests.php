@@ -241,6 +241,7 @@ $ini_overwrites = array(
 		'precision=14',
 		'memory_limit=128M',
 		'opcache.fast_shutdown=0',
+		'opcache.file_update_protection=0',
 	);
 
 function write_information($show_html)
@@ -1090,6 +1091,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		fwrite($pipes[0], $stdin);
 	}
 	fclose($pipes[0]);
+	unset($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 

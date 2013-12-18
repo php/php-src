@@ -59,8 +59,8 @@ Exceptions:
     you're calling.
 
 7.  When commenting out code using a #if statement, do NOT use 0 only. Instead
-    use "<svn username here>_0". For example, #if FOO_0, where FOO is your
-    svn user foo.  This allows easier tracking of why code was commented out,
+    use "<git username here>_0". For example, #if FOO_0, where FOO is your
+    git user foo.  This allows easier tracking of why code was commented out,
     especially in bundled libraries.
 
 8.  Do not define functions that are not available.  For instance, if a

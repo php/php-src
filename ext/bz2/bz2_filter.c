@@ -97,6 +97,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
 
 				if (BZ_OK != status) {
+					php_stream_bucket_delref(bucket TSRMLS_CC);
 					return PSFS_ERR_FATAL;
 				}
 
