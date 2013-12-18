@@ -2240,7 +2240,7 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
+							zend_load_extension(php_optarg TSRMLS_CC);
 							break;
 
 						default:

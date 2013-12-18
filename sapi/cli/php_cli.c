@@ -870,7 +870,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(php_optarg);
+				zend_load_extension(php_optarg TSRMLS_CC);
 				break;
 			case 'H':
 				hide_argv = 1;

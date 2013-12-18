@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(ap_php_optarg);
+				zend_load_extension(ap_php_optarg TSRMLS_CC);
 				break;
 
 			default:
