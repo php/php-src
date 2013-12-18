@@ -155,15 +155,13 @@ static request_rec *get_apache_request(zval *z TSRMLS_DC)
 	return r;
 }
 
-/* {{{ php_apache_request_new(request_rec *r)
+/* {{{ php_apache_request_new(request_rec *r TSRMLS_DC)
  * create a new zval-instance for ApacheRequest that wraps request_rec
  */
-zval *php_apache_request_new(request_rec *r)
+zval *php_apache_request_new(request_rec *r TSRMLS_DC)
 {
 	zval *req;
 	zval *addr;
-	
-	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(addr);
 	Z_TYPE_P(addr) = IS_LONG;
@@ -1170,7 +1168,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r);
+    return_value = php_apache_request_new(sub_r TSRMLS_CC);
 }
 /* }}} */
 
@@ -1196,7 +1194,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_file)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r);
+    return_value = php_apache_request_new(sub_r TSRMLS_CC);
 }
 /* }}} */
 
@@ -1222,7 +1220,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r);
+    return_value = php_apache_request_new(sub_r TSRMLS_CC);
 }
 /* }}} */
 
