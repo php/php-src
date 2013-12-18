@@ -566,6 +566,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
 #endif
+	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -998,6 +999,18 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 #endif
+
+			case 'V': {
+				printf(
+					"phpdbg %s (built: %s %s)\nCopyright (c) 2013 %s\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n",
+					PHPDBG_VERSION,
+					__DATE__,
+					__TIME__,
+					PHPDBG_AUTHORS,
+					PHP_VERSION
+				);
+				return 0;
+			} break;
 		}
 	}
 

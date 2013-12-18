@@ -589,6 +589,7 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console ports");
 	phpdbg_writeln(" -a\t-a192.168.0.3\t\tSetup remote console bind address");
 #endif
+	phpdbg_writeln(" -V\tN/A\t\t\tVersion number");
 	phpdbg_notice("Passing -rr will quit automatically after execution");
 #ifndef _WIN32
 	phpdbg_writeln("Remote Console Mode");
