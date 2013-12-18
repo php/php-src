@@ -1153,8 +1153,9 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_persistent_script *existing_persistent_script = (zend_persistent_script *)bucket->data;
 
 		if (!existing_persistent_script->corrupted) {
-			if (!ZCG(accel_directives).validate_timestamps ||
-			    (new_persistent_script->timestamp == existing_persistent_script->timestamp)) {
+			if (!ZCG(accel_directives).revalidate_path &&
+			    (!ZCG(accel_directives).validate_timestamps ||
+			     (new_persistent_script->timestamp == existing_persistent_script->timestamp))) {
 				zend_accel_add_key(key, key_length, bucket TSRMLS_CC);
 			}
 			zend_shared_alloc_unlock(TSRMLS_C);
@@ -1195,7 +1196,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
-	if (bucket &&
+	if (bucket && !ZCG(accel_directives).revalidate_path &&
 	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
 	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
 	    (new_persistent_script->full_path_len != key_length ||

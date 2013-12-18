@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
 
+- OPCache:
+  . Fixed reavlidate_path=1 behavior to avoid caching of symlinks values.
+    (Dmitry)
+
 - SOAP
   . Fixed bug #66112 (Use after free condition in SOAP extension).
     (martin dot koegler at brz dot gv dot at)
