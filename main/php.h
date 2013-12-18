@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20131106
+#define PHP_API_VERSION 20131218
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
