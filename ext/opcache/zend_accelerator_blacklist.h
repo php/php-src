@@ -26,7 +26,7 @@ typedef struct _zend_regexp_list zend_regexp_list;
 
 typedef struct _zend_blacklist_entry {
     char *path;
-    php_size_t   path_length;
+    zend_size_t   path_length;
 	int   id;
 } zend_blacklist_entry;
 

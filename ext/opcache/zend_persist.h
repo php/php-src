@@ -23,7 +23,7 @@
 #define ZEND_PERSIST_H
 
 int zend_accel_script_persistable(zend_persistent_script *script);
-uint zend_accel_script_persist_calc(zend_persistent_script *script, char *key, php_size_t key_length TSRMLS_DC);
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, php_size_t key_length TSRMLS_DC);
+uint zend_accel_script_persist_calc(zend_persistent_script *script, char *key, zend_size_t key_length TSRMLS_DC);
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, zend_size_t key_length TSRMLS_DC);
 
 #endif /* ZEND_PERSIST_H */

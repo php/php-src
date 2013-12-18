@@ -245,7 +245,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1], *blacklist_path = NULL;
 	FILE *fp;
-	php_size_t path_length, blacklist_path_length;
+	zend_size_t path_length, blacklist_path_length;
 	TSRMLS_FETCH();
 
 	if ((fp = fopen(filename, "r")) == NULL) {

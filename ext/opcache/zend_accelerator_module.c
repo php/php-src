@@ -80,7 +80,7 @@ static zend_function_entry accel_functions[] = {
 static int validate_api_restriction(TSRMLS_D)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
-		php_size_t len = strlen(ZCG(accel_directives).restrict_api);
+		zend_size_t len = strlen(ZCG(accel_directives).restrict_api);
 
 		if (!SG(request_info).path_translated ||
 		    strlen(SG(request_info).path_translated) < len ||
@@ -300,10 +300,10 @@ static int ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 }
 #endif
 
-static int filename_is_in_cache(char *filename, php_size_t filename_len TSRMLS_DC)
+static int filename_is_in_cache(char *filename, zend_size_t filename_len TSRMLS_DC)
 {
 	char *key;
-	php_size_t key_length;
+	zend_size_t key_length;
 	zend_file_handle handle = {0};
 	zend_persistent_script *persistent_script;
 
@@ -706,7 +706,7 @@ static ZEND_FUNCTION(opcache_reset)
 static ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
-	php_size_t script_name_len;
+	zend_size_t script_name_len;
 	zend_bool force = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &script_name, &script_name_len, &force) == FAILURE) {
@@ -727,7 +727,7 @@ static ZEND_FUNCTION(opcache_invalidate)
 static ZEND_FUNCTION(opcache_compile_file)
 {
 	char *script_name;
-	php_size_t script_name_len;
+	zend_size_t script_name_len;
 	zend_file_handle handle;
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
