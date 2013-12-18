@@ -245,14 +245,13 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 }
 
 static void
-php_apache_sapi_flush(void *server_context)
+php_apache_sapi_flush(void *server_context TSRMLS_DC)
 {
 	php_struct *ctx;
 	apr_bucket_brigade *bb;
 	apr_bucket_alloc_t *ba;
 	apr_bucket *b;
 	ap_filter_t *f; /* output filters */
-	TSRMLS_FETCH();
 
 	ctx = server_context;
 

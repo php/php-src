@@ -395,11 +395,10 @@ php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
  * the client. Used for POST/PUT requests.
  */
 
-INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
+INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
   GET_THIS();
-  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -423,7 +422,7 @@ static int
 php_caudium_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
-  THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes), "read post");
+  THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes TSRMLS_CC), "read post");
   return total_read;
 }
 

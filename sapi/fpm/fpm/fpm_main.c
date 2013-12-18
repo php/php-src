@@ -315,7 +315,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static void sapi_cgibin_flush(void *server_context)
+static void sapi_cgibin_flush(void *server_context TSRMLS_DC)
 {
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {

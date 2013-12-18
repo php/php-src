@@ -79,7 +79,7 @@ static zend_str_size_int php_embed_ub_write(const char *str, zend_str_size_uint 
 	return str_length;
 }
 
-static void php_embed_flush(void *server_context)
+static void php_embed_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();

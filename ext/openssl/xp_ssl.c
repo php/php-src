@@ -926,7 +926,7 @@ static char * get_sni(php_stream_context *ctx, const char *resourcename, size_t 
 	if (ctx) {
 		zval **val = NULL;
 
-		if (php_stream_context_get_option(ctx, "ssl", "SNI_enabled", &val) == SUCCESS && !zend_is_true(*val)) {
+		if (php_stream_context_get_option(ctx, "ssl", "SNI_enabled", &val) == SUCCESS && !zend_is_true(*val TSRMLS_CC)) {
 			return NULL;
 		}
 		if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {

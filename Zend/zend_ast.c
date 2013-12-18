@@ -231,9 +231,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			break;
 		case ZEND_BOOL_AND:
 			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1)) {
+			if (zend_is_true(&op1 TSRMLS_CC)) {
 				zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
-				ZVAL_BOOL(result, zend_is_true(&op2));
+				ZVAL_BOOL(result, zend_is_true(&op2 TSRMLS_CC));
 				zval_dtor(&op2);
 			} else {
 				ZVAL_BOOL(result, 0);
@@ -242,18 +242,18 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			break;
 		case ZEND_BOOL_OR:
 			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1)) {
+			if (zend_is_true(&op1 TSRMLS_CC)) {
 				ZVAL_BOOL(result, 1);
 			} else {
 				zend_ast_evaluate(&op2, (&ast->u.child)[1], scope TSRMLS_CC);
-				ZVAL_BOOL(result, zend_is_true(&op2));
+				ZVAL_BOOL(result, zend_is_true(&op2 TSRMLS_CC));
 				zval_dtor(&op2);
 			}
 			zval_dtor(&op1);
 			break;
 		case ZEND_SELECT:
 			zend_ast_evaluate(&op1, (&ast->u.child)[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1)) {
+			if (zend_is_true(&op1 TSRMLS_CC)) {
 				if (!(&ast->u.child)[1]) {
 					*result = op1;
 				} else {

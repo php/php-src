@@ -227,7 +227,7 @@ struct _sapi_module_struct {
 	int (*deactivate)(TSRMLS_D);
 
 	zend_str_size_int (*ub_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
-	void (*flush)(void *server_context);
+	void (*flush)(void *server_context TSRMLS_DC);
 	zend_stat_t *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
 

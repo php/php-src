@@ -46,17 +46,13 @@ static int php_compare_tick_functions(void *elem1, void *elem2)
 	return (func1 == func2);
 }
 
-PHPAPI void php_add_tick_function(void (*func)(int))
+PHPAPI void php_add_tick_function(void (*func)(int) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_llist_add_element(&PG(tick_functions), (void *)&func);
 }
 
-PHPAPI void php_remove_tick_function(void (*func)(int))
+PHPAPI void php_remove_tick_function(void (*func)(int) TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_llist_del_element(&PG(tick_functions), (void *)func,
 						   (int(*)(void*, void*))php_compare_tick_functions);
 }
@@ -69,10 +65,8 @@ static void php_tick_iterator(void *data, void *arg TSRMLS_DC)
 	func(*((int *)arg));
 }
 
-void php_run_ticks(int count)
+void php_run_ticks(int count TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_llist_apply_with_argument(&PG(tick_functions), (llist_apply_with_arg_func_t) php_tick_iterator, &count TSRMLS_CC);
 }
 

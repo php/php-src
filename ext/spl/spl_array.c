@@ -599,7 +599,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(&offset);
-		if (rv && zend_is_true(rv)) {
+		if (rv && zend_is_true(rv TSRMLS_CC)) {
 			zval_ptr_dtor(&rv);
 			return 1;
 		}
@@ -620,7 +620,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 						case 2:
 							return 1;
 						default:
-							return zend_is_true(*tmp);
+							return zend_is_true(*tmp TSRMLS_CC);
 					}
 				}
 			}
@@ -643,7 +643,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 						case 2:
 							return 1;
 						default:
-							return zend_is_true(*tmp);
+							return zend_is_true(*tmp TSRMLS_CC);
 					}
 				}
 				return 0;
