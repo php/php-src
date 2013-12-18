@@ -96,7 +96,7 @@ static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return n;
 }
 
-static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
+static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[1024];
 	struct iovec *vec;
@@ -107,7 +107,6 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 	size_t len;
 	char *status_line;
 	int locate_cl;
-	TSRMLS_FETCH();
 	
 	max_headers = 30;
 	n = 1;
@@ -158,11 +157,10 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
-static int sapi_tux_read_post(char *buffer, uint count_bytes)
+static int sapi_tux_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 #if 0
 	int amount = 0;
-	TSRMLS_FETCH();
 
 	TG(req)->objectlen = count_bytes;
 	TG(req)->object_addr = buffer;
@@ -177,10 +175,8 @@ static int sapi_tux_read_post(char *buffer, uint count_bytes)
 #endif
 }
 
-static char *sapi_tux_read_cookies(void)
+static char *sapi_tux_read_cookies(TSRMLS_D)
 {
-	TSRMLS_FETCH();
-	
 	return TG(req)->cookies;
 }
 
