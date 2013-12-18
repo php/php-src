@@ -153,7 +153,7 @@ PHP_FUNCTION(gethostname)
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
-	zend_str_size_int addr_len;
+	php_size_t addr_len;
 	char *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &addr, &addr_len) == FAILURE) {
@@ -215,7 +215,7 @@ static char *php_gethostbyaddr(char *ip)
 PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	char *addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &hostname, &hostname_len) == FAILURE) {
@@ -233,7 +233,7 @@ PHP_FUNCTION(gethostbyname)
 PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
@@ -346,7 +346,7 @@ PHP_FUNCTION(dns_check_record)
 #endif
 	u_char ans[MAXPACKET];
 	char *hostname, *rectype = NULL;
-	zend_str_size_int hostname_len, rectype_len = 0;
+	php_size_t hostname_len, rectype_len = 0;
 	int type = T_MX, i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -454,7 +454,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 
 	if (raw) {
 		add_assoc_long(*subarray, "type", type);
-		add_assoc_stringl(*subarray, "data", (char*) cp, (zend_str_size_uint) dlen, 1);
+		add_assoc_stringl(*subarray, "data", (char*) cp, (php_size_t) dlen, 1);
 		cp += dlen;
 		return cp;
 	}
@@ -714,7 +714,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	php_int_t type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
@@ -926,7 +926,7 @@ PHP_FUNCTION(dns_get_record)
 PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;

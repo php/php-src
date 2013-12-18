@@ -1063,7 +1063,7 @@ PHP_FUNCTION(ibase_query)
 	zval *zlink, *ztrans, ***bind_args = NULL;
 	char *query;
 	int bind_i, bind_num;
-	zend_str_size_int query_len;
+	php_size_t query_len;
 	php_int_t trans_res_id = 0;
 	ibase_db_link *ib_link = NULL;
 	ibase_trans *trans = NULL;
@@ -1690,7 +1690,7 @@ PHP_FUNCTION(ibase_name_result)
 {
 	zval *result_arg;
 	char *name_arg;
-	zend_str_size_int name_arg_len;
+	php_size_t name_arg_len;
 	ibase_result *ib_result;
 
 	RESET_ERRMSG;
@@ -1736,7 +1736,7 @@ PHP_FUNCTION(ibase_prepare)
 	zval *link_arg, *trans_arg;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
-	zend_str_size_int query_len;
+	php_size_t query_len;
 	int trans_res_id = 0;
 	ibase_query *ib_query;
 	char *query;

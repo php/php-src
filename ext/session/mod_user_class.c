@@ -39,7 +39,7 @@
 PHP_METHOD(SessionHandler, open)
 {
 	char *save_path = NULL, *session_name = NULL;
-	zend_str_size_int save_path_len, session_name_len;
+	php_size_t save_path_len, session_name_len;
 
 	PS_SANITY_CHECK;
 
@@ -72,7 +72,7 @@ PHP_METHOD(SessionHandler, close)
 PHP_METHOD(SessionHandler, read)
 {
 	char *key, *val;
-	zend_str_size_int key_len, val_len;
+	php_size_t key_len, val_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -96,7 +96,7 @@ PHP_METHOD(SessionHandler, read)
 PHP_METHOD(SessionHandler, write)
 {
 	char *key, *val;
-	zend_str_size_int key_len, val_len;
+	php_size_t key_len, val_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 
@@ -113,7 +113,7 @@ PHP_METHOD(SessionHandler, write)
 PHP_METHOD(SessionHandler, destroy)
 {
 	char *key;
-	zend_str_size_int key_len;
+	php_size_t key_len;
 
 	PS_SANITY_CHECK_IS_OPEN;
 

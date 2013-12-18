@@ -51,7 +51,7 @@ PHP_FUNCTION(uniqid)
 #endif
 	char *uniqid;
 	int sec, usec;
-	zend_str_size prefix_len = 0;
+	php_size_t prefix_len = 0;
 	struct timeval tv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Sb", &prefix, &prefix_len,

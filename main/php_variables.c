@@ -43,7 +43,7 @@ PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_arra
 }
 
 /* binary-safe version */
-PHPAPI void php_register_variable_safe(char *var, char *strval, zend_str_size_int str_len, zval *track_vars_array TSRMLS_DC)
+PHPAPI void php_register_variable_safe(char *var, char *strval, php_size_t str_len, zval *track_vars_array TSRMLS_DC)
 {
 	zval new_entry;
 	assert(strval != NULL);
@@ -62,7 +62,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	char *ip = NULL;		/* index pointer */
 	char *index;
 	char *var, *var_orig;
-	zend_str_size var_len, index_len;
+	php_size_t var_len, index_len;
 	zval *gpc_element, **gpc_element_p;
 	zend_bool is_array = 0;
 	HashTable *symtable1 = NULL;
@@ -128,7 +128,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		int nest_level = 0;
 		while (1) {
 			char *index_s;
-			zend_str_size new_idx_len = 0;
+			php_size_t new_idx_len = 0;
 
 			if(++nest_level > PG(max_input_nesting_level)) {
 				HashTable *ht;
@@ -243,7 +243,7 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSR
 {
 	char *ksep, *vsep;
 	size_t klen, vlen;
-	zend_str_size_uint new_vlen;
+	php_size_t new_vlen;
 
 	if (var->ptr >= var->end) {
 		return 0;
@@ -453,7 +453,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		}
 
 		if (val) { /* have a value */
-			zend_str_size val_len, new_val_len;
+			php_size_t val_len, new_val_len;
 
 			*val++ = '\0';
 			php_url_decode(var, strlen(var));
@@ -464,7 +464,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			}
 			efree(val);
 		} else {
-			zend_str_size val_len, new_val_len;
+			php_size_t val_len, new_val_len;
 
 			php_url_decode(var, strlen(var));
 			val_len = 0;
@@ -491,7 +491,7 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	char buf[128];
 	char **env, *p, *t = buf;
-	zend_str_size alloc_size = sizeof(buf);
+	php_size_t alloc_size = sizeof(buf);
 	unsigned long nlen; /* ptrdiff_t is not portable */
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
@@ -513,7 +513,7 @@ void _php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	}
 }
 
-zend_bool php_std_auto_global_callback(char *name, zend_str_size_uint name_len TSRMLS_DC)
+zend_bool php_std_auto_global_callback(char *name, php_size_t name_len TSRMLS_DC)
 {
 	zend_printf("%s\n", name);
 	return 0; /* don't rearm */
@@ -652,7 +652,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 {
 	zval **src_entry, **dest_entry;
 	char *string_key;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition pos;
 	int key_type;
@@ -685,9 +685,9 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_server(const char *name, zend_str_size_uint name_len TSRMLS_DC);
-static zend_bool php_auto_globals_create_env(const char *name, zend_str_size_uint name_len TSRMLS_DC);
-static zend_bool php_auto_globals_create_request(const char *name, zend_str_size_uint name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_server(const char *name, php_size_t name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_env(const char *name, php_size_t name_len TSRMLS_DC);
+static zend_bool php_auto_globals_create_request(const char *name, php_size_t name_len TSRMLS_DC);
 
 /* {{{ php_hash_environment
  */
@@ -702,7 +702,7 @@ int php_hash_environment(TSRMLS_D)
 }
 /* }}} */
 
-static zend_bool php_auto_globals_create_get(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_get(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -725,7 +725,7 @@ static zend_bool php_auto_globals_create_get(const char *name, zend_str_size_uin
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_post(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_post(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -752,7 +752,7 @@ static zend_bool php_auto_globals_create_post(const char *name, zend_str_size_ui
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_cookie(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_cookie(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -775,7 +775,7 @@ static zend_bool php_auto_globals_create_cookie(const char *name, zend_str_size_
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_files(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_files(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *vars;
 
@@ -794,7 +794,7 @@ static zend_bool php_auto_globals_create_files(const char *name, zend_str_size_u
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_server(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_server(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	if (PG(variables_order) && (strchr(PG(variables_order),'S') || strchr(PG(variables_order),'s'))) {
 		php_register_server_variables(TSRMLS_C);
@@ -832,7 +832,7 @@ static zend_bool php_auto_globals_create_server(const char *name, zend_str_size_
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_env(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_env(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *env_vars = NULL;
 	ALLOC_ZVAL(env_vars);
@@ -853,7 +853,7 @@ static zend_bool php_auto_globals_create_env(const char *name, zend_str_size_uin
 	return 0; /* don't rearm */
 }
 
-static zend_bool php_auto_globals_create_request(const char *name, zend_str_size_uint name_len TSRMLS_DC)
+static zend_bool php_auto_globals_create_request(const char *name, php_size_t name_len TSRMLS_DC)
 {
 	zval *form_variables;
 	unsigned char _gpc_flags[3] = {0, 0, 0};

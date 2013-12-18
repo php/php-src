@@ -58,7 +58,7 @@ php_stream_ops php_stream_unixdg_socket_ops;
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
 
 /* {{{ Generic socket stream operations */
-static zend_str_size_size_t php_sockop_write(php_stream *stream, const char *buf, zend_str_size_size_t count TSRMLS_DC)
+static php_size_t php_sockop_write(php_stream *stream, const char *buf, php_size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t didwrite;
@@ -148,7 +148,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	}
 }
 
-static zend_str_size_size_t php_sockop_read(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
+static php_size_t php_sockop_read(php_stream *stream, char *buf, php_size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	ssize_t nr_bytes = 0;
@@ -251,7 +251,7 @@ static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_
 }
 
 static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
-		char **textaddr, zend_str_size_long *textaddrlen,
+		char **textaddr, php_size_t *textaddrlen,
 		struct sockaddr **addr, socklen_t *addrlen
 		TSRMLS_DC)
 {

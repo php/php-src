@@ -43,7 +43,7 @@
 
 /* {{{ php_oci_statement_create()
  Create statemend handle and allocate necessary resources */
-php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, zend_str_size_int query_len TSRMLS_DC)
+php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, php_size_t query_len TSRMLS_DC)
 {
 	php_oci_statement *statement;
 	sword errstatus;
@@ -371,7 +371,7 @@ int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC)
 
 /* {{{ php_oci_statement_get_column()
  Get column from the result set */
-php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, php_int_t column_index, char *column_name, zend_str_size_int column_name_len TSRMLS_DC)
+php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, php_int_t column_index, char *column_name, php_size_t column_name_len TSRMLS_DC)
 {
 	php_oci_out_column *column = NULL;
 	int i;
@@ -1056,7 +1056,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 			case SQLT_LVC:
 				for (i = 0; i < bind->array.current_length; i++) {
 					/* int curr_element_length = strlen(((text *)bind->array.elements)+i*bind->array.max_length); */
-					zend_str_size_int curr_element_length = bind->array.element_lengths[i];
+					php_size_t curr_element_length = bind->array.element_lengths[i];
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
 						ZVAL_STRINGL(*entry, (char *)(((text *)bind->array.elements)+i*bind->array.max_length), curr_element_length, 1);
@@ -1075,7 +1075,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 
 /* {{{ php_oci_bind_by_name()
  Bind zval to the given placeholder */
-int php_oci_bind_by_name(php_oci_statement *statement, char *name, zend_str_size_int name_len, zval *var, php_int_t maxlength, ub2 type TSRMLS_DC)
+int php_oci_bind_by_name(php_oci_statement *statement, char *name, php_size_t name_len, zval *var, php_int_t maxlength, ub2 type TSRMLS_DC)
 {
 	php_oci_collection *bind_collection = NULL;
 	php_oci_descriptor *bind_descriptor = NULL;
@@ -1506,7 +1506,7 @@ int php_oci_statement_get_numrows(php_oci_statement *statement, ub4 *numrows TSR
 
 /* {{{ php_oci_bind_array_by_name()
  Bind arrays to PL/SQL types */
-int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, zend_str_size_int name_len, zval *var, php_int_t max_table_length, php_int_t maxlength, php_int_t type TSRMLS_DC)
+int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, php_size_t name_len, zval *var, php_int_t max_table_length, php_int_t maxlength, php_int_t type TSRMLS_DC)
 {
 	php_oci_bind *bind, *bindp;
 	sword errstatus;
@@ -1657,7 +1657,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, php_int_t max_table_le
 	zend_hash_internal_pointer_reset(hash);
 	for (i = 0; i < max_table_length; i++) {
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
-			zend_str_size_int element_length;
+			php_size_t element_length;
 			
 			convert_to_string_ex(entry);
 			element_length = (maxlength > Z_STRSIZE_PP(entry)) ? Z_STRSIZE_PP(entry) : maxlength;

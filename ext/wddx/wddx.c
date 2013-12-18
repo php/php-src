@@ -295,7 +295,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	zval *retval;
 	zval **ent;
 	char *key;
-	zend_str_size_uint key_length;
+	php_size_t key_length;
 	char tmp[128];
 	php_uint_t idx;
 	int hash_type;
@@ -366,7 +366,7 @@ PHP_MINFO_FUNCTION(wddx)
 
 /* {{{ php_wddx_packet_start
  */
-void php_wddx_packet_start(wddx_packet *packet, char *comment, zend_str_size_int comment_len)
+void php_wddx_packet_start(wddx_packet *packet, char *comment, php_size_t comment_len)
 {
 	php_wddx_add_chunk_static(packet, WDDX_PACKET_S);
 	if (comment) {
@@ -504,7 +504,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 		}
 	} else {
-		zend_str_size_uint key_len;
+		php_size_t key_len;
 
 		PHP_CLASS_ATTRIBUTES;
 
@@ -556,7 +556,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 {
 	zval **ent;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 	int is_struct = 0, ent_type;
 	php_uint_t idx;
 	HashTable *target_hash;
@@ -624,7 +624,7 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 
 /* {{{ php_wddx_serialize_var
  */
-void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, zend_str_size_int name_len TSRMLS_DC)
+void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, php_size_t name_len TSRMLS_DC)
 {
 	HashTable *ht;
 
@@ -934,7 +934,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 		wddx_stack_top(stack, (void**)&ent1);
 
 		if (!strcmp(name, EL_BINARY)) {
-			zend_str_size_int new_len=0;
+			php_size_t new_len=0;
 			unsigned char *new_str;
 
 			new_str = php_base64_decode(Z_STRVAL_P(ent1->data), Z_STRSIZE_P(ent1->data), &new_len);
@@ -1121,7 +1121,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 
 /* {{{ php_wddx_deserialize_ex
  */
-int php_wddx_deserialize_ex(char *value, zend_str_size_int vallen, zval *return_value)
+int php_wddx_deserialize_ex(char *value, php_size_t vallen, zval *return_value)
 {
 	wddx_stack stack;
 	XML_Parser parser;
@@ -1160,7 +1160,7 @@ PHP_FUNCTION(wddx_serialize_value)
 {
 	zval *var;
 	char *comment = NULL;
-	zend_str_size_int comment_len = 0;
+	php_size_t comment_len = 0;
 	wddx_packet *packet;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|S", &var, &comment, &comment_len) == FAILURE) {
@@ -1241,7 +1241,7 @@ void php_wddx_destructor(wddx_packet *packet)
 PHP_FUNCTION(wddx_packet_start)
 {
 	char *comment = NULL;
-	zend_str_size_int comment_len = 0;
+	php_size_t comment_len = 0;
 	wddx_packet *packet;
 
 	comment = NULL;
@@ -1323,7 +1323,7 @@ PHP_FUNCTION(wddx_deserialize)
 {
 	zval *packet;
 	char *payload;
-	zend_str_size_int payload_len;
+	php_size_t payload_len;
 	php_stream *stream = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &packet) == FAILURE) {

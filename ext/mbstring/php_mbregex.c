@@ -657,7 +657,7 @@ PHP_FUNCTION(mb_regex_encoding)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
-	zend_str_size_int encoding_len;
+	php_size_t encoding_len;
 	OnigEncoding mbctype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &encoding, &encoding_len) == FAILURE) {
@@ -691,7 +691,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	zval **arg_pattern, *array;
 	char *string;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	int i, match_len, beg, end;
@@ -789,16 +789,16 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	zval **arg_pattern_zval;
 
 	char *arg_pattern;
-	zend_str_size_int arg_pattern_len;
+	php_size_t arg_pattern_len;
 
 	char *replace;
-	zend_str_size_int replace_len;
+	php_size_t replace_len;
 
 	zend_fcall_info arg_replace_fci;
 	zend_fcall_info_cache arg_replace_fci_cache;
 
 	char *string;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 
 	char *p;
 	php_mb_regex_t *re;
@@ -827,7 +827,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	eval = 0;
 	{
 		char *option_str = NULL;
-		zend_str_size_int option_str_len = 0;
+		php_size_t option_str_len = 0;
 
 		if (!is_callable) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZSS|S",
@@ -1051,12 +1051,12 @@ PHP_FUNCTION(mb_ereg_replace_callback)
 PHP_FUNCTION(mb_split)
 {
 	char *arg_pattern;
-	zend_str_size_int arg_pattern_len;
+	php_size_t arg_pattern_len;
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	char *string;
 	OnigUChar *pos, *chunk_pos;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 
 	int n, err;
 	php_int_t count = -1;
@@ -1130,10 +1130,10 @@ PHP_FUNCTION(mb_split)
 PHP_FUNCTION(mb_ereg_match)
 {
 	char *arg_pattern;
-	zend_str_size_int arg_pattern_len;
+	php_size_t arg_pattern_len;
 
 	char *string;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 
 	php_mb_regex_t *re;
 	OnigSyntaxType *syntax;
@@ -1142,7 +1142,7 @@ PHP_FUNCTION(mb_ereg_match)
 
 	{
 		char *option_str = NULL;
-		zend_str_size_int option_str_len = 0;
+		php_size_t option_str_len = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|S",
 		                          &arg_pattern, &arg_pattern_len, &string, &string_len,
@@ -1179,7 +1179,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	size_t argc = ZEND_NUM_ARGS();
 	char *arg_pattern, *arg_options;
-	zend_str_size_int arg_pattern_len, arg_options_len;
+	php_size_t arg_pattern_len, arg_options_len;
 	int n, i, err, pos, len, beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
@@ -1310,7 +1310,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	size_t argc = ZEND_NUM_ARGS();
 	zval *arg_str;
 	char *arg_pattern = NULL, *arg_options = NULL;
-	zend_str_size_int arg_pattern_len = 0, arg_options_len = 0;
+	php_size_t arg_pattern_len = 0, arg_options_len = 0;
 	OnigSyntaxType *syntax = NULL;
 	OnigOptionType option;
 
@@ -1436,7 +1436,7 @@ PHP_FUNCTION(mb_regex_set_options)
 	OnigOptionType opt;
 	OnigSyntaxType *syntax;
 	char *string = NULL;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 	char buf[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S",

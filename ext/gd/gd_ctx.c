@@ -78,7 +78,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 {
 	zval *imgind;
 	char *file = NULL;
-	zend_str_size_int file_len = 0;
+	php_size_t file_len = 0;
 	php_int_t quality, basefilter;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();

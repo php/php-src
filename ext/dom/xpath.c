@@ -349,7 +349,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 {
 	zval *id;
 	xmlXPathContextPtr ctxp;
-	zend_str_size_int prefix_len, ns_uri_len;
+	php_size_t prefix_len, ns_uri_len;
 	dom_xpath_object *intern;
 	unsigned char *prefix, *ns_uri;
 
@@ -389,7 +389,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	xmlXPathContextPtr ctxp;
 	xmlNodePtr nodep = NULL;
 	xmlXPathObjectPtr xpathobjp;
-	zend_str_size_int expr_len;
+	php_size_t expr_len;
 	int ret, nsnbr = 0, xpath_type;
 	dom_xpath_object *intern;
 	dom_object *nodeobj;
@@ -551,7 +551,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 	zval *id;
 	dom_xpath_object *intern;
 	zval *array_value, **entry, *new_string;
-	zend_str_size_int  name_len = 0;
+	php_size_t  name_len = 0;
 	char *name;
 
 	DOM_GET_THIS(id);

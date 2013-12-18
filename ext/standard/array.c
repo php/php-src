@@ -1228,9 +1228,9 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static int php_valid_var_name(char *var_name, zend_str_size_int var_name_len) /* {{{ */
+static int php_valid_var_name(char *var_name, php_size_t var_name_len) /* {{{ */
 {
-	zend_str_size i;
+	php_size_t i;
 	int ch;
 
 	if (!var_name || !var_name_len) {
@@ -1265,7 +1265,7 @@ static int php_valid_var_name(char *var_name, zend_str_size_int var_name_len) /*
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, zend_str_size_int var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, php_size_t var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
 {
 	Z_STRSIZE_P(result) = Z_STRSIZE_P(prefix) + (add_underscore ? 1 : 0) + var_name_len;
 	Z_TYPE_P(result) = IS_STRING;
@@ -1291,7 +1291,7 @@ PHP_FUNCTION(extract)
 	zval **entry, *data;
 	char *var_name;
 	zend_uint_t num_key;
-	zend_str_size_uint var_name_len;
+	php_size_t var_name_len;
 	int var_exists, key_type, count = 0;
 	int extract_refs = 0;
 	HashPosition pos;
@@ -1946,7 +1946,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	zval *stack,	/* Input stack */
 		 **val;		/* Value to be popped */
 	char *key = NULL;
-	zend_str_size key_len = 0;
+	php_size_t key_len = 0;
 	zend_uint_t index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &stack) == FAILURE) {
@@ -2144,7 +2144,7 @@ PHP_FUNCTION(array_slice)
 	php_int_t		 num_in,		/* Number of elements in the input array */
 			 pos;			/* Current position in the array */
 	char *string_key;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition hpos;
 
@@ -2221,7 +2221,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 {
 	zval **src_entry, **dest_entry;
 	char *string_key;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition pos;
 
@@ -2296,7 +2296,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 {
 	zval **src_entry, **dest_entry;
 	char *string_key;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition pos;
 
@@ -2645,7 +2645,7 @@ PHP_FUNCTION(array_reverse)
 	zval	 *input,				/* Input array */
 			**entry;				/* An entry in the input array */
 	char	 *string_key;
-	zend_str_size   string_key_len;
+	php_size_t   string_key_len;
 	zend_uint_t	  num_key;
 	zend_bool preserve_keys = 0;	/* whether to preserve keys */
 	HashPosition pos;
@@ -2790,7 +2790,7 @@ PHP_FUNCTION(array_change_key_case)
 	zval *array, **entry;
 	char *string_key;
 	char *new_key;
-	zend_str_size str_key_len;
+	php_size_t str_key_len;
 	zend_uint_t num_key;
 	php_int_t change_to_upper=0;
 	HashPosition pos;
@@ -4014,7 +4014,7 @@ PHP_FUNCTION(array_rand)
 	php_int_t randval, num_req = 1;
 	int num_avail, key_type;
 	char *string_key;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition pos;
 
@@ -4225,7 +4225,7 @@ PHP_FUNCTION(array_filter)
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	zend_str_size string_key_len;
+	php_size_t string_key_len;
 	zend_uint_t num_key;
 	HashPosition pos;
 
@@ -4374,7 +4374,7 @@ PHP_FUNCTION(array_map)
 
 	/* We iterate through all the arrays at once. */
 	for (k = 0; k < maxlen; k++) {
-		zend_str_size str_key_len;
+		php_size_t str_key_len;
 		zend_uint_t num_key;
 		char *str_key;
 		int key_type = 0;
@@ -4487,7 +4487,7 @@ PHP_FUNCTION(array_chunk)
 	int argc = ZEND_NUM_ARGS(), key_type, num_in;
 	php_int_t size, current = 0;
 	char *str_key;
-	zend_str_size str_key_len;
+	php_size_t str_key_len;
 	zend_uint_t num_key;
 	zend_bool preserve_keys = 0;
 	zval *input = NULL;

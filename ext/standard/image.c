@@ -426,7 +426,7 @@ static int php_skip_variable(php_stream * stream TSRMLS_DC)
 		return 0;
 	}
 	length = length - 2;
-	php_stream_seek(stream, (zend_str_size_long)length, SEEK_CUR);
+	php_stream_seek(stream, (php_size_t)length, SEEK_CUR);
 	return 1;
 }
 /* }}} */
@@ -448,7 +448,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (zend_str_size_long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (php_size_t) length) <= 0) {
 		efree(buffer);
 		return 0;
 	}
@@ -1388,7 +1388,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	zval **info = NULL;
 	php_stream *stream = NULL;
 	char *input;
-	zend_str_size_int input_len;
+	php_size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "S|Z", &input, &input_len, &info) == FAILURE) {

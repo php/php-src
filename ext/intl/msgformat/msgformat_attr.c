@@ -62,8 +62,8 @@ PHP_FUNCTION( msgfmt_get_pattern )
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
-	zend_str_size_int         value_len = 0;
-	zend_str_size_int         spattern_len = 0;
+	php_size_t         value_len = 0;
+	php_size_t         spattern_len = 0;
 	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;
 

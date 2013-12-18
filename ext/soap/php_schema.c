@@ -2141,7 +2141,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 					while (zend_hash_get_current_data((*tmp)->attributes,(void**)&tmp_attr) == SUCCESS) {
 						if (zend_hash_get_current_key_type((*tmp)->attributes) == HASH_KEY_IS_STRING) {
 							char* key;
-							zend_str_size_uint key_len;
+							php_size_t key_len;
 							sdlAttributePtr newAttr;
 
 							schema_attribute_fixup(ctx,*tmp_attr);

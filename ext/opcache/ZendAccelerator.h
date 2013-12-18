@@ -184,7 +184,7 @@ typedef enum _zend_accel_restart_reason {
 typedef struct _zend_persistent_script {
 	zend_uint_t          hash_value;
 	char          *full_path;              /* full real path with resolved symlinks */
-	zend_str_size_uint   full_path_len;
+	php_size_t   full_path_len;
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
@@ -261,10 +261,10 @@ typedef struct _zend_accel_globals {
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	char                   *cwd;              /* current working directory or NULL */
-	zend_str_size_int                     cwd_len;          /* "cwd" string length */
+	php_size_t                     cwd_len;          /* "cwd" string length */
 	char                   *include_path_key; /* one letter key of current "include_path" */
 	char                   *include_path;     /* current section of "include_path" directive */
-	zend_str_size_int                     include_path_len; /* "include_path" string length */
+	php_size_t                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
@@ -273,7 +273,7 @@ typedef struct _zend_accel_globals {
 	zend_op                *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
-	zend_str_size_int                     key_len;
+	php_size_t                     key_len;
 	char                    key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
@@ -339,12 +339,12 @@ extern char *zps_api_failure_reason;
 void accel_shutdown(TSRMLS_D);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
-int  zend_accel_invalidate(const char *filename, zend_str_size_int filename_len, zend_bool force TSRMLS_DC);
+int  zend_accel_invalidate(const char *filename, php_size_t filename_len, zend_bool force TSRMLS_DC);
 int  zend_accel_script_optimize(zend_persistent_script *persistent_script TSRMLS_DC);
 int  accelerator_shm_read_lock(TSRMLS_D);
 void accelerator_shm_read_unlock(TSRMLS_D);
 
-char *accel_make_persistent_key_ex(zend_file_handle *file_handle, zend_str_size_int path_length, zend_str_size_int *key_len TSRMLS_DC);
+char *accel_make_persistent_key_ex(zend_file_handle *file_handle, php_size_t path_length, php_size_t *key_len TSRMLS_DC);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
@@ -355,7 +355,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
-const char *accel_new_interned_string(const char *arKey, zend_str_size_int nKeyLength, int free_src TSRMLS_DC);
+const char *accel_new_interned_string(const char *arKey, php_size_t nKeyLength, int free_src TSRMLS_DC);
 
 # define interned_free(s) do { \
 		if (!IS_INTERNED(s)) { \

@@ -42,7 +42,7 @@ typedef struct {
 } PHP_SHA1_CTX;
 
 PHP_HASH_API void PHP_SHA1Init(PHP_SHA1_CTX *);
-PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_SHA1Update(PHP_SHA1_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_SHA1Final(unsigned char[20], PHP_SHA1_CTX *);
 
 PHP_FUNCTION(sha1);
@@ -58,7 +58,7 @@ typedef struct {
 } PHP_SHA224_CTX;
 
 PHP_HASH_API void PHP_SHA224Init(PHP_SHA224_CTX *);
-PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_SHA224Update(PHP_SHA224_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_SHA224Final(unsigned char[28], PHP_SHA224_CTX *);
 
 /* SHA256 context. */
@@ -69,7 +69,7 @@ typedef struct {
 } PHP_SHA256_CTX;
 
 PHP_HASH_API void PHP_SHA256Init(PHP_SHA256_CTX *);
-PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
 
 /* SHA384 context */
@@ -80,7 +80,7 @@ typedef struct {
 } PHP_SHA384_CTX;
 
 PHP_HASH_API void PHP_SHA384Init(PHP_SHA384_CTX *);
-PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_SHA384Update(PHP_SHA384_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_SHA384Final(unsigned char[48], PHP_SHA384_CTX *);
 
 /* SHA512 context */
@@ -91,7 +91,7 @@ typedef struct {
 } PHP_SHA512_CTX;
 
 PHP_HASH_API void PHP_SHA512Init(PHP_SHA512_CTX *);
-PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_SHA512Update(PHP_SHA512_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_SHA512Final(unsigned char[64], PHP_SHA512_CTX *);
 
 #endif /* PHP_HASH_SHA_H */

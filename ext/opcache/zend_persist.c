@@ -694,7 +694,7 @@ static void zend_accel_persist_class_table(HashTable *class_table TSRMLS_DC)
 	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce TSRMLS_CC);
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, zend_str_size_uint key_length TSRMLS_DC)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, php_size_t key_length TSRMLS_DC)
 {
 	zend_shared_alloc_clear_xlat_table();
 	zend_hash_persist(&script->function_table, (zend_persist_func_t) zend_persist_op_array, sizeof(zend_op_array) TSRMLS_CC);

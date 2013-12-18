@@ -203,7 +203,7 @@ PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 	zend_hash_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
 }
 
-pdo_driver_t *pdo_find_driver(const char *name, zend_str_size_int namelen)
+pdo_driver_t *pdo_find_driver(const char *name, php_size_t namelen)
 {
 	pdo_driver_t **driver = NULL;
 	

@@ -81,7 +81,7 @@ PHPAPI int php_stream_xport_listen(php_stream *stream,
 /* Get the next client and their address as a string, or the underlying address
  * structure.  You must efree either of these if you request them */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, zend_str_size_int *textaddrlen,
+		char **textaddr, php_size_t *textaddrlen,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
@@ -89,7 +89,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 
 /* Get the name of either the socket or it's peer */
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, zend_str_size_int *textaddrlen,
+		char **textaddr, php_size_t *textaddrlen,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC);
 
@@ -100,13 +100,13 @@ enum php_stream_xport_send_recv_flags {
 
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
-PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, zend_str_size_size_t buflen,
+PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, php_size_t buflen,
 		long flags, void **addr, socklen_t *addrlen,
-		char **textaddr, zend_str_size_int *textaddrlen TSRMLS_DC);
+		char **textaddr, php_size_t *textaddrlen TSRMLS_DC);
 
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
-PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, zend_str_size_size_t buflen,
+PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, php_size_t buflen,
 		long flags, void *addr, socklen_t addrlen TSRMLS_DC);
 
 typedef enum {
@@ -147,7 +147,7 @@ typedef struct _php_stream_xport_param {
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		char *buf;
-		zend_str_size_size_t buflen;
+		php_size_t buflen;
 		long flags;
 	} inputs;
 	struct {
@@ -156,7 +156,7 @@ typedef struct _php_stream_xport_param {
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		char *textaddr;
-		zend_str_size_long textaddrlen;
+		php_size_t textaddrlen;
 
 		char *error_text;
 		int error_code;

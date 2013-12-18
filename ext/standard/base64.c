@@ -53,7 +53,7 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-PHPAPI unsigned char *php_base64_encode(const unsigned char *str, zend_str_size_int length, zend_str_size_int *ret_length) /* {{{ */
+PHPAPI unsigned char *php_base64_encode(const unsigned char *str, php_size_t length, php_size_t *ret_length) /* {{{ */
 {
 	const unsigned char *current = str;
 	unsigned char *p;
@@ -134,13 +134,13 @@ void php_base64_init(void)
 */
 /* }}} */
 
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, zend_str_size_int length, zend_str_size_int *ret_length) /* {{{ */
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, php_size_t length, php_size_t *ret_length) /* {{{ */
 {
 	return php_base64_decode_ex(str, length, ret_length, 0);
 }
 /* }}} */
 
-PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, zend_str_size_int length, zend_str_size_int *ret_length, zend_bool strict) /* {{{ */
+PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, php_size_t length, php_size_t *ret_length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
@@ -221,7 +221,7 @@ PHP_FUNCTION(base64_encode)
 {
 	char *str;
 	unsigned char *result;
-	zend_str_size_int str_len, ret_length;
+	php_size_t str_len, ret_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
@@ -242,7 +242,7 @@ PHP_FUNCTION(base64_decode)
 	char *str;
 	unsigned char *result;
 	zend_bool strict = 0;
-	zend_str_size_int str_len, ret_length;
+	php_size_t str_len, ret_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &str, &str_len, &strict) == FAILURE) {
 		return;

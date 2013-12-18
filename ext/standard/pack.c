@@ -84,7 +84,7 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval **val, zend_str_size_int size, int *map, char *output)
+static void php_pack(zval **val, php_size_t size, int *map, char *output)
 {
 	int i;
 	char *v;
@@ -109,7 +109,7 @@ PHP_FUNCTION(pack)
 	int num_args, i;
 	int currentarg;
 	char *format;
-	zend_str_size_int formatlen;
+	php_size_t formatlen;
 	char *formatcodes;
 	int *formatargs;
 	int formatcount = 0;
@@ -496,7 +496,7 @@ PHP_FUNCTION(pack)
 
 /* {{{ php_unpack
  */
-static php_int_t php_unpack(char *data, zend_str_size_int size, int issigned, int *map)
+static php_int_t php_unpack(char *data, php_size_t size, int issigned, int *map)
 {
 	php_int_t result;
 	char *cresult = (char *) &result;
@@ -529,8 +529,8 @@ static php_int_t php_unpack(char *data, zend_str_size_int size, int issigned, in
 PHP_FUNCTION(unpack)
 {
 	char *format, *input, *formatarg, *inputarg;
-	zend_str_size_int formatarg_len, inputarg_len;
-	zend_str_size_int formatlen, inputpos, inputlen;
+	php_size_t formatarg_len, inputarg_len;
+	php_size_t formatlen, inputpos, inputlen;
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, &formatarg_len,
@@ -677,7 +677,7 @@ PHP_FUNCTION(unpack)
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						zend_str_size_int len = inputlen - inputpos;	/* Remaining string */
+						php_size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -692,7 +692,7 @@ PHP_FUNCTION(unpack)
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						zend_str_size_int len = inputlen - inputpos;	/* Remaining string */
+						php_size_t len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -719,7 +719,7 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						zend_str_size_int	 s,
+						php_size_t	 s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -743,11 +743,11 @@ PHP_FUNCTION(unpack)
 					
 					case 'h': 
 					case 'H': {
-						zend_str_size_int len = (inputlen - inputpos) * 2;	/* Remaining */
+						php_size_t len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						zend_str_size_int ipos, opos;
+						php_size_t ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {

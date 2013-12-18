@@ -801,7 +801,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds TSRMLS_DC) /
 	char 		*key;
 	int			num = 0;
 	php_uint_t       num_key;
-	zend_str_size_uint 		key_len;
+	php_size_t 		key_len;
 
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
@@ -1090,7 +1090,7 @@ PHP_FUNCTION(socket_write)
 	zval		*arg1;
 	php_socket	*php_sock;
 	int			retval;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	php_int_t		length = 0;
 	char		*str;
 
@@ -1390,7 +1390,7 @@ PHP_FUNCTION(socket_connect)
 	php_socket			*php_sock;
 	char				*addr;
 	int					retval;
-	zend_str_size_int addr_len;
+	php_size_t addr_len;
 	php_int_t				port = 0;
 	int					argc = ZEND_NUM_ARGS();
 
@@ -1494,7 +1494,7 @@ PHP_FUNCTION(socket_bind)
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
 	char					*addr;
-	zend_str_size_int						addr_len;
+	php_size_t						addr_len;
 	php_int_t					port = 0;
 	php_int_t					retval = 0;
 
@@ -1630,11 +1630,11 @@ PHP_FUNCTION(socket_send)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	zend_str_size_int			buf_len;
+	php_size_t			buf_len;
 	int retval;
 	php_int_t		len, flags;
 	char		*buf;
-	zend_str_size send_len;
+	php_size_t send_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSii", &arg1, &buf, &buf_len, &len, &flags) == FAILURE) {
 		return;
@@ -1799,11 +1799,11 @@ PHP_FUNCTION(socket_sendto)
 	struct sockaddr_in6	sin6;
 #endif
 	int					retval;
-	zend_str_size_int buf_len, addr_len;
+	php_size_t buf_len, addr_len;
 	php_int_t				len, flags, port = 0;
 	char				*buf, *addr;
 	int					argc = ZEND_NUM_ARGS();
-	zend_str_size       send_len;
+	php_size_t       send_len;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rSiiS|i", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
 		return;

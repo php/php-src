@@ -418,7 +418,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
 #define FREE_BUFFERS() smart_str_free(&buf); smart_str_free(&key);
 #define SWAP_BUFFERS(from, to) do { \
         char *t1 = from.c; \
-        zend_str_size_int t2 = from.a; \
+        php_size_t t2 = from.a; \
         from.c = to.c; \
         from.a = to.a; \
         to.c = t1; \
@@ -436,7 +436,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     machine with a stack.
 */
 int
-parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], zend_str_size_int length, php_int_t options TSRMLS_DC)
+parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], php_size_t length, php_int_t options TSRMLS_DC)
 {
     int next_char;  /* the next character */
     int next_class;  /* the next character class */

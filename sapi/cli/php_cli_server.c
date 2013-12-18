@@ -477,7 +477,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	php_cli_server_client *client;
 	HashTable *headers;
 	char *key;
-	zend_str_size key_len;
+	php_size_t key_len;
 	char **value_pointer;
 	HashPosition pos;
 
@@ -605,7 +605,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static zend_str_size_int sapi_cli_server_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC) /* {{{ */
+static php_size_t sapi_cli_server_ub_write(const char *str, php_size_t str_length TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (!client) {
@@ -686,7 +686,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 	return *val;
 } /* }}} */
 
-static zend_str_size_int sapi_cli_server_read_post(char *buf, zend_str_size_uint count_bytes TSRMLS_DC) /* {{{ */
+static php_size_t sapi_cli_server_read_post(char *buf, php_size_t count_bytes TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	if (client->request.content) {
@@ -702,7 +702,7 @@ static zend_str_size_int sapi_cli_server_read_post(char *buf, zend_str_size_uint
 static void sapi_cli_server_register_variable(zval *track_vars_array, const char *key, const char *val TSRMLS_DC) /* {{{ */
 {
 	char *new_val = (char *)val;
-	zend_str_size_uint new_val_len;
+	php_size_t new_val_len;
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array TSRMLS_CC);
 	}
@@ -1859,7 +1859,7 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	client->addr_len = addr_len;
 	{
 		char *addr_str = 0;
-		zend_str_size_long addr_str_len = 0;
+		php_size_t addr_str_len = 0;
 		php_network_populate_name_from_sockaddr(addr, addr_len, &addr_str, &addr_str_len, NULL, 0 TSRMLS_CC);
 		client->addr_str = pestrndup(addr_str, addr_str_len, 1);
 		client->addr_str_len = addr_str_len;

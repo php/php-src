@@ -39,7 +39,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, php_int_t codepage TSRMLS_
 	HashPosition pos;
 	int keytype;
 	char *strindex;
-	zend_str_size_int strindexlen;
+	php_size_t strindexlen;
 	php_int_t intindex = -1;
 	php_int_t max_index = 0;
 	VARIANT *va;

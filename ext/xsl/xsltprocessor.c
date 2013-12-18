@@ -648,7 +648,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
 	int ret;
-	zend_str_size_int ret_class_len=0;
+	php_size_t ret_class_len=0;
 	char *ret_class = NULL;
 	xsl_object *intern;
 
@@ -706,7 +706,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	xmlDoc *newdocp;
 	xsltStylesheetPtr sheetp;
 	int ret;
-	zend_str_size_int uri_len;
+	php_size_t uri_len;
 	char *uri;
 	xsl_object *intern;
 	
@@ -778,7 +778,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 	xsl_object *intern;
 	char *string_key, *name, *value, *namespace;
 	php_uint_t idx;
-	zend_str_size_int string_key_len, namespace_len, name_len, value_len;
+	php_size_t string_key_len, namespace_len, name_len, value_len;
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "Sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
@@ -824,7 +824,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
 	zval *id;
-	zend_str_size_int name_len = 0, namespace_len = 0;
+	php_size_t name_len = 0, namespace_len = 0;
 	char *name, *namespace;
 	zval **value;
 	xsl_object *intern;
@@ -849,7 +849,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
 	zval *id;
-	zend_str_size_int name_len = 0, namespace_len = 0;
+	php_size_t name_len = 0, namespace_len = 0;
 	char *name, *namespace;
 	xsl_object *intern;
 
@@ -874,7 +874,7 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 	zval *id;
 	xsl_object *intern;
 	zval *array_value, **entry, *new_string;
-	zend_str_size_int  name_len = 0;
+	php_size_t  name_len = 0;
 	char *name;
 
 	DOM_GET_THIS(id);
@@ -917,7 +917,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 	zval *id;
 	xsl_object *intern;
 	char *filename = NULL;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "P!", &filename, &filename_len) == SUCCESS) {

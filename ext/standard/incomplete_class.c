@@ -92,7 +92,7 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zval **object, char *method, php_size_t method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
 	return NULL;
@@ -135,7 +135,7 @@ PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-PHPAPI char *php_lookup_class_name(zval *object, zend_str_size_uint *nlen)
+PHPAPI char *php_lookup_class_name(zval *object, php_size_t *nlen)
 {
 	zval **val;
 	char *retval = NULL;
@@ -158,7 +158,7 @@ PHPAPI char *php_lookup_class_name(zval *object, zend_str_size_uint *nlen)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, zend_str_size_uint len)
+PHPAPI void php_store_class_name(zval *object, const char *name, php_size_t len)
 {
 	zval *val;
 	TSRMLS_FETCH();

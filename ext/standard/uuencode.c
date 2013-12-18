@@ -65,9 +65,9 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_str_size_int php_uuencode(char *src, zend_str_size_int src_len, char **dest) /* {{{ */
+PHPAPI php_size_t php_uuencode(char *src, php_size_t src_len, char **dest) /* {{{ */
 {
-	zend_str_size_int len = 45;
+	php_size_t len = 45;
 	char *p, *s, *e, *ee;
 
 	/* encoded length is ~ 38% greater than the original */
@@ -124,9 +124,9 @@ PHPAPI zend_str_size_int php_uuencode(char *src, zend_str_size_int src_len, char
 }
 /* }}} */
 
-PHPAPI zend_str_size_int php_uudecode(char *src, zend_str_size_int src_len, char **dest, int *error) /* {{{ */
+PHPAPI php_size_t php_uudecode(char *src, php_size_t src_len, char **dest, int *error) /* {{{ */
 {
-	zend_str_size_int len, total_len=0;
+	php_size_t len, total_len=0;
 	char *s, *e, *p, *ee;
 
 	*error = 0;
@@ -192,7 +192,7 @@ err:
 PHP_FUNCTION(convert_uuencode)
 {
 	char *src, *dst;
-	zend_str_size_int src_len, dst_len;
+	php_size_t src_len, dst_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src, &src_len) == FAILURE || src_len < 1) {
 		RETURN_FALSE;
@@ -209,7 +209,7 @@ PHP_FUNCTION(convert_uuencode)
 PHP_FUNCTION(convert_uudecode)
 {
 	char *src, *dst;
-	zend_str_size_int src_len, dst_len;
+	php_size_t src_len, dst_len;
 	int err = 0;;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src, &src_len) == FAILURE || src_len < 1) {

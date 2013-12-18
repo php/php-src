@@ -72,8 +72,8 @@
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
-static zend_str_size_int
-php_apache_sapi_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC)
+static php_size_t
+php_apache_sapi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
 {
 	request_rec *r;
 	php_struct *ctx;
@@ -181,7 +181,7 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static apr_size_t
-php_apache_sapi_read_post(char *buf, zend_str_size_uint count_bytes TSRMLS_DC)
+php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
 {
 	apr_size_t len, tlen=0;
 	php_struct *ctx = SG(server_context);
@@ -270,7 +270,7 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	zend_str_size_int new_val_len;
+	php_size_t new_val_len;
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
@@ -515,7 +515,7 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		char *str;
-		zend_str_size_uint str_len;
+		php_size_t str_len;
 		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
 
 		for (zend_hash_internal_pointer_reset(&c->config);

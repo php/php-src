@@ -400,7 +400,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, php_int_t read_length, php
 
 /* {{{ php_oci_lob_write()
  Write data to the LOB */
-int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, zend_str_size_int data_len, ub4 *bytes_written TSRMLS_DC)
+int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, php_size_t data_len, ub4 *bytes_written TSRMLS_DC)
 {
 	OCILobLocator *lob		   = (OCILobLocator *) descriptor->descriptor;
 	php_oci_connection *connection = (php_oci_connection *) descriptor->connection;
@@ -905,7 +905,7 @@ int php_oci_lob_is_equal (php_oci_descriptor *descriptor_first, php_oci_descript
 
 /* {{{ php_oci_lob_write_tmp()
  Create temporary LOB and write data to it */
-int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, php_int_t type, char *data, zend_str_size_int data_len TSRMLS_DC)
+int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, php_int_t type, char *data, php_size_t data_len TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	OCILobLocator *lob		   = descriptor->descriptor;

@@ -376,7 +376,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 	UChar*      utf16_buf            = NULL;                     /* tmp buffer to hold current processing string in utf-16 */
 	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;       /* the length of utf16_buf */
-	zend_str_size_int         utf16_len            = 0;                        /* length of converted string */
+	php_size_t         utf16_len            = 0;                        /* length of converted string */
 
 	HashTable* sortedHash            = NULL;
 
@@ -546,11 +546,11 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	zend_str_size_int              str_len  = 0;
+	php_size_t              str_len  = 0;
 	UChar*           ustr     = NULL;
-	zend_str_size_int              ustr_len = 0;
+	php_size_t              ustr_len = 0;
 	uint8_t*         key     = NULL;
-	zend_str_size_int              key_len = 0;
+	php_size_t              key_len = 0;
 
 	COLLATOR_METHOD_INIT_VARS
 

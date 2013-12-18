@@ -63,7 +63,7 @@ static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list a
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
-		zend_str_size unmangle = zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
+		php_size_t unmangle = zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name && unmangle == SUCCESS) {
@@ -88,7 +88,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
 	const char *class_name;
-	zend_str_size class_name_len;
+	php_size_t class_name_len;
 	int (*php_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp;
 
@@ -243,7 +243,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht = NULL;
 	const char *class_name;
-	zend_str_size class_name_len;
+	php_size_t class_name_len;
 	int (*zval_element_dump_func)(zval** TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp = 0;
 
@@ -335,7 +335,7 @@ PHP_FUNCTION(debug_zval_dump)
 #define buffer_append_spaces(buf, num_spaces) \
 	do { \
 		char *tmp_spaces; \
-		zend_str_size tmp_spaces_len; \
+		php_size_t tmp_spaces_len; \
 		tmp_spaces_len = spprintf(&tmp_spaces, 0,"%*c", num_spaces, ' '); \
 		smart_str_appendl(buf, tmp_spaces, tmp_spaces_len); \
 		efree(tmp_spaces); \
@@ -356,7 +356,7 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 
 	} else { /* string key */
 		char *key, *tmp_str;
-		zend_str_size key_len, tmp_len;
+		php_size_t key_len, tmp_len;
 		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
 		tmp_str = php_str_to_str_ex(key, key_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
 
@@ -391,7 +391,7 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 		const char *class_name; /* ignored, but must be passed to unmangle */
 		const char *pname;
 		char *pname_esc;
-		zend_str_size  pname_esc_len;
+		php_size_t  pname_esc_len;
 		
 		zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1,
 				&class_name, &pname);
@@ -417,9 +417,9 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 {
 	HashTable *myht;
 	char *tmp_str, *tmp_str2;
-	zend_str_size tmp_len, tmp_len2;
+	php_size_t tmp_len, tmp_len2;
 	const char *class_name;
-	zend_str_size class_name_len;
+	php_size_t class_name_len;
 
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
@@ -547,7 +547,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 {
 	zend_uint_t var_no;
 	char id[32], *p;
-	register zend_str_size len;
+	register php_size_t len;
 
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
@@ -590,7 +590,7 @@ static inline void php_var_serialize_long(smart_str *buf, php_int_t val) /* {{{ 
 }
 /* }}} */
 
-static inline void php_var_serialize_string(smart_str *buf, char *str, zend_str_size_int len) /* {{{ */
+static inline void php_var_serialize_string(smart_str *buf, char *str, php_size_t len) /* {{{ */
 {
 	smart_str_appendl(buf, "s:", 2);
 	smart_str_append_str_size(buf, len);
@@ -672,7 +672,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				ce = zend_get_class_entry(struc TSRMLS_CC);
 				if (ce) {
 					char *prot_name, *priv_name;
-					zend_str_size prop_name_length;
+					php_size_t prop_name_length;
 
 					do {
 						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name, ce->name_length, Z_STRVAL_PP(name), Z_STRSIZE_PP(name), ce->type & ZEND_INTERNAL_CLASS);
@@ -774,7 +774,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				if (ce && ce->serialize != NULL) {
 					/* has custom handler */
 					unsigned char *serialized_data = NULL;
-					zend_str_size serialized_length;
+					php_size_t serialized_length;
 
 					if (ce->serialize(struc, &serialized_data, &serialized_length, (zend_serialize_data *)var_hash TSRMLS_CC) == SUCCESS) {
 						smart_str_appendl(buf, "C:", 2);
@@ -852,7 +852,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				char *key;
 				zval **data;
 				zend_uint_t index;
-				zend_str_size key_len;
+				php_size_t key_len;
 				HashPosition pos;
 
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
@@ -948,7 +948,7 @@ PHP_FUNCTION(serialize)
 PHP_FUNCTION(unserialize)
 {
 	char *buf = NULL;
-	zend_str_size buf_len;
+	php_size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
 	zval *consumed = NULL;

@@ -254,7 +254,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	HashTable *filter_hash = (FG(stream_filters) ? FG(stream_filters) : &stream_filters_hash);
 	php_stream_filter_factory *factory = NULL;
 	php_stream_filter *filter = NULL;
-	zend_str_size_int n;
+	php_size_t n;
 	char *period;
 
 	n = strlen(filtername);

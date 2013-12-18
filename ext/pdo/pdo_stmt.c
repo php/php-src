@@ -320,7 +320,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && ! ZVAL_IS_NULL(param->parameter)) {
 		if (Z_TYPE_P(param->parameter) == IS_DOUBLE) {
 			char *p;
-			zend_str_size_int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(param->parameter));
+			php_size_t len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(param->parameter));
 			ZVAL_STRINGL(param->parameter, p, len, 0);
 		} else {
 			convert_to_string(param->parameter);
@@ -446,7 +446,7 @@ static PHP_METHOD(PDOStatement, execute)
 	if (input_params) {
 		struct pdo_bound_param_data param;
 		zval **tmp;
-		zend_str_size_uint str_length;
+		php_size_t str_length;
 		php_uint_t num_index;
 	
 		if (stmt->bound_params) {	
@@ -1334,7 +1334,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 	php_int_t ori = PDO_FETCH_ORI_NEXT;
 	php_int_t off = 0;
 	char *class_name = NULL;
-	zend_str_size_int class_name_len;
+	php_size_t class_name_len;
 	zend_class_entry *old_ce;
 	zval *old_ctor_args, *ctor_args = NULL;
 	int error = 0, old_arg_count;
@@ -2169,7 +2169,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 		while (SUCCESS == zend_hash_get_current_data_ex(stmt->bound_params,
 				(void**)&param, &pos)) {
 			char *str;
-			zend_str_size_uint len;
+			php_size_t len;
 			php_uint_t num;
 			int res;
 
@@ -2267,7 +2267,7 @@ static union _zend_function *dbstmt_method_get(
 #else
 	zval *object,
 #endif
-   	char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
+   	char *method_name, php_size_t method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;
@@ -2339,7 +2339,7 @@ static zend_object_value dbstmt_clone_obj(zval *zobject TSRMLS_DC)
 }
 
 zend_object_handlers pdo_dbstmt_object_handlers;
-static int pdo_row_serialize(zval *object, unsigned char **buffer, zend_str_size_uint *buf_len, zend_serialize_data *data TSRMLS_DC);
+static int pdo_row_serialize(zval *object, unsigned char **buffer, php_size_t *buf_len, zend_serialize_data *data TSRMLS_DC);
 
 void pdo_stmt_init(TSRMLS_D)
 {
@@ -2702,7 +2702,7 @@ static union _zend_function *row_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
+	char *method_name, php_size_t method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
@@ -2742,7 +2742,7 @@ static zend_class_entry *row_get_ce(const zval *object TSRMLS_DC)
 	return pdo_row_ce;
 }
 
-static int row_get_classname(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC)
+static int row_get_classname(const zval *object, const char **class_name, php_size_t *class_name_len, int parent TSRMLS_DC)
 {
 	if (parent) {
 		return FAILURE;
@@ -2805,7 +2805,7 @@ zend_object_value pdo_row_new(zend_class_entry *ce TSRMLS_DC)
 	return retval;
 }
 
-static int pdo_row_serialize(zval *object, unsigned char **buffer, zend_str_size_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+static int pdo_row_serialize(zval *object, unsigned char **buffer, php_size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "PDORow instances may not be serialized");
 	return FAILURE;

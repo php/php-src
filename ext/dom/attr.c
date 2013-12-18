@@ -61,7 +61,7 @@ PHP_METHOD(domattr, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	zend_str_size_int name_len, value_len;
+	php_size_t name_len, value_len;
 	int name_valid;
 	zend_error_handling error_handling;
 

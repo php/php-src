@@ -582,7 +582,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifdef PHP_WIN32
-static inline zend_uint_t realpath_cache_key(const char *path, zend_str_size_int path_len TSRMLS_DC) /* {{{ */
+static inline zend_uint_t realpath_cache_key(const char *path, zend_size_t path_len TSRMLS_DC) /* {{{ */
 {
 	register zend_uint_t h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
@@ -602,7 +602,7 @@ static inline zend_uint_t realpath_cache_key(const char *path, zend_str_size_int
 }
 /* }}} */
 #else
-static inline zend_uint_t realpath_cache_key(const char *path, zend_str_size_int path_len) /* {{{ */
+static inline zend_uint_t realpath_cache_key(const char *path, zend_size_t path_len) /* {{{ */
 {
 	register zend_uint_t h;
 	const char *e = path + path_len;
@@ -634,7 +634,7 @@ CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-CWD_API void realpath_cache_del(const char *path, zend_str_size_int path_len TSRMLS_DC) /* {{{ */
+CWD_API void realpath_cache_del(const char *path, zend_size_t path_len TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
 	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
@@ -666,7 +666,7 @@ CWD_API void realpath_cache_del(const char *path, zend_str_size_int path_len TSR
 }
 /* }}} */
 
-static inline void realpath_cache_add(const char *path, zend_str_size_int path_len, const char *realpath, zend_str_size_int realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
+static inline void realpath_cache_add(const char *path, zend_size_t path_len, const char *realpath, zend_size_t realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
 {
 	zend_int_t size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
@@ -716,7 +716,7 @@ static inline void realpath_cache_add(const char *path, zend_str_size_int path_l
 }
 /* }}} */
 
-static inline realpath_cache_bucket* realpath_cache_find(const char *path, zend_str_size_int path_len, time_t t TSRMLS_DC) /* {{{ */
+static inline realpath_cache_bucket* realpath_cache_find(const char *path, zend_size_t path_len, time_t t TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
 	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
@@ -750,7 +750,7 @@ static inline realpath_cache_bucket* realpath_cache_find(const char *path, zend_
 }
 /* }}} */
 
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, zend_str_size_int path_len, time_t t TSRMLS_DC) /* {{{ */
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, zend_size_t path_len, time_t t TSRMLS_DC) /* {{{ */
 {
 	return realpath_cache_find(path, path_len, t TSRMLS_CC);
 }

@@ -162,7 +162,7 @@ PHP_MINFO_FUNCTION(php_gettext)
 PHP_NAMED_FUNCTION(zif_textdomain)
 {
 	char *domain, *domain_name, *retval;
-	zend_str_size_int domain_len;
+	php_size_t domain_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &domain, &domain_len) == FAILURE) {
 		return;
@@ -187,7 +187,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 PHP_NAMED_FUNCTION(zif_gettext)
 {
 	char *msgid, *msgstr;
-	zend_str_size_int msgid_len;
+	php_size_t msgid_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &msgid, &msgid_len) == FAILURE) {
 		return;
@@ -205,7 +205,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 PHP_NAMED_FUNCTION(zif_dgettext)
 {
 	char *domain, *msgid, *msgstr;
-	zend_str_size_int domain_len, msgid_len;
+	php_size_t domain_len, msgid_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &domain, &domain_len, &msgid, &msgid_len) == FAILURE)	{
 		return;
@@ -225,7 +225,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 PHP_NAMED_FUNCTION(zif_dcgettext)
 {
 	char *domain, *msgid, *msgstr;
-	zend_str_size_int domain_len, msgid_len;
+	php_size_t domain_len, msgid_len;
 	php_int_t category;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &domain, &domain_len, &msgid, &msgid_len, &category) == FAILURE) {
@@ -246,7 +246,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 PHP_NAMED_FUNCTION(zif_bindtextdomain)
 {
 	char *domain, *dir;
-	zend_str_size_int domain_len, dir_len;
+	php_size_t domain_len, dir_len;
 	char *retval, dir_name[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
@@ -280,7 +280,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 PHP_NAMED_FUNCTION(zif_ngettext)
 {
 	char *msgid1, *msgid2, *msgstr;
-	zend_str_size_int msgid1_len, msgid2_len;
+	php_size_t msgid1_len, msgid2_len;
 	php_int_t count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
@@ -304,7 +304,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
-	zend_str_size_int domain_len, msgid1_len, msgid2_len;
+	php_size_t domain_len, msgid1_len, msgid2_len;
 	php_int_t count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSSi", &domain, &domain_len,
@@ -330,7 +330,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
-	zend_str_size_int domain_len, msgid1_len, msgid2_len;
+	php_size_t domain_len, msgid1_len, msgid2_len;
 	php_int_t count, category;
 
 	RETVAL_FALSE;
@@ -360,7 +360,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 {
 	char *domain, *codeset, *retval = NULL;
-	zend_str_size_int domain_len, codeset_len;
+	php_size_t domain_len, codeset_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
 		return;

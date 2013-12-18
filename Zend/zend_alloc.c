@@ -2619,7 +2619,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	zend_str_size_int length;
+	zend_size_t length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2638,7 +2638,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-ZEND_API char *_estrndup(const char *s, zend_str_size_uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API char *_estrndup(const char *s, zend_size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
@@ -2659,7 +2659,7 @@ ZEND_API char *_estrndup(const char *s, zend_str_size_uint length ZEND_FILE_LINE
 }
 
 
-ZEND_API char *zend_strndup(const char *s, zend_str_size_uint length)
+ZEND_API char *zend_strndup(const char *s, zend_size_t length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS

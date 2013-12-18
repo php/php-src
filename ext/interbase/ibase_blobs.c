@@ -238,7 +238,7 @@ PHP_FUNCTION(ibase_blob_create)
 PHP_FUNCTION(ibase_blob_open)
 {
 	char *blob_id;
-	zend_str_size_int blob_id_len;
+	php_size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -400,7 +400,7 @@ PHP_FUNCTION(ibase_blob_cancel)
 PHP_FUNCTION(ibase_blob_info)
 {
 	char *blob_id;
-	zend_str_size_int blob_id_len;
+	php_size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -476,7 +476,7 @@ PHP_FUNCTION(ibase_blob_info)
 PHP_FUNCTION(ibase_blob_echo)
 {
 	char *blob_id;
-	zend_str_size_int blob_id_len;
+	php_size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

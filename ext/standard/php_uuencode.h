@@ -24,8 +24,8 @@
 PHP_FUNCTION(convert_uudecode);
 PHP_FUNCTION(convert_uuencode);
 
-PHPAPI zend_str_size_int php_uudecode(char *src, zend_str_size_int src_len, char **dest, int *error);
-PHPAPI zend_str_size_int php_uuencode(char *src, zend_str_size_int src_len, char **dest);
+PHPAPI php_size_t php_uudecode(char *src, php_size_t src_len, char **dest, int *error);
+PHPAPI php_size_t php_uuencode(char *src, php_size_t src_len, char **dest);
 
 #endif /* PHP_UUENCODE_H */
 

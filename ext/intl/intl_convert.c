@@ -44,8 +44,8 @@
  * @return void       This function does not return anything.
  */
 void intl_convert_utf8_to_utf16(
-	UChar**     target, zend_str_size_int* target_len,
-	const char* src,    zend_str_size_int  src_len,
+	UChar**     target, php_size_t* target_len,
+	const char* src,    php_size_t  src_len,
 	UErrorCode* status )
 {
 	UChar*      dst_buf = NULL;
@@ -108,8 +108,8 @@ void intl_convert_utf8_to_utf16(
  * @return void       This function does not return anything.
  */
 void intl_convert_utf16_to_utf8(
-	char**       target, zend_str_size_int* target_len,
-	const UChar* src,    zend_str_size_int  src_len,
+	char**       target, php_size_t* target_len,
+	const UChar* src,    php_size_t  src_len,
 	UErrorCode*  status )
 {
 	char*       dst_buf = NULL;

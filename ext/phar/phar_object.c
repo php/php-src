@@ -56,13 +56,13 @@ static int phar_file_type(HashTable *mimes, char *file, char **mime_type TSRMLS_
 }
 /* }}} */
 
-static void phar_mung_server_vars(char *fname, char *entry, zend_str_size_int entry_len, char *basename, zend_str_size_int request_uri_len TSRMLS_DC) /* {{{ */
+static void phar_mung_server_vars(char *fname, char *entry, php_size_t entry_len, char *basename, php_size_t request_uri_len TSRMLS_DC) /* {{{ */
 {
 	HashTable *_SERVER;
 	zval **stuff;
 	char *path_info;
-	zend_str_size_int basename_len = strlen(basename);
-	zend_str_size_int code;
+	php_size_t basename_len = strlen(basename);
+	php_size_t code;
 	zval *temp;
 
 	/* "tweak" $_SERVER variables requested in earlier call to Phar::mungServer() */
@@ -162,7 +162,7 @@ static void phar_mung_server_vars(char *fname, char *entry, zend_str_size_int en
 }
 /* }}} */
 
-static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, zend_str_size_int entry_len, char *arch, char *basename, char *ru, zend_str_size_int ru_len TSRMLS_DC) /* {{{ */
+static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char *mime_type, int code, char *entry, php_size_t entry_len, char *arch, char *basename, char *ru, php_size_t ru_len TSRMLS_DC) /* {{{ */
 {
 	char *name = NULL, buf[8192];
 	const char *cwd;
@@ -170,7 +170,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 	sapi_header_line ctr = {0};
 	size_t got;
 	php_int_t dummy = 1;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
 	zval *result = NULL;
@@ -331,7 +331,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 }
 /* }}} */
 
-static void phar_do_403(char *entry, zend_str_size_int entry_len TSRMLS_DC) /* {{{ */
+static void phar_do_403(char *entry, php_size_t entry_len TSRMLS_DC) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 
@@ -346,7 +346,7 @@ static void phar_do_403(char *entry, zend_str_size_int entry_len TSRMLS_DC) /* {
 }
 /* }}} */
 
-static void phar_do_404(phar_archive_data *phar, char *fname, zend_str_size_int fname_len, char *f404, zend_str_size_int f404_len, char *entry, zend_str_size_int entry_len TSRMLS_DC) /* {{{ */
+static void phar_do_404(phar_archive_data *phar, char *fname, php_size_t fname_len, char *f404, php_size_t f404_len, char *entry, php_size_t entry_len TSRMLS_DC) /* {{{ */
 {
 	sapi_header_line ctr = {0};
 	phar_entry_info	*info;
@@ -374,10 +374,10 @@ static void phar_do_404(phar_archive_data *phar, char *fname, zend_str_size_int 
 /* post-process REQUEST_URI and retrieve the actual request URI.  This is for
    cases like http://localhost/blah.phar/path/to/file.php/extra/stuff
    which calls "blah.phar" file "path/to/file.php" with PATH_INFO "/extra/stuff" */
-static void phar_postprocess_ru_web(char *fname, zend_str_size_int fname_len, char **entry, zend_str_size_int *entry_len, char **ru, zend_str_size_int *ru_len TSRMLS_DC) /* {{{ */
+static void phar_postprocess_ru_web(char *fname, php_size_t fname_len, char **entry, php_size_t *entry_len, char **ru, php_size_t *ru_len TSRMLS_DC) /* {{{ */
 {
 	char *e = *entry + 1, *u = NULL, *u1 = NULL, *saveu = NULL;
-	zend_str_size_int e_len = *entry_len - 1, u_len = 0;
+	php_size_t e_len = *entry_len - 1, u_len = 0;
 	phar_archive_data **pphar = NULL;
 
 	/* we already know we can retrieve the phar if we reach here */
@@ -442,7 +442,7 @@ static void phar_postprocess_ru_web(char *fname, zend_str_size_int fname_len, ch
 PHP_METHOD(Phar, running)
 {
 	char *fname, *arch, *entry;
-	zend_str_size_int fname_len, arch_len, entry_len;
+	php_size_t fname_len, arch_len, entry_len;
 	zend_bool retphar = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &retphar) == FAILURE) {
@@ -476,7 +476,7 @@ PHP_METHOD(Phar, running)
 PHP_METHOD(Phar, mount)
 {
 	char *fname, *arch = NULL, *entry = NULL, *path, *actual;
-	zend_str_size_int fname_len, arch_len, entry_len, path_len, actual_len;
+	php_size_t fname_len, arch_len, entry_len, path_len, actual_len;
 	phar_archive_data **pphar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &path, &path_len, &actual, &actual_len) == FAILURE) {
@@ -566,10 +566,10 @@ PHP_METHOD(Phar, webPhar)
 {
 	zval *mimeoverride = NULL, *rewrite = NULL;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
-	zend_str_size_int alias_len = 0, f404_len = 0, ru_len = 0;
+	php_size_t alias_len = 0, f404_len = 0, ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
-	zend_str_size_int fname_len, entry_len, index_php_len = 0;
+	php_size_t fname_len, entry_len, index_php_len = 0;
 	php_int_t code;
 	int not_cgi, ret, free_pathinfo = 0;
 	phar_archive_data *phar = NULL;
@@ -959,7 +959,7 @@ PHP_METHOD(Phar, interceptFileFuncs)
 PHP_METHOD(Phar, createDefaultStub)
 {
 	char *index = NULL, *webindex = NULL, *stub, *error;
-	zend_str_size_int index_len = 0, webindex_len = 0;
+	php_size_t index_len = 0, webindex_len = 0;
 	size_t stub_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|SS", &index, &index_len, &webindex, &webindex_len) == FAILURE) {
@@ -982,7 +982,7 @@ PHP_METHOD(Phar, createDefaultStub)
 PHP_METHOD(Phar, mapPhar)
 {
 	char *alias = NULL, *error;
-	zend_str_size_int alias_len = 0;
+	php_size_t alias_len = 0;
 	php_int_t dataoffset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!i", &alias, &alias_len, &dataoffset) == FAILURE) {
@@ -1004,7 +1004,7 @@ PHP_METHOD(Phar, mapPhar)
 PHP_METHOD(Phar, loadPhar)
 {
 	char *fname, *alias = NULL, *error;
-	zend_str_size_int fname_len, alias_len = 0;
+	php_size_t fname_len, alias_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S!", &fname, &fname_len, &alias, &alias_len) == FAILURE) {
 		return;
@@ -1082,7 +1082,7 @@ PHP_METHOD(Phar, isValidPharFilename)
 {
 	char *fname;
 	const char *ext_str;
-	zend_str_size_int fname_len, ext_len;
+	php_size_t fname_len, ext_len;
 	int is_executable;
 	zend_bool executable = 1;
 
@@ -1145,7 +1145,7 @@ PHP_METHOD(Phar, __construct)
 	zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Cannot instantiate Phar object without SPL extension");
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
-	zend_str_size_int fname_len, alias_len = 0, arch_len, entry_len;
+	php_size_t fname_len, alias_len = 0, arch_len, entry_len;
 	int is_data;
 	php_int_t flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
 	php_int_t format = 0;
@@ -1327,7 +1327,7 @@ PHP_METHOD(Phar, getSupportedCompression)
 PHP_METHOD(Phar, unlinkArchive)
 {
 	char *fname, *error, *zname, *arch, *entry;
-	zend_str_size_int fname_len, zname_len, arch_len, entry_len;
+	php_size_t fname_len, zname_len, arch_len, entry_len;
 	phar_archive_data *phar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &fname, &fname_len) == FAILURE) {
@@ -1413,7 +1413,7 @@ struct _phar_t {
 	phar_archive_object *p;
 	zend_class_entry *c;
 	char *b;
-	zend_str_size_uint l;
+	php_size_t l;
 	zval *ret;
 	int count;
 	php_stream *fp;
@@ -1424,7 +1424,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	zval **value;
 	zend_bool close_fp = 1;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
-	zend_str_size_uint str_key_len, base_len = p_obj->l, fname_len;
+	php_size_t str_key_len, base_len = p_obj->l, fname_len;
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t contents_len;
@@ -1747,7 +1747,7 @@ after_open_fp:
 PHP_METHOD(Phar, buildFromDirectory)
 {
 	char *dir, *error, *regex = NULL;
-	zend_str_size_int dir_len, regex_len = 0;
+	php_size_t dir_len, regex_len = 0;
 	zend_bool apply_reg = 0;
 	zval arg, arg2, *iter, *iteriter, *regexiter = NULL;
 	struct _phar_t pass;
@@ -1886,7 +1886,7 @@ PHP_METHOD(Phar, buildFromIterator)
 {
 	zval *obj;
 	char *error;
-	zend_str_size_uint base_len = 0;
+	php_size_t base_len = 0;
 	char *base = NULL;
 	struct _phar_t pass;
 
@@ -2031,8 +2031,8 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	zend_class_entry *ce;
 	char *error;
 	const char *pcr_error;
-	zend_str_size_int ext_len = ext ? strlen(ext) : 0;
-	zend_str_size_int oldname_len;
+	php_size_t ext_len = ext ? strlen(ext) : 0;
+	php_size_t oldname_len;
 	phar_archive_data **pphar = NULL;
 	php_stream_statbuf ssb;
 
@@ -2360,7 +2360,7 @@ PHP_METHOD(Phar, convertToExecutable)
 {
 	char *ext = NULL;
 	int is_data;
-	zend_str_size_int ext_len = 0;
+	php_size_t ext_len = 0;
 	php_uint32 flags;
 	zval *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday, so there) */
@@ -2464,7 +2464,7 @@ PHP_METHOD(Phar, convertToData)
 {
 	char *ext = NULL;
 	int is_data;
-	zend_str_size_int ext_len = 0;
+	php_size_t ext_len = 0;
 	php_uint32 flags;
 	zval *ret;
 	/* a number that is not 0, 1 or 2 (Which is also Greg's birthday so there) */
@@ -2616,7 +2616,7 @@ PHP_METHOD(Phar, isWritable)
 PHP_METHOD(Phar, delete)
 {
 	char *fname;
-	zend_str_size_int fname_len;
+	php_size_t fname_len;
 	char *error;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
@@ -2701,7 +2701,7 @@ PHP_METHOD(Phar, setAlias)
 {
 	char *alias, *error, *oldalias;
 	phar_archive_data **fd_ptr;
-	zend_str_size_int alias_len, oldalias_len;
+	php_size_t alias_len, oldalias_len;
 	int old_temp, readd = 0;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -2877,7 +2877,7 @@ PHP_METHOD(Phar, setStub)
 {
 	zval *zstub;
 	char *stub, *error;
-	zend_str_size_int stub_len;
+	php_size_t stub_len;
 	php_int_t len = -1;
 	php_stream *stream;
 	PHAR_ARCHIVE_OBJECT();
@@ -2955,7 +2955,7 @@ PHP_METHOD(Phar, setStub)
 PHP_METHOD(Phar, setDefaultStub)
 {
 	char *index = NULL, *webindex = NULL, *error = NULL, *stub = NULL;
-	zend_str_size_int index_len = 0, webindex_len = 0;
+	php_size_t index_len = 0, webindex_len = 0;
 	int created_stub = 0;
 	size_t stub_len = 0;
 	PHAR_ARCHIVE_OBJECT();
@@ -3031,7 +3031,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 {
 	php_int_t algo;
 	char *error, *key = NULL;
-	zend_str_size_int key_len = 0;
+	php_size_t key_len = 0;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3091,7 +3091,7 @@ PHP_METHOD(Phar, getSignature)
 
 	if (phar_obj->arc.archive->signature) {
 		char *unknown;
-		zend_str_size_int unknown_len;
+		php_size_t unknown_len;
 
 		array_init(return_value);
 		add_assoc_stringl(return_value, "hash", phar_obj->arc.archive->signature, phar_obj->arc.archive->sig_len, 1);
@@ -3203,7 +3203,7 @@ PHP_METHOD(Phar, compress)
 {
 	php_int_t method;
 	char *ext = NULL;
-	zend_str_size_int ext_len = 0;
+	php_size_t ext_len = 0;
 	php_uint32 flags;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
@@ -3271,7 +3271,7 @@ PHP_METHOD(Phar, compress)
 PHP_METHOD(Phar, decompress)
 {
 	char *ext = NULL;
-	zend_str_size_int ext_len = 0;
+	php_size_t ext_len = 0;
 	zval *ret;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3436,7 +3436,7 @@ PHP_METHOD(Phar, copy)
 {
 	char *oldfile, *newfile, *error;
 	const char *pcr_error;
-	zend_str_size_int oldfile_len, newfile_len;
+	php_size_t oldfile_len, newfile_len;
 	phar_entry_info *oldentry, newentry = {0}, *temp;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -3542,7 +3542,7 @@ PHP_METHOD(Phar, copy)
 PHP_METHOD(Phar, offsetExists)
 {
 	char *fname;
-	zend_str_size_int fname_len;
+	php_size_t fname_len;
 	phar_entry_info *entry;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -3579,7 +3579,7 @@ PHP_METHOD(Phar, offsetExists)
 PHP_METHOD(Phar, offsetGet)
 {
 	char *fname, *error;
-	zend_str_size_int fname_len;
+	php_size_t fname_len;
 	zval *zfname;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
@@ -3623,7 +3623,7 @@ PHP_METHOD(Phar, offsetGet)
 
 /* {{{ add a file within the phar archive from a string or resource
  */
-static void phar_add_file(phar_archive_data **pphar, char *filename, zend_str_size_int filename_len, char *cont_str, zend_str_size_int cont_len, zval *zresource TSRMLS_DC)
+static void phar_add_file(phar_archive_data **pphar, char *filename, php_size_t filename_len, char *cont_str, php_size_t cont_len, zval *zresource TSRMLS_DC)
 {
 	char *error;
 	size_t contents_len;
@@ -3723,7 +3723,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, int dirname_len
 PHP_METHOD(Phar, offsetSet)
 {
 	char *fname, *cont_str = NULL;
-	zend_str_size_int fname_len, cont_len;
+	php_size_t fname_len, cont_len;
 	zval *zresource;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3762,7 +3762,7 @@ PHP_METHOD(Phar, offsetSet)
 PHP_METHOD(Phar, offsetUnset)
 {
 	char *fname, *error;
-	zend_str_size_int fname_len;
+	php_size_t fname_len;
 	phar_entry_info *entry;
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3814,7 +3814,7 @@ PHP_METHOD(Phar, offsetUnset)
 PHP_METHOD(Phar, addEmptyDir)
 {
 	char *dirname;
-	zend_str_size_int dirname_len;
+	php_size_t dirname_len;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -3837,7 +3837,7 @@ PHP_METHOD(Phar, addEmptyDir)
 PHP_METHOD(Phar, addFile)
 {
 	char *fname, *localname = NULL;
-	zend_str_size_int fname_len, localname_len = 0;
+	php_size_t fname_len, localname_len = 0;
 	php_stream *resource;
 	zval *zresource;
 
@@ -3883,7 +3883,7 @@ PHP_METHOD(Phar, addFile)
 PHP_METHOD(Phar, addFromString)
 {
 	char *localname, *cont_str;
-	zend_str_size_int localname_len, cont_len;
+	php_size_t localname_len, cont_len;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -4110,10 +4110,10 @@ PHP_METHOD(Phar, delMetadata)
 	php_check_open_basedir(filename TSRMLS_CC)
 #endif
 
-static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, zend_str_size_int dest_len, char **error TSRMLS_DC) /* {{{ */
+static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *dest, php_size_t dest_len, char **error TSRMLS_DC) /* {{{ */
 {
 	php_stream_statbuf ssb;
-	zend_str_size_int len;
+	php_size_t len;
 	php_stream *fp;
 	char *fullpath;
 	const char *slash;
@@ -4264,7 +4264,7 @@ PHP_METHOD(Phar, extractTo)
 	php_stream_statbuf ssb;
 	phar_entry_info *entry;
 	char *pathto, *filename, *actual;
-	zend_str_size_int pathto_len, filename_len;
+	php_size_t pathto_len, filename_len;
 	int ret, i;
 	int nelems;
 	zval *zval_files = NULL;
@@ -4405,7 +4405,7 @@ all_files:
 PHP_METHOD(PharFileInfo, __construct)
 {
 	char *fname, *arch, *entry, *error;
-	zend_str_size_int fname_len, arch_len, entry_len;
+	php_size_t fname_len, arch_len, entry_len;
 	phar_entry_object *entry_obj;
 	phar_entry_info *entry_info;
 	phar_archive_data *phar_data;

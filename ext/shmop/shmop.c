@@ -161,7 +161,7 @@ PHP_FUNCTION(shmop_open)
 	struct shmid_ds shm;
 	int rsid;
 	char *flags;
-	zend_str_size_int flags_len;
+	php_size_t flags_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iSii", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
 		return;
@@ -317,7 +317,7 @@ PHP_FUNCTION(shmop_write)
 	int writesize;
 	php_int_t shmid, offset;
 	char *data;
-	zend_str_size_int data_len;
+	php_size_t data_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iSi", &shmid, &data, &data_len, &offset) == FAILURE) {
 		return;

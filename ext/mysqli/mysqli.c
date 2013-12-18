@@ -1034,7 +1034,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
 	char				*statement;
-	zend_str_size_int					statement_len;
+	php_size_t					statement_len;
 
 	switch (ZEND_NUM_ARGS())
 	{
@@ -1234,7 +1234,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 	if (into_object) {
 		char *class_name;
-		zend_str_size_int class_name_len;
+		php_size_t class_name_len;
 
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|Sz", &mysql_result, mysqli_result_class_entry, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;

@@ -35,7 +35,7 @@ PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 PHP_FUNCTION(sha1)
 {
 	char *arg;
-	zend_str_size_int arg_len;
+	php_size_t arg_len;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
@@ -66,7 +66,7 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	zend_str_size_int           arg_len;
+	php_size_t           arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
@@ -181,7 +181,7 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
    context.
  */
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   zend_str_size_uint inputLen)
+			   php_size_t inputLen)
 {
 	unsigned int i, index, partLen;
 

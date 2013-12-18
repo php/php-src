@@ -423,7 +423,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	enchant_broker *pbroker;
 	php_int_t dict_type;
 	char *value;
-	zend_str_size_int value_len;
+	php_size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riS", &broker, &dict_type, &value, &value_len) == FAILURE) {
 		RETURN_FALSE;
@@ -534,7 +534,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	enchant_dict *dict;
 	EnchantDict *d;
 	char *tag;
-	zend_str_size_int taglen;
+	php_size_t taglen;
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &broker, &tag, &taglen) == FAILURE) {
@@ -588,7 +588,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	enchant_dict *dict;
 	EnchantDict *d;
 	char *pwl;
-	zend_str_size_int pwllen;
+	php_size_t pwllen;
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rP", &broker, &pwl, &pwllen) == FAILURE) {
@@ -656,7 +656,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;
 	char *tag;
-	zend_str_size_int taglen;
+	php_size_t taglen;
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &broker, &tag, &taglen) == FAILURE) {
@@ -680,9 +680,9 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 {
 	zval *broker;
 	char *pordering;
-	zend_str_size_int porderinglen;
+	php_size_t porderinglen;
 	char *ptag;
-	zend_str_size_int ptaglen;
+	php_size_t ptaglen;
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSS", &broker, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
@@ -721,7 +721,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 {
 	zval *dict, *sugg = NULL;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|z/", &dict, &word, &wordlen, &sugg) == FAILURE) {
@@ -767,7 +767,7 @@ PHP_FUNCTION(enchant_dict_check)
 {
 	zval *dict;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &dict, &word, &wordlen) == FAILURE) {
@@ -786,7 +786,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 {
 	zval *dict;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	char **suggs;
 	enchant_dict *pdict;
 	int n_sugg;
@@ -819,7 +819,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 {
 	zval *dict;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &dict, &word, &wordlen) == FAILURE) {
@@ -838,7 +838,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 {
 	zval *dict;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &dict, &word, &wordlen) == FAILURE) {
@@ -857,7 +857,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 {
 	zval *dict;
 	char *word;
-	zend_str_size_int wordlen;
+	php_size_t wordlen;
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &dict, &word, &wordlen) == FAILURE) {
@@ -879,7 +879,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 {
 	zval *dict;
 	char *mis, *cor;
-	zend_str_size_int mislen, corlen;
+	php_size_t mislen, corlen;
 
 	enchant_dict *pdict;
 

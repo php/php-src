@@ -165,7 +165,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # define php_curl_ret(__ret) RETVAL_FALSE; return;
 #endif
 
-static int php_curl_option_url(php_curl *ch, const char *url, const zend_str_size_int len TSRMLS_DC) /* {{{ */
+static int php_curl_option_url(php_curl *ch, const char *url, const php_size_t len TSRMLS_DC) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 #if LIBCURL_VERSION_NUM < 0x071100
@@ -1541,7 +1541,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 #endif
 			} else if (retval_ptr) {
 				if (Z_TYPE_P(retval_ptr) == IS_STRING) {
-					length = MIN((zend_str_size_int) (size * nmemb), Z_STRSIZE_P(retval_ptr));
+					length = MIN((php_size_t) (size * nmemb), Z_STRSIZE_P(retval_ptr));
 					memcpy(data, Z_STRVAL_P(retval_ptr), length);
 				}
 				zval_ptr_dtor(&retval_ptr);
@@ -1846,7 +1846,7 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 			MAKE_STD_ZVAL(certhash);
 			array_init(certhash);
 			for(slist = ci->certinfo[i]; slist; slist = slist->next) {
-				zend_str_size_int len;
+				php_size_t len;
 				char s[64];
 				char *tmp;
 				strncpy(s, slist->data, 64);
@@ -1914,7 +1914,7 @@ PHP_FUNCTION(curl_init)
 	CURL		*cp;
 	zval		*clone;
 	char		*url = NULL;
-	zend_str_size_int		url_len = 0;
+	php_size_t		url_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &url, &url_len) == FAILURE) {
 		return;
@@ -2546,7 +2546,7 @@ string_copy:
 				) {
 					char  *postval;
 					char  *string_key = NULL;
-					zend_str_size_uint   string_key_len;
+					php_size_t   string_key_len;
 					php_uint_t  num_key;
 					int    numeric_key;
 
@@ -2882,7 +2882,7 @@ PHP_FUNCTION(curl_setopt_array)
 	php_uint_t		option;
 	HashPosition	pos;
 	char		*string_key;
-	zend_str_size_uint		str_key_len;
+	php_size_t		str_key_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za", &zid, &arr) == FAILURE) {
 		return;
@@ -3454,7 +3454,7 @@ PHP_FUNCTION(curl_reset)
 PHP_FUNCTION(curl_escape)
 {
 	char       *str = NULL, *res = NULL;
-	zend_str_size_int        str_len = 0;
+	php_size_t        str_len = 0;
 	zval       *zid;
 	php_curl   *ch;
 
@@ -3483,7 +3483,7 @@ PHP_FUNCTION(curl_escape)
 PHP_FUNCTION(curl_unescape)
 {
 	char       *str = NULL, *out = NULL;
-	zend_str_size_int        str_len = 0;
+	php_size_t        str_len = 0;
 	int out_len;
 	zval       *zid;
 	php_curl   *ch;

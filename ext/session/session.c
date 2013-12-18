@@ -197,7 +197,7 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static char *php_session_encode(zend_str_size_int *newlen TSRMLS_DC) /* {{{ */
+static char *php_session_encode(php_size_t *newlen TSRMLS_DC) /* {{{ */
 {
 	char *ret = NULL;
 
@@ -215,7 +215,7 @@ static char *php_session_encode(zend_str_size_int *newlen TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void php_session_decode(const char *val, zend_str_size_int vallen TSRMLS_DC) /* {{{ */
+static void php_session_decode(const char *val, php_size_t vallen TSRMLS_DC) /* {{{ */
 {
 	if (!PS(serializer)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
@@ -467,7 +467,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 static void php_session_initialize(TSRMLS_D) /* {{{ */
 {
 	char *val = NULL;
-	zend_str_size_int vallen;
+	php_size_t vallen;
 
 	if (!PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
@@ -534,7 +534,7 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 	IF_SESSION_VARS() {
  		if (PS(mod_data) || PS(mod_user_implemented)) {
 			char *val;
-			zend_str_size_int vallen;
+			php_size_t vallen;
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
@@ -1016,7 +1016,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	char *name;
 	const char *endptr = val + vallen;
 	zval *current;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
 
@@ -1441,7 +1441,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	zval **data;
 	char *p, *value;
 	int nrand;
-	zend_str_size_int lensess;
+	php_size_t lensess;
 
 	if (PS(use_only_cookies)) {
 		PS(apply_trans_sid) = 0;
@@ -1627,7 +1627,7 @@ static PHP_FUNCTION(session_set_cookie_params)
 {
 	zval **lifetime = NULL;
 	char *path = NULL, *domain = NULL;
-	zend_str_size_int path_len, domain_len;
+	php_size_t path_len, domain_len;
 	int argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
 
@@ -1679,7 +1679,7 @@ static PHP_FUNCTION(session_get_cookie_params)
 static PHP_FUNCTION(session_name)
 {
 	char *name = NULL;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name, &name_len) == FAILURE) {
 		return;
@@ -1698,7 +1698,7 @@ static PHP_FUNCTION(session_name)
 static PHP_FUNCTION(session_module_name)
 {
 	char *name = NULL;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name, &name_len) == FAILURE) {
 		return;
@@ -1733,7 +1733,7 @@ static PHP_FUNCTION(session_module_name)
 static PHP_FUNCTION(session_serializer_name)
 {
 	char *name = NULL;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name, &name_len) == FAILURE) {
 		return;
@@ -1767,7 +1767,7 @@ static PHP_FUNCTION(session_set_save_handler)
 
 	if (argc > 0 && argc <= 2) {
 		zval *obj = NULL, *callback = NULL;
-		zend_str_size_uint func_name_len;
+		php_size_t func_name_len;
 		char *func_name;
 		HashPosition pos;
 		zend_function *default_mptr, *current_mptr;
@@ -1899,7 +1899,7 @@ static PHP_FUNCTION(session_set_save_handler)
 static PHP_FUNCTION(session_save_path)
 {
 	char *name = NULL;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &name, &name_len) == FAILURE) {
 		return;
@@ -1923,7 +1923,7 @@ static PHP_FUNCTION(session_save_path)
 static PHP_FUNCTION(session_id)
 {
 	char *name = NULL;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "|S", &name, &name_len) == FAILURE) {
@@ -1988,7 +1988,7 @@ static PHP_FUNCTION(session_regenerate_id)
 static PHP_FUNCTION(session_cache_limiter)
 {
 	char *limiter = NULL;
-	zend_str_size_int limiter_len;
+	php_size_t limiter_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &limiter, &limiter_len) == FAILURE) {
 		return;
@@ -2026,7 +2026,7 @@ static PHP_FUNCTION(session_cache_expire)
    Serializes the current setup and returns the serialized representation */
 static PHP_FUNCTION(session_encode)
 {
-	zend_str_size_int len;
+	php_size_t len;
 	char *enc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2047,7 +2047,7 @@ static PHP_FUNCTION(session_encode)
 static PHP_FUNCTION(session_decode)
 {
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 
 	if (PS(session_status) == php_session_none) {
 		RETURN_FALSE;

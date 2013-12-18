@@ -259,7 +259,7 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zval **object_ptr, char *name, zend_str_size_int len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *com_method_get(zval **object_ptr, char *name, php_size_t len, const zend_literal *key TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
@@ -442,7 +442,7 @@ static zend_class_entry *com_class_entry_get(const zval *object TSRMLS_DC)
 	return obj->ce;
 }
 
-static int com_class_name_get(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC)
+static int com_class_name_get(const zval *object, const char **class_name, php_size_t *class_name_len, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
 	obj = CDNO_FETCH(object);

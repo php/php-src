@@ -80,7 +80,7 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php
 PHPAPI int php_mkdir_ex(const char *dir, php_int_t mode, int options TSRMLS_DC);
 PHPAPI int php_mkdir(const char *dir, php_int_t mode TSRMLS_DC);
 PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI zend_str_size_int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
+PHPAPI php_size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
 
 #define META_DEF_BUFSIZE 8192
 

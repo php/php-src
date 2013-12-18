@@ -566,7 +566,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 			zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
 			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 				char *s_key;
-				zend_str_size_uint s_len;
+				php_size_t s_len;
 				php_uint_t num_key;
 				size_t value_len = strlen(*entry_value);
 				
@@ -585,7 +585,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 				zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
 				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
 					char *s_key;
-					zend_str_size_int s_len;
+					php_size_t s_len;
 					php_uint_t num_key;
 					size_t value_len = strlen(*entry_value);
 					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {

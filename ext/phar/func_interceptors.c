@@ -26,7 +26,7 @@
 PHAR_FUNC(phar_opendir) /* {{{ */
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	zval *zcontext = NULL;
 
 	if (!PHAR_G(intercepted)) {
@@ -44,7 +44,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -94,11 +94,11 @@ skip_phar:
 PHAR_FUNC(phar_file_get_contents) /* {{{ */
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	char *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	zend_str_size_int len;
+	php_size_t len;
 	php_int_t offset = -1;
 	php_int_t maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
@@ -119,7 +119,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 
 		fname = (char*)zend_get_executed_filename(TSRMLS_C);
@@ -230,7 +230,7 @@ skip_phar:
 PHAR_FUNC(phar_readfile) /* {{{ */
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	int size = 0;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
@@ -249,7 +249,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -326,7 +326,7 @@ skip_phar:
 PHAR_FUNC(phar_fopen) /* {{{ */
 {
 	char *filename, *mode;
-	zend_str_size_int filename_len, mode_len;
+	php_size_t filename_len, mode_len;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
@@ -345,7 +345,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -616,7 +616,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_length) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		php_stat_t sb = {0};
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
@@ -684,7 +684,7 @@ splitted:
 				goto statme_baby;
 			} else {
 				char *save;
-				zend_str_size_int save_len;
+				php_size_t save_len;
 
 notfound:
 				efree(entry);
@@ -811,7 +811,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
 		char *filename; \
-		zend_str_size_int filename_len; \
+		php_size_t filename_len; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename, &filename_len) == FAILURE) { \
 			return; \
@@ -895,7 +895,7 @@ PharFileFunction(phar_is_dir, FS_IS_DIR, orig_is_dir)
 PHAR_FUNC(phar_is_file) /* {{{ */
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -910,7 +910,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
@@ -962,7 +962,7 @@ skip_phar:
 PHAR_FUNC(phar_is_link) /* {{{ */
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 
 	if (!PHAR_G(intercepted)) {
 		goto skip_phar;
@@ -977,7 +977,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
-		zend_str_size_int arch_len, entry_len, fname_len;
+		php_size_t arch_len, entry_len, fname_len;
 		fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is

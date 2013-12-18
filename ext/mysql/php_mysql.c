@@ -720,9 +720,9 @@ PHP_MINFO_FUNCTION(mysql)
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
-	zend_str_size_int  user_len = 0, passwd_len = 0, host_len = 0;
+	php_size_t  user_len = 0, passwd_len = 0, host_len = 0;
 	char *hashed_details=NULL;
-	zend_str_size_int hashed_details_length;
+	php_size_t hashed_details_length;
 	php_int_t port = MYSQL_PORT;
 	php_int_t client_flags = 0;
 	php_mysql_conn *mysql=NULL;
@@ -1131,7 +1131,7 @@ PHP_FUNCTION(mysql_close)
 PHP_FUNCTION(mysql_select_db)
 {
 	char *db;
-	zend_str_size_int db_len;
+	php_size_t db_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 	php_mysql_conn *mysql;
@@ -1355,7 +1355,7 @@ PHP_FUNCTION(mysql_set_charset)
 	zval *mysql_link = NULL;
 	char *csname;
 	php_int_t id = -1;
-	zend_str_size_int csname_len;
+	php_size_t csname_len;
 	php_mysql_conn *mysql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &csname, &csname_len, &mysql_link) == FAILURE) {
@@ -1385,7 +1385,7 @@ PHP_FUNCTION(mysql_set_charset)
 PHP_FUNCTION(mysql_create_db)
 {
 	char *db;
-	zend_str_size_int db_len;
+	php_size_t db_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 	php_mysql_conn *mysql;
@@ -1416,7 +1416,7 @@ PHP_FUNCTION(mysql_create_db)
 PHP_FUNCTION(mysql_drop_db)
 {
 	char *db;
-	zend_str_size_int db_len;
+	php_size_t db_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 	php_mysql_conn *mysql;
@@ -1538,7 +1538,7 @@ static void php_mysql_do_query_general(char *query, int query_len, zval *mysql_l
 static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 {
 	char *query;
-	zend_str_size_int query_len;
+	php_size_t query_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 
@@ -1578,7 +1578,7 @@ PHP_FUNCTION(mysql_unbuffered_query)
 PHP_FUNCTION(mysql_db_query)
 {
 	char *db, *query;
-	zend_str_size_int db_len, query_len;
+	php_size_t db_len, query_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 
@@ -1637,7 +1637,7 @@ PHP_FUNCTION(mysql_list_dbs)
 PHP_FUNCTION(mysql_list_tables)
 {
 	char *db;
-	zend_str_size_int db_len;
+	php_size_t db_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 	php_mysql_conn *mysql;
@@ -1675,7 +1675,7 @@ PHP_FUNCTION(mysql_list_tables)
 PHP_FUNCTION(mysql_list_fields)
 {
 	char *db, *table;
-	zend_str_size_int db_len, table_len;
+	php_size_t db_len, table_len;
 	zval *mysql_link = NULL;
 	php_int_t id = -1;
 	php_mysql_conn *mysql;
@@ -1834,7 +1834,7 @@ PHP_FUNCTION(mysql_affected_rows)
 PHP_FUNCTION(mysql_escape_string)
 {
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
@@ -1861,7 +1861,7 @@ PHP_FUNCTION(mysql_real_escape_string)
 	char *str;
 	char *new_str;
 	php_int_t id = -1;
-	zend_str_size_int str_len, new_str_len;
+	php_size_t str_len, new_str_len;
 	php_mysql_conn *mysql;
 
 
@@ -2070,7 +2070,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_
 #ifdef ZEND_ENGINE_2
 	if (into_object) {
 		char *class_name = NULL;
-		zend_str_size_int class_name_len = 0;
+		php_size_t class_name_len = 0;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|Sz", &res, &class_name, &class_name_len, &ctor_params) == FAILURE) {
 			return;
@@ -2478,7 +2478,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	MYSQL_RES *mysql_result;
 	const MYSQL_FIELD *mysql_field = {0};
 	char buf[512];
-	zend_str_size_int  len;
+	php_size_t  len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &result, &field) == FAILURE) {
 		return;

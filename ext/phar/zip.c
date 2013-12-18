@@ -45,7 +45,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, php_ui
 		phar_zip_extra_field_header header;
 		phar_zip_unix3 unix3;
 	} h;
-	zend_str_size_int read;
+	php_size_t read;
 
 	do {
 		if (sizeof(h.header) != php_stream_read(fp, (char *) &h.header, sizeof(h.header))) {
@@ -163,7 +163,7 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
-int phar_parse_zipfile(php_stream *fp, char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_zipfile(php_stream *fp, char *fname, php_size_t fname_len, char *alias, php_size_t alias_len, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
@@ -717,7 +717,7 @@ foundit:
 /**
  * Create or open a zip-based phar for writing
  */
-int phar_open_or_create_zip(char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_zip(char *fname, php_size_t fname_len, char *alias, php_size_t alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error TSRMLS_CC);
@@ -1079,7 +1079,7 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 {
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
-		zend_str_size_int signature_length;
+		php_size_t signature_length;
 		char *signature, sigbuf[8];
 		phar_entry_info entry = {0};
 		php_stream *newfile;

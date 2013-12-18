@@ -426,23 +426,23 @@ yy45:
 
 struct placeholder {
 	char *pos;
-	zend_str_size_int len;
+	php_size_t len;
 	int bindno;
-	zend_str_size_int qlen;		/* quoted length of value */
+	php_size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	struct placeholder *next;
 };
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, zend_str_size_int inquery_len, 
-	char **outquery, zend_str_size_int *outquery_len TSRMLS_DC)
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, php_size_t inquery_len, 
+	char **outquery, php_size_t *outquery_len TSRMLS_DC)
 {
 	Scanner s;
 	char *ptr, *newbuffer;
 	ptrdiff_t t;
 	int bindno = 0;
 	int ret = 0;
-	zend_str_size_int newbuffer_len;
+	php_size_t newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;

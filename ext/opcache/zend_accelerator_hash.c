@@ -71,7 +71,7 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, zend_uint hash_size)
  * Returns pointer the actual hash entry on success
  * key needs to be already allocated as it is not copied
  */
-zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char *key, zend_str_size_uint key_length, zend_bool indirect, void *data)
+zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char *key, php_size_t key_length, zend_bool indirect, void *data)
 {
 	zend_uint_t hash_value;
 	zend_uint_t index;
@@ -140,7 +140,7 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 /* Returns the data associated with key on success
  * Returns NULL if data doesn't exist
  */
-void* zend_accel_hash_find(zend_accel_hash *accel_hash, char *key, zend_str_size_uint key_length)
+void* zend_accel_hash_find(zend_accel_hash *accel_hash, char *key, php_size_t key_length)
 {
 	zend_uint_t hash_value;
 	zend_uint_t index;
@@ -168,7 +168,7 @@ void* zend_accel_hash_find(zend_accel_hash *accel_hash, char *key, zend_str_size
 /* Returns the hash entry associated with key on success
  * Returns NULL if it doesn't exist
  */
-zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, char *key, zend_str_size_uint key_length)
+zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, char *key, php_size_t key_length)
 {
 	zend_uint_t hash_value;
 	zend_uint_t index;
@@ -193,7 +193,7 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, c
 	return NULL;
 }
 
-int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, zend_str_size_uint key_length)
+int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, php_size_t key_length)
 {
     zend_uint_t hash_value;
     zend_uint_t index;

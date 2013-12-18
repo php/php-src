@@ -365,7 +365,7 @@ static inline int finish_nested_data(UNSERIALIZE_PARAMETER)
 
 static inline int object_custom(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 {
-	zend_str_size_long datalen;
+	php_size_t datalen;
 
 	datalen = parse_iv2((*p) + 2, p);
 

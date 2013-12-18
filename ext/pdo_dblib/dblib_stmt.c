@@ -220,7 +220,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr,
 	pdo_dblib_db_handle *H = S->H;
 	
 	int coltype;
-	zend_str_size_uint tmp_len;
+	php_size_t tmp_len;
 	char *tmp_ptr = NULL;
 	
 	coltype = dbcoltype(H->link, colno+1);

@@ -260,7 +260,7 @@ static PHP_MINIT_FUNCTION(pspell)
 static PHP_FUNCTION(pspell_new)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
-	zend_str_size_int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
+	php_size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	php_int_t mode = Z_I(0),  speed = Z_I(0);
 	int argc = ZEND_NUM_ARGS();
 	int ind;
@@ -357,7 +357,7 @@ static PHP_FUNCTION(pspell_new)
 static PHP_FUNCTION(pspell_new_personal)
 {
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
-	zend_str_size_int personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
+	php_size_t personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	php_int_t mode = Z_I(0),  speed = Z_I(0);
 	int argc = ZEND_NUM_ARGS();
 	int ind;
@@ -492,7 +492,7 @@ static PHP_FUNCTION(pspell_new_config)
 static PHP_FUNCTION(pspell_check)
 {
 	int type;
-	zend_str_size_int word_len;
+	php_size_t word_len;
 	php_int_t scin;
 	char *word;
 	PspellManager *manager;
@@ -517,7 +517,7 @@ static PHP_FUNCTION(pspell_suggest)
 {
 	php_int_t scin;
 	char *word;
-	zend_str_size_int word_len;
+	php_size_t word_len;
 	PspellManager *manager;
 	int type;
 	const PspellWordList *wl;
@@ -550,7 +550,7 @@ static PHP_FUNCTION(pspell_suggest)
 static PHP_FUNCTION(pspell_store_replacement)
 {
 	int type;
-	zend_str_size_int miss_len, corr_len;
+	php_size_t miss_len, corr_len;
 	php_int_t scin;
 	char *miss, *corr;
 	PspellManager *manager;
@@ -576,7 +576,7 @@ static PHP_FUNCTION(pspell_store_replacement)
 static PHP_FUNCTION(pspell_add_to_personal)
 {
 	int type;
-	zend_str_size_int word_len;
+	php_size_t word_len;
 	php_int_t scin;
 	char *word;
 	PspellManager *manager;
@@ -607,7 +607,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 static PHP_FUNCTION(pspell_add_to_session)
 {
 	int type;
-	zend_str_size_int word_len;
+	php_size_t word_len;
 	php_int_t scin;
 	char *word;
 	PspellManager *manager;
@@ -688,7 +688,7 @@ static PHP_FUNCTION(pspell_save_wordlist)
 static PHP_FUNCTION(pspell_config_create)
 {
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
-	zend_str_size_int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
+	php_size_t language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	int ind;
 	PspellConfig *config;
 
@@ -826,7 +826,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	int type;
 	php_int_t conf;
 	char *value;
-	zend_str_size_int value_len;
+	php_size_t value_len;
 	PspellConfig *config;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iP", &conf, &value, &value_len) == FAILURE) {
@@ -875,7 +875,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	int type;
 	php_int_t conf;
 	char *repl;
-	zend_str_size_int repl_len;
+	php_size_t repl_len;
 	PspellConfig *config;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iP", &conf, &repl, &repl_len) == FAILURE) {

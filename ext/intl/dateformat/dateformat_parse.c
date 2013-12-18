@@ -39,7 +39,7 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	double	result =  0;
 	UDate 	timestamp   =0;
 	UChar* 	text_utf16  = NULL;
-	zend_str_size_int text_utf16_len = 0;
+	php_size_t text_utf16_len = 0;
 
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
@@ -85,7 +85,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 {
 	UCalendar      *parsed_calendar = NULL;
 	UChar*  	text_utf16  = NULL;
-	zend_str_size_int 	text_utf16_len = 0;
+	php_size_t 	text_utf16_len = 0;
 	php_int_t 		isInDST = 0;
 
 	/* Convert timezone to UTF-16. */
@@ -128,7 +128,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
-	zend_str_size_int         text_len =0;
+	php_size_t         text_len =0;
 	zval*         	z_parse_pos = NULL;
 	int32_t			parse_pos = -1;
 
@@ -166,7 +166,7 @@ PHP_FUNCTION(datefmt_parse)
 PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
-	zend_str_size_int         text_len =0;
+	php_size_t         text_len =0;
 	zval*         	z_parse_pos = NULL;
 	int32_t			parse_pos = -1;
 

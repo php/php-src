@@ -24,12 +24,12 @@
 
 int make_http_soap_request(zval  *this_ptr, 
                            char  *request, 
-                           zend_str_size_int    request_size, 
+                           php_size_t    request_size, 
                            char  *location, 
                            char  *soapaction, 
                            php_int_t    soap_version,
                            char **response, 
-                           zend_str_size_int   *response_len TSRMLS_DC);
+                           php_size_t   *response_len TSRMLS_DC);
 
 int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);
 int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);

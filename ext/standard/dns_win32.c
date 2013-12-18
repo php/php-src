@@ -44,7 +44,7 @@
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	zval *mx_list, *weight_list = NULL;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
@@ -93,7 +93,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 PHP_FUNCTION(dns_check_record)
 {
 	char *hostname, *rectype = NULL;
-	zend_str_size_int hostname_len, rectype_len = 0;
+	php_size_t hostname_len, rectype_len = 0;
 	int type = DNS_TYPE_MX;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
@@ -163,7 +163,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	if (raw) {
 		add_assoc_long(*subarray, "type", type);
-		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (zend_str_size_uint) pRec->wDataLength, 1);
+		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (php_size_t) pRec->wDataLength, 1);
 		return;
 	}
 
@@ -223,7 +223,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				txt = ecalloc(txt_len * 2, 1);
 				txt_dst = txt;
 				for (i = 0; i < count; i++) {
-					zend_str_size_int len = strlen(data_txt->pStringArray[i]);
+					php_size_t len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
 					add_next_index_stringl(entries, data_txt->pStringArray[i], len, 1);
 					txt_dst += len;
@@ -348,7 +348,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	zend_str_size_int hostname_len;
+	php_size_t hostname_len;
 	php_int_t type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;

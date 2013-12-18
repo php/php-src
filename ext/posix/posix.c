@@ -834,7 +834,7 @@ PHP_FUNCTION(posix_getcwd)
 PHP_FUNCTION(posix_mkfifo)
 {
 	char *path;
-	zend_str_size_int path_len;
+	php_size_t path_len;
 	php_int_t mode;
 	int     result;
 	
@@ -863,7 +863,7 @@ PHP_FUNCTION(posix_mkfifo)
 PHP_FUNCTION(posix_mknod)
 {
 	char *path;
-	zend_str_size_int path_len;
+	php_size_t path_len;
 	php_int_t mode;
 	php_int_t major = 0, minor = 0;
 	int result;
@@ -948,7 +948,7 @@ int php_posix_group_to_array(struct group *g, zval *array_group) /* {{{ */
 PHP_FUNCTION(posix_access)
 {
 	php_int_t mode = 0;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	int ret;
 	char *filename, *path;
 
@@ -993,7 +993,7 @@ PHP_FUNCTION(posix_getgrnam)
 {
 	char *name;
 	struct group *g;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	struct group gbuf;
 	long buflen;
@@ -1112,7 +1112,7 @@ PHP_FUNCTION(posix_getpwnam)
 {
 	struct passwd *pw;
 	char *name;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	struct passwd pwbuf;
 	long buflen;
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(posix_initgroups)
 {
 	php_int_t basegid;
 	char *name;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si", &name, &name_len, &basegid) == FAILURE) {
 		RETURN_FALSE;

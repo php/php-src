@@ -30,6 +30,7 @@
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
+#include "php.h"
 
 #define SAPI_OPTION_NO_CHDIR 1
 #define SAPI_POST_BLOCK_SIZE 0x4000
@@ -50,7 +51,7 @@
 
 typedef struct {
 	char *header;
-	zend_str_size_uint header_len;
+	php_size_t header_len;
 } sapi_header_struct;
 
 
@@ -167,7 +168,7 @@ END_EXTERN_C()
  
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
-	zend_str_size_uint line_len;
+	php_size_t line_len;
 	zend_int_t response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
 
@@ -183,20 +184,20 @@ BEGIN_EXTERN_C()
 SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC);
 
 /* Deprecated functions. Use sapi_header_op instead. */
-SAPI_API int sapi_add_header_ex(char *header_line, zend_str_size_uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
+SAPI_API int sapi_add_header_ex(char *header_line, php_size_t header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC);
 #define sapi_add_header(a, b, c) sapi_add_header_ex((a),(b),(c),1 TSRMLS_CC)
 
 
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
-SAPI_API zend_str_size_int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
+SAPI_API php_size_t sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC);
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
 
 SAPI_API int sapi_flush(TSRMLS_D);
 SAPI_API zend_stat_t *sapi_get_stat(TSRMLS_D);
@@ -226,7 +227,7 @@ struct _sapi_module_struct {
 	int (*activate)(TSRMLS_D);
 	int (*deactivate)(TSRMLS_D);
 
-	zend_str_size_int (*ub_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
+	php_size_t (*ub_write)(const char *str, php_size_t str_length TSRMLS_DC);
 	void (*flush)(void *server_context TSRMLS_DC);
 	zend_stat_t *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
@@ -237,7 +238,7 @@ struct _sapi_module_struct {
 	int (*send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC);
 
-	zend_str_size_int (*read_post)(char *buffer, zend_str_size_uint count_bytes TSRMLS_DC);
+	php_size_t (*read_post)(char *buffer, php_size_t count_bytes TSRMLS_DC);
 	char *(*read_cookies)(TSRMLS_D);
 
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
@@ -264,7 +265,7 @@ struct _sapi_module_struct {
 	int (*get_target_uid)(uid_t * TSRMLS_DC);
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
 
-	unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC);
+	unsigned int (*input_filter)(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC);
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
@@ -298,7 +299,7 @@ struct _sapi_post_entry {
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
-#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC)
+#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC)
 
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);

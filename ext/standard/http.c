@@ -26,16 +26,16 @@
 
 /* {{{ php_url_encode_hash */
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-				const char *num_prefix, zend_str_size_int num_prefix_len,
-				const char *key_prefix, zend_str_size_int key_prefix_len,
-				const char *key_suffix, zend_str_size_int key_suffix_len,
+				const char *num_prefix, php_size_t num_prefix_len,
+				const char *key_prefix, php_size_t key_prefix_len,
+				const char *key_suffix, php_size_t key_suffix_len,
 			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
 {
 	char *key = NULL;
 	char *ekey, *newprefix, *p;
-	zend_str_size_int arg_sep_len, ekey_len, newprefix_len;
+	php_size_t arg_sep_len, ekey_len, newprefix_len;
 	int key_type;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 	zend_uint_t idx;
 	zval **zdata = NULL, *copyzval;
 
@@ -212,7 +212,7 @@ PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
 	char *prefix = NULL, *arg_sep=NULL;
-	zend_str_size_int arg_sep_len = 0, prefix_len = 0;
+	php_size_t arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
 	php_int_t enc_type = PHP_QUERY_RFC1738;
 

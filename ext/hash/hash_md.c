@@ -106,7 +106,7 @@ PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	zend_str_size_int arg_len;
+	php_size_t arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
@@ -135,13 +135,13 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	zend_str_size_int           arg_len;
+	php_size_t           arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
-	zend_str_size_int           n;
+	php_size_t           n;
 	php_stream    *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|b", &arg, &arg_len, &raw_output) == FAILURE) {
@@ -541,9 +541,9 @@ PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX * context)
    operation, processing another message block, and updating the
    context.
  */
-PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, zend_str_size_uint inputLen)
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX * context, const unsigned char *input, php_size_t inputLen)
 {
-	zend_str_size_uint i, index, partLen;
+	php_size_t i, index, partLen;
 
 	/* Compute number of bytes mod 64 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -654,7 +654,7 @@ static void MD2_Transform(PHP_MD2_CTX *context, const unsigned char *block)
 	}
 }
 
-PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, zend_str_size_uint len)
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *buf, php_size_t len)
 {
 	const unsigned char *p = buf, *e = buf + len;
 

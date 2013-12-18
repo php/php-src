@@ -136,7 +136,7 @@ PHP_FUNCTION(openlog)
 {
 	char *ident;
 	php_int_t option, facility;
-	zend_str_size_int ident_len;
+	php_size_t ident_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sii", &ident,
 							  &ident_len, &option, &facility) == FAILURE) {
@@ -177,7 +177,7 @@ PHP_FUNCTION(syslog)
 {
 	php_int_t priority;
 	char *message;
-	zend_str_size_int message_len;
+	php_size_t message_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS", &priority,
 							  &message, &message_len) == FAILURE) {

@@ -175,7 +175,7 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 PHP_FUNCTION(password_get_info)
 {
 	php_password_algo algo;
-	zend_str_size_int hash_len;
+	php_size_t hash_len;
 	char *hash, *algo_name;
 	zval *options;
 
@@ -218,7 +218,7 @@ PHP_FUNCTION(password_needs_rehash)
 {
 	php_int_t new_algo = 0;
 	php_password_algo algo;
-	zend_str_size_int hash_len;
+	php_size_t hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval **option_buffer;
@@ -273,7 +273,7 @@ Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
 	int status = 0, i;
-	zend_str_size_int password_len, hash_len;
+	php_size_t password_len, hash_len;
 	char *ret, *password, *hash;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &password, &password_len, &hash, &hash_len) == FAILURE) {
@@ -309,7 +309,7 @@ PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
 	php_int_t algo = 0;
-	zend_str_size_int password_len = 0, hash_len;
+	php_size_t password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval **option_buffer;
@@ -354,7 +354,7 @@ PHP_FUNCTION(password_hash)
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
-		zend_str_size_int buffer_len_int = 0;
+		php_size_t buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_STRING:

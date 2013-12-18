@@ -584,7 +584,7 @@ ftp_rmdir(ftpbuf_t *ftp, const char *dir)
 /* {{{ ftp_chmod
  */
 int
-ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const zend_str_size_int filename_len)
+ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const php_size_t filename_len)
 {
 	char *buffer;
 

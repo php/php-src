@@ -161,12 +161,12 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysql_handle_preparer */
-static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
 	char *nsql = NULL;
-	zend_str_size_int nsql_len = 0;
+	php_size_t nsql_len = 0;
 	int ret;
 	php_uint_t server_version;
 	
@@ -253,7 +253,7 @@ end:
 /* }}} */
 
 /* {{{ mysql_handle_doer */
-static php_int_t mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len TSRMLS_DC)
+static php_int_t mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_doer");
@@ -288,7 +288,7 @@ static php_int_t mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_siz
 /* }}} */
 
 /* {{{ pdo_mysql_last_insert_id */
-static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, zend_str_size_uint *len TSRMLS_DC)
+static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, php_size_t *len TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	char *id = php_pdo_int64_to_str(mysql_insert_id(H->server) TSRMLS_CC);
@@ -299,7 +299,7 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, zend_str
 /* }}} */
 
 /* {{{ mysql_handle_quoter */
-static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
+static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_quoter");
@@ -557,8 +557,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		;
 
 #if defined(PDO_USE_MYSQLND)
-	zend_str_size_int dbname_len = 0;
-	zend_str_size_int password_len = 0;
+	php_size_t dbname_len = 0;
+	php_size_t password_len = 0;
 #endif
 	PDO_DBG_ENTER("pdo_mysql_handle_factory");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);

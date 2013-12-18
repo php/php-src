@@ -50,7 +50,7 @@ grapheme_close_global_iterator( TSRMLS_D )
 
 /* XXX that's the same mess we have in substr(), revise it with care when int64 is integrated and get rid of this ugly casts */
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, zend_str_size_int str_len, php_int_t f, php_int_t l, int argc, char **sub_str, zend_str_size_int *sub_str_len)
+void grapheme_substr_ascii(char *str, php_size_t str_len, php_int_t f, php_int_t l, int argc, char **sub_str, php_size_t *sub_str_len)
 {
     *sub_str = NULL;
 
@@ -132,7 +132,7 @@ void grapheme_substr_ascii(char *str, zend_str_size_int str_len, php_int_t f, ph
 int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last TSRMLS_DC)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
-	zend_str_size_int uhaystack_len = 0, uneedle_len = 0;
+	php_size_t uhaystack_len = 0, uneedle_len = 0;
 	int32_t char_pos, ret_pos, offset_pos = 0;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
@@ -219,9 +219,9 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
-int grapheme_ascii_check(const unsigned char *day, zend_str_size_int len)
+int grapheme_ascii_check(const unsigned char *day, php_size_t len)
 {
-	zend_str_size_int i = 0;
+	php_size_t i = 0;
 
 	while ( i++ < len ) {
 		if ( *day++ > 0x7f ) {

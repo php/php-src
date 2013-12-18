@@ -55,9 +55,9 @@ void grapheme_register_constants( INIT_FUNC_ARGS )
 PHP_FUNCTION(grapheme_strlen)
 {
 	unsigned char* string;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 	UChar* ustring = NULL;
-	zend_str_size_int ustring_len = 0;
+	php_size_t ustring_len = 0;
 	int ret_len;
 	UErrorCode status;
 
@@ -108,7 +108,7 @@ PHP_FUNCTION(grapheme_strlen)
 PHP_FUNCTION(grapheme_strpos)
 {
 	unsigned char *haystack, *needle;
-	zend_str_size_int haystack_len, needle_len;
+	php_size_t haystack_len, needle_len;
 	unsigned char *found;
 	php_int_t loffset = 0;
 	int32_t offset = 0;
@@ -175,7 +175,7 @@ PHP_FUNCTION(grapheme_strpos)
 PHP_FUNCTION(grapheme_stripos)
 {
 	unsigned char *haystack, *needle, *haystack_dup, *needle_dup;
-	zend_str_size_int haystack_len, needle_len;
+	php_size_t haystack_len, needle_len;
 	unsigned char *found;
 	php_int_t loffset = 0;
 	int32_t offset = 0;
@@ -250,7 +250,7 @@ PHP_FUNCTION(grapheme_stripos)
 PHP_FUNCTION(grapheme_strrpos)
 {
 	unsigned char *haystack, *needle;
-	zend_str_size_int haystack_len, needle_len;
+	php_size_t haystack_len, needle_len;
 	php_int_t loffset = 0;
 	int32_t offset = 0;
 	int32_t ret_pos;
@@ -320,7 +320,7 @@ PHP_FUNCTION(grapheme_strrpos)
 PHP_FUNCTION(grapheme_strripos)
 {
 	unsigned char *haystack, *needle;
-	zend_str_size_int haystack_len, needle_len;
+	php_size_t haystack_len, needle_len;
 	php_int_t loffset = 0;
 	int32_t offset = 0;
 	int32_t ret_pos;
@@ -399,7 +399,7 @@ PHP_FUNCTION(grapheme_substr)
 {
 	unsigned char *str, *sub_str;
 	UChar *ustr;
-	zend_str_size_int str_len, sub_str_len, ustr_len;
+	php_size_t str_len, sub_str_len, ustr_len;
 	php_int_t lstart = 0, length = 0;
 	int32_t start = 0;
 	int iter_val;
@@ -612,7 +612,7 @@ PHP_FUNCTION(grapheme_substr)
 static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_case)
 {
 	unsigned char *haystack, *needle, *found;
-	zend_str_size_int haystack_len, needle_len;
+	php_size_t haystack_len, needle_len;
 	int ret_pos, uchar_pos;
 	zend_bool part = 0;
 
@@ -809,7 +809,7 @@ PHP_FUNCTION(grapheme_extract)
 {
 	unsigned char *str, *pstr;
 	UChar *ustr;
-	zend_str_size_int str_len, ustr_len;
+	php_size_t str_len, ustr_len;
 	php_int_t size; /* maximum number of grapheme clusters, bytes, or characters (based on extract_type) to return */
 	php_int_t lstart = 0; /* starting position in str in bytes */
 	int32_t start = 0;

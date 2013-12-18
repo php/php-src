@@ -81,7 +81,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	char **ep;
 #endif
 	char *p;
-	zend_str_size string_length, cnt, l, sizeenv=0, el_len;
+	php_size_t string_length, cnt, l, sizeenv=0, el_len;
 	zend_uint_t num_key;
 	HashTable *target_hash;
 	HashPosition pos;
@@ -430,7 +430,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	char *command, *cwd=NULL;
-	zend_str_size command_len, cwd_len = 0;
+	php_size_t command_len, cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;

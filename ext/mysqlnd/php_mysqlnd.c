@@ -49,7 +49,7 @@ mysqlnd_minfo_print_hash(zval *values)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&values_entry, &pos_values) == SUCCESS) {
 		char	*string_key;
-		zend_str_size_uint	string_key_len;
+		php_size_t	string_key_len;
 		php_uint_t	num_key;
 
 		zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &string_key, &string_key_len, &num_key, 0, &pos_values);

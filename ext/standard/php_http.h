@@ -25,9 +25,9 @@
 #include "php_smart_str.h"
 
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-				const char *num_prefix, zend_str_size_int num_prefix_len,
-				const char *key_prefix, zend_str_size_int key_prefix_len,
-				const char *key_suffix, zend_str_size_int key_suffix_len, 
+				const char *num_prefix, php_size_t num_prefix_len,
+				const char *key_prefix, php_size_t key_prefix_len,
+				const char *key_suffix, php_size_t key_suffix_len, 
 				zval *type, char *arg_sep, int enc_type TSRMLS_DC);
 #define php_url_encode_hash(ht, formstr)	php_url_encode_hash_ex((ht), (formstr), NULL, 0, NULL, 0, NULL, 0, NULL TSRMLS_CC)
 

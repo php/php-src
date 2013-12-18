@@ -27,7 +27,7 @@
 PHP_NAMED_FUNCTION(php_if_crc32)
 {
 	char *p;
-	zend_str_size_int len, nr;
+	php_size_t len, nr;
 	php_uint32 crcinit = 0;
 	register php_uint32 crc;
 

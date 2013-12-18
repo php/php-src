@@ -1142,7 +1142,7 @@ PHP_FUNCTION(odbc_prepare)
 {
 	zval *pv_conn;
 	char *query;
-	zend_str_size_int query_len;
+	php_size_t query_len;
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(odbc_exec)
 	php_int_t pv_flags;
 	char *query;
 	int numArgs;
-	zend_str_size_int query_len;
+	php_size_t query_len;
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
@@ -2195,7 +2195,7 @@ PHP_FUNCTION(odbc_result_all)
 	zval *pv_res;
 	char *pv_format = NULL;
 	int i;
-	zend_str_size_int pv_format_len = 0;
+	php_size_t pv_format_len = 0;
 	SQLSMALLINT sql_c_type;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
@@ -2431,7 +2431,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		char    dsnbuf[1024];
 		short   dsnbuflen;
 		char    *ldb = 0;
-		zend_str_size_int		ldb_len = 0;
+		php_size_t		ldb_len = 0;
 
 		if (strstr((char*)db, ";")) {
 			direct = 1;
@@ -2487,11 +2487,11 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *db, *uid, *pwd;
-	zend_str_size_int db_len, uid_len, pwd_len;
+	php_size_t db_len, uid_len, pwd_len;
 	php_int_t pv_opt = SQL_CUR_DEFAULT;
 	odbc_connection *db_conn;
 	char *hashed_details;
-	zend_str_size_int hashed_len;
+	php_size_t hashed_len;
 	php_int_t cur_opt;
 
 	/*  Now an optional 4th parameter specifying the cursor type
@@ -2863,7 +2863,7 @@ PHP_FUNCTION(odbc_field_num)
 {
 	char *fname;
 	int i, field_ind;
-	zend_str_size_int fname_len;
+	php_size_t fname_len;
 	odbc_result *result;
 	zval *pv_res;
 
@@ -3064,7 +3064,7 @@ PHP_FUNCTION(odbc_tables)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL, *type = NULL;
-	zend_str_size_int cat_len = 0, schema_len = 0, table_len = 0, type_len = 0;
+	php_size_t cat_len = 0, schema_len = 0, table_len = 0, type_len = 0;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|S!SSS", &pv_conn, &cat, &cat_len, &schema, &schema_len, 
@@ -3131,7 +3131,7 @@ PHP_FUNCTION(odbc_columns)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;
-	zend_str_size_int cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
+	php_size_t cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|S!SSS", &pv_conn, &cat, &cat_len, &schema, &schema_len,
@@ -3201,7 +3201,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema, *table, *column;
-	zend_str_size_int cat_len = 0, schema_len, table_len, column_len;
+	php_size_t cat_len = 0, schema_len, table_len, column_len;
 	RETCODE rc;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS!SSS", &pv_conn, &cat, &cat_len, &schema, &schema_len,
@@ -3265,7 +3265,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *pcat = NULL, *pschema, *ptable, *fcat, *fschema, *ftable;
-	zend_str_size_int pcat_len = 0, pschema_len, ptable_len, fcat_len, fschema_len, ftable_len;
+	php_size_t pcat_len = 0, pschema_len, ptable_len, fcat_len, fschema_len, ftable_len;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS!SSSSS", &pv_conn, &pcat, &pcat_len, &pschema, &pschema_len, 
@@ -3401,7 +3401,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL;
-	zend_str_size_int cat_len = 0, schema_len, table_len;
+	php_size_t cat_len = 0, schema_len, table_len;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS!SS", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
@@ -3462,7 +3462,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *proc = NULL, *col = NULL;
-	zend_str_size_int cat_len = 0, schema_len = 0, proc_len = 0, col_len = 0;
+	php_size_t cat_len = 0, schema_len = 0, proc_len = 0, col_len = 0;
 	RETCODE rc;
 	
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 5) {
@@ -3530,7 +3530,7 @@ PHP_FUNCTION(odbc_procedures)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *proc = NULL;
-	zend_str_size_int cat_len = 0, schema_len = 0, proc_len = 0;
+	php_size_t cat_len = 0, schema_len = 0, proc_len = 0;
 	RETCODE rc;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 4) {
@@ -3596,7 +3596,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *name = NULL;
-	zend_str_size_int cat_len = 0, schema_len, name_len;
+	php_size_t cat_len = 0, schema_len, name_len;
 	SQLUSMALLINT type, scope, nullable;
 	RETCODE rc;
 
@@ -3666,7 +3666,7 @@ PHP_FUNCTION(odbc_statistics)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema, *name;
-	zend_str_size_int cat_len = 0, schema_len, name_len;
+	php_size_t cat_len = 0, schema_len, name_len;
 	SQLUSMALLINT unique, reserved;
 	RETCODE rc;
 
@@ -3734,7 +3734,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL;
-	zend_str_size_int cat_len = 0, schema_len, table_len;
+	php_size_t cat_len = 0, schema_len, table_len;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS!SS", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {

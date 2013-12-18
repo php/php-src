@@ -79,7 +79,7 @@ static const unsigned char tolower_map[256] = {
 		zend_binary_strncasecmp
  */
 
-ZEND_API int zend_atoi(const char *str, zend_str_size_int str_len) /* {{{ */
+ZEND_API int zend_atoi(const char *str, zend_size_t str_len) /* {{{ */
 {
 	int retval;
 
@@ -107,7 +107,7 @@ ZEND_API int zend_atoi(const char *str, zend_str_size_int str_len) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_int_t zend_atol(const char *str, zend_str_size_int str_len) /* {{{ */
+ZEND_API zend_int_t zend_atol(const char *str, zend_size_t str_len) /* {{{ */
 {
 	zend_int_t retval;
 
@@ -135,7 +135,7 @@ ZEND_API zend_int_t zend_atol(const char *str, zend_str_size_int str_len) /* {{{
 }
 /* }}} */
 
-ZEND_API double zend_string_to_double(const char *number, zend_str_size_uint length) /* {{{ */
+ZEND_API double zend_string_to_double(const char *number, zend_size_t length) /* {{{ */
 {
 	double divisor = 10.0;
 	double result = 0.0;
@@ -1107,7 +1107,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 			ZVAL_LONG(result, ~zend_dval_to_lval(Z_DVAL_P(op1)));
 			return SUCCESS;
 		case IS_STRING: {
-			zend_str_size i;
+			zend_size_t i;
 			zval op1_copy = *op1;
 
 			Z_TYPE_P(result) = IS_STRING;
@@ -1135,7 +1135,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_str_size i, result_len;
+		zend_size_t i, result_len;
 
 		if (Z_STRSIZE_P(op1) >= Z_STRSIZE_P(op2)) {
 			longer = op1;
@@ -1182,7 +1182,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_str_size i, result_len;
+		zend_size_t i, result_len;
 
 		if (Z_STRSIZE_P(op1) >= Z_STRSIZE_P(op2)) {
 			longer = op1;
@@ -1229,7 +1229,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
 		char *result_str;
-		zend_str_size i, result_len;
+		zend_size_t i, result_len;
 
 		if (Z_STRSIZE_P(op1) >= Z_STRSIZE_P(op2)) {
 			longer = op1;
@@ -1311,7 +1311,7 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 /* must support result==op1 */
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
-	zend_str_size length = Z_STRSIZE_P(op1) + 1;
+	zend_size_t length = Z_STRSIZE_P(op1) + 1;
 	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
 
 	buf[length - 1] = (char) Z_LVAL_P(op2);
@@ -1324,7 +1324,7 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 /* must support result==op1 */
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
-	zend_str_size length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
+	zend_size_t length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
 	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
 
 	memcpy(buf + Z_STRSIZE_P(op1), Z_STRVAL_P(op2), Z_STRSIZE_P(op2));
@@ -1363,7 +1363,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		op2 = &op2_copy;
 	}
 	if (result==op1 && !IS_INTERNED(Z_STRVAL_P(op1))) {	/* special case, perform operations on result */
-		zend_str_size res_len = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
+		zend_size_t res_len = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
 
 		if (res_len < Z_STRSIZE_P(op1) || res_len < Z_STRSIZE_P(op2)) {
 			efree(Z_STRVAL_P(result));
@@ -1377,7 +1377,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		Z_STRVAL_P(result)[res_len]=0;
 		Z_STRSIZE_P(result) = res_len;
 	} else {
-		zend_str_size length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
+		zend_size_t length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
 		char *buf = (char *) emalloc(length + 1);
 
 		memcpy(buf, Z_STRVAL_P(op1), Z_STRSIZE_P(op1));
@@ -1822,7 +1822,7 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 static void increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
-	zend_str_size pos=Z_STRSIZE_P(str)-1;
+	zend_size_t pos=Z_STRSIZE_P(str)-1;
 	char *s=Z_STRVAL_P(str);
 	char *t;
 	int last=0; /* Shut up the compiler warning */
@@ -2041,7 +2041,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 /* }}} */
 #endif
 
-ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_str_size_uint length) /* {{{ */
+ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_size_t length) /* {{{ */
 {
 	register unsigned char *str = (unsigned char*)source;
 	register unsigned char *result = (unsigned char*)dest;
@@ -2056,13 +2056,13 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_str_si
 }
 /* }}} */
 
-ZEND_API char *zend_str_tolower_dup(const char *source, zend_str_size_uint length) /* {{{ */
+ZEND_API char *zend_str_tolower_dup(const char *source, zend_size_t length) /* {{{ */
 {
 	return zend_str_tolower_copy((char *)emalloc(length+1), source, length);
 }
 /* }}} */
 
-ZEND_API void zend_str_tolower(char *str, zend_str_size_uint length) /* {{{ */
+ZEND_API void zend_str_tolower(char *str, zend_size_t length) /* {{{ */
 {
 	register unsigned char *p = (unsigned char*)str;
 	register unsigned char *end = p + length;
@@ -2074,7 +2074,7 @@ ZEND_API void zend_str_tolower(char *str, zend_str_size_uint length) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2) /* {{{ */
 {
 	int retval;
 
@@ -2090,7 +2090,7 @@ ZEND_API int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const c
 }
 /* }}} */
 
-ZEND_API int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length) /* {{{ */
 {
 	int retval;
 
@@ -2106,10 +2106,10 @@ ZEND_API int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const 
 }
 /* }}} */
 
-ZEND_API int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcasecmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2) /* {{{ */
 {
-	zend_str_size len;
-	zend_str_size c1, c2;
+	zend_size_t len;
+	zend_size_t c1, c2;
 
 	if (s1 == s2) {
 		return 0;
@@ -2128,10 +2128,10 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, con
 }
 /* }}} */
 
-ZEND_API int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncasecmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length) /* {{{ */
 {
-	zend_str_size len;
-	zend_str_size c1, c2;
+	zend_size_t len;
+	zend_size_t c1, c2;
 
 	if (s1 == s2) {
 		return 0;
@@ -2149,10 +2149,10 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, co
 }
 /* }}} */
 
-ZEND_API int zend_binary_strcasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcasecmp_l(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2) /* {{{ */
 {
-	zend_str_size len;
-	zend_str_size c1, c2;
+	zend_size_t len;
+	zend_size_t c1, c2;
 
 	if (s1 == s2) {
 		return 0;
@@ -2171,10 +2171,10 @@ ZEND_API int zend_binary_strcasecmp_l(const char *s1, zend_str_size_uint len1, c
 }
 /* }}} */
 
-ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length) /* {{{ */
 {
-	zend_str_size len;
-	zend_str_size c1, c2;
+	zend_size_t len;
+	zend_size_t c1, c2;
 
 	if (s1 == s2) {
 		return 0;

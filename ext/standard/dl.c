@@ -54,7 +54,7 @@
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &filename, &filename_len) == FAILURE) {
 		return;
@@ -129,7 +129,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 		}
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
-		zend_str_size_int extension_dir_len = strlen(extension_dir);
+		php_size_t extension_dir_len = strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */

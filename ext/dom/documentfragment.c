@@ -124,7 +124,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	xmlNode *nodep;
 	dom_object *intern;
 	char *data = NULL;
-	zend_str_size_int data_len = 0;
+	php_size_t data_len = 0;
 	int err;
 	xmlNodePtr lst;
 

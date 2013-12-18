@@ -79,9 +79,9 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 		parse_namespace(type, &cptype, &ns);
 		nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			zend_str_size_int ns_len = xmlStrlen(nsptr->href);
-			zend_str_size_int type_len = strlen(cptype);
-			zend_str_size_int len = ns_len + type_len + 1;
+			php_size_t ns_len = xmlStrlen(nsptr->href);
+			php_size_t type_len = strlen(cptype);
+			php_size_t len = ns_len + type_len + 1;
 			char *nscat = emalloc(len + 1);
 
 			memcpy(nscat, nsptr->href, ns_len);
@@ -111,9 +111,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	zend_str_size_int ns_len = strlen(ns);
-	zend_str_size_int type_len = strlen(type);
-	zend_str_size_int len = ns_len + type_len + 1;
+	php_size_t ns_len = strlen(ns);
+	php_size_t type_len = strlen(type);
+	php_size_t len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
 	memcpy(nscat, ns, ns_len);
@@ -129,8 +129,8 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 	      memcmp(ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 		char *enc_nscat;
-		zend_str_size_int enc_ns_len;
-		zend_str_size_int enc_len;
+		php_size_t enc_ns_len;
+		php_size_t enc_len;
 
 		enc_ns_len = sizeof(XSD_NAMESPACE)-1;
 		enc_len = enc_ns_len + type_len + 1;
@@ -164,7 +164,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	return enc;
 }
 
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, zend_str_size_int len)
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, php_size_t len)
 {
 	encodePtr *enc;
 	TSRMLS_FETCH();
@@ -1028,7 +1028,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						} else {
 */
 						{
-							zend_str_size_int len = strlen(function->functionName);
+							php_size_t len = strlen(function->functionName);
 							function->responseName = emalloc(len + sizeof("Response"));
 							memcpy(function->responseName, function->functionName, len);
 							memcpy(function->responseName+len, "Response", sizeof("Response"));
@@ -1132,7 +1132,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					{
 						char *tmp = estrdup(function->functionName);
-						zend_str_size_int  len = strlen(tmp);
+						php_size_t  len = strlen(tmp);
 
 						if (zend_hash_add(&ctx.sdl->functions, php_strtolower(tmp, len), len+1, &function, sizeof(sdlFunctionPtr), NULL) != SUCCESS) {
 							zend_hash_next_index_insert(&ctx.sdl->functions, &function, sizeof(sdlFunctionPtr), NULL);
@@ -1418,16 +1418,16 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	enc->to_zval = sdl_guess_convert_zval;
 
 	if (enc->details.sdl_type == NULL) {
-		zend_str_size_int ns_len = strlen(enc->details.ns);
-		zend_str_size_int type_len = strlen(enc->details.type_str);
+		php_size_t ns_len = strlen(enc->details.ns);
+		php_size_t type_len = strlen(enc->details.type_str);
 
 		if (((ns_len == sizeof(SOAP_1_1_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1) == 0) ||
 		     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 			char *enc_nscat;
-			zend_str_size_int enc_ns_len;
-			zend_str_size_int enc_len;
+			php_size_t enc_ns_len;
+			php_size_t enc_len;
 			encodePtr real_enc;
 
 			enc_ns_len = sizeof(XSD_NAMESPACE)-1;
@@ -1800,7 +1800,7 @@ static void sdl_serialize_string(const char *str, smart_str *out)
 static void sdl_serialize_key(HashTable *ht, smart_str *out)
 {
 	char *key;
-	zend_str_size_uint  key_len;
+	php_size_t  key_len;
 	php_uint_t index;
 
 	if (zend_hash_get_current_key_ex(ht, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
@@ -2444,7 +2444,7 @@ static HashTable* make_persistent_sdl_function_headers(HashTable *headers, HashT
 	sdlTypePtr *ptype;
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 
 	pheaders = malloc(sizeof(HashTable));
 	zend_hash_init(pheaders, zend_hash_num_elements(headers), NULL, delete_header_persistent, 1);
@@ -2512,7 +2512,7 @@ static HashTable* make_persistent_sdl_parameters(HashTable *params, HashTable *p
 	encodePtr *penc;
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 
 	pparams = malloc(sizeof(HashTable));
 	zend_hash_init(pparams, zend_hash_num_elements(params), NULL, delete_parameter_persistent, 1);
@@ -2559,7 +2559,7 @@ static HashTable* make_persistent_sdl_function_faults(sdlFunctionPtr func, HashT
 	sdlFaultPtr  *tmp, pfault;
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 
 	pfaults = malloc(sizeof(HashTable));
 	zend_hash_init(pfaults, zend_hash_num_elements(faults), NULL, delete_fault_persistent, 1);
@@ -2608,7 +2608,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 	sdlAttributePtr pattr;
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 
 	pattr = malloc(sizeof(sdlAttribute));
 	memset(pattr, 0, sizeof(sdlAttribute));
@@ -2720,7 +2720,7 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 {
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 	sdlTypePtr ptype = NULL;
 
 	ptype = malloc(sizeof(sdlType));
@@ -2954,7 +2954,7 @@ static sdlPtr make_persistent_sdl(sdlPtr sdl TSRMLS_DC)
 	HashTable bp_types, bp_encoders;
 	php_uint_t index;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 
 	zend_hash_init(&bp_types, 0, NULL, NULL, 0);
 	zend_hash_init(&bp_encoders, 0, NULL, NULL, 0);
@@ -3191,7 +3191,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
 	char* old_error_code = SOAP_GLOBAL(error_code);
-	zend_str_size_int uri_len = 0;
+	php_size_t uri_len = 0;
 	php_stream_context *context=NULL;
 	zval **tmp, **proxy_host, **proxy_port, *orig_context = NULL, *new_context = NULL;
 	smart_str headers = {0};
@@ -3227,10 +3227,10 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 		char md5str[33];
 		PHP_MD5_CTX context;
 		unsigned char digest[16];
-		zend_str_size_int len = strlen(SOAP_GLOBAL(cache_dir));
+		php_size_t len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
 		char *user = php_get_current_user(TSRMLS_C);
-		zend_str_size_int user_len = user ? strlen(user) + 1 : 0;
+		php_size_t user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
 		PHP_MD5Init(&context);
@@ -3377,7 +3377,7 @@ cache_in_memory:
 				HashPosition pos;
 				time_t latest = t;
 				char *key = NULL;
-				zend_str_size_uint key_len;
+				php_size_t key_len;
 				php_uint_t idx;
 
 				for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(mem_cache), &pos);

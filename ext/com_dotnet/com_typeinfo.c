@@ -234,7 +234,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	ITypeLib **TLp;
 	ITypeLib *TL;
 	char *name_dup;
-	zend_str_size_int l;
+	php_size_t l;
 
 	l = strlen(search_string);
 
@@ -438,7 +438,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	int i;
 	OLECHAR *olename;
 	char *ansiname = NULL;
-	zend_str_size_uint ansinamelen;
+	php_size_t ansinamelen;
 	int ret = 0;
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
@@ -492,7 +492,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 				if (printdef) {
 					int j;
 					char *funcdesc;
-					zend_str_size_uint funcdesclen;
+					php_size_t funcdesclen;
 					UINT cnames = 0;
 					BSTR *names;
 

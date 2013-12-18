@@ -291,7 +291,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	zval **regex,			/* Regular expression */
 		**array = NULL;		/* Optional register array */
 	char *findin;		/* String to apply expression to */
-	zend_str_size_int findin_len;
+	php_size_t findin_len;
 	regex_t re;
 	regmatch_t *subs;
 	int err, match_len, string_len;
@@ -555,7 +555,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *string;
 	char *replace;
 	char *ret;
-	zend_str_size_int arg_string_len;
+	php_size_t arg_string_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZS", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
 		return;
@@ -632,7 +632,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	regex_t re;
 	regmatch_t subs[1];
 	char *spliton, *str, *strp, *endp;
-	zend_str_size_int spliton_len, str_len;
+	php_size_t spliton_len, str_len;
 	int err, size, copts = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
@@ -731,7 +731,7 @@ PHP_FUNCTION(spliti)
 PHP_EREG_API PHP_FUNCTION(sql_regcase)
 {
 	char *string, *tmp;
-	zend_str_size_int string_len;
+	php_size_t string_len;
 	unsigned char c;
 	register int i, j;
 

@@ -321,7 +321,7 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval **object, const char *name, zend_str_size_int len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, const char *name, php_size_t len, const zend_literal *key TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
@@ -343,7 +343,7 @@ static zend_class_entry *saproxy_class_entry_get(const zval *object TSRMLS_DC)
 	return php_com_saproxy_class_entry;
 }
 
-static int saproxy_class_name_get(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC)
+static int saproxy_class_name_get(const zval *object, const char **class_name, php_size_t *class_name_len, int parent TSRMLS_DC)
 {
 	*class_name = estrndup(php_com_saproxy_class_entry->name, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;

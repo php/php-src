@@ -96,7 +96,7 @@ PHP_METHOD(sqlite3, open)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *filename, *encryption_key, *fullpath;
-	zend_str_size_int filename_len, encryption_key_len = 0;
+	php_size_t filename_len, encryption_key_len = 0;
 	php_int_t flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
 	zend_error_handling error_handling;
 
@@ -211,7 +211,7 @@ PHP_METHOD(sqlite3, exec)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *sql, *errtext = NULL;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
@@ -337,7 +337,7 @@ PHP_METHOD(sqlite3, loadExtension)
 	zval *object = getThis();
 	char *extension, *lib_path, *extension_dir, *errtext = NULL;
 	char fullpath[MAXPATHLEN];
-	zend_str_size_int extension_len, extension_dir_len;
+	php_size_t extension_len, extension_dir_len;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
@@ -425,7 +425,7 @@ PHP_METHOD(sqlite3, changes)
 PHP_METHOD(sqlite3, escapeString)
 {
 	char *sql, *ret;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &sql, &sql_len)) {
 		return;
@@ -451,7 +451,7 @@ PHP_METHOD(sqlite3, prepare)
 	php_sqlite3_stmt *stmt_obj;
 	zval *object = getThis();
 	char *sql;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 	int errcode;
 	php_sqlite3_free_list *free_item;
 
@@ -506,7 +506,7 @@ PHP_METHOD(sqlite3, query)
 	zval *object = getThis();
 	zval *stmt = NULL;
 	char *sql, *errtext = NULL;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 	int return_code;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -622,7 +622,7 @@ PHP_METHOD(sqlite3, querySingle)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *sql, *errtext = NULL;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 	int return_code;
 	zend_bool entire_row = 0;
 	sqlite3_stmt *stmt;
@@ -939,7 +939,7 @@ PHP_METHOD(sqlite3, createFunction)
 	zval *object = getThis();
 	php_sqlite3_func *func;
 	char *sql_func, *callback_name;
-	zend_str_size_int sql_func_len;
+	php_size_t sql_func_len;
 	zval *callback_func;
 	php_int_t sql_func_num_args = -1;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -989,7 +989,7 @@ PHP_METHOD(sqlite3, createAggregate)
 	zval *object = getThis();
 	php_sqlite3_func *func;
 	char *sql_func, *callback_name;
-	zend_str_size_int sql_func_len;
+	php_size_t sql_func_len;
 	zval *step_callback, *fini_callback;
 	php_int_t sql_func_num_args = -1;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -1049,7 +1049,7 @@ PHP_METHOD(sqlite3, createCollation)
 	zval *object = getThis();
 	php_sqlite3_collation *collation;
 	char *collation_name, *callback_name;
-	zend_str_size_int collation_name_len;
+	php_size_t collation_name_len;
 	zval *callback_func;
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 
@@ -1231,7 +1231,7 @@ PHP_METHOD(sqlite3, openBlob)
 	php_sqlite3_db_object *db_obj;
 	zval *object = getThis();
 	char *table, *column, *dbname = "main";
-	zend_str_size_int table_len, column_len, dbname_len;
+	php_size_t table_len, column_len, dbname_len;
 	php_int_t rowid, flags = 0;
 	sqlite3_blob *blob = NULL;
 	php_stream_sqlite3_data *sqlite3_stream;
@@ -1534,7 +1534,7 @@ PHP_METHOD(sqlite3stmt, execute)
 				case SQLITE_BLOB:
 				{
 					php_stream *stream = NULL;
-					zend_str_size_int blength;
+					php_size_t blength;
 					char *buffer = NULL;
 					if (Z_TYPE_P(param->parameter) == IS_RESOURCE) {
 						php_stream_from_zval_no_verify(stream, &param->parameter);
@@ -1620,7 +1620,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 	zval *object = getThis();
 	zval *db_zval;
 	char *sql;
-	zend_str_size_int sql_len;
+	php_size_t sql_len;
 	int errcode;
 	zend_error_handling error_handling;
 	php_sqlite3_free_list *free_item;

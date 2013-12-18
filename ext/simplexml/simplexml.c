@@ -1246,7 +1246,7 @@ SXE_METHOD(xpath)
 	php_sxe_object    *sxe;
 	zval              *value;
 	char              *query;
-	zend_str_size_int                query_len;
+	php_size_t                query_len;
 	int                i;
 	int                nsnbr = 0;
 	xmlNsPtr          *ns = NULL;
@@ -1332,7 +1332,7 @@ SXE_METHOD(xpath)
 SXE_METHOD(registerXPathNamespace)
 {
 	php_sxe_object    *sxe;
-	zend_str_size_int prefix_len, ns_uri_len;
+	php_size_t prefix_len, ns_uri_len;
 	char *prefix, *ns_uri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
@@ -1360,9 +1360,9 @@ SXE_METHOD(asXML)
 	xmlNodePtr          node;
 	xmlOutputBufferPtr  outbuf;
 	xmlChar            *strval;
-	zend_str_size_int                 strval_len;
+	php_size_t                 strval_len;
 	char               *filename;
-	zend_str_size_int                 filename_len;
+	php_size_t                 filename_len;
 
 	if (ZEND_NUM_ARGS() > 1) {
 		RETURN_FALSE;
@@ -1554,7 +1554,7 @@ SXE_METHOD(children)
 {
 	php_sxe_object *sxe;
 	char           *nsprefix = NULL;
-	zend_str_size_int             nsprefix_len = 0;
+	php_size_t             nsprefix_len = 0;
 	xmlNodePtr      node;
 	zend_bool       isprefix = 0;
 
@@ -1603,7 +1603,7 @@ SXE_METHOD(attributes)
 {
 	php_sxe_object *sxe;
 	char           *nsprefix = NULL;
-	zend_str_size_int             nsprefix_len = 0;
+	php_size_t             nsprefix_len = 0;
 	xmlNodePtr      node;
 	zend_bool       isprefix = 0;
 
@@ -1630,7 +1630,7 @@ SXE_METHOD(addChild)
 {
 	php_sxe_object *sxe;
 	char           *qname, *value = NULL, *nsuri = NULL;
-	zend_str_size_int             qname_len, value_len = 0, nsuri_len = 0;
+	php_size_t             qname_len, value_len = 0, nsuri_len = 0;
 	xmlNodePtr      node, newnode;
 	xmlNsPtr        nsptr = NULL;
 	xmlChar        *localname, *prefix = NULL;
@@ -1695,7 +1695,7 @@ SXE_METHOD(addAttribute)
 {
 	php_sxe_object *sxe;
 	char           *qname, *value = NULL, *nsuri = NULL;
-	zend_str_size_int             qname_len, value_len = 0, nsuri_len = 0;
+	php_size_t             qname_len, value_len = 0, nsuri_len = 0;
 	xmlNodePtr      node;
 	xmlAttrPtr      attrp = NULL;
 	xmlNsPtr        nsptr = NULL;
@@ -2158,10 +2158,10 @@ PHP_FUNCTION(simplexml_load_file)
 {
 	php_sxe_object *sxe;
 	char           *filename;
-	zend_str_size_int             filename_len;
+	php_size_t             filename_len;
 	xmlDocPtr       docp;
 	char           *ns = NULL;
-	zend_str_size_int             ns_len = 0;
+	php_size_t             ns_len = 0;
 	php_int_t            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
@@ -2196,10 +2196,10 @@ PHP_FUNCTION(simplexml_load_string)
 {
 	php_sxe_object *sxe;
 	char           *data;
-	zend_str_size_int             data_len;
+	php_size_t             data_len;
 	xmlDocPtr       docp;
 	char           *ns = NULL;
-	zend_str_size_int             ns_len = 0;
+	php_size_t             ns_len = 0;
 	php_int_t            options = 0;
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
@@ -2234,7 +2234,7 @@ SXE_METHOD(__construct)
 {
 	php_sxe_object *sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 	char           *data, *ns = NULL;
-	zend_str_size_int             data_len, ns_len = 0;
+	php_size_t             data_len, ns_len = 0;
 	xmlDocPtr       docp;
 	php_int_t            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;

@@ -146,7 +146,7 @@ PHP_FUNCTION(recode_string)
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
 	size_t r_len = 0, r_alen = 0;
-	zend_str_size_int req_len, str_len;
+	php_size_t req_len, str_len;
 	char *req, *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &req, &req_len, &str, &str_len) == FAILURE) {
@@ -187,7 +187,7 @@ PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
 	char *req;
-	zend_str_size_int req_len;
+	php_size_t req_len;
 	zval *input, *output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;

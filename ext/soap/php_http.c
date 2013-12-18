@@ -25,8 +25,8 @@
 #include "ext/standard/php_rand.h"
 
 static char *get_http_header_value(char *headers, char *type);
-static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, zend_str_size_int *out_size TSRMLS_DC);
-static int get_http_headers(php_stream *socketd,char **response, zend_str_size_int *out_size TSRMLS_DC);
+static int get_http_body(php_stream *socketd, int close, char *headers,  char **response, php_size_t *out_size TSRMLS_DC);
+static int get_http_headers(php_stream *socketd,char **response, php_size_t *out_size TSRMLS_DC);
 
 #define smart_str_append_const(str, const) \
 	smart_str_appendl(str,const,sizeof(const)-1)
@@ -38,7 +38,7 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login"), (void **)&login) == SUCCESS) {
 		unsigned char* buf;
-		zend_str_size_int len;
+		php_size_t len;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRSIZE_PP(login));
@@ -66,7 +66,7 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login"), (void **)&login) == SUCCESS &&
 			!zend_hash_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest"))) {
 		unsigned char* buf;
-		zend_str_size_int len;
+		php_size_t len;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRSIZE_PP(login));
@@ -239,7 +239,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	if (stream && *use_proxy && use_ssl) {
 		smart_str soap_headers = {0};
 		char *http_headers;
-		zend_str_size_int http_header_size;
+		php_size_t http_header_size;
 
 		smart_str_append_const(&soap_headers, "CONNECT ");
 		smart_str_appends(&soap_headers, phpurl->host);
@@ -314,8 +314,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 static int in_domain(const char *host, const char *domain)
 {
   if (domain[0] == '.') {
-    zend_str_size_int l1 = strlen(host);
-    zend_str_size_int l2 = strlen(domain);
+    php_size_t l1 = strlen(host);
+    php_size_t l2 = strlen(domain);
     if (l1 > l2) {
     	return strcmp(host+l1-l2,domain) == 0;
     } else {
@@ -328,12 +328,12 @@ static int in_domain(const char *host, const char *domain)
 
 int make_http_soap_request(zval  *this_ptr,
                            char  *buf,
-                           zend_str_size_int    buf_size,
+                           php_size_t    buf_size,
                            char  *location,
                            char  *soapaction,
                            php_int_t    soap_version,
                            char **buffer,
-                           zend_str_size_int   *buffer_len TSRMLS_DC)
+                           php_size_t   *buffer_len TSRMLS_DC)
 {
 	char *request;
 	smart_str soap_headers = {0};
@@ -345,7 +345,7 @@ int make_http_soap_request(zval  *this_ptr,
 	int use_proxy = 0;
 	int use_ssl;
 	char *http_headers, *http_body, *content_type, *http_version, *cookie_itt;
-	zend_str_size_int http_header_size, http_body_size;
+	php_size_t http_header_size, http_body_size;
 	int http_close;
 	char *connection;
 	int http_1_1;
@@ -780,7 +780,7 @@ try_again:
 				}
 			} else {
 				unsigned char* buf;
-				zend_str_size_int len;
+				php_size_t len;
 
 				smart_str auth = {0};
 				smart_str_appendl(&auth, Z_STRVAL_PP(login), Z_STRSIZE_PP(login));
@@ -808,7 +808,7 @@ try_again:
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) == SUCCESS) {
 			zval **data;
 			char *key;
-			zend_str_size_uint key_len;
+			php_size_t key_len;
 			int i, n;
 
 			has_cookies = 1;
@@ -1360,11 +1360,11 @@ static char *get_http_header_value(char *headers, char *type)
 	return NULL;
 }
 
-static int get_http_body(php_stream *stream, int close, char *headers,  char **response, zend_str_size_int *out_size TSRMLS_DC)
+static int get_http_body(php_stream *stream, int close, char *headers,  char **response, php_size_t *out_size TSRMLS_DC)
 {
 	char *header, *http_buf = NULL;
 	int header_close = close, header_chunked = 0;
-	zend_str_size_int header_length = 0, http_buf_size = 0;
+	php_size_t header_length = 0, http_buf_size = 0;
 
 	if (!close) {
 		header = get_http_header_value(headers, "Connection: ");
@@ -1398,12 +1398,12 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		done = FALSE;
 
 		while (!done) {
-			zend_str_size_int buf_size = 0;
+			php_size_t buf_size = 0;
 
 			php_stream_gets(stream, headerbuf, sizeof(headerbuf));
 			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
-					zend_str_size_int len_size = 0;
+					php_size_t len_size = 0;
 
 					if (http_buf_size + buf_size + 1 < 0) {
 						efree(http_buf);
@@ -1412,7 +1412,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 					http_buf = erealloc(http_buf, http_buf_size + buf_size + 1);
 
 					while (len_size < buf_size) {
-						zend_str_size_int len_read = php_stream_read(stream, http_buf + http_buf_size, buf_size - len_size);
+						php_size_t len_read = php_stream_read(stream, http_buf + http_buf_size, buf_size - len_size);
 						if (len_read == 0) {
 							/* Error or EOF */
 							done = TRUE;
@@ -1470,7 +1470,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		}
 		http_buf = safe_emalloc(1, header_length, 1);
 		while (http_buf_size < header_length) {
-			zend_str_size_int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
+			php_size_t len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
 			if (len_read == 0) {
 				break;
 			}
@@ -1478,7 +1478,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		}
 	} else if (header_close) {
 		do {
-			zend_str_size_int len_read;
+			php_size_t len_read;
 			http_buf = erealloc(http_buf, http_buf_size + 4096 + 1);
 			len_read = php_stream_read(stream, http_buf + http_buf_size, 4096);
 			if (len_read > 0) {
@@ -1495,7 +1495,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	return TRUE;
 }
 
-static int get_http_headers(php_stream *stream, char **response, zend_str_size_int *out_size TSRMLS_DC)
+static int get_http_headers(php_stream *stream, char **response, php_size_t *out_size TSRMLS_DC)
 {
 	int done = FALSE;
 	smart_str tmp_response = {0};

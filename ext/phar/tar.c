@@ -19,7 +19,7 @@
 
 #include "phar_internal.h"
 
-static php_uint32 phar_tar_number(char *buf, zend_str_size_int len) /* {{{ */
+static php_uint32 phar_tar_number(char *buf, php_size_t len) /* {{{ */
 {
 	php_uint32 num = 0;
 	int i = 0;
@@ -62,10 +62,10 @@ static php_uint32 phar_tar_number(char *buf, zend_str_size_int len) /* {{{ */
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static int phar_tar_octal(char *buf, php_uint32 val, zend_str_size_int len) /* {{{ */
+static int phar_tar_octal(char *buf, php_uint32 val, php_size_t len) /* {{{ */
 {
 	char *p = buf;
-	zend_str_size_int s = len;
+	php_size_t s = len;
 
 	p += len;		/* Start at the end and work backwards. */
 	while (s-- > 0) {
@@ -84,7 +84,7 @@ static int phar_tar_octal(char *buf, php_uint32 val, zend_str_size_int len) /* {
 }
 /* }}} */
 
-static php_uint32 phar_tar_checksum(char *buf, zend_str_size_int len) /* {{{ */
+static php_uint32 phar_tar_checksum(char *buf, php_size_t len) /* {{{ */
 {
 	php_uint32 sum = 0;
 	char *end = buf + len;
@@ -121,7 +121,7 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 }
 /* }}} */
 
-int phar_open_or_create_tar(char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_tar(char *fname, php_size_t fname_len, char *alias, php_size_t alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error TSRMLS_CC);
@@ -192,7 +192,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, zend_str_size_int fname_len, char *alias, zend_str_size_int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, php_size_t fname_len, char *alias, php_size_t alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -863,7 +863,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 
 static int phar_tar_setupmetadata(void *pDest, void *argument TSRMLS_DC) /* {{{ */
 {
-	zend_str_size_int lookfor_len;
+	php_size_t lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
 	char *lookfor, **error = i->error;
 	phar_entry_info *entry = (phar_entry_info *)pDest, *metadata, newentry = {0};
@@ -923,7 +923,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, php_int_t len, int 
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
 	php_stream *oldfile, *newfile, *stubfile;
 	int closeoldfile, free_user_stub;
-	zend_str_size_int signature_length;
+	php_size_t signature_length;
 	struct _phar_pass_tar_info pass;
 	char *buf, *signature, *tmp, sigbuf[8];
 	char halt_stub[] = "__HALT_COMPILER();";

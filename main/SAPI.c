@@ -184,7 +184,7 @@ SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 static void sapi_read_post_data(TSRMLS_D)
 {
 	sapi_post_entry *post_entry;
-	zend_str_size_uint content_type_length = strlen(SG(request_info).content_type);
+	php_size_t content_type_length = strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
@@ -241,9 +241,9 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 }
 
-SAPI_API zend_str_size_int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
+SAPI_API php_size_t sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
 {
-	zend_str_size_int read_bytes;
+	php_size_t read_bytes;
 
 	if (!sapi_module.read_post) {
 		return -1;
@@ -301,10 +301,10 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-static inline char *get_default_content_type(zend_str_size_uint prefix_len, zend_str_size_uint *len TSRMLS_DC)
+static inline char *get_default_content_type(php_size_t prefix_len, php_size_t *len TSRMLS_DC)
 {
 	char *mimetype, *charset, *content_type;
-	zend_str_size_uint mimetype_len, charset_len;
+	php_size_t mimetype_len, charset_len;
 
 	if (SG(default_mimetype)) {
 		mimetype = SG(default_mimetype);
@@ -343,7 +343,7 @@ static inline char *get_default_content_type(zend_str_size_uint prefix_len, zend
 
 SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
 {
-	zend_str_size_uint len;
+	php_size_t len;
 
 	return get_default_content_type(0, &len TSRMLS_CC);
 }
@@ -351,7 +351,7 @@ SAPI_API char *sapi_get_default_content_type(TSRMLS_D)
 
 SAPI_API void sapi_get_default_content_type_header(sapi_header_struct *default_header TSRMLS_DC)
 {
-    zend_str_size_uint len;
+    php_size_t len;
 
 	default_header->header = get_default_content_type(sizeof("Content-type: ")-1, &len TSRMLS_CC);
 	default_header->header_len = len;
@@ -595,7 +595,7 @@ static void sapi_update_response_code(int ncode TSRMLS_DC)
  * since zend_llist_del_element only remove one matched item once,
  * we should remove them by ourself
  */
-static void sapi_remove_header(zend_llist *l, char *name, zend_str_size_uint len) {
+static void sapi_remove_header(zend_llist *l, char *name, php_size_t len) {
 	sapi_header_struct *header;
 	zend_llist_element *next;
 	zend_llist_element *current=l->head;
@@ -623,7 +623,7 @@ static void sapi_remove_header(zend_llist *l, char *name, zend_str_size_uint len
 	}
 }
 
-SAPI_API int sapi_add_header_ex(char *header_line, zend_str_size_uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
+SAPI_API int sapi_add_header_ex(char *header_line, php_size_t header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
 {
 	sapi_header_line ctr = {0};
 	int r;
@@ -862,7 +862,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
 		sapi_header_struct default_header;
-	    zend_str_size_uint len;
+	    php_size_t len;
 
 		SG(sapi_headers).mimetype = get_default_content_type(0, &len TSRMLS_CC);
 		default_header.header_len = sizeof("Content-type: ") - 1 + len;
@@ -979,7 +979,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
 {
 	if (SG(sapi_started) && EG(in_execution)) {
 		return FAILURE;

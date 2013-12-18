@@ -259,7 +259,7 @@ PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
 	char *str, *salt_in = NULL, *result = NULL;
-	zend_str_size_int str_len, salt_in_len = 0;
+	php_size_t str_len, salt_in_len = 0;
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption

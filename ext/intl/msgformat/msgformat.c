@@ -30,9 +30,9 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
-	zend_str_size_int         locale_len = 0, pattern_len = 0;
+	php_size_t         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
-	zend_str_size_int         spattern_len = 0;
+	php_size_t         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
 	intl_error_reset( NULL TSRMLS_CC );

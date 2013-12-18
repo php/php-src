@@ -208,7 +208,7 @@ PHP_FUNCTION(bcadd)
 	char *left, *right;
 	php_int_t scale_param = 0;
 	bc_num first, second, result;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale = BCG(bc_precision);
 	int argc = ZEND_NUM_ARGS();
 
@@ -246,7 +246,7 @@ PHP_FUNCTION(bcadd)
 PHP_FUNCTION(bcsub)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale_param = 0;
 	bc_num first, second, result;
 	php_int_t scale = BCG(bc_precision);
@@ -286,7 +286,7 @@ PHP_FUNCTION(bcsub)
 PHP_FUNCTION(bcmul)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale_param = 0;
 	bc_num first, second, result;
 	php_int_t scale = BCG(bc_precision);
@@ -326,7 +326,7 @@ PHP_FUNCTION(bcmul)
 PHP_FUNCTION(bcdiv)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale_param = 0;
 	bc_num first, second, result;
 	php_int_t scale = BCG(bc_precision);
@@ -372,7 +372,7 @@ PHP_FUNCTION(bcdiv)
 PHP_FUNCTION(bcmod)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	bc_num first, second, result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &left, &left_len, &right, &right_len) == FAILURE) {
@@ -408,7 +408,7 @@ PHP_FUNCTION(bcmod)
 PHP_FUNCTION(bcpowmod)
 {
 	char *left, *right, *modulous;
-	zend_str_size_int left_len, right_len, modulous_len;
+	php_size_t left_len, right_len, modulous_len;
 	bc_num first, second, mod, result;
 	php_int_t scale = BCG(bc_precision);
 	int scale_int;
@@ -451,7 +451,7 @@ PHP_FUNCTION(bcpowmod)
 PHP_FUNCTION(bcpow)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale_param = 0;
 	bc_num first, second, result;
 	php_int_t scale = BCG(bc_precision);
@@ -491,7 +491,7 @@ PHP_FUNCTION(bcpow)
 PHP_FUNCTION(bcsqrt)
 {
 	char *left;
-	zend_str_size_int left_len;
+	php_size_t left_len;
 	php_int_t scale_param = 0;
 	bc_num result;
 	php_int_t scale = BCG(bc_precision);
@@ -529,7 +529,7 @@ PHP_FUNCTION(bcsqrt)
 PHP_FUNCTION(bccomp)
 {
 	char *left, *right;
-	zend_str_size_int left_len, right_len;
+	php_size_t left_len, right_len;
 	php_int_t scale_param = 0;
 	bc_num first, second;
 	php_int_t scale = BCG(bc_precision);

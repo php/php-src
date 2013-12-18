@@ -33,13 +33,13 @@ PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
-	zend_str_size_int              str1_len  = 0;
-	zend_str_size_int              str2_len  = 0;
+	php_size_t              str1_len  = 0;
+	php_size_t              str2_len  = 0;
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;
-	zend_str_size_int              ustr1_len = 0;
-	zend_str_size_int              ustr2_len = 0;
+	php_size_t              ustr1_len = 0;
+	php_size_t              ustr2_len = 0;
 
 	UCollationResult result;
 

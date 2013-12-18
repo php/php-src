@@ -469,7 +469,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			HashPosition pos;
 			zval **tmp;
 			char *type_name = NULL;
-			zend_str_size_uint type_len;
+			php_size_t type_len;
 			php_uint_t idx;
 
 			for (zend_hash_internal_pointer_reset_ex(SOAP_GLOBAL(class_map), &pos);
@@ -784,7 +784,7 @@ static zval *to_zval_base64(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 {
 	zval *ret;
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 
 	MAKE_STD_ZVAL(ret);
 	FIND_XML_NULL(data, ret);
@@ -863,7 +863,7 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 {
 	xmlNodePtr ret, text;
 	char *str;
-	zend_str_size_int new_len;
+	php_size_t new_len;
 
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, ret);
@@ -951,7 +951,7 @@ static xmlNodePtr to_xml_base64(encodeTypePtr type, zval *data, int style, xmlNo
 {
 	xmlNodePtr ret, text;
 	unsigned char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, ret);
@@ -2055,7 +2055,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				char *str_key;
 				php_uint_t index;
 				int key_type;
-				zend_str_size_uint str_key_len;
+				php_size_t str_key_len;
 
 				key_type = zend_hash_get_current_key_ex(prop, &str_key, &str_key_len, &index, FALSE, NULL);
 				zend_hash_get_current_data(prop, (void **)&zprop);
@@ -3228,7 +3228,7 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 		zval **el;
 		encodePtr enc = get_conversion(XSD_ANYXML);
 		char *name;
-		zend_str_size_uint name_len;
+		php_size_t name_len;
 		php_uint_t idx;
 
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);

@@ -258,7 +258,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const xmlChar *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, zend_str_size_int len);
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, php_size_t len);
 
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);

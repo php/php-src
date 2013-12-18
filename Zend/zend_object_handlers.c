@@ -359,12 +359,12 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, zend_str_size_int prop_info_name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, zend_size_t prop_info_name_len TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
-	zend_str_size prop_name_len;
+	zend_size_t prop_name_len;
 
 	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
 	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
@@ -914,7 +914,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
+static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_size_t function_name_strlen, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	if (!ce) {
 		return 0;
@@ -949,7 +949,7 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 }
 /* }}} */
 
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen TSRMLS_DC) /* {{{ */
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_size_t function_name_strlen TSRMLS_DC) /* {{{ */
 {
 	return zend_check_private_int(fbc, ce, function_name_strval, function_name_strlen, zend_hash_func(function_name_strval, function_name_strlen+1) TSRMLS_CC) != NULL;
 }
@@ -984,7 +984,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, const char *method_name, zend_str_size_int method_len) /* {{{ */
+static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, const char *method_name, zend_size_t method_len) /* {{{ */
 {
 	zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 	call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -1000,7 +1000,7 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 }
 /* }}} */
 
-static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, zend_size_t method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc;
 	zval *object = *object_ptr;
@@ -1142,7 +1142,7 @@ static inline union _zend_function *zend_get_user_callstatic_function(zend_class
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, zend_str_size_int function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, zend_size_t function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc = NULL;
 	char *lc_class_name, *lc_function_name = NULL;
@@ -1231,7 +1231,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 }
 /* }}} */
 
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, zend_str_size_int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, zend_size_t property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	zend_uint_t hash_value;
@@ -1288,7 +1288,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, zend_str_size_int property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, zend_size_t property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_error_noreturn(E_ERROR, "Attempt to unset static property %s::$%s", ce->name, property_name);
 	return 0;
@@ -1499,7 +1499,7 @@ zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
+int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_size_t *class_name_len, int parent TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zend_class_entry *ce;

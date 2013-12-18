@@ -22,7 +22,7 @@
 #include "php_soap.h"
 
 /* SOAP client calls this function to parse response from SOAP server */
-int parse_packet_soap(zval *this_ptr, char *buffer, zend_str_size_int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers TSRMLS_DC)
+int parse_packet_soap(zval *this_ptr, char *buffer, php_size_t buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers TSRMLS_DC)
 {
 	char* envelope_ns = NULL;
 	xmlDocPtr response;

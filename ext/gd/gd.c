@@ -1420,7 +1420,7 @@ PHP_GD_API int phpi_get_le_gd(void)
 PHP_FUNCTION(imageloadfont)
 {
 	char *file;
-	zend_str_size_int file_name;
+	php_size_t file_name;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int ind, body_size, n = 0, b;
 	zend_off_t body_size_check, i;
@@ -2350,7 +2350,7 @@ PHP_FUNCTION(imagecreatefromstring)
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)())
 {
 	char *file;
-	zend_str_size_int file_len;
+	php_size_t file_len;
 	php_int_t srcx, srcy, width, height;
 	gdImagePtr im = NULL;
 	php_stream *stream;
@@ -2557,7 +2557,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	zend_str_size_int file_len = 0;
+	php_size_t file_len = 0;
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
@@ -3505,7 +3505,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zval *IM;
 	php_int_t SIZE, X, Y, COL;
 	char *C;
-	zend_str_size_int C_len;
+	php_size_t C_len;
 	gdImagePtr im;
 	int ch = 0, col, x, y, size, i, l = 0;
 	unsigned char *str = NULL;
@@ -3796,9 +3796,9 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	zval *IM, *EXT = NULL;
 	gdImagePtr im=NULL;
 	php_int_t col = -1, x = -1, y = -1;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	int i, brect[8];
-	zend_str_size_int fontname_len;
+	php_size_t fontname_len;
 	double ptsize, angle;
 	char *str = NULL, *fontname = NULL;
 	char *error = NULL;
@@ -3914,7 +3914,7 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 PHP_FUNCTION(imagepsloadfont)
 {
 	char *file;
-	zend_str_size_int file_len;
+	php_size_t file_len;
 	int f_ind, *font;
 #ifdef PHP_WIN32
 	zend_stat_t st;
@@ -4025,7 +4025,7 @@ PHP_FUNCTION(imagepsencodefont)
 {
 	zval *fnt;
 	char *enc, **enc_vector;
-	zend_str_size_int enc_len;
+	php_size_t enc_len;
 	int *f_ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &fnt, &enc, &enc_len) == FAILURE) {
@@ -4123,7 +4123,7 @@ PHP_FUNCTION(imagepstext)
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSriiiii|iidi", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
@@ -4253,7 +4253,7 @@ PHP_FUNCTION(imagepsbbox)
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	per_char = 0;
 	int argc = ZEND_NUM_ARGS();
 	double angle = 0, sin_a = 0, cos_a = 0;
@@ -4427,7 +4427,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 {
 	char *f_org, *f_dest;
-	zend_str_size_int f_org_len, f_dest_len;
+	php_size_t f_org_len, f_dest_len;
 	php_int_t height, width, threshold;
 	gdImagePtr im_org, im_dest, im_tmp;
 	char *fn_org = NULL;

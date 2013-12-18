@@ -282,7 +282,7 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error
 
 /* Get the next client and their address (as a string) */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, zend_str_size_int *textaddrlen,
+		char **textaddr, php_size_t *textaddrlen,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
@@ -321,7 +321,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 }
 
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, zend_str_size_int *textaddrlen,
+		char **textaddr, php_size_t *textaddrlen,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC)
 {
@@ -394,13 +394,13 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
-PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, zend_str_size_size_t buflen,
-		long flags, void **addr, socklen_t *addrlen, char **textaddr, zend_str_size_int *textaddrlen
+PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, php_size_t buflen,
+		long flags, void **addr, socklen_t *addrlen, char **textaddr, php_size_t *textaddrlen
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
 	int ret = 0;
-	zend_str_size recvd_len = 0;
+	php_size_t recvd_len = 0;
 #if 0
 	int oob;
 
@@ -464,7 +464,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, zend_str_siz
 
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
-PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, zend_str_size_size_t buflen,
+PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, php_size_t buflen,
 		long flags, void *addr, socklen_t addrlen TSRMLS_DC)
 {
 	php_stream_xport_param param;

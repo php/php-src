@@ -446,7 +446,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	pcre_cache_entry *pce;
 	char *res;
 	zval *repl;
-	zend_str_size_int res_len;
+	php_size_t res_len;
 	int rep_cnt = 0;
 	TSRMLS_FETCH();
 

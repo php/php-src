@@ -244,7 +244,7 @@ ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC) /* {{{ */
 /* }}} */
 #endif
 
-ZEND_API int zend_alter_ini_entry(char *name, zend_str_size_uint name_length, char *new_value, zend_str_size_uint new_value_length, int modify_type, int stage) /* {{{ */
+ZEND_API int zend_alter_ini_entry(char *name, zend_size_t name_length, char *new_value, zend_size_t new_value_length, int modify_type, int stage) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -252,7 +252,7 @@ ZEND_API int zend_alter_ini_entry(char *name, zend_str_size_uint name_length, ch
 }
 /* }}} */
 
-ZEND_API int zend_alter_ini_entry_ex(char *name, zend_str_size_uint name_length, char *new_value, zend_str_size_uint new_value_length, int modify_type, int stage, int force_change TSRMLS_DC) /* {{{ */
+ZEND_API int zend_alter_ini_entry_ex(char *name, zend_size_t name_length, char *new_value, zend_size_t new_value_length, int modify_type, int stage, int force_change TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
@@ -306,7 +306,7 @@ ZEND_API int zend_alter_ini_entry_ex(char *name, zend_str_size_uint name_length,
 }
 /* }}} */
 
-ZEND_API int zend_restore_ini_entry(char *name, zend_str_size_uint name_length, int stage) /* {{{ */
+ZEND_API int zend_restore_ini_entry(char *name, zend_size_t name_length, int stage) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -328,7 +328,7 @@ ZEND_API int zend_restore_ini_entry(char *name, zend_str_size_uint name_length, 
 }
 /* }}} */
 
-ZEND_API int zend_ini_register_displayer(char *name, zend_str_size_uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
+ZEND_API int zend_ini_register_displayer(char *name, zend_size_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -345,7 +345,7 @@ ZEND_API int zend_ini_register_displayer(char *name, zend_str_size_uint name_len
  * Data retrieval
  */
 
-ZEND_API zend_int_t zend_ini_long(char *name, zend_str_size_uint name_length, int orig) /* {{{ */
+ZEND_API zend_int_t zend_ini_long(char *name, zend_size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -362,7 +362,7 @@ ZEND_API zend_int_t zend_ini_long(char *name, zend_str_size_uint name_length, in
 }
 /* }}} */
 
-ZEND_API double zend_ini_double(char *name, zend_str_size_uint name_length, int orig) /* {{{ */
+ZEND_API double zend_ini_double(char *name, zend_size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -379,7 +379,7 @@ ZEND_API double zend_ini_double(char *name, zend_str_size_uint name_length, int 
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(char *name, zend_str_size_uint name_length, int orig, zend_bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(char *name, zend_size_t name_length, int orig, zend_bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();
@@ -403,7 +403,7 @@ ZEND_API char *zend_ini_string_ex(char *name, zend_str_size_uint name_length, in
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(char *name, zend_str_size_uint name_length, int orig) /* {{{ */
+ZEND_API char *zend_ini_string(char *name, zend_size_t name_length, int orig) /* {{{ */
 {
 	zend_bool exists = 1;
 	char *return_value;
@@ -425,7 +425,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 		ini_entry->displayer(ini_entry, type);
 	} else {
 		char *display_string;
-		zend_str_size_uint display_string_length;
+		zend_size_t display_string_length;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value) {

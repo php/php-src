@@ -22,7 +22,7 @@
 
 #include "phar_internal.h"
 
-phar_path_check_result phar_path_check(char **s, zend_str_size_int *len, const char **error)
+phar_path_check_result phar_path_check(char **s, php_size_t *len, const char **error)
 {
 	const unsigned char *p = (const unsigned char*)*s;
 	const unsigned char *m;

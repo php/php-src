@@ -63,7 +63,7 @@ TODO:
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	zend_str_size_int link_len;
+	php_size_t link_len;
 	char target[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &link, &link_len) == FAILURE) {
@@ -87,7 +87,7 @@ PHP_FUNCTION(readlink)
 PHP_FUNCTION(linkinfo)
 {
 	char *link;
-	zend_str_size_int link_len;
+	php_size_t link_len;
 	php_stat_t sb;
 	int ret;
 
@@ -110,7 +110,7 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
-	zend_str_size_int topath_len, frompath_len;
+	php_size_t topath_len, frompath_len;
 	BOOLEAN ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
@@ -190,7 +190,7 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;
-	zend_str_size_int topath_len, frompath_len;
+	php_size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];

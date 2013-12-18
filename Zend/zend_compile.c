@@ -132,10 +132,10 @@ static void zend_destroy_property_info_internal(zend_property_info *property_inf
 }
 /* }}} */
 
-static void build_runtime_defined_function_key(zval *result, const char *name, zend_str_size_int name_length TSRMLS_DC) /* {{{ */
+static void build_runtime_defined_function_key(zval *result, const char *name, zend_size_t name_length TSRMLS_DC) /* {{{ */
 {
 	char char_pos_buf[32];
-	zend_str_size char_pos_len;
+	zend_size_t char_pos_len;
 	const char *filename;
 
 	char_pos_len = zend_sprintf(char_pos_buf, "%p", LANG_SCNG(yy_text));
@@ -246,7 +246,7 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 ZEND_API char *zend_set_compiled_filename(const char *new_compiled_filename TSRMLS_DC) /* {{{ */
 {
 	char **pp, *p;
-	zend_str_size length = strlen(new_compiled_filename);
+	zend_size_t length = strlen(new_compiled_filename);
 
 	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp) == SUCCESS) {
 		CG(compiled_filename) = *pp;
@@ -271,7 +271,7 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
+ZEND_API zend_size_t zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
 {
 	return CG(zend_lineno);
 }
@@ -289,7 +289,7 @@ static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 }
 /* }}} */
 
-static int lookup_cv(zend_op_array *op_array, char* name, zend_str_size_int name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
+static int lookup_cv(zend_op_array *op_array, char* name, zend_size_t name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
 {
 	int i = 0;
 	zend_uint_t hash_value = hash ? hash : zend_inline_hash_func(name, name_len+1);
@@ -403,7 +403,7 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 	int ret;
 	char *lc_name;
 	const char *ns_separator;
-	zend_str_size lc_len;
+	zend_size_t lc_len;
 	zval c;
 	int lc_literal;
 
@@ -440,7 +440,7 @@ int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_D
 {
 	int ret;
 	char *lc_name;
-	zend_str_size lc_len;
+	zend_size_t lc_len;
 	zval c;
 	int lc_literal;
 
@@ -475,7 +475,7 @@ int zend_add_const_name_literal(zend_op_array *op_array, const zval *zv, int unq
 	int ret, tmp_literal;
 	char *name, *tmp_name;
 	const char *ns_separator;
-	zend_str_size name_len, ns_len;
+	zend_size_t name_len, ns_len;
 	zval c;
 
 	if (op_array->last_literal > 0 &&
@@ -1529,8 +1529,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 {
 	zend_op_array op_array;
 	char *name = Z_STRVAL(function_name->u.constant);
-	zend_str_size_int name_len = Z_STRSIZE(function_name->u.constant);
-	zend_str_size_int function_begin_line = function_token->u.op.opline_num;
+	zend_size_t name_len = Z_STRSIZE(function_name->u.constant);
+	zend_size_t function_begin_line = function_token->u.op.opline_num;
 	zend_uint fn_flags;
 	const char *lcname;
 	zend_bool orig_interactive;
@@ -1814,7 +1814,7 @@ void zend_do_handle_exception(TSRMLS_D) /* {{{ */
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* {{{ */
 {
 	char lcname[16];
-	zend_str_size name_len;
+	zend_size_t name_len;
 
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
@@ -2096,7 +2096,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	znode tmp;
-	zend_str_size len;
+	zend_size_t len;
 	zval **ns;
 	char *lookup_name, *compound = memchr(Z_STRVAL(element_name->u.constant), '\\', Z_STRSIZE(element_name->u.constant));
 
@@ -2230,7 +2230,7 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 	char *lcname;
 	zval **ns;
 	znode tmp;
-	zend_str_size len;
+	zend_size_t len;
 
 	compound = memchr(Z_STRVAL(class_name->u.constant), '\\', Z_STRSIZE(class_name->u.constant));
 	if (compound) {
@@ -2451,7 +2451,7 @@ void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC) /* {{{ */
 {
-	zend_str_size length;
+	zend_size_t length;
 
 	if (!result) {
 		result = prefix;
@@ -3216,7 +3216,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 		if (fe_arg_info->class_name) {
 			const char *fe_class_name, *proto_class_name;
-			zend_str_size fe_class_name_len, proto_class_name_len;
+			zend_size_t fe_class_name_len, proto_class_name_len;
 
 			if (!strcasecmp(fe_arg_info->class_name, "parent") && proto->common.scope) {
 				fe_class_name = proto->common.scope->name;
@@ -3288,7 +3288,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{{ */
 {
 	char *offset, *buf;
-	zend_str_size length = 1024;
+	zend_size_t length = 1024;
 
 	offset = buf = (char *)emalloc(length * sizeof(char));
 	if (fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) {
@@ -3319,7 +3319,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 		for (i = 0; i < fptr->common.num_args;) {
 			if (arg_info->class_name) {
 				const char *class_name;
-				zend_str_size class_name_len;
+				zend_size_t class_name_len;
 				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope ) {
 					class_name = fptr->common.scope->name;
 					class_name_len = fptr->common.scope->name_length;
@@ -3335,7 +3335,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				offset += class_name_len;
 				*(offset++) = ' ';
 			} else if (arg_info->type_hint) {
-				zend_str_size type_name_len;
+				zend_size_t type_name_len;
 				char *type_name = zend_get_type_by_const(arg_info->type_hint);
 				type_name_len = strlen(type_name);
 				REALLOC_BUF_IF_EXCEED(buf, offset, length, type_name_len);
@@ -3889,7 +3889,7 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 }
 /* }}} */
 
-static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, zend_str_size_uint mname_len, zend_function* fe TSRMLS_DC) /* {{{ */
+static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, zend_size_t mname_len, zend_function* fe TSRMLS_DC) /* {{{ */
 {
 	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
@@ -3930,7 +3930,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, zend
 }
 /* }}} */
 
-static void zend_add_trait_method(zend_class_entry *ce, const char *name, const char *arKey, zend_str_size_uint nKeyLength, zend_function *fn, HashTable **overriden TSRMLS_DC) /* {{{ */
+static void zend_add_trait_method(zend_class_entry *ce, const char *name, const char *arKey, zend_size_t nKeyLength, zend_function *fn, HashTable **overriden TSRMLS_DC) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
 	zend_uint_t h = zend_hash_func(arKey, nKeyLength);
@@ -4027,7 +4027,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	zend_trait_alias  *alias, **alias_ptr;
 	HashTable         *exclude_table;
 	char              *lcname;
-	zend_str_size      fnname_len;
+	zend_size_t      fnname_len;
 	zend_function      fn_copy;
 	void              *dummy;
 
@@ -4165,7 +4165,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j]) {
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
-					zend_str_size name_length = strlen(class_name);
+					zend_size_t name_length = strlen(class_name);
 
 					if (!(cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name);
@@ -4231,7 +4231,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 			j = 0;
 			while (precedences[i]->exclude_from_classes[j]) {
 				if (precedences[i]->exclude_from_classes[j] == trait) {
-					zend_str_size lcname_len = precedences[i]->trait_method->mname_len;
+					zend_size_t lcname_len = precedences[i]->trait_method->mname_len;
 					char *lcname = zend_str_tolower_dup(precedences[i]->trait_method->method_name, lcname_len);
 
 					if (zend_hash_add(exclude_table, lcname, lcname_len, NULL, 0, NULL) == FAILURE) {
@@ -4280,7 +4280,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, zend_str_size_int prop_name_length, zend_uint_t prop_hash, zend_class_entry *coliding_ce) /* {{{ */
+static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, zend_size_t prop_name_length, zend_uint_t prop_hash, zend_class_entry *coliding_ce) /* {{{ */
 {
 	size_t i;
 
@@ -4303,7 +4303,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zend_property_info *coliding_prop;
 	zval compare_result;
 	const char* prop_name;
-	zend_str_size   prop_name_length;
+	zend_size_t   prop_name_length;
 	zend_uint_t prop_hash;
 	const char* class_name_unused;
 	zend_bool not_compatible;
@@ -5262,10 +5262,10 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_mangle_property_name(char **dest, zend_str_size_int *dest_length, const char *src1, zend_str_size_int src1_length, const char *src2, zend_str_size_int src2_length, int internal) /* {{{ */
+ZEND_API void zend_mangle_property_name(char **dest, zend_size_t *dest_length, const char *src1, zend_size_t src1_length, const char *src2, zend_size_t src2_length, int internal) /* {{{ */
 {
 	char *prop_name;
-	zend_str_size_int prop_name_length;
+	zend_size_t prop_name_length;
 
 	prop_name_length = 1 + src1_length + 1 + src2_length;
 	prop_name = pemalloc(prop_name_length + 1, internal);
@@ -5278,17 +5278,17 @@ ZEND_API void zend_mangle_property_name(char **dest, zend_str_size_int *dest_len
 }
 /* }}} */
 
-static zend_str_size_int zend_strnlen(const char* s, zend_str_size_int maxlen) /* {{{ */
+static zend_size_t zend_strnlen(const char* s, zend_size_t maxlen) /* {{{ */
 {
-	zend_str_size_int len = 0;
+	zend_size_t len = 0;
 	while (*s++ && maxlen--) len++;
 	return len;
 }
 /* }}} */
 
-ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, zend_str_size_int len, const char **class_name, const char **prop_name, zend_str_size_int *prop_len) /* {{{ */
+ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, zend_size_t len, const char **class_name, const char **prop_name, zend_size_t *prop_len) /* {{{ */
 {
-	zend_str_size class_name_len;
+	zend_size_t class_name_len;
 
 	*class_name = NULL;
 
@@ -5331,7 +5331,7 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 	zval *property;
 	zend_property_info *existing_property_info;
 	char *comment = NULL;
-	zend_str_size comment_len = 0;
+	zend_size_t comment_len = 0;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -5483,7 +5483,7 @@ void zend_do_halt_compiler_register(TSRMLS_D) /* {{{ */
 {
 	char *name, *cfilename;
 	char haltoff[] = "__COMPILER_HALT_OFFSET__";
-	zend_str_size len, clen;
+	zend_size_t len, clen;
 
 	if (CG(has_bracketed_namespaces) && CG(in_namespace)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope");
@@ -6751,7 +6751,7 @@ void zend_do_ticks(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
+zend_bool zend_is_auto_global_quick(const char *name, zend_size_t name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
 
@@ -6765,13 +6765,13 @@ zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_le
 }
 /* }}} */
 
-zend_bool zend_is_auto_global(const char *name, zend_str_size_uint name_len TSRMLS_DC) /* {{{ */
+zend_bool zend_is_auto_global(const char *name, zend_size_t name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_is_auto_global_quick(name, name_len, zend_hash_func(name, name_len+1) TSRMLS_CC);
 }
 /* }}} */
 
-int zend_register_auto_global(const char *name, zend_str_size_uint name_len, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
+int zend_register_auto_global(const char *name, zend_size_t name_len, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global auto_global;
 
@@ -6914,7 +6914,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 }
 /* }}} */
 
-int zend_get_class_fetch_type(const char *class_name, zend_str_size_uint class_name_len) /* {{{ */
+int zend_get_class_fetch_type(const char *class_name, zend_size_t class_name_len) /* {{{ */
 {
 	if ((class_name_len == sizeof("self")-1) &&
 		!strncasecmp(class_name, "self", sizeof("self")-1)) {
@@ -6931,7 +6931,7 @@ int zend_get_class_fetch_type(const char *class_name, zend_str_size_uint class_n
 }
 /* }}} */
 
-ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, zend_str_size_int* name_len) /* {{{ */
+ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, zend_size_t* name_len) /* {{{ */
 {
 	if (name_len) {
 		*name_len = op_array->vars[var].name_len;
@@ -7355,7 +7355,7 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 ZEND_API size_t zend_dirname(char *path, size_t len)
 {
 	register char *end = path + len - 1;
-	zend_str_size len_adjust = 0;
+	zend_size_t len_adjust = 0;
 
 #ifdef PHP_WIN32
 	/* Note that on Win32 CWD is per drive (heritage from CP/M).

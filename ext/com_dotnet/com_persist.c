@@ -370,7 +370,7 @@ CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
 	char *filename, *fullpath = NULL;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	zend_bool remember = TRUE;
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
@@ -433,7 +433,7 @@ CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
 	char *filename, *fullpath;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 	php_int_t flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();

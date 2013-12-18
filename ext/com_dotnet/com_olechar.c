@@ -30,7 +30,7 @@
 #include "php_com_dotnet_internal.h"
 
 
-PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, zend_str_size_uint string_len, php_int_t codepage TSRMLS_DC)
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, php_size_t string_len, php_int_t codepage TSRMLS_DC)
 {
 	OLECHAR *olestring = NULL;
 	DWORD flags = codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS;
@@ -65,7 +65,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, zend_str_s
 	return olestring;
 }
 
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, zend_str_size_uint *string_len, php_int_t codepage TSRMLS_DC)
+PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, php_size_t *string_len, php_int_t codepage TSRMLS_DC)
 {
 	char *string;
 	uint length = 0;

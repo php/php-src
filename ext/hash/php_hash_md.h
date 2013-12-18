@@ -67,7 +67,7 @@ typedef struct {
 
 PHP_HASH_API void make_digest(char *md5str, unsigned char *digest);
 PHP_HASH_API void PHP_MD5Init(PHP_MD5_CTX *);
-PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_MD5Update(PHP_MD5_CTX *, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_MD5Final(unsigned char[16], PHP_MD5_CTX *);
 
 PHP_NAMED_FUNCTION(php_if_md5);
@@ -82,7 +82,7 @@ typedef struct {
 } PHP_MD4_CTX;
 
 PHP_HASH_API void PHP_MD4Init(PHP_MD4_CTX *);
-PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_MD4Update(PHP_MD4_CTX *context, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_MD4Final(unsigned char[16], PHP_MD4_CTX *);
 
 /* MD2 context */
@@ -94,7 +94,7 @@ typedef struct {
 } PHP_MD2_CTX;
 
 PHP_HASH_API void PHP_MD2Init(PHP_MD2_CTX *context);
-PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, zend_str_size_uint);
+PHP_HASH_API void PHP_MD2Update(PHP_MD2_CTX *context, const unsigned char *, php_size_t);
 PHP_HASH_API void PHP_MD2Final(unsigned char[16], PHP_MD2_CTX *);
 
 #endif

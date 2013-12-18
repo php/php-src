@@ -83,9 +83,9 @@ PHP_FUNCTION(clearstatcache);
 #define getuid() 1
 #endif
 
-typedef zend_str_size php_stat_len;
+typedef php_size_t php_stat_len;
 
-PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, zend_str_size_int filename_len TSRMLS_DC);
+PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, php_size_t filename_len TSRMLS_DC);
 PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int type, zval *return_value TSRMLS_DC);
 
 /* Switches for various filestat functions: */

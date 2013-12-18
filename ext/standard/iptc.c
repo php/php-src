@@ -178,7 +178,7 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
-	zend_str_size_int iptcdata_len, jpeg_file_len;
+	php_size_t iptcdata_len, jpeg_file_len;
 	php_int_t spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
@@ -296,11 +296,11 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	zend_str_size_int inx = 0, len;
+	php_size_t inx = 0, len;
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	zval *values, **element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) != SUCCESS) {

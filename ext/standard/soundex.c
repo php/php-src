@@ -29,7 +29,7 @@
 PHP_FUNCTION(soundex)
 {
 	char	*str;
-	zend_str_size_int i, _small, str_len;
+	php_size_t i, _small, str_len;
 	int last, code;
 	char	soundex[4 + 1];
 

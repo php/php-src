@@ -248,13 +248,13 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC) /* {{{ */
+static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
 	ub4 prefetch;
 	char *nsql = NULL;
-	zend_str_size_int nsql_len = 0;
+	php_size_t nsql_len = 0;
 	int ret;
 
 #if HAVE_OCISTMTFETCH2
@@ -324,7 +324,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size sq
 }
 /* }}} */
 
-static php_int_t oci_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len TSRMLS_DC) /* {{{ */
+static php_int_t oci_handle_doer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -368,7 +368,7 @@ static php_int_t oci_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size 
 }
 /* }}} */
 
-static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC) /* {{{ */
+static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type paramtype  TSRMLS_DC) /* {{{ */
 {
 	int qcount = 0;
 	char const *cu, *l, *r;

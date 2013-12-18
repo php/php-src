@@ -225,7 +225,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
-	zend_str_size_int arg_len;
+	php_size_t arg_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
 		return;
@@ -261,7 +261,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	char		*arg;
 	php_int_t        offset;
 	int         length;
-	zend_str_size_int arg_len;
+	php_size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OiS", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
@@ -365,7 +365,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	char		*arg;
 	php_int_t        offset, count;
 	int         length;
-	zend_str_size_int arg_len;
+	php_size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OiiS", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {

@@ -45,9 +45,9 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 	UErrorCode* status )
 {
 	const char* old_val;
-	zend_str_size_int         old_val_len;
+	php_size_t         old_val_len;
 	UChar*      new_val      = NULL;
-	zend_str_size_int         new_val_len  = 0;
+	php_size_t         new_val_len  = 0;
 	zval**      hashData     = NULL;
 	zval*       znew_val     = NULL;
 
@@ -89,9 +89,9 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 	UErrorCode* status )
 {
 	const char* old_val;
-	zend_str_size_int         old_val_len;
+	php_size_t         old_val_len;
 	char*       new_val      = NULL;
-	zend_str_size_int         new_val_len  = 0;
+	php_size_t         new_val_len  = 0;
 	zval**      hashData     = NULL;
 	zval*       znew_val     = NULL;
 
@@ -191,7 +191,7 @@ zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval )
 {
 	zval* utf8_zval   = NULL;
 	char* str         = NULL;
-	zend_str_size_int   str_len     = 0;
+	php_size_t   str_len     = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* Convert to utf8 then. */
@@ -219,7 +219,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval )
 {
 	zval* zstr        = NULL;
 	UChar* ustr       = NULL;
-	zend_str_size_int    ustr_len   = 0;
+	php_size_t    ustr_len   = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* Convert the string to UTF-16. */
@@ -246,7 +246,7 @@ zval* collator_convert_object_to_string( zval* obj TSRMLS_DC )
 	zval* zstr        = NULL;
 	UErrorCode status = U_ZERO_ERROR;
 	UChar* ustr       = NULL;
-	zend_str_size_int    ustr_len   = 0;
+	php_size_t    ustr_len   = 0;
 
 	/* Bail out if it's not an object. */
 	if( Z_TYPE_P( obj ) != IS_OBJECT )

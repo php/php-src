@@ -128,7 +128,7 @@ static zend_always_inline zend_int_t zend_dval_to_lval(double d)
  * could not be represented as such due to overflow. It writes 1 to oflow_info
  * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
  */
-static inline zend_uchar is_numeric_string_ex(const char *str, zend_str_size_int length, zend_int_t *lval, double *dval, int allow_errors, int *oflow_info)
+static inline zend_uchar is_numeric_string_ex(const char *str, zend_size_t length, zend_int_t *lval, double *dval, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -265,24 +265,24 @@ process_double:
 	}
 }
 
-static inline zend_uchar is_numeric_string(const char *str, zend_str_size_int length, zend_int_t *lval, double *dval, int allow_errors) {
+static inline zend_uchar is_numeric_string(const char *str, zend_size_t length, zend_int_t *lval, double *dval, int allow_errors) {
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
 static inline const char *
-zend_memnstr(const char *haystack, const char *needle, zend_str_size_int needle_len, char *end)
+zend_memnstr(const char *haystack, const char *needle, zend_size_t needle_len, char *end)
 {
 	const char *p = haystack;
 	const char ne = needle[needle_len-1];
 	ptrdiff_t off_p;
-	zend_str_size_int off_s;
+	zend_size_t off_s;
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
 	}
 
 	off_p = end - haystack;
-	off_s = (off_p > 0) ? (zend_str_size_int)off_p : 0;
+	off_s = (off_p > 0) ? (zend_size_t)off_p : 0;
 	if (needle_len > off_s) {
 		return NULL;
 	}
@@ -306,7 +306,7 @@ zend_memnstr(const char *haystack, const char *needle, zend_str_size_int needle_
 	return NULL;
 }
 
-static inline const void *zend_memrchr(const void *s, int c, zend_str_size_size_t n)
+static inline const void *zend_memrchr(const void *s, int c, zend_size_t n)
 {
 	register const unsigned char *e;
 
@@ -345,7 +345,7 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 #define convert_to_cstring(op) if ((op)->type != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if ((op)->type != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
-ZEND_API double zend_string_to_double(const char *number, zend_str_size_uint length);
+ZEND_API double zend_string_to_double(const char *number, zend_size_t length);
 
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -357,27 +357,27 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSR
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 #endif
 
-ZEND_API void zend_str_tolower(char *str, zend_str_size_uint length);
-ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_str_size_uint length);
-ZEND_API char *zend_str_tolower_dup(const char *source, zend_str_size_uint length);
+ZEND_API void zend_str_tolower(char *str, zend_size_t length);
+ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_size_t length);
+ZEND_API char *zend_str_tolower_dup(const char *source, zend_size_t length);
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
-ZEND_API int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
-ZEND_API int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
-ZEND_API int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
-ZEND_API int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
-ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
+ZEND_API int zend_binary_strcmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2);
+ZEND_API int zend_binary_strncmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length);
+ZEND_API int zend_binary_strcasecmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2);
+ZEND_API int zend_binary_strncasecmp(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_size_t len1, const char *s2, zend_size_t len2, zend_size_t length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
 ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC);
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC);
 
-ZEND_API int zend_atoi(const char *str, zend_str_size_int str_len);
-ZEND_API zend_int_t zend_atol(const char *str, zend_str_size_int str_len);
+ZEND_API int zend_atoi(const char *str, zend_size_t str_len);
+ZEND_API zend_int_t zend_atol(const char *str, zend_size_t str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()

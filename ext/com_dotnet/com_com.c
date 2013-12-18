@@ -37,7 +37,7 @@ PHP_FUNCTION(com_create_instance)
 	php_com_dotnet_object *obj;
 	char *module_name, *typelib_name = NULL, *server_name = NULL;
 	char *user_name = NULL, *domain_name = NULL, *password = NULL;
-	zend_str_size_int module_name_len, typelib_name_len, server_name_len,
+	php_size_t module_name_len, typelib_name_len, server_name_len,
 		user_name_len, domain_name_len, password_len;
 	OLECHAR *moniker;
 	CLSID clsid;
@@ -288,7 +288,7 @@ PHP_FUNCTION(com_get_active_object)
 {
 	CLSID clsid;
 	char *module_name;
-	zend_str_size_int module_name_len;
+	php_size_t module_name_len;
 	php_int_t code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
@@ -349,7 +349,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 	if (silent == 0 && FAILED(hr)) {
 		char *source = NULL, *desc = NULL, *msg = NULL;
-		zend_str_size_int source_len, desc_len;
+		php_size_t source_len, desc_len;
 
 		switch (hr) {
 			case DISP_E_EXCEPTION:
@@ -416,7 +416,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 
 /* map an ID to a name */
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		zend_str_size_int namelen, DISPID *dispid TSRMLS_DC)
+		php_size_t namelen, DISPID *dispid TSRMLS_DC)
 {
 	OLECHAR *olename;
 	HRESULT hr;
@@ -461,7 +461,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 }
 
 /* the core of COM */
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, zend_str_size_int namelen,
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, php_size_t namelen,
 		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC)
 {
 	DISPID dispid, altdispid;
@@ -629,7 +629,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
 }
 
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, zend_str_size_int namelen,
+int php_com_do_invoke(php_com_dotnet_object *obj, char *name, php_size_t namelen,
 		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC)
 {
 	DISPID dispid;
@@ -742,7 +742,7 @@ PHP_FUNCTION(com_print_typeinfo)
 	zval *arg1;
 	char *ifacename = NULL;
 	char *typelibname = NULL;
-	zend_str_size_int ifacelen;
+	php_size_t ifacelen;
 	zend_bool wantsink = 0;
 	php_com_dotnet_object *obj = NULL;
 	ITypeInfo *typeinfo;
@@ -805,7 +805,7 @@ PHP_FUNCTION(com_message_pump)
 PHP_FUNCTION(com_load_typelib)
 {
 	char *name;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	ITypeLib *pTL = NULL;
 	zend_bool cs = TRUE;
 	php_int_t codepage = COMG(code_page);

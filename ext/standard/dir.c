@@ -214,7 +214,7 @@ PHP_MINIT_FUNCTION(dir)
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	char *dirname;
-	zend_str_size dir_len;
+	php_size_t dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
@@ -293,7 +293,7 @@ PHP_FUNCTION(chroot)
 {
 	char *str;
 	int ret;
-	zend_str_size str_len;
+	php_size_t str_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
@@ -325,7 +325,7 @@ PHP_FUNCTION(chdir)
 {
 	char *str;
 	int ret;
-	zend_str_size str_len;
+	php_size_t str_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
@@ -424,14 +424,14 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
-	zend_str_size_int cwd_skip = 0;
+	php_size_t cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
 	char *pattern = NULL;
-	zend_str_size pattern_len;
+	php_size_t pattern_len;
 	php_int_t flags = 0;
 	glob_t globbuf;
 	int n;
@@ -554,7 +554,7 @@ no_results:
 PHP_FUNCTION(scandir)
 {
 	char *dirn;
-	zend_str_size dirn_len;
+	php_size_t dirn_len;
 	php_int_t flags = 0;
 	char **namelist;
 	int n, i;

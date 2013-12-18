@@ -66,7 +66,7 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int php_filter_parse_int(const char *str, zend_str_size_uint str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_int(const char *str, php_size_t str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
 	php_int_t ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
@@ -118,7 +118,7 @@ static int php_filter_parse_int(const char *str, zend_str_size_uint str_len, php
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, zend_str_size_uint str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_octal(const char *str, php_size_t str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
 	php_uint_t ctx_value = 0;
 	const char *end = str + str_len;
 
@@ -141,7 +141,7 @@ static int php_filter_parse_octal(const char *str, zend_str_size_uint str_len, p
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, zend_str_size_uint str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_hex(const char *str, php_size_t str_len, php_int_t *ret TSRMLS_DC) { /* {{{ */
 	php_uint_t ctx_value = 0;
 	const char *end = str + str_len;
 	php_uint_t n;
@@ -238,7 +238,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *str = Z_STRVAL_P(value);
-	zend_str_size_int len = Z_STRSIZE_P(value);
+	php_size_t len = Z_STRSIZE_P(value);
 	int ret;
 
 	PHP_FILTER_TRIM_DEFAULT_EX(str, len, 0);
@@ -413,7 +413,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval **option_val;
 	char  *regexp;
-	zend_str_size_int regexp_len;
+	php_size_t regexp_len;
 	php_int_t   option_flags;
 	int    regexp_set, option_flags_set;
 
@@ -449,7 +449,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
-	zend_str_size_int old_len = Z_STRSIZE_P(value);
+	php_size_t old_len = Z_STRSIZE_P(value);
 	
 	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
 
@@ -555,7 +555,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4(char *str, zend_str_size_int str_len, int *ip) /* {{{ */
+static int _php_filter_validate_ipv4(char *str, php_size_t str_len, int *ip) /* {{{ */
 {
 	const char *end = str + str_len;
 	int num, m;
@@ -590,7 +590,7 @@ static int _php_filter_validate_ipv4(char *str, zend_str_size_int str_len, int *
 }
 /* }}} */
 
-static int _php_filter_validate_ipv6(char *str, zend_str_size_int str_len TSRMLS_DC) /* {{{ */
+static int _php_filter_validate_ipv6(char *str, php_size_t str_len TSRMLS_DC) /* {{{ */
 {
 	int compressed = 0;
 	int blocks = 0;
@@ -783,9 +783,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *input = Z_STRVAL_P(value);
-	zend_str_size_int input_len = Z_STRSIZE_P(value);
+	php_size_t input_len = Z_STRSIZE_P(value);
 	int tokens, length, i, offset, exp_separator_set;
-	zend_str_size_int exp_separator_len;
+	php_size_t exp_separator_len;
 	char separator;
 	char *exp_separator;
 	php_int_t ret = 0;

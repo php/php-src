@@ -80,9 +80,9 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char	*bundlename;
-	zend_str_size_int			bundlename_len = 0;
+	php_size_t			bundlename_len = 0;
 	const char	*locale;
-	zend_str_size_int			locale_len = 0;
+	php_size_t			locale_len = 0;
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
@@ -312,7 +312,7 @@ ZEND_END_ARG_INFO()
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
-	zend_str_size_int    bundlename_len = 0;
+	php_size_t    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
 	UEnumeration *icuenum;

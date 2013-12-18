@@ -288,11 +288,11 @@ PHP_MINFO_FUNCTION(ldap)
 PHP_FUNCTION(ldap_connect)
 {
 	char *host = NULL;
-	zend_str_size_int hostlen;
+	php_size_t hostlen;
 	php_int_t port = 389; /* Default port */
 #ifdef HAVE_ORALDAP
 	char *wallet = NULL, *walletpasswd = NULL;
-	zend_str_size_int walletlen = 0, walletpasswdlen = 0;
+	php_size_t walletlen = 0, walletpasswdlen = 0;
 	php_int_t authmode = GSLC_SSL_NO_AUTH;
 	int ssl=0;
 #endif
@@ -388,7 +388,7 @@ PHP_FUNCTION(ldap_bind)
 {
 	zval *link;
 	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
-	zend_str_size_int ldap_bind_dnlen, ldap_bind_pwlen;
+	php_size_t ldap_bind_dnlen, ldap_bind_pwlen;
 	ldap_linkdata *ld;
 	int rc;
 
@@ -505,7 +505,7 @@ PHP_FUNCTION(ldap_sasl_bind)
 	char *sasl_authz_id = NULL;
 	char *sasl_authc_id = NULL;
 	char *props = NULL;
-	zend_str_size_int rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
+	php_size_t rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|SSSSSSS", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
@@ -1144,7 +1144,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	char *attr;
 	struct berval **ldap_value_len;
 	int i, num_values;
-	zend_str_size_int attr_len;
+	php_size_t attr_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrS", &link, &result_entry, &attr, &attr_len) != SUCCESS) {
 		return;
@@ -1208,7 +1208,7 @@ PHP_FUNCTION(ldap_explode_dn)
 	php_int_t with_attrib;
 	char *dn, **ldap_value;
 	int i, count;
-	zend_str_size_int dn_len;
+	php_size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si", &dn, &dn_len, &with_attrib) != SUCCESS) {
 		return;
@@ -1239,7 +1239,7 @@ PHP_FUNCTION(ldap_explode_dn)
 PHP_FUNCTION(ldap_dn2ufn)
 {
 	char *dn, *ufn;
-	zend_str_size_int dn_len;
+	php_size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &dn, &dn_len) != SUCCESS) {
 		return;
@@ -1270,7 +1270,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	char *dn;
 	LDAPMod **ldap_mods;
 	int i, j, num_attribs, num_values;
-	zend_str_size_int dn_len;
+	php_size_t dn_len;
 	int *num_berval;
 	char *attribute;
 	php_uint_t index;
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(ldap_delete)
 	ldap_linkdata *ld;
 	char *dn;
 	int rc;
-	zend_str_size_int dn_len;
+	php_size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &link, &dn, &dn_len) != SUCCESS) {
 		return;
@@ -1499,7 +1499,7 @@ PHP_FUNCTION(ldap_compare)
 {
 	zval *link;
 	char *dn, *attr, *value;
-	zend_str_size_int dn_len, attr_len, value_len;
+	php_size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
 	int errno;
 
@@ -1533,7 +1533,7 @@ PHP_FUNCTION(ldap_sort)
 	zval *link, *result;
 	ldap_linkdata *ld;
 	char *sortfilter;
-	zend_str_size_int sflen;
+	php_size_t sflen;
 	zend_rsrc_list_entry *le;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrS", &link, &result, &sortfilter, &sflen) != SUCCESS) {
@@ -2000,7 +2000,7 @@ PHP_FUNCTION(ldap_rename)
 	ldap_linkdata *ld;
 	int rc;
 	char *dn, *newrdn, *newparent;
-	zend_str_size_int dn_len, newrdn_len, newparent_len;
+	php_size_t dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSSSb", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn) != SUCCESS) {
@@ -2186,7 +2186,7 @@ static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, con
 PHP_FUNCTION(ldap_escape)
 {
 	char *value, *ignores, *result;
-	zend_str_size_int valuelen = 0, ignoreslen = 0;
+	php_size_t valuelen = 0, ignoreslen = 0;
 	int i;
 	size_t resultlen;
 	php_int_t flags = 0;
@@ -2232,7 +2232,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 {
 	char *value;
 	int result;
-	zend_str_size_int ldap_len;
+	php_size_t ldap_len;
 		
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &value, &value_len) != SUCCESS) {
 		return;
@@ -2284,7 +2284,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 	zend_bool iscritical;
 	zval *link;
 	char *cookie = NULL;
-	zend_str_size_int cookie_len = 0;
+	php_size_t cookie_len = 0;
 	struct berval lcookie = { 0, NULL };
 	ldap_linkdata *ld;
 	LDAP *ldap;

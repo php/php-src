@@ -80,7 +80,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type TSRMLS_DC)
 		ini_entry->displayer(ini_entry, type);
 	} else {
 		char *display_string;
-		zend_str_size display_string_length;
+		php_size_t display_string_length;
 		int esc_html=0;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
@@ -281,7 +281,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 /* fprintf(stdout, "ZEND_INI_PARSER_SECTION: %s\n",Z_STRVAL_P(arg1)); */
 
 				char *key = NULL;
-				zend_str_size key_len;
+				php_size_t key_len;
 
 				/* PATH sections */
 				if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
@@ -359,14 +359,14 @@ static void php_load_php_extension_cb(void *arg TSRMLS_DC)
 static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
 	char *filename = *((char **) arg);
-	zend_str_size length = strlen(filename);
+	php_size_t length = strlen(filename);
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename TSRMLS_CC);
 	} else {
 	    char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
-		zend_str_size extension_dir_len = strlen(extension_dir);
+		php_size_t extension_dir_len = strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
@@ -385,7 +385,7 @@ int php_init_config(TSRMLS_D)
 {
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;
-	zend_str_size php_ini_scanned_path_len;
+	php_size_t php_ini_scanned_path_len;
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
@@ -408,7 +408,7 @@ int php_init_config(TSRMLS_D)
 		php_ini_search_path = sapi_module.php_ini_path_override;
 		free_ini_search_path = 0;
 	} else if (!sapi_module.php_ini_ignore) {
-		zend_str_size search_path_size;
+		php_size_t search_path_size;
 		char *default_location;
 		char *env_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
@@ -422,7 +422,7 @@ int php_init_config(TSRMLS_D)
 #ifdef PHP_WIN32
 		if (!env_location) {
 			char dummybuf;
-			zend_str_size size;
+			php_size_t size;
 
 			SetLastError(0);
 
@@ -672,7 +672,7 @@ int php_init_config(TSRMLS_D)
 			free(namelist);
 
 			if (total_l) {
-				zend_str_size php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
+				php_size_t php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
 				php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
 				if (!php_ini_scanned_files_len) {
 					*php_ini_scanned_files = '\0';
@@ -770,7 +770,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 {
 	char *str;
 	zval *data;
-	zend_str_size str_len;
+	php_size_t str_len;
 	zend_uint_t num_index;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
@@ -794,7 +794,7 @@ PHPAPI int php_ini_has_per_dir_config(void)
 
 /* {{{ php_ini_activate_per_dir_config
  */
-PHPAPI void php_ini_activate_per_dir_config(char *path, zend_str_size_uint path_len TSRMLS_DC)
+PHPAPI void php_ini_activate_per_dir_config(char *path, php_size_t path_len TSRMLS_DC)
 {
 	zval *tmp2;
 	char *ptr;
@@ -845,7 +845,7 @@ PHPAPI int php_ini_has_per_host_config(void)
 
 /* {{{ php_ini_activate_per_host_config
  */
-PHPAPI void php_ini_activate_per_host_config(const char *host, zend_str_size_uint host_len TSRMLS_DC)
+PHPAPI void php_ini_activate_per_host_config(const char *host, php_size_t host_len TSRMLS_DC)
 {
 	zval *tmp;
 
@@ -860,7 +860,7 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, zend_str_size_uin
 
 /* {{{ cfg_get_entry
  */
-PHPAPI zval *cfg_get_entry(const char *name, zend_str_size_uint name_length)
+PHPAPI zval *cfg_get_entry(const char *name, php_size_t name_length)
 {
 	zval *tmp;
 

@@ -1172,7 +1172,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
 		php_stat_t sb;
-		zend_str_size_int dir_len = strlen(dir);
+		php_size_t dir_len = strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];
 
@@ -1246,7 +1246,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 #if PHP_WIN32
-	zend_str_size_int url_len = strlen(url);
+	php_size_t url_len = strlen(url);
 #endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
@@ -1281,7 +1281,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 	mode_t mode;
 	int ret = 0;
 #if PHP_WIN32
-	zend_str_size_int url_len = strlen(url);
+	php_size_t url_len = strlen(url);
 #endif
 
 #if PHP_WIN32
@@ -1387,9 +1387,9 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	zend_str_size_int path_length;
-	zend_str_size_int filename_length;
-	zend_str_size_int exec_fname_length;
+	php_size_t path_length;
+	php_size_t filename_length;
+	php_size_t exec_fname_length;
 
 	if (opened_path) {
 		*opened_path = NULL;

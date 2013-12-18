@@ -100,11 +100,11 @@ PHP_FUNCTION( msgfmt_format_message )
 {
 	zval       *args;
 	UChar      *spattern = NULL;
-	zend_str_size_int         spattern_len = 0;
+	php_size_t         spattern_len = 0;
 	char       *pattern = NULL;
-	zend_str_size_int         pattern_len = 0;
+	php_size_t         pattern_len = 0;
 	const char *slocale = NULL;
-	zend_str_size_int         slocale_len = 0;
+	php_size_t         slocale_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

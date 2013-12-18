@@ -40,7 +40,7 @@
 struct php_sqlite3_bound_param  {
 	php_int_t param_number;
 	char *name;
-	zend_str_size_int name_len;
+	php_size_t name_len;
 	php_int_t type;
 
 	zval *parameter;

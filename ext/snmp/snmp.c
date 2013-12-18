@@ -554,8 +554,8 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	char sbuf[512];
 	char *buf = &(sbuf[0]);
 	char *dbuf = (char *)NULL;
-	zend_str_size_int buflen = sizeof(sbuf) - 1;
-	zend_str_size_int val_len = vars->val_len;
+	php_size_t buflen = sizeof(sbuf) - 1;
+	php_size_t val_len = vars->val_len;
 	
 	/* use emalloc() for large values, use static array otherwize */
 
@@ -1421,7 +1421,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 {
 	zval **oid, **value, **type;
 	char *a1, *a2, *a3, *a4, *a5, *a6, *a7;
-	zend_str_size_int a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
+	php_size_t a1_len, a2_len, a3_len, a4_len, a5_len, a6_len, a7_len;
 	zend_bool use_orignames = 0, suffix_keys = 0;
 	php_int_t timeout = SNMP_DEFAULT_TIMEOUT;
 	php_int_t retries = SNMP_DEFAULT_RETRIES;
@@ -1784,7 +1784,7 @@ PHP_FUNCTION(snmp_get_valueretrieval)
 PHP_FUNCTION(snmp_read_mib)
 {
 	char *filename;
-	zend_str_size_int filename_len;
+	php_size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1806,7 +1806,7 @@ PHP_METHOD(snmp, __construct)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1, *a2;
-	zend_str_size_int a1_len, a2_len;
+	php_size_t a1_len, a2_len;
 	php_int_t timeout = SNMP_DEFAULT_TIMEOUT;
 	php_int_t retries = SNMP_DEFAULT_RETRIES;
 	php_int_t version = SNMP_DEFAULT_VERSION;
@@ -1908,7 +1908,7 @@ PHP_METHOD(snmp, setSecurity)
 	php_snmp_object *snmp_object;
 	zval *object = getThis();
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
-	zend_str_size_int a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
+	php_size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -2098,7 +2098,7 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 	HashTable *props;
 	zval *val;
 	char *key;
-	zend_str_size_uint key_len;
+	php_size_t key_len;
 	HashPosition pos;
 	php_uint_t num_key;
 

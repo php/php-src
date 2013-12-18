@@ -121,7 +121,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char *tmp = NULL;
 	char *ua_str = NULL;
 	zval **ua_zval = NULL, **tmpzval = NULL;
-	zend_str_size_int scratch_len = 0;
+	php_size_t scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 	zval *response_header = NULL;
@@ -131,9 +131,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect = 0;
 	char *transport_string, *errstr = NULL;
-	zend_str_size_int transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
+	php_size_t transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
 	char *protocol_version = NULL;
-	zend_str_size_int protocol_version_len = 3; /* Default: "1.0" */
+	php_size_t protocol_version_len = 3; /* Default: "1.0" */
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);

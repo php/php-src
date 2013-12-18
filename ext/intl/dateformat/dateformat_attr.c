@@ -128,8 +128,8 @@ PHP_FUNCTION( datefmt_get_pattern )
 PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = NULL;
-	zend_str_size_int         value_len = 0;
-	zend_str_size_int         slength = 0;
+	php_size_t         value_len = 0;
+	php_size_t         slength = 0;
 	UChar*	    svalue  = NULL;
 	zend_bool   is_pattern_localized =FALSE;
 

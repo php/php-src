@@ -61,11 +61,11 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 {
 	FILE *fp;
 	char *buf;
-	zend_str_size l = 0;
+	php_size_t l = 0;
 	int pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
-	zend_str_size buflen, bufl = 0;
+	php_size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
@@ -172,7 +172,7 @@ err:
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
-	zend_str_size cmd_len;
+	php_size_t cmd_len;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
@@ -241,10 +241,10 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI char *php_escape_shell_cmd(char *str)
 {
-	register zend_str_size x, y, l = strlen(str);
+	register php_size_t x, y, l = strlen(str);
 	char *cmd;
 	char *p = NULL;
-	zend_str_size estimate = (2 * l) + 1;
+	php_size_t estimate = (2 * l) + 1;
 
 	TSRMLS_FETCH();
 
@@ -332,9 +332,9 @@ PHPAPI char *php_escape_shell_cmd(char *str)
  */
 PHPAPI char *php_escape_shell_arg(char *str)
 {
-	zend_str_size x, y = 0, l = strlen(str);
+	php_size_t x, y = 0, l = strlen(str);
 	char *cmd;
-	zend_str_size estimate = (4 * l) + 3;
+	php_size_t estimate = (4 * l) + 3;
 
 	TSRMLS_FETCH();
 
@@ -347,7 +347,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 #endif
 
 	for (x = 0; x < l; x++) {
-		zend_str_size mb_len = php_mblen(str + x, (l - x));
+		php_size_t mb_len = php_mblen(str + x, (l - x));
 
 		/* skip non-valid multibyte characters */
 		if (mb_len < 0) {
@@ -397,7 +397,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
-	zend_str_size command_len;
+	php_size_t command_len;
 	char *cmd = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &command, &command_len) == FAILURE) {
@@ -418,7 +418,7 @@ PHP_FUNCTION(escapeshellcmd)
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
-	zend_str_size argument_len;
+	php_size_t argument_len;
 	char *cmd = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &argument, &argument_len) == FAILURE) {
@@ -439,7 +439,7 @@ PHP_FUNCTION(shell_exec)
 	FILE *in;
 	size_t total_readbytes;
 	char *command;
-	zend_str_size command_len;
+	php_size_t command_len;
 	char *ret;
 	php_stream *stream;
 

@@ -248,7 +248,7 @@ typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, php_uint_t 
 typedef php_int_t (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, php_uint_t sql_len TSRMLS_DC);
 
 /* quote a string */
-typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC);
+typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type paramtype TSRMLS_DC);
 
 /* transaction related */
 typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
@@ -258,7 +258,7 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, php_int_t attr, zval *val T
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, zend_str_size_uint *len TSRMLS_DC);
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, php_size_t *len TSRMLS_DC);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
@@ -486,7 +486,7 @@ struct _pdo_dbh_t {
 
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
-	zend_str_size_int persistent_id_len;
+	php_size_t persistent_id_len;
 	unsigned int refcount;
 
 	/* driver specific "class" methods for the dbh and stmt */
@@ -512,7 +512,7 @@ struct _pdo_dbh_t {
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	php_uint_t maxlen;
 	enum pdo_param_type param_type;
 	php_uint_t precision;
@@ -525,7 +525,7 @@ struct pdo_column_data {
 struct pdo_bound_param_data {
 	php_int_t paramno; /* if -1, then it has a name, and we don't know the index *yet* */
 	char *name;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 
 	php_int_t max_value_len;	/* as a hint for pre-allocation */
 	
@@ -587,11 +587,11 @@ struct _pdo_stmt_t {
 
 	/* used to hold the statement's current query */
 	char *query_string;
-	zend_str_size_int query_stringlen;
+	php_size_t query_stringlen;
 
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
 	char *active_query_string;
-	zend_str_size_int active_query_stringlen;
+	php_size_t active_query_stringlen;
 
 	/* the cursor specific error code. */
 	pdo_error_type error_code;
@@ -649,8 +649,8 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, zend_str_size_int inquery_len, 
-	char **outquery, zend_str_size_int *outquery_len TSRMLS_DC);
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, php_size_t inquery_len, 
+	char **outquery, php_size_t *outquery_len TSRMLS_DC);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp TSRMLS_DC);

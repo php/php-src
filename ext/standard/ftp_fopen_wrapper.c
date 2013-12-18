@@ -137,10 +137,10 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	php_stream *stream = NULL, *reuseid = NULL;
 	php_url *resource = NULL;
 	int result, use_ssl, use_ssl_on_data = 0;
-	zend_str_size_int tmp_len;
+	php_size_t tmp_len;
 	char tmp_line[512];
 	char *transport;
-	zend_str_size_int transport_len;
+	php_size_t transport_len;
 
 	resource = php_url_parse(path);
 	if (resource == NULL || resource->path == NULL) {
@@ -428,7 +428,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int allow_overwrite = 0;
 	int read_write = 0;
 	char *transport;
-	zend_str_size_int transport_len;
+	php_size_t transport_len;
 
 	tmp_line[0] = '\0';
 

@@ -32,7 +32,7 @@
 static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host;
-	zend_str_size_int host_len;
+	php_size_t host_len;
 	php_int_t port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
@@ -42,7 +42,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_stream *stream = NULL;
 	int err;
 	char *hostname = NULL;
-	zend_str_size_long hostname_len;
+	php_size_t hostname_len;
 	char *errstr = NULL;
 
 	RETVAL_FALSE;

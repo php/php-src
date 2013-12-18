@@ -204,7 +204,7 @@ struct _PHPTidyObj {
 
 /* {{{ ext/tidy prototypes
 */
-static char *php_tidy_file_to_mem(char *, zend_bool, zend_str_size_int * TSRMLS_DC);
+static char *php_tidy_file_to_mem(char *, zend_bool, php_size_t * TSRMLS_DC);
 static void tidy_object_free_storage(void * TSRMLS_DC);
 static zend_object_value tidy_object_new_node(zend_class_entry * TSRMLS_DC);
 static zend_object_value tidy_object_new_doc(zend_class_entry * TSRMLS_DC);
@@ -553,7 +553,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
 	char *data=NULL, *arg1, *enc = NULL;
-	zend_str_size_int arg1_len, enc_len = 0, data_len = 0;
+	php_size_t arg1_len, enc_len = 0, data_len = 0;
 	zend_bool use_include_path = 0;
 	TidyDoc doc;
 	TidyBuffer *errbuf;
@@ -639,7 +639,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	tidyRelease(doc);
 }
 
-static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, zend_str_size_int *len TSRMLS_DC)
+static char *php_tidy_file_to_mem(char *filename, zend_bool use_include_path, php_size_t *len TSRMLS_DC)
 {
 	php_stream *stream;
 	char *data = NULL;
@@ -1015,7 +1015,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 	char *opt_name;
 	zval **opt_val;
 	php_uint_t opt_indx;
-	zend_str_size_uint opt_name_len;
+	php_size_t opt_name_len;
 	zend_bool clear_str;
 
 	for (zend_hash_internal_pointer_reset(ht_options);
@@ -1044,7 +1044,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 	return SUCCESS;
 }
 
-static int php_tidy_parse_string(PHPTidyObj *obj, char *string, zend_str_size_int len, char *enc TSRMLS_DC)
+static int php_tidy_parse_string(PHPTidyObj *obj, char *string, php_size_t len, char *enc TSRMLS_DC)
 {
 	TidyBuffer buf;
 
@@ -1226,7 +1226,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 static PHP_FUNCTION(tidy_parse_string)
 {
 	char *input, *enc = NULL;
-	zend_str_size_int input_len, enc_len = 0;
+	php_size_t input_len, enc_len = 0;
 	zval **options = NULL;
 	PHPTidyObj *obj;
 
@@ -1281,7 +1281,7 @@ static PHP_FUNCTION(tidy_get_output)
 static PHP_FUNCTION(tidy_parse_file)
 {
 	char *inputfile, *enc = NULL;
-	zend_str_size_int input_len, contents_len, enc_len = 0;
+	php_size_t input_len, contents_len, enc_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval **options = NULL;
@@ -1379,7 +1379,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 {
 	PHPTidyObj *obj;
 	char *optval, *optname;
-	zend_str_size_int optname_len;
+	php_size_t optname_len;
 	TidyOption opt;
 
 	TIDY_SET_CONTEXT;
@@ -1539,7 +1539,7 @@ static PHP_FUNCTION(tidy_getopt)
 	PHPTidyObj *obj;
 	char *optname;
 	void *optval;
-	zend_str_size_int optname_len;
+	php_size_t optname_len;
 	TidyOption opt;
 	TidyOptionType optt;
 	
@@ -1594,7 +1594,7 @@ static PHP_FUNCTION(tidy_getopt)
 static TIDY_DOC_METHOD(__construct)
 {
 	char *inputfile = NULL, *enc = NULL;
-	zend_str_size_int input_len = 0, enc_len = 0, contents_len = 0;
+	php_size_t input_len = 0, enc_len = 0, contents_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval **options = NULL;
@@ -1626,7 +1626,7 @@ static TIDY_DOC_METHOD(__construct)
 static TIDY_DOC_METHOD(parseFile)
 {
 	char *inputfile, *enc = NULL;
-	zend_str_size_int input_len, enc_len = 0, contents_len = 0;
+	php_size_t input_len, enc_len = 0, contents_len = 0;
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval **options = NULL;
@@ -1660,7 +1660,7 @@ static TIDY_DOC_METHOD(parseFile)
 static TIDY_DOC_METHOD(parseString)
 {
 	char *input, *enc = NULL;
-	zend_str_size_int input_len, enc_len = 0;
+	php_size_t input_len, enc_len = 0;
 	zval **options = NULL;
 	PHPTidyObj *obj;
 

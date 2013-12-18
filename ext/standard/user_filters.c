@@ -167,7 +167,7 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_filter *thisfilter,
 			php_stream_bucket_brigade *buckets_in,
 			php_stream_bucket_brigade *buckets_out,
-			zend_str_size_size_t *bytes_consumed,
+			php_size_t *bytes_consumed,
 			int flags
 			TSRMLS_DC)
 {
@@ -283,7 +283,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval *obj, *zfilter;
 	zval func_name;
 	zval *retval = NULL;
-	zend_str_size len;
+	php_size_t len;
 	
 	/* some sanity checks */
 	if (persistent) {
@@ -507,7 +507,7 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
-	zend_str_size buffer_len;
+	php_size_t buffer_len;
 	php_stream_bucket *bucket;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS", &zstream, &buffer, &buffer_len) == FAILURE) {
@@ -545,7 +545,7 @@ PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
 	int key_flags;
-	zend_str_size filter_name_len = 0;
+	php_size_t filter_name_len = 0;
 	HashTable *filters_hash;
 	zend_uint_t num_key;
 
@@ -574,7 +574,7 @@ PHP_FUNCTION(stream_get_filters)
 PHP_FUNCTION(stream_filter_register)
 {
 	char *filtername, *classname;
-	zend_str_size filtername_len, classname_len;
+	php_size_t filtername_len, classname_len;
 	struct php_user_filter_data *fdat;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &filtername, &filtername_len,

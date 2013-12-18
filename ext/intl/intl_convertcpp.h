@@ -28,8 +28,8 @@ extern "C" {
 #include <php.h>
 }
 
-int intl_stringFromChar(UnicodeString &ret, char *str, zend_str_size_int str_len, UErrorCode *status);
+int intl_stringFromChar(UnicodeString &ret, char *str, php_size_t str_len, UErrorCode *status);
 
-int intl_charFromString(const UnicodeString &from, char **res, zend_str_size_int *res_len, UErrorCode *status);
+int intl_charFromString(const UnicodeString &from, char **res, php_size_t *res_len, UErrorCode *status);
 
 #endif /* INTL_CONVERTCPP_H */

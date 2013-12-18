@@ -142,7 +142,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -150,7 +150,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size s
 	enum pdo_cursor_type cursor_type = PDO_CURSOR_FWDONLY;
 	int ret;
 	char *nsql = NULL;
-	zend_str_size_int nsql_len = 0;
+	php_size_t nsql_len = 0;
 
 	S->H = H;
 	S->assume_utf8 = H->assume_utf8;
@@ -220,7 +220,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size s
 	return 1;
 }
 
-static php_int_t odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len TSRMLS_DC)
+static php_int_t odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -261,7 +261,7 @@ out:
 	return row_count;
 }
 
-static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type param_type  TSRMLS_DC)
+static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type param_type  TSRMLS_DC)
 {
 	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
 	/* TODO: figure it out */

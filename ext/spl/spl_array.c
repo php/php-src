@@ -795,7 +795,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	zval *tmp, *storage;
-	zend_str_size name_len;
+	php_size_t name_len;
 	char *zname;
 	zend_class_entry *base;
 
@@ -916,7 +916,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSRMLS_DC) /* {{{ */
 {
 	char *string_key;
-	zend_str_size string_length;
+	php_size_t string_length;
 	zend_uint_t num_key;
 
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
@@ -1430,7 +1430,7 @@ SPL_METHOD(Array, count)
 	RETURN_LONG(count);
 } /* }}} */
 
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, zend_str_size_int fname_len, int use_arg) /* {{{ */
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, php_size_t fname_len, int use_arg) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -1722,7 +1722,7 @@ SPL_METHOD(Array, unserialize)
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	char *buf;
-	zend_str_size buf_len;
+	php_size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *pmembers, *pflags = NULL;

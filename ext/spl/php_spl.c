@@ -316,7 +316,7 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 PHP_FUNCTION(spl_autoload)
 {
 	char *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
-	zend_str_size_int class_name_len, file_exts_len = SPL_G(autoload_extensions_len);
+	php_size_t class_name_len, file_exts_len = SPL_G(autoload_extensions_len);
 	int found = 0;
 	char *copy, *pos1, *pos2;
 	zval **original_return_value = EG(return_value_ptr_ptr);
@@ -372,7 +372,7 @@ PHP_FUNCTION(spl_autoload)
 PHP_FUNCTION(spl_autoload_extensions)
 {
 	char *file_exts = NULL;
-	zend_str_size_int file_exts_len;
+	php_size_t file_exts_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &file_exts, &file_exts_len) == FAILURE) {
 		return;
@@ -414,9 +414,9 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 PHP_FUNCTION(spl_autoload_call)
 {
 	zval *class_name, *retval = NULL;
-	zend_str_size_int class_name_len;
+	php_size_t class_name_len;
 	char *func_name, *lc_name;
-	zend_str_size_uint func_name_len;
+	php_size_t func_name_len;
 	zend_uint_t dummy;
 	HashPosition function_pos;
 	autoload_func_info *alfi;
@@ -467,7 +467,7 @@ PHP_FUNCTION(spl_autoload_call)
 PHP_FUNCTION(spl_autoload_register)
 {
 	char *func_name, *error = NULL;
-	zend_str_size_int func_name_len;
+	php_size_t func_name_len;
 	char *lc_name = NULL;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
@@ -628,7 +628,7 @@ skip:
 PHP_FUNCTION(spl_autoload_unregister)
 {
 	char *func_name, *error = NULL;
-	zend_str_size_int func_name_len;
+	php_size_t func_name_len;
 	char *lc_name = NULL;
 	zval *zcallable;
 	int success = FAILURE;
@@ -749,7 +749,7 @@ PHP_FUNCTION(spl_autoload_functions)
 					add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
 				} else {
 				   char *key;
-				   zend_str_size_uint len;
+				   php_size_t len;
 				   zend_uint_t dummy;
 				   zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &len, &dummy, 0, &function_pos); 
 				   add_next_index_stringl(return_value, key, len - 1, 1);

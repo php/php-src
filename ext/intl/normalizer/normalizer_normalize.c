@@ -35,18 +35,18 @@ PHP_FUNCTION( normalizer_normalize )
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
 	php_int_t			form = NORMALIZER_DEFAULT;
-	zend_str_size_int			input_len = 0;
+	php_size_t			input_len = 0;
 		
 	UChar*			uinput = NULL;
-	zend_str_size_int			uinput_len = 0;
+	php_size_t			uinput_len = 0;
 	int			expansion_factor = 1;
 	UErrorCode		status = U_ZERO_ERROR;
 		
 	UChar*			uret_buf = NULL;
-	zend_str_size_int			uret_len = 0;
+	php_size_t			uret_len = 0;
 		
 	char*			ret_buf = NULL;
-	zend_str_size_int			ret_len = 0;
+	php_size_t			ret_len = 0;
 
 	int32_t			size_needed;
 		
@@ -173,10 +173,10 @@ PHP_FUNCTION( normalizer_is_normalized )
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
 	php_int_t		form = NORMALIZER_DEFAULT;
-	zend_str_size_int		input_len = 0;
+	php_size_t		input_len = 0;
 
 	UChar*	 	uinput = NULL;
-	zend_str_size_int		uinput_len = 0;
+	php_size_t		uinput_len = 0;
 	UErrorCode	status = U_ZERO_ERROR;
 		
 	UBool		uret = FALSE;

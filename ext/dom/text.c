@@ -69,7 +69,7 @@ PHP_METHOD(domtext, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 	char *value = NULL;
-	zend_str_size_int value_len;
+	php_size_t value_len;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);

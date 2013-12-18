@@ -291,7 +291,7 @@ PHP_FUNCTION(finfo_open)
 {
 	php_int_t options = MAGIC_NONE;
 	char *file = NULL;
-	zend_str_size_int file_len = 0;
+	php_size_t file_len = 0;
 	struct php_fileinfo *finfo;
 	FILEINFO_DECLARE_INIT_OBJECT(object)
 	char resolved_path[MAXPATHLEN];
@@ -412,7 +412,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 {
 	php_int_t options = 0;
 	char *ret_val = NULL, *buffer = NULL;
-	zend_str_size_int buffer_len;
+	php_size_t buffer_len;
 	struct php_fileinfo *finfo = NULL;
 	zval *zfinfo, *zcontext = NULL;
 	zval *what;

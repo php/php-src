@@ -176,7 +176,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 
 	for (i = 0; i < cNames; i++) {
 		char *name;
-		zend_str_size_uint namelen;
+		php_size_t namelen;
 		zval **tmp;
 		
 		name = php_com_olestring_to_string(rgszNames[i], &namelen, COMG(code_page) TSRMLS_CC);
@@ -220,7 +220,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 {
 	HRESULT ret = DISP_E_UNKNOWNNAME;
 	char *name;
-	zend_str_size_uint namelen;
+	php_size_t namelen;
 	zval **tmp;
 	FETCH_DISP("GetDispID");
 
@@ -453,7 +453,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	HashPosition pos;
 	char *name = NULL;
 	zval *tmp;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	int keytype;
 	php_uint_t pid;
 
@@ -585,7 +585,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	HashPosition pos;
 	char *name = NULL;
 	zval *tmp, **ntmp;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	int keytype;
 	php_uint_t pid;
 

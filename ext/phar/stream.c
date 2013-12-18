@@ -60,7 +60,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
-	zend_str_size_int arch_len, entry_len;
+	php_size_t arch_len, entry_len;
 
 	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
 		return NULL;
@@ -165,7 +165,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	php_url *resource = NULL;
 	php_stream *fpf;
 	zval **pzoption, *metadata;
-	zend_str_size_uint host_len;
+	php_size_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
 		return NULL;
@@ -570,8 +570,8 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	zend_str_size_uint host_len;
-	zend_str_size_int internal_file_len;
+	php_size_t host_len;
+	php_size_t internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET TSRMLS_CC)) == NULL) {
 		return FAILURE;
@@ -629,7 +629,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
 		char *str_key;
 		php_uint_t unused;
-		zend_str_size_uint keylen;
+		php_size_t keylen;
 		HashPosition pos;
 
 		for (zend_hash_internal_pointer_reset_ex(&phar->mounted_dirs, &pos);
@@ -640,7 +640,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 				continue;
 			} else {
 				char *test;
-				zend_str_size_int test_len;
+				php_size_t test_len;
 				php_stream_statbuf ssbi;
 
 				if (SUCCESS != zend_hash_find(&phar->manifest, str_key, keylen, (void **) &entry)) {
@@ -682,10 +682,10 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 {
 	php_url *resource;
 	char *internal_file, *error;
-	zend_str_size_int internal_file_len;
+	php_size_t internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data **pphar;
-	zend_str_size_uint host_len;
+	php_size_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options TSRMLS_CC)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: unlink failed");
@@ -903,10 +903,10 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	if (is_dir) {
 		int key_type;
 		char *str_key, *new_str_key;
-		zend_str_size_uint key_len, new_key_len;
+		php_size_t key_len, new_key_len;
 		php_uint_t unused;
-		zend_str_size_uint from_len = strlen(resource_from->path+1);
-		zend_str_size_uint to_len = strlen(resource_to->path+1);
+		php_size_t from_len = strlen(resource_from->path+1);
+		php_size_t to_len = strlen(resource_to->path+1);
 
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
 			HASH_KEY_NON_EXISTENT != (key_type = zend_hash_get_current_key_ex(&phar->manifest, &str_key, &key_len, &unused, 0, NULL)) &&

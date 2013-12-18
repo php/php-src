@@ -704,7 +704,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 	char *outBuf;
 	zval *vals, *out_opts = NULL;
 	char *method = NULL;
-	zend_str_size_int method_len;
+	php_size_t method_len;
 	php_output_options out;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
@@ -816,7 +816,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 {
 	char *xml, *encoding = NULL;
 	zval **method;
-	zend_str_size_int xml_len, encoding_len = 0;
+	php_size_t xml_len, encoding_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SZ|S", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
@@ -838,7 +838,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 PHP_FUNCTION(xmlrpc_decode)
 {
 	char *arg1, *arg2 = NULL;
-	zend_str_size_int arg1_len, arg2_len = 0;
+	php_size_t arg1_len, arg2_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
 		return;
@@ -1026,7 +1026,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 PHP_FUNCTION(xmlrpc_server_register_method)
 {
 	char *method_key;
-	zend_str_size_int method_key_len;
+	php_size_t method_key_len;
 	zval *handle, *method_name_save, **method_name;
 	int type;
 	xmlrpc_server_data* server;
@@ -1096,7 +1096,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	xmlrpc_server_data* server;
 	zval **caller_params, *handle, *output_opts = NULL;
 	char *rawxml;
-	zend_str_size_int rawxml_len;
+	php_size_t rawxml_len;
 	int type;
 	php_output_options out;
 	int argc =ZEND_NUM_ARGS();
@@ -1228,7 +1228,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 {
 	zval *retval;
 	char *arg1;
-	zend_str_size_int arg1_len;
+	php_size_t arg1_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1, &arg1_len) == FAILURE) {
 		return;
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(xmlrpc_set_type)
 {
 	zval **arg;
 	char *type;
-	zend_str_size_int type_len;
+	php_size_t type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZS", &arg, &type, &type_len) == FAILURE) {

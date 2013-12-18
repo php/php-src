@@ -204,10 +204,10 @@ static PHP_METHOD(PDO, dbh_constructor)
 	pdo_dbh_t *dbh = NULL;
 	zend_bool is_persistent = FALSE;
 	char *data_source;
-	zend_str_size_int data_source_len;
+	php_size_t data_source_len;
 	char *colon;
 	char *username=NULL, *password=NULL;
-	zend_str_size_int usernamelen, passwordlen;
+	php_size_t usernamelen, passwordlen;
 	pdo_driver_t *driver = NULL;
 	zval *options = NULL;
 	char alt_dsn[512];
@@ -275,7 +275,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
 		zval **v;
-		zend_str_size_int plen = 0;
+		php_size_t plen = 0;
 		char *hashkey = NULL;
 		zend_rsrc_list_entry *le;
 		pdo_dbh_t *pdbh = NULL;
@@ -515,7 +515,7 @@ static PHP_METHOD(PDO, prepare)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
 	char *statement;
-	zend_str_size_int statement_len;
+	php_size_t statement_len;
 	zval *options = NULL, **opt, **item, *ctor_args;
 	zend_class_entry *dbstmt_ce, **pce;
 
@@ -957,7 +957,7 @@ static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *statement;
-	zend_str_size_int statement_len;
+	php_size_t statement_len;
 	php_int_t ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &statement, &statement_len)) {
@@ -987,7 +987,7 @@ static PHP_METHOD(PDO, lastInsertId)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *name = NULL;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!", &name, &namelen)) {
 		RETURN_FALSE;
@@ -1090,7 +1090,7 @@ static PHP_METHOD(PDO, query)
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
 	char *statement;
-	zend_str_size_int statement_len;
+	php_size_t statement_len;
 
 	/* Return a meaningful error when no parameters were passed */
 	if (!ZEND_NUM_ARGS()) {
@@ -1166,10 +1166,10 @@ static PHP_METHOD(PDO, quote)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	php_int_t paramtype = PDO_PARAM_STR;
 	char *qstr;
-	zend_str_size_int qlen;
+	php_size_t qlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &str, &str_len, &paramtype)) {
 		RETURN_FALSE;
@@ -1293,7 +1293,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	const zend_function_entry *funcs;
 	zend_function func;
 	zend_internal_function *ifunc = (zend_internal_function*)&func;
-	zend_str_size_int namelen;
+	php_size_t namelen;
 	char *lc_name;
 
 	if (!dbh || !dbh->methods || !dbh->methods->get_driver_methods) {
@@ -1358,7 +1358,7 @@ static union _zend_function *dbh_method_get(
 #else
 	zval *object,
 #endif
-	char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
+	char *method_name, php_size_t method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	char *lc_method_name;

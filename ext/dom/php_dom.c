@@ -502,7 +502,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 			zend_hash_move_forward_ex(prop_handlers, &pos)) {
 		zval	*value;
 		char	*string_key		= NULL;
-		zend_str_size_uint	string_length	= 0;
+		php_size_t	string_length	= 0;
 		php_uint_t	num_key;
 
 		if (entry->read_func(obj, &value TSRMLS_CC) == FAILURE) {

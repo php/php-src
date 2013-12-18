@@ -794,7 +794,7 @@ PHP_FUNCTION(rad2deg)
 PHPAPI php_int_t _php_math_basetolong(zval *arg, int base)
 {
 	php_int_t num = 0, digit, onum;
-	zend_str_size_int i;
+	php_size_t i;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -840,7 +840,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
 	php_int_t num = 0;
 	double fnum = 0;
-	zend_str_size_int i;
+	php_size_t i;
 	int mode = 0;
 	char c, *s;
 	php_int_t cutoff;
@@ -1098,14 +1098,14 @@ PHPAPI char *_php_math_number_format(double d, php_int_t dec, char dec_point, ch
 }
 
 static char *_php_math_number_format_ex_len(double d, php_int_t dec, char *dec_point,
-		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len,
-		zend_str_size_int *result_len)
+		php_size_t dec_point_len, char *thousand_sep, php_size_t thousand_sep_len,
+		php_size_t *result_len)
 {
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
-	zend_str_size_int integral;
-	zend_str_size_int tmplen, reslen=0;
+	php_size_t integral;
+	php_size_t tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
 
@@ -1171,8 +1171,8 @@ static char *_php_math_number_format_ex_len(double d, php_int_t dec, char *dec_p
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		zend_str_size_int declen = dp ? s - dp : 0;
-		zend_str_size_int topad = dec > declen ? dec - declen : 0;
+		php_size_t declen = dp ? s - dp : 0;
+		php_size_t topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
@@ -1219,7 +1219,7 @@ static char *_php_math_number_format_ex_len(double d, php_int_t dec, char *dec_p
 }
 
 PHPAPI char *_php_math_number_format_ex(double d, php_int_t dec, char *dec_point,
-		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len)
+		php_size_t dec_point_len, char *thousand_sep, php_size_t thousand_sep_len)
 {
 	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
 			thousand_sep, thousand_sep_len, NULL);
@@ -1234,7 +1234,7 @@ PHP_FUNCTION(number_format)
 	php_int_t dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	zend_str_size thousand_sep_len = 0, dec_point_len = 0;
+	php_size_t thousand_sep_len = 0, dec_point_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|iS!S!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;

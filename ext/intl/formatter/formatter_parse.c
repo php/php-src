@@ -38,9 +38,9 @@ PHP_FUNCTION( numfmt_parse )
 {
 	php_int_t type = FORMAT_TYPE_DOUBLE;
 	UChar* sstr = NULL;
-	zend_str_size_int sstr_len = 0;
+	php_size_t sstr_len = 0;
 	char* str = NULL;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	int32_t val32, position = 0;
 	int64_t val64;
 	double val_double;
@@ -124,11 +124,11 @@ PHP_FUNCTION( numfmt_parse_currency )
 	double number;
 	UChar currency[5] = {0};
 	UChar* sstr = NULL;
-	zend_str_size_int sstr_len = 0;
+	php_size_t sstr_len = 0;
 	char *currency_str = NULL;
-	zend_str_size_int currency_len = 0;
+	php_size_t currency_len = 0;
 	char *str;
-	zend_str_size_int str_len;
+	php_size_t str_len;
 	int32_t* position_p = NULL;
 	int32_t position = 0;
 	zval *zcurrency, *zposition = NULL;

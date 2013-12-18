@@ -896,7 +896,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 {
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i;
-	zend_str_size_int len[] = { 0, 0, 0, 0, 0 };
+	php_size_t len[] = { 0, 0, 0, 0, 0 };
 	php_int_t largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_rsrc_list_entry new_index_ptr, *le;
@@ -1416,7 +1416,7 @@ PHP_FUNCTION(ibase_gen_id)
 {
 	zval *link = NULL;
 	char query[128], *generator;
-	zend_str_size_int gen_len;
+	php_size_t gen_len;
 	php_int_t inc = 1;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

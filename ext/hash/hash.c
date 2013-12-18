@@ -86,7 +86,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 
 /* Hash Registry Access */
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, zend_str_size_int algo_len) /* {{{ */
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, php_size_t algo_len) /* {{{ */
 {
 	php_hash_ops *ops;
 	char *lower = estrndup(algo, algo_len);
@@ -103,7 +103,7 @@ PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, zend_str_s
 
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops) /* {{{ */
 {
-	zend_str_size_int algo_len = strlen(algo);
+	php_size_t algo_len = strlen(algo);
 	char *lower = estrndup(algo, algo_len);
 	
 	zend_str_tolower(lower, algo_len);
@@ -126,7 +126,7 @@ PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_c
 static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
 {
 	char *algo, *data, *digest;
-	zend_str_size_int algo_len, data_len;
+	php_size_t algo_len, data_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
@@ -157,7 +157,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	if (isfilename) {
 		char buf[1024];
-		zend_str_size_int n;
+		php_size_t n;
 
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
@@ -203,21 +203,21 @@ PHP_FUNCTION(hash_file)
 }
 /* }}} */
 
-static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const zend_str_size_int length) {
-	zend_str_size_int i;
+static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const php_size_t length) {
+	php_size_t i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with;
 	}
 }
 
-static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const zend_str_size_int length) {
-	zend_str_size_int i;
+static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const php_size_t length) {
+	php_size_t i;
 	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with[i];
 	}
 }
 
-static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const zend_str_size_int key_len) {
+static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const php_size_t key_len) {
 	memset(K, 0, ops->block_size);
 	if (key_len > ops->block_size) {
 		/* Reduce the key first */
@@ -241,7 +241,7 @@ static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops 
 static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
 {
 	char *algo, *data, *digest, *key, *K;
-	zend_str_size_int algo_len, data_len, key_len;
+	php_size_t algo_len, data_len, key_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
@@ -274,7 +274,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (isfilename) {
 		char buf[1024];
-		zend_str_size_int n;
+		php_size_t n;
 		ops->hash_init(context);
 		ops->hash_update(context, (unsigned char *) K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
@@ -333,7 +333,7 @@ Initialize a hashing context */
 PHP_FUNCTION(hash_init)
 {
 	char *algo, *key = NULL;
-	zend_str_size_int algo_len, key_len = 0;
+	php_size_t algo_len, key_len = 0;
 	int argc = ZEND_NUM_ARGS();
 	php_int_t options = 0;
 	void *context;
@@ -401,7 +401,7 @@ PHP_FUNCTION(hash_update)
 	zval *zhash;
 	php_hash_data *hash;
 	char *data;
-	zend_str_size_int data_len;
+	php_size_t data_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &zhash, &data, &data_len) == FAILURE) {
 		return;
@@ -433,7 +433,7 @@ PHP_FUNCTION(hash_update_stream)
 
 	while (length) {
 		char buf[1024];
-		zend_str_size_int n;
+		php_size_t n;
 		php_int_t toread = 1024;
 
 		if (length > 0 && toread > length) {
@@ -462,7 +462,7 @@ PHP_FUNCTION(hash_update_file)
 	php_stream_context *context;
 	php_stream *stream;
 	char *filename, buf[1024];
-	zend_str_size_int filename_len, n;
+	php_size_t filename_len, n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
@@ -495,7 +495,7 @@ PHP_FUNCTION(hash_final)
 	zend_bool raw_output = 0;
 	zend_rsrc_list_entry *le;
 	char *digest;
-	zend_str_size_int digest_len;
+	php_size_t digest_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &zhash, &raw_output) == FAILURE) {
 		return;
@@ -507,7 +507,7 @@ PHP_FUNCTION(hash_final)
 	digest = emalloc(digest_len + 1);
 	hash->ops->hash_final((unsigned char *) digest, hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
-		zend_str_size_int i;
+		php_size_t i;
 
 		/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
 		for(i=0; i < hash->ops->block_size; i++) {
@@ -593,7 +593,7 @@ PHP_FUNCTION(hash_algos)
 {
 	HashPosition pos;
 	char *str;
-	zend_str_size_uint str_len;
+	php_size_t str_len;
 	php_int_t type;
 	php_uint_t idx;
 
@@ -614,9 +614,9 @@ PHP_FUNCTION(hash_pbkdf2)
 	char *returnval, *algo, *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
 	php_int_t loops, i, j, iterations, length;
-	zend_str_size_int algo_len, pass_len, digest_length = 0;
+	php_size_t algo_len, pass_len, digest_length = 0;
 	int argc;
-	zend_str_size_int salt_len = 0;
+	php_size_t salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
@@ -893,7 +893,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 {
 	php_int_t algorithm, l_bytes;
 	char *password, *salt;
-	zend_str_size_int password_len, salt_len;
+	php_size_t password_len, salt_len;
 	char padded_salt[SALT_SIZE];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iSSi", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
@@ -923,7 +923,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 				void *context;
 				char *key, *digest;
 				php_int_t i = 0, j = 0;
-				zend_str_size_int block_size = ops->digest_size;
+				php_size_t block_size = ops->digest_size;
 				php_int_t times = l_bytes / block_size;
 				if (l_bytes % block_size  != 0) times++;
 

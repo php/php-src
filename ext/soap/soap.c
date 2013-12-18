@@ -68,7 +68,7 @@ static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
-static void soap_error_handler(int error_num, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args);
+static void soap_error_handler(int error_num, const char *error_filename, const php_size_t error_lineno, const char *format, va_list args);
 
 #define SOAP_SERVER_BEGIN_CODE() \
 	zend_bool _old_handler = SOAP_GLOBAL(use_soap_error_handler);\
@@ -164,7 +164,7 @@ zend_class_entry* soap_var_class_entry;
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
-static void (*old_error_handler)(int, const char *, const zend_str_size_uint, const char*, va_list);
+static void (*old_error_handler)(int, const char *, const php_size_t, const char*, va_list);
 
 #ifdef va_copy
 #define call_old_error_handler(error_num, error_filename, error_lineno, format, args) \
@@ -781,7 +781,7 @@ PHP_METHOD(SoapParam, SoapParam)
 {
 	zval *data;
 	char *name;
-	zend_str_size_int name_length;
+	php_size_t name_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS", &data, &name, &name_length) == FAILURE) {
 		return;
@@ -803,7 +803,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 {
 	zval *data = NULL, *actor = NULL;
 	char *name, *ns;
-	zend_str_size_int name_len, ns_len;
+	php_size_t name_len, ns_len;
 	zend_bool must_understand = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|zbz", &ns, &ns_len, &name, &name_len, &data, &must_understand, &actor) == FAILURE) {
@@ -842,7 +842,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 PHP_METHOD(SoapFault, SoapFault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
-	zend_str_size_int fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
+	php_size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
 	zval *code = NULL, *details = NULL, *headerfault = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS|S!z!S!z",
@@ -898,7 +898,7 @@ PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, *trace;
 	char *str;
-	zend_str_size_int len;
+	php_size_t len;
 	zend_fcall_info fci;
 	zval fname;
 
@@ -941,7 +941,7 @@ PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
-	zend_str_size_int stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
+	php_size_t stype_len = 0, ns_len = 0, name_len = 0, namens_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z!z|SSSS", &data, &type, &stype, &stype_len, &ns, &ns_len, &name, &name_len, &namens, &namens_len) == FAILURE) {
 		return;
@@ -1002,7 +1002,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht TSRMLS_DC)
 		zend_hash_internal_pointer_reset_ex(ht2, &pos2);
 		while (zend_hash_get_current_data_ex(ht2, (void**)&tmp, &pos2) == SUCCESS) {
 			char *name = NULL;
-			zend_str_size_uint name_len;
+			php_size_t name_len;
 			php_uint_t index;
 
 			zend_hash_get_current_key_ex(ht2, &name, &name_len, &index, 0, &pos2);
@@ -1262,7 +1262,7 @@ PHP_METHOD(SoapServer, setClass)
 	char *classname;
 	zend_class_entry **ce;
 
-	zend_str_size_int classname_len;
+	php_size_t classname_len;
 	int found, num_args = 0;
 	zval ***argv = NULL;
 
@@ -1409,7 +1409,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(function_name), &pos);
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(function_name), (void **)&tmp_function, &pos) != FAILURE) {
 				char *key;
-				zend_str_size_int   key_len;
+				php_size_t   key_len;
 				zend_function *f;
 
 				if (Z_TYPE_PP(tmp_function) != IS_STRING) {
@@ -1436,7 +1436,7 @@ PHP_METHOD(SoapServer, addFunction)
 		}
 	} else if (function_name->type == IS_STRING) {
 		char *key;
-		zend_str_size_int   key_len;
+		php_size_t   key_len;
 		zend_function *f;
 
 		key_len = Z_STRSIZE_P(function_name);
@@ -1492,7 +1492,7 @@ PHP_METHOD(SoapServer, handle)
 	soapHeader *soap_headers = NULL;
 	sdlFunctionPtr function;
 	char *arg = NULL;
-	zend_str_size_int arg_len = 0;
+	php_size_t arg_len = 0;
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	php_int_t old_features;
@@ -1993,7 +1993,7 @@ fail:
 PHP_METHOD(SoapServer, fault)
 {
 	char *code, *string, *actor=NULL, *name=NULL;
-	zend_str_size_int code_len, string_len, actor_len = 0, name_len = 0;
+	php_size_t code_len, string_len, actor_len = 0, name_len = 0;
 	zval* details = NULL;
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
@@ -2110,7 +2110,7 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	zend_bailout();
 }
 
-static void soap_error_handler(int error_num, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args)
+static void soap_error_handler(int error_num, const char *error_filename, const php_size_t error_lineno, const char *format, va_list args)
 {
 	zend_bool _old_in_compilation, _old_in_execution;
 	zend_execute_data *_old_current_execute_data;
@@ -2611,7 +2611,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 
 static void do_soap_call(zval* this_ptr,
                          char* function,
-                         zend_str_size_int function_len,
+                         php_size_t function_len,
                          int arg_count,
                          zval** real_args,
                          zval* return_value,
@@ -2844,7 +2844,7 @@ static void verify_soap_headers_array(HashTable *ht TSRMLS_DC)
 PHP_METHOD(SoapClient, __call)
 {
 	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
-	zend_str_size_int function_len;
+	php_size_t function_len;
 	int i = 0;
 	HashTable* soap_headers = NULL;
 	zval *options = NULL;
@@ -3088,7 +3088,7 @@ PHP_METHOD(SoapClient, __getLastResponseHeaders)
 PHP_METHOD(SoapClient, __doRequest)
 {
   char *buf, *location, *action;
-  zend_str_size_int   buf_size, location_size, action_size;
+  php_size_t   buf_size, location_size, action_size;
   php_int_t  version;
   php_int_t  one_way = 0;
 
@@ -3123,7 +3123,7 @@ PHP_METHOD(SoapClient, __setCookie)
 {
 	char *name;
 	char *val = NULL;
-	zend_str_size_int  name_len, val_len = 0;
+	php_size_t  name_len, val_len = 0;
 	zval **cookies;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &name, &name_len, &val, &val_len) == FAILURE) {
@@ -3201,7 +3201,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 PHP_METHOD(SoapClient, __setLocation)
 {
 	char *location = NULL;
-	zend_str_size_int  location_len = 0;
+	php_size_t  location_len = 0;
 	zval **tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &location, &location_len) == FAILURE) {
@@ -3791,7 +3791,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(ret), &pos);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(ret), (void **)&data, &pos) != FAILURE) {
 			char *param_name = NULL;
-			zend_str_size_uint param_name_len;
+			php_size_t param_name_len;
 			php_uint_t param_index = i;
 
 			zend_hash_get_current_key_ex(Z_ARRVAL_P(ret), &param_name, &param_name_len, &param_index, 0, &pos);
@@ -4483,7 +4483,7 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name)
 {
 	sdlFunctionPtr *tmp;
 
-	zend_str_size_int len = strlen(function_name);
+	php_size_t len = strlen(function_name);
 	char *str = estrndup(function_name,len);
 	php_strtolower(str,len);
 	if (sdl != NULL) {

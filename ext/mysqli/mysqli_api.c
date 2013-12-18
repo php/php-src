@@ -220,7 +220,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
 	char			*types;
-	zend_str_size_int				types_len;
+	php_size_t				types_len;
 	php_uint_t	rc;
 
 	/* calculate and check number of parameters */
@@ -521,7 +521,7 @@ PHP_FUNCTION(mysqli_change_user)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
 	char		*user, *password, *dbname;
-	zend_str_size_int			user_len, password_len, dbname_len;
+	php_size_t			user_len, password_len, dbname_len;
 	php_uint_t		rc;
 #if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
 	const		CHARSET_INFO * old_charset;
@@ -704,7 +704,7 @@ PHP_FUNCTION(mysqli_commit)
 	zval		*mysql_link;
 	php_int_t		flags = TRANS_COR_NO_OPT;
 	char *		name = NULL;
-	zend_str_size_int			name_len = 0;
+	php_size_t			name_len = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|iS", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
 		return;
@@ -755,7 +755,7 @@ PHP_FUNCTION(mysqli_data_seek)
 PHP_FUNCTION(mysqli_debug)
 {
 	char	*debug;
-	zend_str_size_int		debug_len;
+	php_size_t		debug_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &debug, &debug_len) == FAILURE) {
 		return;
@@ -1809,7 +1809,7 @@ PHP_FUNCTION(mysqli_prepare)
 	MY_MYSQL		*mysql;
 	MY_STMT			*stmt;
 	char			*query = NULL;
-	zend_str_size_int				query_len;
+	php_size_t				query_len;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE	*mysqli_resource;
 
@@ -1896,7 +1896,7 @@ PHP_FUNCTION(mysqli_real_query)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*query = NULL;
-	zend_str_size_int			query_len;
+	php_size_t			query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &mysql_link, mysqli_link_class_entry, &query, &query_len) == FAILURE) {
 		return;
@@ -1926,7 +1926,7 @@ PHP_FUNCTION(mysqli_real_escape_string) {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
 	char		*escapestr, *newstr;
-	zend_str_size_int			escapestr_len, newstr_len;
+	php_size_t			escapestr_len, newstr_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &mysql_link, mysqli_link_class_entry, &escapestr, &escapestr_len) == FAILURE) {
 		return;
@@ -1950,7 +1950,7 @@ PHP_FUNCTION(mysqli_rollback)
 	zval		*mysql_link;
 	php_int_t		flags = TRANS_COR_NO_OPT;
 	char *		name = NULL;
-	zend_str_size_int			name_len = 0;
+	php_size_t			name_len = 0;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|iS", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
 		return;
@@ -1976,7 +1976,7 @@ PHP_FUNCTION(mysqli_stmt_send_long_data)
 	zval	*mysql_stmt;
 	char	*data;
 	php_int_t	param_nr;
-	zend_str_size_int		data_len;
+	php_size_t		data_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OiS", &mysql_stmt, mysqli_stmt_class_entry, &param_nr, &data, &data_len) == FAILURE) {
 		return;
@@ -2170,7 +2170,7 @@ PHP_FUNCTION(mysqli_select_db)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*dbname;
-	zend_str_size_int			dbname_len;
+	php_size_t			dbname_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &mysql_link, mysqli_link_class_entry, &dbname, &dbname_len) == FAILURE) {
 		return;
@@ -2211,7 +2211,7 @@ PHP_FUNCTION(mysqli_ssl_set)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char		*ssl_parm[5];
-	zend_str_size_int			ssl_parm_len[5];
+	php_size_t			ssl_parm_len[5];
 	int i;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OSSSSS", &mysql_link, mysqli_link_class_entry, &ssl_parm[0], &ssl_parm_len[0], &ssl_parm[1], &ssl_parm_len[1], &ssl_parm[2], &ssl_parm_len[2], &ssl_parm[3], &ssl_parm_len[3], &ssl_parm[4], &ssl_parm_len[4])   == FAILURE) {
@@ -2430,7 +2430,7 @@ PHP_FUNCTION(mysqli_stmt_prepare)
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
 	char	*query;
-	zend_str_size_int		query_len;
+	php_size_t		query_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &mysql_stmt, mysqli_stmt_class_entry, &query, &query_len) == FAILURE) {
 		return;

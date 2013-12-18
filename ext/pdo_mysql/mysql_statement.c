@@ -675,7 +675,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 		PDO_DBG_RETURN(1);
 	}
 	for (i = 0; i < stmt->column_count; i++) {
-		zend_str_size_int namelen;
+		php_size_t namelen;
 
 		if (S->H->fetch_table_names) {
 			namelen = spprintf(&cols[i].name, 0, "%s.%s", S->fields[i].table, S->fields[i].name);

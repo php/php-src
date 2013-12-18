@@ -33,7 +33,7 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    zend_str_size_int len = strlen(version);
+    php_size_t len = strlen(version);
     char *buf = safe_emalloc(len, 2, 1), *q, lp, lq;
     const char *p;
 
@@ -211,7 +211,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2, *op = NULL;
-	zend_str_size_int v1_len, v2_len, op_len = 0;
+	php_size_t v1_len, v2_len, op_len = 0;
 	int compare, argc;
 
 	argc = ZEND_NUM_ARGS();

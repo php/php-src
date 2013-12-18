@@ -819,7 +819,7 @@ use_string:
 				case MYSQL_TYPE_VAR_STRING:
 send_string:
 					{
-						zend_str_size_uint len = Z_STRSIZE_P(data);
+						php_size_t len = Z_STRSIZE_P(data);
 						/* to is after p. The latter hasn't been moved */
 						*p = php_mysqlnd_net_store_length(*p, len);
 						memcpy(*p, Z_STRVAL_P(data), len);

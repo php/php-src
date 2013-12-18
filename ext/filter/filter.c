@@ -77,7 +77,7 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC);
+static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC);
 static unsigned int php_sapi_filter_init(TSRMLS_D);
 
 /* {{{ arginfo */
@@ -404,7 +404,7 @@ static void php_zval_filter(zval **value, php_int_t filter, php_int_t flags, zva
 }
 /* }}} */
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC) /* {{{ */
+static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -571,7 +571,7 @@ PHP_FUNCTION(filter_has_var)
 {
 	php_int_t        arg;
 	char       *var;
-	zend_str_size_int         var_len;
+	php_size_t         var_len;
 	zval       *array_ptr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS", &arg, &var, &var_len) == FAILURE) {
@@ -681,7 +681,7 @@ static void php_filter_call(zval **filtered, php_int_t filter, zval **filter_arg
 static void php_filter_array_handler(zval *input, zval **op, zval *return_value, zend_bool add_empty TSRMLS_DC) /* {{{ */
 {
 	char *arg_key;
-	zend_str_size_uint arg_key_len;
+	php_size_t arg_key_len;
 	php_uint_t index;
 	HashPosition pos;
 	zval **tmp, **arg_elm;
@@ -741,7 +741,7 @@ PHP_FUNCTION(filter_input)
 	zval **filter_args = NULL, **tmp;
 	zval  *input = NULL;
 	char *var;
-	zend_str_size_int var_len;
+	php_size_t var_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS|iZ", &fetch_from, &var, &var_len, &filter, &filter_args) == FAILURE) {
 		return;
@@ -906,7 +906,7 @@ PHP_FUNCTION(filter_list)
 PHP_FUNCTION(filter_id)
 {
 	int i;
-	zend_str_size_int filter_len;
+	php_size_t filter_len;
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 	char *filter;
 

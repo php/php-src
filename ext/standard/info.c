@@ -61,10 +61,10 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static zend_str_size_int php_info_print_html_esc(const char *str, zend_str_size_int len) /* {{{ */
+static php_size_t php_info_print_html_esc(const char *str, php_size_t len) /* {{{ */
 {
 	size_t new_len;
-	zend_str_size_int written;
+	php_size_t written;
 	char *new_str;
 	TSRMLS_FETCH();
 
@@ -75,10 +75,10 @@ static zend_str_size_int php_info_print_html_esc(const char *str, zend_str_size_
 }
 /* }}} */
 
-static zend_str_size_int php_info_printf(const char *fmt, ...) /* {{{ */
+static php_size_t php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
-	zend_str_size_int len, written;
+	php_size_t len, written;
 	va_list argv;
 	TSRMLS_FETCH();
 
@@ -92,7 +92,7 @@ static zend_str_size_int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static zend_str_size_int php_info_print(const char *str) /* {{{ */
+static php_size_t php_info_print(const char *str) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, strlen(str) TSRMLS_CC);
@@ -102,7 +102,7 @@ static zend_str_size_int php_info_print(const char *str) /* {{{ */
 static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	char *key;
-	zend_str_size_uint len;
+	php_size_t len;
 
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
@@ -196,7 +196,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
 	char *string_key;
-	zend_str_size_uint string_len;
+	php_size_t string_len;
 	zend_uint_t num_key;
 
 	zend_is_auto_global(name, name_length TSRMLS_CC);
@@ -991,7 +991,7 @@ PHPAPI void php_info_print_hr(void) /* {{{ */
 
 PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
 {
-	zend_str_size_int spaces;
+	php_size_t spaces;
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
-	zend_str_size_int ext_name_len = 0;
+	php_size_t ext_name_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &ext_name, &ext_name_len) == FAILURE) {
 		return;
@@ -1215,7 +1215,7 @@ PHP_FUNCTION(php_sapi_name)
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
-	zend_str_size_int modelen = sizeof("a")-1;
+	php_size_t modelen = sizeof("a")-1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &mode, &modelen) == FAILURE) {
 		return;

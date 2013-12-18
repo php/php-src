@@ -30,7 +30,7 @@ typedef unsigned long filter_map[256];
 static void php_filter_encode_html(zval *value, const unsigned char *chars)
 {
 	smart_str str = {0};
-	zend_str_size_int len = Z_STRSIZE_P(value);
+	php_size_t len = Z_STRSIZE_P(value);
 	unsigned char *s = (unsigned char *)Z_STRVAL_P(value);
 	unsigned char *e = s + len;
 
@@ -64,7 +64,7 @@ static const unsigned char hexchars[] = "0123456789ABCDEF";
 
 #define DEFAULT_URL_ENCODE    LOWALPHA HIALPHA DIGIT "-._"
 
-static void php_filter_encode_url(zval *value, const unsigned char* chars, const zend_str_size_int char_len, int high, int low, int encode_nul)
+static void php_filter_encode_url(zval *value, const unsigned char* chars, const php_size_t char_len, int high, int low, int encode_nul)
 {
 	unsigned char *str, *p;
 	unsigned char tmp[256];
@@ -145,7 +145,7 @@ static void filter_map_init(filter_map *map)
 
 static void filter_map_update(filter_map *map, int flag, const unsigned char *allowed_list)
 {
-	zend_str_size_int l, i;
+	php_size_t l, i;
 
 	l = strlen((const char*)allowed_list);
 	for (i = 0; i < l; ++i) {
@@ -368,7 +368,7 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	char *buf;
-	zend_str_size_int   len;
+	php_size_t   len;
 	
 	/* just call php_addslashes quotes */
 	buf = php_addslashes(Z_STRVAL_P(value), Z_STRSIZE_P(value), &len, 0 TSRMLS_CC);

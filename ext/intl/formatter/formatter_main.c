@@ -29,10 +29,10 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern = NULL;
-	zend_str_size_int         locale_len = 0, pattern_len = 0;
+	php_size_t         locale_len = 0, pattern_len = 0;
 	php_int_t        style;
 	UChar*      spattern     = NULL;
-	zend_str_size_int         spattern_len = 0;
+	php_size_t         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */

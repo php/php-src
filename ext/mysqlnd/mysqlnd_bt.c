@@ -124,7 +124,7 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			break;
 		case IS_OBJECT: {
 			char *class_name;
-			zend_str_size_uint class_name_len;
+			php_size_t class_name_len;
 			int dupl;
 
 			TRACE_APPEND_STR("Object(");

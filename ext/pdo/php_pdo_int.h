@@ -55,7 +55,7 @@ extern zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
 
-extern pdo_driver_t *pdo_find_driver(const char *name, zend_str_size_int namelen);
+extern pdo_driver_t *pdo_find_driver(const char *name, php_size_t namelen);
 
 int pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);

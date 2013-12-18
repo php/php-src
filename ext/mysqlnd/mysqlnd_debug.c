@@ -447,7 +447,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 			zend_hash_internal_pointer_reset_ex(&self->function_profiles, &pos_values);
 			while (zend_hash_get_current_data_ex(&self->function_profiles, (void **) &f_profile, &pos_values) == SUCCESS) {
 				char	*string_key = NULL;
-				zend_str_size_uint	string_key_len;
+				php_size_t	string_key_len;
 				php_uint_t	num_key;
 
 				zend_hash_get_current_key_ex(&self->function_profiles, &string_key, &string_key_len, &num_key, 0, &pos_values);

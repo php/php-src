@@ -551,14 +551,14 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	zend_str_size_int val_len;
+	php_size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *val;
 	char *key_str, *key_free;
-	zend_str_size_size_t key_len;
+	php_size_t key_len;
 
 	if (zend_parse_parameters(ac TSRMLS_CC, "zSr", &key, &val, &val_len, &id) == FAILURE) {
 		return;
@@ -619,7 +619,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dba_info *info, *other;
 	dba_handler *hptr;
 	char *key = NULL, *error = NULL;
-	zend_str_size_int keylen = 0;
+	php_size_t keylen = 0;
 	int i;
 	int lock_mode, lock_flag, lock_dbf = 0;
 	char *file_mode;
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
 	char *key, *name;
-	zend_str_size_int key_len;
+	php_size_t key_len;
 
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;

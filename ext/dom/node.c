@@ -1510,7 +1510,7 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_node_is_supported)
 {
 	zval *id;
-	zend_str_size_int feature_len, version_len;
+	php_size_t feature_len, version_len;
 	char *feature, *version;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OSS", &id, dom_node_class_entry, &feature, &feature_len, &version, &version_len) == FAILURE) {
@@ -1598,7 +1598,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 	xmlNodePtr nodep, lookupp = NULL;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	zend_str_size_int uri_len = 0;
+	php_size_t uri_len = 0;
 	char *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
@@ -1648,7 +1648,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	zend_str_size_int uri_len = 0;
+	php_size_t uri_len = 0;
 	char *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS", &id, dom_node_class_entry, &uri, &uri_len) == FAILURE) {
@@ -1681,7 +1681,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 	xmlNodePtr nodep;
 	dom_object *intern;
 	xmlNsPtr nsptr;
-	zend_str_size_int prefix_len = 0;
+	php_size_t prefix_len = 0;
 	char *prefix=NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS!", &id, dom_node_class_entry, &prefix, &prefix_len) == FAILURE) {
@@ -1757,7 +1757,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 	xmlChar **inclusive_ns_prefixes = NULL;
 	char *file = NULL;
 	int ret = -1;
-	zend_str_size_int file_len = 0;
+	php_size_t file_len = 0;
 	xmlOutputBufferPtr buf;
 	xmlXPathContextPtr ctxp=NULL;
 	xmlXPathObjectPtr xpathobjp=NULL;
@@ -1826,7 +1826,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
 					char *prefix;
 					php_uint_t idx;
-					zend_str_size_uint prefix_key_len;
+					php_size_t prefix_key_len;
 
 					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
 						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {

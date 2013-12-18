@@ -34,11 +34,11 @@
 
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
 #define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
-#define PS_READ_ARGS void **mod_data, const char *key, char **val, zend_str_size_int *vallen TSRMLS_DC
-#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const zend_str_size_int vallen TSRMLS_DC
+#define PS_READ_ARGS void **mod_data, const char *key, char **val, php_size_t *vallen TSRMLS_DC
+#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const php_size_t vallen TSRMLS_DC
 #define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
 #define PS_GC_ARGS void **mod_data, php_int_t maxlifetime, php_int_t *nrdels TSRMLS_DC
-#define PS_CREATE_SID_ARGS void **mod_data, zend_str_size_int *newlen TSRMLS_DC
+#define PS_CREATE_SID_ARGS void **mod_data, php_size_t *newlen TSRMLS_DC
 
 /* default create id function */
 PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
@@ -194,8 +194,8 @@ extern zend_module_entry session_module_entry;
 #define PS(v) (ps_globals.v)
 #endif
 
-#define PS_SERIALIZER_ENCODE_ARGS char **newstr, zend_str_size_int *newlen TSRMLS_DC
-#define PS_SERIALIZER_DECODE_ARGS const char *val, zend_str_size_int vallen TSRMLS_DC
+#define PS_SERIALIZER_ENCODE_ARGS char **newstr, php_size_t *newlen TSRMLS_DC
+#define PS_SERIALIZER_DECODE_ARGS const char *val, php_size_t vallen TSRMLS_DC
 
 typedef struct ps_serializer_struct {
 	const char *name;
@@ -254,7 +254,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 
 #define PS_ENCODE_VARS 											\
 	char *key;													\
-	zend_str_size_uint key_length;											\
+	php_size_t key_length;											\
 	php_uint_t num_key;												\
 	zval **struc;
 

@@ -49,7 +49,7 @@
 #define HT_DESTROYED		2
 #define HT_CLEANING			3
 
-static void _zend_is_inconsistent(const HashTable *ht, const char *file, zend_str_size_int line)
+static void _zend_is_inconsistent(const HashTable *ht, const char *file, zend_size_t line)
 {
 	if (ht->inconsistent==HT_OK) {
 		return;
@@ -98,7 +98,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, zend_st
 
 static void zend_hash_do_resize(HashTable *ht);
 
-ZEND_API zend_uint_t zend_hash_func(const char *arKey, zend_str_size_uint nKeyLength)
+ZEND_API zend_uint_t zend_hash_func(const char *arKey, zend_size_t nKeyLength)
 {
 	return zend_inline_hash_func(arKey, nKeyLength);
 }
@@ -188,7 +188,7 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 
 
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	zend_uint_t h;
 	uint nIndex;
@@ -254,7 +254,7 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_str
 	return SUCCESS;
 }
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	uint nIndex;
 	Bucket *p;
@@ -321,7 +321,7 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ze
 }
 
 
-ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength)
+ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, zend_size_t nKeyLength)
 {
 	void *dummy = (void *) 1;
 
@@ -434,7 +434,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	return SUCCESS;
 }
 
-ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, int flag)
+ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, int flag)
 {
 	uint nIndex;
 	Bucket *p;
@@ -855,7 +855,7 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
  * data is returned in pData. The reason is that there's no reason
  * someone using the hash table might not want to have NULL data
  */
-ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, void **pData)
+ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, void **pData)
 {
 	zend_uint_t h;
 	uint nIndex;
@@ -879,7 +879,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_str_siz
 }
 
 
-ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, void **pData)
+ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, void **pData)
 {
 	uint nIndex;
 	Bucket *p;
@@ -903,7 +903,7 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_s
 }
 
 
-ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength)
+ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_size_t nKeyLength)
 {
 	zend_uint_t h;
 	uint nIndex;
@@ -926,7 +926,7 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_str_s
 }
 
 
-ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h)
+ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h)
 {
 	uint nIndex;
 	Bucket *p;
@@ -1085,7 +1085,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, zend_str_size_uint *str_length, zend_uint_t *num_index, zend_bool duplicate, HashPosition *pos)
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, zend_size_t *str_length, zend_uint_t *num_index, zend_bool duplicate, HashPosition *pos)
 {
 	Bucket *p;
 
@@ -1169,7 +1169,7 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 /* This function changes key of current element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, zend_str_size_uint str_length, zend_uint_t num_index, int mode, HashPosition *pos)
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, zend_size_t str_length, zend_uint_t num_index, int mode, HashPosition *pos)
 {
 	Bucket *p, *q;
 	zend_uint_t h;

@@ -519,7 +519,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 PHP_FUNCTION(stream_wrapper_register)
 {
 	char *protocol, *classname;
-	zend_str_size protocol_len, classname_len;
+	php_size_t protocol_len, classname_len;
 	struct php_user_stream_wrapper * uwrap;
 	int rsrc_id;
 	php_int_t flags = 0;
@@ -564,7 +564,7 @@ PHP_FUNCTION(stream_wrapper_register)
 PHP_FUNCTION(stream_wrapper_unregister)
 {
 	char *protocol;
-	zend_str_size protocol_len;
+	php_size_t protocol_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
@@ -585,7 +585,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 PHP_FUNCTION(stream_wrapper_restore)
 {
 	char *protocol;
-	zend_str_size protocol_len;
+	php_size_t protocol_len;
 	php_stream_wrapper **wrapperpp = NULL, *wrapper;
 	HashTable *global_wrapper_hash;
 
@@ -619,7 +619,7 @@ PHP_FUNCTION(stream_wrapper_restore)
 }
 /* }}} */
 
-static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const char *buf, zend_str_size_size_t count TSRMLS_DC)
+static php_size_t php_userstreamop_write(php_stream *stream, const char *buf, php_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
@@ -627,7 +627,7 @@ static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const cha
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval **args[1];
 	zval *zbufptr;
-	zend_str_size didwrite = 0;
+	php_size_t didwrite = 0;
 
 	assert(us != NULL);
 
@@ -668,13 +668,13 @@ static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const cha
 	return didwrite;
 }
 
-static zend_str_size_size_t php_userstreamop_read(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
+static php_size_t php_userstreamop_read(php_stream *stream, char *buf, php_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	zval **args[1];
 	int call_result;
-	zend_str_size didread = 0;
+	php_size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval *zcount;
 
@@ -1508,12 +1508,12 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 
 }
 
-static zend_str_size_size_t php_userstreamop_readdir(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
+static php_size_t php_userstreamop_readdir(php_stream *stream, char *buf, php_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	int call_result;
-	zend_str_size didread = 0;
+	php_size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 

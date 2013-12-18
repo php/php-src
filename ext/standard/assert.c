@@ -142,7 +142,7 @@ PHP_FUNCTION(assert)
 {
 	zval **assertion;
 	php_int_t val;
-	zend_str_size_int description_len = 0;
+	php_size_t description_len = 0;
 	char *myeval = NULL;
 	char *compiled_string_description, *description = NULL;
 

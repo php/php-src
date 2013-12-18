@@ -515,7 +515,7 @@ void php_libxml_issue_error(int level, const char *msg TSRMLS_DC)
 static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
 {
 	char *buf;
-	zend_str_size_int len, len_iter, output = 0;
+	php_size_t len, len_iter, output = 0;
 
 	TSRMLS_FETCH();
 

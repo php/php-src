@@ -45,7 +45,7 @@
 
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
-	register zend_str_size_int i = strlen(message)-1;
+	register php_size_t i = strlen(message)-1;
 	char *tmp;
 
 	if (i>1 && (message[i-1] == '\r' || message[i-1] == '\n') && message[i] == '.') {
@@ -215,7 +215,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
@@ -223,7 +223,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size 
 #if HAVE_PQPREPARE
 	int ret;
 	char *nsql = NULL;
-	zend_str_size_int nsql_len = 0;
+	php_size_t nsql_len = 0;
 	int emulate = 0;
 #endif
 
@@ -285,7 +285,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_str_size 
 	return 1;
 }
 
-static php_int_t pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_size sql_len TSRMLS_DC)
+static php_int_t pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
@@ -314,7 +314,7 @@ static php_int_t pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_str_siz
 	return ret;
 }
 
-static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_size_int unquotedlen, char **quoted, zend_str_size_int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
+static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
 	unsigned char *escaped;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -351,7 +351,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, zend_str_si
 	return 1;
 }
 
-static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, zend_str_size_uint *len TSRMLS_DC)
+static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, php_size_t *len TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
@@ -525,7 +525,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	zval *pg_rows;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	zend_str_size_int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	php_size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -572,14 +572,14 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 
 	if (status == PGRES_COPY_IN && pgsql_result) {
 		int command_failed = 0;
-		zend_str_size_int buffer_len = 0;
+		php_size_t buffer_len = 0;
 		zval **tmp;
 		HashPosition pos;
 
 		PQclear(pgsql_result);
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
-			zend_str_size_int query_len;
+			php_size_t query_len;
 			convert_to_string_ex(tmp);
 		
 			if (buffer_len < Z_STRSIZE_PP(tmp)) {
@@ -637,7 +637,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *filename, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	zend_str_size_int  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	php_size_t  table_name_len, filename_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 	PGresult *pgsql_result;
 	ExecStatusType status;
@@ -736,7 +736,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL, *filename = NULL;
-	zend_str_size_int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
+	php_size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len, filename_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -831,7 +831,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	pdo_pgsql_db_handle *H;
 
 	char *table_name, *pg_delim = NULL, *pg_null_as = NULL, *pg_fields = NULL;
-	zend_str_size_int table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
+	php_size_t table_name_len, pg_delim_len = 0, pg_null_as_len = 0, pg_fields_len;
 	char *query;
 
 	PGresult *pgsql_result;
@@ -936,9 +936,9 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	Oid oid;
 	int lfd;
 	char *oidstr;
-	zend_str_size_int oidstrlen;
+	php_size_t oidstrlen;
 	char *modestr = "rb";
-	zend_str_size_int modestrlen;
+	php_size_t modestrlen;
 	int mode = INV_READ;
 	char *end_ptr;
 
@@ -987,7 +987,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 	pdo_pgsql_db_handle *H;
 	Oid oid;
 	char *oidstr, *end_ptr;
-	zend_str_size_int oidlen;
+	php_size_t oidlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S",
 				&oidstr, &oidlen)) {

@@ -98,7 +98,7 @@
 	smart_str_append_unsigned_ex((dest), (val), 0)
 
 #define smart_str_appendc_ex(dest, ch, what) do {					\
-	register zend_str_size __nl;											\
+	register php_size_t __nl;											\
 	smart_str_alloc4((dest), 1, (what), __nl);						\
 	(dest)->len = __nl;												\
 	((unsigned char *) (dest)->c)[(dest)->len - 1] = (ch);			\
@@ -114,7 +114,7 @@
 } while (0)
 
 #define smart_str_appendl_ex(dest, src, nlen, what) do {			\
-	register zend_str_size __nl;											\
+	register php_size_t __nl;											\
 	smart_str *__dest = (smart_str *) (dest);						\
 																	\
 	smart_str_alloc4(__dest, (nlen), (what), __nl);					\
@@ -180,7 +180,7 @@ static inline char *smart_str_print_unsigned(char *buf, zend_int_t num) {
 	smart_str_append_generic_ex((dest), (num), (type), zend_uint_t, _long)
 
 #define smart_str_append_str_size_ex(dest, num, type) \
-	smart_str_append_generic_ex((dest), (num), (type), zend_str_size, _long)
+	smart_str_append_generic_ex((dest), (num), (type), php_size_t, _long)
 
 #define smart_str_append_php_int_ex(dest, num, type) \
 	smart_str_append_generic_ex((dest), (num), (type), zend_int_t, _long)

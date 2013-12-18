@@ -207,11 +207,11 @@ PHP_FUNCTION( numfmt_set_attribute )
  */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
-	zend_str_size_int slength = 0;
+	php_size_t slength = 0;
 	UChar *svalue = NULL;
 	php_int_t attribute;
 	char *value;
-	zend_str_size_int len;
+	php_size_t len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -299,9 +299,9 @@ PHP_FUNCTION( numfmt_set_symbol )
 {
 	php_int_t       symbol;
 	char*      value     = NULL;
-	zend_str_size_int        value_len = 0;
+	php_size_t        value_len = 0;
 	UChar*     svalue  = 0;
-	zend_str_size_int        slength = 0;
+	php_size_t        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -387,8 +387,8 @@ PHP_FUNCTION( numfmt_get_pattern )
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
-	zend_str_size_int         value_len = 0;
-	zend_str_size_int         slength = 0;
+	php_size_t         value_len = 0;
+	php_size_t         slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 

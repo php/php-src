@@ -36,7 +36,7 @@ PHP_INI_END()
 PHP_FUNCTION(confirm_extname_compiled)
 {
 	char *arg = NULL;
-	zend_str_size_int arg_len, len;
+	php_size_t arg_len, len;
 	char *strg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {

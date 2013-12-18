@@ -31,6 +31,6 @@ PHP_FUNCTION(headers_list);
 PHP_FUNCTION(http_response_code);
 
 PHPAPI int php_header(TSRMLS_D);
-PHPAPI int php_setcookie(char *name, zend_str_size_int name_len, char *value, zend_str_size_int value_len, time_t expires, char *path, zend_str_size_int path_len, char *domain, zend_str_size_int domain_len, int secure, int url_encode, int httponly TSRMLS_DC);
+PHPAPI int php_setcookie(char *name, php_size_t name_len, char *value, php_size_t value_len, time_t expires, char *path, php_size_t path_len, char *domain, php_size_t domain_len, int secure, int url_encode, int httponly TSRMLS_DC);
 
 #endif

@@ -160,7 +160,7 @@ typedef struct _spl_dual_it_object {
 			php_int_t             preg_flags;
 			pcre_cache_entry *pce;
 			char             *regex;
-			zend_str_size_uint             regex_len;
+			php_size_t             regex_len;
 		} regex;
 #endif
 		_spl_cbfilter_it_intern *cbfilter;

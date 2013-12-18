@@ -202,15 +202,15 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 #endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, zend_str_size_int domain_len, uint32_t option, int mode)
+		const char *domain, php_size_t domain_len, uint32_t option, int mode)
 {
 	UChar* ustring = NULL;
-	zend_str_size_int ustring_len = 0;
+	php_size_t ustring_len = 0;
 	UErrorCode status;
 	char     *converted_utf8;
-	zend_str_size_int   converted_utf8_len;
+	php_size_t   converted_utf8_len;
 	UChar     converted[MAXPATHLEN];
-	zend_str_size_int   converted_ret_len;
+	php_size_t   converted_ret_len;
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
@@ -262,7 +262,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	zend_str_size_int domain_len;
+	php_size_t domain_len;
 	php_int_t option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;

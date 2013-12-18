@@ -181,7 +181,7 @@ PHP_FUNCTION(token_get_all)
 {
 	char *source = NULL;
 	int argc = ZEND_NUM_ARGS();
-	zend_str_size_int source_len;
+	php_size_t source_len;
 	zval source_z;
 	zend_lex_state original_lex_state;
 
