@@ -642,7 +642,7 @@ static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf 
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
 	int ret;
-	php_int_t er;
+	zend_size_t er;
 
 	if (!filename) {
 		return FAILURE;
@@ -788,7 +788,7 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 				php_stream *stream = (php_stream *)file_handle->handle.stream.handle;
 				php_stream_statbuf sb;
 				int ret;
-				php_int_t er;
+				zend_size_t er;
 
 				if (!stream ||
 				    !stream->ops ||
