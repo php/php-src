@@ -18,6 +18,8 @@
 #ifndef INTL_CONVERT_H
 #define INTL_CONVERT_H
 
+#include "php.h"
+
 #include <unicode/ustring.h>
 
 void intl_convert_utf8_to_utf16(
