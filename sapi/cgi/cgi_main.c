@@ -928,7 +928,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 				php_handle_aborted_connection();
 			}
 		} else {
-			sapi_cgi_flush(SG(server_context));
+			sapi_cgi_flush(SG(server_context) TSRMLS_CC);
 		}
 	}
 	return SUCCESS;
