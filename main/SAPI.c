@@ -992,7 +992,7 @@ SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, ch
 SAPI_API int sapi_flush(TSRMLS_D)
 {
 	if (sapi_module.flush) {
-		sapi_module.flush(SG(server_context));
+		sapi_module.flush(SG(server_context) TSRMLS_CC);
 		return SUCCESS;
 	} else {
 		return FAILURE;

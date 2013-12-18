@@ -320,7 +320,7 @@ static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-static void sapi_cli_flush(void *server_context) /* {{{ */
+static void sapi_cli_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.

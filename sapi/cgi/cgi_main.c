@@ -324,14 +324,14 @@ static int sapi_fcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_cgi_flush(void *server_context)
+static void sapi_cgi_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void sapi_fcgi_flush(void *server_context)
+static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 

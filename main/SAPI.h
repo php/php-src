@@ -227,7 +227,7 @@ struct _sapi_module_struct {
 	int (*deactivate)(TSRMLS_D);
 
 	int (*ub_write)(const char *str, unsigned int str_length TSRMLS_DC);
-	void (*flush)(void *server_context);
+	void (*flush)(void *server_context TSRMLS_DC);
 	struct stat *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
 

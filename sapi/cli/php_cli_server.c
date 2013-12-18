@@ -614,10 +614,9 @@ static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) 
 	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
-static void sapi_cli_server_flush(void *server_context) /* {{{ */
+static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
 {
 	php_cli_server_client *client = server_context;
-	TSRMLS_FETCH();
 
 	if (!client) {
 		return;

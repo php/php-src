@@ -157,7 +157,7 @@ static int sapi_lsapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ sapi_lsapi_flush
  */
-static void sapi_lsapi_flush( void * server_context )
+static void sapi_lsapi_flush( void * server_context TSRMLS_DC )
 {
     if ( lsapi_mode ) {
         if ( LSAPI_Flush() == -1) {
