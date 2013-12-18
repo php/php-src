@@ -94,8 +94,8 @@ static int validate_api_restriction(TSRMLS_D)
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
-	zend_size_t *p;
-	zend_size_t memsize;
+	php_int_t *p;
+	php_int_t memsize;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -105,7 +105,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (zend_size_t *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	memsize = atoi(new_value);
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -132,8 +132,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 {
-	zend_size_t *p;
-	zend_size_t size;
+	php_int_t *p;
+	php_int_t size;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -143,7 +143,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (zend_size_t *) (base + (size_t)mh_arg1);
+	p = (php_int_t *) (base + (size_t)mh_arg1);
 	size = atoi(new_value);
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
@@ -179,7 +179,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 {
 	double *p;
-	zend_size_t percentage;
+	php_int_t percentage;
 #ifndef ZTS
 	char *base = (char *) mh_arg2;
 #else
@@ -519,7 +519,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 			add_assoc_stringl(persistent_script_report, "last_used", str, len, 1);
 			add_assoc_long(persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
 			if (ZCG(accel_directives).validate_timestamps) {
-				add_assoc_long(persistent_script_report, "timestamp", (zend_size_t)script->timestamp);
+				add_assoc_long(persistent_script_report, "timestamp", (php_int_t)script->timestamp);
 			}
 			timerclear(&exec_time);
 			timerclear(&fetch_time);
@@ -536,7 +536,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
    Obtain statistics information regarding code acceleration */
 static ZEND_FUNCTION(opcache_get_status)
 {
-	zend_size_t reqs;
+	php_int_t reqs;
 	zval *memory_usage,*statistics,*scripts;
 	zend_bool fetch_scripts = 1;
 
