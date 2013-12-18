@@ -1001,14 +1001,19 @@ phpdbg_main:
 #endif
 
 			case 'V': {
+				sapi_startup(phpdbg);
+				phpdbg->startup(phpdbg);
 				printf(
-					"phpdbg %s (built: %s %s)\nCopyright (c) 2013 %s\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n",
+					"phpdbg %s (built: %s %s)\nCopyright (c) 2013 %s\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,
 					PHPDBG_AUTHORS,
-					PHP_VERSION
+					PHP_VERSION,
+					get_zend_version()
 				);
+				sapi_deactivate(TSRMLS_C);
+				sapi_shutdown();
 				return 0;
 			} break;
 		}
