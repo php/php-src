@@ -115,6 +115,12 @@ PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class,
 	}
 
 	if (class != NULL) {
+	
+		if (str[0] == '\\') {
+			str++;
+			len--;
+		}
+		
 		*class = estrndup(str, sep - str);
 		(*class)[sep - str] = 0;
 	}
