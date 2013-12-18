@@ -1020,6 +1020,10 @@ PHPDBG_COMMAND(watch) /* {{{ */
 			phpdbg_create_var_watchpoint(param->str, param->len TSRMLS_CC);
 			break;
 
+		case EMPTY_PARAM:
+			phpdbg_list_watchpoints(TSRMLS_C);
+			break;
+
 		phpdbg_default_switch_case();
 	}
 

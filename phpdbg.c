@@ -177,6 +177,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(seek));
 	zend_hash_destroy(&PHPDBG_G(registered));
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
+	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));

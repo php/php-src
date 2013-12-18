@@ -48,10 +48,10 @@ struct _phpdbg_watchpoint_t {
 	char *name_in_parent;
 	size_t name_in_parent_len;
 	char *str;
+	size_t str_len;
 	union {
 		zval *zv;
 		HashTable *ht;
-		zend_llist *llist;
 		void *ptr;
 	} addr;
 	size_t size;
@@ -67,5 +67,7 @@ void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch);
 int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC);
 
 int phpdbg_print_changed_zvals(TSRMLS_D);
+
+void phpdbg_list_watchpoints(TSRMLS_D);
 
 #endif

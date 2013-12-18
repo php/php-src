@@ -50,5 +50,18 @@ function phpdbg_test_ob()
 	echo $b;
 }
 
+$array = [
+	1,
+	2,
+	[3, 4],
+	[5, 6],
+];
+
+array_walk($array, function (&$item) {
+	if (is_array($item))
+		$item[0] += 2;
+	else
+		$item -= 1;
+});
 
 ?>

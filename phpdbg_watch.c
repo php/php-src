@@ -93,10 +93,113 @@ void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch) {
 	watch->type = WATCH_ON_ZVAL;
 }
 
-int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC) {
+static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i TSRMLS_DC) {
+	zend_bool new_index = 1;
+	char *last_index;
+	int index_len = 0;
 	zval **zv;
-	phpdbg_watchpoint_t *watch = emalloc(sizeof(phpdbg_watchpoint_t));
 
+	if (len < 2 || *input != '$') {
+		goto error;
+	}
+
+	while (i++ < len) {
+		if (i == len) {
+			new_index = 1;
+		} else {
+			switch (input[i]) {
+				case '[':
+					new_index = 1;
+					break;
+				case ']':
+					break;
+				case '>':
+					if (last_index[index_len - 1] == '-') {
+						new_index = 1;
+						index_len--;
+					}
+					break;
+
+				default:
+					if (new_index) {
+						last_index = input + i;
+						new_index = 0;
+					}
+					if (input[i - 1] == ']') {
+						goto error;
+					}
+					index_len++;
+			}
+		}
+
+		if (new_index && index_len == 0) {
+			HashPosition position;
+			for (zend_hash_internal_pointer_reset_ex(parent, &position);
+			     zend_hash_get_current_data_ex(parent, (void **)&zv, &position) == SUCCESS;
+			     zend_hash_move_forward_ex(parent, &position)) {
+				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
+					zval *key = emalloc(sizeof(zval));
+					phpdbg_watchpoint_t *watch = emalloc(sizeof(phpdbg_watchpoint_t));
+					zend_hash_get_current_key_zval_ex(parent, key, &position);
+					convert_to_string(key);
+					watch->str_len = asprintf(&watch->str, "%.*s%.*s%s", i, input, Z_STRLEN_P(key), Z_STRVAL_P(key), input[len - 1] == ']'?"]":"");
+					efree(key);
+					watch->name_in_parent = estrndup(last_index, index_len);
+					watch->name_in_parent_len = index_len;
+					watch->parent_container = parent;
+					phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
+					phpdbg_store_watchpoint(watch TSRMLS_CC);
+					zend_hash_add(&PHPDBG_G(watchpoints), watch->str, watch->str_len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
+
+					phpdbg_activate_watchpoint(watch);
+				} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+					phpdbg_watchpoint_parse_input(input, len, Z_OBJPROP_PP(zv), i TSRMLS_CC);
+				} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+					phpdbg_watchpoint_parse_input(input, len, Z_ARRVAL_PP(zv), i TSRMLS_CC);
+				} else {
+					/* Ignore silently */
+				}
+			}
+			return SUCCESS;
+		} else if (new_index) {
+			char last_chr = last_index[index_len];
+			last_index[index_len] = 0;
+			if (zend_symtable_find(parent, last_index, index_len + 1, (void **)&zv) == FAILURE) {
+				phpdbg_error("%.*s is undefined", i, input);
+				return FAILURE;
+			}
+			last_index[index_len] = last_chr;
+			if (i == len) {
+				phpdbg_watchpoint_t *watch = emalloc(sizeof(phpdbg_watchpoint_t));
+				watch->str = estrndup(input, len);
+				watch->str_len = len;
+				watch->name_in_parent = estrndup(last_index, index_len);
+				watch->name_in_parent_len = index_len;
+				watch->parent_container = parent;
+				phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
+				phpdbg_store_watchpoint(watch TSRMLS_CC);
+				zend_hash_add(&PHPDBG_G(watchpoints), input, len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
+
+				phpdbg_activate_watchpoint(watch);
+			} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+				parent = Z_OBJPROP_PP(zv);
+			} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+				parent = Z_ARRVAL_PP(zv);
+			} else {
+				phpdbg_error("%.*s is nor an array nor an object", i, input);
+				return FAILURE;
+			}
+			index_len = 0;
+		}
+	}
+
+	return SUCCESS;
+	error:
+		phpdbg_error("Malformed input");
+		return FAILURE;
+}
+
+int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 	if (!EG(active_op_array)) {
 		phpdbg_error("No active op array!");
 		return SUCCESS;
@@ -111,22 +214,7 @@ int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC) {
 		}
 	}
 
-	watch->str = estrndup(name, len);
-	watch->parent_container = EG(current_execute_data)->symbol_table;
-	watch->name_in_parent = estrndup(name, len);
-	watch->name_in_parent_len = len + 1;
-
-	/* Lookup current symbol table */
-	if (zend_hash_find(EG(current_execute_data)->symbol_table, name, len + 1, (void **)&zv) == SUCCESS) {
-		phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
-		zend_hash_add(&PHPDBG_G(watchpoints), name, len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
-		phpdbg_store_watchpoint(watch TSRMLS_CC);
-
-		phpdbg_activate_watchpoint(watch);
-		return SUCCESS;
-	}
-
-	return FAILURE;
+	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0 TSRMLS_CC);
 }
 
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC) {
@@ -229,9 +317,9 @@ static int phpdbg_print_changed_zval(void *llist_data) {
 					phpdbg_writeln("\nOld refcount: %d; Old is_ref: %d", ((zval *)oldPtr)->refcount__gc, ((zval *)oldPtr)->is_ref__gc);
 
 					/* check if zval was removed */
-					if (((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_hash_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len)) {
-						phpdbg_notice("Watchpoint %s was unset, removing watchpoint");
-						phpdbg_deactivate_watchpoint(watch);
+					if (((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1)) {
+						phpdbg_notice("Watchpoint %s was unset, removing watchpoint", watch->str);
+						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 						break;
 					}
 
@@ -255,4 +343,15 @@ int phpdbg_print_changed_zvals(TSRMLS_D) {
 	zend_llist_apply_with_del(&PHPDBG_G(watchlist_mem), phpdbg_print_changed_zval);
 
 	return PHPDBG_G(watchpoint_hit)?SUCCESS:FAILURE;
+}
+
+void phpdbg_list_watchpoints(TSRMLS_D) {
+	HashPosition position;
+	phpdbg_watchpoint_t **watch;
+
+	for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(watchpoints), &position);
+	     zend_hash_get_current_data_ex(&PHPDBG_G(watchpoints), (void**) &watch, &position) == SUCCESS;
+	     zend_hash_move_forward_ex(&PHPDBG_G(watchpoints), &position)) {
+		phpdbg_writeln("%.*s", (int)(*watch)->str_len, (*watch)->str);
+	}
 }
