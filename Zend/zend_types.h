@@ -36,14 +36,15 @@ typedef unsigned short zend_ushort;
 # else
 #  define ZEND_SIZE_MAX  SIZE_MAX
 # endif
+typedef size_t zend_size_t;
 #else
 # if defined(ZEND_WIN32)
 #  define ZEND_SIZE_MAX  _UI32_MAX
 # else
 #  define ZEND_SIZE_MAX SIZE_MAX
 # endif
+typedef unsigned int zend_size_t;
 #endif
-typedef size_t zend_size_t;
 
 #define HAVE_ZEND_LONG64
 #ifdef ZEND_WIN32
