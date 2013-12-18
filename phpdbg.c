@@ -499,9 +499,14 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 	return phpdbg_write("%s", message);
 } /* }}} */
 
+#if PHP_VERSION_ID >= 50700
+static inline void php_sapi_phpdbg_flush(void *context TSRMLS_DC)  /* {{{ */
+{
+#else
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
 	TSRMLS_FETCH();
+#endif
 
 	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
