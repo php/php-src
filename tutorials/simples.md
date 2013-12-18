@@ -42,7 +42,7 @@ phpdbg> print class myClassName
 Introspection doesn't only provide you with names, but the addresses of every opcode in every statement, which you may use to specify with as much precision as 
 is possible where to break execution.
 
-**There is a print command for particular methods, useful if a class is very large and your screen is not !**
+**There is a print command for particular methods, useful if a class is very large and your screen is not!**
 
 At this point, break points are set; the next thing to do is issue the run command:
 

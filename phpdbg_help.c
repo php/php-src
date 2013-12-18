@@ -201,7 +201,7 @@ PHPDBG_HELP(run) /* {{{ */
 PHPDBG_HELP(eval) /* {{{ */
 {
 	phpdbg_help_header();
-	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though !!");
+	phpdbg_writeln("Access to eval() allows you to change the environment during execution, careful though!!");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("Examples");
 	phpdbg_writeln("\t%seval $variable", phpdbg_get_prompt(TSRMLS_C));
@@ -293,7 +293,7 @@ PHPDBG_HELP(break) /* {{{ */
 			++break_command;
 		}
 	}
-	phpdbg_writeln("Note: Conditional breaks are costly, use them sparingly !");
+	phpdbg_writeln("Note: Conditional breaks are costly, use them sparingly!");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -415,7 +415,7 @@ PHPDBG_HELP(list) /* {{{ */
 	phpdbg_writeln("\t%sl c myClass", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill print the source of \"myClass\"");
 	phpdbg_writeln(EMPTY);
-	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
+	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile!!");
 	phpdbg_writeln(EMPTY);
 	phpdbg_notice("The parameters enclosed by [] are usually optional, but help avoid ambigious commands");
 	phpdbg_writeln(EMPTY);
@@ -561,7 +561,7 @@ PHPDBG_HELP(shell) /* {{{ */
 	phpdbg_writeln("\t%s- ls /usr/src/php-src", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\tWill execute ls /usr/src/php-src, displaying the output in the console");
 	phpdbg_writeln(EMPTY);
-	phpdbg_writeln("Note: read only commands please !");
+	phpdbg_writeln("Note: read only commands please!");
 	phpdbg_help_footer();
 	return SUCCESS;
 } /* }}} */
@@ -583,8 +583,8 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -I\tN/A\t\t\tIgnore default .phpdbginit");
 	phpdbg_writeln(" -O\t-Omy.oplog\t\tSets oplog output file");
 	phpdbg_writeln(" -r\tN/A\t\t\tRun execution context");
-	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful !");
-	phpdbg_writeln(" -S\t-Scli\t\t\tOverride SAPI name, careful !");
+	phpdbg_writeln(" -E\tN/A\t\t\tEnable step through eval, careful!");
+	phpdbg_writeln(" -S\t-Scli\t\t\tOverride SAPI name, careful!");
 #ifndef _WIN32
 	phpdbg_writeln(" -l\t-l4000\t\t\tSetup remote console ports");
 	phpdbg_writeln(" -a\t-a192.168.0.3\t\tSetup remote console bind address");

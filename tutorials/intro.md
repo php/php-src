@@ -80,7 +80,7 @@ class phpdbg {
 
 $dbg = new phpdbg();
 
-var_dump($dbg->isGreat("PHP Rocks !!"));
+var_dump($dbg->isGreat("PHP Rocks!!"));
 ?>
 ```
 

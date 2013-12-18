@@ -421,7 +421,7 @@ namespace phpdbg\testing {
 		}
 		
 		/**
-		* Obvious !! 
+		* Obvious!! 
 		* 
 		*/
 		public function getResult() {

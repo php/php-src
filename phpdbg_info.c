@@ -223,7 +223,7 @@ PHPDBG_INFO(literal) /* {{{ */
 			literal++;
 		}
 	} else {
-		phpdbg_error("Not executing !");
+		phpdbg_error("Not executing!");
 	}
 
 	return SUCCESS;
@@ -244,7 +244,7 @@ PHPDBG_INFO(memory) /* {{{ */
 		phpdbg_writeln("|-------> Real:\t%.3f kB", 
 			(float) (zend_memory_peak_usage(1 TSRMLS_CC)/1024));
 	} else {
-		phpdbg_error("Memory Manager Disabled !");
+		phpdbg_error("Memory Manager Disabled!");
 	}
 	return SUCCESS;
 } /* }}} */

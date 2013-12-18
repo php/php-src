@@ -472,7 +472,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 			if ((!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && !phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) ||
 				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 				/* the user has gone away */
-				phpdbg_error("Failed to read console !");
+				phpdbg_error("Failed to read console!");
 				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
@@ -489,7 +489,7 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 
 			if (!cmd) {
 				/* the user has gone away */
-				phpdbg_error("Failed to read console !");
+				phpdbg_error("Failed to read console!");
 				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
@@ -646,7 +646,7 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 
 				rc = command->handler(&param, input TSRMLS_CC);
 
-				/* only set last command when it is worth it ! */
+				/* only set last command when it is worth it! */
 				if ((rc != FAILURE) &&
 					!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
 					PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
@@ -661,7 +661,7 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 	} else {
 		/* this should NEVER happen */
 		phpdbg_error(
-			"No function executed !!");
+			"No function executed!!");
 	}
 
 	return rc;

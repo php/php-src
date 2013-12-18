@@ -121,7 +121,7 @@ public class JConsole extends javax.swing.JDialog {
 
         hostnameLabel.setText("Hostname:");
 
-        input.setToolTipText("Enter phpdbg commands here !");
+        input.setToolTipText("Enter phpdbg commands here!");
         input.setEnabled(false);
         input.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -344,7 +344,7 @@ public class JConsole extends javax.swing.JDialog {
         if (address != null && address.length() > 0) {
             return address;
         } else {
-            messageBox("Invalid hostname provided !", MessageType.WARN);
+            messageBox("Invalid hostname provided!", MessageType.WARN);
         }
         
         return null;
@@ -354,7 +354,7 @@ public class JConsole extends javax.swing.JDialog {
         try {
             return Integer.parseInt(stdinPort.getText()); 
         } catch (NumberFormatException ex) {
-            messageBox("Invalid stdin port provided !", MessageType.WARN);
+            messageBox("Invalid stdin port provided!", MessageType.WARN);
         }
         return 0;
     }
@@ -363,7 +363,7 @@ public class JConsole extends javax.swing.JDialog {
         try {
             return Integer.parseInt(stdoutPort.getText()); 
         } catch (NumberFormatException ex) {
-            messageBox("Invalid stdout port provided !", MessageType.WARN);
+            messageBox("Invalid stdout port provided!", MessageType.WARN);
         }
         return 0;
     }
