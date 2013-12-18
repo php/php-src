@@ -448,7 +448,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 			Z_SET_REFCOUNT_P(tmp, 1);
 			Z_UNSET_ISREF_P(tmp);
 			if (check_empty == 1) {
-				retval = zend_is_true(tmp);
+				retval = zend_is_true(tmp TSRMLS_CC);
 			} else if (check_empty == 0) {
 				retval = (Z_TYPE_P(tmp) != IS_NULL);
 			}

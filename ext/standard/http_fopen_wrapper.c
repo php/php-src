@@ -682,7 +682,7 @@ finish:
 				response_code = 0;
 			}
 			if (context && SUCCESS==php_stream_context_get_option(context, "http", "ignore_errors", &tmpzval)) {
-				ignore_errors = zend_is_true(*tmpzval);
+				ignore_errors = zend_is_true(*tmpzval TSRMLS_CC);
 			}
 			/* when we request only the header, don't fail even on error codes */
 			if ((options & STREAM_ONLY_GET_HEADERS) || ignore_errors) {

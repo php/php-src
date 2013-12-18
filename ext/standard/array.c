@@ -4277,7 +4277,7 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-				int retval_true = zend_is_true(retval);
+				int retval_true = zend_is_true(retval TSRMLS_CC);
 
 				zval_ptr_dtor(&retval);
 				if (use_type) {
@@ -4290,7 +4290,7 @@ PHP_FUNCTION(array_filter)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
-		} else if (!zend_is_true(*operand)) {
+		} else if (!zend_is_true(*operand TSRMLS_CC)) {
 			continue;
 		}
 

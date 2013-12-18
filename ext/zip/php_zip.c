@@ -1010,7 +1010,11 @@ static int php_zip_has_property(zval *object, zval *member, int type KEY_ARG_DC 
 			Z_SET_REFCOUNT_P(tmp, 1);
 			Z_UNSET_ISREF_P(tmp);
 			if (type == 1) {
+#if PHP_VERSION_ID >= 50699
+				retval = zend_is_true(tmp TSRMLS_CC);
+#else
 				retval = zend_is_true(tmp);
+#endif
 			} else if (type == 0) {
 				retval = (Z_TYPE_P(tmp) != IS_NULL);
 			}

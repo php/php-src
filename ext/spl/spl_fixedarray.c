@@ -511,7 +511,7 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 		if (!intern->array->elements[index]) {
 			retval = 0;
 		} else if (check_empty) {
-			if (zend_is_true(intern->array->elements[index])) {
+			if (zend_is_true(intern->array->elements[index] TSRMLS_CC)) {
 				retval = 1;
 			} else {
 				retval = 0;
@@ -540,7 +540,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			return zend_is_true(intern->retval);
+			return zend_is_true(intern->retval TSRMLS_CC);
 		}
 		return 0;
 	}

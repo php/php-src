@@ -2101,7 +2101,7 @@ ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
 		ret = Z_LVAL_P(val);
 	} else {
-		ret = i_zend_is_true(val);
+		ret = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
@@ -2131,7 +2131,7 @@ ZEND_VM_HANDLER(44, ZEND_JMPNZ, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
 		ret = Z_LVAL_P(val);
 	} else {
-		ret = i_zend_is_true(val);
+		ret = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
@@ -2161,7 +2161,7 @@ ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
 		retval = Z_LVAL_P(val);
 	} else {
-		retval = i_zend_is_true(val);
+		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
@@ -2195,7 +2195,7 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
 		retval = Z_LVAL_P(val);
 	} else {
-		retval = i_zend_is_true(val);
+		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
@@ -2226,7 +2226,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && EXPECTED(Z_TYPE_P(val) == IS_BOOL)) {
 		retval = Z_LVAL_P(val);
 	} else {
-		retval = i_zend_is_true(val);
+		retval = i_zend_is_true(val TSRMLS_CC);
 		FREE_OP1();
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			HANDLE_EXCEPTION();
@@ -3302,7 +3302,7 @@ ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMP|VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	/* PHP 3.0 returned "" for false and 1 for true, here we use 0 and 1 for now */
-	ZVAL_BOOL(retval, i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R)));
+	ZVAL_BOOL(retval, i_zend_is_true(GET_OP1_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
 	FREE_OP1();
 
 	CHECK_EXCEPTION();
@@ -4464,7 +4464,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			ZVAL_BOOL(&EX_T(opline->result.var).tmp_var, 0);
 		}
 	} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-		if (!isset || !i_zend_is_true(*value)) {
+		if (!isset || !i_zend_is_true(*value TSRMLS_CC)) {
 			ZVAL_BOOL(&EX_T(opline->result.var).tmp_var, 1);
 		} else {
 			ZVAL_BOOL(&EX_T(opline->result.var).tmp_var, 0);
@@ -4536,7 +4536,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 				result = isset;
 			}
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-			if (!isset || !i_zend_is_true(*value)) {
+			if (!isset || !i_zend_is_true(*value TSRMLS_CC)) {
 				result = 0;
 			} else {
 				result = 1;
@@ -4730,7 +4730,7 @@ ZEND_VM_HANDLER(152, ZEND_JMP_SET, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if (i_zend_is_true(value)) {
+	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, value);
 		if (!IS_OP1_TMP_FREE()) {
 			zendi_zval_copy_ctor(EX_T(opline->result.var).tmp_var);
@@ -4756,7 +4756,7 @@ ZEND_VM_HANDLER(158, ZEND_JMP_SET_VAR, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	if (i_zend_is_true(value)) {
+	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 			Z_ADDREF_P(value);
 			EX_T(opline->result.var).var.ptr = value;
