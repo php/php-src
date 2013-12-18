@@ -46,7 +46,7 @@ static void _breakiter_factory(const char *func_name,
 {
 	BreakIterator	*biter;
 	const char		*locale_str = NULL;
-	zend_str_size_int				dummy;
+	php_size_t				dummy;
 	char			*msg;
 	UErrorCode		status = UErrorCode();
 	intl_error_reset(NULL TSRMLS_CC);
@@ -149,7 +149,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 U_CFUNC PHP_FUNCTION(breakiter_set_text)
 {
 	char	*text;
-	zend_str_size_int	text_len;
+	php_size_t	text_len;
 	UText	*ut = NULL;
 	zval	**textzv;
 	BREAKITER_METHOD_INIT_VARS;

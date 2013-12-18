@@ -288,7 +288,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	const TimeZone	*tz;
 	UnicodeString	ustr;
 	char			*str;
-	zend_str_size_int				str_len;
+	php_size_t				str_len;
 	UErrorCode		uec = U_ZERO_ERROR;
 
 	*is_temp = 1;

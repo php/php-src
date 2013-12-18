@@ -63,7 +63,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	zval				*object,
 						**format = NULL;
 	const char			*locale_str	= NULL;
-	zend_str_size_int					locale_len;
+	php_size_t					locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;

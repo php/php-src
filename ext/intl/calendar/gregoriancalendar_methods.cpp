@@ -42,7 +42,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	zval		**args_a[6] = {0},
 				***args		= &args_a[0];
 	char		*locale		= NULL;
-	zend_str_size_int			locale_len;
+	php_size_t			locale_len;
 	php_int_t		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;

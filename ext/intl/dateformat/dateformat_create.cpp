@@ -41,7 +41,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval		*object;
 
 	const char	*locale_str;
-	zend_str_size_int			locale_len		= 0;
+	php_size_t			locale_len		= 0;
 	Locale		locale;
     php_int_t		date_type		= 0;
     php_int_t		time_type		= 0;
@@ -53,9 +53,9 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
-    zend_str_size_int         pattern_str_len	= 0;
+    php_size_t         pattern_str_len	= 0;
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
-    zend_str_size_int         slength			= 0;
+    php_size_t         slength			= 0;
 	IntlDateFormatter_object* dfo;
 
 	intl_error_reset(NULL TSRMLS_CC);

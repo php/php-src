@@ -251,7 +251,7 @@ U_CFUNC zend_object_value IntlPartsIterator_object_create(zend_class_entry *ce T
 }
 
 U_CFUNC zend_function *IntlPartsIterator_get_method(zval **object_ptr,
-		char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
+		char *method, php_size_t method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_literal local_literal = {0};
 	zend_function *ret;

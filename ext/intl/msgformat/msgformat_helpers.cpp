@@ -391,7 +391,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	// Key related variables
 	int				key_type;
 	char			*str_index;
-	zend_str_size_uint			str_len;
+	php_size_t			str_len;
 	php_uint_t			num_index;
 
 	for (zend_hash_internal_pointer_reset_ex(args, &pos);
@@ -547,7 +547,7 @@ retry_kint64:
 					double dd = intl_zval_to_millis(*elem, &err, "msgfmt_format" TSRMLS_CC);
 					if (U_FAILURE(err.code)) {
 						char *message, *key_char;
-						zend_str_size_int key_len;
+						php_size_t key_len;
 						UErrorCode status = UErrorCode();
 						if (intl_charFromString(key, &key_char, &key_len,
 								&status) == SUCCESS) {
@@ -590,7 +590,7 @@ retry_kint64:
 			default:
 				{
 					char *message, *key_char;
-					zend_str_size_int key_len;
+					php_size_t key_len;
 					UErrorCode status = UErrorCode();
 					if (intl_charFromString(key, &key_char, &key_len,
 							&status) == SUCCESS) {
@@ -653,7 +653,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 		double aDate;
 		UnicodeString temp;
 		char *stmp;
-		zend_str_size_int stmp_len;
+		php_size_t stmp_len;
 
 		ALLOC_INIT_ZVAL((*args)[i]);
 
