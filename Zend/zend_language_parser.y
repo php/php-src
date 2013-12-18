@@ -1300,7 +1300,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		if (CG(parse_error) == 0) {
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
-			zend_str_size len = 0, toklen = 0, yystr_len;
+			zend_size_t len = 0, toklen = 0, yystr_len;
 			
 			CG(parse_error) = 1;
 

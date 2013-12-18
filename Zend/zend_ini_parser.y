@@ -104,7 +104,7 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	zend_str_size length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
+	zend_size_t length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
 
 	Z_STRVAL_P(result) = (char *) realloc(Z_STRVAL_P(op1), length+1);
 	memcpy(Z_STRVAL_P(result)+Z_STRSIZE_P(op1), Z_STRVAL_P(op2), Z_STRSIZE_P(op2));
@@ -163,7 +163,7 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 static void ini_error(char *msg)
 {
 	char *error_buf;
-	zend_str_size error_buf_len;
+	zend_size_t error_buf_len;
 	char *currently_parsed_filename;
 	TSRMLS_FETCH();
 
