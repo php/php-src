@@ -8,8 +8,11 @@
 # include <stdint.h>
 #endif
 
-/* Integer types or the old good long. This part will have to be
-   reworked, obviously if we wanna some platform dependent stuff. */
+#if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+# define ZEND_ENABLE_INT64 1
+#endif
+
+/* Integer types or the old bad long. */
 #ifdef ZEND_ENABLE_INT64
 # ifdef ZEND_WIN32
 #  ifdef _WIN64
@@ -25,7 +28,7 @@ typedef __int64 zend_off_t;
 #   error Cant enable 64 bit integers on non 64 bit platform
 #  endif
 # else
-#  if defined(__LP64__) || defined(_LP64)
+#  if defined(__X86_64__) || defined(__LP64__) || defined(_LP64)
 typedef int64_t zend_int_t;
 typedef uint64_t zend_uint_t;
 typedef off_t zend_off_t;

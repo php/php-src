@@ -864,19 +864,21 @@ else
   ZEND_DEBUG=no
 fi
 
+#XXX remove this option, placebo for now
 PHP_ARG_ENABLE(zstrlen, whether to include Z_STRLEN macros,
 [  --enable-zstrlen       Enable legacy Z_STRLEN macros and types], no, no)
 
-if test "$PHP_ZSTRLEN" = "yes"; then
-  AC_DEFINE(ZEND_USE_LEGACY_STRING_TYPES, "1", [ ])
-fi
+#if test "$PHP_ZSTRLEN" = "yes"; then
+#	AC_DEFINE(ZEND_USE_LEGACY_STRING_TYPES, "1", [ ])
+#fi
 
+#XXX remove this option, placebo for now
 PHP_ARG_ENABLE(zint64, whether to enable 64 bit integers,
 [  --enable-zint64        Enable 64 bit integers], no, no)
 
-if test "$PHP_ZINT64" = "yes"; then
-	AC_DEFINE(ZEND_ENABLE_INT64, "1", [ ])
-fi
+#if test "$PHP_ZINT64" = "yes"; then
+#	AC_DEFINE(ZEND_ENABLE_INT64, "1", [ ])
+#fi
 
 PHP_ARG_WITH(layout, layout of installed files,
 [  --with-layout=TYPE      Set how installed files will be laid out.  Type can

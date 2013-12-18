@@ -22,38 +22,40 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#include "zend_int.h"
+
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
 typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
-#ifdef ZEND_USE_LEGACY_STRING_TYPES
-# define zend_str_size_int int
-# define zend_str_size_uint unsigned int
-# define zend_str_size_size_t size_t
-# define zend_str_size_long long
-# define ZEND_SIZE_MAX_LONG LONG_MAX
-# define ZEND_SIZE_MAX_INT INT_MAX
-typedef int zend_str_size;
-#else
+#ifdef ZEND_ENABLE_INT64
 # define zend_str_size_int zend_str_size
 # define zend_str_size_uint zend_str_size
 # define zend_str_size_size_t zend_str_size
 # define zend_str_size_long zend_str_size
-# ifdef PHP_WIN32
-#  ifdef _WIN64
-#   define ZEND_SIZE_MAX_LONG  _UI64_MAX
-#   define ZEND_SIZE_MAX_INT  _UI64_MAX
-#  else
-#   define ZEND_SIZE_MAX_LONG  _UI32_MAX
-#   define ZEND_SIZE_MAX_INT  _UI32_MAX
-#  endif
+# ifdef ZEND_WIN32
+#  define ZEND_SIZE_MAX_LONG  _UI64_MAX
+#  define ZEND_SIZE_MAX_INT  _UI64_MAX
 # else
 #  define ZEND_SIZE_MAX_LONG  SIZE_MAX
 #  define ZEND_SIZE_MAX_INT  SIZE_MAX
 # endif
 typedef size_t zend_str_size;
+#else
+# define zend_str_size_int int
+# define zend_str_size_uint unsigned int
+# define zend_str_size_size_t size_t
+# define zend_str_size_long long
+# if defined(ZEND_WIN32)
+#  define ZEND_SIZE_MAX_LONG  _UI32_MAX
+#  define ZEND_SIZE_MAX_INT  _UI32_MAX
+# else
+#  define ZEND_SIZE_MAX_LONG LONG_MAX
+#  define ZEND_SIZE_MAX_INT INT_MAX
+# endif
+typedef int zend_str_size;
 #endif
 
 #define HAVE_ZEND_LONG64
