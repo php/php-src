@@ -178,7 +178,7 @@ PHPDBG_SET(oplog) /* {{{ */
 					fclose(
 						PHPDBG_G(oplog));
 				} else {
-					phpdbg_error("Oplog is not enabled !");
+					phpdbg_error("Oplog is not enabled!");
 				}
 			} break;
 		} break;

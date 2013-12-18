@@ -105,7 +105,7 @@ PHPDBG_BREAK(lineno) /* {{{ */
 			if (PHPDBG_G(exec)) {
 				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			} else {
-				phpdbg_error("Execution context not set !");
+				phpdbg_error("Execution context not set!");
 			}
 		} break;
 

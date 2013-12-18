@@ -180,7 +180,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="input">
       <Properties>
-        <Property name="toolTipText" type="java.lang.String" value="Enter phpdbg commands here !"/>
+        <Property name="toolTipText" type="java.lang.String" value="Enter phpdbg commands here!"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>

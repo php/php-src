@@ -17,7 +17,7 @@ Features
  - Userland API
  - SAPI Agnostic - Easily Integrated
  - PHP Configuration File Support
- - JIT Super Globals - Set Your Own !!
+ - JIT Super Globals - Set Your Own!!
  - Optional readline Support - Comfortable Terminal Operation
  - Remote Debugging Support - Bundled Java GUI
  - Easy Operation - See Help :)
