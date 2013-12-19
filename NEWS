@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)
 
+- ZIP:
+  . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
+
 12 Dec 2013, PHP 5.4.23
 
 - Core:
