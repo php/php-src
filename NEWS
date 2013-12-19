@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
 
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
 - XSL
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)

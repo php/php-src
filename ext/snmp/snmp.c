@@ -896,6 +896,12 @@ retry:
 					keepwalking = 1;
 				}
 			} else {
+				if (st & SNMP_CMD_WALK && response->errstat == SNMP_ERR_TOOBIG && objid_query->max_repetitions > 1) { /* Answer will not fit into single packet */
+					objid_query->max_repetitions /= 2;
+					snmp_free_pdu(response);
+					keepwalking = 1;
+					continue;
+				}
 				if (!(st & SNMP_CMD_WALK) || response->errstat != SNMP_ERR_NOSUCHNAME || Z_TYPE_P(return_value) == IS_BOOL) {
 					for (	count=1, vars = response->variables;
 						vars && count != response->errindex;
