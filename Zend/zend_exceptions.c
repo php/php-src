@@ -161,7 +161,7 @@ static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_t
 	zend_fetch_debug_backtrace(trace, skip_top_traces, 0, 0 TSRMLS_CC);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
-	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 	zend_update_property(default_exception_ce, &obj, "trace", sizeof("trace")-1, trace TSRMLS_CC);
 
 	return Z_OBJVAL(obj);
@@ -210,7 +210,7 @@ ZEND_METHOD(exception, __construct)
 	}
 
 	if (code) {
-		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	if (previous) {
@@ -240,21 +240,21 @@ ZEND_METHOD(error_exception, __construct)
 	}
 
 	if (code) {
-		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	if (previous) {
 		zend_update_property(default_exception_ce, object, "previous", sizeof("previous")-1, previous TSRMLS_CC);
 	}
 
-	zend_update_property_long(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 
 	if (argc >= 4) {
 	    zend_update_property_string(default_exception_ce, object, "file", sizeof("file")-1, filename TSRMLS_CC);
     	if (argc < 5) {
     	    lineno = 0; /* invalidate lineno */
     	}
-    	zend_update_property_long(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
+    	zend_update_property_int(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -709,7 +709,7 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 
 	zend_declare_property_string(default_exception_ce, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ce, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
-	zend_declare_property_long(default_exception_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_int(default_exception_ce, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "file", sizeof("file")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "line", sizeof("line")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ce, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE TSRMLS_CC);
@@ -718,7 +718,7 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ErrorException", error_exception_functions);
 	error_exception_ce = zend_register_internal_class_ex(&ce, default_exception_ce, NULL TSRMLS_CC);
 	error_exception_ce->create_object = zend_error_exception_new;
-	zend_declare_property_long(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_int(error_exception_ce, "severity", sizeof("severity")-1, E_ERROR, ZEND_ACC_PROTECTED TSRMLS_CC);
 }
 /* }}} */
 
@@ -754,7 +754,7 @@ ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char 
 		zend_update_property_string(default_exception_ce, ex, "message", sizeof("message")-1, message TSRMLS_CC);
 	}
 	if (code) {
-		zend_update_property_long(default_exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
+		zend_update_property_int(default_exception_ce, ex, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
 	zend_throw_exception_internal(ex TSRMLS_CC);
@@ -780,7 +780,7 @@ ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, zend_int
 ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, zend_int_t code, int severity TSRMLS_DC) /* {{{ */
 {
 	zval *ex = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
-	zend_update_property_long(default_exception_ce, ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);
+	zend_update_property_int(default_exception_ce, ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 	return ex;
 }
 /* }}} */

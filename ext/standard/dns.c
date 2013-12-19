@@ -1008,7 +1008,7 @@ PHP_FUNCTION(dns_get_mx)
 		cp += i;
 		add_next_index_string(mx_list, buf, 1);
 		if (weight_list) {
-			add_next_index_long(weight_list, weight);
+			add_next_index_int(weight_list, weight);
 		}
 	}
 	php_dns_free_handle(handle);

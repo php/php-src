@@ -999,7 +999,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 						ZVAL_INT(*entry, ((ub4 *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
 					} else {
-						add_next_index_long(bind->zval, ((ub4 *)(bind->array.elements))[i]);
+						add_next_index_int(bind->zval, ((ub4 *)(bind->array.elements))[i]);
 					}
 				}
 				break;

@@ -113,7 +113,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	pdo_pgsql_error_info *einfo = &H->einfo;
 
 	if (einfo->errcode) {
-		add_next_index_long(info, einfo->errcode);
+		add_next_index_int(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg, 1);
 	}
 
@@ -1066,7 +1066,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	array_init(return_value);
 	if (result_type == PDO_FETCH_NUM || result_type == PDO_FETCH_BOTH) {
 		add_index_string(return_value, 0, pgsql_notify->relname, 1);
-		add_index_long(return_value, 1, pgsql_notify->be_pid);
+		add_index_int(return_value, 1, pgsql_notify->be_pid);
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);

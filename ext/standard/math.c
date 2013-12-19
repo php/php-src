@@ -625,11 +625,11 @@ PHP_FUNCTION(pow)
 
 			if (i % 2) {
 				--i;
-				ZEND_SIGNED_MULTIPLY_LONG(l1,l2,l1,dval,overflow);
+				ZEND_SIGNED_MULTIPLY_INT(l1,l2,l1,dval,overflow);
 				if (overflow) RETURN_DOUBLE(dval * pow(l2,i));
 			} else {
 				i /= 2;
-				ZEND_SIGNED_MULTIPLY_LONG(l2,l2,l2,dval,overflow);
+				ZEND_SIGNED_MULTIPLY_INT(l2,l2,l2,dval,overflow);
 				if (overflow) RETURN_DOUBLE((double)l1 * pow(dval,i));
 			}
 			if (i == 0) {

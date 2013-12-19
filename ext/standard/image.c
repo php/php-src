@@ -1361,9 +1361,9 @@ static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERN
 
 	if (result) {
 		array_init(return_value);
-		add_index_long(return_value, 0, result->width);
-		add_index_long(return_value, 1, result->height);
-		add_index_long(return_value, 2, itype);
+		add_index_int(return_value, 0, result->width);
+		add_index_int(return_value, 1, result->height);
+		add_index_int(return_value, 2, itype);
 		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
 		add_index_string(return_value, 3, temp, 0);
 

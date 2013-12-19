@@ -2315,7 +2315,7 @@ PHP_FUNCTION(mysql_fetch_lengths)
 	num_fields = mysql_num_fields(mysql_result);
 
 	for (i=0; i<num_fields; i++) {
-		add_index_long(return_value, i, lengths[i]);
+		add_index_int(return_value, i, lengths[i]);
 	}
 }
 /* }}} */

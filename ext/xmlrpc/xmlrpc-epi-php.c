@@ -318,7 +318,7 @@ PHP_MINFO_FUNCTION(xmlrpc)
 #if 0
 static int add_long(zval* list, char* id, int num) {
 	if(id) return add_assoc_int(list, id, num);
-	else   return add_next_index_long(list, num);
+	else   return add_next_index_int(list, num);
 }
 
 static int add_double(zval* list, char* id, double num) {

@@ -1335,7 +1335,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, zend_size_t key_len, 
 }
 /* }}} */
 
-ZEND_API int add_index_long(zval *arg, zend_uint_t index, zend_int_t n) /* {{{ */
+ZEND_API int add_index_int(zval *arg, zend_uint_t index, zend_int_t n) /* {{{ */
 {
 	zval *tmp;
 
@@ -1418,7 +1418,7 @@ ZEND_API int add_index_zval(zval *arg, zend_uint_t index, zval *value) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_next_index_long(zval *arg, zend_int_t n) /* {{{ */
+ZEND_API int add_next_index_int(zval *arg, zend_int_t n) /* {{{ */
 {
 	zval *tmp;
 
@@ -1523,7 +1523,7 @@ ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, zend_size_t ke
 }
 /* }}} */
 
-ZEND_API int add_get_index_long(zval *arg, zend_uint_t index, zend_int_t l, void **dest) /* {{{ */
+ZEND_API int add_get_index_int(zval *arg, zend_uint_t index, zend_int_t l, void **dest) /* {{{ */
 {
 	zval *tmp;
 
@@ -3578,7 +3578,7 @@ ZEND_API int zend_declare_property_bool(zend_class_entry *ce, const char *name, 
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_long(zend_class_entry *ce, const char *name, zend_size_t name_length, zend_int_t value, int access_type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_declare_property_int(zend_class_entry *ce, const char *name, zend_size_t name_length, zend_int_t value, int access_type TSRMLS_DC) /* {{{ */
 {
 	zval *property;
 
@@ -3662,7 +3662,7 @@ ZEND_API int zend_declare_class_constant_null(zend_class_entry *ce, const char *
 }
 /* }}} */
 
-ZEND_API int zend_declare_class_constant_long(zend_class_entry *ce, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_declare_class_constant_int(zend_class_entry *ce, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
 {
 	zval *constant;
 
@@ -3777,7 +3777,7 @@ ZEND_API void zend_update_property_bool(zend_class_entry *scope, zval *object, c
 }
 /* }}} */
 
-ZEND_API void zend_update_property_long(zend_class_entry *scope, zval *object, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_update_property_int(zend_class_entry *scope, zval *object, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 
@@ -3886,7 +3886,7 @@ ZEND_API int zend_update_static_property_bool(zend_class_entry *scope, const cha
 }
 /* }}} */
 
-ZEND_API int zend_update_static_property_long(zend_class_entry *scope, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_update_static_property_int(zend_class_entry *scope, const char *name, zend_size_t name_length, zend_int_t value TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 

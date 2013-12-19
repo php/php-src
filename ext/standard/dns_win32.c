@@ -77,7 +77,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 
 		add_next_index_string(mx_list, pRec->Data.MX.pNameExchange, 1);
 		if (weight_list) {
-			add_next_index_long(weight_list, srv->wPriority);
+			add_next_index_int(weight_list, srv->wPriority);
 		}
 	}
 

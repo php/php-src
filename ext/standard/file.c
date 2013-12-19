@@ -1547,38 +1547,38 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 
 	array_init(return_value);
 
-	MAKE_LONG_ZVAL_INCREF(stat_dev, stat_ssb.sb.st_dev);
-	MAKE_LONG_ZVAL_INCREF(stat_ino, stat_ssb.sb.st_ino);
-	MAKE_LONG_ZVAL_INCREF(stat_mode, stat_ssb.sb.st_mode);
-	MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_ssb.sb.st_nlink);
-	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
-	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
+	MAKE_INT_ZVAL_INCREF(stat_dev, stat_ssb.sb.st_dev);
+	MAKE_INT_ZVAL_INCREF(stat_ino, stat_ssb.sb.st_ino);
+	MAKE_INT_ZVAL_INCREF(stat_mode, stat_ssb.sb.st_mode);
+	MAKE_INT_ZVAL_INCREF(stat_nlink, stat_ssb.sb.st_nlink);
+	MAKE_INT_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
+	MAKE_INT_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
 # ifdef _WIN64
 	if (stat_ssb.sb.st_rdev < ((_dev_t)-1)) {
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
+		MAKE_INT_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
 	} else {
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+		MAKE_INT_ZVAL_INCREF(stat_rdev, -1);
 	}
 # else
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
+	MAKE_INT_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
 # endif
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+	MAKE_INT_ZVAL_INCREF(stat_rdev, -1);
 #endif
-	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
-	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
-	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
-	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
+	MAKE_INT_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
+	MAKE_INT_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
+	MAKE_INT_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
+	MAKE_INT_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize);
+	MAKE_INT_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
+	MAKE_INT_ZVAL_INCREF(stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-	MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_ssb.sb.st_blocks);
+	MAKE_INT_ZVAL_INCREF(stat_blocks, stat_ssb.sb.st_blocks);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
+	MAKE_INT_ZVAL_INCREF(stat_blocks,-1);
 #endif
 	/* Store numeric indexes in propper order */
 	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);

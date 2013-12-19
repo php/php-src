@@ -48,7 +48,7 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 				einfo->what, einfo->last_error,
 				einfo->file, einfo->line);
 
-	add_next_index_long(info, einfo->last_error);
+	add_next_index_int(info, einfo->last_error);
 	add_next_index_string(info, message, 0);
 	add_next_index_string(info, einfo->last_state, 1);
 

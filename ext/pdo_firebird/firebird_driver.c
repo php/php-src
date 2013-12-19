@@ -612,7 +612,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 	php_int_t i = 0, l, sqlcode = isc_sqlcode(s);
 
 	if (sqlcode) {
-		add_next_index_long(info, sqlcode);
+		add_next_index_int(info, sqlcode);
 
 		while ((l = isc_interprete(&buf[i],&s))) {
 			i += l;
@@ -620,7 +620,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 		}
 		add_next_index_string(info, buf, 1);
 	} else if (H->last_app_error) {
-		add_next_index_long(info, -999);
+		add_next_index_int(info, -999);
 		add_next_index_string(info, const_cast(H->last_app_error),1);
 	}
 	return 1;

@@ -929,7 +929,7 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 			case TYPE_PAIR(IS_INT, IS_INT): {
 				zend_int_t overflow;
 
-				ZEND_SIGNED_MULTIPLY_LONG(Z_IVAL_P(op1),Z_IVAL_P(op2), Z_IVAL_P(result),Z_DVAL_P(result),overflow);
+				ZEND_SIGNED_MULTIPLY_INT(Z_IVAL_P(op1),Z_IVAL_P(op2), Z_IVAL_P(result),Z_DVAL_P(result),overflow);
 				Z_TYPE_P(result) = overflow ? IS_DOUBLE : IS_INT;
 				return SUCCESS;
 

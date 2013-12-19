@@ -539,36 +539,36 @@ static void phar_fancy_stat(php_stat_t *stat_sb, int type, zval *return_value TS
 	case FS_STAT:
 		array_init(return_value);
 
-		MAKE_LONG_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
-		MAKE_LONG_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
-		MAKE_LONG_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
-		MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_sb->st_nlink);
-		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
-		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
+		MAKE_INT_ZVAL_INCREF(stat_dev, stat_sb->st_dev);
+		MAKE_INT_ZVAL_INCREF(stat_ino, stat_sb->st_ino);
+		MAKE_INT_ZVAL_INCREF(stat_mode, stat_sb->st_mode);
+		MAKE_INT_ZVAL_INCREF(stat_nlink, stat_sb->st_nlink);
+		MAKE_INT_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
+		MAKE_INT_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+		MAKE_INT_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+		MAKE_INT_ZVAL_INCREF(stat_rdev, -1);
 #endif
-		MAKE_LONG_ZVAL_INCREF(stat_size, stat_sb->st_size);
+		MAKE_INT_ZVAL_INCREF(stat_size, stat_sb->st_size);
 #ifdef NETWARE
-		MAKE_LONG_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
+		MAKE_INT_ZVAL_INCREF(stat_atime, (stat_sb->st_atime).tv_sec);
+		MAKE_INT_ZVAL_INCREF(stat_mtime, (stat_sb->st_mtime).tv_sec);
+		MAKE_INT_ZVAL_INCREF(stat_ctime, (stat_sb->st_ctime).tv_sec);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
-		MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
-		MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
+		MAKE_INT_ZVAL_INCREF(stat_atime, stat_sb->st_atime);
+		MAKE_INT_ZVAL_INCREF(stat_mtime, stat_sb->st_mtime);
+		MAKE_INT_ZVAL_INCREF(stat_ctime, stat_sb->st_ctime);
 #endif
 #ifdef HAVE_ST_BLKSIZE
-		MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize);
+		MAKE_INT_ZVAL_INCREF(stat_blksize, stat_sb->st_blksize);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
+		MAKE_INT_ZVAL_INCREF(stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_sb->st_blocks);
+		MAKE_INT_ZVAL_INCREF(stat_blocks, stat_sb->st_blocks);
 #else
-		MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
+		MAKE_INT_ZVAL_INCREF(stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);

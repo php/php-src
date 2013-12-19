@@ -614,7 +614,7 @@ ZEND_FUNCTION(each)
 			add_get_index_stringl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, !IS_INTERNED(string_key));
 			break;
 		case HASH_KEY_IS_INT:
-			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
+			add_get_index_int(return_value, 0, num_key, (void **) &inserted_pointer);
 			break;
 	}
 	zend_hash_update(return_value->value.ht, "key", sizeof("key"), inserted_pointer, sizeof(zval *), NULL);

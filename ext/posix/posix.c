@@ -511,7 +511,7 @@ PHP_FUNCTION(posix_getgroups)
 	array_init(return_value);
 
 	for (i=0; i<result; i++) {
-		add_next_index_long(return_value, gidlist[i]);
+		add_next_index_int(return_value, gidlist[i]);
 	}
 }
 #endif

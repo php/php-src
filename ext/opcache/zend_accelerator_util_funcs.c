@@ -1023,7 +1023,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			clen = strlen(cfilename);
 			zend_mangle_property_name(&name, &len, haltoff, sizeof(haltoff) - 1, cfilename, clen, 0);
 			if (!zend_hash_exists(EG(zend_constants), name, len + 1)) {
-				zend_register_long_constant(name, len + 1, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
+				zend_register_int_constant(name, len + 1, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
 			}
 			efree(name);
 		}

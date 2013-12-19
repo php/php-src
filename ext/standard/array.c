@@ -1721,7 +1721,7 @@ long_str:
 				goto err;
 			}
 			for (; low >= high; low -= lstep) {
-				add_next_index_long(return_value, (php_int_t)low);
+				add_next_index_int(return_value, (php_int_t)low);
 			}
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < lstep || lstep <= 0) {
@@ -1729,10 +1729,10 @@ long_str:
 				goto err;
 			}
 			for (; low <= high; low += lstep) {
-				add_next_index_long(return_value, (php_int_t)low);
+				add_next_index_int(return_value, (php_int_t)low);
 			}
 		} else {
-			add_next_index_long(return_value, (php_int_t)low);
+			add_next_index_int(return_value, (php_int_t)low);
 		}
 	}
 err:
@@ -4055,7 +4055,7 @@ PHP_FUNCTION(array_rand)
 				if (key_type == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, string_key, string_key_len - 1, 1);
 				} else {
-					add_next_index_long(return_value, num_key);
+					add_next_index_int(return_value, num_key);
 				}
 			}
 			num_req--;

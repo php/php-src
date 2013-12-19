@@ -3141,7 +3141,7 @@ PHP_FUNCTION(imap_sort)
 	array_init(return_value);
 	if (slst != NIL && slst != 0) {
 		for (sl = slst; *sl; sl++) {
-			add_next_index_long(return_value, *sl);
+			add_next_index_int(return_value, *sl);
 		}
 		fs_give ((void **) &slst);
 	}
@@ -4125,7 +4125,7 @@ PHP_FUNCTION(imap_search)
 
 	cur = IMAPG(imap_messages);
 	while (cur != NIL) {
-		add_next_index_long(return_value, cur->msgid);
+		add_next_index_int(return_value, cur->msgid);
 		cur = cur->next;
 	}
 	mail_free_messagelist(&IMAPG(imap_messages), &IMAPG(imap_messages_tail));

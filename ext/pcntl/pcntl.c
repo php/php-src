@@ -964,7 +964,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			if (sigismember(&oldset, signo) != 1) {
 				continue;
 			}
-			add_next_index_long(user_oldset, signo);
+			add_next_index_int(user_oldset, signo);
 		}
 	}
 

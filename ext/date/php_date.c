@@ -1767,15 +1767,15 @@ PHP_FUNCTION(localtime)
 		add_assoc_int(return_value, "tm_yday",  timelib_day_of_year(ts->y, ts->m, ts->d));
 		add_assoc_int(return_value, "tm_isdst", ts->dst);
 	} else {
-		add_next_index_long(return_value, ts->s);
-		add_next_index_long(return_value, ts->i);
-		add_next_index_long(return_value, ts->h);
-		add_next_index_long(return_value, ts->d);
-		add_next_index_long(return_value, ts->m - 1);
-		add_next_index_long(return_value, ts->y- 1900);
-		add_next_index_long(return_value, timelib_day_of_week(ts->y, ts->m, ts->d));
-		add_next_index_long(return_value, timelib_day_of_year(ts->y, ts->m, ts->d));
-		add_next_index_long(return_value, ts->dst);
+		add_next_index_int(return_value, ts->s);
+		add_next_index_int(return_value, ts->i);
+		add_next_index_int(return_value, ts->h);
+		add_next_index_int(return_value, ts->d);
+		add_next_index_int(return_value, ts->m - 1);
+		add_next_index_int(return_value, ts->y- 1900);
+		add_next_index_int(return_value, timelib_day_of_week(ts->y, ts->m, ts->d));
+		add_next_index_int(return_value, timelib_day_of_year(ts->y, ts->m, ts->d));
+		add_next_index_int(return_value, ts->dst);
 	}
 
 	timelib_time_dtor(ts);
@@ -1812,7 +1812,7 @@ PHP_FUNCTION(getdate)
 	add_assoc_int(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
 	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
 	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
-	add_index_long(return_value, 0, timestamp);
+	add_index_int(return_value, 0, timestamp);
 
 	timelib_time_dtor(ts);
 }
@@ -2053,7 +2053,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
 
 #define REGISTER_TIMEZONE_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_long(date_ce_timezone, const_name, sizeof(const_name)-1, value TSRMLS_CC);
+	zend_declare_class_constant_int(date_ce_timezone, const_name, sizeof(const_name)-1, value TSRMLS_CC);
 
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("AFRICA",      PHP_DATE_TIMEZONE_GROUP_AFRICA);
 	REGISTER_TIMEZONE_CLASS_CONST_STRING("AMERICA",     PHP_DATE_TIMEZONE_GROUP_AMERICA);
@@ -2096,7 +2096,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_period.write_property = date_period_write_property;
 
 #define REGISTER_PERIOD_CLASS_CONST_STRING(const_name, value) \
-	zend_declare_class_constant_long(date_ce_period, const_name, sizeof(const_name)-1, value TSRMLS_CC);
+	zend_declare_class_constant_int(date_ce_period, const_name, sizeof(const_name)-1, value TSRMLS_CC);
 
 	REGISTER_PERIOD_CLASS_CONST_STRING("EXCLUDE_START_DATE", PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 }

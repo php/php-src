@@ -3880,7 +3880,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 
 	/* return array with the text's bounding box */
 	for (i = 0; i < 8; i++) {
-		add_next_index_long(return_value, brect[i]);
+		add_next_index_int(return_value, brect[i]);
 	}
 }
 /* }}} */
@@ -4235,10 +4235,10 @@ PHP_FUNCTION(imagepstext)
 
 	array_init(return_value);
 
-	add_next_index_long(return_value, str_img->metrics.leftSideBearing);
-	add_next_index_long(return_value, str_img->metrics.descent);
-	add_next_index_long(return_value, str_img->metrics.rightSideBearing);
-	add_next_index_long(return_value, str_img->metrics.ascent);
+	add_next_index_int(return_value, str_img->metrics.leftSideBearing);
+	add_next_index_int(return_value, str_img->metrics.descent);
+	add_next_index_int(return_value, str_img->metrics.rightSideBearing);
+	add_next_index_int(return_value, str_img->metrics.ascent);
 }
 /* }}} */
 
@@ -4335,10 +4335,10 @@ PHP_FUNCTION(imagepsbbox)
 	/*
 	printf("%d %d %d %d\n", str_bbox.llx, str_bbox.lly, str_bbox.urx, str_bbox.ury);
 	*/
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.llx)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.lly)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.urx)*sz/1000));
-	add_next_index_long(return_value, (int) ceil(((double) str_bbox.ury)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.llx)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.lly)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.urx)*sz/1000));
+	add_next_index_int(return_value, (int) ceil(((double) str_bbox.ury)*sz/1000));
 }
 /* }}} */
 #endif

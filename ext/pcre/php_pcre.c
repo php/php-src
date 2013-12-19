@@ -548,7 +548,7 @@ static inline void add_offset_pair(zval *result, char *str, php_size_t len, php_
 
 	/* Add (match, offset) to the return value */
 	add_next_index_stringl(match_pair, str, len, 1);
-	add_next_index_long(match_pair, offset);
+	add_next_index_int(match_pair, offset);
 	
 	if (name) {
 		zval_add_ref(&match_pair);

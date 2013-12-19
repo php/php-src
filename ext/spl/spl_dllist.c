@@ -1402,10 +1402,10 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_debug_info = spl_dllist_object_get_debug_info;
 
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
-	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
+	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
+	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
+	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
+	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
 
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Countable);

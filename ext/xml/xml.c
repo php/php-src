@@ -745,7 +745,7 @@ static void _xml_add_to_info(xml_parser *parser,char *name)
 		zend_hash_update(Z_ARRVAL_P(parser->info), name, strlen(name)+1, (void *) &values, sizeof(zval*), (void **) &element);
 	} 
 			
-	add_next_index_long(*element,parser->curtag);
+	add_next_index_int(*element,parser->curtag);
 	
 	parser->curtag++;
 }

@@ -39,8 +39,8 @@ void collator_register_constants( INIT_FUNC_ARGS )
 	}
 
 	#define COLLATOR_EXPOSE_CONST(x) REGISTER_INT_CONSTANT(#x, x, CONST_CS)
-	#define COLLATOR_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( Collator_ce_ptr, ZEND_STRS( #x ) - 1, UCOL_##x TSRMLS_CC );
-	#define COLLATOR_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Collator_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
+	#define COLLATOR_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_int( Collator_ce_ptr, ZEND_STRS( #x ) - 1, UCOL_##x TSRMLS_CC );
+	#define COLLATOR_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_int( Collator_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
 
 	/* UColAttributeValue constants */
 	COLLATOR_EXPOSE_CUSTOM_CLASS_CONST( "DEFAULT_VALUE", UCOL_DEFAULT );

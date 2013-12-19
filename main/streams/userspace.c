@@ -1381,8 +1381,8 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 			array_init(zvalue);
 			if(value) {
 				struct utimbuf *newtime = (struct utimbuf *)value;
-				add_index_long(zvalue, 0, newtime->modtime);
-				add_index_long(zvalue, 1, newtime->actime);
+				add_index_int(zvalue, 0, newtime->modtime);
+				add_index_int(zvalue, 1, newtime->actime);
 			}
 			break;
 		case PHP_STREAM_META_GROUP:

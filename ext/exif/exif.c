@@ -2023,7 +2023,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_long(array, b, (int)(info_value->s[b]));
+											add_index_int(array, b, (int)(info_value->s[b]));
 										}
 										break;
 									}
@@ -2032,7 +2032,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l==1) {
 										add_assoc_int(tmpi, name, (int)info_value->u);
 									} else {
-										add_index_long(array, ap, (int)info_value->u);
+										add_index_int(array, ap, (int)info_value->u);
 									}
 									break;
 
@@ -2049,7 +2049,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_long(array, ap, (int)info_value->s[b]);
+											add_index_int(array, ap, (int)info_value->s[b]);
 										}
 										break;
 									}
@@ -2058,7 +2058,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l==1) {
 										add_assoc_int(tmpi, name, info_value->i);
 									} else {
-										add_index_long(array, ap, info_value->i);
+										add_index_int(array, ap, info_value->i);
 									}
 									break;
 

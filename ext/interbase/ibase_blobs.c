@@ -454,13 +454,13 @@ PHP_FUNCTION(ibase_blob_info)
 
 	array_init(return_value);
 
-	add_index_long(return_value, 0, bl_info.total_length);
+	add_index_int(return_value, 0, bl_info.total_length);
  	add_assoc_int(return_value, "length", bl_info.total_length);
 
-	add_index_long(return_value, 1, bl_info.num_segments);
+	add_index_int(return_value, 1, bl_info.num_segments);
  	add_assoc_int(return_value, "numseg", bl_info.num_segments);
 
-	add_index_long(return_value, 2, bl_info.max_segment);
+	add_index_int(return_value, 2, bl_info.max_segment);
  	add_assoc_int(return_value, "maxseg", bl_info.max_segment);
 
 	add_index_bool(return_value, 3, bl_info.bl_stream);

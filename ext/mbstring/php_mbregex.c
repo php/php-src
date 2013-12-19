@@ -1244,8 +1244,8 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			array_init(return_value);
 			beg = MBREX(search_regs)->beg[0];
 			end = MBREX(search_regs)->end[0];
-			add_next_index_long(return_value, beg);
-			add_next_index_long(return_value, end - beg);
+			add_next_index_int(return_value, beg);
+			add_next_index_int(return_value, end - beg);
 			break;
 		case 2:
 			array_init(return_value);

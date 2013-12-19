@@ -4938,16 +4938,16 @@ PHP_FUNCTION(count_chars)
 	for (inx = 0; inx < 256; inx++) {
 		switch (mymode) {
 	 		case 0:
-				add_index_long(return_value, inx, chars[inx]);
+				add_index_int(return_value, inx, chars[inx]);
 				break;
 	 		case 1:
 				if (chars[inx] != 0) {
-					add_index_long(return_value, inx, chars[inx]);
+					add_index_int(return_value, inx, chars[inx]);
 				}
 				break;
   			case 2:
 				if (chars[inx] == 0) {
-					add_index_long(return_value, inx, chars[inx]);
+					add_index_int(return_value, inx, chars[inx]);
 				}
 				break;
 	  		case 3:
@@ -5066,14 +5066,14 @@ PHP_FUNCTION(localeconv)
 		len = strlen(currlocdata.grouping);
 
 		for (i = 0; i < len; i++) {
-			add_index_long(grouping, i, currlocdata.grouping[i]);
+			add_index_int(grouping, i, currlocdata.grouping[i]);
 		}
 
 		/* Grab the monetary grouping data out of the array */
 		len = strlen(currlocdata.mon_grouping);
 
 		for (i = 0; i < len; i++) {
-			add_index_long(mon_grouping, i, currlocdata.mon_grouping[i]);
+			add_index_int(mon_grouping, i, currlocdata.mon_grouping[i]);
 		}
 
 		add_assoc_string(return_value, "decimal_point",     currlocdata.decimal_point,     1);
@@ -5097,8 +5097,8 @@ PHP_FUNCTION(localeconv)
 	/* Ok, it doesn't look like we have locale info floating around, so I guess it
 	   wouldn't hurt to just go ahead and return the POSIX locale information?  */
 
-	add_index_long(grouping, 0, -1);
-	add_index_long(mon_grouping, 0, -1);
+	add_index_int(grouping, 0, -1);
+	add_index_int(mon_grouping, 0, -1);
 
 	add_assoc_string(return_value, "decimal_point",     "\x2E", 1);
 	add_assoc_string(return_value, "thousands_sep",     "",     1);

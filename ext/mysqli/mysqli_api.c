@@ -52,7 +52,7 @@ PHP_FUNCTION(mysqli_affected_rows)
 	if (rc == (my_ulonglong) -1) {
 		RETURN_INT(-1);
 	}
-	MYSQLI_RETURN_INT_LONG(rc);
+	MYSQLI_RETURN_INT_INT(rc);
 }
 /* }}} */
 
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	array_init(return_value);
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
-		add_index_long(return_value, i, ret[i]);
+		add_index_int(return_value, i, ret[i]);
 	}
 }
 /* }}} */
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(mysqli_insert_id)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 	rc = mysql_insert_id(mysql->mysql);
-	MYSQLI_RETURN_INT_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -1651,7 +1651,7 @@ PHP_FUNCTION(mysqli_num_rows)
 		RETURN_INT(0);
 	}
 
-	MYSQLI_RETURN_INT_LONG(mysql_num_rows(result));
+	MYSQLI_RETURN_INT_INT(mysql_num_rows(result));
 }
 /* }}} */
 
@@ -2012,7 +2012,7 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 	if (rc == (my_ulonglong) -1) {
 		RETURN_INT(-1);
 	}
-	MYSQLI_RETURN_INT_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -2104,7 +2104,7 @@ PHP_FUNCTION(mysqli_stmt_insert_id)
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 	rc = mysql_stmt_insert_id(stmt->stmt);
-	MYSQLI_RETURN_INT_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 
@@ -2159,7 +2159,7 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 
 	rc = mysql_stmt_num_rows(stmt->stmt);
-	MYSQLI_RETURN_INT_LONG(rc)
+	MYSQLI_RETURN_INT_INT(rc)
 }
 /* }}} */
 

@@ -5078,7 +5078,7 @@ PHP_FUNCTION(pg_get_notify)
 	array_init(return_value);
 	if (result_type & PGSQL_NUM) {
 		add_index_string(return_value, 0, pgsql_notify->relname, 1);
-		add_index_long(return_value, 1, pgsql_notify->be_pid);
+		add_index_int(return_value, 1, pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
 #else 

@@ -320,7 +320,7 @@ static void php_converter_from_u_callback(const void *context,
 	while (i < length) {
 		UChar32 c;
 		U16_NEXT(codeUnits, i, length, c);
-		add_next_index_long(zsource, c);
+		add_next_index_int(zsource, c);
 	}
 	zargs[1] = &zsource;
 
@@ -1102,8 +1102,8 @@ static zend_object_value php_converter_clone_object(zval *object TSRMLS_DC) {
 }
 /* }}} */
 
-#define CONV_REASON_CONST(v) zend_declare_class_constant_long(php_converter_ce, "REASON_" #v, sizeof("REASON_" #v) - 1, UCNV_ ## v TSRMLS_CC)
-#define CONV_TYPE_CONST(v)   zend_declare_class_constant_long(php_converter_ce, #v ,          sizeof(#v) - 1,           UCNV_ ## v TSRMLS_CC)
+#define CONV_REASON_CONST(v) zend_declare_class_constant_int(php_converter_ce, "REASON_" #v, sizeof("REASON_" #v) - 1, UCNV_ ## v TSRMLS_CC)
+#define CONV_TYPE_CONST(v)   zend_declare_class_constant_int(php_converter_ce, #v ,          sizeof(#v) - 1,           UCNV_ ## v TSRMLS_CC)
 
 /* {{{ php_converter_minit */
 int php_converter_minit(INIT_FUNC_ARGS) {

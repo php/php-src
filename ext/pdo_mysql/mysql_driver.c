@@ -129,7 +129,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	}
 
 	if (einfo->errcode) {
-		add_next_index_long(info, einfo->errcode);
+		add_next_index_int(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg, 1);
 	}
 

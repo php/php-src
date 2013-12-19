@@ -331,7 +331,7 @@ U_CFUNC void breakiterator_register_IntlPartsIterator_class(TSRMLS_D)
 	IntlPartsIterator_handlers.get_method = IntlPartsIterator_get_method;
 
 #define PARTSITER_DECL_LONG_CONST(name) \
-	zend_declare_class_constant_long(IntlPartsIterator_ce_ptr, #name, \
+	zend_declare_class_constant_int(IntlPartsIterator_ce_ptr, #name, \
 		sizeof(#name) - 1, PARTS_ITERATOR_ ## name TSRMLS_CC)
 
 	PARTSITER_DECL_LONG_CONST(KEY_SEQUENTIAL);

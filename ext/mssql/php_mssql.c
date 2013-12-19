@@ -1548,7 +1548,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_INT) {
 				if (result_type & MSSQL_NUM)
-					add_index_long(return_value, i, Z_IVAL(result->data[result->cur_row][i]));
+					add_index_int(return_value, i, Z_IVAL(result->data[result->cur_row][i]));
 				
 				if (result_type & MSSQL_ASSOC)
 					add_assoc_int(return_value, result->fields[i].name, Z_IVAL(result->data[result->cur_row][i]));

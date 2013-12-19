@@ -183,7 +183,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 
 	array_init_size(return_value, num_rules);
 	for (int32_t i = 0; i < num_rules; i++) {
-		add_next_index_long(return_value, rules[i]);
+		add_next_index_int(return_value, rules[i]);
 	}
 	delete[] rules;
 }

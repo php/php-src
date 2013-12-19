@@ -5348,8 +5348,8 @@ zend_function_entry phar_exception_methods[] = {
 };
 /* }}} */
 
-#define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
-	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
+#define REGISTER_PHAR_CLASS_CONST_INT(class_name, const_name, value) \
+	zend_declare_class_constant_int(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
 #define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
 
@@ -5383,20 +5383,20 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 	phar_ce_data->ce_flags |= ZEND_ACC_FINAL_CLASS;
 #endif
 
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "NONE", PHAR_ENT_COMPRESSED_NONE)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHAR", PHAR_FORMAT_PHAR)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "TAR", PHAR_FORMAT_TAR)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "ZIP", PHAR_FORMAT_ZIP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHP", PHAR_MIME_PHP)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "MD5", PHAR_SIG_MD5)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
-	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "GZ", PHAR_ENT_COMPRESSED_GZ)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "NONE", PHAR_ENT_COMPRESSED_NONE)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "PHAR", PHAR_FORMAT_PHAR)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "TAR", PHAR_FORMAT_TAR)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "ZIP", PHAR_FORMAT_ZIP)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "COMPRESSED", PHAR_ENT_COMPRESSION_MASK)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "PHP", PHAR_MIME_PHP)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "PHPS", PHAR_MIME_PHPS)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "MD5", PHAR_SIG_MD5)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "OPENSSL", PHAR_SIG_OPENSSL)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "SHA1", PHAR_SIG_SHA1)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "SHA256", PHAR_SIG_SHA256)
+	REGISTER_PHAR_CLASS_CONST_INT(phar_ce_archive, "SHA512", PHAR_SIG_SHA512)
 }
 /* }}} */
 

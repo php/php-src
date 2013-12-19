@@ -752,7 +752,7 @@ literal:
 						Z_SET_REFCOUNT_PP(current, refcount);
 						Z_SET_ISREF_PP(current);
 					} else {
-						add_index_long(*return_value, objIndex++, string - baseString);
+						add_index_int(*return_value, objIndex++, string - baseString);
 					}
 				}
 				nconversions++;
@@ -1081,7 +1081,7 @@ addToInt:
 							zval_dtor(*current);
 							ZVAL_INT(*current, value);
 						} else {
-							add_index_long(*return_value, objIndex++, value);
+							add_index_int(*return_value, objIndex++, value);
 						}
 					}
 				}

@@ -752,7 +752,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	key_sizes = mcrypt_enc_get_supported_key_sizes(pm->td, &count);
 
 	for (i = 0; i < count; i++) {
-		add_index_long(return_value, i, key_sizes[i]);
+		add_index_int(return_value, i, key_sizes[i]);
 	}
 
 	mcrypt_free(key_sizes);
@@ -977,7 +977,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes(module, dir, &count);
 
 	for (i = 0; i < count; i++) {
-		add_index_long(return_value, i, key_sizes[i]);
+		add_index_int(return_value, i, key_sizes[i]);
 	}
 	mcrypt_free(key_sizes);
 }
