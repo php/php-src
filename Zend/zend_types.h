@@ -77,8 +77,6 @@ typedef struct _zend_object_value {
 	const zend_object_handlers *handlers;
 } zend_object_value;
 
-#include "zend_int.h"
-
 #endif /* ZEND_TYPES_H */
 
 /*
