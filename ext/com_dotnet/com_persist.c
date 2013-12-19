@@ -501,7 +501,7 @@ CPH_METHOD(GetMaxStreamSize)
 		php_com_throw_exception(res, NULL TSRMLS_CC);
 	} else {
 		/* TODO: handle 64 bit properly */
-		RETURN_LONG((php_int_t)size.QuadPart);
+		RETURN_INT((php_int_t)size.QuadPart);
 	}
 }
 /* }}} */

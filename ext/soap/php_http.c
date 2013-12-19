@@ -172,17 +172,17 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
 	    Z_TYPE_PP(proxy_host) == IS_STRING &&
 	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
-	    Z_TYPE_PP(proxy_port) == IS_LONG) {
+	    Z_TYPE_PP(proxy_port) == IS_INT) {
 		host = Z_STRVAL_PP(proxy_host);
-		port = Z_LVAL_PP(proxy_port);
+		port = Z_IVAL_PP(proxy_port);
 		*use_proxy = 1;
 	} else {
 		host = phpurl->host;
 		port = phpurl->port;
 	}
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_connection_timeout", sizeof("_connection_timeout"), (void **) &tmp) == SUCCESS &&
-	    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) > 0) {
-	  tv.tv_sec = Z_LVAL_PP(tmp);
+	    Z_TYPE_PP(tmp) == IS_INT && Z_IVAL_PP(tmp) > 0) {
+	  tv.tv_sec = Z_IVAL_PP(tmp);
 	  tv.tv_usec = 0;
 		timeout = &tv;
 	}
@@ -193,9 +193,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	/* Changed ternary operator to an if/else so that additional comparisons can be done on the ssl_method property */
 	if (use_ssl && !*use_proxy) {
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
-			Z_TYPE_PP(tmp) == IS_LONG) {
+			Z_TYPE_PP(tmp) == IS_INT) {
 			/* uses constants declared in soap.c to determine ssl uri protocol */
-			switch (Z_LVAL_PP(tmp)) {
+			switch (Z_IVAL_PP(tmp)) {
 				case SOAP_SSL_METHOD_TLS:
 					protocol = "tls";
 					break;
@@ -276,8 +276,8 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
  			   proper encrypyion method based on constants defined in soap.c */
 			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
 			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
-				Z_TYPE_PP(tmp) == IS_LONG) {
-				switch (Z_LVAL_PP(tmp)) {
+				Z_TYPE_PP(tmp) == IS_INT) {
+				switch (Z_IVAL_PP(tmp)) {
 					case SOAP_SSL_METHOD_TLS:
 						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
 						break;
@@ -367,13 +367,13 @@ int make_http_soap_request(zval  *this_ptr,
   request = buf;
   request_size = buf_size;
 	/* Compress request */
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_LONG) {
-		int level = Z_LVAL_PP(tmp) & 0x0f;
-		int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_INT) {
+		int level = Z_IVAL_PP(tmp) & 0x0f;
+		int kind  = Z_IVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
 
 		if (level > 9) {level = 9;}
 		
-	  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
+	  if ((Z_IVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
 			smart_str_append_const(&soap_headers_z,"Accept-Encoding: gzip, deflate\r\n");
 	  }
 	  if (level > 0) {
@@ -390,7 +390,7 @@ int make_http_soap_request(zval  *this_ptr,
 			params[2] = &param3;
 			INIT_PZVAL(params[2]);
 			ZVAL_STRINGL(params[0], buf, buf_size, 0);
-			ZVAL_LONG(params[1], level);
+			ZVAL_INT(params[1], level);
 	    if (kind == SOAP_COMPRESSION_DEFLATE) {
 	    	n = 2;
 				ZVAL_STRING(&func, "gzcompress", 0);
@@ -399,7 +399,7 @@ int make_http_soap_request(zval  *this_ptr,
 	      n = 3;
 				ZVAL_STRING(&func, "gzencode", 0);
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
-				ZVAL_LONG(params[2], 0x1f);
+				ZVAL_INT(params[2], 0x1f);
 	    }
 			if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
 			    Z_TYPE(retval) == IS_STRING) {
@@ -415,8 +415,8 @@ int make_http_soap_request(zval  *this_ptr,
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
 		php_stream_from_zval_no_verify(stream,tmp);
-		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_LONG) {
-			use_proxy = Z_LVAL_PP(tmp);
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_INT) {
+			use_proxy = Z_IVAL_PP(tmp);
 		}
 	} else {
 		stream = NULL;
@@ -434,8 +434,8 @@ int make_http_soap_request(zval  *this_ptr,
 	if (context && 
 		php_stream_context_get_option(context, "http", "max_redirects", &tmp) == SUCCESS) {
 		if (Z_TYPE_PP(tmp) != IS_STRING || !is_numeric_string(Z_STRVAL_PP(tmp), Z_STRSIZE_PP(tmp), &redirect_max, NULL, 1)) {
-			if (Z_TYPE_PP(tmp) == IS_LONG)
-				redirect_max = Z_LVAL_PP(tmp);
+			if (Z_TYPE_PP(tmp) == IS_INT)
+				redirect_max = Z_IVAL_PP(tmp);
 		}
 	}
 
@@ -510,7 +510,7 @@ try_again:
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
-			add_property_long(this_ptr, "_use_proxy", use_proxy);
+			add_property_int(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
 			if (request != buf) {efree(request);}
@@ -572,7 +572,7 @@ try_again:
 		}
 		if (!http_1_1 ||
 			(zend_hash_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive"), (void **)&tmp) == SUCCESS &&
-			 Z_LVAL_PP(tmp) == 0)) {
+			 Z_IVAL_PP(tmp) == 0)) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
 		} else {
@@ -643,11 +643,11 @@ try_again:
 					make_digest(cnonce, hash);
 
 					if (zend_hash_find(Z_ARRVAL_PP(digest), "nc", sizeof("nc"), (void **)&tmp) == SUCCESS &&
-					    Z_TYPE_PP(tmp) == IS_LONG) {
-						Z_LVAL_PP(tmp)++;
-						snprintf(nc, sizeof(nc), "%08ld", Z_LVAL_PP(tmp));
+					    Z_TYPE_PP(tmp) == IS_INT) {
+						Z_IVAL_PP(tmp)++;
+						snprintf(nc, sizeof(nc), "%08ld", Z_IVAL_PP(tmp));
 					} else {
-						add_assoc_long(*digest, "nc", 1);
+						add_assoc_int(*digest, "nc", 1);
 						strcpy(nc, "00000001");
 					}
 
@@ -849,7 +849,7 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-		    Z_LVAL_PP(trace) > 0) {
+		    Z_IVAL_PP(trace) > 0) {
 			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.c, soap_headers.len, 1);
 		}
 		smart_str_appendl(&soap_headers, request, request_size);
@@ -894,7 +894,7 @@ try_again:
 		}
 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-		    Z_LVAL_PP(trace) > 0) {
+		    Z_IVAL_PP(trace) > 0) {
 			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
 		}
 

@@ -118,13 +118,13 @@
 }
 
 #define PHP_FILTER_GET_LONG_OPT(zv, opt) { \
-	if (Z_TYPE_PP(zv) != IS_LONG) {                                                                      \
+	if (Z_TYPE_PP(zv) != IS_INT) {                                                                      \
 		zval ___tmp = **zv;                                                                                 \
 		zval_copy_ctor(&___tmp);                                                                                    \
-		convert_to_long(&___tmp);                                                                                   \
-		opt = Z_LVAL(___tmp);                                                                                  \
+		convert_to_int(&___tmp);                                                                                   \
+		opt = Z_IVAL(___tmp);                                                                                  \
 	} else {                                                                                                     \
-		opt = Z_LVAL_PP(zv);                                                                        \
+		opt = Z_IVAL_PP(zv);                                                                        \
 	}                                                                                                            \
 }
 

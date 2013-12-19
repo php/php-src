@@ -335,9 +335,9 @@ PHP_FUNCTION(ibase_blob_get)
 		RETURN_FALSE;
 	}
 
-	convert_to_long_ex(len_arg);
+	convert_to_int_ex(len_arg);
 
-	if (_php_ibase_blob_get(return_value, ib_blob, Z_LVAL_PP(len_arg) TSRMLS_CC) != SUCCESS) {
+	if (_php_ibase_blob_get(return_value, ib_blob, Z_IVAL_PP(len_arg) TSRMLS_CC) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -375,7 +375,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{
 		ib_blob->bl_handle = NULL;
 		RETVAL_TRUE;
 	}
-	zend_list_delete(Z_LVAL_PP(blob_arg));
+	zend_list_delete(Z_IVAL_PP(blob_arg));
 }
 /* }}} */
 
@@ -455,13 +455,13 @@ PHP_FUNCTION(ibase_blob_info)
 	array_init(return_value);
 
 	add_index_long(return_value, 0, bl_info.total_length);
- 	add_assoc_long(return_value, "length", bl_info.total_length);
+ 	add_assoc_int(return_value, "length", bl_info.total_length);
 
 	add_index_long(return_value, 1, bl_info.num_segments);
- 	add_assoc_long(return_value, "numseg", bl_info.num_segments);
+ 	add_assoc_int(return_value, "numseg", bl_info.num_segments);
 
 	add_index_long(return_value, 2, bl_info.max_segment);
- 	add_assoc_long(return_value, "maxseg", bl_info.max_segment);
+ 	add_assoc_int(return_value, "maxseg", bl_info.max_segment);
 
 	add_index_bool(return_value, 3, bl_info.bl_stream);
  	add_assoc_bool(return_value, "stream", bl_info.bl_stream);

@@ -245,10 +245,10 @@ static void php_pspell_close_config(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 static PHP_MINIT_FUNCTION(pspell)
 {
-	REGISTER_LONG_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("PSPELL_FAST", PSPELL_FAST, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("PSPELL_NORMAL", PSPELL_NORMAL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("PSPELL_BAD_SPELLERS", PSPELL_BAD_SPELLERS, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("PSPELL_RUN_TOGETHER", PSPELL_RUN_TOGETHER, CONST_PERSISTENT | CONST_CS);
 	le_pspell = zend_register_list_destructors_ex(php_pspell_close, NULL, "pspell", module_number);
 	le_pspell_config = zend_register_list_destructors_ex(php_pspell_close_config, NULL, "pspell config", module_number);
 	return SUCCESS;
@@ -348,7 +348,7 @@ static PHP_FUNCTION(pspell_new)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -453,7 +453,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -483,7 +483,7 @@ static PHP_FUNCTION(pspell_new_config)
 	
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -747,7 +747,7 @@ static PHP_FUNCTION(pspell_config_create)
 	pspell_config_replace(config, "save-repl", "false");
 
 	ind = zend_list_insert(config, le_pspell_config TSRMLS_CC);
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -804,7 +804,7 @@ static PHP_FUNCTION(pspell_config_mode)
 static PHP_FUNCTION(pspell_config_ignore)
 {
 	int type;
-	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
+	char ignore_str[MAX_LENGTH_OF_ZEND_INT + 1];	
 	php_int_t conf, ignore = 0L;
 	PspellConfig *config;
 	

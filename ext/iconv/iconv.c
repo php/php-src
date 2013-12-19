@@ -269,8 +269,8 @@ PHP_MINIT_FUNCTION(miconv)
 #endif
 	REGISTER_STRING_CONSTANT("ICONV_VERSION", version, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ICONV_MIME_DECODE_STRICT", PHP_ICONV_MIME_DECODE_STRICT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ICONV_MIME_DECODE_CONTINUE_ON_ERROR", PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	if (php_iconv_stream_filter_register_factory(TSRMLS_C) != PHP_ICONV_ERR_SUCCESS) {
 		return FAILURE;
@@ -1981,7 +1981,7 @@ PHP_FUNCTION(iconv_strlen)
 	err = _php_iconv_strlen(&retval, str, str_len, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 	if (err == PHP_ICONV_ERR_SUCCESS) {
-		RETVAL_LONG((php_int_t)retval);
+		RETVAL_INT((php_int_t)retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2069,7 +2069,7 @@ PHP_FUNCTION(iconv_strpos)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (php_size_t)-1) {
-		RETVAL_LONG((php_int_t)retval);
+		RETVAL_INT((php_int_t)retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2111,7 +2111,7 @@ PHP_FUNCTION(iconv_strrpos)
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
 	if (err == PHP_ICONV_ERR_SUCCESS && retval != (php_size_t)-1) {
-		RETVAL_LONG((php_int_t)retval);
+		RETVAL_INT((php_int_t)retval);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2187,14 +2187,14 @@ PHP_FUNCTION(iconv_mime_encode)
 		if (zend_hash_find(Z_ARRVAL_P(pref), "line-length", sizeof("line-length"), (void **)&ppval) == SUCCESS) {
 			zval val, *pval = *ppval;
 
-			if (Z_TYPE_P(pval) != IS_LONG) {
+			if (Z_TYPE_P(pval) != IS_INT) {
 				val = *pval;
 				zval_copy_ctor(&val);
-				convert_to_long(&val);
+				convert_to_int(&val);
 				pval = &val;
 			}
 
-			line_len = Z_LVAL_P(pval);
+			line_len = Z_IVAL_P(pval);
 
 			if (pval == &val) {
 				zval_dtor(&val);

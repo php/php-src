@@ -375,7 +375,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 /* no longer supported */
 ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
-ZEND_API int add_assoc_long_ex(zval *arg, const char *key, zend_size_t key_len, zend_int_t n);
+ZEND_API int add_assoc_int_ex(zval *arg, const char *key, zend_size_t key_len, zend_int_t n);
 ZEND_API int add_assoc_null_ex(zval *arg, const char *key, zend_size_t key_len);
 ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, zend_size_t key_len, int b);
 ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, zend_size_t key_len, int r);
@@ -384,7 +384,7 @@ ZEND_API int add_assoc_string_ex(zval *arg, const char *key, zend_size_t key_len
 ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, zend_size_t key_len, char *str, zend_size_t length, int duplicate);
 ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, zend_size_t key_len, zval *value);
 
-#define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
+#define add_assoc_int(__arg, __key, __n) add_assoc_int_ex(__arg, __key, strlen(__key)+1, __n)
 #define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key) + 1)
 #define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
 #define add_assoc_resource(__arg, __key, __r) add_assoc_resource_ex(__arg, __key, strlen(__key)+1, __r)
@@ -430,7 +430,7 @@ ZEND_API int add_get_index_stringl(zval *arg, zend_uint_t idx, const char *str, 
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
-ZEND_API int add_property_long_ex(zval *arg, const char *key, zend_size_t key_len, zend_int_t l TSRMLS_DC);
+ZEND_API int add_property_int_ex(zval *arg, const char *key, zend_size_t key_len, zend_int_t l TSRMLS_DC);
 ZEND_API int add_property_null_ex(zval *arg, const char *key, zend_size_t key_len TSRMLS_DC);
 ZEND_API int add_property_bool_ex(zval *arg, const char *key, zend_size_t key_len, int b TSRMLS_DC);
 ZEND_API int add_property_resource_ex(zval *arg, const char *key, zend_size_t key_len, zend_int_t r TSRMLS_DC);
@@ -439,7 +439,7 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, zend_size_t key_
 ZEND_API int add_property_stringl_ex(zval *arg, const char *key, zend_size_t key_len,  const char *str, zend_size_t length, int duplicate TSRMLS_DC);
 ZEND_API int add_property_zval_ex(zval *arg, const char *key, zend_size_t key_len, zval *value TSRMLS_DC);
 
-#define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
+#define add_property_int(__arg, __key, __n) add_property_int_ex(__arg, __key, strlen(__key)+1, __n TSRMLS_CC)
 #define add_property_null(__arg, __key) add_property_null_ex(__arg, __key, strlen(__key) + 1 TSRMLS_CC)
 #define add_property_bool(__arg, __key, __b) add_property_bool_ex(__arg, __key, strlen(__key)+1, __b TSRMLS_CC)
 #define add_property_resource(__arg, __key, __r) add_property_resource_ex(__arg, __key, strlen(__key)+1, __r TSRMLS_CC)
@@ -547,13 +547,13 @@ END_EXTERN_C()
 
 #define ZVAL_RESOURCE(z, l) do {	\
 		zval *__z = (z);			\
-		Z_LVAL_P(__z) = l;			\
+		Z_IVAL_P(__z) = l;			\
 		Z_TYPE_P(__z) = IS_RESOURCE;\
 	} while (0)
 
 #define ZVAL_BOOL(z, b) do {		\
 		zval *__z = (z);			\
-		Z_LVAL_P(__z) = ((b) != 0);	\
+		Z_IVAL_P(__z) = ((b) != 0);	\
 		Z_TYPE_P(__z) = IS_BOOL;	\
 	} while (0)
 
@@ -561,10 +561,10 @@ END_EXTERN_C()
 		Z_TYPE_P(z) = IS_NULL;		\
 	}
 
-#define ZVAL_LONG(z, l) {			\
+#define ZVAL_INT(z, l) {			\
 		zval *__z = (z);			\
-		Z_LVAL_P(__z) = l;			\
-		Z_TYPE_P(__z) = IS_LONG;	\
+		Z_IVAL_P(__z) = l;			\
+		Z_TYPE_P(__z) = IS_INT;	\
 	}
 
 #define ZVAL_DOUBLE(z, d) {			\
@@ -617,7 +617,7 @@ END_EXTERN_C()
 #define RETVAL_RESOURCE(l)				ZVAL_RESOURCE(return_value, l)
 #define RETVAL_BOOL(b)					ZVAL_BOOL(return_value, b)
 #define RETVAL_NULL() 					ZVAL_NULL(return_value)
-#define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)
+#define RETVAL_INT(l) 					ZVAL_INT(return_value, l)
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
 #define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
 #define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
@@ -629,7 +629,7 @@ END_EXTERN_C()
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
 #define RETURN_NULL() 					{ RETVAL_NULL(); return;}
-#define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
+#define RETURN_INT(l) 					{ RETVAL_INT(l); return; }
 #define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
 #define RETURN_STRING(s, duplicate) 	{ RETVAL_STRING(s, duplicate); return; }
 #define RETURN_STRINGL(s, l, duplicate) { RETVAL_STRINGL(s, l, duplicate); return; }
@@ -672,7 +672,7 @@ END_EXTERN_C()
 								{														\
 									zval *var;											\
 									ALLOC_ZVAL(var);									\
-									ZVAL_LONG(var, v);									\
+									ZVAL_INT(var, v);									\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
 								}														\
 							}

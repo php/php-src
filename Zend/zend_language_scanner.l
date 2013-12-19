@@ -563,7 +563,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 
 	retval_znode.op_type = IS_CONST;
 	INIT_PZVAL(&retval_znode.u.constant);
-	ZVAL_LONG(&retval_znode.u.constant, 1);
+	ZVAL_INT(&retval_znode.u.constant, 1);
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
@@ -1498,11 +1498,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	if (len < SIZEOF_ZEND_INT * 8) {
 		if (len == 0) {
-			Z_LVAL_P(zendlval) = 0;
+			Z_IVAL_P(zendlval) = 0;
 		} else {
-			Z_LVAL_P(zendlval) = ZEND_STRTOL(bin, NULL, 2);
+			Z_IVAL_P(zendlval) = ZEND_STRTOL(bin, NULL, 2);
 		}
-		zendlval->type = IS_LONG;
+		zendlval->type = IS_INT;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, NULL));
@@ -1511,11 +1511,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
-	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		Z_LVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
+	if (yyleng < MAX_LENGTH_OF_ZEND_INT - 1) { /* Won't overflow */
+		Z_IVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
 	} else {
 		errno = 0;
-		Z_LVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
+		Z_IVAL_P(zendlval) = ZEND_STRTOL(yytext, NULL, 0);
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
 				Z_DVAL_P(zendlval) = zend_oct_strtod(yytext, NULL);
@@ -1527,7 +1527,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 	}
 
-	zendlval->type = IS_LONG;
+	zendlval->type = IS_INT;
 	return T_LNUMBER;
 }
 
@@ -1543,11 +1543,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	if (len < SIZEOF_ZEND_INT * 2 || (len == SIZEOF_ZEND_INT * 2 && *hex <= '7')) {
 		if (len == 0) {
-			Z_LVAL_P(zendlval) = 0;
+			Z_IVAL_P(zendlval) = 0;
 		} else {
-			Z_LVAL_P(zendlval) = ZEND_STRTOL(hex, NULL, 16);
+			Z_IVAL_P(zendlval) = ZEND_STRTOL(hex, NULL, 16);
 		}
-		zendlval->type = IS_LONG;
+		zendlval->type = IS_INT;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, NULL));
@@ -1556,8 +1556,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
-	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 10));
+	if (yyleng < MAX_LENGTH_OF_ZEND_INT - 1 || (yyleng == MAX_LENGTH_OF_ZEND_INT - 1 && strcmp(yytext, long_min_digits) < 0)) {
+		ZVAL_INT(zendlval, ZEND_STRTOL(yytext, NULL, 10));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng, 1);
 	}
@@ -1626,7 +1626,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
-	ZVAL_LONG(zendlval, CG(zend_lineno));
+	ZVAL_INT(zendlval, CG(zend_lineno));
 	return T_LINE;
 }
 
@@ -2115,7 +2115,7 @@ inline_html:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_LVAL_P(zendlval) = (long) '{';
+	Z_IVAL_P(zendlval) = (long) '{';
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;

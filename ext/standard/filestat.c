@@ -437,9 +437,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(group) == IS_LONG) {
+			if (Z_TYPE_P(group) == IS_INT) {
 				option = PHP_STREAM_META_GROUP;
-				value = &Z_LVAL_P(group);
+				value = &Z_IVAL_P(group);
 			} else if (Z_TYPE_P(group) == IS_STRING) {
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
@@ -465,8 +465,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
+	if (Z_TYPE_P(group) == IS_INT) {
+		gid = (gid_t)Z_IVAL_P(group);
 	} else if (Z_TYPE_P(group) == IS_STRING) {
 		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
@@ -574,9 +574,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(user) == IS_LONG) {
+			if (Z_TYPE_P(user) == IS_INT) {
 				option = PHP_STREAM_META_OWNER;
-				value = &Z_LVAL_P(user);
+				value = &Z_IVAL_P(user);
 			} else if (Z_TYPE_P(user) == IS_STRING) {
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
@@ -603,8 +603,8 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_FALSE;
 #else
 
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
+	if (Z_TYPE_P(user) == IS_INT) {
+		uid = (uid_t)Z_IVAL_P(user);
 	} else if (Z_TYPE_P(user) == IS_STRING) {
 		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((php_int_t)ssb.sb.st_mode);
+		RETURN_INT((php_int_t)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((php_int_t)ssb.sb.st_ino);
+		RETURN_INT((php_int_t)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_LONG((php_int_t)ssb.sb.st_size);
+		RETURN_INT((php_int_t)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_LONG((php_int_t)ssb.sb.st_uid);
+		RETURN_INT((php_int_t)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((php_int_t)ssb.sb.st_gid);
+		RETURN_INT((php_int_t)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_LONG((php_int_t)ssb.sb.st_atime);
+		RETURN_INT((php_int_t)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_LONG((php_int_t)ssb.sb.st_mtime);
+		RETURN_INT((php_int_t)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((php_int_t)ssb.sb.st_ctime);
+		RETURN_INT((php_int_t)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link", 1);
@@ -1195,7 +1195,7 @@ PHP_FUNCTION(realpath_cache_size)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_LONG(realpath_cache_size(TSRMLS_C));
+	RETURN_INT(realpath_cache_size(TSRMLS_C));
 }
 
 /* {{{ proto bool realpath_cache_get()
@@ -1218,13 +1218,13 @@ PHP_FUNCTION(realpath_cache_get)
 
 			/* bucket->key is unsigned long */
 			if (ZEND_INT_MAX >= bucket->key) {
-				add_assoc_long(entry, "key", bucket->key);
+				add_assoc_int(entry, "key", bucket->key);
 			} else {
 				add_assoc_double(entry, "key", (double)bucket->key);
 			}
 			add_assoc_bool(entry, "is_dir", bucket->is_dir);
 			add_assoc_stringl(entry, "realpath", bucket->realpath, bucket->realpath_len, 1);
-			add_assoc_long(entry, "expires", bucket->expires);
+			add_assoc_int(entry, "expires", bucket->expires);
 #ifdef PHP_WIN32
 			add_assoc_bool(entry, "is_rvalid", bucket->is_rvalid);
 			add_assoc_bool(entry, "is_wvalid", bucket->is_wvalid);

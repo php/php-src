@@ -1667,7 +1667,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				MYSQLND_INC_CONN_STATISTIC_W_VALUE2(stats, statistic, 1, STAT_BYTES_RECEIVED_PURE_DATA_TEXT, len);
 			}
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
-			if (as_int_or_float && perm_bind.php_type == IS_LONG) {
+			if (as_int_or_float && perm_bind.php_type == IS_INT) {
 				zend_uchar save = *(p + len);
 				/* We have to make it ASCIIZ temporarily */
 				*(p + len) = '\0';
@@ -1679,7 +1679,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 #else
 						_atoi64((char *) p);
 #endif
-					ZVAL_LONG(*current_field, (php_int_t) v); /* the cast is safe */
+					ZVAL_INT(*current_field, (php_int_t) v); /* the cast is safe */
 				} else {
 					uint64_t v =
 #ifndef PHP_WIN32
@@ -1701,7 +1701,7 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 					{
 						ZVAL_STRINGL(*current_field, (char *)p, len, 0);
 					} else {
-						ZVAL_LONG(*current_field, (php_int_t) v); /* the cast is safe */
+						ZVAL_INT(*current_field, (php_int_t) v); /* the cast is safe */
 					}
 				}
 				*(p + len) = save;
@@ -1730,8 +1730,8 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 				  later in this function there will be an advancement.
 				*/
 				p -= len;
-				if (Z_TYPE_PP(current_field) == IS_LONG) {
-					bit_area += 1 + sprintf((char *)start, ZEND_INT_FMT, Z_LVAL_PP(current_field));
+				if (Z_TYPE_PP(current_field) == IS_INT) {
+					bit_area += 1 + sprintf((char *)start, ZEND_INT_FMT, Z_IVAL_PP(current_field));
 					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
 				} else if (Z_TYPE_PP(current_field) == IS_STRING){
 					memcpy(bit_area, Z_STRVAL_PP(current_field), Z_STRSIZE_PP(current_field));

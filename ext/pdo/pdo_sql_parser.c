@@ -596,9 +596,9 @@ safe:
 							break;
 
 						case IS_BOOL:
-							convert_to_long(&tmp_param);
+							convert_to_int(&tmp_param);
 							/* fall through */
-						case IS_LONG:
+						case IS_INT:
 						case IS_DOUBLE:
 							convert_to_string(&tmp_param);
 							plc->qlen = Z_STRSIZE(tmp_param);

@@ -92,7 +92,7 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, count);
+	ZVAL_INT(*retval, count);
 	return SUCCESS;
 }
 

@@ -244,7 +244,7 @@ static void _php_intlcal_field_uec_ret_in32t_method(
 		(UCalendarDateFields)field, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get)
@@ -432,7 +432,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	}
 	
 	for (i = 0; i < variant; i++) {
-		if (Z_LVAL_PP(args[i]) < INT32_MIN || Z_LVAL_PP(args[i]) > INT32_MAX) {
+		if (Z_IVAL_PP(args[i]) < INT32_MIN || Z_IVAL_PP(args[i]) > INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlcal_set: at least one of the arguments has an absolute "
 				"value that is too large", 0 TSRMLS_CC);
@@ -597,7 +597,7 @@ U_CFUNC PHP_FUNCTION(intlcal_field_difference)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_field_difference: Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_actual_maximum)
@@ -638,7 +638,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_day_of_week_type)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_day_of_week_type: Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 #endif
 
@@ -659,7 +659,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_first_day_of_week)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_first_day_of_week: Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 static void _php_intlcal_field_ret_in32t_method(
@@ -691,7 +691,7 @@ static void _php_intlcal_field_ret_in32t_method(
 	int32_t result = (co->ucal->*func)((UCalendarDateFields)field);
 	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_greatest_minimum)
@@ -757,7 +757,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_minimal_days_in_first_week)
 	INTL_METHOD_CHECK_STATUS(co,
 		"intlcal_get_first_day_of_week: Call to ICU method has failed");
 
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_minimum)
@@ -831,7 +831,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_weekend_transition)
 	INTL_METHOD_CHECK_STATUS(co, "intlcal_get_weekend_transition: "
 		"Error calling ICU method");
 
-	RETURN_LONG((php_int_t)res);
+	RETURN_INT((php_int_t)res);
 }
 #endif
 
@@ -1065,7 +1065,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(co->ucal->getRepeatedWallTimeOption());
+	RETURN_INT(co->ucal->getRepeatedWallTimeOption());
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
@@ -1081,7 +1081,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
 
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(co->ucal->getSkippedWallTimeOption());
+	RETURN_INT(co->ucal->getSkippedWallTimeOption());
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
@@ -1181,7 +1181,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 
 	zend_call_method_with_0_params(&zv_datetime, php_date_get_date_ce(),
 		NULL, "gettimestamp", &zv_timestamp);
-	if (!zv_timestamp || Z_TYPE_P(zv_timestamp) != IS_LONG) {
+	if (!zv_timestamp || Z_TYPE_P(zv_timestamp) != IS_INT) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_from_date_time: bad DateTime; call to "
 			"DateTime::getTimestamp() failed", 0 TSRMLS_CC);
@@ -1210,7 +1210,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 				"error creating ICU Calendar object", 0 TSRMLS_CC);
 		goto error;
 	}
-	cal->setTime(((UDate)Z_LVAL_P(zv_timestamp)) * 1000., status);
+	cal->setTime(((UDate)Z_IVAL_P(zv_timestamp)) * 1000., status);
     if (U_FAILURE(status)) {
 		/* time zone was adopted by cal; should not be deleted here */
 		delete cal;
@@ -1326,7 +1326,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 	if (co == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((php_int_t)CALENDAR_ERROR_CODE(co));
+	RETURN_INT((php_int_t)CALENDAR_ERROR_CODE(co));
 }
 
 U_CFUNC PHP_FUNCTION(intlcal_get_error_message)

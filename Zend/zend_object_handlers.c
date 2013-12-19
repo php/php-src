@@ -1359,10 +1359,10 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
-					if (Z_LVAL(result) != 0) {
+					if (Z_IVAL(result) != 0) {
 						Z_OBJ_UNPROTECT_RECURSION(o1);
 						Z_OBJ_UNPROTECT_RECURSION(o2);
-						return Z_LVAL(result);
+						return Z_IVAL(result);
 					}
 				} else {
 					Z_OBJ_UNPROTECT_RECURSION(o1);
@@ -1564,14 +1564,14 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			INIT_PZVAL(writeobj);
 			ZVAL_BOOL(writeobj, 1);
 			return SUCCESS;
-		case IS_LONG:
+		case IS_INT:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ce->name);
 			INIT_PZVAL(writeobj);
 			if (readobj == writeobj) {
 				zval_dtor(readobj);
 			}
-			ZVAL_LONG(writeobj, 1);
+			ZVAL_INT(writeobj, 1);
 			return SUCCESS;
 		case IS_DOUBLE:
 			ce = Z_OBJCE_P(readobj);

@@ -358,7 +358,7 @@ ZEND_FUNCTION(zend_version)
    Returns number of freed zvals */
 ZEND_FUNCTION(gc_collect_cycles)
 {
-	RETURN_LONG(gc_collect_cycles(TSRMLS_C));
+	RETURN_INT(gc_collect_cycles(TSRMLS_C));
 }
 /* }}} */
 
@@ -393,10 +393,10 @@ ZEND_FUNCTION(func_num_args)
 	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
 	if (ex && ex->function_state.arguments) {
-		RETURN_LONG((long)(zend_uintptr_t)*(ex->function_state.arguments));
+		RETURN_INT((long)(zend_uintptr_t)*(ex->function_state.arguments));
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
 }
 /* }}} */
@@ -487,7 +487,7 @@ ZEND_FUNCTION(strlen)
 		return;
 	}
 
-	RETVAL_LONG((zend_int_t) s1_len);
+	RETVAL_INT((zend_int_t) s1_len);
 }
 /* }}} */
 
@@ -503,7 +503,7 @@ ZEND_FUNCTION(strcmp)
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcmp(s1, s1_len, s2, s2_len));
+	RETURN_INT(zend_binary_strcmp(s1, s1_len, s2, s2_len));
 }
 /* }}} */
 
@@ -525,7 +525,7 @@ ZEND_FUNCTION(strncmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncmp(s1, s1_len, s2, s2_len, len));
+	RETURN_INT(zend_binary_strncmp(s1, s1_len, s2, s2_len, len));
 }
 /* }}} */
 
@@ -541,7 +541,7 @@ ZEND_FUNCTION(strcasecmp)
 		return;
 	}
 
-	RETURN_LONG(zend_binary_strcasecmp(s1, s1_len, s2, s2_len));
+	RETURN_INT(zend_binary_strcasecmp(s1, s1_len, s2, s2_len));
 }
 /* }}} */
 
@@ -563,7 +563,7 @@ ZEND_FUNCTION(strncasecmp)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
+	RETURN_INT(zend_binary_strncasecmp(s1, s1_len, s2, s2_len, len));
 }
 /* }}} */
 
@@ -613,7 +613,7 @@ ZEND_FUNCTION(each)
 		case HASH_KEY_IS_STRING:
 			add_get_index_stringl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, !IS_INTERNED(string_key));
 			break;
-		case HASH_KEY_IS_LONG:
+		case HASH_KEY_IS_INT:
 			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
 			break;
 	}
@@ -641,7 +641,7 @@ ZEND_FUNCTION(error_reporting)
 		zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), err, err_len, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	}
 
-	RETVAL_LONG(old_error_reporting);
+	RETVAL_INT(old_error_reporting);
 }
 /* }}} */
 
@@ -674,7 +674,7 @@ ZEND_FUNCTION(define)
 
 repeat:
 	switch (Z_TYPE_P(val)) {
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_BOOL:
@@ -1841,11 +1841,11 @@ ZEND_FUNCTION(create_function)
 		new_function = *func;
 		function_add_ref(&new_function);
 
-		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG);
+		function_name = (char *) emalloc(sizeof("0lambda_")+MAX_LENGTH_OF_ZEND_INT);
 		function_name[0] = '\0';
 
 		do {
-			function_name_length = 1 + snprintf(function_name + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count));
+			function_name_length = 1 + snprintf(function_name + 1, sizeof("lambda_")+MAX_LENGTH_OF_ZEND_INT, "lambda_%d", ++EG(lambda_count));
 		} while (zend_hash_add(EG(function_table), function_name, function_name_length+1, &new_function, sizeof(zend_function), NULL)==FAILURE);
 		zend_hash_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME));
 		RETURN_STRINGL(function_name, function_name_length, 0);
@@ -1869,7 +1869,7 @@ ZEND_FUNCTION(zend_test_func)
 #ifdef ZTS
 ZEND_FUNCTION(zend_thread_id)
 {
-	RETURN_LONG((long)tsrm_thread_id());
+	RETURN_INT((long)tsrm_thread_id());
 }
 #endif
 #endif
@@ -1885,7 +1885,7 @@ ZEND_FUNCTION(get_resource_type)
 		return;
 	}
 
-	resource_type = zend_rsrc_list_get_rsrc_type(Z_LVAL_P(z_resource_type) TSRMLS_CC);
+	resource_type = zend_rsrc_list_get_rsrc_type(Z_IVAL_P(z_resource_type) TSRMLS_CC);
 	if (resource_type) {
 		RETURN_STRING(resource_type, 1);
 	} else {
@@ -2279,7 +2279,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			filename = skip->op_array->filename;
 			lineno = skip->opline->lineno;
 			add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)filename, 1);
-			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+			add_assoc_int_ex(stack_frame, "line", sizeof("line"), lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
 			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
@@ -2296,7 +2296,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				}				    
 				if (prev->op_array) {
 					add_assoc_string_ex(stack_frame, "file", sizeof("file"), (char*)prev->op_array->filename, 1);
-					add_assoc_long_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
+					add_assoc_int_ex(stack_frame, "line", sizeof("line"), prev->opline->lineno);
 					break;
 				}
 				prev = prev->prev_execute_data;

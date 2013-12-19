@@ -154,7 +154,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define SAVE_CURL_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
-#define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s), (php_int_t) v);
+#define CAAL(s, v) add_assoc_int_ex(return_value, s, sizeof(s), (php_int_t) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s), (double) v);
 #define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) (v ? v : ""), 1);
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
@@ -599,7 +599,7 @@ PHP_MINFO_FUNCTION(curl)
 }
 /* }}} */
 
-#define REGISTER_CURL_CONSTANT(__c) REGISTER_LONG_CONSTANT(#__c, __c, CONST_CS | CONST_PERSISTENT)
+#define REGISTER_CURL_CONSTANT(__c) REGISTER_INT_CONSTANT(#__c, __c, CONST_CS | CONST_PERSISTENT)
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -1320,10 +1320,10 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
-				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
-					convert_to_long_ex(&retval_ptr);
+				if (Z_TYPE_P(retval_ptr) != IS_INT) {
+					convert_to_int_ex(&retval_ptr);
 				}
-				length = Z_LVAL_P(retval_ptr);
+				length = Z_IVAL_P(retval_ptr);
 				zval_ptr_dtor(&retval_ptr);
 			}
 
@@ -1385,10 +1385,10 @@ static php_int_t curl_fnmatch(void *ctx, const char *pattern, const char *string
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
 			} else if (retval_ptr) {
-				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
-					convert_to_long_ex(&retval_ptr);
+				if (Z_TYPE_P(retval_ptr) != IS_INT) {
+					convert_to_int_ex(&retval_ptr);
 				}
-				rval = Z_LVAL_P(retval_ptr);
+				rval = Z_IVAL_P(retval_ptr);
 				zval_ptr_dtor(&retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
@@ -1436,10 +1436,10 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 
 			ZVAL_RESOURCE(handle, ch->id);
 			zend_list_addref(ch->id);
-			ZVAL_LONG(zdltotal, (php_int_t) dltotal);
-			ZVAL_LONG(zdlnow, (php_int_t) dlnow);
-			ZVAL_LONG(zultotal, (php_int_t) ultotal);
-			ZVAL_LONG(zulnow, (php_int_t) ulnow);
+			ZVAL_INT(zdltotal, (php_int_t) dltotal);
+			ZVAL_INT(zdlnow, (php_int_t) dlnow);
+			ZVAL_INT(zultotal, (php_int_t) ultotal);
+			ZVAL_INT(zulnow, (php_int_t) ulnow);
 
 			argv[0] = &handle;
 			argv[1] = &zdltotal;
@@ -1463,10 +1463,10 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
 			} else if (retval_ptr) {
-				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
-					convert_to_long_ex(&retval_ptr);
+				if (Z_TYPE_P(retval_ptr) != IS_INT) {
+					convert_to_int_ex(&retval_ptr);
 				}
-				if (0 != Z_LVAL_P(retval_ptr)) {
+				if (0 != Z_IVAL_P(retval_ptr)) {
 					rval = 1;
 				}
 				zval_ptr_dtor(&retval_ptr);
@@ -1515,7 +1515,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			zend_list_addref(ch->id);
 			ZVAL_RESOURCE(zfd, t->fd);
 			zend_list_addref(t->fd);
-			ZVAL_LONG(zlength, (php_int_t) size * nmemb);
+			ZVAL_INT(zlength, (php_int_t) size * nmemb);
 
 			argv[0] = &handle;
 			argv[1] = &zfd;
@@ -1614,10 +1614,10 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
 			} else if (retval_ptr) {
-				if (Z_TYPE_P(retval_ptr) != IS_LONG) {
-					convert_to_long_ex(&retval_ptr);
+				if (Z_TYPE_P(retval_ptr) != IS_INT) {
+					convert_to_int_ex(&retval_ptr);
 				}
-				length = Z_LVAL_P(retval_ptr);
+				length = Z_IVAL_P(retval_ptr);
 				zval_ptr_dtor(&retval_ptr);
 			}
 			zval_ptr_dtor(argv[0]);
@@ -1674,7 +1674,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	ZVAL_RESOURCE(argv[0], ch->id);
 	zend_list_addref(ch->id);
 	ZVAL_STRING(argv[1], prompt, 1);
-	ZVAL_LONG(argv[2], buflen);
+	ZVAL_INT(argv[2], buflen);
 
 	error = call_user_function(EG(function_table), NULL, func, retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
@@ -1948,7 +1948,7 @@ PHP_FUNCTION(curl_init)
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, ch, le_curl);
-	ch->id = Z_LVAL_P(return_value);
+	ch->id = Z_IVAL_P(return_value);
 }
 /* }}} */
 
@@ -1976,7 +1976,7 @@ PHP_FUNCTION(curl_copy_handle)
 	TSRMLS_SET_CTX(dupch->thread_ctx);
 
 	dupch->cp = cp;
-	zend_list_addref(Z_LVAL_P(zid));
+	zend_list_addref(Z_IVAL_P(zid));
 	if (ch->handlers->write->stream) {
 		Z_ADDREF_P(ch->handlers->write->stream);
 	}
@@ -2054,7 +2054,7 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->clone = ch->clone;
 
 	ZEND_REGISTER_RESOURCE(return_value, dupch, le_curl);
-	dupch->id = Z_LVAL_P(return_value);
+	dupch->id = Z_IVAL_P(return_value);
 }
 /* }}} */
 
@@ -2220,20 +2220,20 @@ static int _php_curl_setopt(php_curl *ch, php_int_t option, zval **zvalue, zval 
 #if CURLOPT_MUTE != 0
 		case CURLOPT_MUTE:
 #endif
-			convert_to_long_ex(zvalue);
+			convert_to_int_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
-				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
+				(PG(open_basedir) && *PG(open_basedir)) && (Z_IVAL_PP(zvalue) & CURLPROTO_FILE)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLPROTO_FILE cannot be activated when an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 			}
 #endif
-			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
+			error = curl_easy_setopt(ch->cp, option, Z_IVAL_PP(zvalue));
 			break;
 		case CURLOPT_SAFE_UPLOAD:
-			convert_to_long_ex(zvalue);
-			ch->safe_upload = (Z_LVAL_PP(zvalue) != 0);
+			convert_to_int_ex(zvalue);
+			ch->safe_upload = (Z_IVAL_PP(zvalue) != 0);
 			break;
 
 		/* String options */
@@ -2398,7 +2398,7 @@ string_copy:
 					}
 					Z_ADDREF_PP(zvalue);
 					ch->handlers->read->fp = fp;
-					ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+					ch->handlers->read->fd = Z_IVAL_PP(zvalue);
 					ch->handlers->read->stream = *zvalue;
 					break;
 				case CURLOPT_STDERR:
@@ -2503,17 +2503,17 @@ string_copy:
 			break;
 
 		case CURLOPT_FOLLOWLOCATION:
-			convert_to_long_ex(zvalue);
+			convert_to_int_ex(zvalue);
 #if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
-				if (Z_LVAL_PP(zvalue) != 0) {
+				if (Z_IVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
 					RETVAL_FALSE;
 					return 1;
 				}
 			}
 #endif
-			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
+			error = curl_easy_setopt(ch->cp, option, Z_IVAL_PP(zvalue));
 			break;
 
 		case CURLOPT_HEADERFUNCTION:
@@ -2708,8 +2708,8 @@ string_copy:
 			break;
 
 		case CURLOPT_RETURNTRANSFER:
-			convert_to_long_ex(zvalue);
-			if (Z_LVAL_PP(zvalue)) {
+			convert_to_int_ex(zvalue);
+			if (Z_IVAL_PP(zvalue)) {
 				ch->handlers->write->method = PHP_CURL_RETURN;
 			} else {
 				ch->handlers->write->method = PHP_CURL_STDOUT;
@@ -2729,15 +2729,15 @@ string_copy:
 #if LIBCURL_VERSION_NUM >= 0x070f05 /* Available since 7.15.5 */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
-			convert_to_long_ex(zvalue);
-			error = curl_easy_setopt(ch->cp, option, (curl_off_t)Z_LVAL_PP(zvalue));
+			convert_to_int_ex(zvalue);
+			error = curl_easy_setopt(ch->cp, option, (curl_off_t)Z_IVAL_PP(zvalue));
 			break;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 		case CURLOPT_POSTREDIR:
-			convert_to_long_ex(zvalue);
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_PP(zvalue) & CURL_REDIR_POST_ALL);
+			convert_to_int_ex(zvalue);
+			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_IVAL_PP(zvalue) & CURL_REDIR_POST_ALL);
 			break;
 #endif
 
@@ -2798,8 +2798,8 @@ string_copy:
 		}
 
 		case CURLINFO_HEADER_OUT:
-			convert_to_long_ex(zvalue);
-			if (Z_LVAL_PP(zvalue) == 1) {
+			convert_to_int_ex(zvalue);
+			if (Z_IVAL_PP(zvalue) == 1) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 1);
@@ -2892,7 +2892,7 @@ PHP_FUNCTION(curl_setopt_array)
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&entry, &pos) == SUCCESS) {
-		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) != HASH_KEY_IS_LONG) {
+		if (zend_hash_get_current_key_ex(Z_ARRVAL_P(arr), &string_key, &str_key_len, &option, 0, &pos) != HASH_KEY_IS_INT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array keys must be CURLOPT constants or equivalent integer values");
 			RETURN_FALSE;
 		}
@@ -3144,7 +3144,7 @@ PHP_FUNCTION(curl_getinfo)
 						php_int_t code = 0;
 
 						if (curl_easy_getinfo(ch->cp, option, &code) == CURLE_OK) {
-							RETURN_LONG(code);
+							RETURN_INT(code);
 						} else {
 							RETURN_FALSE;
 						}
@@ -3216,7 +3216,7 @@ PHP_FUNCTION(curl_errno)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	RETURN_LONG(ch->err.no);
+	RETURN_INT(ch->err.no);
 }
 /* }}} */
 
@@ -3238,7 +3238,7 @@ PHP_FUNCTION(curl_close)
 		return;
 	}
 
-	zend_list_delete(Z_LVAL_P(zid));
+	zend_list_delete(Z_IVAL_P(zid));
 }
 /* }}} */
 
@@ -3524,7 +3524,7 @@ PHP_FUNCTION(curl_pause)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	RETURN_LONG(curl_easy_pause(ch->cp, (int)bitmask));
+	RETURN_INT(curl_easy_pause(ch->cp, (int)bitmask));
 }
 /* }}} */
 #endif

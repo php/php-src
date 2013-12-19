@@ -818,7 +818,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
 	if (optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), key, sizeof(key), (void**)&item) == SUCCESS) \
-		varname = Z_LVAL_PP(item); \
+		varname = Z_IVAL_PP(item); \
 	else \
 		varname = defval
 
@@ -878,7 +878,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 	}
 
 	if (req->priv_key_encrypt && optional_args && zend_hash_find(Z_ARRVAL_P(optional_args), "encrypt_key_cipher", sizeof("encrypt_key_cipher"), (void**)&item) == SUCCESS) {
-		php_int_t cipher_algo = Z_LVAL_PP(item);
+		php_int_t cipher_algo = Z_IVAL_PP(item);
 		const EVP_CIPHER* cipher = php_openssl_get_evp_cipher_from_algo(cipher_algo);
 		if (cipher == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown cipher algorithm for private key.");
@@ -1095,83 +1095,83 @@ PHP_MINIT_FUNCTION(openssl)
 	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
 	
 	REGISTER_STRING_CONSTANT("OPENSSL_VERSION_TEXT", OPENSSL_VERSION_TEXT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_VERSION_NUMBER", OPENSSL_VERSION_NUMBER, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_VERSION_NUMBER", OPENSSL_VERSION_NUMBER, CONST_CS|CONST_PERSISTENT);
 	
 	/* purposes for cert purpose checking */
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_CLIENT", X509_PURPOSE_SSL_CLIENT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_SERVER", X509_PURPOSE_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_NS_SSL_SERVER", X509_PURPOSE_NS_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_SMIME_SIGN", X509_PURPOSE_SMIME_SIGN, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_SMIME_ENCRYPT", X509_PURPOSE_SMIME_ENCRYPT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_CRL_SIGN", X509_PURPOSE_CRL_SIGN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_SSL_CLIENT", X509_PURPOSE_SSL_CLIENT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_SSL_SERVER", X509_PURPOSE_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_NS_SSL_SERVER", X509_PURPOSE_NS_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_SMIME_SIGN", X509_PURPOSE_SMIME_SIGN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_SMIME_ENCRYPT", X509_PURPOSE_SMIME_ENCRYPT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_CRL_SIGN", X509_PURPOSE_CRL_SIGN, CONST_CS|CONST_PERSISTENT);
 #ifdef X509_PURPOSE_ANY
-	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
 #endif
 
 	/* signature algorithm constants */
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
 #ifdef HAVE_OPENSSL_MD2_H
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA256", OPENSSL_ALGO_SHA256, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA384", OPENSSL_ALGO_SHA384, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA512", OPENSSL_ALGO_SHA512, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_RMD160", OPENSSL_ALGO_RMD160, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_SHA256", OPENSSL_ALGO_SHA256, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_SHA384", OPENSSL_ALGO_SHA384, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_SHA512", OPENSSL_ALGO_SHA512, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ALGO_RMD160", OPENSSL_ALGO_RMD160, CONST_CS|CONST_PERSISTENT);
 #endif
 
 	/* flags for S/MIME */
-	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_TEXT", PKCS7_TEXT, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOINTERN", PKCS7_NOINTERN, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOVERIFY", PKCS7_NOVERIFY, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOCHAIN", PKCS7_NOCHAIN, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOCERTS", PKCS7_NOCERTS, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOATTR", PKCS7_NOATTR, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_TEXT", PKCS7_TEXT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOINTERN", PKCS7_NOINTERN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOVERIFY", PKCS7_NOVERIFY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOCHAIN", PKCS7_NOCHAIN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOCERTS", PKCS7_NOCERTS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOATTR", PKCS7_NOATTR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_PADDING", RSA_PKCS1_PADDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_SSLV23_PADDING", RSA_SSLV23_PADDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_PKCS1_PADDING", RSA_PKCS1_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_SSLV23_PADDING", RSA_SSLV23_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
 
 	/* Ciphers */
 #ifndef OPENSSL_NO_RC2
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_128", PHP_OPENSSL_CIPHER_RC2_128, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_RC2_64", PHP_OPENSSL_CIPHER_RC2_64, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_RC2_128", PHP_OPENSSL_CIPHER_RC2_128, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_RC2_64", PHP_OPENSSL_CIPHER_RC2_64, CONST_CS|CONST_PERSISTENT);
 #endif
 #ifndef OPENSSL_NO_DES
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_DES", PHP_OPENSSL_CIPHER_DES, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_3DES", PHP_OPENSSL_CIPHER_3DES, CONST_CS|CONST_PERSISTENT);
 #endif
 #ifndef OPENSSL_NO_AES
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_128_CBC", PHP_OPENSSL_CIPHER_AES_128_CBC, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_192_CBC", PHP_OPENSSL_CIPHER_AES_192_CBC, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_CIPHER_AES_256_CBC", PHP_OPENSSL_CIPHER_AES_256_CBC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_AES_128_CBC", PHP_OPENSSL_CIPHER_AES_128_CBC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_AES_192_CBC", PHP_OPENSSL_CIPHER_AES_192_CBC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_AES_256_CBC", PHP_OPENSSL_CIPHER_AES_256_CBC, CONST_CS|CONST_PERSISTENT);
 #endif
  
 	/* Values for key types */
-	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_RSA", OPENSSL_KEYTYPE_RSA, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_RSA", OPENSSL_KEYTYPE_RSA, CONST_CS|CONST_PERSISTENT);
 #ifndef NO_DSA
-	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
 #ifdef EVP_PKEY_EC
-	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
 
-	REGISTER_LONG_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_RAW_DATA", OPENSSL_RAW_DATA, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_ZERO_PADDING", OPENSSL_ZERO_PADDING, CONST_CS|CONST_PERSISTENT);
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
 	/* SNI support included in OpenSSL >= 0.9.8j */
-	REGISTER_LONG_CONSTANT("OPENSSL_TLSEXT_SERVER_NAME", 1, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_TLSEXT_SERVER_NAME", 1, CONST_CS|CONST_PERSISTENT);
 #endif
 
 	/* Determine default SSL configuration file */
@@ -1278,7 +1278,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, php_int_
 		}
 		/* this is so callers can decide if they should free the X509 */
 		if (resourceval) {
-			*resourceval = Z_LVAL_PP(val);
+			*resourceval = Z_IVAL_PP(val);
 		}
 		if (type == le_x509) {
 			return (X509*)what;
@@ -1410,8 +1410,8 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (method != NULL) {
-		if (Z_TYPE_P(method) == IS_LONG) {
-			algo = Z_LVAL_P(method);
+		if (Z_TYPE_P(method) == IS_INT) {
+			algo = Z_IVAL_P(method);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Algorithm must be of supported type");
 			goto cleanup;
@@ -1956,22 +1956,22 @@ PHP_FUNCTION(openssl_x509_parse)
 	}
 	
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
-	add_assoc_long(return_value, "version", 			X509_get_version(cert));
+	add_assoc_int(return_value, "version", 			X509_get_version(cert));
 
 	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), 1); 
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
 
-	add_assoc_long(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert) TSRMLS_CC));
-	add_assoc_long(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert) TSRMLS_CC));
+	add_assoc_int(return_value, "validFrom_time_t", 	asn1_time_to_time_t(X509_get_notBefore(cert) TSRMLS_CC));
+	add_assoc_int(return_value, "validTo_time_t", 		asn1_time_to_time_t(X509_get_notAfter(cert) TSRMLS_CC));
 
 	tmpstr = (char *)X509_alias_get0(cert, NULL);
 	if (tmpstr) {
 		add_assoc_string(return_value, "alias", tmpstr, 1);
 	}
 /*
-	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
+	add_assoc_int(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
 	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
 	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
 */
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		return;
 	}
 
-	RETVAL_LONG(-1);
+	RETVAL_INT(-1);
 
 	if (untrusted) {
 		untrustedchain = load_all_certs_from_file(untrusted);
@@ -2167,7 +2167,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 
 	ret = check_cert(cainfo, cert, untrustedchain, purpose);
 	if (ret != 0 && ret != 1) {
-		RETVAL_LONG(ret);
+		RETVAL_INT(ret);
 	} else {
 		RETVAL_BOOL(ret);
 	}
@@ -2264,7 +2264,7 @@ PHP_FUNCTION(openssl_x509_read)
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	x509 = php_openssl_x509_from_zval(cert, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	x509 = php_openssl_x509_from_zval(cert, 1, &Z_IVAL_P(return_value) TSRMLS_CC);
 
 	if (x509 == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied parameter cannot be coerced into an X509 certificate!");
@@ -2284,7 +2284,7 @@ PHP_FUNCTION(openssl_x509_free)
 		return;
 	}
 	ZEND_FETCH_RESOURCE(cert, X509 *, &x509, -1, "OpenSSL X.509", le_x509);
-	zend_list_delete(Z_LVAL_P(x509));
+	zend_list_delete(Z_IVAL_P(x509));
 }
 /* }}} */
 
@@ -2791,7 +2791,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, php_i
 		what = zend_fetch_resource(val TSRMLS_CC, -1, "OpenSSL X.509 CSR", &type, 1, le_csr);
 		if (what) {
 			if (resourceval) {
-				*resourceval = Z_LVAL_PP(val);
+				*resourceval = Z_IVAL_PP(val);
 			}
 			return (X509_REQ*)what;
 		}
@@ -3262,7 +3262,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			TMP_CLEAN;
 		}
 		if (resourceval) { 
-			*resourceval = Z_LVAL_PP(val);
+			*resourceval = Z_IVAL_PP(val);
 		}
 		if (type == le_x509) {
 			/* extract key from cert, depending on public_key param */
@@ -3769,12 +3769,12 @@ PHP_FUNCTION(openssl_pkey_get_public)
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(cert, 1, NULL, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(cert, 1, NULL, 1, &Z_IVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
-	zend_list_addref(Z_LVAL_P(return_value));
+	zend_list_addref(Z_IVAL_P(return_value));
 }
 /* }}} */
 
@@ -3789,7 +3789,7 @@ PHP_FUNCTION(openssl_pkey_free)
 		return;
 	}
 	ZEND_FETCH_RESOURCE(pkey, EVP_PKEY *, &key, -1, "OpenSSL key", le_key);
-	zend_list_delete(Z_LVAL_P(key));
+	zend_list_delete(Z_IVAL_P(key));
 }
 /* }}} */
 
@@ -3806,12 +3806,12 @@ PHP_FUNCTION(openssl_pkey_get_private)
 		return;
 	}
 	Z_TYPE_P(return_value) = IS_RESOURCE;
-	pkey = php_openssl_evp_from_zval(cert, 0, passphrase, 1, &Z_LVAL_P(return_value) TSRMLS_CC);
+	pkey = php_openssl_evp_from_zval(cert, 0, passphrase, 1, &Z_IVAL_P(return_value) TSRMLS_CC);
 
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
-	zend_list_addref(Z_LVAL_P(return_value));
+	zend_list_addref(Z_IVAL_P(return_value));
 }
 
 /* }}} */
@@ -3839,7 +3839,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 	pbio_len = BIO_get_mem_data(out, &pbio);
 
 	array_init(return_value);
-	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
+	add_assoc_int(return_value, "bits", EVP_PKEY_bits(pkey));
 	add_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
 	/*TODO: Use the real values once the openssl constants are used 
 	 * See the enum at the top of this file
@@ -3911,7 +3911,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			ktype = -1;
 			break;
 	}
-	add_assoc_long(return_value, "type", ktype);
+	add_assoc_int(return_value, "type", ktype);
 
 	BIO_free(out);
 }
@@ -4010,7 +4010,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	char * datafilename = NULL;
 	php_size_t datafilename_len = 0;
 	
-	RETVAL_LONG(-1);
+	RETVAL_INT(-1);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pi|PaPP", &filename, &filename_len,
 				&flags, &signersfilename, &signersfilename_len, &cainfo,
@@ -4086,7 +4086,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				sk_X509_free(signers);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "signature OK, but cannot open %s for writing", signersfilename);
-				RETVAL_LONG(-1);
+				RETVAL_INT(-1);
 			}
 		}
 		goto clean_exit;
@@ -4740,9 +4740,9 @@ PHP_FUNCTION(openssl_sign)
 		RETURN_FALSE;
 	}
 
-	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
+	if (method == NULL || Z_TYPE_P(method) == IS_INT) {
 		if (method != NULL) {
-			signature_algo = Z_LVAL_P(method);
+			signature_algo = Z_IVAL_P(method);
 		}
 		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
 	} else if (Z_TYPE_P(method) == IS_STRING) {
@@ -4811,9 +4811,9 @@ PHP_FUNCTION(openssl_verify)
 		RETURN_FALSE;
 	}
 
-	if (method == NULL || Z_TYPE_P(method) == IS_LONG) {
+	if (method == NULL || Z_TYPE_P(method) == IS_INT) {
 		if (method != NULL) {
-			signature_algo = Z_LVAL_P(method);
+			signature_algo = Z_IVAL_P(method);
 		}
 		mdtype = php_openssl_get_evp_md_from_algo(signature_algo);
 	} else if (Z_TYPE_P(method) == IS_STRING) {
@@ -4841,7 +4841,7 @@ PHP_FUNCTION(openssl_verify)
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
 	}
-	RETURN_LONG(err);
+	RETURN_INT(err);
 }
 /* }}} */
 
@@ -4960,7 +4960,7 @@ PHP_FUNCTION(openssl_seal)
 	} else {
 		efree(buf);
 	}
-	RETVAL_LONG(len1 + len2);
+	RETVAL_INT(len1 + len2);
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
@@ -5083,9 +5083,9 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 	/* check the depth */
 	if (GET_VER_OPT("verify_depth")) {
-		convert_to_long_ex(val);
+		convert_to_int_ex(val);
 
-		if (depth > Z_LVAL_PP(val)) {
+		if (depth > Z_IVAL_PP(val)) {
 			ret = 0;
 			X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
 		}
@@ -5287,8 +5287,8 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		}
 
 		if (GET_VER_OPT("verify_depth")) {
-			convert_to_long_ex(val);
-			SSL_CTX_set_verify_depth(ctx, Z_LVAL_PP(val));
+			convert_to_int_ex(val);
+			SSL_CTX_set_verify_depth(ctx, Z_IVAL_PP(val));
 		}
 	} else {
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
@@ -5714,7 +5714,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(EVP_CIPHER_iv_length(cipher_type));
+	RETURN_INT(EVP_CIPHER_iv_length(cipher_type));
 }
 /* }}} */
 

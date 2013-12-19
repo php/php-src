@@ -1543,13 +1543,13 @@ PHP_MINIT_FUNCTION(mbstring)
 		sapi_register_post_entries(mbstr_post_entries TSRMLS_CC);
 	}
 
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_MBREGEX
 	PHP_MINIT(mb_regex) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1961,7 +1961,7 @@ PHP_FUNCTION(mb_substitute_character)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			RETURN_STRING("entity", 1);
 		} else {
-			RETURN_LONG(MBSTRG(current_filter_illegal_substchar));
+			RETURN_INT(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else {
 		RETVAL_TRUE;
@@ -1975,11 +1975,11 @@ PHP_FUNCTION(mb_substitute_character)
 			} else if (strncasecmp("entity", Z_STRVAL_PP(arg1), Z_STRSIZE_PP(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 			} else {
-				convert_to_long_ex(arg1);
+				convert_to_int_ex(arg1);
 
-				if (Z_LVAL_PP(arg1) < 0xffff && Z_LVAL_PP(arg1) > 0x0) {
+				if (Z_IVAL_PP(arg1) < 0xffff && Z_IVAL_PP(arg1) > 0x0) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+					MBSTRG(current_filter_illegal_substchar) = Z_IVAL_PP(arg1);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 					RETURN_FALSE;
@@ -1987,10 +1987,10 @@ PHP_FUNCTION(mb_substitute_character)
 			}
 			break;
 		default:
-			convert_to_long_ex(arg1);
-			if (Z_LVAL_PP(arg1) < 0xffff && Z_LVAL_PP(arg1) > 0x0) {
+			convert_to_int_ex(arg1);
+			if (Z_IVAL_PP(arg1) < 0xffff && Z_IVAL_PP(arg1) > 0x0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-				MBSTRG(current_filter_illegal_substchar) = Z_LVAL_PP(arg1);
+				MBSTRG(current_filter_illegal_substchar) = Z_IVAL_PP(arg1);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown character.");
 				RETURN_FALSE;
@@ -2211,7 +2211,7 @@ PHP_FUNCTION(mb_strlen)
 
 	n = mbfl_strlen(&string);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2259,7 +2259,7 @@ PHP_FUNCTION(mb_strpos)
 
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		switch (-n) {
 		case 1:
@@ -2335,15 +2335,15 @@ PHP_FUNCTION(mb_strrpos)
 			}
 
 			if (str_flg) {
-				convert_to_long_ex(zoffset);
-				offset   = Z_LVAL_PP(zoffset);
+				convert_to_int_ex(zoffset);
+				offset   = Z_IVAL_PP(zoffset);
 			} else {
 				enc_name     = enc_name2;
 				enc_name_len = enc_name_len2;
 			}
 		} else {
-			convert_to_long_ex(zoffset);
-			offset = Z_LVAL_PP(zoffset);
+			convert_to_int_ex(zoffset);
+			offset = Z_IVAL_PP(zoffset);
 		}
 	}
 
@@ -2373,7 +2373,7 @@ PHP_FUNCTION(mb_strrpos)
 
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2402,7 +2402,7 @@ PHP_FUNCTION(mb_stripos)
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2428,7 +2428,7 @@ PHP_FUNCTION(mb_strripos)
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
 
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2702,7 +2702,7 @@ PHP_FUNCTION(mb_substr_count)
 
 	n = mbfl_substr_count(&haystack, &needle);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2743,8 +2743,8 @@ PHP_FUNCTION(mb_substr)
 	if (argc < 3 || Z_TYPE_PP(z_len) == IS_NULL) {
 		len = str_len;
 	} else {
-		convert_to_long_ex(z_len);
-		len = Z_LVAL_PP(z_len);
+		convert_to_int_ex(z_len);
+		len = Z_IVAL_PP(z_len);
 	}
 
 	/* measures length */
@@ -2817,8 +2817,8 @@ PHP_FUNCTION(mb_strcut)
 	if (argc < 3 || Z_TYPE_PP(z_len) == IS_NULL) {
 		len = string.len;
 	} else {
-		convert_to_long_ex(z_len);
-		len = Z_LVAL_PP(z_len);
+		convert_to_int_ex(z_len);
+		len = Z_IVAL_PP(z_len);
 	}
 
 	/* if "from" position is negative, count start position from the end
@@ -2882,7 +2882,7 @@ PHP_FUNCTION(mb_strwidth)
 
 	n = mbfl_strwidth(&string);
 	if (n >= 0) {
-		RETVAL_LONG(n);
+		RETVAL_INT(n);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3761,8 +3761,8 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 				if (zend_hash_get_current_data(target_hash, (void **) &hash_entry) == FAILURE) {
 					break;
 				}
-				convert_to_long_ex(hash_entry);
-				*mapelm++ = Z_LVAL_PP(hash_entry);
+				convert_to_int_ex(hash_entry);
+				*mapelm++ = Z_IVAL_PP(hash_entry);
 				mapsize++;
 				i--;
 				zend_hash_move_forward(target_hash);
@@ -4342,7 +4342,7 @@ PHP_FUNCTION(mb_get_info)
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes"), 0)) != NULL) {
 			add_assoc_string(return_value, "http_output_conv_mimetypes", name, 1);
 		}
-		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
+		add_assoc_int(return_value, "func_overload", MBSTRG(func_overload));
 		if (MBSTRG(func_overload)){
 			over_func = &(mb_ovld[0]);
 			MAKE_STD_ZVAL(row1);
@@ -4368,7 +4368,7 @@ PHP_FUNCTION(mb_get_info)
 				add_assoc_string(return_value, "mail_body_encoding", name, 1);
 			}
 		}
-		add_assoc_long(return_value, "illegal_chars", MBSTRG(illegalchars));
+		add_assoc_int(return_value, "illegal_chars", MBSTRG(illegalchars));
 		if (MBSTRG(encoding_translation)) {
 			add_assoc_string(return_value, "encoding_translation", "On", 1);
 		} else {
@@ -4396,7 +4396,7 @@ PHP_FUNCTION(mb_get_info)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			add_assoc_string(return_value, "substitute_character", "entity", 1);
 		} else {
-			add_assoc_long(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
+			add_assoc_int(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
 		}
 		if (MBSTRG(strict_detection)) {
 			add_assoc_string(return_value, "strict_detection", "On", 1);
@@ -4420,7 +4420,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name, 1);
 		}
 	} else if (!strcasecmp("func_overload", typ)) {
- 		RETVAL_LONG(MBSTRG(func_overload));
+ 		RETVAL_INT(MBSTRG(func_overload));
 	} else if (!strcasecmp("func_overload_list", typ)) {
 		if (MBSTRG(func_overload)){
 				over_func = &(mb_ovld[0]);
@@ -4447,7 +4447,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING(name, 1);
 		}
 	} else if (!strcasecmp("illegal_chars", typ)) {
-		RETVAL_LONG(MBSTRG(illegalchars));
+		RETVAL_INT(MBSTRG(illegalchars));
 	} else if (!strcasecmp("encoding_translation", typ)) {
 		if (MBSTRG(encoding_translation)) {
 			RETVAL_STRING("On", 1);
@@ -4477,7 +4477,7 @@ PHP_FUNCTION(mb_get_info)
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
 			RETVAL_STRING("entity", 1);
 		} else {
-			RETVAL_LONG(MBSTRG(current_filter_illegal_substchar));
+			RETVAL_INT(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else if (!strcasecmp("strict_detection", typ)) {
 		if (MBSTRG(strict_detection)) {

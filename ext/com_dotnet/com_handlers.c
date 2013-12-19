@@ -106,10 +106,10 @@ static zval *com_read_dimension(zval *object, zval *offset, int type TSRMLS_DC)
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
-		convert_to_long(offset);
+		convert_to_int(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
-			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
+			if (php_com_safearray_get_elem(&obj->v, &v, Z_IVAL_P(offset) TSRMLS_CC)) {
 				php_com_wrap_variant(return_value, &v, obj->code_page TSRMLS_CC);
 				VariantClear(&v);
 			}
@@ -152,8 +152,8 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 				vt = V_VT(&obj->v) & ~VT_ARRAY;
 			}
 
-			convert_to_long(offset);
-			indices = Z_LVAL_P(offset);
+			convert_to_int(offset);
+			indices = Z_IVAL_P(offset);
 
 			VariantInit(&v);
 			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);
@@ -507,7 +507,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	}
 
 	switch(type) {
-		case IS_LONG:
+		case IS_INT:
 			vt = VT_INT;
 			break;
 		case IS_DOUBLE:

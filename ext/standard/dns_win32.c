@@ -159,10 +159,10 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	add_assoc_string(*subarray, "host", pRec->pName, 1);
 	add_assoc_string(*subarray, "class", "IN", 1);
-	add_assoc_long(*subarray, "ttl", ttl);
+	add_assoc_int(*subarray, "ttl", ttl);
 
 	if (raw) {
-		add_assoc_long(*subarray, "type", type);
+		add_assoc_int(*subarray, "type", type);
 		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (php_size_t) pRec->wDataLength, 1);
 		return;
 	}
@@ -178,7 +178,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 		case DNS_TYPE_MX:
 			add_assoc_string(*subarray, "type", "MX", 1);
-			add_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
+			add_assoc_int(*subarray, "pri", pRec->Data.Srv.wPriority);
 			/* no break; */
 
 		case DNS_TYPE_CNAME:
@@ -242,11 +242,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 				add_assoc_string(*subarray, "mname", data_soa->pNamePrimaryServer, 1);
 				add_assoc_string(*subarray, "rname", data_soa->pNameAdministrator, 1);
-				add_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
-				add_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
-				add_assoc_long(*subarray, "retry", data_soa->dwRetry);
-				add_assoc_long(*subarray, "expire", data_soa->dwExpire);
-				add_assoc_long(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
+				add_assoc_int(*subarray, "serial", data_soa->dwSerialNo);
+				add_assoc_int(*subarray, "refresh", data_soa->dwRefresh);
+				add_assoc_int(*subarray, "retry", data_soa->dwRetry);
+				add_assoc_int(*subarray, "expire", data_soa->dwExpire);
+				add_assoc_int(*subarray, "minimum-ttl", data_soa->dwDefaultTtl);
 			}
 			break;
 
@@ -310,9 +310,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				DNS_SRV_DATA *data_srv = &pRec->Data.Srv;
 
 				add_assoc_string(*subarray, "type", "SRV", 1);
-				add_assoc_long(*subarray, "pri", data_srv->wPriority);
-				add_assoc_long(*subarray, "weight", data_srv->wWeight);
-				add_assoc_long(*subarray, "port", data_srv->wPort);
+				add_assoc_int(*subarray, "pri", data_srv->wPriority);
+				add_assoc_int(*subarray, "weight", data_srv->wWeight);
+				add_assoc_int(*subarray, "port", data_srv->wPort);
 				add_assoc_string(*subarray, "target", data_srv->pNameTarget, 1);
 			}
 			break;
@@ -323,8 +323,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
 
 				add_assoc_string(*subarray, "type", "NAPTR", 1);
-				add_assoc_long(*subarray, "order", data_naptr->wOrder);
-				add_assoc_long(*subarray, "pref", data_naptr->wPreference);
+				add_assoc_int(*subarray, "order", data_naptr->wOrder);
+				add_assoc_int(*subarray, "pref", data_naptr->wPreference);
 				add_assoc_string(*subarray, "flags", data_naptr->pFlags, 1);
 				add_assoc_string(*subarray, "services", data_naptr->pService, 1);
 				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression, 1);

@@ -442,14 +442,14 @@ PHP_FUNCTION(hash_update_stream)
 
 		if ((n = php_stream_read(stream, buf, toread)) <= 0) {
 			/* Nada mas */
-			RETURN_LONG(didread);
+			RETURN_INT(didread);
 		}
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
 	} 
 
-	RETURN_LONG(didread);
+	RETURN_INT(didread);
 }
 /* }}} */
 
@@ -810,8 +810,8 @@ PHP_FUNCTION(mhash)
 	}
 
 	SEPARATE_ZVAL(z_algorithm);
-	convert_to_long_ex(z_algorithm);
-	algorithm = Z_LVAL_PP(z_algorithm);
+	convert_to_int_ex(z_algorithm);
+	algorithm = Z_IVAL_PP(z_algorithm);
 
 	/* need to convert the first parameter from int constant to string algorithm name */
 	if (algorithm >= 0 && algorithm < MHASH_NUM_ALGOS) {
@@ -858,7 +858,7 @@ PHP_FUNCTION(mhash_count)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_LONG(MHASH_NUM_ALGOS - 1);
+	RETURN_INT(MHASH_NUM_ALGOS - 1);
 }
 /* }}} */
 
@@ -878,7 +878,7 @@ PHP_FUNCTION(mhash_get_block_size)
 		if (algorithm_lookup.mhash_name) {
 			const php_hash_ops *ops = php_hash_fetch_ops(algorithm_lookup.hash_name, strlen(algorithm_lookup.hash_name));
 			if (ops) {
-				RETVAL_LONG(ops->digest_size);
+				RETVAL_INT(ops->digest_size);
 			}
 		}
 	}
@@ -1014,7 +1014,7 @@ PHP_MINIT_FUNCTION(hash)
 	PHP_HASH_HAVAL_REGISTER(5,224);
 	PHP_HASH_HAVAL_REGISTER(5,256);
 
-	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
 
 #ifdef PHP_MHASH_BC
 	mhash_init(INIT_FUNC_ARGS_PASSTHRU);

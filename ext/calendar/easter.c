@@ -112,12 +112,12 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, php_int_t gm)
 			te.tm_mday = easter-10;
 		}
 
-	        Z_LVAL_P(return_value) = mktime(&te);
+	        Z_IVAL_P(return_value) = mktime(&te);
 	} else {							/* return the days after March 21 */	
-	        Z_LVAL_P(return_value) = easter;
+	        Z_IVAL_P(return_value) = easter;
 	}
 
-        Z_TYPE_P(return_value) = IS_LONG;
+        Z_TYPE_P(return_value) = IS_INT;
 
 }
 

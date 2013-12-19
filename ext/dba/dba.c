@@ -1053,7 +1053,7 @@ PHP_FUNCTION(dba_key_split)
 		WRONG_PARAM_COUNT;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &zkey) == SUCCESS) {
-		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_BOOL && !Z_LVAL_P(zkey))) {
+		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_BOOL && !Z_IVAL_P(zkey))) {
 			RETURN_BOOL(0);
 		}
 	}

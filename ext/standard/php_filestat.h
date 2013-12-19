@@ -63,7 +63,7 @@ PHP_FUNCTION(clearstatcache);
 
 #define MAKE_LONG_ZVAL_INCREF(name, val)\
 	MAKE_STD_ZVAL(name); \
-	ZVAL_LONG(name, val); \
+	ZVAL_INT(name, val); \
 	Z_ADDREF_P(name); 
 
 #ifdef PHP_WIN32

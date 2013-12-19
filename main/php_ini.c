@@ -884,8 +884,8 @@ PHPAPI int cfg_get_long(const char *varname, zend_int_t *result)
 	}
 	var = *tmp;
 	zval_copy_ctor(&var);
-	convert_to_long(&var);
-	*result = Z_LVAL(var);
+	convert_to_int(&var);
+	*result = Z_IVAL(var);
 	return SUCCESS;
 }
 /* }}} */

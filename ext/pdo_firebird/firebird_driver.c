@@ -554,7 +554,7 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *v
 		char tmp[512];
 		
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(val,dbh->auto_commit);
+			ZVAL_INT(val,dbh->auto_commit);
 			return 1;
 
 		case PDO_ATTR_CONNECTION_STATUS:

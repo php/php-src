@@ -211,7 +211,7 @@ static void _breakiter_no_args_ret_int32(
 
 	int32_t res = (bio->biter->*func)();
 
-	RETURN_LONG((php_int_t)res);
+	RETURN_INT((php_int_t)res);
 }
 
 static void _breakiter_int32_ret_int32(
@@ -243,7 +243,7 @@ static void _breakiter_int32_ret_int32(
 
 	int32_t res = (bio->biter->*func)((int32_t)arg);
 
-	RETURN_LONG((php_int_t)res);
+	RETURN_INT((php_int_t)res);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_first)
@@ -311,7 +311,7 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 
 	int32_t res = bio->biter->current();
 
-	RETURN_LONG((php_int_t)res);
+	RETURN_INT((php_int_t)res);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_following)
@@ -425,7 +425,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	if (bio == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((php_int_t)BREAKITER_ERROR_CODE(bio));
+	RETURN_INT((php_int_t)BREAKITER_ERROR_CODE(bio));
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_error_message)

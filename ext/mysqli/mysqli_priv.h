@@ -98,10 +98,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 }
 
 
-#define MYSQLI_RETURN_LONG_LONG(__val) \
+#define MYSQLI_RETURN_INT_LONG(__val) \
 { \
 	if ((__val) < PHP_INT_MAX) {		\
-		RETURN_LONG((php_int_t) (__val));		\
+		RETURN_INT((php_int_t) (__val));		\
 	} else {				\
 		char *ret;			\
 		/* always used with my_ulonglong -> %llu */ \

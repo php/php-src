@@ -339,14 +339,14 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_STRICT, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_LVAL_P(offset), Z_LVAL_P(offset));
+		zend_error(E_STRICT, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_IVAL_P(offset), Z_IVAL_P(offset));
 	case IS_DOUBLE:
 	case IS_BOOL:
-	case IS_LONG:
+	case IS_INT:
 		if (offset->type == IS_DOUBLE) {
 			index = (php_int_t)Z_DVAL_P(offset);
 		} else {
-			index = Z_LVAL_P(offset);
+			index = Z_IVAL_P(offset);
 		}
 		if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 			switch (type) {
@@ -468,7 +468,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL:
-	case IS_LONG:
+	case IS_INT:
 		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 		if (ht->nApplyCount > 0) {
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
@@ -477,7 +477,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		if (offset->type == IS_DOUBLE) {
 			index = (php_int_t)Z_DVAL_P(offset);
 		} else {
-			index = Z_LVAL_P(offset);
+			index = Z_IVAL_P(offset);
 		}
 		Z_ADDREF_P(value);
 		zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), NULL);
@@ -562,11 +562,11 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL:
-	case IS_LONG:
+	case IS_INT:
 		if (offset->type == IS_DOUBLE) {
 			index = (php_int_t)Z_DVAL_P(offset);
 		} else {
-			index = Z_LVAL_P(offset);
+			index = Z_IVAL_P(offset);
 		}
 		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 		if (ht->nApplyCount > 0) {
@@ -574,7 +574,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset: %pd", Z_LVAL_P(offset));
+			zend_error(E_NOTICE,"Undefined offset: %pd", Z_IVAL_P(offset));
 		}
 		break;
 	default:
@@ -628,13 +628,13 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case IS_DOUBLE:
 		case IS_RESOURCE:
 		case IS_BOOL:
-		case IS_LONG:
+		case IS_INT:
 			{
 				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 				if (offset->type == IS_DOUBLE) {
 					index = (php_int_t)Z_DVAL_P(offset);
 				} else {
-					index = Z_LVAL_P(offset);
+					index = Z_IVAL_P(offset);
 				}
 				if (zend_hash_index_find(ht, index, (void **)&tmp) != FAILURE) {
 					switch (check_empty) {
@@ -904,7 +904,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	ht2		= spl_array_get_hash_table(intern2, 0 TSRMLS_CC);
 
 	zend_compare_symbol_tables(&temp_zv, ht1, ht2 TSRMLS_CC);
-	result = (int)Z_LVAL(temp_zv);
+	result = (int)Z_IVAL(temp_zv);
 	/* if we just compared std.properties, don't do it again */
 	if (result == 0 &&
 			!(ht1 == intern1->std.properties && ht2 == intern2->std.properties)) {
@@ -1251,7 +1251,7 @@ SPL_METHOD(Array, getFlags)
 		return;
 	}
 
-	RETURN_LONG(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
+	RETURN_INT(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
 }
 /* }}} */
 
@@ -1403,8 +1403,8 @@ int spl_array_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /*
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			convert_to_long(intern->retval);
-			*count = (php_int_t) Z_LVAL_P(intern->retval);
+			convert_to_int(intern->retval);
+			*count = (php_int_t) Z_IVAL_P(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -1427,7 +1427,7 @@ SPL_METHOD(Array, count)
 
 	spl_array_object_count_elements_helper(intern, &count TSRMLS_CC);
 
-	RETURN_LONG(count);
+	RETURN_INT(count);
 } /* }}} */
 
 static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, php_size_t fname_len, int use_arg) /* {{{ */
@@ -1651,7 +1651,7 @@ SPL_METHOD(Array, getChildren)
 	}
 
 	MAKE_STD_ZVAL(flags);
-	ZVAL_LONG(flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
+	ZVAL_INT(flags, SPL_ARRAY_USE_OTHER | intern->ar_flags);
 	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, *entry, flags TSRMLS_CC);
 	zval_ptr_dtor(&flags);
 }
@@ -1681,7 +1681,7 @@ SPL_METHOD(Array, serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	MAKE_STD_ZVAL(flags);
-	ZVAL_LONG(flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
+	ZVAL_INT(flags, (intern->ar_flags & SPL_ARRAY_CLONE_MASK));
 
 	/* storage */
 	smart_str_appendl(&buf, "x:", 2);
@@ -1747,13 +1747,13 @@ SPL_METHOD(Array, unserialize)
 	++p;
 
 	ALLOC_INIT_ZVAL(pflags);
-	if (!php_var_unserialize(&pflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pflags) != IS_LONG) {
+	if (!php_var_unserialize(&pflags, &p, s + buf_len, &var_hash TSRMLS_CC) || Z_TYPE_P(pflags) != IS_INT) {
 		zval_ptr_dtor(&pflags);
 		goto outexcept;
 	}
 
 	--p; /* for ';' */
-	flags = Z_LVAL_P(pflags);
+	flags = Z_IVAL_P(pflags);
 	zval_ptr_dtor(&pflags);
 	/* flags needs to be verified and we also need to verify whether the next
 	 * thing we get is ';'. After that we require an 'm' or somethign else

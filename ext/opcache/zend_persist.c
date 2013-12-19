@@ -244,7 +244,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		EG(in_execution) = 1;
 		EG(active_op_array) = op_array;
 		if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
-			main_persistent_script->compiler_halt_offset = Z_LVAL(offset);
+			main_persistent_script->compiler_halt_offset = Z_IVAL(offset);
 		}
 		EG(active_op_array) = orig_op_array;
 		EG(in_execution) = orig_in_execution;

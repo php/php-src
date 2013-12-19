@@ -565,15 +565,15 @@ ZEND_MODULE_STARTUP_D(mysql)
 	le_plink = zend_register_list_destructors_ex(NULL, _close_mysql_plink, "mysql link persistent", module_number);
 	Z_TYPE(mysql_module_entry) = type;
 
-	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_COMPRESS", CLIENT_COMPRESS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_CLIENT_COMPRESS", CLIENT_COMPRESS, CONST_CS | CONST_PERSISTENT);
 #if MYSQL_VERSION_ID >= 40000
-	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT);
 
 #ifndef MYSQL_USE_MYSQLND
 #if MYSQL_VERSION_ID >= 40000
@@ -972,7 +972,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
-				Z_LVAL_P(return_value) = link;
+				Z_IVAL_P(return_value) = link;
 				php_mysql_set_default_link(link TSRMLS_CC);
 				Z_TYPE_P(return_value) = IS_RESOURCE;
 				efree(hashed_details);
@@ -1040,7 +1040,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		new_index_ptr.ptr = (void *) Z_IVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1,(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 			efree(hashed_details);
@@ -1050,7 +1050,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	efree(hashed_details);
-	php_mysql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
+	php_mysql_set_default_link(Z_IVAL_P(return_value) TSRMLS_CC);
 	MYSQL_DO_CONNECT_CLEANUP();
 }
 /* }}} */
@@ -1211,7 +1211,7 @@ PHP_FUNCTION(mysql_get_proto_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG(mysql_get_proto_info(mysql->conn));
+	RETURN_INT(mysql_get_proto_info(mysql->conn));
 }
 /* }}} */
 
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(mysql_thread_id)
 	}
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG((php_int_t) mysql_thread_id(mysql->conn));
+	RETURN_INT((php_int_t) mysql_thread_id(mysql->conn));
 }
 /* }}} */
 
@@ -1528,7 +1528,7 @@ static void php_mysql_do_query_general(char *query, int query_len, zval *mysql_l
 	MySG(result_allocated)++;
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 	if (use_store == MYSQL_USE_RESULT) {
-		mysql->active_result_id = Z_LVAL_P(return_value);
+		mysql->active_result_id = Z_IVAL_P(return_value);
 	}
 }
 /* }}} */
@@ -1788,7 +1788,7 @@ PHP_FUNCTION(mysql_errno)
 		id = MySG(default_link);
 		if (id==-1) {
 		  	if (MySG(connect_errno)!=0){
-				RETURN_LONG(MySG(connect_errno));
+				RETURN_INT(MySG(connect_errno));
 			} else {
 				RETURN_FALSE;
 			}
@@ -1797,7 +1797,7 @@ PHP_FUNCTION(mysql_errno)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_LONG(mysql_errno(mysql->conn));
+	RETURN_INT(mysql_errno(mysql->conn));
 }
 #endif
 /* }}} */
@@ -1823,8 +1823,8 @@ PHP_FUNCTION(mysql_affected_rows)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (php_int_t) mysql_affected_rows(mysql->conn);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = (php_int_t) mysql_affected_rows(mysql->conn);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -1904,8 +1904,8 @@ PHP_FUNCTION(mysql_insert_id)
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (php_int_t) mysql_insert_id(mysql->conn);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = (php_int_t) mysql_insert_id(mysql->conn);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -1935,7 +1935,7 @@ Q: String or long first?
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	if (row<0 || row>=(int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on MySQL result index %ld", row, Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on MySQL result index %ld", row, Z_IVAL_P(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, row);
@@ -1964,7 +1964,7 @@ Q: String or long first?
 					}
 					if (!tmp_field) { /* no match found */
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %ld",
-									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_P(result));
+									(table_name?table_name:""), (table_name?".":""), field_name, Z_IVAL_P(result));
 						efree(field_name);
 						if (table_name) {
 							efree(table_name);
@@ -1978,8 +1978,8 @@ Q: String or long first?
 				}
 				break;
 			default:
-				convert_to_long_ex(&field);
-				field_offset = Z_LVAL_P(field);
+				convert_to_int_ex(&field);
+				field_offset = Z_IVAL_P(field);
 				if (field_offset<0 || field_offset>=(int)mysql_num_fields(mysql_result)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
 					RETURN_FALSE;
@@ -2030,8 +2030,8 @@ PHP_FUNCTION(mysql_num_rows)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	/* conversion from int64 to long happing here */
-	Z_LVAL_P(return_value) = (php_int_t) mysql_num_rows(mysql_result);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = (php_int_t) mysql_num_rows(mysql_result);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -2048,8 +2048,8 @@ PHP_FUNCTION(mysql_num_fields)
 
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
-	Z_LVAL_P(return_value) = mysql_num_fields(mysql_result);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = mysql_num_fields(mysql_result);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -2283,7 +2283,7 @@ PHP_FUNCTION(mysql_data_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	if (offset<0 || offset>=(int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %ld is invalid for MySQL result index %ld (or the query data is unbuffered)", offset, Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset %ld is invalid for MySQL result index %ld (or the query data is unbuffered)", offset, Z_IVAL_P(result));
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, offset);
@@ -2426,16 +2426,16 @@ PHP_FUNCTION(mysql_fetch_field)
 	add_property_string(return_value, "name",(mysql_field->name?mysql_field->name:""), 1);
 	add_property_string(return_value, "table",(mysql_field->table?mysql_field->table:""), 1);
 	add_property_string(return_value, "def",(mysql_field->def?mysql_field->def:""), 1);
-	add_property_long(return_value, "max_length", mysql_field->max_length);
-	add_property_long(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);
-	add_property_long(return_value, "primary_key", IS_PRI_KEY(mysql_field->flags)?1:0);
-	add_property_long(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0));
-	add_property_long(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0));
-	add_property_long(return_value, "numeric", IS_NUM(Z_TYPE_P(mysql_field))?1:0);
-	add_property_long(return_value, "blob", IS_BLOB(mysql_field->flags)?1:0);
+	add_property_int(return_value, "max_length", mysql_field->max_length);
+	add_property_int(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);
+	add_property_int(return_value, "primary_key", IS_PRI_KEY(mysql_field->flags)?1:0);
+	add_property_int(return_value, "multiple_key",(mysql_field->flags&MULTIPLE_KEY_FLAG?1:0));
+	add_property_int(return_value, "unique_key",(mysql_field->flags&UNIQUE_KEY_FLAG?1:0));
+	add_property_int(return_value, "numeric", IS_NUM(Z_TYPE_P(mysql_field))?1:0);
+	add_property_int(return_value, "blob", IS_BLOB(mysql_field->flags)?1:0);
 	add_property_string(return_value, "type", php_mysql_get_field_name(Z_TYPE_P(mysql_field)), 1);
-	add_property_long(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0));
-	add_property_long(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0));
+	add_property_int(return_value, "unsigned",(mysql_field->flags&UNSIGNED_FLAG?1:0));
+	add_property_int(return_value, "zerofill",(mysql_field->flags&ZEROFILL_FLAG?1:0));
 }
 /* }}} */
 
@@ -2454,7 +2454,7 @@ PHP_FUNCTION(mysql_field_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	if (offset<0 || offset>=(int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", offset, Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", offset, Z_IVAL_P(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, offset);
@@ -2487,7 +2487,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
 	if (field<0 || field>=(int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", field, Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field %ld is invalid for MySQL result index %ld", field, Z_IVAL_P(result));
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, field);
@@ -2507,8 +2507,8 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_MYSQL_FIELD_LEN:
-			Z_LVAL_P(return_value) = mysql_field->length;
-			Z_TYPE_P(return_value) = IS_LONG;
+			Z_IVAL_P(return_value) = mysql_field->length;
+			Z_TYPE_P(return_value) = IS_INT;
 			break;
 		case PHP_MYSQL_FIELD_TYPE:
 			Z_STRVAL_P(return_value) = php_mysql_get_field_name(Z_TYPE_P(mysql_field));
@@ -2652,13 +2652,13 @@ PHP_FUNCTION(mysql_free_result)
 		return;
 	}
 
-	if (Z_LVAL_P(result)==0) {
+	if (Z_IVAL_P(result)==0) {
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, &result, -1, "MySQL result", le_result);
 
-	zend_list_delete(Z_LVAL_P(result));
+	zend_list_delete(Z_IVAL_P(result));
 	RETURN_TRUE;
 }
 /* }}} */

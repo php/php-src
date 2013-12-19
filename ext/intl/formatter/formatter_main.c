@@ -114,7 +114,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 	nfo = (NumberFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	/* Return formatter's last error code. */
-	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
+	RETURN_INT( INTL_DATA_ERROR_CODE(nfo) );
 }
 /* }}} */
 

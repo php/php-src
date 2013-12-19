@@ -86,7 +86,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, php_i
 		}
 	}
 	zval_dtor(error);
-	ZVAL_LONG(error, U_ZERO_ERROR);
+	ZVAL_INT(error, U_ZERO_ERROR);
 }
 /* }}} */
 
@@ -152,9 +152,9 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		case IS_NULL:
 			/* Code unit is being skipped */
 			return;
-		case IS_LONG:
+		case IS_INT:
 		{
-			php_int_t lval = Z_LVAL_P(val);
+			php_int_t lval = Z_IVAL_P(val);
 			if ((lval < 0) || (lval > 0x10FFFF)) {
 				php_converter_throw_failure(objval, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC, "Invalid codepoint U+%04lx", lval);
 				return;
@@ -220,7 +220,7 @@ static void php_converter_to_u_callback(const void *context,
 #endif
 
 	MAKE_STD_ZVAL(zreason);
-	ZVAL_LONG(zreason, reason);
+	ZVAL_INT(zreason, reason);
 	zargs[0] = &zreason;
 
 	MAKE_STD_ZVAL(zsource);
@@ -232,7 +232,7 @@ static void php_converter_to_u_callback(const void *context,
 	zargs[2] = &zcodeunits;
 
 	MAKE_STD_ZVAL(zerror);
-	ZVAL_LONG(zerror, *pErrorCode);
+	ZVAL_INT(zerror, *pErrorCode);
 	zargs[3] = &zerror;
 
 	objval->to_cb.param_count    = 4;
@@ -247,8 +247,8 @@ static void php_converter_to_u_callback(const void *context,
 		zval_ptr_dtor(&retval);
 	}
 
-	if (Z_TYPE_P(zerror) == IS_LONG) {
-		*pErrorCode = Z_LVAL_P(zerror);
+	if (Z_TYPE_P(zerror) == IS_INT) {
+		*pErrorCode = Z_IVAL_P(zerror);
 	}
 
 	zval_ptr_dtor(&zreason);
@@ -264,9 +264,9 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 		case IS_NULL:
 			/* Ignore */
 			return;
-		case IS_LONG:
+		case IS_INT:
 			if (TARGET_CHECK(args, 1)) {
-				*(args->target++) = Z_LVAL_P(val);
+				*(args->target++) = Z_IVAL_P(val);
 			}
 			return;
 		case IS_STRING:
@@ -311,7 +311,7 @@ static void php_converter_from_u_callback(const void *context,
 #endif
 
 	MAKE_STD_ZVAL(zreason);
-	ZVAL_LONG(zreason, reason);
+	ZVAL_INT(zreason, reason);
 	zargs[0] = &zreason;
 
 	MAKE_STD_ZVAL(zsource);
@@ -325,11 +325,11 @@ static void php_converter_from_u_callback(const void *context,
 	zargs[1] = &zsource;
 
 	MAKE_STD_ZVAL(zcodepoint);
-	ZVAL_LONG(zcodepoint, codePoint);
+	ZVAL_INT(zcodepoint, codePoint);
 	zargs[2] = &zcodepoint;
 
 	MAKE_STD_ZVAL(zerror);
-	ZVAL_LONG(zerror, *pErrorCode);
+	ZVAL_INT(zerror, *pErrorCode);
 	zargs[3] = &zerror;
 
 	objval->from_cb.param_count    = 4;
@@ -344,8 +344,8 @@ static void php_converter_from_u_callback(const void *context,
 		zval_ptr_dtor(&retval);
 	}
 
-	if (Z_TYPE_P(zerror) == IS_LONG) {
-		*pErrorCode = Z_LVAL_P(zerror);
+	if (Z_TYPE_P(zerror) == IS_INT) {
+		*pErrorCode = Z_IVAL_P(zerror);
 	}
 
 	zval_ptr_dtor(&zreason);
@@ -519,7 +519,7 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(t);
+	RETURN_INT(t);
 }
 /* }}} */
 
@@ -872,7 +872,7 @@ static PHP_METHOD(UConverter, getErrorCode) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(intl_error_get_code(&(objval->error) TSRMLS_CC));	
+	RETURN_INT(intl_error_get_code(&(objval->error) TSRMLS_CC));	
 }
 /* }}} */
 

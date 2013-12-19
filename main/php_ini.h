@@ -83,7 +83,7 @@ END_EXTERN_C()
 
 #define php_alter_ini_entry		zend_alter_ini_entry
 
-#define php_ini_long	zend_ini_long
+#define php_ini_long	zend_ini_int
 #define php_ini_double	zend_ini_double
 #define php_ini_string	zend_ini_string
 

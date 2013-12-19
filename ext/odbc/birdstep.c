@@ -316,7 +316,7 @@ PHP_FUNCTION(birdstep_connect)
 	new = (VConn *)emalloc(sizeof(VConn));
 	ind = birdstep_add_conn(list,new,hdbc TSRMLS_CC);
 	php_birdstep_module.num_links++;
-	RETURN_LONG(ind);
+	RETURN_INT(ind);
 }
 /* }}} */
 
@@ -393,7 +393,7 @@ PHP_FUNCTION(birdstep_exec)
 		}
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
-		RETURN_LONG(rows);
+		RETURN_INT(rows);
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)safe_emalloc(sizeof(VResVal), cols, 0);
 		res->numcols = cols;
@@ -419,7 +419,7 @@ PHP_FUNCTION(birdstep_exec)
 	}
 	res->fetched = 0;
 	indx = birdstep_add_result(list,res,conn);
-	RETURN_LONG(indx);
+	RETURN_INT(indx);
 }
 /* }}} */
 
@@ -442,13 +442,13 @@ PHP_FUNCTION(birdstep_fetch)
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 	if ( stat == SQL_NO_DATA_FOUND ) {
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_PP(ind));
+		birdstep_del_result(list,Z_IVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		birdstep_del_result(list,Z_LVAL_PP(ind));
+		birdstep_del_result(list,Z_IVAL_PP(ind));
 		RETURN_FALSE;
 	}
 	res->fetched = 1;
@@ -479,8 +479,8 @@ PHP_FUNCTION(birdstep_result)
 	if ( Z_TYPE_PP(col) == IS_STRING ) {
 		field = Z_STRVAL_PP(col);
 	} else {
-		convert_to_long_ex(col);
-		indx = Z_LVAL_PP(col);
+		convert_to_int_ex(col);
+		indx = Z_IVAL_PP(col);
 	}
 	if ( field ) {
 		for ( i = 0; i < res->numcols; i++ ) {
@@ -503,13 +503,13 @@ PHP_FUNCTION(birdstep_result)
 		stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 		if ( stat == SQL_NO_DATA_FOUND ) {
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_PP(ind));
+			birdstep_del_result(list,Z_IVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			birdstep_del_result(list,Z_LVAL_PP(ind));
+			birdstep_del_result(list,Z_IVAL_PP(ind));
 			RETURN_FALSE;
 		}
 		res->fetched = 1;
@@ -528,19 +528,19 @@ l1:
 				res->values[indx].value,4095,&res->values[indx].vallen);
 			if ( stat == SQL_NO_DATA_FOUND ) {
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_PP(ind));
+				birdstep_del_result(list,Z_IVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				birdstep_del_result(list,Z_LVAL_PP(ind));
+				birdstep_del_result(list,Z_IVAL_PP(ind));
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
 				RETURN_STRING(res->values[indx].value,TRUE);
 			} else {
-				RETURN_LONG((long)res->values[indx].value);
+				RETURN_INT((long)res->values[indx].value);
 			}
 		default:
 			if ( res->values[indx].value != NULL ) {
@@ -697,7 +697,7 @@ PHP_FUNCTION(birdstep_fieldnum)
 
 	PHP_GET_BIRDSTEP_RES_IDX(ind);
 
-	RETURN_LONG(res->numcols);
+	RETURN_INT(res->numcols);
 }
 /* }}} */
 

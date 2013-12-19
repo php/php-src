@@ -98,10 +98,10 @@ PHP_FUNCTION(linkinfo)
 	ret = VCWD_STAT(link, &sb);
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
-		RETURN_LONG(-1L);
+		RETURN_INT(-1L);
 	}
 
-	RETURN_LONG((php_int_t) sb.st_dev);
+	RETURN_INT((php_int_t) sb.st_dev);
 }
 /* }}} */
 

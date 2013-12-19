@@ -151,8 +151,8 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 
 		/* 1. Here comes the error no */
 		zend_hash_get_current_data(Z_ARRVAL_P(row), (void **)&entry);
-		convert_to_long_ex(entry);
-		errno = Z_LVAL_PP(entry);
+		convert_to_int_ex(entry);
+		errno = Z_IVAL_PP(entry);
 		zend_hash_move_forward(Z_ARRVAL_P(row));
 
 		/* 2. Here comes the reason */
@@ -257,7 +257,7 @@ int mysqli_warning_errno(mysqli_object *obj, zval **retval TSRMLS_DC)
 	}
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, w->errorno);
+	ZVAL_INT(*retval, w->errorno);
 	return SUCCESS;
 }
 /* }}} */

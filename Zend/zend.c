@@ -176,7 +176,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 					ZEND_WRITE_EX(string_key, str_len-1);
 				}
 				break;
-			case HASH_KEY_IS_LONG:
+			case HASH_KEY_IS_INT:
 				{
 					char key[25];
 					snprintf(key, sizeof(key), ZEND_INT_FMT, num_key);
@@ -216,7 +216,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 			case HASH_KEY_IS_STRING:
 				ZEND_PUTS(string_key);
 				break;
-			case HASH_KEY_IS_LONG:
+			case HASH_KEY_IS_INT:
 				zend_printf(ZEND_INT_FMT, num_key);
 				break;
 		}
@@ -239,7 +239,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			break;
 		case IS_BOOL:
-			if (Z_LVAL_P(expr)) {
+			if (Z_IVAL_P(expr)) {
 				Z_STRSIZE_P(expr_copy) = 1;
 				Z_STRVAL_P(expr_copy) = estrndup("1", 1);
 			} else {
@@ -248,8 +248,8 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			}
 			break;
 		case IS_RESOURCE:
-			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG);
-			Z_STRSIZE_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #" ZEND_INT_FMT, Z_LVAL_P(expr));
+			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_ZEND_INT);
+			Z_STRSIZE_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_ZEND_INT, "Resource id #" ZEND_INT_FMT, Z_IVAL_P(expr));
 			break;
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
@@ -1160,15 +1160,15 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 #endif
 			Z_TYPE_P(z_error_message) = IS_STRING;
 
-			Z_LVAL_P(z_error_type) = type;
-			Z_TYPE_P(z_error_type) = IS_LONG;
+			Z_IVAL_P(z_error_type) = type;
+			Z_TYPE_P(z_error_type) = IS_INT;
 
 			if (error_filename) {
 				ZVAL_STRING(z_error_filename, error_filename, 1);
 			}
 
-			Z_LVAL_P(z_error_lineno) = error_lineno;
-			Z_TYPE_P(z_error_lineno) = IS_LONG;
+			Z_IVAL_P(z_error_lineno) = error_lineno;
+			Z_TYPE_P(z_error_lineno) = IS_INT;
 
 			if (!EG(active_symbol_table)) {
 				zend_rebuild_symbol_table(TSRMLS_C);
@@ -1215,7 +1215,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 				if (retval) {
-					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
+					if (Z_TYPE_P(retval) == IS_BOOL && Z_IVAL_P(retval) == 0) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
 					}
 					zval_ptr_dtor(&retval);

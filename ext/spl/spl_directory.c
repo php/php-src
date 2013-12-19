@@ -275,7 +275,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	intern->type = SPL_FS_FILE;
 
 	php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, &tmp TSRMLS_CC);
-	if (Z_LVAL(tmp)) {
+	if (Z_IVAL(tmp)) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
 		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Cannot use SplFileObject with directories");
@@ -773,7 +773,7 @@ SPL_METHOD(DirectoryIterator, key)
 	}
 
 	if (intern->u.dir.dirp) {
-		RETURN_LONG(intern->u.dir.index);
+		RETURN_INT(intern->u.dir.index);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1464,7 +1464,7 @@ SPL_METHOD(FilesystemIterator, getFlags)
 		return;
 	}
 
-	RETURN_LONG(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK | SPL_FILE_DIR_OTHERS_MASK));
+	RETURN_INT(intern->flags & (SPL_FILE_DIR_KEY_MODE_MASK | SPL_FILE_DIR_CURRENT_MODE_MASK | SPL_FILE_DIR_OTHERS_MASK));
 } /* }}} */
 
 /* {{{ proto void FilesystemIterator::setFlags(long $flags)
@@ -1527,7 +1527,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	} else {
 		MAKE_STD_ZVAL(zflags);
 		MAKE_STD_ZVAL(zpath);
-		ZVAL_LONG(zflags, intern->flags);
+		ZVAL_INT(zflags, intern->flags);
 		ZVAL_STRINGL(zpath, intern->file_name, intern->file_name_len, 1);
 		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, zpath, zflags TSRMLS_CC);
 		zval_ptr_dtor(&zpath);
@@ -1617,7 +1617,7 @@ SPL_METHOD(GlobIterator, count)
 	}
 
 	if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
-		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
+		RETURN_INT(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 	} else {
 		/* should not happen */
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "GlobIterator lost glob state");
@@ -1711,7 +1711,7 @@ static void spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zval *
 {
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
 
-	ZVAL_LONG(key, object->u.dir.index);
+	ZVAL_INT(key, object->u.dir.index);
 }
 /* }}} */
 
@@ -2467,7 +2467,7 @@ SPL_METHOD(SplFileObject, key)
 	if (!intern->current_line) {
 		spl_filesystem_file_read_line(getThis(), intern, 1 TSRMLS_CC);
 	} */
-	RETURN_LONG(intern->u.file.current_line_num);
+	RETURN_INT(intern->u.file.current_line_num);
 } /* }}} */
 
 /* {{{ proto void SplFileObject::next()
@@ -2508,7 +2508,7 @@ SPL_METHOD(SplFileObject, getFlags)
 		return;
 	}
 
-	RETURN_LONG(intern->flags & SPL_FILE_OBJECT_MASK);
+	RETURN_INT(intern->flags & SPL_FILE_OBJECT_MASK);
 } /* }}} */
 
 /* {{{ proto void SplFileObject::setMaxLineLen(int max_len)
@@ -2541,7 +2541,7 @@ SPL_METHOD(SplFileObject, getMaxLineLen)
 		return;
 	}
 
-	RETURN_LONG((php_int_t)intern->u.file.max_line_len);
+	RETURN_INT((php_int_t)intern->u.file.max_line_len);
 } /* }}} */
 
 /* {{{ proto bool SplFileObject::hasChildren()
@@ -2648,7 +2648,7 @@ SPL_METHOD(SplFileObject, fputcsv)
 			break;
 		}
 		ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape TSRMLS_CC);
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 	}
 }
 /* }}} */
@@ -2739,7 +2739,7 @@ SPL_METHOD(SplFileObject, ftell)
 	if (ret == -1) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(ret);
+		RETURN_INT(ret);
 	}
 } /* }}} */
 
@@ -2755,7 +2755,7 @@ SPL_METHOD(SplFileObject, fseek)
 	}
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
-	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, whence));
+	RETURN_INT(php_stream_seek(intern->u.file.stream, pos, whence));
 } /* }}} */
 
 /* {{{ proto int SplFileObject::fgetc()
@@ -2792,9 +2792,9 @@ SPL_METHOD(SplFileObject, fgetss)
 	MAKE_STD_ZVAL(arg2);
 
 	if (intern->u.file.max_line_len > 0) {
-		ZVAL_LONG(arg2, intern->u.file.max_line_len);
+		ZVAL_INT(arg2, intern->u.file.max_line_len);
 	} else {
-		ZVAL_LONG(arg2, 1024);
+		ZVAL_INT(arg2, 1024);
 	}
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
@@ -2811,7 +2811,7 @@ SPL_METHOD(SplFileObject, fpassthru)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
+	RETURN_INT(php_stream_passthru(intern->u.file.stream));
 } /* }}} */
 
 /* {{{ proto bool SplFileObject::fscanf(string format [, string ...])
@@ -2844,10 +2844,10 @@ SPL_METHOD(SplFileObject, fwrite)
 		str_len = MAX(0, MIN(length, str_len));
 	}
 	if (!str_len) {
-		RETURN_LONG(0);
+		RETURN_INT(0);
 	}
 
-	RETURN_LONG(php_stream_write(intern->u.file.stream, str, str_len));
+	RETURN_INT(php_stream_write(intern->u.file.stream, str, str_len));
 } /* }}} */
 
 /* {{{ proto bool SplFileObject::fstat()

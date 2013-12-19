@@ -285,11 +285,11 @@ PHP_FUNCTION(abs)
 	
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		if (Z_LVAL_PP(value) == ZEND_INT_MIN) {
+	} else if (Z_TYPE_PP(value) == IS_INT) {
+		if (Z_IVAL_PP(value) == ZEND_INT_MIN) {
 			RETURN_DOUBLE(-(double)ZEND_INT_MIN);
 		} else {
-			RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
+			RETURN_INT(Z_IVAL_PP(value) < 0 ? -Z_IVAL_PP(value) : Z_IVAL_PP(value));
 		}
 	}
 	RETURN_FALSE;
@@ -309,7 +309,7 @@ PHP_FUNCTION(ceil)
 
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(ceil(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
+	} else if (Z_TYPE_PP(value) == IS_INT) {
 		convert_to_double_ex(value);
 		RETURN_DOUBLE(Z_DVAL_PP(value));
 	}
@@ -330,7 +330,7 @@ PHP_FUNCTION(floor)
 
 	if (Z_TYPE_PP(value) == IS_DOUBLE) {
 		RETURN_DOUBLE(floor(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
+	} else if (Z_TYPE_PP(value) == IS_INT) {
 		convert_to_double_ex(value);
 		RETURN_DOUBLE(Z_DVAL_PP(value));
 	}
@@ -358,15 +358,15 @@ PHP_FUNCTION(round)
 	convert_scalar_to_number_ex(value);
 
 	switch (Z_TYPE_PP(value)) {
-		case IS_LONG:
+		case IS_INT:
 			/* Simple case - long that doesn't need to be rounded. */
 			if (places >= 0) {
-				RETURN_DOUBLE((double) Z_LVAL_PP(value));
+				RETURN_DOUBLE((double) Z_IVAL_PP(value));
 			}
 			/* break omitted intentionally */
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_PP(value) == IS_LONG) ? (double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
+			return_val = (Z_TYPE_PP(value) == IS_INT) ? (double)Z_IVAL_PP(value) : Z_DVAL_PP(value);
 			return_val = _php_math_round(return_val, places, mode);
 			RETURN_DOUBLE(return_val);
 			break;
@@ -609,13 +609,13 @@ PHP_FUNCTION(pow)
 	convert_scalar_to_number(zexp TSRMLS_CC);
 
 	/* if both base and exponent were longs, we'll try to get a long out */
-	if (Z_TYPE_P(zbase) == IS_LONG && Z_TYPE_P(zexp) == IS_LONG && Z_LVAL_P(zexp) >= 0) {
-		php_int_t l1 = 1, l2 = Z_LVAL_P(zbase), i = Z_LVAL_P(zexp);
+	if (Z_TYPE_P(zbase) == IS_INT && Z_TYPE_P(zexp) == IS_INT && Z_IVAL_P(zexp) >= 0) {
+		php_int_t l1 = 1, l2 = Z_IVAL_P(zbase), i = Z_IVAL_P(zexp);
 		
 		if (i == 0) {
-			RETURN_LONG(1L);
+			RETURN_INT(1L);
 		} else if (l2 == 0) {
-			RETURN_LONG(0);
+			RETURN_INT(0);
 		}
 
 		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
@@ -633,7 +633,7 @@ PHP_FUNCTION(pow)
 				if (overflow) RETURN_DOUBLE((double)l1 * pow(dval,i));
 			}
 			if (i == 0) {
-				RETURN_LONG(l1);
+				RETURN_INT(l1);
 			}
 		}
 	}
@@ -889,7 +889,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	if (mode == 1) {
 		ZVAL_DOUBLE(ret, fnum);
 	} else {
-		ZVAL_LONG(ret, num);
+		ZVAL_INT(ret, num);
 	}
 	return SUCCESS;
 }
@@ -907,11 +907,11 @@ PHPAPI char * _php_math_longtobase(zval *arg, int base)
 	char *ptr, *end;
 	php_uint_t value;
 
-	if (Z_TYPE_P(arg) != IS_LONG || base < 2 || base > 36) {
+	if (Z_TYPE_P(arg) != IS_INT || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
 	}
 
-	value = Z_LVAL_P(arg);
+	value = Z_IVAL_P(arg);
 
 	end = ptr = buf + sizeof(buf) - 1;
 	*ptr = '\0';
@@ -934,7 +934,7 @@ PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
-	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
+	if ((Z_TYPE_P(arg) != IS_INT && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
 		return STR_EMPTY_ALLOC();
 	}
 
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(decbin)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(*arg, 2);
 	RETURN_STRING(result, 0);
 }
@@ -1038,7 +1038,7 @@ PHP_FUNCTION(decoct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(*arg, 8);
 	RETURN_STRING(result, 0);
 }
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(dechex)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
+	convert_to_int_ex(arg);
 	result = _php_math_longtobase(*arg, 16);
 	RETURN_STRING(result, 0);
 }

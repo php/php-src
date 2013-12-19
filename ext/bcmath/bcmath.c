@@ -548,8 +548,8 @@ PHP_FUNCTION(bccomp)
 
 	bc_str2num(&first, left, scale TSRMLS_CC);
 	bc_str2num(&second, right, scale TSRMLS_CC);
-	Z_LVAL_P(return_value) = bc_compare(first, second);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = bc_compare(first, second);
+	Z_TYPE_P(return_value) = IS_INT;
 
 	bc_free_num(&first);
 	bc_free_num(&second);

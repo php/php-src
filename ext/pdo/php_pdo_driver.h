@@ -197,8 +197,8 @@ static inline php_int_t pdo_attr_lval(zval *options, enum pdo_attribute_type opt
 	zval **v;
 
 	if (options && SUCCESS == zend_hash_index_find(Z_ARRVAL_P(options), option_name, (void**)&v)) {
-		convert_to_long_ex(v);
-		return Z_LVAL_PP(v);
+		convert_to_int_ex(v);
+		return Z_IVAL_PP(v);
 	}
 	return defval;
 }

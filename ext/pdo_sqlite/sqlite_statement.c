@@ -111,13 +111,13 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								return 1;
 							}
 						} else {
-							convert_to_long(param->parameter);
+							convert_to_int(param->parameter);
 #if ZEND_INT_MAX > 2147483647
-							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL_P(param->parameter))) {
+							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_IVAL_P(param->parameter))) {
 								return 1;
 							}
 #else
-							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_LVAL_P(param->parameter))) {
+							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_IVAL_P(param->parameter))) {
 								return 1;
 							}
 #endif

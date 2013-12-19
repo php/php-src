@@ -26,7 +26,7 @@
 #include "zend.h"
 
 #define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
+#define HASH_KEY_IS_INT 2
 #define HASH_KEY_NON_EXISTENT 3
 #define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
@@ -318,9 +318,9 @@ END_EXTERN_C()
 																			\
 		if ((*end != '\0') /* not a null terminated string */				\
 		 || (*tmp == '0' && length > 2) /* numbers with leading zeros */	\
-		 || (end - tmp > MAX_LENGTH_OF_LONG - 1) /* number too long */		\
+		 || (end - tmp > MAX_LENGTH_OF_ZEND_INT - 1) /* number too long */		\
 		 || (SIZEOF_ZEND_INT == 4 &&											\
-		     end - tmp == MAX_LENGTH_OF_LONG - 1 &&							\
+		     end - tmp == MAX_LENGTH_OF_ZEND_INT - 1 &&							\
 		     *tmp > '2')) { /* overflow */									\
 			break;															\
 		}																	\
@@ -377,7 +377,7 @@ static inline int zend_symtable_exists(HashTable *ht, const char *arKey, zend_si
 
 static inline int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, zend_size_t nKeyLength, int mode, HashPosition *pos)
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, pos));
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_INT, NULL, 0, idx, mode, pos));
 	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, pos);
 }
 #define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \

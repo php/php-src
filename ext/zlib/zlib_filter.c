@@ -333,11 +333,11 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				/* log-2 base of history window (9 - 15) */
 				tmp = **tmpzval;
 				zval_copy_ctor(&tmp);
-				convert_to_long(&tmp);
-				if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 32) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+				convert_to_int(&tmp);
+				if (Z_IVAL(tmp) < -MAX_WBITS || Z_IVAL(tmp) > MAX_WBITS + 32) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_IVAL(tmp));
 				} else {
-					windowBits = Z_LVAL(tmp);
+					windowBits = Z_IVAL(tmp);
 				}
 			}
 		}
@@ -365,26 +365,26 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					if (zend_hash_find(HASH_OF(filterparams), "memory", sizeof("memory"), (void**) &tmpzval) == SUCCESS) {
 						tmp = **tmpzval;
 						zval_copy_ctor(&tmp);
-						convert_to_long(&tmp);
+						convert_to_int(&tmp);
 
 						/* Memory Level (1 - 9) */
-						if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > MAX_MEM_LEVEL) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
+						if (Z_IVAL(tmp) < 1 || Z_IVAL(tmp) > MAX_MEM_LEVEL) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_IVAL(tmp));
 						} else {
-							memLevel = Z_LVAL(tmp);
+							memLevel = Z_IVAL(tmp);
 						}
 					}
 
 					if (zend_hash_find(HASH_OF(filterparams), "window", sizeof("window"), (void**) &tmpzval) == SUCCESS) {
 						tmp = **tmpzval;
 						zval_copy_ctor(&tmp);
-						convert_to_long(&tmp);
+						convert_to_int(&tmp);
 
 						/* log-2 base of history window (9 - 15) */
-						if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 16) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+						if (Z_IVAL(tmp) < -MAX_WBITS || Z_IVAL(tmp) > MAX_WBITS + 16) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_IVAL(tmp));
 						} else {
-							windowBits = Z_LVAL(tmp);
+							windowBits = Z_IVAL(tmp);
 						}
 					}
 
@@ -397,17 +397,17 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					break;
 				case IS_STRING:
 				case IS_DOUBLE:
-				case IS_LONG:
+				case IS_INT:
 					tmp = *filterparams;
 factory_setlevel:
 					zval_copy_ctor(&tmp);
-					convert_to_long(&tmp);
+					convert_to_int(&tmp);
 
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
-					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
+					if (Z_IVAL(tmp) < -1 || Z_IVAL(tmp) > 9) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%pd)", Z_IVAL(tmp));
 					} else {
-						level = Z_LVAL(tmp);
+						level = Z_IVAL(tmp);
 					}
 					break;
 				default:

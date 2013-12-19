@@ -53,7 +53,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_INT:
 			lfield = ures_getInt( source->child, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve integer value");
-			ZVAL_LONG( return_value, lfield );
+			ZVAL_INT( return_value, lfield );
 			break;
 
 		case URES_INT_VECTOR:

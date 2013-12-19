@@ -163,7 +163,7 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key T
 	zval *object = (zval *)iterator->intern.data;
 
 	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
-		ZVAL_LONG(key, iter->index);
+		ZVAL_INT(key, iter->index);
 	} else {
 		dom_object *intern = (dom_object *)zend_object_store_get_object(iterator->curobj TSRMLS_CC);
 

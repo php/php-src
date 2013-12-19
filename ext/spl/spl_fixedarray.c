@@ -352,10 +352,10 @@ static inline zval **spl_fixedarray_object_read_dimension_helper(spl_fixedarray_
 		return NULL;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -412,10 +412,10 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		return;
 	}
 
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -458,10 +458,10 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 {
 	php_int_t index;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -499,10 +499,10 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 	php_int_t index;
 	int retval;
 	
-	if (Z_TYPE_P(offset) != IS_LONG) {
-		index = spl_offset_convert_to_long(offset TSRMLS_CC);
+	if (Z_TYPE_P(offset) != IS_INT) {
+		index = spl_offset_convert_to_int(offset TSRMLS_CC);
 	} else {
-		index = Z_LVAL_P(offset);
+		index = Z_IVAL_P(offset);
 	}
 	
 	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
@@ -561,8 +561,8 @@ static int spl_fixedarray_object_count_elements(zval *object, php_int_t *count T
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			convert_to_long(intern->retval);
-			*count = (php_int_t) Z_LVAL_P(intern->retval);
+			convert_to_int(intern->retval);
+			*count = (php_int_t) Z_IVAL_P(intern->retval);
 			return SUCCESS;
 		}
 	} else if (intern->array) {
@@ -649,9 +649,9 @@ SPL_METHOD(SplFixedArray, count)
 
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(object TSRMLS_CC);
 	if (intern->array) {
-		RETURN_LONG(intern->array->size);
+		RETURN_INT(intern->array->size);
 	}
-	RETURN_LONG(0);
+	RETURN_INT(0);
 }
 /* }}} */
 
@@ -710,7 +710,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 			zend_hash_get_current_data(Z_ARRVAL_P(data), (void **) &element) == SUCCESS;
 			zend_hash_move_forward(Z_ARRVAL_P(data))
 			) {
-			if (zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0) != HASH_KEY_IS_LONG || (php_int_t)num_index < 0) {
+			if (zend_hash_get_current_key(Z_ARRVAL_P(data), &str_index, &num_index, 0) != HASH_KEY_IS_INT || (php_int_t)num_index < 0) {
 				efree(array);
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC, "array must contain only positive integer keys");
 				return;
@@ -783,9 +783,9 @@ SPL_METHOD(SplFixedArray, getSize)
 
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(object TSRMLS_CC);
 	if (intern->array) {
-		RETURN_LONG(intern->array->size);
+		RETURN_INT(intern->array->size);
 	}
-	RETURN_LONG(0);
+	RETURN_INT(0);
 }
 /* }}} */
 
@@ -935,7 +935,7 @@ static void spl_fixedarray_it_get_current_data(zend_object_iterator *iter, zval 
 		zend_user_it_get_current_data(iter, data TSRMLS_CC);
 	} else {
 		ALLOC_INIT_ZVAL(zindex);
-		ZVAL_LONG(zindex, iterator->object->current);
+		ZVAL_INT(zindex, iterator->object->current);
 
 		*data = spl_fixedarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
@@ -956,7 +956,7 @@ static void spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zval *
 	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
 		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
-		ZVAL_LONG(key, iterator->object->current);
+		ZVAL_INT(key, iterator->object->current);
 	}
 }
 /* }}} */
@@ -985,7 +985,7 @@ SPL_METHOD(SplFixedArray, key)
 		return;
 	}
 
-	RETURN_LONG(intern->current);
+	RETURN_INT(intern->current);
 }
 /* }}} */
 
@@ -1043,7 +1043,7 @@ SPL_METHOD(SplFixedArray, current)
 	}
 
 	ALLOC_INIT_ZVAL(zindex);
-	ZVAL_LONG(zindex, intern->current);
+	ZVAL_INT(zindex, intern->current);
 
 	value_pp  = spl_fixedarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 

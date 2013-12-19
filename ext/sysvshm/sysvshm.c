@@ -212,7 +212,7 @@ PHP_FUNCTION(shm_detach)
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
-	RETURN_BOOL(SUCCESS == zend_list_delete(Z_LVAL_P(shm_id)));
+	RETURN_BOOL(SUCCESS == zend_list_delete(Z_IVAL_P(shm_id)));
 }
 /* }}} */
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(shm_remove)
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %pd: %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %pd: %s", shm_list_ptr->key, Z_IVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 

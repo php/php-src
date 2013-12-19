@@ -1261,13 +1261,13 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *
 	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
 		zval tmp, *ztval = *tmpval;
 
-		if (Z_TYPE_PP(tmpval) != IS_LONG) {
+		if (Z_TYPE_PP(tmpval) != IS_INT) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
+			convert_to_int(&tmp);
 			ztval = &tmp;
 		}
-		*pretval = Z_LVAL_P(ztval);
+		*pretval = Z_IVAL_P(ztval);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	} 
@@ -1284,16 +1284,16 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t
 	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
 		zval tmp, *ztval = *tmpval;
 
-		if (Z_TYPE_PP(tmpval) != IS_LONG) {
+		if (Z_TYPE_PP(tmpval) != IS_INT) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
+			convert_to_int(&tmp);
 			ztval = &tmp;
 		}
-		if (Z_LVAL_P(ztval) < 0) {
+		if (Z_IVAL_P(ztval) < 0) {
 			*pretval = 0;
 		} else {
-			*pretval = Z_LVAL_P(ztval);
+			*pretval = Z_IVAL_P(ztval);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;

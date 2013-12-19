@@ -63,7 +63,7 @@
 #define PGSQL_STATUS_LONG     1
 #define PGSQL_STATUS_STRING   2
 
-#define PGSQL_MAX_LENGTH_OF_LONG   30
+#define PGSQL_MAX_LENGTH_OF_ZEND_INT   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
 #if PHP_INT_MAX < UINT_MAX
@@ -74,11 +74,11 @@
 		smart_str_0(&s); \
 		RETURN_STRINGL(s.c, s.len, 0); \
 	} \
-	RETURN_LONG((php_int_t)(oid)); \
+	RETURN_INT((php_int_t)(oid)); \
 } while(0)
 #else
 #define PGSQL_RETURN_OID(oid) do {\
-	RETURN_LONG((php_int_t)(oid)) \
+	RETURN_INT((php_int_t)(oid)) \
 } while(0)
 #endif
 
@@ -1037,72 +1037,72 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", PG_VERSION_STR, CONST_CS | CONST_PERSISTENT);
 #endif
 	/* For connection option */
-	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_CS | CONST_PERSISTENT);
 	/* For pg_fetch_array() */
-	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 	/* For pg_connection_status() */
-	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
 #if HAVE_PGTRANSACTIONSTATUS
 	/* For pg_transaction_status() */
-	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_IDLE", PQTRANS_IDLE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_ACTIVE", PQTRANS_ACTIVE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INTRANS", PQTRANS_INTRANS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INERROR", PQTRANS_INERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_UNKNOWN", PQTRANS_UNKNOWN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TRANSACTION_IDLE", PQTRANS_IDLE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TRANSACTION_ACTIVE", PQTRANS_ACTIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TRANSACTION_INTRANS", PQTRANS_INTRANS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TRANSACTION_INERROR", PQTRANS_INERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TRANSACTION_UNKNOWN", PQTRANS_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 #endif
 #if HAVE_PQSETERRORVERBOSITY
 	/* For pg_set_error_verbosity() */
-	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_VERBOSE", PQERRORS_VERBOSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_ERRORS_VERBOSE", PQERRORS_VERBOSE, CONST_CS | CONST_PERSISTENT);
 #endif
 	/* For lo_seek() */
-	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
 	/* For pg_result_status() return value type */
-	REGISTER_LONG_CONSTANT("PGSQL_STATUS_LONG", PGSQL_STATUS_LONG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_STATUS_STRING", PGSQL_STATUS_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_STATUS_LONG", PGSQL_STATUS_LONG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_STATUS_STRING", PGSQL_STATUS_STRING, CONST_CS | CONST_PERSISTENT);
 	/* For pg_result_status() return value */
-	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_COPY_OUT", PGRES_COPY_OUT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_COPY_IN", PGRES_COPY_IN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_NONFATAL_ERROR", PGRES_NONFATAL_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_FATAL_ERROR", PGRES_FATAL_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_COPY_OUT", PGRES_COPY_OUT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_COPY_IN", PGRES_COPY_IN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_NONFATAL_ERROR", PGRES_NONFATAL_ERROR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_FATAL_ERROR", PGRES_FATAL_ERROR, CONST_CS | CONST_PERSISTENT);
 #if HAVE_PQRESULTERRORFIELD
 	/* For pg_result_error_field() field codes */
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SEVERITY", PG_DIAG_SEVERITY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SQLSTATE", PG_DIAG_SQLSTATE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_PRIMARY", PG_DIAG_MESSAGE_PRIMARY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_DETAIL", PG_DIAG_MESSAGE_DETAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_MESSAGE_HINT", PG_DIAG_MESSAGE_HINT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_STATEMENT_POSITION", PG_DIAG_STATEMENT_POSITION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_SEVERITY", PG_DIAG_SEVERITY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_SQLSTATE", PG_DIAG_SQLSTATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_MESSAGE_PRIMARY", PG_DIAG_MESSAGE_PRIMARY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_MESSAGE_DETAIL", PG_DIAG_MESSAGE_DETAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_MESSAGE_HINT", PG_DIAG_MESSAGE_HINT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_STATEMENT_POSITION", PG_DIAG_STATEMENT_POSITION, CONST_CS | CONST_PERSISTENT);
 #ifdef PG_DIAG_INTERNAL_POSITION
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_INTERNAL_POSITION", PG_DIAG_INTERNAL_POSITION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_INTERNAL_POSITION", PG_DIAG_INTERNAL_POSITION, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef PG_DIAG_INTERNAL_QUERY
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_INTERNAL_QUERY", PG_DIAG_INTERNAL_QUERY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_INTERNAL_QUERY", PG_DIAG_INTERNAL_QUERY, CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_CONTEXT", PG_DIAG_CONTEXT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_FILE", PG_DIAG_SOURCE_FILE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_LINE", PG_DIAG_SOURCE_LINE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DIAG_SOURCE_FUNCTION", PG_DIAG_SOURCE_FUNCTION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_CONTEXT", PG_DIAG_CONTEXT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_SOURCE_FILE", PG_DIAG_SOURCE_FILE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_SOURCE_LINE", PG_DIAG_SOURCE_LINE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DIAG_SOURCE_FUNCTION", PG_DIAG_SOURCE_FUNCTION, CONST_CS | CONST_PERSISTENT);
 #endif
 	/* pg_convert options */
-	REGISTER_LONG_CONSTANT("PGSQL_CONV_IGNORE_DEFAULT", PGSQL_CONV_IGNORE_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_CONV_FORCE_NULL", PGSQL_CONV_FORCE_NULL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_CONV_IGNORE_NOT_NULL", PGSQL_CONV_IGNORE_NOT_NULL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONV_IGNORE_DEFAULT", PGSQL_CONV_IGNORE_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONV_FORCE_NULL", PGSQL_CONV_FORCE_NULL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_CONV_IGNORE_NOT_NULL", PGSQL_CONV_IGNORE_NOT_NULL, CONST_CS | CONST_PERSISTENT);
 	/* pg_insert/update/delete/select options */
-	REGISTER_LONG_CONSTANT("PGSQL_DML_NO_CONV", PGSQL_DML_NO_CONV, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DML_EXEC", PGSQL_DML_EXEC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DML_ASYNC", PGSQL_DML_ASYNC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DML_NO_CONV", PGSQL_DML_NO_CONV, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DML_EXEC", PGSQL_DML_EXEC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DML_ASYNC", PGSQL_DML_ASYNC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PGSQL_DML_STRING", PGSQL_DML_STRING, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -1196,11 +1196,11 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* make sure that the PGSQL_CONNECT_FORCE_NEW bit is not part of the hash so that subsequent connections
 		 * can re-use this connection. Bug #39979
 		 */ 
-		if (i == 1 && ZEND_NUM_ARGS() == 2 && Z_TYPE_PP(args[i]) == IS_LONG) {
-			if (Z_LVAL_PP(args[1]) == PGSQL_CONNECT_FORCE_NEW) {
+		if (i == 1 && ZEND_NUM_ARGS() == 2 && Z_TYPE_PP(args[i]) == IS_INT) {
+			if (Z_IVAL_PP(args[1]) == PGSQL_CONNECT_FORCE_NEW) {
 				continue;
-			} else if (Z_LVAL_PP(args[1]) & PGSQL_CONNECT_FORCE_NEW) {
-				smart_str_append_long(&str, Z_LVAL_PP(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
+			} else if (Z_IVAL_PP(args[1]) & PGSQL_CONNECT_FORCE_NEW) {
+				smart_str_append_long(&str, Z_IVAL_PP(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
 			}
 		}
 		convert_to_string_ex(args[i]);
@@ -1214,8 +1214,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		connstring = Z_STRVAL_PP(args[0]);
 	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
 		connstring = Z_STRVAL_PP(args[0]);
-		convert_to_long_ex(args[1]);
-		connect_type = Z_LVAL_PP(args[1]);
+		convert_to_int_ex(args[1]);
+		connect_type = Z_IVAL_PP(args[1]);
 	} else {
 		host = Z_STRVAL_PP(args[0]);
 		port = Z_STRVAL_PP(args[1]);
@@ -1331,7 +1331,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			link = (php_uint_t) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
-				Z_LVAL_P(return_value) = link;
+				Z_IVAL_P(return_value) = link;
 				zend_list_addref(link);
 				php_pgsql_set_default_link(link TSRMLS_CC);
 				Z_TYPE_P(return_value) = IS_RESOURCE;
@@ -1361,7 +1361,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+		new_index_ptr.ptr = (void *) Z_IVAL_P(return_value);
 		Z_TYPE(new_index_ptr) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list),str.c,str.len+1,(void *) &new_index_ptr, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
 			goto err;
@@ -1372,7 +1372,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_RESOURCE) {
 		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void*)Z_RESVAL_P(return_value));
 	}
-	php_pgsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
+	php_pgsql_set_default_link(Z_IVAL_P(return_value) TSRMLS_CC);
 	
 cleanup:
 	smart_str_free(&str);
@@ -1509,7 +1509,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			array_init(return_value);
 			add_assoc_string(return_value, "client", PG_VERSION, 1);
 #if HAVE_PQPROTOCOLVERSION
-			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
+			add_assoc_int(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
@@ -2118,23 +2118,23 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 
 	switch (entry_type) {
 		case PHP_PG_NUM_ROWS:
-			Z_LVAL_P(return_value) = PQntuples(pgsql_result);
+			Z_IVAL_P(return_value) = PQntuples(pgsql_result);
 			break;
 		case PHP_PG_NUM_FIELDS:
-			Z_LVAL_P(return_value) = PQnfields(pgsql_result);
+			Z_IVAL_P(return_value) = PQnfields(pgsql_result);
 			break;
 		case PHP_PG_CMD_TUPLES:
 #if HAVE_PQCMDTUPLES
-			Z_LVAL_P(return_value) = atoi(PQcmdTuples(pgsql_result));
+			Z_IVAL_P(return_value) = atoi(PQcmdTuples(pgsql_result));
 #else
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported under this build");
-			Z_LVAL_P(return_value) = 0;
+			Z_IVAL_P(return_value) = 0;
 #endif
 			break;
 		default:
 			RETURN_FALSE;
 	}
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -2288,7 +2288,7 @@ PHP_FUNCTION(pg_field_table)
 			RETURN_STRINGL(oidstr.c, oidstr.len, 0);
 		} else
 #endif
-			RETURN_LONG((php_int_t)oid);
+			RETURN_INT((php_int_t)oid);
 	}
 
 	/* try to lookup the table name in the resource list */
@@ -2375,8 +2375,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case PHP_PG_FIELD_SIZE:
-			Z_LVAL_P(return_value) = PQfsize(pgsql_result, field);
-			Z_TYPE_P(return_value) = IS_LONG;
+			Z_IVAL_P(return_value) = PQfsize(pgsql_result, field);
+			Z_TYPE_P(return_value) = IS_INT;
 			break;
 		case PHP_PG_FIELD_TYPE:
 			Z_STRVAL_P(return_value) = get_field_name(pg_result->conn, PQftype(pgsql_result, field), &EG(regular_list) TSRMLS_CC);
@@ -2397,8 +2397,8 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 			} else
 #endif
 			{
-				Z_LVAL_P(return_value) = (php_int_t)oid;
-				Z_TYPE_P(return_value) = IS_LONG;
+				Z_IVAL_P(return_value) = (php_int_t)oid;
+				Z_TYPE_P(return_value) = IS_INT;
 			}
 			break;
 		default:
@@ -2458,8 +2458,8 @@ PHP_FUNCTION(pg_field_num)
 
 	pgsql_result = pg_result->result;
 	
-	Z_LVAL_P(return_value) = PQfnumber(pgsql_result, field);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = PQfnumber(pgsql_result, field);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -2498,7 +2498,7 @@ PHP_FUNCTION(pg_fetch_result)
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
-							row, Z_LVAL_P(result));
+							row, Z_IVAL_P(result));
 			RETURN_FALSE;
 		}
 	}
@@ -2507,8 +2507,8 @@ PHP_FUNCTION(pg_fetch_result)
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_PP(field));
 			break;
 		default:
-			convert_to_long_ex(field);
-			field_offset = Z_LVAL_PP(field);
+			convert_to_int_ex(field);
+			field_offset = Z_IVAL_PP(field);
 			break;
 	}
 	if (field_offset<0 || field_offset>=PQnfields(pgsql_result)) {
@@ -2563,8 +2563,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_
 	if (zrow == NULL) {
 		row = -1;
 	} else {
-		convert_to_long(zrow);
-		row = Z_LVAL_P(zrow);
+		convert_to_int(zrow);
+		row = Z_IVAL_P(zrow);
 		if (row < 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The row parameter must be greater or equal to zero");
 			RETURN_FALSE;
@@ -2586,7 +2586,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, php_int_t result_
 		pg_result->row = pgsql_row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
-							row, Z_LVAL_P(result));
+							row, Z_IVAL_P(result));
 			RETURN_FALSE;
 		}
 	} else {
@@ -2864,7 +2864,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		pgsql_row = row;
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
-							row, Z_LVAL_P(result));
+							row, Z_IVAL_P(result));
 			RETURN_FALSE;
 		}
 	}
@@ -2875,8 +2875,8 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_PP(field));
 			break;
 		default:
-			convert_to_long_ex(field);
-			field_offset = Z_LVAL_PP(field);
+			convert_to_int_ex(field);
+			field_offset = Z_IVAL_PP(field);
 			break;
 	}
 	if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
@@ -2886,13 +2886,13 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	
 	switch (entry_type) {
 		case PHP_PG_DATA_LENGTH:
-			Z_LVAL_P(return_value) = PQgetlength(pgsql_result, pgsql_row, field_offset);
+			Z_IVAL_P(return_value) = PQgetlength(pgsql_result, pgsql_row, field_offset);
 			break;
 		case PHP_PG_DATA_ISNULL:
-			Z_LVAL_P(return_value) = PQgetisnull(pgsql_result, pgsql_row, field_offset);
+			Z_IVAL_P(return_value) = PQgetisnull(pgsql_result, pgsql_row, field_offset);
 			break;
 	}
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -2924,7 +2924,7 @@ PHP_FUNCTION(pg_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(pg_result, pgsql_result_handle *, &result, -1, "PostgreSQL result", le_result);
-	if (Z_LVAL_P(result) == 0) {
+	if (Z_IVAL_P(result) == 0) {
 		RETURN_FALSE;
 	}
 	zend_list_delete(Z_RESVAL_P(result));
@@ -3082,12 +3082,12 @@ PHP_FUNCTION(pg_lo_create)
 				}
 			}
 			break;
-		case IS_LONG:
-			if (Z_LVAL_P(oid) < (php_int_t)InvalidOid) {
+		case IS_INT:
+			if (Z_IVAL_P(oid) < (php_int_t)InvalidOid) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
 				RETURN_FALSE;
 			}
-			wanted_oid = (Oid)Z_LVAL_P(oid);
+			wanted_oid = (Oid)Z_IVAL_P(oid);
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
@@ -3286,8 +3286,8 @@ PHP_FUNCTION(pg_lo_open)
 				} else {
 					pgsql_lofp->conn = pgsql;
 					pgsql_lofp->lofd = pgsql_lofd;
-					Z_LVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp TSRMLS_CC);
-					Z_TYPE_P(return_value) = IS_LONG;
+					Z_IVAL_P(return_value) = zend_list_insert(pgsql_lofp, le_lofp TSRMLS_CC);
+					Z_TYPE_P(return_value) = IS_INT;
 				}
 			}
 		} else {
@@ -3400,7 +3400,7 @@ PHP_FUNCTION(pg_lo_write)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(nbytes);
+	RETURN_INT(nbytes);
 }
 /* }}} */
 
@@ -3425,7 +3425,7 @@ PHP_FUNCTION(pg_lo_read_all)
 		PHPWRITE(buf, nbytes);
 		tbytes += nbytes;
 	}
-	RETURN_LONG(tbytes);
+	RETURN_INT(tbytes);
 }
 /* }}} */
 
@@ -3486,12 +3486,12 @@ PHP_FUNCTION(pg_lo_import)
 				}
 			}
 			break;
-		case IS_LONG:
-			if (Z_LVAL_P(oid) < (php_int_t)InvalidOid) {
+		case IS_INT:
+			if (Z_IVAL_P(oid) < (php_int_t)InvalidOid) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
 				RETURN_FALSE;
 			}
-			wanted_oid = (Oid)Z_LVAL_P(oid);
+			wanted_oid = (Oid)Z_IVAL_P(oid);
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "invalid OID value passed");
@@ -3653,7 +3653,7 @@ PHP_FUNCTION(pg_lo_tell)
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
 	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
-	RETURN_LONG(offset);
+	RETURN_INT(offset);
 }
 /* }}} */
 
@@ -3687,8 +3687,8 @@ PHP_FUNCTION(pg_set_error_verbosity)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	if (verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE)) {
-		Z_LVAL_P(return_value) = PQsetErrorVerbosity(pgsql, verbosity);
-		Z_TYPE_P(return_value) = IS_LONG;
+		Z_IVAL_P(return_value) = PQsetErrorVerbosity(pgsql, verbosity);
+		Z_TYPE_P(return_value) = IS_INT;
 	} else {
 		RETURN_FALSE;
 	}
@@ -3726,8 +3726,8 @@ PHP_FUNCTION(pg_set_client_encoding)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	Z_LVAL_P(return_value) = PQsetClientEncoding(pgsql, encoding);
-	Z_TYPE_P(return_value) = IS_LONG;
+	Z_IVAL_P(return_value) = PQsetClientEncoding(pgsql, encoding);
+	Z_TYPE_P(return_value) = IS_INT;
 }
 /* }}} */
 
@@ -4543,7 +4543,7 @@ PHP_FUNCTION(pg_connection_status)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	RETURN_LONG(PQstatus(pgsql));
+	RETURN_INT(PQstatus(pgsql));
 }
 
 /* }}} */
@@ -4564,7 +4564,7 @@ PHP_FUNCTION(pg_transaction_status)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	RETURN_LONG(PQtransactionStatus(pgsql));
+	RETURN_INT(PQtransactionStatus(pgsql));
 }
 #endif
 
@@ -4640,12 +4640,12 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	switch(entry_type) {
 		case PHP_PG_ASYNC_IS_BUSY:
 			PQconsumeInput(pgsql);
-			Z_LVAL_P(return_value) = PQisBusy(pgsql);
-			Z_TYPE_P(return_value) = IS_LONG;
+			Z_IVAL_P(return_value) = PQisBusy(pgsql);
+			Z_TYPE_P(return_value) = IS_INT;
 			break;
 		case PHP_PG_ASYNC_REQUEST_CANCEL:
-			Z_LVAL_P(return_value) = PQrequestCancel(pgsql);
-			Z_TYPE_P(return_value) = IS_LONG;
+			Z_IVAL_P(return_value) = PQrequestCancel(pgsql);
+			Z_TYPE_P(return_value) = IS_INT;
 			while ((pgsql_result = PQgetResult(pgsql))) {
 				PQclear(pgsql_result);
 			}
@@ -5034,7 +5034,7 @@ PHP_FUNCTION(pg_result_status)
 	pgsql_result = pg_result->result;
 	if (result_type == PGSQL_STATUS_LONG) {
 		status = PQresultStatus(pgsql_result);
-		RETURN_LONG((int)status);
+		RETURN_INT((int)status);
 	}
 	else if (result_type == PGSQL_STATUS_STRING) {
 		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
@@ -5091,7 +5091,7 @@ PHP_FUNCTION(pg_get_notify)
 	}
 	if (result_type & PGSQL_ASSOC) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
-		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+		add_assoc_int(return_value, "pid", pgsql_notify->be_pid);
 #if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS 
 		if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 9.0) {
 #else 
@@ -5121,7 +5121,7 @@ PHP_FUNCTION(pg_get_pid)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	RETURN_LONG(PQbackendPID(pgsql));
+	RETURN_INT(PQbackendPID(pgsql));
 }
 /* }}} */
 
@@ -5196,9 +5196,9 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		char *name;
 		MAKE_STD_ZVAL(elem);
 		array_init(elem);
-		add_assoc_long(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
+		add_assoc_int(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
 		add_assoc_string(elem, "type", PQgetvalue(pg_result,i,2), 1);
-		add_assoc_long(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
+		add_assoc_int(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
 		if (!strcmp(PQgetvalue(pg_result,i,4), "t")) {
 			add_assoc_bool(elem, "not null", 1);
 		}
@@ -5211,7 +5211,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		else {
 			add_assoc_bool(elem, "has default", 0);
 		}
-		add_assoc_long(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
+		add_assoc_int(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
 		if (!strcmp(PQgetvalue(pg_result,i,7), "t")) {
 			add_assoc_bool(elem, "is enum", 1);
 		}
@@ -5476,7 +5476,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get array key type");
 			err = 1;
 		}
-		if (!err && key_type == HASH_KEY_IS_LONG) {
+		if (!err && key_type == HASH_KEY_IS_INT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Accepts only string key for values");
 			err = 1;
 		}
@@ -5553,9 +5553,9 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						break;
 						
-					case IS_LONG:
+					case IS_INT:
 					case IS_BOOL:
-						if (Z_LVAL_PP(val)) {
+						if (Z_IVAL_PP(val)) {
 							ZVAL_STRING(new_val, "'t'", 1);
 						}
 						else {
@@ -5598,11 +5598,11 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(new_val, Z_DVAL_PP(val));
-						convert_to_long_ex(&new_val);
+						convert_to_int_ex(&new_val);
 						break;
 						
-					case IS_LONG:
-						ZVAL_LONG(new_val, Z_LVAL_PP(val));
+					case IS_INT:
+						ZVAL_INT(new_val, Z_IVAL_PP(val));
 						break;
 						
 					case IS_NULL:
@@ -5638,8 +5638,8 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						break;
 						
-					case IS_LONG:
-						ZVAL_LONG(new_val, Z_LVAL_PP(val));
+					case IS_INT:
+						ZVAL_INT(new_val, Z_IVAL_PP(val));
 						break;
 						
 					case IS_DOUBLE:
@@ -5687,8 +5687,8 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						break;
 						
-					case IS_LONG:
-						ZVAL_LONG(new_val, Z_LVAL_PP(val));
+					case IS_INT:
+						ZVAL_INT(new_val, Z_IVAL_PP(val));
 						convert_to_string_ex(&new_val);
 						break;
 						
@@ -5725,18 +5725,18 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							} 
 							else {
 								ZVAL_STRING(new_val, Z_STRVAL_PP(val), 1);
-								convert_to_long_ex(&new_val);
+								convert_to_int_ex(&new_val);
 							}
 						}
 						break;
 						
 					case IS_DOUBLE:
 						ZVAL_DOUBLE(new_val, Z_DVAL_PP(val));
-						convert_to_long_ex(&new_val);
+						convert_to_int_ex(&new_val);
 						break;
 						
-					case IS_LONG:
-						ZVAL_LONG(new_val, Z_LVAL_PP(val));
+					case IS_INT:
+						ZVAL_INT(new_val, Z_IVAL_PP(val));
 						break;
 						
 					case IS_NULL:
@@ -5987,8 +5987,8 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						}
 						break;
 						
-					case IS_LONG:
-						ZVAL_LONG(new_val, Z_LVAL_PP(val));
+					case IS_INT:
+						ZVAL_INT(new_val, Z_IVAL_PP(val));
 						convert_to_string_ex(&new_val);
 						break;
 						
@@ -6239,7 +6239,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
 	while ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld,
 					&fld_len, &num_idx, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
-		if (key_type == HASH_KEY_IS_LONG) {
+		if (key_type == HASH_KEY_IS_INT) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects associative array for values to be inserted");
 			goto cleanup;
 		}
@@ -6260,8 +6260,8 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 			case IS_STRING:
 				smart_str_appendl(&querystr, Z_STRVAL_PP(val), Z_STRSIZE_PP(val));
 				break;
-			case IS_LONG:
-				smart_str_append_long(&querystr, Z_LVAL_PP(val));
+			case IS_INT:
+				smart_str_append_long(&querystr, Z_IVAL_PP(val));
 				break;
 			case IS_DOUBLE:
 				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%F", Z_DVAL_PP(val)));
@@ -6355,7 +6355,7 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, in
 		 zend_hash_get_current_data_ex(ht, (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(ht, &pos)) {
 		 key_type = zend_hash_get_current_key_ex(ht, &fld, &fld_len, &num_idx, 0, &pos);		
-		if (key_type == HASH_KEY_IS_LONG) {
+		if (key_type == HASH_KEY_IS_INT) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects associative array for values to be inserted");
 			return -1;
 		}
@@ -6370,8 +6370,8 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, in
 			case IS_STRING:
 				smart_str_appendl(querystr, Z_STRVAL_PP(val), Z_STRSIZE_PP(val));
 				break;
-			case IS_LONG:
-				smart_str_append_long(querystr, Z_LVAL_PP(val));
+			case IS_INT:
+				smart_str_append_long(querystr, Z_IVAL_PP(val));
 				break;
 			case IS_DOUBLE:
 				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_PP(val)), sizeof(buf)-1));

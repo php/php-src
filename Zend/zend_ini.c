@@ -345,7 +345,7 @@ ZEND_API int zend_ini_register_displayer(char *name, zend_size_t name_length, vo
  * Data retrieval
  */
 
-ZEND_API zend_int_t zend_ini_long(char *name, zend_size_t name_length, int orig) /* {{{ */
+ZEND_API zend_int_t zend_ini_int(char *name, zend_size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	TSRMLS_FETCH();

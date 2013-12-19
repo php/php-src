@@ -303,7 +303,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					map[i] = l_null;
 					break;
 				case IS_BOOL:
-					if (Z_LVAL(op_array->literals[i].constant)) {
+					if (Z_IVAL(op_array->literals[i].constant)) {
 						if (l_true < 0) {
 							l_true = j;
 							if (i != j) {
@@ -325,12 +325,12 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						map[i] = l_false;
 					}
 					break;
-				case IS_LONG:
-					if (zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i].constant), (void**)&pos) == SUCCESS) {
+				case IS_INT:
+					if (zend_hash_index_find(&hash, Z_IVAL(op_array->literals[i].constant), (void**)&pos) == SUCCESS) {
 						map[i] = *pos;
 					} else {
 						map[i] = j;
-						zend_hash_index_update(&hash, Z_LVAL(op_array->literals[i].constant), (void**)&j, sizeof(int), NULL);
+						zend_hash_index_update(&hash, Z_IVAL(op_array->literals[i].constant), (void**)&j, sizeof(int), NULL);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -355,7 +355,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 				case IS_CONSTANT:
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
-							key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRSIZE(op_array->literals[i].constant);
+							key_len = MAX_LENGTH_OF_ZEND_INT + sizeof("->") + Z_STRSIZE(op_array->literals[i].constant);
 							key = emalloc(key_len);
 							key_len = snprintf(key, key_len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i].constant));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {

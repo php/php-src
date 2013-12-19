@@ -671,14 +671,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op1)->opcode == ZEND_PRINT &&
 			opline->opcode != ZEND_CASE && opline->opcode != ZEND_FREE) {
 			ZEND_OP1_TYPE(opline) = IS_CONST;
-			LITERAL_LONG(opline->op1, 1);
+			LITERAL_INT(opline->op1, 1);
 		}
 
 		if (ZEND_OP2_TYPE(opline) == IS_TMP_VAR &&
 			VAR_SOURCE(opline->op2) &&
 			VAR_SOURCE(opline->op2)->opcode == ZEND_PRINT) {
 			ZEND_OP2_TYPE(opline) = IS_CONST;
-			LITERAL_LONG(opline->op2, 1);
+			LITERAL_INT(opline->op2, 1);
 		}
 
 		/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
@@ -733,11 +733,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zend_op *sv = fcall-1;
 			if(sv >= block->start_opline && sv->opcode == ZEND_SEND_VAL &&
 			   ZEND_OP1_TYPE(sv) == IS_CONST && Z_TYPE(OPLINE_OP1_LITERAL(sv)) == IS_STRING &&
-			   Z_LVAL(OPLINE_OP2_LITERAL(sv)) == 1
+			   Z_IVAL(OPLINE_OP2_LITERAL(sv)) == 1
 			   ) {
 				zval *arg = &OPLINE_OP1_LITERAL(sv);
-				char *fname = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].function_name;
-				int flen = FUNCTION_CACHE->funcs[Z_LVAL(ZEND_OP1_LITERAL(fcall))].name_len;
+				char *fname = FUNCTION_CACHE->funcs[Z_IVAL(ZEND_OP1_LITERAL(fcall))].function_name;
+				int flen = FUNCTION_CACHE->funcs[Z_IVAL(ZEND_OP1_LITERAL(fcall))].name_len;
 				if(flen == sizeof("defined")-1 && zend_binary_strcasecmp(fname, flen, "defined", sizeof("defined")-1) == 0) {
 					zval c;
 					if(zend_get_persistent_constant(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), &c, 0 TSRMLS_CC ELS_CC) != 0) {
@@ -791,14 +791,14 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
+					((opline->opcode == ZEND_IS_EQUAL) == Z_IVAL(ZEND_OP1_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 					   Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
+					((opline->opcode == ZEND_IS_EQUAL) == Z_IVAL(ZEND_OP2_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				SET_UNUSED(opline->op2);
 			}
@@ -986,7 +986,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			continue;
 		} else if (opline->opcode == ZEND_ADD_CHAR && ZEND_OP1_TYPE(opline) == IS_CONST && ZEND_OP2_TYPE(opline) == IS_CONST) {
             /* convert ADD_CHAR(C1, C2) to CONCAT(C1, C2) */
-			char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
+			char c = (char)Z_IVAL(ZEND_OP2_LITERAL(opline));
 			ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1, 1);
 			opline->opcode = ZEND_CONCAT;
 			continue;
@@ -1016,8 +1016,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			int er;
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-                  Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
+                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_INT &&
+                  Z_IVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
                  (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
                   Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
 				if (RESULT_USED(opline)) {
@@ -1084,7 +1084,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_UNSET(opline->op1);
 			COPY_NODE(opline->op1, opline->op2);
 			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
+				char c = (char)Z_IVAL(ZEND_OP2_LITERAL(opline));
 				ZVAL_STRINGL(&ZEND_OP1_LITERAL(opline), &c, 1, 1);
 			}
 			SET_UNUSED(opline->op2);
@@ -1105,7 +1105,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_UNSET(opline->op1);
 			COPY_NODE(opline->op1, src->op1);
 			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
+				char c = (char)Z_IVAL(ZEND_OP2_LITERAL(opline));
 				ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1, 1);
 			}
 			opline->opcode = ZEND_CONCAT;
@@ -1136,7 +1136,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_UNSET(opline->op1);
 			COPY_NODE(opline->op1, src->op1);
 			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
+				char c = (char)Z_IVAL(ZEND_OP2_LITERAL(opline));
 				ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1, 1);
 			}
 			opline->opcode = ZEND_CONCAT;

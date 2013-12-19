@@ -408,7 +408,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 						  *storedArgType = NULL;
 
 		/* Process key and retrieve type */
-		if (key_type == HASH_KEY_IS_LONG) {
+		if (key_type == HASH_KEY_IS_INT) {
 			/* includes case where index < 0 because it's exposed as unsigned */
 			if (num_index > (ulong)INT32_MAX) {
 				intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
@@ -476,14 +476,14 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					double d;
 					if (Z_TYPE_PP(elem) == IS_DOUBLE) {
 						d = Z_DVAL_PP(elem);
-					} else if (Z_TYPE_PP(elem) == IS_LONG) {
-						d = (double)Z_LVAL_PP(elem);
+					} else if (Z_TYPE_PP(elem) == IS_INT) {
+						d = (double)Z_IVAL_PP(elem);
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
 						convert_scalar_to_number(*elem TSRMLS_CC);
 						d = (Z_TYPE_PP(elem) == IS_DOUBLE)
 							? Z_DVAL_PP(elem)
-							: (double)Z_LVAL_PP(elem);
+							: (double)Z_IVAL_PP(elem);
 					}
 					formattable.setDouble(d);
 					break;
@@ -501,14 +501,14 @@ retry_klong:
 						} else {
 							tInt32 = (int32_t)Z_DVAL_PP(elem);
 						}
-					} else if (Z_TYPE_PP(elem) == IS_LONG) {
-						if (Z_LVAL_PP(elem) > INT32_MAX ||
-								Z_LVAL_PP(elem) < INT32_MIN) {
+					} else if (Z_TYPE_PP(elem) == IS_INT) {
+						if (Z_IVAL_PP(elem) > INT32_MAX ||
+								Z_IVAL_PP(elem) < INT32_MIN) {
 							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 								"Found PHP integer with absolute value too large "
 								"for 32 bit integer argument", 0 TSRMLS_CC);
 						} else {
-							tInt32 = (int32_t)Z_LVAL_PP(elem);
+							tInt32 = (int32_t)Z_IVAL_PP(elem);
 						}
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
@@ -531,9 +531,9 @@ retry_kint64:
 						} else {
 							tInt64 = (int64_t)Z_DVAL_PP(elem);
 						}
-					} else if (Z_TYPE_PP(elem) == IS_LONG) {
+					} else if (Z_TYPE_PP(elem) == IS_INT) {
 						/* assume long is not wider than 64 bits */
-						tInt64 = (int64_t)Z_LVAL_PP(elem);
+						tInt64 = (int64_t)Z_IVAL_PP(elem);
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
 						convert_scalar_to_number(*elem TSRMLS_CC);
@@ -576,10 +576,10 @@ retry_kint64:
 				formattable.setDouble(Z_DVAL_PP(elem));
 				break;
 			case IS_BOOL:
-				convert_to_long_ex(elem);
+				convert_to_int_ex(elem);
 				/* Intentional fallthrough */
-			case IS_LONG:
-				formattable.setInt64((int64_t)Z_LVAL_PP(elem));
+			case IS_INT:
+				formattable.setInt64((int64_t)Z_IVAL_PP(elem));
 				break;
 			case IS_NULL:
 				formattable.setInt64((int64_t)0);
@@ -668,7 +668,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
             break;
 
         case Formattable::kLong:
-			ZVAL_LONG((*args)[i], fargs[i].getLong());
+			ZVAL_INT((*args)[i], fargs[i].getLong());
             break;
 
         case Formattable::kInt64:
@@ -676,7 +676,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 			if(aInt64 > LONG_MAX || aInt64 < -LONG_MAX) {
 				ZVAL_DOUBLE((*args)[i], (double)aInt64);
 			} else {
-				ZVAL_LONG((*args)[i], (php_int_t)aInt64);
+				ZVAL_INT((*args)[i], (php_int_t)aInt64);
 			}
             break;
 

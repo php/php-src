@@ -98,13 +98,13 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
-		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_PP(struc) ? "true" : "false");
+		php_printf("%sbool(%s)\n", COMMON, Z_IVAL_PP(struc) ? "true" : "false");
 		break;
 	case IS_NULL:
 		php_printf("%sNULL\n", COMMON);
 		break;
-	case IS_LONG:
-		php_printf("%sint(" ZEND_INT_FMT ")\n", COMMON, Z_LVAL_PP(struc));
+	case IS_INT:
+		php_printf("%sint(" ZEND_INT_FMT ")\n", COMMON, Z_IVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
 		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
@@ -156,8 +156,8 @@ head_done:
 		PUTS("}\n");
 		break;
 	case IS_RESOURCE: {
-		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown");
+		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_IVAL_PP(struc) TSRMLS_CC);
+		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s)\n", COMMON, Z_IVAL_PP(struc), type_name ? type_name : "Unknown");
 		break;
 	}
 	default:
@@ -253,13 +253,13 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
-		php_printf("%sbool(%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc)?"true":"false", Z_REFCOUNT_PP(struc));
+		php_printf("%sbool(%s) refcount(%u)\n", COMMON, Z_IVAL_PP(struc)?"true":"false", Z_REFCOUNT_PP(struc));
 		break;
 	case IS_NULL:
 		php_printf("%sNULL refcount(%u)\n", COMMON, Z_REFCOUNT_PP(struc));
 		break;
-	case IS_LONG:
-		php_printf("%slong(" ZEND_INT_FMT ") refcount(" ZEND_UINT_FMT ")\n", COMMON, Z_LVAL_PP(struc), Z_REFCOUNT_PP(struc));
+	case IS_INT:
+		php_printf("%slong(" ZEND_INT_FMT ") refcount(" ZEND_UINT_FMT ")\n", COMMON, Z_IVAL_PP(struc), Z_REFCOUNT_PP(struc));
 		break;
 	case IS_DOUBLE:
 		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc), Z_REFCOUNT_PP(struc));
@@ -302,8 +302,8 @@ head_done:
 		PUTS("}\n");
 		break;
 	case IS_RESOURCE: {
-		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(struc) TSRMLS_CC);
-		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_LVAL_PP(struc), type_name ? type_name : "Unknown", Z_REFCOUNT_PP(struc));
+		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_IVAL_PP(struc) TSRMLS_CC);
+		php_printf("%sresource(" ZEND_INT_FMT ") of type (%s) refcount(%u)\n", COMMON, Z_IVAL_PP(struc), type_name ? type_name : "Unknown", Z_REFCOUNT_PP(struc));
 		break;
 	}
 	default:
@@ -423,7 +423,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
-		if (Z_LVAL_PP(struc)) {
+		if (Z_IVAL_PP(struc)) {
 			smart_str_appendl(buf, "true", 4);
 		} else {
 			smart_str_appendl(buf, "false", 5);
@@ -432,8 +432,8 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 	case IS_NULL:
 		smart_str_appendl(buf, "NULL", 4);
 		break;
-	case IS_LONG:
-		smart_str_append_php_int(buf, Z_LVAL_PP(struc));
+	case IS_INT:
+		smart_str_append_php_int(buf, Z_IVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
 		tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_PP(struc));
@@ -733,7 +733,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	switch (Z_TYPE_P(struc)) {
 		case IS_BOOL:
 			smart_str_appendl(buf, "b:", 2);
-			smart_str_append_long(buf, Z_LVAL_P(struc));
+			smart_str_append_long(buf, Z_IVAL_P(struc));
 			smart_str_appendc(buf, ';');
 			return;
 
@@ -741,8 +741,8 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			smart_str_appendl(buf, "N;", 2);
 			return;
 
-		case IS_LONG:
-			php_var_serialize_long(buf, Z_LVAL_P(struc));
+		case IS_INT:
+			php_var_serialize_long(buf, Z_IVAL_P(struc));
 			return;
 
 		case IS_DOUBLE: {
@@ -866,7 +866,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					}
 
 					switch (i) {
-						case HASH_KEY_IS_LONG:
+						case HASH_KEY_IS_INT:
 							php_var_serialize_long(buf, index);
 							break;
 						case HASH_KEY_IS_STRING:
@@ -975,7 +975,7 @@ PHP_FUNCTION(unserialize)
 
 	if (consumed) {
 		zval_dtor(consumed);
-		ZVAL_LONG(consumed, ((char*)p) - buf);
+		ZVAL_INT(consumed, ((char*)p) - buf);
 	}
 }
 /* }}} */
@@ -989,7 +989,7 @@ PHP_FUNCTION(memory_get_usage) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_memory_usage(real_usage TSRMLS_CC));
+	RETURN_INT(zend_memory_usage(real_usage TSRMLS_CC));
 }
 /* }}} */
 
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(memory_get_peak_usage) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(zend_memory_peak_usage(real_usage TSRMLS_CC));
+	RETURN_INT(zend_memory_peak_usage(real_usage TSRMLS_CC));
 }
 /* }}} */
 

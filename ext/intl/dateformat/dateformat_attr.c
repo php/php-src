@@ -48,7 +48,7 @@ PHP_FUNCTION( datefmt_get_datetype )
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter datetype." );
 
-	RETURN_LONG(dfo->date_type );
+	RETURN_INT(dfo->date_type );
 }
 /* }}} */
 
@@ -74,7 +74,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 
 	INTL_METHOD_CHECK_STATUS(dfo, "Error getting formatter timetype." );
 
-	RETURN_LONG(dfo->time_type );
+	RETURN_INT(dfo->time_type );
 }
 /* }}} */
 

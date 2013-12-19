@@ -241,7 +241,7 @@ PHP_METHOD(sqlite3, version)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "versionString", (char*)sqlite3_libversion(), 1);
-	add_assoc_long(return_value, "versionNumber", sqlite3_libversion_number());
+	add_assoc_int(return_value, "versionNumber", sqlite3_libversion_number());
 
 	return;
 }
@@ -261,7 +261,7 @@ PHP_METHOD(sqlite3, lastInsertRowID)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_last_insert_rowid(db_obj->db));
+	RETURN_INT(sqlite3_last_insert_rowid(db_obj->db));
 }
 /* }}} */
 
@@ -279,7 +279,7 @@ PHP_METHOD(sqlite3, lastErrorCode)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_errcode(db_obj->db));
+	RETURN_INT(sqlite3_errcode(db_obj->db));
 }
 /* }}} */
 
@@ -416,7 +416,7 @@ PHP_METHOD(sqlite3, changes)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_changes(db_obj->db));
+	RETURN_INT(sqlite3_changes(db_obj->db));
 }
 /* }}} */
 
@@ -591,7 +591,7 @@ static zval* sqlite_value_to_zval(sqlite3_stmt *stmt, int column) /* {{{ */
 			if ((sqlite3_column_int64(stmt, column)) >= INT_MAX || sqlite3_column_int64(stmt, column) <= INT_MIN) {
 				ZVAL_STRINGL(data, (char *)sqlite3_column_text(stmt, column), sqlite3_column_bytes(stmt, column), 1);
 			} else {
-				ZVAL_LONG(data, sqlite3_column_int64(stmt, column));
+				ZVAL_INT(data, sqlite3_column_int64(stmt, column));
 			}
 			break;
 
@@ -739,7 +739,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 
 		zargs[1] = emalloc(sizeof(zval*));
 		MAKE_STD_ZVAL(*zargs[1]);
-		ZVAL_LONG(*zargs[1], agg_context->row_count);
+		ZVAL_INT(*zargs[1], agg_context->row_count);
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -749,9 +749,9 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
 #if PHP_INT_MAX > 2147483647
-				ZVAL_LONG(*zargs[i + is_agg], sqlite3_value_int64(argv[i]));
+				ZVAL_INT(*zargs[i + is_agg], sqlite3_value_int64(argv[i]));
 #else
-				ZVAL_LONG(*zargs[i + is_agg], sqlite3_value_int(argv[i]));
+				ZVAL_INT(*zargs[i + is_agg], sqlite3_value_int(argv[i]));
 #endif
 				break;
 
@@ -795,11 +795,11 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		 * or if we are finalizing an aggregate */
 		if (retval) {
 			switch (Z_TYPE_P(retval)) {
-				case IS_LONG:
+				case IS_INT:
 #if PHP_INT_MAX > 2147483647
-					sqlite3_result_int64(context, Z_LVAL_P(retval));
+					sqlite3_result_int64(context, Z_IVAL_P(retval));
 #else
-					sqlite3_result_int(context, Z_LVAL_P(retval));
+					sqlite3_result_int(context, Z_IVAL_P(retval));
 #endif
 					break;
 
@@ -916,13 +916,13 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	efree(zargs[1]);
 	efree(zargs);
 
-	//retval ought to contain a ZVAL_LONG by now
+	//retval ought to contain a ZVAL_INT by now
 	// (the result of a comparison, i.e. most likely -1, 0, or 1)
 	//I suppose we could accept any scalar return type, though.
-	if (Z_TYPE_P(retval) != IS_LONG){
+	if (Z_TYPE_P(retval) != IS_INT){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the compare callback (invalid return type).  Collation behaviour is undefined.");
 	}else{
-		ret = Z_LVAL_P(retval);
+		ret = Z_IVAL_P(retval);
 	}
 
 	zval_ptr_dtor(&retval);
@@ -1297,7 +1297,7 @@ PHP_METHOD(sqlite3stmt, paramCount)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_bind_parameter_count(stmt_obj->stmt));
+	RETURN_INT(sqlite3_bind_parameter_count(stmt_obj->stmt));
 }
 /* }}} */
 
@@ -1518,11 +1518,11 @@ PHP_METHOD(sqlite3stmt, execute)
 
 			switch (param->type) {
 				case SQLITE_INTEGER:
-					convert_to_long(param->parameter);
+					convert_to_int(param->parameter);
 #if PHP_INT_MAX > 2147483647
-					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_LVAL_P(param->parameter));
+					sqlite3_bind_int64(stmt_obj->stmt, param->param_number, Z_IVAL_P(param->parameter));
 #else
-					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_LVAL_P(param->parameter));
+					sqlite3_bind_int(stmt_obj->stmt, param->param_number, Z_IVAL_P(param->parameter));
 #endif
 					break;
 
@@ -1683,7 +1683,7 @@ PHP_METHOD(sqlite3result, numColumns)
 		return;
 	}
 
-	RETURN_LONG(sqlite3_column_count(result_obj->stmt_obj->stmt));
+	RETURN_INT(sqlite3_column_count(result_obj->stmt_obj->stmt));
 }
 /* }}} */
 
@@ -1731,7 +1731,7 @@ PHP_METHOD(sqlite3result, columnType)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(sqlite3_column_type(result_obj->stmt_obj->stmt, column));
+	RETURN_INT(sqlite3_column_type(result_obj->stmt_obj->stmt, column));
 }
 /* }}} */
 
@@ -2280,19 +2280,19 @@ PHP_MINIT_FUNCTION(sqlite3)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("SQLITE3_ASSOC", PHP_SQLITE3_ASSOC, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_NUM", PHP_SQLITE3_NUM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_BOTH", PHP_SQLITE3_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_ASSOC", PHP_SQLITE3_ASSOC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_NUM", PHP_SQLITE3_NUM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_BOTH", PHP_SQLITE3_BOTH, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("SQLITE3_INTEGER", SQLITE_INTEGER, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_FLOAT", SQLITE_FLOAT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_TEXT", SQLITE3_TEXT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_BLOB", SQLITE_BLOB, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_NULL", SQLITE_NULL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_INTEGER", SQLITE_INTEGER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_FLOAT", SQLITE_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_TEXT", SQLITE3_TEXT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_BLOB", SQLITE_BLOB, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_NULL", SQLITE_NULL, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READONLY", SQLITE_OPEN_READONLY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_READWRITE", SQLITE_OPEN_READWRITE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("SQLITE3_OPEN_CREATE", SQLITE_OPEN_CREATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_OPEN_READONLY", SQLITE_OPEN_READONLY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_OPEN_READWRITE", SQLITE_OPEN_READWRITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("SQLITE3_OPEN_CREATE", SQLITE_OPEN_CREATE, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }

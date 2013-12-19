@@ -403,7 +403,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 			break;
 		}
 		case IS_BOOL:
-			if (Z_LVAL_PP(arg)) {
+			if (Z_IVAL_PP(arg)) {
 				TRACE_APPEND_STR("true, ");
 			} else {
 				TRACE_APPEND_STR("false, ");
@@ -412,9 +412,9 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 		case IS_RESOURCE:
 			TRACE_APPEND_STR("Resource id #");
 			/* break; */
-		case IS_LONG: {
-			zend_int_t lval = Z_LVAL_PP(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+		case IS_INT: {
+			zend_int_t lval = Z_IVAL_PP(arg);
+			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			zend_size_t l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
@@ -477,7 +477,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	len = va_arg(args, zend_size_t*);
 	num = va_arg(args, zend_size_t*);
 
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_ZEND_INT + 1 + 1);
 	sprintf(s_tmp, "#" ZEND_INT_FMT " ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
@@ -487,8 +487,8 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 			TRACE_APPEND_STR("[unknown function]");
 		} else{
 			if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
-				if (Z_TYPE_PP(tmp) == IS_LONG) {
-					line = Z_LVAL_PP(tmp);
+				if (Z_TYPE_PP(tmp) == IS_INT) {
+					line = Z_IVAL_PP(tmp);
 				} else {
 					zend_error(E_WARNING, "Line is no long");
 					line = 0;
@@ -496,7 +496,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 			} else {
 				line = 0;
 			}
-			s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+			s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_ZEND_INT + 4 + 1);
 			sprintf(s_tmp, "%s(" ZEND_INT_FMT "): ", Z_STRVAL_PP(file), line);
 			TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 			efree(s_tmp);
@@ -540,7 +540,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
 	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 3, str, len, &num);
 
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_ZEND_INT + 7 + 1);
 	sprintf(s_tmp, "#" ZEND_INT_FMT " {main}", num);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
@@ -599,7 +599,7 @@ ZEND_METHOD(exception, __toString)
 
 		convert_to_string(&message);
 		convert_to_string(&file);
-		convert_to_long(&line);
+		convert_to_int(&line);
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
@@ -620,12 +620,12 @@ ZEND_METHOD(exception, __toString)
 
 		if (Z_STRSIZE(message) > 0) {
 			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
+								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_IVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		} else {
 			len = zend_spprintf(&str, 0, "exception '%s' in %s:" ZEND_INT_FMT "\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
+								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_IVAL(line),
 								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		}
@@ -822,12 +822,12 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 
 				convert_to_string(file);
 				file = (Z_STRSIZE_P(file) > 0) ? file : NULL;
-				line = (Z_TYPE_P(line) == IS_LONG) ? line : NULL;
+				line = (Z_TYPE_P(line) == IS_INT) ? line : NULL;
 			} else {
 				file = NULL;
 				line = NULL;
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
+			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_IVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE_P(EG(exception))->name, ce_exception->name);
 		}
 
 		str = zend_read_property(default_exception_ce, exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
@@ -836,9 +836,9 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 
 		convert_to_string(str);
 		convert_to_string(file);
-		convert_to_long(line);
+		convert_to_int(line);
 
-		zend_error_va(severity, (Z_STRSIZE_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(severity, (Z_STRSIZE_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_IVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}

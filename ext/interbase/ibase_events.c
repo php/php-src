@@ -303,8 +303,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 			RETURN_FALSE;
 		}
 
-		convert_to_long_ex(args[0]);
-		link_res_id = Z_LVAL_PP(args[0]);
+		convert_to_int_ex(args[0]);
+		link_res_id = Z_IVAL_PP(args[0]);
 
 	} else {
 		/* callback, event_1 [, ... event_15] 
@@ -370,7 +370,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	ib_link->event_head = event;
 
 	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
-	zend_list_addref(Z_LVAL_P(return_value));
+	zend_list_addref(Z_IVAL_P(return_value));
 	efree(args);
 }
 /* }}} */
@@ -390,7 +390,7 @@ PHP_FUNCTION(ibase_free_event_handler)
 
 		event->state = DEAD;
 
-		zend_list_delete(Z_LVAL_P(event_arg));
+		zend_list_delete(Z_IVAL_P(event_arg));
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

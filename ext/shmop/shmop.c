@@ -227,7 +227,7 @@ PHP_FUNCTION(shmop_open)
 	shmop->size = shm.shm_segsz;
 
 	rsid = zend_list_insert(shmop, shm_type TSRMLS_CC);
-	RETURN_LONG(rsid);
+	RETURN_INT(rsid);
 err:
 	efree(shmop);
 	RETURN_FALSE;
@@ -304,7 +304,7 @@ PHP_FUNCTION(shmop_size)
 
 	PHP_SHMOP_GET_RES
 
-	RETURN_LONG(shmop->size);
+	RETURN_INT(shmop->size);
 }
 /* }}} */
 
@@ -338,7 +338,7 @@ PHP_FUNCTION(shmop_write)
 	writesize = (data_len < shmop->size - offset) ? data_len : shmop->size - offset;
 	memcpy(shmop->addr + offset, data, writesize);
 
-	RETURN_LONG(writesize);
+	RETURN_INT(writesize);
 }
 /* }}} */
 

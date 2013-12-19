@@ -496,7 +496,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if (to == NULL )
 		RETURN_FALSE;
 
-	RETURN_LONG( (php_int_t) TRANSLITERATOR_ERROR_CODE( to ) );
+	RETURN_INT( (php_int_t) TRANSLITERATOR_ERROR_CODE( to ) );
 }
 /* }}} */
 

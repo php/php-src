@@ -103,9 +103,9 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 	return i;
 }
 
-# define LITERAL_LONG(op, val) do { \
+# define LITERAL_INT(op, val) do { \
 		zval _c; \
-		ZVAL_LONG(&_c, val); \
+		ZVAL_INT(&_c, val); \
 		op.constant = zend_optimizer_add_literal(op_array, &_c TSRMLS_CC); \
 	} while (0)
 
@@ -127,7 +127,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 
 #else
 
-# define LITERAL_LONG(op, val) ZVAL_LONG(&op.u.constant, val)
+# define LITERAL_INT(op, val) ZVAL_INT(&op.u.constant, val)
 
 # define LITERAL_BOOL(op, val) ZVAL_BOOL(&op.u.constant, val)
 
@@ -285,7 +285,7 @@ check_numeric:
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRSIZE_P(val)+1, index, numeric = 1);
 					if (numeric) {
 						zval_dtor(val);
-						ZVAL_LONG(val, index);
+						ZVAL_INT(val, index);
 						op_array->literals[opline->op2.constant].constant = *val;
 		        	}
 				}

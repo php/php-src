@@ -1070,7 +1070,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
-		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+		add_assoc_int(return_value, "pid", pgsql_notify->be_pid);
 	}
 
 	PQfreemem(pgsql_notify);
@@ -1089,7 +1089,7 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	RETURN_LONG(PQbackendPID(H->server));
+	RETURN_INT(PQbackendPID(H->server));
 }
 /* }}} */
 
@@ -1124,10 +1124,10 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_D
 	switch (attr) {
 #if HAVE_PQPREPARE
 		case PDO_ATTR_EMULATE_PREPARES:
-			H->emulate_prepares = Z_LVAL_P(val);
+			H->emulate_prepares = Z_IVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
-			H->disable_native_prepares = Z_LVAL_P(val);
+			H->disable_native_prepares = Z_IVAL_P(val);
 			return 1;
 #endif
 

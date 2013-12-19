@@ -3272,7 +3272,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host"), (void **) &proxy_host) == SUCCESS &&
 	    Z_TYPE_PP(proxy_host) == IS_STRING &&
 	    zend_hash_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port"), (void **) &proxy_port) == SUCCESS &&
-	    Z_TYPE_PP(proxy_port) == IS_LONG) {
+	    Z_TYPE_PP(proxy_port) == IS_INT) {
 	    	zval str_port, *str_proxy;
 	    	smart_str proxy = {0};
 		str_port = **proxy_port;

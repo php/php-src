@@ -996,7 +996,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 				for (i = 0; i < bind->array.current_length; i++) {
 					if ((i < bind->array.old_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
 						zval_dtor(*entry);
-						ZVAL_LONG(*entry, ((ub4 *)(bind->array.elements))[i]);
+						ZVAL_INT(*entry, ((ub4 *)(bind->array.elements))[i]);
 						zend_hash_move_forward(hash);
 					} else {
 						add_next_index_long(bind->zval, ((ub4 *)(bind->array.elements))[i]);
@@ -1139,8 +1139,8 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, php_size_t na
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
 				return 1;
 			}
-			convert_to_long(var);
-			bind_data = (ub4 *)&Z_LVAL_P(var);
+			convert_to_int(var);
+			bind_data = (ub4 *)&Z_IVAL_P(var);
 			value_sz = sizeof(ub4);
 			mode = OCI_DEFAULT;
 			break;
@@ -1445,10 +1445,10 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		/* NB: for PHP4 compat only, it should be using 'Z' instead */
 		tmp = *column_index;
 		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
-		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0 TSRMLS_CC);
+		convert_to_int(&tmp);
+		column = php_oci_statement_get_column(statement, Z_IVAL(tmp), NULL, 0 TSRMLS_CC);
 		if (!column) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%pd\"", Z_LVAL(tmp));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%pd\"", Z_IVAL(tmp));
 			zval_dtor(&tmp);
 			return NULL;
 		}
@@ -1702,8 +1702,8 @@ php_oci_bind *php_oci_bind_array_helper_number(zval *var, php_int_t max_table_le
 			bind->array.element_lengths[i] = sizeof(ub4);
 		}
 		if ((i < bind->array.current_length) && (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE)) {
-			convert_to_long_ex(entry);
-			((ub4 *)bind->array.elements)[i] = (ub4) Z_LVAL_PP(entry);
+			convert_to_int_ex(entry);
+			((ub4 *)bind->array.elements)[i] = (ub4) Z_IVAL_PP(entry);
 			zend_hash_move_forward(hash);
 		} else {
 			((ub4 *)bind->array.elements)[i] = 0;

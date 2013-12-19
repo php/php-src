@@ -113,13 +113,13 @@ PHP_MINIT_FUNCTION(user_filters)
 		return FAILURE;
 	}
 
-	REGISTER_LONG_CONSTANT("PSFS_PASS_ON",			PSFS_PASS_ON,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FEED_ME",			PSFS_FEED_ME,			CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_ERR_FATAL",		PSFS_ERR_FATAL,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_PASS_ON",			PSFS_PASS_ON,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FEED_ME",			PSFS_FEED_ME,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_ERR_FATAL",		PSFS_ERR_FATAL,			CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
 	
 	return SUCCESS;
 }
@@ -203,7 +203,7 @@ php_stream_filter_status_t userfilter_filter(
 
 	ALLOC_INIT_ZVAL(zconsumed);
 	if (bytes_consumed) {
-		ZVAL_LONG(zconsumed, *bytes_consumed);
+		ZVAL_INT(zconsumed, *bytes_consumed);
 	} else {
 		ZVAL_NULL(zconsumed);
 	}
@@ -221,14 +221,14 @@ php_stream_filter_status_t userfilter_filter(
 			0, NULL TSRMLS_CC);
 
 	if (call_result == SUCCESS && retval != NULL) {
-		convert_to_long(retval);
-		ret = Z_LVAL_P(retval);
+		convert_to_int(retval);
+		ret = Z_IVAL_P(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
 	}
 
 	if (bytes_consumed) {
-		*bytes_consumed = Z_LVAL_P(zconsumed);
+		*bytes_consumed = Z_IVAL_P(zconsumed);
 	}
 
 	if (retval) {
@@ -373,7 +373,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			0, NULL TSRMLS_CC);
 
 	if (retval) {
-		if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
+		if (Z_TYPE_P(retval) == IS_BOOL && Z_IVAL_P(retval) == 0) {
 			/* User reported filter creation error "return false;" */
 			zval_ptr_dtor(&retval);
 
@@ -433,7 +433,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
 		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
-		add_property_long(return_value, "datalen", bucket->buflen);
+		add_property_int(return_value, "datalen", bucket->buflen);
 	}
 }
 /* }}} */
@@ -535,7 +535,7 @@ PHP_FUNCTION(stream_bucket_new)
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zbucket);
 	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
-	add_property_long(return_value, "datalen", bucket->buflen);
+	add_property_int(return_value, "datalen", bucket->buflen);
 }
 /* }}} */
 

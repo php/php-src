@@ -565,7 +565,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 			convert_to_string_ex(entry);
 
 			MAKE_STD_ZVAL(new_string);
-			ZVAL_LONG(new_string,1);
+			ZVAL_INT(new_string,1);
 		
 			zend_hash_update(intern->registered_phpfunctions, Z_STRVAL_PP(entry), Z_STRSIZE_PP(entry) + 1, &new_string, sizeof(zval*), NULL);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));
@@ -577,7 +577,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 		intern = (dom_xpath_object *)zend_object_store_get_object(id TSRMLS_CC);
 		
 		MAKE_STD_ZVAL(new_string);
-		ZVAL_LONG(new_string,1);
+		ZVAL_INT(new_string,1);
 		zend_hash_update(intern->registered_phpfunctions, name, name_len + 1, &new_string, sizeof(zval*), NULL);
 		intern->registerPhpFunctions = 2;
 		

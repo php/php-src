@@ -580,11 +580,11 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	/* prepare argc */
 	ALLOC_INIT_ZVAL(argc);
 	if (SG(request_info).argc) {
-		Z_LVAL_P(argc) = SG(request_info).argc;
+		Z_IVAL_P(argc) = SG(request_info).argc;
 	} else {
-		Z_LVAL_P(argc) = count;
+		Z_IVAL_P(argc) = count;
 	}
-	Z_TYPE_P(argc) = IS_LONG;
+	Z_TYPE_P(argc) = IS_INT;
 
 	if (SG(request_info).argc) {
 		Z_ADDREF_P(arr);
@@ -638,8 +638,8 @@ static inline void php_register_server_variables(TSRMLS_D)
 		Z_TYPE(request_time_float) = IS_DOUBLE;
 		Z_DVAL(request_time_float) = sapi_get_request_time(TSRMLS_C);
 		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, array_ptr TSRMLS_CC);
-		Z_TYPE(request_time_long) = IS_LONG;
-		Z_LVAL(request_time_long) = zend_dval_to_lval(Z_DVAL(request_time_float));
+		Z_TYPE(request_time_long) = IS_INT;
+		Z_IVAL(request_time_long) = zend_dval_to_lval(Z_DVAL(request_time_float));
 		php_register_variable_ex("REQUEST_TIME", &request_time_long, array_ptr TSRMLS_CC);
 	}
 
@@ -663,7 +663,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 		key_type = zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos);
 		if (Z_TYPE_PP(src_entry) != IS_ARRAY
 			|| (key_type == HASH_KEY_IS_STRING && zend_hash_find(dest, string_key, string_key_len, (void **) &dest_entry) != SUCCESS)
-			|| (key_type == HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
+			|| (key_type == HASH_KEY_IS_INT && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
 			|| Z_TYPE_PP(dest_entry) != IS_ARRAY
 			) {
 			Z_ADDREF_PP(src_entry);

@@ -43,7 +43,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRM
 }
 /* }}} */
 
-PHPAPI php_int_t spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI php_int_t spl_offset_convert_to_int(zval *offset TSRMLS_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(offset)) {
 	case IS_STRING:
@@ -53,8 +53,8 @@ PHPAPI php_int_t spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
 		return (php_int_t)Z_DVAL_P(offset);
 	case IS_RESOURCE:
 	case IS_BOOL:
-	case IS_LONG:
-		return Z_LVAL_P(offset);
+	case IS_INT:
+		return Z_IVAL_P(offset);
 	}
 	return -1;
 } 

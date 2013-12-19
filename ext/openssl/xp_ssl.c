@@ -901,8 +901,8 @@ static int get_crypto_method(php_stream_context *ctx) {
                 long crypto_method;
 
                 if (php_stream_context_get_option(ctx, "ssl", "crypto_method", &val) == SUCCESS) {
-                        convert_to_long_ex(val);
-                        crypto_method = (long)Z_LVAL_PP(val);
+                        convert_to_int_ex(val);
+                        crypto_method = (long)Z_IVAL_PP(val);
 
                         switch (crypto_method) {
                                 case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:

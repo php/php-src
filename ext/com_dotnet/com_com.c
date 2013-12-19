@@ -108,8 +108,8 @@ PHP_FUNCTION(com_create_instance)
 
 		if (SUCCESS == zend_hash_find(HASH_OF(server_params),
 				"Flags", sizeof("Flags"), (void**)&tmp)) {
-			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_PP(tmp);
+			convert_to_int_ex(tmp);
+			ctx = (CLSCTX)Z_IVAL_PP(tmp);
 		}
 	}
 

@@ -45,7 +45,7 @@ PHP_FUNCTION(unixtojd)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
+	RETURN_INT(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
 }
 /* }}} */
 
@@ -64,7 +64,7 @@ PHP_FUNCTION(jdtounix)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(uday * 24 * 3600);
+	RETURN_INT(uday * 24 * 3600);
 }
 /* }}} */
 

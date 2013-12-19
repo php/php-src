@@ -398,7 +398,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->host != NULL) RETVAL_STRING(resource->host, 1);
 				break;
 			case PHP_URL_PORT:
-				if (resource->port != 0) RETVAL_LONG(resource->port);
+				if (resource->port != 0) RETVAL_INT(resource->port);
 				break;
 			case PHP_URL_USER:
 				if (resource->user != NULL) RETVAL_STRING(resource->user, 1);
@@ -431,7 +431,7 @@ PHP_FUNCTION(parse_url)
 	if (resource->host != NULL)
 		add_assoc_string(return_value, "host", resource->host, 1);
 	if (resource->port != 0)
-		add_assoc_long(return_value, "port", resource->port);
+		add_assoc_int(return_value, "port", resource->port);
 	if (resource->user != NULL)
 		add_assoc_string(return_value, "user", resource->user, 1);
 	if (resource->pass != NULL)

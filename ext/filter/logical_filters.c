@@ -92,8 +92,8 @@ static int php_filter_parse_int(const char *str, php_size_t str_len, php_int_t *
 		return -1;
 	}
 
-	if ((end - str > MAX_LENGTH_OF_LONG - 1) /* number too long */
-	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_LONG - 1) && *str > '2')) {
+	if ((end - str > MAX_LENGTH_OF_ZEND_INT - 1) /* number too long */
+	 || (SIZEOF_LONG == 4 && (end - str == MAX_LENGTH_OF_ZEND_INT - 1) && *str > '2')) {
 		/* overflow */
 		return -1;
 	}
@@ -228,8 +228,8 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	} else {
 		zval_dtor(value);
-		Z_TYPE_P(value) = IS_LONG;
-		Z_LVAL_P(value) = ctx_value;
+		Z_TYPE_P(value) = IS_INT;
+		Z_IVAL_P(value) = ctx_value;
 		return;
 	}
 }
@@ -387,7 +387,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	*p = 0;
 
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
-		case IS_LONG:
+		case IS_INT:
 			zval_dtor(value);
 			Z_TYPE_P(value) = IS_DOUBLE;
 			Z_DVAL_P(value) = lval;

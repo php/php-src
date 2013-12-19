@@ -245,7 +245,7 @@ zend_uchar collator_is_numeric( UChar *str, php_size_t length, php_int_t *lval, 
 			if (lval) {
 				*lval = local_lval;
 			}
-			return IS_LONG;
+			return IS_INT;
 		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
 			return 0;
 		}
@@ -288,7 +288,7 @@ zend_uchar collator_is_numeric( UChar *str, php_size_t length, php_int_t *lval, 
 			return IS_DOUBLE;
 		} else if (end_ptr_long && lval) {
 			*lval = local_lval;
-			return IS_LONG;
+			return IS_INT;
 		}
 	}
 	return 0;

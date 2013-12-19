@@ -1106,7 +1106,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
 			return HASH_KEY_IS_STRING;
 		} else {
 			*num_index = p->h;
-			return HASH_KEY_IS_LONG;
+			return HASH_KEY_IS_INT;
 		}
 	}
 	return HASH_KEY_NON_EXISTENT;
@@ -1126,8 +1126,8 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 		Z_STRVAL_P(key) = IS_INTERNED(p->arKey) ? (char*)p->arKey : estrndup(p->arKey, p->nKeyLength - 1);
 		Z_STRSIZE_P(key) = p->nKeyLength - 1;
 	} else {
-		Z_TYPE_P(key) = IS_LONG;
-		Z_LVAL_P(key) = p->h;
+		Z_TYPE_P(key) = IS_INT;
+		Z_IVAL_P(key) = p->h;
 	}
 }
 
@@ -1143,7 +1143,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 		if (p->nKeyLength) {
 			return HASH_KEY_IS_STRING;
 		} else {
-			return HASH_KEY_IS_LONG;
+			return HASH_KEY_IS_INT;
 		}
 	}
 	return HASH_KEY_NON_EXISTENT;
@@ -1182,7 +1182,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 	IS_CONSISTENT(ht);
 
 	if (p) {
-		if (key_type == HASH_KEY_IS_LONG) {
+		if (key_type == HASH_KEY_IS_INT) {
 			str_length = 0;
 			if (!p->nKeyLength && p->h == num_index) {
 				return SUCCESS;
@@ -1354,7 +1354,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			p = q;
 		}
 
-		if (key_type == HASH_KEY_IS_LONG) {
+		if (key_type == HASH_KEY_IS_INT) {
 			p->h = num_index;
 		} else {
 			p->h = h;

@@ -145,7 +145,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
+	RETURN_INT(fetch_rbbi(bio)->getRuleStatus());
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)

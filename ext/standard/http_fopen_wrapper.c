@@ -343,8 +343,8 @@ finish:
 
 	if (header_init && context && php_stream_context_get_option(context, "http", "max_redirects", &tmpzval) == SUCCESS) {
 		SEPARATE_ZVAL(tmpzval);
-		convert_to_long_ex(tmpzval);
-		redirect_max = Z_LVAL_PP(tmpzval);
+		convert_to_int_ex(tmpzval);
+		redirect_max = Z_IVAL_PP(tmpzval);
 	}
 
 	if (context && php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
@@ -750,8 +750,8 @@ finish:
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				if (context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
 					SEPARATE_ZVAL(tmpzval);
-					convert_to_long_ex(tmpzval);
-					follow_location = Z_LVAL_PP(tmpzval);
+					convert_to_int_ex(tmpzval);
+					follow_location = Z_IVAL_PP(tmpzval);
 				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code)) { 
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307) 
@@ -773,7 +773,7 @@ finish:
 					if (context && php_stream_context_get_option(context, "http", "auto_decode", &tmpzval) == SUCCESS) {
 						SEPARATE_ZVAL(tmpzval);
 						convert_to_boolean(*tmpzval);
-						decode = Z_LVAL_PP(tmpzval);
+						decode = Z_IVAL_PP(tmpzval);
 					}
 					if (decode) {
 						transfer_encoding = php_stream_filter_create("dechunk", NULL, php_stream_is_persistent(stream) TSRMLS_CC);

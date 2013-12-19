@@ -735,7 +735,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			INIT_PZVAL(zv);
 			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
 			if (Z_TYPE_P(zv) == IS_BOOL) {
-				if (Z_LVAL_P(zv)) {
+				if (Z_IVAL_P(zv)) {
 					string_write(str, "true", sizeof("true")-1);
 				} else {
 					string_write(str, "false", sizeof("false")-1);
@@ -1827,7 +1827,7 @@ ZEND_METHOD(reflection_function, getStartLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(fptr->op_array.line_start);
+		RETURN_INT(fptr->op_array.line_start);
 	}
 	RETURN_FALSE;
 }
@@ -1845,7 +1845,7 @@ ZEND_METHOD(reflection_function, getEndLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(fptr->op_array.line_end);
+		RETURN_INT(fptr->op_array.line_end);
 	}
 	RETURN_FALSE;
 }
@@ -2033,7 +2033,7 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_LONG(fptr->common.num_args);
+	RETURN_INT(fptr->common.num_args);
 }
 /* }}} */
 
@@ -2047,7 +2047,7 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_LONG(fptr->common.required_num_args);
+	RETURN_INT(fptr->common.required_num_args);
 }
 /* }}} */
 
@@ -2246,8 +2246,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
-	if (Z_TYPE_PP(parameter) == IS_LONG) {
-		position= Z_LVAL_PP(parameter);
+	if (Z_TYPE_PP(parameter) == IS_INT) {
+		position= Z_IVAL_PP(parameter);
 		if (position < 0 || (zend_uint)position >= fptr->common.num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
@@ -2527,7 +2527,7 @@ ZEND_METHOD(reflection_parameter, getPosition)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_LONG(param->offset);
+	RETVAL_INT(param->offset);
 }
 /* }}} */
 
@@ -3232,7 +3232,7 @@ ZEND_METHOD(reflection_method, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	RETURN_LONG(mptr->common.fn_flags);
+	RETURN_INT(mptr->common.fn_flags);
 }
 /* }}} */
 
@@ -3614,7 +3614,7 @@ ZEND_METHOD(reflection_class, getStartLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_FUNCTION) {
-		RETURN_LONG(ce->info.user.line_start);
+		RETURN_INT(ce->info.user.line_start);
 	}
 	RETURN_FALSE;
 }
@@ -3632,7 +3632,7 @@ ZEND_METHOD(reflection_class, getEndLine)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_LONG(ce->info.user.line_end);
+		RETURN_INT(ce->info.user.line_end);
 	}
 	RETURN_FALSE;
 }
@@ -4189,7 +4189,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags);
+	RETURN_INT(ce->ce_flags);
 }
 /* }}} */
 
@@ -4986,7 +4986,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	RETURN_LONG(ref->prop.flags);
+	RETURN_INT(ref->prop.flags);
 }
 /* }}} */
 

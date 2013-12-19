@@ -456,9 +456,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *val TS
 			dbh->in_txn = 0;
 		}
 
-		convert_to_long(val);
+		convert_to_int(val);
 
-		dbh->auto_commit = Z_LVAL_P(val);
+		dbh->auto_commit = Z_IVAL_P(val);
 		return 1;
 	} else {
 		return 0;

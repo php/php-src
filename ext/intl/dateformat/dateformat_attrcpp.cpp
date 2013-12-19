@@ -157,7 +157,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_calendar)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(dfo->calendar);
+	RETURN_INT(dfo->calendar);
 }
 /* }}} */
 

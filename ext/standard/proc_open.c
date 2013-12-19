@@ -164,7 +164,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 				p += l;
 				break;
-			case HASH_KEY_IS_LONG:
+			case HASH_KEY_IS_INT:
 				memcpy(p,data,el_len);
 #ifndef PHP_WIN32
 				*ep = p;
@@ -311,9 +311,9 @@ PHP_FUNCTION(proc_close)
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 
 	FG(pclose_wait) = 1;
-	zend_list_delete(Z_LVAL_P(zproc));
+	zend_list_delete(Z_IVAL_P(zproc));
 	FG(pclose_wait) = 0;
-	RETURN_LONG(FG(pclose_ret));
+	RETURN_INT(FG(pclose_ret));
 }
 /* }}} */
 
@@ -341,7 +341,7 @@ PHP_FUNCTION(proc_get_status)
 	array_init(return_value);
 
 	add_assoc_string(return_value, "command", proc->command, 1);
-	add_assoc_long(return_value, "pid", (php_int_t) proc->child);
+	add_assoc_int(return_value, "pid", (php_int_t) proc->child);
 
 #ifdef PHP_WIN32
 
@@ -381,9 +381,9 @@ PHP_FUNCTION(proc_get_status)
 	add_assoc_bool(return_value, "running", running);
 	add_assoc_bool(return_value, "signaled", signaled);
 	add_assoc_bool(return_value, "stopped", stopped);
-	add_assoc_long(return_value, "exitcode", exitcode);
-	add_assoc_long(return_value, "termsig", termsig);
-	add_assoc_long(return_value, "stopsig", stopsig);
+	add_assoc_int(return_value, "exitcode", exitcode);
+	add_assoc_int(return_value, "termsig", termsig);
+	add_assoc_int(return_value, "stopsig", stopsig);
 }
 /* }}} */
 
@@ -483,14 +483,14 @@ PHP_FUNCTION(proc_open)
 	if (other_options) {
 		zval **item;
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "suppress_errors", sizeof("suppress_errors"), (void**)&item)) {
-			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
-			    Z_LVAL_PP(item)) {
+			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_INT) &&
+			    Z_IVAL_PP(item)) {
 				suppress_errors = 1;
 			}
 		}
 		if (SUCCESS == zend_hash_find(Z_ARRVAL_P(other_options), "bypass_shell", sizeof("bypass_shell"), (void**)&item)) {
-			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_LONG) &&
-			    Z_LVAL_PP(item)) {
+			if ((Z_TYPE_PP(item) == IS_BOOL || Z_TYPE_PP(item) == IS_INT) &&
+			    Z_IVAL_PP(item)) {
 				bypass_shell = 1;
 			}
 		}
@@ -956,7 +956,7 @@ PHP_FUNCTION(proc_open)
 					php_stream_to_zval(stream, retfp);
 					add_index_zval(pipes, descriptors[i].index, retfp);
 
-					proc->pipes[i] = Z_LVAL_P(retfp);
+					proc->pipes[i] = Z_IVAL_P(retfp);
 				}
 				break;
 			default:

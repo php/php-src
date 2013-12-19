@@ -326,7 +326,7 @@ PHP_FUNCTION(mysqli_link_construct)
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
-	RETURN_LONG(MyG(error_no));
+	RETURN_INT(MyG(error_no));
 }
 /* }}} */
 
@@ -439,7 +439,7 @@ PHP_FUNCTION(mysqli_error_list)
 			zval * single_error;
 			MAKE_STD_ZVAL(single_error);
 			array_init(single_error);
-			add_assoc_long_ex(single_error, "errno", sizeof("errno"), message->error_no);
+			add_assoc_int_ex(single_error, "errno", sizeof("errno"), message->error_no);
 			add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), message->sqlstate, 1);
 			add_assoc_string_ex(single_error, "error", sizeof("error"), message->error, 1);
 			add_next_index_zval(return_value, single_error);
@@ -450,7 +450,7 @@ PHP_FUNCTION(mysqli_error_list)
 		zval * single_error;
 		MAKE_STD_ZVAL(single_error);
 		array_init(single_error);
-		add_assoc_long_ex(single_error, "errno", sizeof("errno"), mysql_errno(mysql->mysql));
+		add_assoc_int_ex(single_error, "errno", sizeof("errno"), mysql_errno(mysql->mysql));
 		add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), mysql_sqlstate(mysql->mysql), 1);
 		add_assoc_string_ex(single_error, "error", sizeof("error"), mysql_error(mysql->mysql), 1);
 		add_next_index_zval(return_value, single_error);
@@ -483,7 +483,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 			zval * single_error;
 			MAKE_STD_ZVAL(single_error);
 			array_init(single_error);
-			add_assoc_long_ex(single_error, "errno", sizeof("errno"), message->error_no);
+			add_assoc_int_ex(single_error, "errno", sizeof("errno"), message->error_no);
 			add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), message->sqlstate, 1);
 			add_assoc_string_ex(single_error, "error", sizeof("error"), message->error, 1);
 			add_next_index_zval(return_value, single_error);
@@ -494,7 +494,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		zval * single_error;
 		MAKE_STD_ZVAL(single_error);
 		array_init(single_error);
-		add_assoc_long_ex(single_error, "errno", sizeof("errno"), mysql_stmt_errno(stmt->stmt));
+		add_assoc_int_ex(single_error, "errno", sizeof("errno"), mysql_stmt_errno(stmt->stmt));
 		add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), mysql_stmt_sqlstate(stmt->stmt), 1);
 		add_assoc_string_ex(single_error, "error", sizeof("error"), mysql_stmt_error(stmt->stmt), 1);
 		add_next_index_zval(return_value, single_error);
@@ -818,7 +818,7 @@ PHP_FUNCTION(mysqli_poll)
 		efree(new_e_array);
 	}
 	if (ret == PASS) {
-		RETURN_LONG(desc_num);
+		RETURN_INT(desc_num);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1037,10 +1037,10 @@ PHP_FUNCTION(mysqli_get_charset)
 	add_property_string(return_value, "charset", (name) ? (char *)name : "", 1);
 	add_property_string(return_value, "collation",(collation) ? (char *)collation : "", 1);
 	add_property_string(return_value, "dir", (dir) ? (char *)dir : "", 1);
-	add_property_long(return_value, "min_length", minlength);
-	add_property_long(return_value, "max_length", maxlength);
-	add_property_long(return_value, "number", number);
-	add_property_long(return_value, "state", state);
+	add_property_int(return_value, "min_length", minlength);
+	add_property_int(return_value, "max_length", maxlength);
+	add_property_int(return_value, "number", number);
+	add_property_int(return_value, "state", state);
 	add_property_string(return_value, "comment", (comment) ? (char *)comment : "", 1);
 }
 /* }}} */

@@ -569,17 +569,17 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 				}
 
 				case 'd':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_appendint(&result, &outpos, &size,
-										  Z_LVAL_P(tmp),
+										  Z_IVAL_P(tmp),
 										  width, padding, alignment,
 										  always_sign);
 					break;
 
 				case 'u':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_appenduint(&result, &outpos, &size,
-										  Z_LVAL_P(tmp),
+										  Z_IVAL_P(tmp),
 										  width, padding, alignment);
 					break;
 
@@ -599,39 +599,39 @@ php_formatted_print(int ht, php_size_t *len, int use_array, int format_offset TS
 					break;
 					
 				case 'c':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_appendchar(&result, &outpos, &size,
-										(char) Z_LVAL_P(tmp) TSRMLS_CC);
+										(char) Z_IVAL_P(tmp) TSRMLS_CC);
 					break;
 
 				case 'o':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_P(tmp),
+										 Z_IVAL_P(tmp),
 										 width, padding, alignment, 3,
 										 hexchars, expprec);
 					break;
 
 				case 'x':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_P(tmp),
+										 Z_IVAL_P(tmp),
 										 width, padding, alignment, 4,
 										 hexchars, expprec);
 					break;
 
 				case 'X':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_P(tmp),
+										 Z_IVAL_P(tmp),
 										 width, padding, alignment, 4,
 										 HEXCHARS, expprec);
 					break;
 
 				case 'b':
-					convert_to_long(tmp);
+					convert_to_int(tmp);
 					php_sprintf_append2n(&result, &outpos, &size,
-										 Z_LVAL_P(tmp),
+										 Z_IVAL_P(tmp),
 										 width, padding, alignment, 1,
 										 hexchars, expprec);
 					break;
@@ -699,7 +699,7 @@ PHP_FUNCTION(user_printf)
 	}
 	rlen = PHPWRITE(result, len);
 	efree(result);
-	RETURN_LONG(rlen);
+	RETURN_INT(rlen);
 }
 /* }}} */
 
@@ -715,7 +715,7 @@ PHP_FUNCTION(vprintf)
 	}
 	rlen = PHPWRITE(result, len);
 	efree(result);
-	RETURN_LONG(rlen);
+	RETURN_INT(rlen);
 }
 /* }}} */
 
@@ -746,7 +746,7 @@ PHP_FUNCTION(fprintf)
 
 	efree(result);
 
-	RETURN_LONG(len);
+	RETURN_INT(len);
 }
 /* }}} */
 
@@ -777,7 +777,7 @@ PHP_FUNCTION(vfprintf)
 
 	efree(result);
 
-	RETURN_LONG(len);
+	RETURN_INT(len);
 }
 /* }}} */
 

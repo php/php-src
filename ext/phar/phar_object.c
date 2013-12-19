@@ -841,10 +841,10 @@ PHP_METHOD(Phar, webPhar)
 
 			if (SUCCESS == zend_hash_find(Z_ARRVAL_P(mimeoverride), ext, strlen(ext)+1, (void **) &val)) {
 				switch (Z_TYPE_PP(val)) {
-					case IS_LONG:
-						if (Z_LVAL_PP(val) == PHAR_MIME_PHP || Z_LVAL_PP(val) == PHAR_MIME_PHPS) {
+					case IS_INT:
+						if (Z_IVAL_PP(val) == PHAR_MIME_PHP || Z_IVAL_PP(val) == PHAR_MIME_PHPS) {
 							mime_type = "";
-							code = Z_LVAL_PP(val);
+							code = Z_IVAL_PP(val);
 						} else {
 							zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "Unknown mime type specifier used, only Phar::PHP, Phar::PHPS and a mime type string are allowed");
 #ifdef PHP_WIN32
@@ -1254,7 +1254,7 @@ PHP_METHOD(Phar, __construct)
 	INIT_PZVAL(&arg1);
 	ZVAL_STRINGL(&arg1, fname, fname_len, 0);
 	INIT_PZVAL(&arg2);
-	ZVAL_LONG(&arg2, flags);
+	ZVAL_INT(&arg2, flags);
 
 	zend_call_method_with_2_params(&zobj, Z_OBJCE_P(zobj), 
 		&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg1, &arg2);
@@ -1775,7 +1775,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	INIT_PZVAL(&arg);
 	ZVAL_STRINGL(&arg, dir, dir_len, 0);
 	INIT_PZVAL(&arg2);
-	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
+	ZVAL_INT(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
 
 	zend_call_method_with_2_params(&iter, spl_ce_RecursiveDirectoryIterator, 
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg, &arg2);
@@ -1945,7 +1945,7 @@ PHP_METHOD(Phar, count)
 		return;
 	}
 
-	RETURN_LONG(zend_hash_num_elements(&phar_obj->arc.archive->manifest));
+	RETURN_INT(zend_hash_num_elements(&phar_obj->arc.archive->manifest));
 }
 /* }}} */
 
@@ -2571,11 +2571,11 @@ PHP_METHOD(Phar, isCompressed)
 	}
 
 	if (phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSED_GZ) {
-		RETURN_LONG(PHAR_ENT_COMPRESSED_GZ);
+		RETURN_INT(PHAR_ENT_COMPRESSED_GZ);
 	}
 
 	if (phar_obj->arc.archive->flags & PHAR_FILE_COMPRESSED_BZ2) {
-		RETURN_LONG(PHAR_ENT_COMPRESSED_BZ2);
+		RETURN_INT(PHAR_ENT_COMPRESSED_BZ2);
 	}
 
 	RETURN_FALSE;
@@ -4501,7 +4501,7 @@ PHP_METHOD(PharFileInfo, getCompressedSize)
 		return;
 	}
 
-	RETURN_LONG(entry_obj->ent.entry->compressed_filesize);
+	RETURN_INT(entry_obj->ent.entry->compressed_filesize);
 }
 /* }}} */
 
@@ -4550,7 +4550,7 @@ PHP_METHOD(PharFileInfo, getCRC32)
 	}
 
 	if (entry_obj->ent.entry->is_crc_checked) {
-		RETURN_LONG(entry_obj->ent.entry->crc32);
+		RETURN_INT(entry_obj->ent.entry->crc32);
 	} else {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, \
 			"Phar entry was not CRC checked"); \
@@ -4584,7 +4584,7 @@ PHP_METHOD(PharFileInfo, getPharFlags)
 		return;
 	}
 
-	RETURN_LONG(entry_obj->ent.entry->flags & ~(PHAR_ENT_PERM_MASK|PHAR_ENT_COMPRESSION_MASK));
+	RETURN_INT(entry_obj->ent.entry->flags & ~(PHAR_ENT_PERM_MASK|PHAR_ENT_COMPRESSION_MASK));
 }
 /* }}} */
 

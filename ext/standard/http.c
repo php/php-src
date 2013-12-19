@@ -177,9 +177,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRSIZE_PP(zdata), &ekey_len);						
 					}
 					break;
-				case IS_LONG:
+				case IS_INT:
 				case IS_BOOL:
-					ekey_len = spprintf(&ekey, 0, ZEND_INT_FMT, Z_LVAL_PP(zdata));
+					ekey_len = spprintf(&ekey, 0, ZEND_INT_FMT, Z_IVAL_PP(zdata));
 					break;
 				case IS_DOUBLE:
 					ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_PP(zdata));

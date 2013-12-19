@@ -2126,7 +2126,7 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 		zval *retval = NULL;
 		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, &retval, 1, &zfd)) {
 			if (retval) {
-				decline = Z_TYPE_P(retval) == IS_BOOL && !Z_LVAL_P(retval);
+				decline = Z_TYPE_P(retval) == IS_BOOL && !Z_IVAL_P(retval);
 				zval_ptr_dtor(&retval);
 			}
 		} else {

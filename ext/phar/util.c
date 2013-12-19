@@ -1486,10 +1486,10 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 
 	switch (Z_TYPE_P(retval_ptr)) {
 		default:
-		case IS_LONG:
+		case IS_INT:
 			zval_dtor(zsig);
 			efree(zsig);
-			if (1 == Z_LVAL_P(retval_ptr)) {
+			if (1 == Z_IVAL_P(retval_ptr)) {
 				efree(retval_ptr);
 				return SUCCESS;
 			}

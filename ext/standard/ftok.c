@@ -41,16 +41,16 @@ PHP_FUNCTION(ftok)
 
 	if (pathname_len == 0){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pathname is invalid");
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
 
 	if (proj_len != 1){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
 
 	if (php_check_open_basedir(pathname TSRMLS_CC)) {
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
 
 	k = ftok(pathname, proj[0]);
@@ -58,7 +58,7 @@ PHP_FUNCTION(ftok)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "ftok() failed - %s", strerror(errno));
 	}
 
-	RETURN_LONG(k);
+	RETURN_INT(k);
 }
 /* }}} */
 #endif

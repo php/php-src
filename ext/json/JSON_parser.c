@@ -295,7 +295,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t optio
 {
     ALLOC_INIT_ZVAL(*z);
 
-    if (type == IS_LONG)
+    if (type == IS_INT)
     {
 		zend_bool bigint = 0;
 
@@ -303,8 +303,8 @@ static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t optio
 			buf->len--;
 		}
 
-		if (buf->len >= MAX_LENGTH_OF_LONG - 1) {
-			if (buf->len == MAX_LENGTH_OF_LONG - 1) {
+		if (buf->len >= MAX_LENGTH_OF_ZEND_INT - 1) {
+			if (buf->len == MAX_LENGTH_OF_ZEND_INT - 1) {
 				int cmp = strcmp(buf->c + (buf->c[0] == '-'), long_min_digits);
 
 				if (!(cmp < 0 || (cmp == 0 && buf->c[0] == '-'))) {
@@ -328,7 +328,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t optio
 			}
 		}
 
-		ZVAL_LONG(*z, ZEND_STRTOL(buf->c, NULL, 10));
+		ZVAL_INT(*z, ZEND_STRTOL(buf->c, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {
@@ -508,10 +508,10 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], php_size_t l
 	                utf16 += dehexchar(next_char);
 	                utf16_to_utf8(&buf, utf16);
 	            }
-	        } else if (type < IS_LONG && (next_class == C_DIGIT || next_class == C_ZERO)) {
-	            type = IS_LONG;
+	        } else if (type < IS_INT && (next_class == C_DIGIT || next_class == C_ZERO)) {
+	            type = IS_INT;
 	            smart_str_appendc(&buf, next_char);
-	        } else if (type == IS_LONG && next_state == E1) {
+	        } else if (type == IS_INT && next_state == E1) {
 	            type = IS_DOUBLE;
 	            smart_str_appendc(&buf, next_char);
 	        } else if (type < IS_DOUBLE && next_class == C_POINT) {

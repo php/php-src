@@ -85,7 +85,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 	} else {\
 		l = (__ret_type)__int_func(p);\
 		if (l < PHP_INT_MAX) {\
-			ZVAL_LONG(*retval, (php_int_t) l);\
+			ZVAL_INT(*retval, (php_int_t) l);\
 		} else { \
 			char *ret; \
 			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
@@ -117,7 +117,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC)\
 static int link_client_version_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, MYSQL_VERSION_ID);
+	ZVAL_INT(*retval, MYSQL_VERSION_ID);
 	return SUCCESS;
 }
 /* }}} */
@@ -136,7 +136,7 @@ static int link_client_info_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 static int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, (php_int_t)MyG(error_no));
+	ZVAL_INT(*retval, (php_int_t)MyG(error_no));
 	return SUCCESS;
 }
 /* }}} */
@@ -174,12 +174,12 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		rc = mysql_affected_rows(mysql->mysql);
 
 		if (rc == (my_ulonglong) -1) {
-			ZVAL_LONG(*retval, -1);
+			ZVAL_INT(*retval, -1);
 			return SUCCESS;
 		}
 
 		if (rc < PHP_INT_MAX) {
-			ZVAL_LONG(*retval, (php_int_t) rc);
+			ZVAL_INT(*retval, (php_int_t) rc);
 		} else {
 			char *ret;
 			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
@@ -215,7 +215,7 @@ static int link_error_list_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 				zval * single_error;
 				MAKE_STD_ZVAL(single_error);
 				array_init(single_error);
-				add_assoc_long_ex(single_error, "errno", sizeof("errno"), message->error_no);
+				add_assoc_int_ex(single_error, "errno", sizeof("errno"), message->error_no);
 				add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), message->sqlstate, 1);
 				add_assoc_string_ex(single_error, "error", sizeof("error"), message->error, 1);
 				add_next_index_zval(*retval, single_error);
@@ -226,7 +226,7 @@ static int link_error_list_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			zval * single_error;
 			MAKE_STD_ZVAL(single_error);
 			array_init(single_error);
-			add_assoc_long_ex(single_error, "errno", sizeof("errno"), mysql_errno(mysql->mysql));
+			add_assoc_int_ex(single_error, "errno", sizeof("errno"), mysql_errno(mysql->mysql));
 			add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), mysql_sqlstate(mysql->mysql), 1);
 			add_assoc_string_ex(single_error, "error", sizeof("error"), mysql_error(mysql->mysql), 1);
 			add_next_index_zval(*retval, single_error);
@@ -300,7 +300,7 @@ static int result_type_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_LONG(*retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
+		ZVAL_INT(*retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
 	}
 	return SUCCESS;
 }
@@ -351,7 +351,7 @@ static int stmt_id_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (!p) {
 		ZVAL_NULL(*retval);
 	} else {
-		ZVAL_LONG(*retval, mysqli_stmt_get_id(p->stmt));
+		ZVAL_INT(*retval, mysqli_stmt_get_id(p->stmt));
 	}
 	return SUCCESS;
 }
@@ -374,12 +374,12 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 		rc = mysql_stmt_affected_rows(p->stmt);
 
 		if (rc == (my_ulonglong) -1) {
-			ZVAL_LONG(*retval, -1);
+			ZVAL_INT(*retval, -1);
 			return SUCCESS;
 		}
 
 		if (rc < PHP_INT_MAX) {
-			ZVAL_LONG(*retval, (php_int_t) rc);
+			ZVAL_INT(*retval, (php_int_t) rc);
 		} else {
 			char *ret;
 			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
@@ -412,7 +412,7 @@ static int stmt_error_list_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 				zval * single_error;
 				MAKE_STD_ZVAL(single_error);
 				array_init(single_error);
-				add_assoc_long_ex(single_error, "errno", sizeof("errno"), message->error_no);
+				add_assoc_int_ex(single_error, "errno", sizeof("errno"), message->error_no);
 				add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), message->sqlstate, 1);
 				add_assoc_string_ex(single_error, "error", sizeof("error"), message->error, 1);
 				add_next_index_zval(*retval, single_error);
@@ -423,7 +423,7 @@ static int stmt_error_list_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			zval * single_error;
 			MAKE_STD_ZVAL(single_error);
 			array_init(single_error);
-			add_assoc_long_ex(single_error, "errno", sizeof("errno"), mysql_stmt_errno(stmt->stmt));
+			add_assoc_int_ex(single_error, "errno", sizeof("errno"), mysql_stmt_errno(stmt->stmt));
 			add_assoc_string_ex(single_error, "sqlstate", sizeof("sqlstate"), mysql_stmt_sqlstate(stmt->stmt), 1);
 			add_assoc_string_ex(single_error, "error", sizeof("error"), mysql_stmt_error(stmt->stmt), 1);
 			add_next_index_zval(*retval, single_error);

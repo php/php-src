@@ -108,8 +108,8 @@ static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object
 			return FAILURE;
 		}
 
-		convert_to_long(result_p);
-		*result = Z_LVAL_P(result_p);
+		convert_to_int(result_p);
+		*result = Z_IVAL_P(result_p);
 
 		zval_ptr_dtor(&result_p);
 
@@ -161,7 +161,7 @@ static int spl_ptr_heap_zval_max_cmp(spl_ptr_heap_element a, spl_ptr_heap_elemen
 
 	INIT_ZVAL(result);
 	compare_function(&result, (zval *)a, (zval *)b TSRMLS_CC);
-	return Z_LVAL(result);
+	return Z_IVAL(result);
 }
 /* }}} */
 
@@ -186,7 +186,7 @@ static int spl_ptr_heap_zval_min_cmp(spl_ptr_heap_element a, spl_ptr_heap_elemen
 
 	INIT_ZVAL(result);
 	compare_function(&result, (zval *)b, (zval *)a TSRMLS_CC);
-	return Z_LVAL(result);
+	return Z_IVAL(result);
 }
 /* }}} */
 
@@ -217,7 +217,7 @@ static int spl_ptr_pqueue_zval_cmp(spl_ptr_heap_element a, spl_ptr_heap_element 
 
 	INIT_ZVAL(result);
 	compare_function(&result, *a_priority_pp, *b_priority_pp TSRMLS_CC);
-	return Z_LVAL(result);
+	return Z_IVAL(result);
 }
 /* }}} */
 
@@ -505,8 +505,8 @@ static int spl_heap_object_count_elements(zval *object, php_int_t *count TSRMLS_
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			convert_to_long(intern->retval);
-			*count = (php_int_t) Z_LVAL_P(intern->retval);
+			convert_to_int(intern->retval);
+			*count = (php_int_t) Z_IVAL_P(intern->retval);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -544,7 +544,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
-		add_assoc_long_ex(&zrv, pnstr, pnlen+1, intern->flags);
+		add_assoc_int_ex(&zrv, pnstr, pnlen+1, intern->flags);
 		efree(pnstr);
 
 		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1, &pnlen TSRMLS_CC);
@@ -592,7 +592,7 @@ SPL_METHOD(SplHeap, count)
 	}
 
 	count = spl_ptr_heap_count(intern->heap);
-	RETURN_LONG(count);
+	RETURN_INT(count);
 }
 /* }}} */
 
@@ -792,7 +792,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 
 	intern->flags = value & SPL_PQUEUE_EXTR_MASK;
 
-	RETURN_LONG(intern->flags);
+	RETURN_INT(intern->flags);
 }
 /* }}} */
 
@@ -824,7 +824,7 @@ SPL_METHOD(SplPriorityQueue, compare)
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_INT(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
 } 
 /* }}} */
 
@@ -867,7 +867,7 @@ SPL_METHOD(SplMinHeap, compare)
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_INT(spl_ptr_heap_zval_min_cmp(a, b, NULL TSRMLS_CC));
 } 
 /* }}} */
 
@@ -881,7 +881,7 @@ SPL_METHOD(SplMaxHeap, compare)
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_INT(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
 } 
 /* }}} */
 
@@ -953,7 +953,7 @@ static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key TS
 {
 	spl_heap_it *iterator = (spl_heap_it *)iter;
 
-	ZVAL_LONG(key, iterator->object->heap->count - 1);
+	ZVAL_INT(key, iterator->object->heap->count - 1);
 }
 /* }}} */
 
@@ -988,7 +988,7 @@ SPL_METHOD(SplHeap, key)
 		return;
 	}		
 	
-	RETURN_LONG(intern->heap->count - 1);
+	RETURN_INT(intern->heap->count - 1);
 }
 /* }}} */
 

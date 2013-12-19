@@ -643,11 +643,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRSIZE(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
-				case IS_LONG:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+				case IS_INT:
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_INT, NULL, 0, Z_IVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_DOUBLE:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_INT, NULL, 0, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_NULL:
 					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, "", 1, 0, HASH_UPDATE_KEY_IF_BEFORE, NULL);
@@ -1295,7 +1295,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
-				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_INT) {
 					zend_resolve_goto_label(CG(active_op_array), opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */

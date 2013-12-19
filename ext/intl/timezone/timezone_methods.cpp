@@ -159,19 +159,19 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 
 	if (arg == NULL || Z_TYPE_PP(arg) == IS_NULL) {
 		se = TimeZone::createEnumeration();
-	} else if (Z_TYPE_PP(arg) == IS_LONG) {
+	} else if (Z_TYPE_PP(arg) == IS_INT) {
 int_offset:
-		if (Z_LVAL_PP(arg) < (php_int_t)INT32_MIN ||
-				Z_LVAL_PP(arg) > (php_int_t)INT32_MAX) {
+		if (Z_IVAL_PP(arg) < (php_int_t)INT32_MIN ||
+				Z_IVAL_PP(arg) > (php_int_t)INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_enumeration: value is out of range", 0 TSRMLS_CC);
 			RETURN_FALSE;
 		} else {
-			se = TimeZone::createEnumeration((int32_t) Z_LVAL_PP(arg));
+			se = TimeZone::createEnumeration((int32_t) Z_IVAL_PP(arg));
 		}
 	} else if (Z_TYPE_PP(arg) == IS_DOUBLE) {
 double_offset:
-		convert_to_long_ex(arg);
+		convert_to_int_ex(arg);
 		goto int_offset;
 	} else if (Z_TYPE_PP(arg) == IS_OBJECT || Z_TYPE_PP(arg) == IS_STRING) {
 		php_int_t lval;
@@ -184,11 +184,11 @@ double_offset:
 			Z_TYPE_PP(arg) = IS_DOUBLE;
 			Z_DVAL_PP(arg) = dval;
 			goto double_offset;
-		case IS_LONG:
+		case IS_INT:
 			SEPARATE_ZVAL(arg);
 			zval_dtor(*arg);
-			Z_TYPE_PP(arg) = IS_LONG;
-			Z_LVAL_PP(arg) = lval;
+			Z_TYPE_PP(arg) = IS_INT;
+			Z_IVAL_PP(arg) = lval;
 			goto int_offset;
 		}
 		/* else call string version */
@@ -230,7 +230,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	}
 
 	int32_t result = TimeZone::countEquivalentIDs(id);
-	RETURN_LONG((php_int_t)result);
+	RETURN_INT((php_int_t)result);
 }
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
@@ -476,9 +476,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
 
 	zval_dtor(rawOffsetArg);
-	ZVAL_LONG(rawOffsetArg, rawOffset);
+	ZVAL_INT(rawOffsetArg, rawOffset);
 	zval_dtor(dstOffsetArg);
-	ZVAL_LONG(dstOffsetArg, dstOffset);
+	ZVAL_INT(dstOffsetArg, dstOffset);
 
 	RETURN_TRUE;
 }
@@ -496,7 +496,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_raw_offset)
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG(to->utimezone->getRawOffset());
+	RETURN_INT(to->utimezone->getRawOffset());
 }
 
 U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
@@ -590,7 +590,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
-	RETURN_LONG((php_int_t)to->utimezone->getDSTSavings());
+	RETURN_INT((php_int_t)to->utimezone->getDSTSavings());
 }
 
 U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
@@ -632,7 +632,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_code)
 	if (to == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG((php_int_t)TIMEZONE_ERROR_CODE(to));
+	RETURN_INT((php_int_t)TIMEZONE_ERROR_CODE(to));
 }
 
 U_CFUNC PHP_FUNCTION(intltz_get_error_message)

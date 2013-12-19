@@ -149,7 +149,7 @@ encode defaultEncoding[] = {
 
 	{{IS_NULL, "nil", XSI_NAMESPACE, NULL}, to_zval_null, to_xml_null},
 	{{IS_STRING, XSD_STRING_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
-	{{IS_LONG, XSD_INT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
+	{{IS_INT, XSD_INT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{IS_DOUBLE, XSD_FLOAT_STRING, XSD_NAMESPACE, NULL}, to_zval_double, to_xml_double},
 	{{IS_BOOL, XSD_BOOLEAN_STRING, XSD_NAMESPACE, NULL}, to_zval_bool, to_xml_bool},
 	{{IS_CONSTANT, XSD_STRING_STRING, XSD_NAMESPACE, NULL}, to_zval_string, to_xml_string},
@@ -432,7 +432,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			}
 		}
 		if (enc == NULL) {
-			enc = get_conversion(Z_LVAL_P(*ztype));
+			enc = get_conversion(Z_IVAL_P(*ztype));
 		}
 		if (enc == NULL) {
 			enc = encode;
@@ -1032,7 +1032,7 @@ static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 
 			whiteSpace_collapse(data->children->content);
 			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0)) {
-				case IS_LONG:
+				case IS_INT:
 					Z_TYPE_P(ret) = IS_DOUBLE;
 					Z_DVAL_P(ret) = lval;
 					break;
@@ -1075,8 +1075,8 @@ static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 			errno = 0;
 
 			switch ((Z_TYPE_P(ret) = is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0))) {
-				case IS_LONG:
-					Z_LVAL_P(ret) = lval;
+				case IS_INT:
+					Z_IVAL_P(ret) = lval;
 					break;
 				case IS_DOUBLE:
 					Z_DVAL_P(ret) = dval;
@@ -1110,8 +1110,8 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 		zval tmp = *data;
 
 		zval_copy_ctor(&tmp);
-		if (Z_TYPE(tmp) != IS_LONG) {
-			convert_to_long(&tmp);
+		if (Z_TYPE(tmp) != IS_INT) {
+			convert_to_int(&tmp);
 		}
 		convert_to_string(&tmp);
 		xmlNodeSetContentLen(ret, BAD_CAST(Z_STRVAL(tmp)), Z_STRSIZE(tmp));
@@ -2854,8 +2854,8 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 
 			if (Z_TYPE_P(key) == IS_STRING) {
 				zend_symtable_update(Z_ARRVAL_P(ret), Z_STRVAL_P(key), Z_STRSIZE_P(key) + 1, &value, sizeof(zval *), NULL);
-			} else if (Z_TYPE_P(key) == IS_LONG) {
-				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL_P(key), &value, sizeof(zval *), NULL);
+			} else if (Z_TYPE_P(key) == IS_INT) {
+				zend_hash_index_update(Z_ARRVAL_P(ret), Z_IVAL_P(key), &value, sizeof(zval *), NULL);
 			} else {
 				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowd as keys");
 			}
@@ -2954,7 +2954,7 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 
 		MAKE_STD_ZVAL(soapvar);
 		object_init_ex(soapvar, soap_var_class_entry);
-		add_property_long(soapvar, "enc_type", enc->details.type);
+		add_property_int(soapvar, "enc_type", enc->details.type);
 		Z_DELREF_P(ret);
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
@@ -2987,12 +2987,12 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 	xmlAddChild(parent, xmlParam);
 	FIND_ZVAL_NULL(data, xmlParam, style);
 
-	if (Z_TYPE_P(data) == IS_LONG) {
-		timestamp = Z_LVAL_P(data);
+	if (Z_TYPE_P(data) == IS_INT) {
+		timestamp = Z_IVAL_P(data);
 		ta = php_localtime_r(&timestamp, &tmbuf);
 		/*ta = php_gmtime_r(&timestamp, &tmbuf);*/
 		if (!ta) {
-			soap_error1(E_ERROR, "Encoding: Invalid timestamp %pd", Z_LVAL_P(data));
+			soap_error1(E_ERROR, "Encoding: Invalid timestamp %pd", Z_IVAL_P(data));
 		}
 
 		buf = (char *) emalloc(buf_len);
@@ -3643,7 +3643,7 @@ static encodePtr get_array_type(xmlNodePtr node, zval *array, smart_str *type TS
 			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_type", sizeof("enc_type"), (void **)&ztype) == FAILURE) {
 				soap_error0(E_ERROR,  "Encoding: SoapVar has no 'enc_type' property");
 			}
-			cur_type = Z_LVAL_PP(ztype);
+			cur_type = Z_IVAL_PP(ztype);
 
 			if (zend_hash_find(Z_OBJPROP_PP(tmp), "enc_stype", sizeof("enc_stype"), (void **)&ztype) == SUCCESS) {
 				cur_stype = Z_STRVAL_PP(ztype);

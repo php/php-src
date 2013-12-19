@@ -433,9 +433,9 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 		zval_copy_ctor(&value_copy);
 		newval = &value_copy;
 	}
-	convert_to_long(newval);
+	convert_to_int(newval);
 
-	standalone = Z_LVAL_P(newval);
+	standalone = Z_IVAL_P(newval);
     if (standalone > 0) {
         docp->standalone = 1;
     }
@@ -1795,7 +1795,7 @@ PHP_FUNCTION(dom_document_save)
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(bytes);
+	RETURN_INT(bytes);
 }
 /* }}} end dom_document_save */
 
@@ -1943,7 +1943,7 @@ PHP_FUNCTION(dom_document_xinclude)
 	}
 
 	if (err) {
-		RETVAL_LONG(err);
+		RETVAL_INT(err);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -2310,7 +2310,7 @@ PHP_FUNCTION(dom_document_save_html_file)
 	if (bytes == -1) {
 		RETURN_FALSE;
 	}
-	RETURN_LONG(bytes);
+	RETURN_INT(bytes);
 }
 /* }}} end dom_document_save_html_file */
 

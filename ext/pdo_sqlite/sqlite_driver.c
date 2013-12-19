@@ -301,8 +301,8 @@ static int pdo_sqlite_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_
 
 	switch (attr) {
 		case PDO_ATTR_TIMEOUT:
-			convert_to_long(val);
-			sqlite3_busy_timeout(H->db, Z_LVAL_P(val) * 1000);
+			convert_to_int(val);
+			sqlite3_busy_timeout(H->db, Z_IVAL_P(val) * 1000);
 			return 1;
 	}
 	return 0;
@@ -350,7 +350,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 
 		zargs[1] = emalloc(sizeof(zval*));
 		MAKE_STD_ZVAL(*zargs[1]);
-		ZVAL_LONG(*zargs[1], sqlite3_aggregate_count(context));
+		ZVAL_INT(*zargs[1], sqlite3_aggregate_count(context));
 	}
 	
 	for (i = 0; i < argc; i++) {
@@ -360,7 +360,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		/* get the value */
 		switch (sqlite3_value_type(argv[i])) {
 			case SQLITE_INTEGER:
-				ZVAL_LONG(*zargs[i + is_agg], sqlite3_value_int(argv[i]));
+				ZVAL_INT(*zargs[i + is_agg], sqlite3_value_int(argv[i]));
 				break;
 
 			case SQLITE_FLOAT:
@@ -406,8 +406,8 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		 * or if we are finalizing an aggregate */
 		if (retval) {
 			switch (Z_TYPE_P(retval)) {
-				case IS_LONG:
-					sqlite3_result_int(context, Z_LVAL_P(retval));
+				case IS_INT:
+					sqlite3_result_int(context, Z_IVAL_P(retval));
 					break;
 
 				case IS_NULL:
@@ -510,14 +510,14 @@ static int php_sqlite3_collation_callback(void *context,
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the callback");
 	}
 	else if (retval) {
-		if (Z_TYPE_P(retval) != IS_LONG) {
-			convert_to_long_ex(&retval);
+		if (Z_TYPE_P(retval) != IS_INT) {
+			convert_to_int_ex(&retval);
 		}
 		ret = 0;
-		if (Z_LVAL_P(retval) > 0) {
+		if (Z_IVAL_P(retval) > 0) {
 			ret = 1;
 		}
-		else if (Z_LVAL_P(retval) < 0) {
+		else if (Z_IVAL_P(retval) < 0) {
 			ret = -1;
 		}
 		zval_ptr_dtor(&retval);

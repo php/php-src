@@ -89,7 +89,7 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			break;
 		}
 		case IS_BOOL:
-			if (Z_LVAL_PP(arg)) {
+			if (Z_IVAL_PP(arg)) {
 				TRACE_APPEND_STR("true, ");
 			} else {
 				TRACE_APPEND_STR("false, ");
@@ -98,9 +98,9 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 		case IS_RESOURCE:
 			TRACE_APPEND_STR("Resource id #");
 			/* break; */
-		case IS_LONG: {
-			php_int_t lval = Z_LVAL_PP(arg);
-			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+		case IS_INT: {
+			php_int_t lval = Z_IVAL_PP(arg);
+			char s_tmp[MAX_LENGTH_OF_ZEND_INT + 1];
 			int l_tmp = zend_sprintf(s_tmp, ZEND_INT_FMT, lval);  /* SAFE */
 			TRACE_APPEND_STRL(s_tmp, l_tmp);
 			TRACE_APPEND_STR(", ");
@@ -166,17 +166,17 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 	}
 	--*level;
 
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_ZEND_INT + 1 + 1);
 	sprintf(s_tmp, "#%d ", (*num)++);
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
 	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
 		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
-			line = Z_LVAL_PP(tmp);
+			line = Z_IVAL_PP(tmp);
 		} else {
 			line = 0;
 		}
-		s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+		s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_ZEND_INT + 4 + 1);
 		sprintf(s_tmp, "%s(%pd): ", Z_STRVAL_PP(file), line);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);
@@ -217,7 +217,7 @@ mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC)
 	zval_ptr_dtor(&trace);
 
 	if (max_levels) {
-		s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
+		s_tmp = emalloc(1 + MAX_LENGTH_OF_ZEND_INT + 7 + 1);
 		sprintf(s_tmp, "#%d {main}", num);
 		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 		efree(s_tmp);

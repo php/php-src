@@ -47,8 +47,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				int er;
 
 				if (opline->opcode == ZEND_DIV &&
-					Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-					Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) {
+					Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_INT &&
+					Z_IVAL(ZEND_OP2_LITERAL(opline)) == 0) {
 					/* div by 0 */
 					break;
 				}
@@ -88,8 +88,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					case IS_BOOL:
 						convert_to_boolean(&res);
 						break;
-					case IS_LONG:
-						convert_to_long(&res);
+					case IS_INT:
+						convert_to_int(&res);
 						break;
 					case IS_DOUBLE:
 						convert_to_double(&res);
@@ -441,7 +441,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						"strlen", sizeof("strlen")-1)) {
 					zval t;
 
-					ZVAL_LONG(&t, Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)));
+					ZVAL_INT(&t, Z_STRSIZE(ZEND_OP1_LITERAL(opline - 1)));
 					if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
 						literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
 						MAKE_NOP((opline - 1));

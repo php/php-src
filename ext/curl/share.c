@@ -62,7 +62,7 @@ PHP_FUNCTION(curl_share_close)
 	}
 
 	ZEND_FETCH_RESOURCE(sh, php_curlsh *, &z_sh, -1, le_curl_share_handle_name, le_curl_share_handle);
-	zend_list_delete(Z_LVAL_P(z_sh));
+	zend_list_delete(Z_IVAL_P(z_sh));
 }
 /* }}} */
 
@@ -73,8 +73,8 @@ static int _php_curl_share_setopt(php_curlsh *sh, php_int_t option, zval **zvalu
 	switch (option) {
 		case CURLSHOPT_SHARE:
 		case CURLSHOPT_UNSHARE:
-			convert_to_long_ex(zvalue);
-			error = curl_share_setopt(sh->share, option, Z_LVAL_PP(zvalue));
+			convert_to_int_ex(zvalue);
+			error = curl_share_setopt(sh->share, option, Z_IVAL_PP(zvalue));
 			break;
 
 		default:

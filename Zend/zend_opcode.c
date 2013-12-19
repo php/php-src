@@ -622,7 +622,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				int nest_levels, array_offset;
 				zend_brk_cont_element *jmp_to;
 
-				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant].constant);
+				nest_levels = Z_IVAL(op_array->literals[opline->op2.constant].constant);
 				array_offset = opline->op1.opline_num;
 				do {
 					jmp_to = &op_array->brk_cont_array[array_offset];
@@ -634,7 +634,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				break;
 			}
 			case ZEND_GOTO:
-				if (Z_TYPE(op_array->literals[opline->op2.constant].constant) != IS_LONG) {
+				if (Z_TYPE(op_array->literals[opline->op2.constant].constant) != IS_INT) {
 					zend_uint num = opline->op2.constant;
 					opline->op2.zv = &op_array->literals[opline->op2.constant].constant;
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
@@ -694,7 +694,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
-				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
+				if (Z_TYPE_P(opline->op2.zv) != IS_INT) {
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
 				}
 				/* break omitted intentionally */

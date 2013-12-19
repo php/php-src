@@ -141,9 +141,9 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, php_int_t
 			safe_array_from_zval(v, z, codepage TSRMLS_CC);
 			break;
 
-		case IS_LONG:
+		case IS_INT:
 			V_VT(v) = VT_I4;
-			V_I4(v) = Z_LVAL_P(z);
+			V_I4(v) = Z_IVAL_P(z);
 			break;
 
 		case IS_DOUBLE:
@@ -179,28 +179,28 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, php_int_t 
 			ZVAL_NULL(z);
 			break;
 		case VT_UI1:
-			ZVAL_LONG(z, (php_int_t)V_UI1(v));
+			ZVAL_INT(z, (php_int_t)V_UI1(v));
 			break;
 		case VT_I1:
-			ZVAL_LONG(z, (php_int_t)V_I1(v));
+			ZVAL_INT(z, (php_int_t)V_I1(v));
 			break;
 		case VT_UI2:
-			ZVAL_LONG(z, (php_int_t)V_UI2(v));
+			ZVAL_INT(z, (php_int_t)V_UI2(v));
 			break;
 		case VT_I2:
-			ZVAL_LONG(z, (php_int_t)V_I2(v));
+			ZVAL_INT(z, (php_int_t)V_I2(v));
 			break;
 		case VT_UI4:  /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (php_int_t)V_UI4(v));
+			ZVAL_INT(z, (php_int_t)V_UI4(v));
 			break;
 		case VT_I4:
-			ZVAL_LONG(z, (php_int_t)V_I4(v));
+			ZVAL_INT(z, (php_int_t)V_I4(v));
 			break;
 		case VT_INT:
-			ZVAL_LONG(z, V_INT(v));
+			ZVAL_INT(z, V_INT(v));
 			break;
 		case VT_UINT: /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (php_int_t)V_UINT(v));
+			ZVAL_INT(z, (php_int_t)V_UINT(v));
 			break;
 		case VT_R4:
 			ZVAL_DOUBLE(z, (double)V_R4(v));
@@ -898,7 +898,7 @@ PHP_FUNCTION(variant_cmp)
 		return;
 	}
 
-	ZVAL_LONG(return_value, VarCmp(vleft, vright, lcid, flags));
+	ZVAL_INT(return_value, VarCmp(vleft, vright, lcid, flags));
 
 	VariantClear(&left_val);
 	VariantClear(&right_val);
@@ -937,7 +937,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
 		tmv.tm_isdst = -1;
 
 		tzset();
-		RETVAL_LONG(mktime(&tmv));
+		RETVAL_INT(mktime(&tmv));
 	}
 
 	VariantClear(&vres);
@@ -999,7 +999,7 @@ PHP_FUNCTION(variant_get_type)
 	}
 	obj = CDNO_FETCH(zobj);
 		
-	RETURN_LONG(V_VT(&obj->v));
+	RETURN_INT(V_VT(&obj->v));
 }
 /* }}} */
 

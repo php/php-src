@@ -40,7 +40,7 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("boolean", 1);
 			break;
 
-		case IS_LONG:
+		case IS_INT:
 			RETVAL_STRING("integer", 1);
 			break;
 
@@ -72,7 +72,7 @@ PHP_FUNCTION(gettype)
 
 		case IS_RESOURCE:
 			{
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_IVAL_PP(arg) TSRMLS_CC);
 
 				if (type_name) {
 					RETVAL_STRING("resource", 1);
@@ -99,9 +99,9 @@ PHP_FUNCTION(settype)
 	}
 
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(*var);
+		convert_to_int(*var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(*var);
+		convert_to_int(*var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(*var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
@@ -157,7 +157,7 @@ PHP_FUNCTION(intval)
 	}
 
 	RETVAL_ZVAL(*num, 1, 0);
-	convert_to_long_base(return_value, base);
+	convert_to_int_base(return_value, base);
 }
 /* }}} */
 
@@ -233,7 +233,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 			}
 		}
 		if (type == IS_RESOURCE) {
-			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_IVAL_PP(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}
@@ -273,7 +273,7 @@ PHP_FUNCTION(is_bool)
    Returns true if variable is a long (integer) */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_INT);
 }
 /* }}} */
 
@@ -320,7 +320,7 @@ PHP_FUNCTION(is_numeric)
 	}
 
 	switch (Z_TYPE_PP(arg)) {
-		case IS_LONG:
+		case IS_INT:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 			break;
@@ -353,7 +353,7 @@ PHP_FUNCTION(is_scalar)
 	switch (Z_TYPE_PP(arg)) {
 		case IS_BOOL:
 		case IS_DOUBLE:
-		case IS_LONG:
+		case IS_INT:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;

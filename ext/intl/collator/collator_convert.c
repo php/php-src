@@ -75,7 +75,7 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		zend_hash_update( hash, hashKey, strlen( hashKey ) + 1,
 			(void*) &znew_val, sizeof(zval*), NULL );
 	}
-	else /* hashKeyType == HASH_KEY_IS_LONG */
+	else /* hashKeyType == HASH_KEY_IS_INT */
 	{
 		zend_hash_index_update( hash, hashIndex,
 			(void*) &znew_val, sizeof(zval*), NULL );
@@ -120,7 +120,7 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 		zend_hash_update( hash, hashKey, strlen( hashKey ) + 1,
 			(void*) &znew_val, sizeof(zval*), NULL );
 	}
-	else /* hashKeyType == HASH_KEY_IS_LONG */
+	else /* hashKeyType == HASH_KEY_IS_INT */
 	{
 		zend_hash_index_update( hash, hashIndex,
 			(void*) &znew_val, sizeof(zval*), NULL );
@@ -334,7 +334,7 @@ zval* collator_convert_string_to_number( zval* str )
 		zval_ptr_dtor( &num );
 
 		ALLOC_INIT_ZVAL( num );
-		ZVAL_LONG( num, 0 );
+		ZVAL_INT( num, 0 );
 	}
 
 	return num;
@@ -352,9 +352,9 @@ zval* collator_convert_string_to_number( zval* str )
 zval* collator_convert_string_to_double( zval* str )
 {
 	zval* num = collator_convert_string_to_number( str );
-	if( Z_TYPE_P(num) == IS_LONG )
+	if( Z_TYPE_P(num) == IS_INT )
 	{
-		ZVAL_DOUBLE( num, Z_LVAL_P( num ) );
+		ZVAL_DOUBLE( num, Z_IVAL_P( num ) );
 	}
 
 	return num;
@@ -386,8 +386,8 @@ zval* collator_convert_string_to_number_if_possible( zval* str )
 	{
 		ALLOC_INIT_ZVAL( num );
 
-		if( is_numeric == IS_LONG )
-			Z_LVAL_P(num) = lval;
+		if( is_numeric == IS_INT )
+			Z_IVAL_P(num) = lval;
 		if( is_numeric == IS_DOUBLE )
 			Z_DVAL_P(num) = dval;
 

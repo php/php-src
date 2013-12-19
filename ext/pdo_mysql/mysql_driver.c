@@ -396,12 +396,12 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *val TSR
 			PDO_DBG_RETURN(1);
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			if (Z_LVAL_P(val) < 0) {
+			if (Z_IVAL_P(val) < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
-				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = Z_LVAL_P(val);
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = Z_IVAL_P(val);
 			}
 			PDO_DBG_RETURN(1);
 			break;
@@ -451,20 +451,20 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_
 		}
 			break;
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(return_value, dbh->auto_commit);
+			ZVAL_INT(return_value, dbh->auto_commit);
 			break;
 			
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-			ZVAL_LONG(return_value, H->buffered);
+			ZVAL_INT(return_value, H->buffered);
 			break;
 
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
-			ZVAL_LONG(return_value, H->emulate_prepare);
+			ZVAL_INT(return_value, H->emulate_prepare);
 			break;
 
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			ZVAL_LONG(return_value, H->max_buffer_size);
+			ZVAL_INT(return_value, H->max_buffer_size);
 			break;
 #endif
 

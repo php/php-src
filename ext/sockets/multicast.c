@@ -89,14 +89,14 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 {
 	int ret;
 
-	if (Z_TYPE_P(val) == IS_LONG) {
-		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
+	if (Z_TYPE_P(val) == IS_INT) {
+		if (Z_IVAL_P(val) < 0 || Z_IVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %pd", UINT_MAX, Z_LVAL_P(val));
+				" given %pd", UINT_MAX, Z_IVAL_P(val));
 			ret = FAILURE;
 		} else {
-			*out = Z_LVAL_P(val);
+			*out = Z_IVAL_P(val);
 			ret = SUCCESS;
 		}
 	} else {
@@ -285,14 +285,14 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
-		convert_to_long_ex(arg4);
-		if (Z_LVAL_PP(arg4) < 0L || Z_LVAL_PP(arg4) > 255L) {
+		convert_to_int_ex(arg4);
+		if (Z_IVAL_PP(arg4) < 0L || Z_IVAL_PP(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between 0 and 255");
 			return FAILURE;
 		}
 ipv4_loop_ttl:
-		ipv4_mcast_ttl_lback = (unsigned char) Z_LVAL_PP(arg4);
+		ipv4_mcast_ttl_lback = (unsigned char) Z_IVAL_PP(arg4);
 		opt_ptr = &ipv4_mcast_ttl_lback;
 		optlen	= sizeof(ipv4_mcast_ttl_lback);
 		goto dosockopt;
@@ -349,14 +349,14 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		convert_to_boolean_ex(arg4);
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
-		convert_to_long_ex(arg4);
-		if (Z_LVAL_PP(arg4) < -1L || Z_LVAL_PP(arg4) > 255L) {
+		convert_to_int_ex(arg4);
+		if (Z_IVAL_PP(arg4) < -1L || Z_IVAL_PP(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between -1 and 255");
 			return FAILURE;
 		}
 ipv6_loop_hops:
-		ov = (int) Z_LVAL_PP(arg4);
+		ov = (int) Z_IVAL_PP(arg4);
 		opt_ptr = &ov;
 		optlen	= sizeof(ov);
 		goto dosockopt;

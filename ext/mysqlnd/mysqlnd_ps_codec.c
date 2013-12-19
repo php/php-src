@@ -84,7 +84,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 #endif /* #if SIZEOF_LONG==4 */
 		{
 			if (byte_count < 8 || uval <= L64(9223372036854775807)) {
-				ZVAL_LONG(zv, (php_int_t) uval); /* the cast is safe, we are in the range */
+				ZVAL_INT(zv, (php_int_t) uval); /* the cast is safe, we are in the range */
 			} else {
 				DBG_INF("stringify");
 				tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
@@ -112,7 +112,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 		} else
 #endif /* SIZEOF */
 		{
-			ZVAL_LONG(zv, (php_int_t) lval); /* the cast is safe, we are in the range */
+			ZVAL_INT(zv, (php_int_t) lval); /* the cast is safe, we are in the range */
 		}
 	}
 
@@ -365,32 +365,32 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].func		= ps_fetch_int8;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].pack_len	= 1;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_TINY].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].func		= ps_fetch_int16;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].pack_len	= 2;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_SHORT].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].func		= ps_fetch_int16;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].pack_len	= 2;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_YEAR].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].func		= ps_fetch_int32;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].pack_len	= 4;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_INT24].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].func		= ps_fetch_int32;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].pack_len	= 4;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONG].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].func	= ps_fetch_int64;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].pack_len= 8;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].php_type= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].php_type= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_LONGLONG].can_ret_as_str_in_uni	= TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_FLOAT].func		= ps_fetch_float;
@@ -454,7 +454,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].func		= ps_fetch_bit;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].pack_len	= 8;
-	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].php_type	= IS_LONG;
+	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].php_type	= IS_INT;
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_BIT].can_ret_as_str_in_uni = TRUE;
 
 	mysqlnd_ps_fetch_functions[MYSQL_TYPE_VAR_STRING].func		= ps_fetch_string;
@@ -572,7 +572,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		short current_type = stmt->param_bind[i].type;
 		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
 			/* always copy the var, because we do many conversions */
-			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG &&
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_INT &&
 				PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
 			{
 				SET_OOM_ERROR(*stmt->error_info);
@@ -582,7 +582,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > PHP_INT_MAX
 			*/
-			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_INT) {
 				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 				/*
 				  Because converting to double and back to long can lead
@@ -605,7 +605,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					stmt->send_types_to_server = resend_types_next_time = 1;
 					convert_to_string_ex(&tmp_data);
 				} else {
-					convert_to_long_ex(&tmp_data);
+					convert_to_int_ex(&tmp_data);
 				}
 
 				zval_ptr_dtor(&tmp_data_copy);
@@ -649,17 +649,17 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				  if it doesn't fit in a long send it as a string.
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > PHP_INT_MAX
 				*/
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_INT) {
 					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 					/*
-					  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
+					  In case of IS_INT we do nothing, it is ok, in case of string, we just need to set current_type.
 					  The actual transformation has been performed several dozens line above.
 					*/
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						current_type = MYSQL_TYPE_VAR_STRING;
 						/*
 						  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
-						  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
+						  we force convert_to_int_ex in all cases, thus the type will be right in the next switch.
 						  if the type is however not long, then we will do a goto in the next switch.
 						  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 						*/
@@ -712,7 +712,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						goto use_string;
 					}
-					convert_to_long_ex(&tmp_data);
+					convert_to_int_ex(&tmp_data);
 				}
 				data_size += 8;
 				break;
@@ -722,7 +722,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						goto use_string;
 					}
-					convert_to_long_ex(&tmp_data);
+					convert_to_int_ex(&tmp_data);
 				}
 				data_size += 4;
 				break;
@@ -797,7 +797,7 @@ use_string:
 						goto send_string;
 					}
 					/* data has alreade been converted to long */
-					int8store(*p, Z_LVAL_P(data));
+					int8store(*p, Z_IVAL_P(data));
 					(*p) += 8;
 					break;
 				case MYSQL_TYPE_LONG:
@@ -805,7 +805,7 @@ use_string:
 						goto send_string;
 					}
 					/* data has alreade been converted to long */
-					int4store(*p, Z_LVAL_P(data));
+					int4store(*p, Z_IVAL_P(data));
 					(*p) += 4;
 					break;
 				case MYSQL_TYPE_LONG_BLOB:

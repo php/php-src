@@ -99,11 +99,11 @@ PHP_MINIT_FUNCTION(assert) /* {{{ */
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -185,10 +185,10 @@ PHP_FUNCTION(assert)
 		}
 
 		convert_to_boolean(&retval);
-		val = Z_LVAL(retval);
+		val = Z_IVAL(retval);
 	} else {
 		convert_to_boolean_ex(assertion);
-		val = Z_LVAL_PP(assertion);
+		val = Z_IVAL_PP(assertion);
 	}
 
 	if (val) {
@@ -212,7 +212,7 @@ PHP_FUNCTION(assert)
 		MAKE_STD_ZVAL(args[2]);
 
 		ZVAL_STRING(args[0], SAFE_STRING(filename), 1);
-		ZVAL_LONG (args[1], lineno);
+		ZVAL_INT (args[1], lineno);
 		ZVAL_STRING(args[2], SAFE_STRING(myeval), 1);
 
 		MAKE_STD_ZVAL(retval);
@@ -280,7 +280,7 @@ PHP_FUNCTION(assert_options)
 			convert_to_string_ex(value);
 			zend_alter_ini_entry_ex("assert.active", sizeof("assert.active"), Z_STRVAL_PP(value), Z_STRSIZE_PP(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_BAIL:
@@ -289,7 +289,7 @@ PHP_FUNCTION(assert_options)
 			convert_to_string_ex(value);
 			zend_alter_ini_entry_ex("assert.bail", sizeof("assert.bail"), Z_STRVAL_PP(value), Z_STRSIZE_PP(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_QUIET_EVAL:
@@ -298,7 +298,7 @@ PHP_FUNCTION(assert_options)
 			convert_to_string_ex(value);
 			zend_alter_ini_entry_ex("assert.quiet_eval", sizeof("assert.quiet_eval"), Z_STRVAL_PP(value), Z_STRSIZE_PP(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_WARNING:
@@ -307,7 +307,7 @@ PHP_FUNCTION(assert_options)
 			convert_to_string_ex(value);
 			zend_alter_ini_entry_ex("assert.warning", sizeof("assert.warning"), Z_STRVAL_PP(value), Z_STRSIZE_PP(value), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
 		}
-		RETURN_LONG(oldint);
+		RETURN_INT(oldint);
 		break;
 
 	case ASSERT_CALLBACK:

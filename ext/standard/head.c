@@ -239,7 +239,7 @@ PHP_FUNCTION(headers_sent)
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		zval_dtor(arg2);
-		ZVAL_LONG(arg2, line);
+		ZVAL_INT(arg2, line);
 	case 1:
 		zval_dtor(arg1);
 		if (file) {
@@ -303,7 +303,7 @@ PHP_FUNCTION(http_response_code)
 		SG(sapi_headers).http_response_code = response_code;
 
 		if (old_response_code) {
-			RETURN_LONG(old_response_code);
+			RETURN_INT(old_response_code);
 		}
 
 		RETURN_TRUE;
@@ -313,7 +313,7 @@ PHP_FUNCTION(http_response_code)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(SG(sapi_headers).http_response_code);
+	RETURN_INT(SG(sapi_headers).http_response_code);
 }
 /* }}} */
 

@@ -101,8 +101,8 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 		case IS_BOOL:
 			ZVAL_BOOL(*retval, retint);
 			break;
-		case IS_LONG:
-			ZVAL_LONG(*retval, retint);
+		case IS_INT:
+			ZVAL_INT(*retval, retint);
 			break;
 		default:
 			ZVAL_NULL(*retval);
@@ -1341,9 +1341,9 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 
 	zend_hash_init(&xmlreader_prop_handlers, 0, NULL, NULL, 1);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_LONG TSRMLS_CC);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "attributeCount", xmlTextReaderAttributeCount, NULL, IS_INT TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "baseURI", NULL, xmlTextReaderConstBaseUri, IS_STRING TSRMLS_CC);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_LONG TSRMLS_CC);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "depth", xmlTextReaderDepth, NULL, IS_INT TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasAttributes", xmlTextReaderHasAttributes, NULL, IS_BOOL TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "hasValue", xmlTextReaderHasValue, NULL, IS_BOOL TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "isDefault", xmlTextReaderIsDefault, NULL, IS_BOOL TSRMLS_CC);
@@ -1351,7 +1351,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "localName", NULL, xmlTextReaderConstLocalName, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "name", NULL, xmlTextReaderConstName, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "namespaceURI", NULL, xmlTextReaderConstNamespaceUri, IS_STRING TSRMLS_CC);
-	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "nodeType", xmlTextReaderNodeType, NULL, IS_LONG TSRMLS_CC);
+	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "nodeType", xmlTextReaderNodeType, NULL, IS_INT TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "prefix", NULL, xmlTextReaderConstPrefix, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "value", NULL, xmlTextReaderConstValue, IS_STRING TSRMLS_CC);
 	xmlreader_register_prop_handler(&xmlreader_prop_handlers, "xmlLang", NULL, xmlTextReaderConstXmlLang, IS_STRING TSRMLS_CC);

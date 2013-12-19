@@ -563,7 +563,7 @@ static void zend_assign_to_variable_reference(zval **variable_ptr_ptr, zval **va
 static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 {
 	if (Z_TYPE_PP(object_ptr) == IS_NULL
-		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0)
+		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_IVAL_PP(object_ptr) == 0)
 		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRSIZE_PP(object_ptr) == 0)
 	) {
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
@@ -686,7 +686,7 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 			return;
 		}
 		if (Z_TYPE_P(object) == IS_NULL ||
-		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
+		    (Z_TYPE_P(object) == IS_BOOL && Z_IVAL_P(object) == 0) ||
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRSIZE_P(object) == 0)) {
 			SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 			object = *object_ptr;
@@ -1045,11 +1045,11 @@ fetch_string_dim:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (" ZEND_INT_FMT ")", Z_LVAL_P(dim), Z_LVAL_P(dim));
+			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (" ZEND_INT_FMT ")", Z_IVAL_P(dim), Z_IVAL_P(dim));
 			/* Fall Through */
 		case IS_BOOL:
-		case IS_LONG:
-			hval = Z_LVAL_P(dim);
+		case IS_INT:
+			hval = Z_IVAL_P(dim);
 num_index:
 			if (zend_hash_index_find(ht, hval, (void **) &retval) == FAILURE) {
 				switch (type) {
@@ -1147,12 +1147,12 @@ convert_to_array:
 					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 
-				if (Z_TYPE_P(dim) != IS_LONG) {
+				if (Z_TYPE_P(dim) != IS_INT) {
 
 					switch(Z_TYPE_P(dim)) {
-						/* case IS_LONG: */
+						/* case IS_INT: */
 						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
+							if (IS_INT == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
 								break;
 							}
 							if (type != BP_VAR_UNSET) {
@@ -1172,13 +1172,13 @@ convert_to_array:
 
 					tmp = *dim;
 					zval_copy_ctor(&tmp);
-					convert_to_long(&tmp);
+					convert_to_int(&tmp);
 					dim = &tmp;
 				}
 				container = *container_ptr;
 				result->str_offset.str = container;
 				PZVAL_LOCK(container);
-				result->str_offset.offset = Z_LVAL_P(dim);
+				result->str_offset.offset = Z_IVAL_P(dim);
 				result->str_offset.ptr_ptr = NULL;
 				return;
 			}
@@ -1227,7 +1227,7 @@ convert_to_array:
 			break;
 
 		case IS_BOOL:
-			if (type != BP_VAR_UNSET && Z_LVAL_P(container)==0) {
+			if (type != BP_VAR_UNSET && Z_IVAL_P(container)==0) {
 				goto convert_to_array;
 			}
 			/* break missing intentionally */
@@ -1267,11 +1267,11 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval *conta
 				zval tmp;
 				zval *ptr;
 
-				if (Z_TYPE_P(dim) != IS_LONG) {
+				if (Z_TYPE_P(dim) != IS_INT) {
 					switch(Z_TYPE_P(dim)) {
-						/* case IS_LONG: */
+						/* case IS_INT: */
 						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
+							if (IS_INT == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
 								break;
 							}
 							if (type != BP_VAR_IS) {
@@ -1292,7 +1292,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval *conta
 
 					ZVAL_COPY_VALUE(&tmp, dim);
 					zval_copy_ctor(&tmp);
-					convert_to_long(&tmp);
+					convert_to_int(&tmp);
 					dim = &tmp;
 				}
 
@@ -1300,15 +1300,15 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval *conta
 				INIT_PZVAL(ptr);
 				Z_TYPE_P(ptr) = IS_STRING;
 
-				if (Z_LVAL_P(dim) < 0 || Z_STRSIZE_P(container) <= Z_LVAL_P(dim)) {
+				if (Z_IVAL_P(dim) < 0 || Z_STRSIZE_P(container) <= Z_IVAL_P(dim)) {
 					if (type != BP_VAR_IS) {
-						zend_error(E_NOTICE, "Uninitialized string offset: " ZEND_INT_FMT, Z_LVAL_P(dim));
+						zend_error(E_NOTICE, "Uninitialized string offset: " ZEND_INT_FMT, Z_IVAL_P(dim));
 					}
 					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
 					Z_STRSIZE_P(ptr) = 0;
 				} else {
 					Z_STRVAL_P(ptr) = (char*)emalloc(2);
-					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_IVAL_P(dim)];
 					Z_STRVAL_P(ptr)[1] = 0;
 					Z_STRSIZE_P(ptr) = 1;
 				}
@@ -1366,7 +1366,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		/* this should modify object only if it's empty */
 		if (type != BP_VAR_UNSET &&
 		    ((Z_TYPE_P(container) == IS_NULL ||
-		     (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0) ||
+		     (Z_TYPE_P(container) == IS_BOOL && Z_IVAL_P(container)==0) ||
 		     (Z_TYPE_P(container) == IS_STRING && Z_STRSIZE_P(container)==0)))) {
 			if (!PZVAL_IS_REF(container)) {
 				SEPARATE_ZVAL(container_ptr);

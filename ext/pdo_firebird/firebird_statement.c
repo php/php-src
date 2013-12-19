@@ -536,10 +536,10 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			switch (Z_TYPE_P(param->parameter)) {
 				int force_null;
 				
-				case IS_LONG:
+				case IS_INT:
 					/* keep the allow-NULL flag */
 					var->sqltype = (sizeof(php_int_t) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
-					var->sqldata = (void*)&Z_LVAL_P(param->parameter);
+					var->sqldata = (void*)&Z_IVAL_P(param->parameter);
 					var->sqllen = sizeof(php_int_t);
 					break;
 				case IS_DOUBLE:
@@ -606,7 +606,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						}
 					case PDO_PARAM_INT:
 						if (value) {
-							ZVAL_LONG(param->parameter, *(php_int_t*)value);
+							ZVAL_INT(param->parameter, *(php_int_t*)value);
 							break;
 						}
                                         case PDO_PARAM_EVT_NORMALIZE:

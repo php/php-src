@@ -1048,8 +1048,8 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					exit_status=254;
 				}
 				ALLOC_ZVAL(argi);
-				Z_TYPE_P(argi) = IS_LONG;
-				Z_LVAL_P(argi) = index;
+				Z_TYPE_P(argi) = IS_INT;
+				Z_IVAL_P(argi) = index;
 				INIT_PZVAL(argi);
 				zend_hash_update(&EG(symbol_table), "argi", sizeof("argi"), &argi, sizeof(zval *), NULL);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
@@ -1063,7 +1063,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					Z_STRVAL_P(argn) = estrndup(input, len);
 					INIT_PZVAL(argn);
 					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(zval *), NULL);
-					Z_LVAL_P(argi) = ++index;
+					Z_IVAL_P(argi) = ++index;
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1 TSRMLS_CC) == FAILURE) {
 							exit_status=254;

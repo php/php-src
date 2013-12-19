@@ -713,7 +713,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (Z_TYPE_PP(arg_pattern) != IS_STRING) {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_PP(arg_pattern) == IS_DOUBLE) {
-			convert_to_long_ex(arg_pattern);	/* get rid of decimal places */
+			convert_to_int_ex(arg_pattern);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(arg_pattern);
 		/* don't bother doing an extended regex with just a number */
@@ -759,7 +759,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (match_len == 0) {
 		match_len = 1;
 	}
-	RETVAL_LONG(match_len);
+	RETVAL_INT(match_len);
 out:
 	if (regs != NULL) {
 		onig_region_free(regs, 1);
@@ -859,8 +859,8 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		arg_pattern_len = Z_STRSIZE_PP(arg_pattern_zval);
 	} else {
 		/* FIXME: this code is not multibyte aware! */
-		convert_to_long_ex(arg_pattern_zval);
-		pat_buf[0] = (char)Z_LVAL_PP(arg_pattern_zval);	
+		convert_to_int_ex(arg_pattern_zval);
+		pat_buf[0] = (char)Z_IVAL_PP(arg_pattern_zval);	
 		pat_buf[1] = '\0';
 
 		arg_pattern = pat_buf;
@@ -1390,7 +1390,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
    Get search start position */
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
-	RETVAL_LONG(MBREX(search_pos));
+	RETVAL_INT(MBREX(search_pos));
 }
 /* }}} */
 

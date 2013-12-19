@@ -534,7 +534,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					case IS_STRING:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_VAR_STRING);
 						break;
-					case IS_LONG:
+					case IS_INT:
 #if SIZEOF_ZEND_INT==8
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, param->parameter, MYSQL_TYPE_LONGLONG);
 #elif SIZEOF_ZEND_INT==4
@@ -559,9 +559,9 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						*b->length = Z_STRSIZE_P(param->parameter);
 						PDO_DBG_RETURN(1);
 
-					case IS_LONG:
+					case IS_INT:
 						b->buffer_type = MYSQL_TYPE_LONG;
-						b->buffer = &Z_LVAL_P(param->parameter);
+						b->buffer = &Z_IVAL_P(param->parameter);
 						PDO_DBG_RETURN(1);
 
 					case IS_DOUBLE:
@@ -860,10 +860,10 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, php_int_t colno, zval *retu
 #if SIZEOF_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
+			add_assoc_int(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 		default:
-			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
+			add_assoc_int(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 	}
 #endif

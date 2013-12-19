@@ -69,7 +69,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
-		ZVAL_LONG(zerrno, 0);
+		ZVAL_INT(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
@@ -93,7 +93,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-			ZVAL_LONG(zerrno, err);
+			ZVAL_INT(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */

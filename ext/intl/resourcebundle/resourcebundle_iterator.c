@@ -112,7 +112,7 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key T
 	if (iterator->is_table) {
 		ZVAL_STRING(key, iterator->currentkey, 1);
 	} else {
-		ZVAL_LONG(key, iterator->i);
+		ZVAL_INT(key, iterator->i);
 	}
 }
 /* }}} */

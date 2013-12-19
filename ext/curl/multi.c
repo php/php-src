@@ -93,7 +93,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	zend_llist_add_element(&mh->easyh, &tmp_val);
 
-	RETURN_LONG((php_int_t) curl_multi_add_handle(mh->multi, ch->cp));	
+	RETURN_INT((php_int_t) curl_multi_add_handle(mh->multi, ch->cp));	
 }
 /* }}} */
 
@@ -112,7 +112,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 		return;
 	}
 
-	zend_list_delete(Z_LVAL_P(z_ch));
+	zend_list_delete(Z_IVAL_P(z_ch));
 }
 /* }}} */
 
@@ -121,7 +121,7 @@ static int curl_compare_resources( zval *z1, zval **z2 ) /* {{{ */
 {
 	return (Z_TYPE_P( z1 ) == Z_TYPE_PP( z2 ) && 
 			Z_TYPE_P( z1 ) == IS_RESOURCE     &&
-			Z_LVAL_P( z1 ) == Z_LVAL_PP( z2 ) );
+			Z_IVAL_P( z1 ) == Z_IVAL_PP( z2 ) );
 }
 /* }}} */
 
@@ -143,7 +143,7 @@ PHP_FUNCTION(curl_multi_remove_handle)
 
 
 
-	RETVAL_LONG((php_int_t) curl_multi_remove_handle(mh->multi, ch->cp));
+	RETVAL_INT((php_int_t) curl_multi_remove_handle(mh->multi, ch->cp));
 	zend_llist_del_element( &mh->easyh, &z_ch, 
 							(int (*)(void *, void *)) curl_compare_resources );
 
@@ -187,9 +187,9 @@ PHP_FUNCTION(curl_multi_select)
 
 	curl_multi_fdset(mh->multi, &readfds, &writefds, &exceptfds, &maxfd);
 	if (maxfd == -1) {
-		RETURN_LONG(-1);
+		RETURN_INT(-1);
 	}
-	RETURN_LONG(select(maxfd + 1, &readfds, &writefds, &exceptfds, &to));
+	RETURN_INT(select(maxfd + 1, &readfds, &writefds, &exceptfds, &to));
 }
 /* }}} */
 
@@ -222,12 +222,12 @@ PHP_FUNCTION(curl_multi_exec)
 		}
 	}
 
-	convert_to_long_ex(&z_still_running);
-	still_running = Z_LVAL_P(z_still_running);
+	convert_to_int_ex(&z_still_running);
+	still_running = Z_IVAL_P(z_still_running);
 	result = curl_multi_perform(mh->multi, (int *)&still_running);
-	ZVAL_LONG(z_still_running, still_running);
+	ZVAL_INT(z_still_running, still_running);
 
-	RETURN_LONG(result);
+	RETURN_INT(result);
 }
 /* }}} */
 
@@ -273,12 +273,12 @@ PHP_FUNCTION(curl_multi_info_read)
 	}
 	if (zmsgs_in_queue) {
 		zval_dtor(zmsgs_in_queue);
-		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
+		ZVAL_INT(zmsgs_in_queue, queued_msgs);
 	}
 
 	array_init(return_value);
-	add_assoc_long(return_value, "msg", tmp_msg->msg);
-	add_assoc_long(return_value, "result", tmp_msg->data.result);
+	add_assoc_int(return_value, "msg", tmp_msg->msg);
+	add_assoc_int(return_value, "result", tmp_msg->data.result);
 
 	/* find the original easy curl handle */
 	{
@@ -327,7 +327,7 @@ PHP_FUNCTION(curl_multi_close)
 
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, &z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 
-	zend_list_delete(Z_LVAL_P(z_mh));
+	zend_list_delete(Z_IVAL_P(z_mh));
 }
 /* }}} */
 
@@ -388,8 +388,8 @@ static int _php_curl_multi_setopt(php_curlm *mh, php_int_t option, zval **zvalue
 #if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
 #endif
-			convert_to_long_ex(zvalue);
-			error = curl_multi_setopt(mh->multi, option, Z_LVAL_PP(zvalue));
+			convert_to_int_ex(zvalue);
+			error = curl_multi_setopt(mh->multi, option, Z_IVAL_PP(zvalue));
 			break;
 
 		default:

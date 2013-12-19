@@ -265,7 +265,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 		for (zend_hash_internal_pointer_reset(_ht);					\
 				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; \
 					zend_hash_move_forward(_ht)) {					\
-			if (key_type == HASH_KEY_IS_LONG) {						\
+			if (key_type == HASH_KEY_IS_INT) {						\
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key " ZEND_INT_FMT, num_key);	\
 				continue;											\
 			}														\

@@ -86,7 +86,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 				co->ucoll,
 				INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
 				INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
-		result->type = IS_LONG;
+		result->type = IS_INT;
 	}
 	else
 	{
@@ -195,7 +195,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 			co->ucoll,
 			INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
 			INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
-	result->type = IS_LONG;
+	result->type = IS_INT;
 
 	zval_ptr_dtor( &str1 );
 	zval_ptr_dtor( &str2 );
@@ -234,11 +234,11 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 			return 0;
 	}
 
-	convert_to_long(&result);
+	convert_to_int(&result);
 
-	if( Z_LVAL(result) < 0 )
+	if( Z_IVAL(result) < 0 )
 		return -1;
-	else if( Z_LVAL(result) > 0 )
+	else if( Z_IVAL(result) > 0 )
 		return 1;
 
 	return 0;

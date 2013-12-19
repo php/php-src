@@ -34,7 +34,7 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 		return;
 	}
 
-	#define DATEFORMATTER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS)
+	#define DATEFORMATTER_EXPOSE_CONST(x) REGISTER_INT_CONSTANT(#x, x, CONST_CS)
 	#define DATEFORMATTER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UDAT_##x TSRMLS_CC );
 	#define DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
 
@@ -85,7 +85,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	/* Return formatter's last error code. */
-	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
+	RETURN_INT( INTL_DATA_ERROR_CODE(dfo) );
 }
 /* }}} */
 

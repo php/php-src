@@ -92,7 +92,7 @@ PHP_FUNCTION(ezmlm_hash)
 
 	h = (h % 53);
 
-	RETURN_LONG((int) h);
+	RETURN_INT((int) h);
 }
 /* }}} */
 

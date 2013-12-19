@@ -2225,7 +2225,7 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 					zend_list_delete(zvalue->value.lval);
 				}
 				break;
-			case IS_LONG:
+			case IS_INT:
 			case IS_DOUBLE:
 			case IS_BOOL:
 			case IS_NULL:

@@ -320,7 +320,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_PP(regex) == IS_DOUBLE) {
-			convert_to_long_ex(regex);	/* get rid of decimal places */
+			convert_to_int_ex(regex);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
@@ -376,7 +376,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		if (match_len == 0)
 			match_len = 1;
-		RETVAL_LONG(match_len);
+		RETVAL_INT(match_len);
 	}
 	regfree(&re);
 }
@@ -568,9 +568,9 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			pattern = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_pattern);
+		convert_to_int_ex(arg_pattern);
 		pattern = emalloc(2);
-		pattern[0] = (char) Z_LVAL_PP(arg_pattern);
+		pattern[0] = (char) Z_IVAL_PP(arg_pattern);
 		pattern[1] = '\0';
 	}
 
@@ -581,9 +581,9 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			replace = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_long_ex(arg_replace);
+		convert_to_int_ex(arg_replace);
 		replace = emalloc(2);
-		replace[0] = (char) Z_LVAL_PP(arg_replace);
+		replace[0] = (char) Z_IVAL_PP(arg_replace);
 		replace[1] = '\0';
 	}
 

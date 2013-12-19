@@ -313,7 +313,7 @@ notfound:
 		}
 		size = php_stream_passthru(stream);
 		php_stream_close(stream);
-		RETURN_LONG(size);
+		RETURN_INT(size);
 	}
 
 skip_phar:
@@ -483,32 +483,32 @@ static void phar_fancy_stat(php_stat_t *stat_sb, int type, zval *return_value TS
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((php_int_t)stat_sb->st_mode);
+		RETURN_INT((php_int_t)stat_sb->st_mode);
 	case FS_INODE:
-		RETURN_LONG((php_int_t)stat_sb->st_ino);
+		RETURN_INT((php_int_t)stat_sb->st_ino);
 	case FS_SIZE:
-		RETURN_LONG((php_int_t)stat_sb->st_size);
+		RETURN_INT((php_int_t)stat_sb->st_size);
 	case FS_OWNER:
-		RETURN_LONG((php_int_t)stat_sb->st_uid);
+		RETURN_INT((php_int_t)stat_sb->st_uid);
 	case FS_GROUP:
-		RETURN_LONG((php_int_t)stat_sb->st_gid);
+		RETURN_INT((php_int_t)stat_sb->st_gid);
 	case FS_ATIME:
 #ifdef NETWARE
-		RETURN_LONG((php_int_t)stat_sb->st_atime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_atime.tv_sec);
 #else
-		RETURN_LONG((php_int_t)stat_sb->st_atime);
+		RETURN_INT((php_int_t)stat_sb->st_atime);
 #endif
 	case FS_MTIME:
 #ifdef NETWARE
-		RETURN_LONG((php_int_t)stat_sb->st_mtime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_mtime.tv_sec);
 #else
-		RETURN_LONG((php_int_t)stat_sb->st_mtime);
+		RETURN_INT((php_int_t)stat_sb->st_mtime);
 #endif
 	case FS_CTIME:
 #ifdef NETWARE
-		RETURN_LONG((php_int_t)stat_sb->st_ctime.tv_sec);
+		RETURN_INT((php_int_t)stat_sb->st_ctime.tv_sec);
 #else
-		RETURN_LONG((php_int_t)stat_sb->st_ctime);
+		RETURN_INT((php_int_t)stat_sb->st_ctime);
 #endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {

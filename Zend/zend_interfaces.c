@@ -189,7 +189,7 @@ ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval **
 static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	*int_key = _iter->index;
-	return HASH_KEY_IS_LONG;
+	return HASH_KEY_IS_INT;
 }
 #endif
 /* }}} */
@@ -210,7 +210,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
 		}
 
-		ZVAL_LONG(key, 0);
+		ZVAL_INT(key, 0);
 	}
 }
 

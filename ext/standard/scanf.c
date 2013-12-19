@@ -748,7 +748,7 @@ literal:
 						current = args[objIndex++];
 						refcount = Z_REFCOUNT_PP(current);
 						zval_dtor( *current );
-						ZVAL_LONG( *current, (php_int_t)(string - baseString) );
+						ZVAL_INT( *current, (php_int_t)(string - baseString) );
 						Z_SET_REFCOUNT_PP(current, refcount);
 						Z_SET_ISREF_PP(current);
 					} else {
@@ -1079,7 +1079,7 @@ addToInt:
 						} else if (numVars) {
 							current = args[objIndex++];
 							zval_dtor(*current);
-							ZVAL_LONG(*current, value);
+							ZVAL_INT(*current, value);
 						} else {
 							add_index_long(*return_value, objIndex++, value);
 						}
@@ -1201,8 +1201,8 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_long( *return_value );
-		Z_LVAL_PP(return_value) = nconversions;
+		convert_to_int( *return_value );
+		Z_IVAL_PP(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */
 	}
@@ -1214,8 +1214,8 @@ done:
 static inline void scan_set_error_return(int numVars, zval **return_value) /* {{{ */
 {
 	if (numVars) {
-		Z_TYPE_PP(return_value) = IS_LONG;
-		Z_LVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
+		Z_TYPE_PP(return_value) = IS_INT;
+		Z_IVAL_PP(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
 		convert_to_null( *return_value );
