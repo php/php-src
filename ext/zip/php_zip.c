@@ -1537,7 +1537,7 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_LONG((long)err);
 	}
 	ze_obj->filename = estrdup(resolved_path);
-	ze_obj->filename_len = filename_len;
+	ze_obj->filename_len = strlen(resolved_path);
 	ze_obj->za = intern;
 	RETURN_TRUE;
 }
