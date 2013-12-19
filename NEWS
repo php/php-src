@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed reavlidate_path=1 behavior to avoid caching of symlinks values.
     (Dmitry)
 
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
 - SOAP
   . Fixed bug #66112 (Use after free condition in SOAP extension).
     (martin dot koegler at brz dot gv dot at)
