@@ -27,15 +27,15 @@ PHP                                                                        NEWS
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
 
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
 - XSL
   . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
     function). (Mike)
 
 - ZIP:
   . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
-
-- SNMP:
-  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations (Boris Lytochkin)
 
 12 Dec 2013, PHP 5.4.23
 
