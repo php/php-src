@@ -27,10 +27,17 @@
 #define PHPDBG_WATCH(name) PHPDBG_COMMAND(watch_##name)
 
 /**
-* Printer Forward Declarations
-*/
-/*PHPDBG_WATCH();*/
+ * Printer Forward Declarations
+ */
+PHPDBG_WATCH(delete);
 
+/**
+ * Commands
+ */
+
+static const phpdbg_command_t phpdbg_watch_commands[] = {
+	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint", 'd', watch_delete, NULL, 1),
+};
 
 /* Watchpoint functions/typedefs */
 
@@ -64,7 +71,9 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 
 void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch);
 void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch);
-int phpdbg_create_var_watchpoint(char *name, size_t len TSRMLS_DC);
+
+int phpdbg_delete_var_watchpoint(char *input, size_t len TSRMLS_DC);
+int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC);
 
 int phpdbg_print_changed_zvals(TSRMLS_D);
 

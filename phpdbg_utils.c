@@ -377,3 +377,21 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 
 	return PHPDBG_G(prompt)[1];
 } /* }}} */
+
+int phpdbg_rebuild_symtable(TSRMLS_D) {
+	if (!EG(active_op_array)) {
+		phpdbg_error("No active op array!");
+		return FAILURE;
+	}
+
+	if (!EG(active_symbol_table)) {
+		zend_rebuild_symbol_table(TSRMLS_C);
+
+		if (!EG(active_symbol_table)) {
+			phpdbg_error("No active symbol table!");
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}

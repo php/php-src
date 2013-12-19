@@ -22,6 +22,7 @@
 #include "phpdbg.h"
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
+#include "phpdbg_utils.h"
 #include <unistd.h>
 #include <sys/mman.h>
 
@@ -93,7 +94,25 @@ void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch) {
 	watch->type = WATCH_ON_ZVAL;
 }
 
-static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i TSRMLS_DC) {
+static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch) {
+	phpdbg_store_watchpoint(watch TSRMLS_CC);
+	zend_hash_add(&PHPDBG_G(watchpoints), watch->str, watch->str_len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
+
+	phpdbg_activate_watchpoint(watch);
+
+	return SUCCESS;
+}
+
+static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *watch) {
+	int ret = zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+
+	efree(watch);
+
+	return ret;
+}
+
+static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i, int (*callback)(phpdbg_watchpoint_t *) TSRMLS_DC) {
+	int ret = FAILURE;
 	zend_bool new_index = 1;
 	char *last_index;
 	int index_len = 0;
@@ -148,19 +167,17 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 					watch->name_in_parent_len = index_len;
 					watch->parent_container = parent;
 					phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
-					phpdbg_store_watchpoint(watch TSRMLS_CC);
-					zend_hash_add(&PHPDBG_G(watchpoints), watch->str, watch->str_len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
 
-					phpdbg_activate_watchpoint(watch);
+					ret = callback(watch) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 				} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
-					phpdbg_watchpoint_parse_input(input, len, Z_OBJPROP_PP(zv), i TSRMLS_CC);
+					phpdbg_watchpoint_parse_input(input, len, Z_OBJPROP_PP(zv), i, callback TSRMLS_CC);
 				} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
-					phpdbg_watchpoint_parse_input(input, len, Z_ARRVAL_PP(zv), i TSRMLS_CC);
+					phpdbg_watchpoint_parse_input(input, len, Z_ARRVAL_PP(zv), i, callback TSRMLS_CC);
 				} else {
 					/* Ignore silently */
 				}
 			}
-			return SUCCESS;
+			return ret;
 		} else if (new_index) {
 			char last_chr = last_index[index_len];
 			last_index[index_len] = 0;
@@ -177,10 +194,8 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 				watch->name_in_parent_len = index_len;
 				watch->parent_container = parent;
 				phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
-				phpdbg_store_watchpoint(watch TSRMLS_CC);
-				zend_hash_add(&PHPDBG_G(watchpoints), input, len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
 
-				phpdbg_activate_watchpoint(watch);
+				ret = callback(watch) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 			} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
 				parent = Z_OBJPROP_PP(zv);
 			} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
@@ -193,28 +208,41 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 		}
 	}
 
-	return SUCCESS;
+	return ret;
 	error:
 		phpdbg_error("Malformed input");
 		return FAILURE;
 }
 
+PHPDBG_WATCH(delete) /* {{{ */
+{
+	switch (param->type) {
+		case STR_PARAM:
+			if (phpdbg_delete_var_watchpoint(param->str, param->len TSRMLS_CC) == FAILURE) {
+				phpdbg_error("Nothing was deleted, no corresponding watchpoint found");
+			}
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC) {
-	if (!EG(active_op_array)) {
-		phpdbg_error("No active op array!");
+	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
 		return SUCCESS;
 	}
 
-	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
+	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, phpdbg_create_watchpoint TSRMLS_CC);
+}
 
-		if (!EG(active_symbol_table)) {
-			phpdbg_error("No active symbol table!");
-			return SUCCESS;
-		}
+int phpdbg_delete_var_watchpoint(char *input, size_t len TSRMLS_DC) {
+	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
+		return SUCCESS;
 	}
 
-	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0 TSRMLS_CC);
+	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, phpdbg_delete_watchpoint TSRMLS_CC);
 }
 
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC) {
