@@ -1516,7 +1516,7 @@ static ZIPARCHIVE_METHOD(open)
 	php_size_t filename_len;
 	int err = 0;
 	php_int_t flags = 0;
-	char resolved_path[MAXPATHLEN];
+	char *resolved_path;
 
 	zval *this = getThis();
 	ze_zip_object *ze_obj = NULL;
@@ -1539,7 +1539,7 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_FALSE;
 	}
 
-	if (!expand_filepath(filename, resolved_path TSRMLS_CC)) {
+	if (!(resolved_path = expand_filepath(filename, NULL TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
 
@@ -1560,8 +1560,8 @@ static ZIPARCHIVE_METHOD(open)
 	if (!intern || err) {
 		RETURN_INT((php_int_t)err);
 	}
-	ze_obj->filename = estrdup(resolved_path);
-	ze_obj->filename_len = filename_len;
+	ze_obj->filename = resolved_path;
+	ze_obj->filename_len = strlen(resolved_path);
 	ze_obj->za = intern;
 	RETURN_TRUE;
 }
