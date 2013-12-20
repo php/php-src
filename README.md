@@ -78,4 +78,6 @@ The following switches change the default behaviour of phpdbg:
 Getting Started
 ===============
 
-See the tutorials for help [getting started with phpdbg][1].
+See the website for tutorials/documentation
+
+http://phpdbg.com
