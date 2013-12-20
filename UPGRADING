@@ -62,6 +62,8 @@ PHP X.Y UPGRADE NOTES
 2. Changes in SAPI modules
 ========================================
 
+- Added phpdbg sapi.
+  (https://wiki.php.net/rfc/phpdbg)
 
 ========================================
 3. Deprecated Functionality
