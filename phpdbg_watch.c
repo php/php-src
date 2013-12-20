@@ -48,7 +48,14 @@ static inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
 }
 
 static phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *addr TSRMLS_DC) {
-	phpdbg_watchpoint_t *watch = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)phpdbg_get_page_boundary(addr) + phpdbg_pagesize - 1)->ptr;
+	phpdbg_watchpoint_t *watch;
+	phpdbg_btree_result *result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)phpdbg_get_page_boundary(addr) + phpdbg_pagesize - 1);
+
+	if (result == NULL) {
+		return NULL;
+	}
+
+	watch = result->ptr;
 
 	/* check if that addr is in a mprotect()'ed memory area */
 	if ((char *)phpdbg_get_page_boundary(watch->addr.ptr) > (char *)addr || (char *)phpdbg_get_page_boundary(watch->addr.ptr) + phpdbg_get_total_page_size(watch->addr.ptr, watch->size) < (char *)addr) {
@@ -161,7 +168,8 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 					phpdbg_watchpoint_t *watch = emalloc(sizeof(phpdbg_watchpoint_t));
 					zend_hash_get_current_key_zval_ex(parent, key, &position);
 					convert_to_string(key);
-					watch->str_len = asprintf(&watch->str, "%.*s%.*s%s", i, input, Z_STRLEN_P(key), Z_STRVAL_P(key), input[len - 1] == ']'?"]":"");
+					watch->str = emalloc(i + Z_STRLEN_P(key) + 2);
+					watch->str_len = sprintf(watch->str, "%.*s%.*s%s", i, input, Z_STRLEN_P(key), Z_STRVAL_P(key), input[len - 1] == ']'?"]":"");
 					efree(key);
 					watch->name_in_parent = estrndup(last_index, index_len);
 					watch->name_in_parent_len = index_len;
@@ -284,7 +292,7 @@ void phpdbg_watchpoints_clean(TSRMLS_DC) {
 static void phpdbg_watch_dtor(void *pDest) {
 	TSRMLS_FETCH();
 
-	phpdbg_watchpoint_t *watch = (phpdbg_watchpoint_t *)pDest;
+	phpdbg_watchpoint_t *watch = *(phpdbg_watchpoint_t **)pDest;
 
 	phpdbg_deactivate_watchpoint(watch);
 	phpdbg_btree_delete(&PHPDBG_G(watchpoint_tree), (zend_ulong)watch->addr.ptr);

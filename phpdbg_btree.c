@@ -184,18 +184,24 @@ int phpdbg_btree_delete(phpdbg_btree *tree, zend_ulong idx) {
 	} while (i--);
 
 	if (i_last_dual_branch == -1) {
-		efree(tree);
-		tree = NULL;
+		efree(tree->branch);
+		tree->branch = NULL;
 	} else {
 		if (last_dual_branch->branches[last_dual_branch_branch] == last_dual_branch + 1) {
 			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], i_last_dual_branch * sizeof(phpdbg_btree_branch));
-			efree(last_dual_branch->branches[last_dual_branch_branch]);
+			efree(last_dual_branch->branches[!last_dual_branch_branch]);
 			last_dual_branch->branches[!last_dual_branch_branch] = last_dual_branch + 1;
+
+			branch = last_dual_branch->branches[!last_dual_branch_branch];
+			for (i = i_last_dual_branch; i--;) {
+				branch->branches[!!branch->branches[1]] = last_dual_branch + i_last_dual_branch - i + 1;
+				branch = branch->branches[!!branch->branches[1]];
+			}
 		} else {
 			efree(last_dual_branch->branches[last_dual_branch_branch]);
 		}
 
-		last_dual_branch->branches[i_last_dual_branch] = NULL;
+		last_dual_branch->branches[last_dual_branch_branch] = NULL;
 	}
 
 	return SUCCESS;
