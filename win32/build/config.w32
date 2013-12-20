@@ -450,13 +450,3 @@ if (PHP_STATIC_ANALYZE == "yes") {
 	ADD_FLAG("CFLAGS", " /wd6308 ");
 }
 
-ARG_ENABLE("zstrlen", "Include Z_STRLEN macros enabling size_t for string length", "no");
-if (PHP_ZSTRLEN == "yes") {
-	// XXX remove this option, placebo for now
-}
-
-ARG_ENABLE("zint64", "Enable 64 bit integers", "no");
-if (PHP_ZINT64== "yes") {
-	// XXX remove this option, placebo for now
-}
-
