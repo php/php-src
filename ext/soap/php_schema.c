@@ -460,7 +460,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			smart_str anonymous = {0};
 			
 			smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+			smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
 			smart_str_0(&anonymous);
 			newType->name = anonymous.c;
 		}
@@ -556,7 +556,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				smart_str anonymous = {0};
 			
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				newType->name = anonymous.c;
 			}
@@ -1925,7 +1925,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				smart_str anonymous = {0};
 			
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				dummy_type->name = anonymous.c;
 			}

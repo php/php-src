@@ -260,7 +260,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_IVAL(holder) = 0;									\
 				break;												\
 			case IS_DOUBLE:											\
-				Z_IVAL(holder) = zend_dval_to_lval(Z_DVAL_P(op));	\
+				Z_IVAL(holder) = zend_dval_to_ival(Z_DVAL_P(op));	\
 				break;												\
 			case IS_STRING:											\
 				Z_IVAL(holder) = ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);	\
@@ -384,7 +384,7 @@ ZEND_API void convert_to_int_base(zval *op, int base) /* {{{ */
 		case IS_INT:
 			break;
 		case IS_DOUBLE:
-			Z_IVAL_P(op) = zend_dval_to_lval(Z_DVAL_P(op));
+			Z_IVAL_P(op) = zend_dval_to_ival(Z_DVAL_P(op));
 			break;
 		case IS_STRING:
 			{
@@ -1104,7 +1104,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 			ZVAL_INT(result, ~Z_IVAL_P(op1));
 			return SUCCESS;
 		case IS_DOUBLE:
-			ZVAL_INT(result, ~zend_dval_to_lval(Z_DVAL_P(op1)));
+			ZVAL_INT(result, ~zend_dval_to_ival(Z_DVAL_P(op1)));
 			return SUCCESS;
 		case IS_STRING: {
 			zend_size_t i;

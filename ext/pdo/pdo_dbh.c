@@ -370,7 +370,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	}	
 
 	{
-		php_int_t __tmp = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
+		php_int_t __tmp = pdo_attr_ival(options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 		dbh->auto_commit = (0 == __tmp) ? 0 : 1;
 	}
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {

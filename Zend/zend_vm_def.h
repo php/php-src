@@ -3639,7 +3639,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index);
 			case IS_INT:
 			case IS_BOOL:
@@ -3982,7 +3982,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -4497,7 +4497,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index_prop);
 			case IS_RESOURCE:
 			case IS_BOOL:

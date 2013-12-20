@@ -360,7 +360,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 									}
 								}
 
-								*p = zend_dval_to_lval(d);
+								*p = zend_dval_to_ival(d);
 							}
 						}
 						break;
@@ -1586,7 +1586,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			result = zend_hash_index_update(ht, Z_IVAL_P(key), &value, sizeof(zval *), NULL);
 			break;
 		case IS_DOUBLE:
-			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), &value, sizeof(zval *), NULL);
+			result = zend_hash_index_update(ht, zend_dval_to_ival(Z_DVAL_P(key)), &value, sizeof(zval *), NULL);
 			break;
 		default:
 			zend_error(E_WARNING, "Illegal offset type");

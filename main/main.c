@@ -2320,7 +2320,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				while(*p) {
 					php_int_t value;
 
-					if (cfg_get_long((char*)*p, &value) == SUCCESS && value) {
+					if (cfg_get_int((char*)*p, &value) == SUCCESS && value) {
 						zend_error(directives[i].error_level, directives[i].phrase, *p);
 					}
 

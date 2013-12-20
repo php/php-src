@@ -621,7 +621,7 @@ try_again:
 			}
 		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
-		smart_str_append_long(&soap_headers, request_size);
+		smart_str_append_int(&soap_headers, request_size);
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */

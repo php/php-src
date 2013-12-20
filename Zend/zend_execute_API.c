@@ -647,7 +647,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_INT, NULL, 0, Z_IVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_DOUBLE:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_INT, NULL, 0, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_INT, NULL, 0, zend_dval_to_ival(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_NULL:
 					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, "", 1, 0, HASH_UPDATE_KEY_IF_BEFORE, NULL);

@@ -31,8 +31,8 @@
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
 
-#define ISC_LONG_MIN 	INT_MIN
-#define ISC_LONG_MAX 	INT_MAX
+#define ISC_INT_MIN 	INT_MIN
+#define ISC_INT_MAX 	INT_MAX
 
 #define QUERY_RESULT	1
 #define EXECUTE_RESULT	2
@@ -500,7 +500,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, php_uint_t buf_size, /* {
 					*(short*) buf = (short) l;
 					break;
 				case SQL_LONG:
-					if (l > ISC_LONG_MAX || l < ISC_LONG_MIN) {
+					if (l > ISC_INT_MAX || l < ISC_INT_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
 						return FAILURE;
 					}
@@ -546,7 +546,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, php_uint_t buf_size, /* {
 				case SQL_LONG:
 					convert_to_int(val);
 #if (SIZEOF_LONG > 4)
-					if (Z_IVAL_P(val) > ISC_LONG_MAX || Z_IVAL_P(val) < ISC_LONG_MIN) {
+					if (Z_IVAL_P(val) > ISC_INT_MAX || Z_IVAL_P(val) < ISC_INT_MIN) {
 						_php_ibase_module_error("Array parameter exceeds field width" TSRMLS_CC);
 						return FAILURE;
 					}

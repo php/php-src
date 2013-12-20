@@ -351,7 +351,7 @@ static int php_array_element_export(zval **zv TSRMLS_DC, int num_args, va_list a
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
-		smart_str_append_long(buf, (php_int_t) hash_key->h);
+		smart_str_append_int(buf, (php_int_t) hash_key->h);
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
@@ -403,7 +403,7 @@ static int php_object_element_export(zval **zv TSRMLS_DC, int num_args, va_list 
 		smart_str_appendc(buf, '\'');
 		efree(pname_esc);
 	} else {
-		smart_str_append_long(buf, (php_int_t) hash_key->h);
+		smart_str_append_int(buf, (php_int_t) hash_key->h);
 	}
 	smart_str_appendl(buf, " => ", 4);
 	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
@@ -585,7 +585,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 static inline void php_var_serialize_long(smart_str *buf, php_int_t val) /* {{{ */
 {
 	smart_str_appendl(buf, "i:", 2);
-	smart_str_append_long(buf, val);
+	smart_str_append_int(buf, val);
 	smart_str_appendc(buf, ';');
 }
 /* }}} */
@@ -627,7 +627,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	if (incomplete_class) {
 		--count;
 	}
-	smart_str_append_long(buf, count);
+	smart_str_append_int(buf, count);
 	smart_str_appendl(buf, ":{", 2);
 
 	if (count > 0) {
@@ -719,12 +719,12 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	if (var_hash && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
-			smart_str_append_long(buf, (php_int_t)*var_already);
+			smart_str_append_int(buf, (php_int_t)*var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		} else if (Z_TYPE_P(struc) == IS_OBJECT) {
 			smart_str_appendl(buf, "r:", 2);
-			smart_str_append_long(buf, (php_int_t)*var_already);
+			smart_str_append_int(buf, (php_int_t)*var_already);
 			smart_str_appendc(buf, ';');
 			return;
 		}
@@ -733,7 +733,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	switch (Z_TYPE_P(struc)) {
 		case IS_BOOL:
 			smart_str_appendl(buf, "b:", 2);
-			smart_str_append_long(buf, Z_IVAL_P(struc));
+			smart_str_append_int(buf, Z_IVAL_P(struc));
 			smart_str_appendc(buf, ';');
 			return;
 
@@ -846,7 +846,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			if (i > 0 && incomplete_class) {
 				--i;
 			}
-			smart_str_append_long(buf, i);
+			smart_str_append_int(buf, i);
 			smart_str_appendl(buf, ":{", 2);
 			if (i > 0) {
 				char *key;

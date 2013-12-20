@@ -1128,7 +1128,7 @@ yy79:
 	/* Use double for large long values that were serialized on a 64-bit system */
 	if (digits >= MAX_LENGTH_OF_ZEND_INT - 1) {
 		if (digits == MAX_LENGTH_OF_ZEND_INT - 1) {
-			int cmp = strncmp(YYCURSOR - MAX_LENGTH_OF_ZEND_INT, long_min_digits, MAX_LENGTH_OF_ZEND_INT - 1);
+			int cmp = strncmp(YYCURSOR - MAX_LENGTH_OF_ZEND_INT, int_min_digits, MAX_LENGTH_OF_ZEND_INT - 1);
 
 			if (!(cmp < 0 || (cmp == 0 && start[2] == '-'))) {
 				goto use_double;

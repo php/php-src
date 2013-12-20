@@ -327,7 +327,7 @@ STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PH
 
 
 if (VCVERS == 1200) {
-	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
+	AC_DEFINE('ZEND_DVAL_TO_IVAL_CAST_OK', 1);
 }
 
 if (VCVERS >= 1400) {

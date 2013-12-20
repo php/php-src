@@ -1042,7 +1042,7 @@ fetch_string_dim:
 			}
 			break;
 		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
+			hval = zend_dval_to_ival(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
 			zend_error(E_STRICT, "Resource ID#" ZEND_INT_FMT " used as offset, casting to integer (" ZEND_INT_FMT ")", Z_IVAL_P(dim), Z_IVAL_P(dim));

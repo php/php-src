@@ -268,10 +268,10 @@ char *alloca ();
 
 #if SIZEOF_ZEND_INT == 4
 #define MAX_LENGTH_OF_ZEND_INT 11
-static const char long_min_digits[] = "2147483648";
+static const char int_min_digits[] = "2147483648";
 #elif SIZEOF_ZEND_INT == 8
 #define MAX_LENGTH_OF_ZEND_INT 20
-static const char long_min_digits[] = "9223372036854775808";
+static const char int_min_digits[] = "9223372036854775808";
 #else
 #error "Unknown SIZEOF_ZEND_INT"
 #endif

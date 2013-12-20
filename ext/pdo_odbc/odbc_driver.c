@@ -181,7 +181,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql_
 		return 0;
 	}
 
-	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
+	cursor_type = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -431,7 +431,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	/* set up the cursor library, if needed, or if configured explicitly */
-	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
+	cursor_lib = pdo_attr_ival(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
 	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");

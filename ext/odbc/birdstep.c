@@ -193,7 +193,7 @@ PHP_MINIT_FUNCTION(birdstep)
 {
 	SQLAllocEnv(&henv);
 
-	if ( cfg_get_long("birdstep.max_links",&php_birdstep_module.max_links) == FAILURE ) {
+	if ( cfg_get_int("birdstep.max_links",&php_birdstep_module.max_links) == FAILURE ) {
 		php_birdstep_module.max_links = -1;
 	}
 	php_birdstep_module.num_links = 0;

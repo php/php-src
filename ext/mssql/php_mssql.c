@@ -424,7 +424,7 @@ static PHP_GINIT_FUNCTION(mssql)
 
 	mssql_globals->num_persistent = 0;
 	mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
-	if (cfg_get_long("mssql.compatibility_mode", &compatibility_mode) == SUCCESS) {
+	if (cfg_get_int("mssql.compatibility_mode", &compatibility_mode) == SUCCESS) {
 		if (compatibility_mode) {
 			mssql_globals->get_column_content = php_mssql_get_column_content_without_type;	
 		}

@@ -326,7 +326,7 @@ static void json_encode_array(smart_str *buf, zval **val, php_int_t options TSRM
 						json_pretty_print_indent(buf, options TSRMLS_CC);
 
 						smart_str_appendc(buf, '"');
-						smart_str_append_long(buf, (php_int_t) index);
+						smart_str_append_int(buf, (php_int_t) index);
 						smart_str_appendc(buf, '"');
 						smart_str_appendc(buf, ':');
 
@@ -417,7 +417,7 @@ static void json_escape_string(smart_str *buf, char *s, php_size_t len, php_int_
 
 		if ((type = is_numeric_string(s, len, &p, &d, 0)) != 0) {
 			if (type == IS_INT) {
-				smart_str_append_long(buf, p);
+				smart_str_append_int(buf, p);
 			} else if (type == IS_DOUBLE) {
 				if (!zend_isinf(d) && !zend_isnan(d)) {
 					char *tmp;
@@ -619,7 +619,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, php_int_t options T
 			break;
 
 		case IS_INT:
-			smart_str_append_long(buf, Z_IVAL_P(val));
+			smart_str_append_int(buf, Z_IVAL_P(val));
 			break;
 
 		case IS_DOUBLE:

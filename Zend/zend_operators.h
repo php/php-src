@@ -70,10 +70,10 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
 END_EXTERN_C()
 
-#if ZEND_DVAL_TO_LVAL_CAST_OK
-# define zend_dval_to_lval(d) ((zend_int_t) (d))
+#if ZEND_DVAL_TO_IVAL_CAST_OK
+# define zend_dval_to_ival(d) ((zend_int_t) (d))
 #elif SIZEOF_ZEND_INT == 4
-static zend_always_inline zend_int_t zend_dval_to_lval(double d)
+static zend_always_inline zend_int_t zend_dval_to_ival(double d)
 {
 	if (d > ZEND_INT_MAX || d < ZEND_INT_MIN) {
 		double	two_pow_32 = pow(2., 32.),
@@ -90,7 +90,7 @@ static zend_always_inline zend_int_t zend_dval_to_lval(double d)
 	return (zend_int_t)d;
 }
 #else
-static zend_always_inline zend_int_t zend_dval_to_lval(double d)
+static zend_always_inline zend_int_t zend_dval_to_ival(double d)
 {
 	/* >= as (double)LONG_MAX is outside signed range */
 	if (d >= ZEND_INT_MAX || d < ZEND_INT_MIN) {
@@ -237,7 +237,7 @@ process_double:
 
 	if (type == IS_INT) {
 		if (digits == MAX_LENGTH_OF_ZEND_INT - 1) {
-			int cmp = strcmp(&ptr[-digits], long_min_digits);
+			int cmp = strcmp(&ptr[-digits], int_min_digits);
 
 			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
 				if (dval) {

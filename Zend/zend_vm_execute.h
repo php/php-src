@@ -3870,7 +3870,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -4758,7 +4758,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -5605,7 +5605,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -6307,7 +6307,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -7231,7 +7231,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -9112,7 +9112,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -9962,7 +9962,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -10811,7 +10811,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -11391,7 +11391,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -12238,7 +12238,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -15675,7 +15675,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -15826,7 +15826,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -16048,7 +16048,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -17905,7 +17905,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -17978,7 +17978,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -18115,7 +18115,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -20189,7 +20189,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -20340,7 +20340,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -20562,7 +20562,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -21598,7 +21598,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -23613,7 +23613,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -23686,7 +23686,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -23823,7 +23823,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -25181,7 +25181,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -25316,7 +25316,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -26488,7 +26488,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -26623,7 +26623,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -27795,7 +27795,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -27930,7 +27930,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -29524,7 +29524,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -29659,7 +29659,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -32775,7 +32775,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -32926,7 +32926,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -33146,7 +33146,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -34868,7 +34868,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -34941,7 +34941,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -35076,7 +35076,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -37014,7 +37014,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -37165,7 +37165,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -37385,7 +37385,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:
@@ -38294,7 +38294,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -40155,7 +40155,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index;
 			case IS_INT:
 			case IS_BOOL:
@@ -40228,7 +40228,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
-						hval = zend_dval_to_lval(Z_DVAL_P(offset));
+						hval = zend_dval_to_ival(Z_DVAL_P(offset));
 						zend_hash_index_del(ht, hval);
 						break;
 					case IS_RESOURCE:
@@ -40363,7 +40363,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
-				hval = zend_dval_to_lval(Z_DVAL_P(offset));
+				hval = zend_dval_to_ival(Z_DVAL_P(offset));
 				goto num_index_prop;
 			case IS_RESOURCE:
 			case IS_BOOL:

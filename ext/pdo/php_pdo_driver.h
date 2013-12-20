@@ -192,7 +192,7 @@ enum pdo_null_handling {
 };
 
 /* {{{ utils for reading attributes set as driver_options */
-static inline php_int_t pdo_attr_lval(zval *options, enum pdo_attribute_type option_name, php_int_t defval TSRMLS_DC)
+static inline php_int_t pdo_attr_ival(zval *options, enum pdo_attribute_type option_name, php_int_t defval TSRMLS_DC)
 {
 	zval **v;
 

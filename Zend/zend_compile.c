@@ -5865,7 +5865,7 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 				zend_hash_index_update(Z_ARRVAL(result->u.constant), Z_IVAL(offset->u.constant), &element, sizeof(zval *), NULL);
 				break;
 			case IS_DOUBLE:
-				zend_hash_index_update(Z_ARRVAL(result->u.constant), zend_dval_to_lval(Z_DVAL(offset->u.constant)), &element, sizeof(zval *), NULL);
+				zend_hash_index_update(Z_ARRVAL(result->u.constant), zend_dval_to_ival(Z_DVAL(offset->u.constant)), &element, sizeof(zval *), NULL);
 				break;
 			case IS_CONSTANT_ARRAY:
 				zend_error(E_ERROR, "Illegal offset type");

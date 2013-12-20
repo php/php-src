@@ -1200,7 +1200,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (Z_IVAL_PP(args[1]) == PGSQL_CONNECT_FORCE_NEW) {
 				continue;
 			} else if (Z_IVAL_PP(args[1]) & PGSQL_CONNECT_FORCE_NEW) {
-				smart_str_append_long(&str, Z_IVAL_PP(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
+				smart_str_append_int(&str, Z_IVAL_PP(args[1]) ^ PGSQL_CONNECT_FORCE_NEW);
 			}
 		}
 		convert_to_string_ex(args[i]);
@@ -6261,7 +6261,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 				smart_str_appendl(&querystr, Z_STRVAL_PP(val), Z_STRSIZE_PP(val));
 				break;
 			case IS_INT:
-				smart_str_append_long(&querystr, Z_IVAL_PP(val));
+				smart_str_append_int(&querystr, Z_IVAL_PP(val));
 				break;
 			case IS_DOUBLE:
 				smart_str_appendl(&querystr, buf, snprintf(buf, sizeof(buf), "%F", Z_DVAL_PP(val)));
@@ -6371,7 +6371,7 @@ static inline int build_assignment_string(smart_str *querystr, HashTable *ht, in
 				smart_str_appendl(querystr, Z_STRVAL_PP(val), Z_STRSIZE_PP(val));
 				break;
 			case IS_INT:
-				smart_str_append_long(querystr, Z_IVAL_PP(val));
+				smart_str_append_int(querystr, Z_IVAL_PP(val));
 				break;
 			case IS_DOUBLE:
 				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_PP(val)), sizeof(buf)-1));

@@ -639,7 +639,7 @@ static inline void php_register_server_variables(TSRMLS_D)
 		Z_DVAL(request_time_float) = sapi_get_request_time(TSRMLS_C);
 		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, array_ptr TSRMLS_CC);
 		Z_TYPE(request_time_long) = IS_INT;
-		Z_IVAL(request_time_long) = zend_dval_to_lval(Z_DVAL(request_time_float));
+		Z_IVAL(request_time_long) = zend_dval_to_ival(Z_DVAL(request_time_float));
 		php_register_variable_ex("REQUEST_TIME", &request_time_long, array_ptr TSRMLS_CC);
 	}
 

@@ -559,7 +559,7 @@ static PHP_GINIT_FUNCTION(sybase)
 	 * signals to implement timeouts, they are actually implemented
 	 * by using poll() or select() on Solaris and Linux.
 	 */
-	if (cfg_get_long("sybct.timeout", &opt)==SUCCESS) {
+	if (cfg_get_int("sybct.timeout", &opt)==SUCCESS) {
 		CS_INT cs_timeout = opt;
 		if (ct_config(sybase_globals->context, CS_SET, CS_TIMEOUT, &cs_timeout, CS_UNUSED, NULL)!=CS_SUCCEED) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Unable to update the timeout");
@@ -678,7 +678,7 @@ static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char 
 		}
 	}
 	
-	if (cfg_get_long("sybct.packet_size", &packetsize) == SUCCESS) {
+	if (cfg_get_int("sybct.packet_size", &packetsize) == SUCCESS) {
 		if (ct_con_props(sybase->connection, CS_SET, CS_PACKETSIZE, (CS_VOID *)&packetsize, CS_UNUSED, NULL) != CS_SUCCEED) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase: Unable to update connection packetsize");
 		}

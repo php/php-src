@@ -136,7 +136,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, PHP_SHM_RSRC_NAME, module_number);
 
-	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
+	if (cfg_get_int("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
 	}
 	return SUCCESS;

@@ -325,7 +325,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
 					smart_str_appendl(&prefix, "#ref", 4);
-					smart_str_append_long(&prefix, SOAP_GLOBAL(cur_uniq_ref));
+					smart_str_append_int(&prefix, SOAP_GLOBAL(cur_uniq_ref));
 					smart_str_0(&prefix);
 					id = prefix.c;
 					xmlSetProp((*node_ptr), BAD_CAST("id"), BAD_CAST(id+1));
@@ -342,7 +342,7 @@ static zend_bool soap_check_zval_ref(zval *data, xmlNodePtr node TSRMLS_DC) {
 				} else {
 					SOAP_GLOBAL(cur_uniq_ref)++;
 					smart_str_appendl(&prefix, "#ref", 4);
-					smart_str_append_long(&prefix, SOAP_GLOBAL(cur_uniq_ref));
+					smart_str_append_int(&prefix, SOAP_GLOBAL(cur_uniq_ref));
 					smart_str_0(&prefix);
 					id = prefix.c;
 					set_ns_prop((*node_ptr), SOAP_1_2_ENC_NAMESPACE, "id", id+1);
@@ -2417,10 +2417,10 @@ iterator_done:
 				}
 			}
 
-			smart_str_append_long(&array_size, dims[0]);
+			smart_str_append_int(&array_size, dims[0]);
 			for (i=1; i<dimension; i++) {
 				smart_str_appendc(&array_size, ',');
-				smart_str_append_long(&array_size, dims[i]);
+				smart_str_append_int(&array_size, dims[i]);
 			}
 
 			efree(value);
@@ -2447,15 +2447,15 @@ iterator_done:
 				dims = get_position_12(dimension, (*ext)->val);
 				if (dims[0] == 0) {dims[0] = i;}
 
-				smart_str_append_long(&array_size, dims[0]);
+				smart_str_append_int(&array_size, dims[0]);
 				for (i=1; i<dimension; i++) {
 					smart_str_appendc(&array_size, ',');
-					smart_str_append_long(&array_size, dims[i]);
+					smart_str_append_int(&array_size, dims[i]);
 				}
 			} else {
 				dims = emalloc(sizeof(int));
 				*dims = 0;
-				smart_str_append_long(&array_size, i);
+				smart_str_append_int(&array_size, i);
 			}
 		} else if (sdl_type &&
 		           sdl_type->attributes &&
@@ -2468,10 +2468,10 @@ iterator_done:
 			dims = get_position_12(dimension, (*ext)->val);
 			if (dims[0] == 0) {dims[0] = i;}
 
-			smart_str_append_long(&array_size, dims[0]);
+			smart_str_append_int(&array_size, dims[0]);
 			for (i=1; i<dimension; i++) {
 				smart_str_appendc(&array_size, ',');
-				smart_str_append_long(&array_size, dims[i]);
+				smart_str_append_int(&array_size, dims[i]);
 			}
 
 			if (sdl_type && sdl_type->elements &&
@@ -2497,14 +2497,14 @@ iterator_done:
 			enc = elementType->encode;
 			get_type_str(xmlParam, elementType->encode->details.ns, elementType->encode->details.type_str, &array_type);
 
-			smart_str_append_long(&array_size, i);
+			smart_str_append_int(&array_size, i);
 
 			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
 		} else {
 
 			enc = get_array_type(xmlParam, data, &array_type TSRMLS_CC);
-			smart_str_append_long(&array_size, i);
+			smart_str_append_int(&array_size, i);
 			dims = safe_emalloc(sizeof(int), dimension, 0);
 			dims[0] = i;
 		}
@@ -2801,7 +2801,7 @@ static xmlNodePtr to_xml_map(encodeTypePtr type, zval *data, int style, xmlNodeP
 				xmlNodeSetContent(key, BAD_CAST(key_val));
 			} else {
 				smart_str tmp = {0};
-				smart_str_append_long(&tmp, int_val);
+				smart_str_append_int(&tmp, int_val);
 				smart_str_0(&tmp);
 
 				if (style == SOAP_ENCODED) {
@@ -3526,7 +3526,7 @@ xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns)
 
 			while (1) {
 				smart_str_appendl(&prefix, "ns", 2);
-				smart_str_append_long(&prefix, num);
+				smart_str_append_int(&prefix, num);
 				smart_str_0(&prefix);
 				if (xmlSearchNs(node->doc, node, BAD_CAST(prefix.c)) == NULL) {
 					break;

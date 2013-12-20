@@ -231,7 +231,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 	stmt->driver_data = S;
 	stmt->methods = &pgsql_stmt_methods;
 
-	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
+	scrollable = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
@@ -246,8 +246,8 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 
 #if HAVE_PQPREPARE
 	else if (driver_options) {
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1 ||
-			pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1 ||
+			pdo_attr_ival(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
 			emulate = 1;
 		}
 	} else {
@@ -1177,7 +1177,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (driver_options) {
-		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		connect_timeout = pdo_attr_ival(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 	}
 
 	/* support both full connection string & connection string + login and/or password */

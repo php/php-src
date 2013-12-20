@@ -305,7 +305,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t optio
 
 		if (buf->len >= MAX_LENGTH_OF_ZEND_INT - 1) {
 			if (buf->len == MAX_LENGTH_OF_ZEND_INT - 1) {
-				int cmp = strcmp(buf->c + (buf->c[0] == '-'), long_min_digits);
+				int cmp = strcmp(buf->c + (buf->c[0] == '-'), int_min_digits);
 
 				if (!(cmp < 0 || (cmp == 0 && buf->c[0] == '-'))) {
 					bigint = 1;

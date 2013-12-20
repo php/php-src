@@ -1556,7 +1556,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
-	if (yyleng < MAX_LENGTH_OF_ZEND_INT - 1 || (yyleng == MAX_LENGTH_OF_ZEND_INT - 1 && strcmp(yytext, long_min_digits) < 0)) {
+	if (yyleng < MAX_LENGTH_OF_ZEND_INT - 1 || (yyleng == MAX_LENGTH_OF_ZEND_INT - 1 && strcmp(yytext, int_min_digits) < 0)) {
 		ZVAL_INT(zendlval, ZEND_STRTOL(yytext, NULL, 10));
 	} else {
 		ZVAL_STRINGL(zendlval, yytext, yyleng, 1);
