@@ -1208,6 +1208,7 @@ function gen_vm($def, $skel) {
 	out($f, $GLOBALS['header_text']);
 
 	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
+	fputs($f, "extern ZEND_API const char *zend_vm_opcodes_map[".($max_opcode + 1)."];\n\n");
 
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
@@ -1215,15 +1216,25 @@ function gen_vm($def, $skel) {
 		fputs($f,"#define $op $code\n");
 	}
 
-	fputs($f,"\nstatic const char *zend_vm_opcodes_map[] = {\n");
+	fputs($f, "\n#endif");
+	fclose($f);
+	echo "zend_vm_opcodes.h generated successfully.\n";
+
+	// zend_vm_opcodes.c
+	$f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
+
+	// Insert header
+	out($f, $GLOBALS['header_text']);
+	fputs($f,"#include <stdio.h>\n\n");
+
+	fputs($f,"const char *zend_vm_opcodes_map[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
 	}
 	fputs($f, "};\n");
 
-	fputs($f, "\n#endif");
 	fclose($f);
-	echo "zend_vm_opcodes.h generated successfully.\n";
+	echo "zend_vm_opcodes.c generated successfully.\n";
 
 	// Generate zend_vm_execute.h
 	$f = fopen(__DIR__ . "/zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
