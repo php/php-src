@@ -285,7 +285,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 	return SUCCESS;
 }
 
-void phpdbg_watchpoints_clean(TSRMLS_DC) {
+void phpdbg_watchpoints_clean(TSRMLS_D) {
 	zend_hash_clean(&PHPDBG_G(watchpoints));
 }
 
