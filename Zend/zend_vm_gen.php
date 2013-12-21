@@ -1219,6 +1219,7 @@ function gen_vm($def, $skel) {
 
 	// Insert header
 	out($f, $GLOBALS['header_text']);
+	fputs($f,"#include <stdio.h>\n\n");
 
 	fputs($f,"const char *zend_vm_opcodes_map[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
