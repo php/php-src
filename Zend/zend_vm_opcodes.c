@@ -18,6 +18,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include <stdio.h>
+
 const char *zend_vm_opcodes_map[164] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
