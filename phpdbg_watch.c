@@ -70,7 +70,7 @@ static void phpdbg_store_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_btree_insert(&PHPDBG_G(watchpoint_tree), (zend_ulong)watch->addr.ptr, watch);
 }
 
-static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int access) {
+static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int access TSRMLS_DC) {
 	int m;
 
 	/* pagesize is assumed to be in the range of 2^x */
@@ -82,12 +82,12 @@ static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int acce
 	}
 }
 
-static inline void phpdbg_activate_watchpoint(phpdbg_watchpoint_t *watch) {
-	phpdbg_change_watchpoint_access(watch, PROT_READ);
+static inline void phpdbg_activate_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+	phpdbg_change_watchpoint_access(watch, PROT_READ TSRMLS_CC);
 }
 
-static inline void phpdbg_deactivate_watchpoint(phpdbg_watchpoint_t *watch) {
-	phpdbg_change_watchpoint_access(watch, PROT_READ | PROT_WRITE);
+static inline void phpdbg_deactivate_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+	phpdbg_change_watchpoint_access(watch, PROT_READ | PROT_WRITE TSRMLS_CC);
 }
 
 void phpdbg_create_addr_watchpoint(void *addr, size_t size, phpdbg_watchpoint_t *watch) {
@@ -101,16 +101,16 @@ void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch) {
 	watch->type = WATCH_ON_ZVAL;
 }
 
-static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch) {
+static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_store_watchpoint(watch TSRMLS_CC);
 	zend_hash_add(&PHPDBG_G(watchpoints), watch->str, watch->str_len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
 
-	phpdbg_activate_watchpoint(watch);
+	phpdbg_activate_watchpoint(watch TSRMLS_CC);
 
 	return SUCCESS;
 }
 
-static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *watch) {
+static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	int ret = zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 
 	efree(watch);
@@ -118,7 +118,7 @@ static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *watch) {
 	return ret;
 }
 
-static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i, int (*callback)(phpdbg_watchpoint_t *) TSRMLS_DC) {
+static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i, int (*callback)(phpdbg_watchpoint_t * TSRMLS_DC) TSRMLS_DC) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
 	char *last_index;
@@ -174,9 +174,9 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 					watch->name_in_parent = estrndup(last_index, index_len);
 					watch->name_in_parent_len = index_len;
 					watch->parent_container = parent;
-					phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
+					phpdbg_create_zval_watchpoint(*zv, watch);
 
-					ret = callback(watch) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+					ret = callback(watch TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 				} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
 					phpdbg_watchpoint_parse_input(input, len, Z_OBJPROP_PP(zv), i, callback TSRMLS_CC);
 				} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
@@ -201,9 +201,9 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 				watch->name_in_parent = estrndup(last_index, index_len);
 				watch->name_in_parent_len = index_len;
 				watch->parent_container = parent;
-				phpdbg_create_zval_watchpoint(*zv, watch TSRMLS_CC);
+				phpdbg_create_zval_watchpoint(*zv, watch);
 
-				ret = callback(watch) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				ret = callback(watch TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
 			} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
 				parent = Z_OBJPROP_PP(zv);
 			} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
@@ -285,7 +285,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 	return SUCCESS;
 }
 
-void phpdbg_watchpoints_clean(TSRMLS_DC) {
+void phpdbg_watchpoints_clean(TSRMLS_D) {
 	zend_hash_clean(&PHPDBG_G(watchpoints));
 }
 
@@ -294,7 +294,7 @@ static void phpdbg_watch_dtor(void *pDest) {
 
 	phpdbg_watchpoint_t *watch = *(phpdbg_watchpoint_t **)pDest;
 
-	phpdbg_deactivate_watchpoint(watch);
+	phpdbg_deactivate_watchpoint(watch TSRMLS_CC);
 	phpdbg_btree_delete(&PHPDBG_G(watchpoint_tree), (zend_ulong)watch->addr.ptr);
 
 	efree(watch->str);
