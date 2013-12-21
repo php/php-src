@@ -1207,11 +1207,21 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
+
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
 		fputs($f,"#define $op $code\n");
 	}
+
+	fputs($f,"\nconst char *zend_vm_opcodes_map[] = {\n");
+	for ($i = 0; $i <= $max_opcode; $i++) {
+		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
+	}
+	fputs($f, "};\n");
+
+	fputs($f, "\n#endif");
 	fclose($f);
 	echo "zend_vm_opcodes.h generated successfully.\n";
 
