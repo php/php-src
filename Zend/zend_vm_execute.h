@@ -481,6 +481,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 	zend_bool should_change_scope = 0;
 	zend_function *fbc = EX(function_state).function;
+	zend_uint num_args;
 
 	SAVE_OPLINE();
 	EX(object) = EX(call)->object;
@@ -525,19 +526,18 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		EG(called_scope) = EX(call)->called_scope;
 	}
 
+	num_args = opline->extended_value + EX(call)->num_additional_args;
 	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-	zend_vm_stack_push((void*)(zend_uintptr_t)opline->extended_value TSRMLS_CC);
+	zend_vm_stack_push((void*)(zend_uintptr_t) num_args TSRMLS_CC);
 	LOAD_OPLINE();
 
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-			zend_uint i=0;
-			zval **p = (zval**)EX(function_state).arguments;
-			ulong arg_count = opline->extended_value;
+			zend_uint i;
+			void **p = EX(function_state).arguments - num_args;
 
-			while (arg_count>0) {
-				zend_verify_arg_type(fbc, ++i, *(p-arg_count), 0 TSRMLS_CC);
-				arg_count--;
+			for (i = 0; i < num_args; ++i, ++p) {
+				zend_verify_arg_type(fbc, i + 1, (zval *) *p, 0 TSRMLS_CC);
 			}
 		}
 
@@ -551,7 +551,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
-				fbc->internal_function.handler(opline->extended_value, ret->var.ptr, &ret->var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+				fbc->internal_function.handler(num_args, ret->var.ptr, &ret->var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 			} else {
 				zend_execute_internal(execute_data, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
 			}
@@ -601,7 +601,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 		/* Not sure what should be done here if it's a static method */
 		if (EXPECTED(EX(object) != NULL)) {
-			Z_OBJ_HT_P(EX(object))->call_method(fbc->common.function_name, opline->extended_value, EX_T(opline->result.var).var.ptr, &EX_T(opline->result.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+			Z_OBJ_HT_P(EX(object))->call_method(fbc->common.function_name, num_args, EX_T(opline->result.var).var.ptr, &EX_T(opline->result.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
@@ -699,6 +699,154 @@ static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Pass execution back to handling code */
 	ZEND_VM_RETURN();
+}
+
+static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *args;
+	int arg_num;
+	SAVE_OPLINE();
+
+	args = get_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, BP_VAR_R);
+	arg_num = opline->op2.num + EX(call)->num_additional_args + 1;
+
+	switch (Z_TYPE_P(args)) {
+		case IS_ARRAY: {
+			HashTable *ht = Z_ARRVAL_P(args);
+			HashPosition pos;
+			zval **arg_ptr, *arg;
+
+			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
+
+			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
+			     zend_hash_get_current_data_ex(ht, (void **) &arg_ptr, &pos) == SUCCESS;
+			     zend_hash_move_forward_ex(ht, &pos), ++arg_num
+			) {
+				char *name;
+				zend_uint name_len;
+				zend_ulong index;
+
+				if (zend_hash_get_current_key_ex(ht, &name, &name_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
+					FREE_OP(free_op1);
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
+
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(arg_ptr);
+					arg = *arg_ptr;
+					Z_ADDREF_P(arg);
+				} else if (Z_ISREF_PP(arg_ptr)) {
+					ALLOC_ZVAL(arg);
+					MAKE_COPY_ZVAL(arg_ptr, arg);
+				} else {
+					arg = *arg_ptr;
+					Z_ADDREF_P(arg);
+				}
+
+				zend_vm_stack_push(arg TSRMLS_CC);
+				EX(call)->num_additional_args++;
+			}
+			break;
+		}
+		case IS_OBJECT: {
+			zend_class_entry *ce = Z_OBJCE_P(args);
+			zend_object_iterator *iter;
+
+			if (!ce || !ce->get_iterator) {
+				zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+				break;
+			}
+
+			iter = ce->get_iterator(ce, args, 0 TSRMLS_CC);
+			if (UNEXPECTED(!iter)) {
+				FREE_OP(free_op1);
+				if (!EG(exception)) {
+					zend_throw_exception_ex(
+						NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name
+					);
+				}
+				HANDLE_EXCEPTION();
+			}
+
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					goto unpack_iter_dtor;
+				}
+			}
+
+			for (; iter->funcs->valid(iter TSRMLS_CC) == SUCCESS; ++arg_num) {
+				zval **arg_ptr, *arg;
+
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					goto unpack_iter_dtor;
+				}
+
+				iter->funcs->get_current_data(iter, &arg_ptr TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					goto unpack_iter_dtor;
+				}
+
+				if (iter->funcs->get_current_key) {
+					zval key;
+					iter->funcs->get_current_key(iter, &key TSRMLS_CC);
+					if (UNEXPECTED(EG(exception) != NULL)) {
+						goto unpack_iter_dtor;
+					}
+
+					if (Z_TYPE(key) == IS_STRING) {
+						zend_error(E_RECOVERABLE_ERROR,
+							"Cannot unpack Traversable with string keys");
+						zval_dtor(&key);
+						goto unpack_iter_dtor;
+					}
+
+					zval_dtor(&key);
+				}
+
+				if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+					zend_error(
+						E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
+						" by unpacking a Traversable, passing by-value instead", arg_num,
+						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name : "",
+						EX(call)->fbc->common.scope ? "::" : "",
+						EX(call)->fbc->common.function_name
+					);
+				}
+
+				if (Z_ISREF_PP(arg_ptr)) {
+					ALLOC_ZVAL(arg);
+					MAKE_COPY_ZVAL(arg_ptr, arg);
+				} else {
+					arg = *arg_ptr;
+					Z_ADDREF_P(arg);
+				}
+
+				ZEND_VM_STACK_GROW_IF_NEEDED(1);
+				zend_vm_stack_push(arg TSRMLS_CC);
+				EX(call)->num_additional_args++;
+
+				iter->funcs->move_forward(iter TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					goto unpack_iter_dtor;
+				}
+			}
+
+unpack_iter_dtor:
+			iter->funcs->dtor(iter TSRMLS_CC);
+			break;
+		}
+		default:
+			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
+	}
+
+	FREE_OP(free_op1);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -814,6 +962,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		call->fbc = constructor;
 		call->object = object_zval;
 		call->called_scope = EX_T(opline->op1.var).class_entry;
+		call->num_additional_args = 0;
 		call->is_ctor_call = 1;
 		call->is_ctor_result_used = RETURN_VALUE_USED(opline);
 		EX(call) = call;
@@ -1108,7 +1257,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		if (EX(delayed_exception)) {
 			zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
-		} 
+		}
 		EX(delayed_exception) = EG(exception);
 		EG(exception) = NULL;
 		EX(fast_ret) = NULL;
@@ -1243,7 +1392,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		
+
 		zval *class_name = opline->op2.zv;
 
 		if (IS_CONST == IS_CONST) {
@@ -1285,16 +1434,19 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		} else {
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
+
 		call->object = NULL;
 		call->called_scope = NULL;
+		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
 		EX(call) = call;
+
 		/*CHECK_EXCEPTION();*/
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
 		int function_name_strlen;
-		
+
 
 		SAVE_OPLINE();
 		function_name = opline->op2.zv;
@@ -1315,8 +1467,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 
 			call->object = NULL;
 			call->called_scope = NULL;
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CONST != IS_CONST && IS_CONST != IS_TMP_VAR &&
@@ -1333,8 +1487,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			} else {
 
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CONST != IS_CONST &&
@@ -1400,6 +1557,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (UNEXPECTED(call->fbc == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, Z_STRVAL_PP(method));
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 
@@ -1439,7 +1598,9 @@ static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPC
 
 	call->object = NULL;
 	call->called_scope = NULL;
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
+
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1609,10 +1770,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 		} else {
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
+
 		call->object = NULL;
 		call->called_scope = NULL;
+		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
 		EX(call) = call;
+
 		/*CHECK_EXCEPTION();*/
 		ZEND_VM_NEXT_OPCODE();
 	} else {
@@ -1637,10 +1801,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			}
 			efree(lcname);
 			zval_dtor(free_op2.var);
+
 			call->object = NULL;
 			call->called_scope = NULL;
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_TMP_VAR != IS_CONST && IS_TMP_VAR != IS_TMP_VAR &&
@@ -1657,8 +1824,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			} else {
 				zval_dtor(free_op2.var);
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_TMP_VAR != IS_CONST &&
@@ -1724,8 +1894,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED(call->fbc == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, Z_STRVAL_PP(method));
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			zval_dtor(free_op2.var);
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -1796,10 +1969,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		} else {
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
+
 		call->object = NULL;
 		call->called_scope = NULL;
+		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
 		EX(call) = call;
+
 		/*CHECK_EXCEPTION();*/
 		ZEND_VM_NEXT_OPCODE();
 	} else {
@@ -1824,10 +2000,13 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			}
 			efree(lcname);
 			zval_ptr_dtor_nogc(&free_op2.var);
+
 			call->object = NULL;
 			call->called_scope = NULL;
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_VAR != IS_CONST && IS_VAR != IS_TMP_VAR &&
@@ -1844,8 +2023,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			} else {
 				zval_ptr_dtor_nogc(&free_op2.var);
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_VAR != IS_CONST &&
@@ -1911,8 +2093,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (UNEXPECTED(call->fbc == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, Z_STRVAL_PP(method));
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			zval_ptr_dtor_nogc(&free_op2.var);
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -1940,7 +2125,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		
+
 		zval *class_name = NULL;
 
 		if (IS_UNUSED == IS_CONST) {
@@ -1979,7 +2164,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	} else {
-		
+
 		zval *class_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		if (IS_CV == IS_CONST) {
@@ -2021,16 +2206,19 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		} else {
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
+
 		call->object = NULL;
 		call->called_scope = NULL;
+		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
 		EX(call) = call;
+
 		/*CHECK_EXCEPTION();*/
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
 		int function_name_strlen;
-		
+
 
 		SAVE_OPLINE();
 		function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
@@ -2051,8 +2239,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 
 			call->object = NULL;
 			call->called_scope = NULL;
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CV != IS_CONST && IS_CV != IS_TMP_VAR &&
@@ -2069,8 +2259,11 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			} else {
 
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
+
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		} else if (IS_CV != IS_CONST &&
@@ -2136,6 +2329,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (UNEXPECTED(call->fbc == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name, Z_STRVAL_PP(method));
 			}
+
+			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 
@@ -2155,7 +2350,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_not_function(&EX_T(opline->result.var).tmp_var,
@@ -2168,7 +2363,7 @@ static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_BOOL_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_not_function(&EX_T(opline->result.var).tmp_var,
@@ -2181,7 +2376,7 @@ static int ZEND_FASTCALL  ZEND_BOOL_NOT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *z;
 
 	SAVE_OPLINE();
@@ -2207,7 +2402,7 @@ static int ZEND_FASTCALL  ZEND_PRINT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int ret;
 
@@ -2237,7 +2432,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int ret;
 
@@ -2267,7 +2462,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -2301,7 +2496,7 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -2332,7 +2527,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -2363,7 +2558,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *fname = opline->op1.zv;
 	call_slot *call = EX(call_slots) + opline->op2.num;
 
@@ -2375,9 +2570,11 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	} else {
 		CACHE_PTR(opline->op1.literal->cache_slot, EX(function_state).function);
 	}
+
 	call->fbc = EX(function_state).function;
 	call->object = NULL;
 	call->called_scope = NULL;
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -2388,7 +2585,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zval *retval_ptr;
-	
+
 
 	SAVE_OPLINE();
 	retval_ptr = opline->op1.zv;
@@ -2432,12 +2629,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zval *retval_ptr;
 	zval **retval_ptr_ptr;
-	
+
 
 	SAVE_OPLINE();
 
 	do {
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR || 
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR ||
 		    (IS_CONST == IS_VAR && opline->extended_value == ZEND_RETURNS_VALUE)) {
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
@@ -2503,7 +2700,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	USE_OPLINE
 	zval *value;
 	zval *exception;
-	
+
 
 	SAVE_OPLINE();
 	value = opline->op1.zv;
@@ -2534,14 +2731,17 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", arg_num);
+		}
 	}
+
 	{
 		zval *valptr;
 		zval *value;
-		
+
 
 		value = opline->op1.zv;
 
@@ -2560,7 +2760,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *retval = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -2574,7 +2774,7 @@ static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *obj;
 	zend_class_entry *ce;
 	zend_function *clone;
@@ -2640,7 +2840,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr;
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
@@ -2700,7 +2900,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 {
 	USE_OPLINE
 	zend_op_array *new_op_array=NULL;
-	
+
 	zval *inc_filename;
 	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
@@ -2832,7 +3032,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *array_ptr, **array_ptr_ptr;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
@@ -2891,7 +3091,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 			}
 		} else if (IS_CONST == IS_CONST ||
-		           (IS_CONST == IS_CV && 
+		           (IS_CONST == IS_CV &&
 		            !Z_ISREF_P(array_ptr) &&
 		            Z_REFCOUNT_P(array_ptr) > 1) ||
 		           (IS_CONST == IS_VAR &&
@@ -2998,7 +3198,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *ptr = opline->op1.zv;
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
@@ -3016,7 +3216,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 
 	SAVE_OPLINE();
@@ -3041,7 +3241,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value, *ret;
 
 	SAVE_OPLINE();
@@ -3075,7 +3275,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 
 	SAVE_OPLINE();
@@ -3093,7 +3293,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value, *ret;
 
 	SAVE_OPLINE();
@@ -3120,7 +3320,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_add_function(&EX_T(opline->result.var).tmp_var,
@@ -3135,7 +3335,7 @@ static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_SUB_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_sub_function(&EX_T(opline->result.var).tmp_var,
@@ -3150,7 +3350,7 @@ static int ZEND_FASTCALL  ZEND_SUB_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_MUL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mul_function(&EX_T(opline->result.var).tmp_var,
@@ -3165,7 +3365,7 @@ static int ZEND_FASTCALL  ZEND_MUL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_DIV_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_div_function(&EX_T(opline->result.var).tmp_var,
@@ -3180,7 +3380,7 @@ static int ZEND_FASTCALL  ZEND_DIV_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_MOD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mod_function(&EX_T(opline->result.var).tmp_var,
@@ -3195,7 +3395,7 @@ static int ZEND_FASTCALL  ZEND_MOD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_SL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_left_function(&EX_T(opline->result.var).tmp_var,
@@ -3210,7 +3410,7 @@ static int ZEND_FASTCALL  ZEND_SL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_SR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_right_function(&EX_T(opline->result.var).tmp_var,
@@ -3225,7 +3425,7 @@ static int ZEND_FASTCALL  ZEND_SR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	concat_function(&EX_T(opline->result.var).tmp_var,
@@ -3240,7 +3440,7 @@ static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_identical_function(&EX_T(opline->result.var).tmp_var,
@@ -3255,7 +3455,7 @@ static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -3272,7 +3472,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -3288,7 +3488,7 @@ static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -3304,7 +3504,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -3320,7 +3520,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -3336,7 +3536,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_or_function(&EX_T(opline->result.var).tmp_var,
@@ -3351,7 +3551,7 @@ static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_and_function(&EX_T(opline->result.var).tmp_var,
@@ -3366,7 +3566,7 @@ static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -3381,7 +3581,7 @@ static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -3449,7 +3649,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -3542,7 +3742,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CONST_CONST(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CONST_CONST(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3558,7 +3758,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -3575,7 +3775,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -3585,7 +3785,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 		PZVAL_LOCK(&EG(uninitialized_zval));
 		EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 	} else {
-		
+
 		zval *value = *zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), opline->op2.zv, IS_CONST, BP_VAR_R TSRMLS_CC);
 
 		PZVAL_LOCK(value);
@@ -3641,7 +3841,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 	} else if (IS_CONST != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_CONST == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -3712,6 +3912,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -3722,7 +3924,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_equal_function(&EX_T(opline->result.var).tmp_var,
@@ -3832,7 +4034,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -3867,7 +4069,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *offset = opline->op2.zv;
 		ulong hval;
 
@@ -3929,7 +4131,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV &&
@@ -4025,7 +4227,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -4090,7 +4292,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *name;
 	zval *val;
 	zend_constant c;
@@ -4150,7 +4352,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -4228,7 +4430,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 	/* Set the new yielded key */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
@@ -4695,6 +4897,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -4720,7 +4924,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -4835,7 +5039,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -5303,7 +5507,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -5396,7 +5600,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CONST_VAR(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CONST_VAR(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5542,6 +5746,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -5567,7 +5773,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -5664,7 +5870,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV &&
@@ -5760,7 +5966,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -5845,7 +6051,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -6038,7 +6244,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -6131,7 +6337,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPC
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CONST_UNUSED(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CONST_UNUSED(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6189,7 +6395,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 	} else if (IS_UNUSED != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_UNUSED == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -6260,6 +6466,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -6270,7 +6478,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -6305,7 +6513,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *offset = NULL;
 		ulong hval;
 
@@ -6367,7 +6575,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CONST == IS_CV &&
@@ -6463,7 +6671,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -6566,7 +6774,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -6644,7 +6852,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded key */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
@@ -6705,7 +6913,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_add_function(&EX_T(opline->result.var).tmp_var,
@@ -6720,7 +6928,7 @@ static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_SUB_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_sub_function(&EX_T(opline->result.var).tmp_var,
@@ -6735,7 +6943,7 @@ static int ZEND_FASTCALL  ZEND_SUB_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_MUL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mul_function(&EX_T(opline->result.var).tmp_var,
@@ -6750,7 +6958,7 @@ static int ZEND_FASTCALL  ZEND_MUL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_DIV_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_div_function(&EX_T(opline->result.var).tmp_var,
@@ -6765,7 +6973,7 @@ static int ZEND_FASTCALL  ZEND_DIV_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_MOD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mod_function(&EX_T(opline->result.var).tmp_var,
@@ -6780,7 +6988,7 @@ static int ZEND_FASTCALL  ZEND_MOD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_SL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_left_function(&EX_T(opline->result.var).tmp_var,
@@ -6795,7 +7003,7 @@ static int ZEND_FASTCALL  ZEND_SL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_SR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_right_function(&EX_T(opline->result.var).tmp_var,
@@ -6810,7 +7018,7 @@ static int ZEND_FASTCALL  ZEND_SR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	concat_function(&EX_T(opline->result.var).tmp_var,
@@ -6825,7 +7033,7 @@ static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_identical_function(&EX_T(opline->result.var).tmp_var,
@@ -6840,7 +7048,7 @@ static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -6857,7 +7065,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CONST_CV_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -6873,7 +7081,7 @@ static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -6889,7 +7097,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -6905,7 +7113,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -6921,7 +7129,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CONST_CV_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_or_function(&EX_T(opline->result.var).tmp_var,
@@ -6936,7 +7144,7 @@ static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_and_function(&EX_T(opline->result.var).tmp_var,
@@ -6951,7 +7159,7 @@ static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -6966,7 +7174,7 @@ static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -6981,7 +7189,7 @@ static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -7040,7 +7248,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 	} else if (IS_CV != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_CV == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -7111,6 +7319,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -7181,7 +7391,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_equal_function(&EX_T(opline->result.var).tmp_var,
@@ -7195,7 +7405,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -7230,7 +7440,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
@@ -7310,7 +7520,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -7388,7 +7598,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded key */
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
@@ -7722,7 +7932,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 
 	do {
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR || 
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR ||
 		    (IS_TMP_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_VALUE)) {
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
@@ -7819,10 +8029,13 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
-		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", arg_num);
+		}
 	}
+
 	{
 		zval *valptr;
 		zval *value;
@@ -8177,7 +8390,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			}
 		} else if (IS_TMP_VAR == IS_CONST ||
-		           (IS_TMP_VAR == IS_CV && 
+		           (IS_TMP_VAR == IS_CV &&
 		            !Z_ISREF_P(array_ptr) &&
 		            Z_REFCOUNT_P(array_ptr) > 1) ||
 		           (IS_TMP_VAR == IS_VAR &&
@@ -8787,7 +9000,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -8880,7 +9093,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_TMP_CONST(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_TMP_CONST(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -8923,7 +9136,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_TMP_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		PZVAL_LOCK(&EG(uninitialized_zval));
 		EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 	} else {
-		
+
 		zval *value = *zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), opline->op2.zv, IS_CONST, BP_VAR_R TSRMLS_CC);
 
 		PZVAL_LOCK(value);
@@ -9051,6 +9264,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -9111,7 +9326,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *offset = opline->op2.zv;
 		ulong hval;
 
@@ -9432,7 +9647,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded key */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
@@ -9899,6 +10114,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -10509,7 +10726,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -10602,7 +10819,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_H
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_TMP_VAR(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_TMP_VAR(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10748,6 +10965,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -11246,7 +11465,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -11339,7 +11558,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCOD
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_TMP_UNUSED(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_TMP_UNUSED(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -11390,7 +11609,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *offset = NULL;
 		ulong hval;
 
@@ -11711,7 +11930,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded key */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
@@ -12065,7 +12284,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *str = &EX_T(opline->result.var).tmp_var;
 	zval *var;
 	zval var_copy;
@@ -12177,6 +12396,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -12237,7 +12458,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
@@ -12395,7 +12616,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded key */
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
@@ -12909,7 +13130,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 
 	do {
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR || 
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR ||
 		    (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_VALUE)) {
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
@@ -13040,14 +13261,18 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *varptr;
+	int arg_num;
 
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -13065,7 +13290,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
-			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
+			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		ALLOC_ZVAL(valptr);
@@ -13102,9 +13327,11 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
-	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
-	    !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
@@ -13121,9 +13348,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
-	if ((opline->extended_value == ZEND_DO_FCALL_BY_NAME)
-		&& ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 	SAVE_OPLINE();
 	return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -13474,7 +13703,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 			}
 		} else if (IS_VAR == IS_CONST ||
-		           (IS_VAR == IS_CV && 
+		           (IS_VAR == IS_CV &&
 		            !Z_ISREF_P(array_ptr) &&
 		            Z_REFCOUNT_P(array_ptr) > 1) ||
 		           (IS_VAR == IS_VAR &&
@@ -13577,7 +13806,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *array = EX_T(opline->op1.var).fe.ptr;
 	zval **value;
 	HashTable *fe_ht;
@@ -14645,7 +14874,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -14738,7 +14967,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_VAR_CONST(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_VAR_CONST(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -14846,9 +15075,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OP
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -14919,7 +15147,7 @@ static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_VAR_CONST(
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -15042,7 +15270,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -15083,7 +15311,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CONST_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -15202,7 +15430,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = opline->op2.zv;
 
 		if (0) {
@@ -15395,6 +15623,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -15449,7 +15679,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 	} else if (IS_CONST != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_CONST == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -15520,6 +15750,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -15675,7 +15907,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *offset = opline->op2.zv;
 		ulong hval;
 
@@ -16281,7 +16513,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded key */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
@@ -17169,9 +17401,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TMP_HANDLER(ZEND_OPCO
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -17406,7 +17637,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TMP_HANDLER(ZEND_OPCO
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -17719,6 +17950,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -17845,6 +18078,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -19197,7 +19432,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -19290,7 +19525,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_H
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_VAR_VAR(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_VAR_VAR(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -19398,9 +19633,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCO
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -19635,7 +19869,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_VAR_HANDLER(ZEND_OPCO
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -20003,6 +20237,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -20129,6 +20365,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -21162,7 +21400,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -21255,7 +21493,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCOD
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_VAR_UNUSED(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_VAR_UNUSED(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21331,9 +21569,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UNUSED_HANDLER(ZEND_O
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -21371,7 +21608,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = NULL;
 
 		if (0) {
@@ -21483,7 +21720,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 	} else if (IS_UNUSED != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_UNUSED == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -21554,6 +21791,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -21599,7 +21838,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *offset = NULL;
 		ulong hval;
 
@@ -21942,7 +22181,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded key */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
@@ -22829,9 +23068,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV_HANDLER(ZEND_OPCOD
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
 		if (IS_VAR == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -22902,7 +23140,7 @@ static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_VAR_CV(ZEN
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -23025,7 +23263,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -23066,7 +23304,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV_HANDLER(ZEND_OPCOD
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -23185,7 +23423,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		if (0) {
@@ -23431,6 +23669,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -23485,7 +23725,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 	} else if (IS_CV != IS_UNUSED) {
 		char *function_name_strval = NULL;
 		int function_name_strlen = 0;
-		
+
 
 		if (IS_CV == IS_CONST) {
 			function_name_strval = Z_STRVAL_P(opline->op2.zv);
@@ -23556,6 +23796,8 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 			call->called_scope = Z_OBJCE_P(call->object);
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -23615,7 +23857,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
@@ -24058,7 +24300,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded key */
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
@@ -24119,7 +24361,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *obj;
 	zend_class_entry *ce;
 	zend_function *clone;
@@ -24189,7 +24431,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	SAVE_OPLINE();
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *ptr = NULL;
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
@@ -24458,7 +24700,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCO
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -24562,7 +24804,7 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -24664,9 +24906,9 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_UNUSED_CONST(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -24785,9 +25027,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -24827,7 +25069,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CONST_HANDLER(ZEND
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -24905,7 +25147,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *property_name;
 
@@ -24984,7 +25226,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	zval *function_name;
 	char *function_name_strval;
 	int function_name_strlen;
-	
+
 	call_slot *call = EX(call_slots) + opline->result.num;
 
 	SAVE_OPLINE();
@@ -25049,6 +25291,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -25170,7 +25414,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 	ulong hval;
@@ -25265,7 +25509,7 @@ num_index_dim:
 static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 
@@ -25305,7 +25549,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(int prop_dim, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
@@ -25470,7 +25714,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -25548,7 +25792,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded key */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
@@ -26067,7 +26311,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_UNUSED_TMP(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -26188,7 +26432,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -26230,7 +26474,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMP_HANDLER(ZEND_O
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -26451,6 +26695,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -26777,7 +27023,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -27374,7 +27620,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_OBJ_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_UNUSED_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -27495,7 +27741,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -27537,7 +27783,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_VAR_HANDLER(ZEND_O
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -27758,6 +28004,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -28084,7 +28332,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -28509,7 +28757,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -28587,7 +28835,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	/* Set the new yielded key */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
@@ -28899,7 +29147,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -29003,7 +29251,7 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -29105,9 +29353,9 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_UNUSED_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -29226,9 +29474,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -29268,7 +29516,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CV_HANDLER(ZEND_OP
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -29346,7 +29594,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *property_name;
 
@@ -29376,7 +29624,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *str = &EX_T(opline->result.var).tmp_var;
 	zval *var;
 	zval var_copy;
@@ -29423,7 +29671,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	zval *function_name;
 	char *function_name_strval;
 	int function_name_strlen;
-	
+
 	call_slot *call = EX(call_slots) + opline->result.num;
 
 	SAVE_OPLINE();
@@ -29488,6 +29736,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -29513,7 +29763,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 	ulong hval;
@@ -29608,7 +29858,7 @@ num_index_dim:
 static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 
@@ -29648,7 +29898,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(int prop_dim, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
@@ -29813,7 +30063,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -29891,7 +30141,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded key */
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
@@ -29952,7 +30202,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_not_function(&EX_T(opline->result.var).tmp_var,
@@ -29965,7 +30215,7 @@ static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_BOOL_NOT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_not_function(&EX_T(opline->result.var).tmp_var,
@@ -29978,7 +30228,7 @@ static int ZEND_FASTCALL  ZEND_BOOL_NOT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **var_ptr;
 
 	SAVE_OPLINE();
@@ -30024,7 +30274,7 @@ static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **var_ptr;
 
 	SAVE_OPLINE();
@@ -30070,7 +30320,7 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **var_ptr, *retval;
 
 	SAVE_OPLINE();
@@ -30112,7 +30362,7 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **var_ptr, *retval;
 
 	SAVE_OPLINE();
@@ -30154,7 +30404,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *z;
 
 	SAVE_OPLINE();
@@ -30180,7 +30430,7 @@ static int ZEND_FASTCALL  ZEND_PRINT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int ret;
 
@@ -30210,7 +30460,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int ret;
 
@@ -30240,7 +30490,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -30274,7 +30524,7 @@ static int ZEND_FASTCALL  ZEND_JMPZNZ_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -30305,7 +30555,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *val;
 	int retval;
 
@@ -30337,7 +30587,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *retval_ptr;
-	
+
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -30381,12 +30631,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 	zval *retval_ptr;
 	zval **retval_ptr_ptr;
-	
+
 
 	SAVE_OPLINE();
 
 	do {
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR || 
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR ||
 		    (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_VALUE)) {
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
@@ -30452,7 +30702,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 	zval *value;
 	zval *exception;
-	
+
 
 	SAVE_OPLINE();
 	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -30482,7 +30732,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zval *varptr;
-	
+
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (varptr == &EG(uninitialized_zval)) {
@@ -30514,16 +30764,20 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *varptr;
+	int arg_num;
 
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
 		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
 			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -30541,7 +30795,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
-			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
+			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		ALLOC_ZVAL(valptr);
@@ -30559,7 +30813,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **varptr_ptr;
 	zval *varptr;
 
@@ -30578,9 +30832,11 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
-	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
-	    !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr_ptr);
@@ -30596,9 +30852,11 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
-	if ((opline->extended_value == ZEND_DO_FCALL_BY_NAME)
-		&& ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
-		return ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
+		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			return ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 	SAVE_OPLINE();
 	return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -30607,7 +30865,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *retval = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -30621,7 +30879,7 @@ static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *obj;
 	zend_class_entry *ce;
 	zend_function *clone;
@@ -30687,7 +30945,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr;
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
@@ -30747,7 +31005,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 {
 	USE_OPLINE
 	zend_op_array *new_op_array=NULL;
-	
+
 	zval *inc_filename;
 	zval *tmp_inc_filename = NULL;
 	zend_bool failure_retval=0;
@@ -30879,7 +31137,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *array_ptr, **array_ptr_ptr;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
@@ -30938,7 +31196,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				}
 			}
 		} else if (IS_CV == IS_CONST ||
-		           (IS_CV == IS_CV && 
+		           (IS_CV == IS_CV &&
 		            !Z_ISREF_P(array_ptr) &&
 		            Z_REFCOUNT_P(array_ptr) > 1) ||
 		           (IS_CV == IS_VAR &&
@@ -31045,7 +31303,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (Z_TYPE_P(ptr) == IS_LONG) {
@@ -31063,7 +31321,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 
 	SAVE_OPLINE();
@@ -31088,7 +31346,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value, *ret;
 
 	SAVE_OPLINE();
@@ -31122,7 +31380,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 
 	SAVE_OPLINE();
@@ -31140,7 +31398,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value, *ret;
 
 	SAVE_OPLINE();
@@ -31167,7 +31425,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr;
 	zend_bool result;
 
@@ -31188,7 +31446,7 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_add_function(&EX_T(opline->result.var).tmp_var,
@@ -31203,7 +31461,7 @@ static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_SUB_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_sub_function(&EX_T(opline->result.var).tmp_var,
@@ -31218,7 +31476,7 @@ static int ZEND_FASTCALL  ZEND_SUB_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_MUL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mul_function(&EX_T(opline->result.var).tmp_var,
@@ -31233,7 +31491,7 @@ static int ZEND_FASTCALL  ZEND_MUL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_DIV_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_div_function(&EX_T(opline->result.var).tmp_var,
@@ -31248,7 +31506,7 @@ static int ZEND_FASTCALL  ZEND_DIV_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_MOD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mod_function(&EX_T(opline->result.var).tmp_var,
@@ -31263,7 +31521,7 @@ static int ZEND_FASTCALL  ZEND_MOD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_SL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_left_function(&EX_T(opline->result.var).tmp_var,
@@ -31278,7 +31536,7 @@ static int ZEND_FASTCALL  ZEND_SL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_SR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_right_function(&EX_T(opline->result.var).tmp_var,
@@ -31293,7 +31551,7 @@ static int ZEND_FASTCALL  ZEND_SR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	concat_function(&EX_T(opline->result.var).tmp_var,
@@ -31308,7 +31566,7 @@ static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_identical_function(&EX_T(opline->result.var).tmp_var,
@@ -31323,7 +31581,7 @@ static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -31340,7 +31598,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -31356,7 +31614,7 @@ static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -31372,7 +31630,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -31388,7 +31646,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -31404,7 +31662,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_or_function(&EX_T(opline->result.var).tmp_var,
@@ -31419,7 +31677,7 @@ static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_and_function(&EX_T(opline->result.var).tmp_var,
@@ -31434,7 +31692,7 @@ static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -31449,7 +31707,7 @@ static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -31715,7 +31973,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -31819,7 +32077,7 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -31974,7 +32232,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -32067,7 +32325,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CV_CONST(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CV_CONST(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -32083,7 +32341,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -32155,7 +32413,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_RW_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -32174,9 +32432,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPC
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
-
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -32245,9 +32502,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CV_CONST(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -32366,9 +32623,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -32408,7 +32665,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPC
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -32486,7 +32743,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *property_name;
 
@@ -32516,7 +32773,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 
 	SAVE_OPLINE();
@@ -32526,7 +32783,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = opline->op2.zv;
 
 		if (0) {
@@ -32596,7 +32853,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 	zval **variable_ptr_ptr;
 
@@ -32652,7 +32909,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	zval *function_name;
 	char *function_name_strval;
 	int function_name_strlen;
-	
+
 	call_slot *call = EX(call_slots) + opline->result.num;
 
 	SAVE_OPLINE();
@@ -32717,6 +32974,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -32728,7 +32987,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_equal_function(&EX_T(opline->result.var).tmp_var,
@@ -32742,7 +33001,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -32777,7 +33036,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	}
 
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *offset = opline->op2.zv;
 		ulong hval;
 
@@ -32839,7 +33098,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV &&
@@ -32915,7 +33174,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 	ulong hval;
@@ -33010,7 +33269,7 @@ num_index_dim:
 static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 
@@ -33070,7 +33329,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -33135,7 +33394,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(int prop_dim, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
@@ -33300,7 +33559,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -33378,7 +33637,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded key */
 	if (IS_CONST != IS_UNUSED) {
-		
+
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
@@ -34264,9 +34523,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP_HANDLER(ZEND_OPCOD
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
-
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -34335,7 +34593,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CV_TMP(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -34456,7 +34714,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -34498,7 +34756,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP_HANDLER(ZEND_OPCOD
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -34606,7 +34864,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 
 	SAVE_OPLINE();
@@ -34808,6 +35066,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -34835,7 +35095,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -35230,7 +35490,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -36156,7 +36416,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -36249,7 +36509,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HA
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CV_VAR(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CV_VAR(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -36356,9 +36616,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCOD
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
-
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -36427,7 +36686,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CV_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -36548,7 +36807,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
@@ -36590,7 +36849,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCOD
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1, free_op2;
 		zval *property;
@@ -36698,7 +36957,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 
 	SAVE_OPLINE();
@@ -36954,6 +37213,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -36981,7 +37242,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -37078,7 +37339,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV &&
@@ -37309,7 +37570,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -37539,7 +37800,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -37983,7 +38244,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
 		} else {
-			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -38076,7 +38337,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 
-	return zend_fetch_var_address_helper_SPEC_CV_UNUSED(ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))?BP_VAR_W:BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_fetch_var_address_helper_SPEC_CV_UNUSED(zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_UNSET_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -38151,9 +38412,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OP
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
-
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -38181,7 +38441,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 
 	SAVE_OPLINE();
@@ -38191,7 +38451,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = NULL;
 
 		if (0) {
@@ -38261,7 +38521,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -38296,7 +38556,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *offset = NULL;
 		ulong hval;
 
@@ -38358,7 +38618,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
-	
+
 
 	SAVE_OPLINE();
 	if (IS_CV == IS_CV &&
@@ -38454,7 +38714,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		}
 	} else {
 		HashTable *target_symbol_table;
-		
+
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
@@ -38539,7 +38799,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -38617,7 +38877,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded key */
 	if (IS_UNUSED != IS_UNUSED) {
-		
+
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
@@ -38678,7 +38938,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_add_function(&EX_T(opline->result.var).tmp_var,
@@ -38693,7 +38953,7 @@ static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_SUB_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_sub_function(&EX_T(opline->result.var).tmp_var,
@@ -38708,7 +38968,7 @@ static int ZEND_FASTCALL  ZEND_SUB_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_MUL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mul_function(&EX_T(opline->result.var).tmp_var,
@@ -38723,7 +38983,7 @@ static int ZEND_FASTCALL  ZEND_MUL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_DIV_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_div_function(&EX_T(opline->result.var).tmp_var,
@@ -38738,7 +38998,7 @@ static int ZEND_FASTCALL  ZEND_DIV_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_MOD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	fast_mod_function(&EX_T(opline->result.var).tmp_var,
@@ -38753,7 +39013,7 @@ static int ZEND_FASTCALL  ZEND_MOD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_SL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_left_function(&EX_T(opline->result.var).tmp_var,
@@ -38768,7 +39028,7 @@ static int ZEND_FASTCALL  ZEND_SL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_SR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	shift_right_function(&EX_T(opline->result.var).tmp_var,
@@ -38783,7 +39043,7 @@ static int ZEND_FASTCALL  ZEND_SR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	concat_function(&EX_T(opline->result.var).tmp_var,
@@ -38798,7 +39058,7 @@ static int ZEND_FASTCALL  ZEND_CONCAT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_identical_function(&EX_T(opline->result.var).tmp_var,
@@ -38813,7 +39073,7 @@ static int ZEND_FASTCALL  ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -38830,7 +39090,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -38846,7 +39106,7 @@ static int ZEND_FASTCALL  ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -38862,7 +39122,7 @@ static int ZEND_FASTCALL  ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -38878,7 +39138,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *result = &EX_T(opline->result.var).tmp_var;
 
 	SAVE_OPLINE();
@@ -38894,7 +39154,7 @@ static int ZEND_FASTCALL  ZEND_IS_SMALLER_OR_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_or_function(&EX_T(opline->result.var).tmp_var,
@@ -38909,7 +39169,7 @@ static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_and_function(&EX_T(opline->result.var).tmp_var,
@@ -38924,7 +39184,7 @@ static int ZEND_FASTCALL  ZEND_BW_AND_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	bitwise_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -38939,7 +39199,7 @@ static int ZEND_FASTCALL  ZEND_BW_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 static int ZEND_FASTCALL  ZEND_BOOL_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	boolean_xor_function(&EX_T(opline->result.var).tmp_var,
@@ -39205,7 +39465,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -39309,7 +39569,7 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *object;
 	zval *property;
@@ -39411,7 +39671,7 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -39483,7 +39743,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_RW_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_FETCH_DIM_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 
 	SAVE_OPLINE();
@@ -39502,9 +39762,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE
 
 	SAVE_OPLINE();
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		zval **container = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
-
 		if (IS_CV == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -39573,9 +39832,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL zend_fetch_property_address_read_helper_SPEC_CV_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -39694,9 +39953,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
-	
+
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -39736,7 +39995,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE
 {
 	USE_OPLINE
 
-	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
 		/* Behave like FETCH_OBJ_W */
 		zend_free_op free_op1;
 		zval *property;
@@ -39814,7 +40073,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 	zval *property_name;
 
@@ -39844,7 +40103,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **object_ptr;
 
 	SAVE_OPLINE();
@@ -39854,7 +40113,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
 	if (Z_TYPE_PP(object_ptr) == IS_OBJECT) {
-		
+
 		zval *property_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		if (0) {
@@ -39924,7 +40183,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *value;
 	zval **variable_ptr_ptr;
 
@@ -40032,7 +40291,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	zval *function_name;
 	char *function_name_strval;
 	int function_name_strlen;
-	
+
 	call_slot *call = EX(call_slots) + opline->result.num;
 
 	SAVE_OPLINE();
@@ -40097,6 +40356,8 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 			call->object = this_ptr;
 		}
 	}
+
+	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -40108,7 +40369,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 
 	SAVE_OPLINE();
 	is_equal_function(&EX_T(opline->result.var).tmp_var,
@@ -40122,7 +40383,7 @@ static int ZEND_FASTCALL  ZEND_CASE_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *expr_ptr;
 
 	SAVE_OPLINE();
@@ -40157,7 +40418,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
@@ -40217,7 +40478,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 	ulong hval;
@@ -40312,7 +40573,7 @@ num_index_dim:
 static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval **container;
 	zval *offset;
 
@@ -40352,7 +40613,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int prop_dim, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	
+
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
@@ -40517,7 +40778,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
-		
+
 
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
@@ -40595,7 +40856,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	/* Set the new yielded key */
 	if (IS_CV != IS_UNUSED) {
-		
+
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
@@ -44788,6 +45049,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
+  	ZEND_SEND_UNPACK_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
