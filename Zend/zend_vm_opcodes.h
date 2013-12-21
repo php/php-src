@@ -163,7 +163,7 @@
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
 
-const char *zend_vm_opcodes_map[] = {
+static const char *zend_vm_opcodes_map[] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
