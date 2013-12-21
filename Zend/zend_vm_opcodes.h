@@ -169,7 +169,7 @@
 #define ZEND_FAST_RET                        163
 #define ZEND_RECV_VARIADIC                   164
 
-const char *zend_vm_opcodes_map[] = {
+static const char *zend_vm_opcodes_map[] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",

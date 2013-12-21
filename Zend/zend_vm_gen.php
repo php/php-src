@@ -1215,7 +1215,7 @@ function gen_vm($def, $skel) {
 		fputs($f,"#define $op $code\n");
 	}
 
-	fputs($f,"\nconst char *zend_vm_opcodes_map[] = {\n");
+	fputs($f,"\nstatic const char *zend_vm_opcodes_map[] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
 		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
 	}
