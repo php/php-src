@@ -1194,7 +1194,7 @@ function gen_vm($def, $skel) {
 	echo "zend_vm_opcodes.h generated successfully.\n";
 
 	// zend_vm_opcodes.c
-	$f = fopen(__DIR__ . "zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
+	$f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
 
 	// Insert header
 	out($f, $GLOBALS['header_text']);
