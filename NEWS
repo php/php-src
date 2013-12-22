@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
+    
+- PDO_odbc:
+  . Fixed bug #66311 (Stack smashing protection kills PDO/ODBC queries). 
+    (michael at orlitzky dot com)
 
 - MySQLi:
   . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
