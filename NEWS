@@ -1,6 +1,73 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+<<<<<<< HEAD
 ?? ??? 20??, PHP 5.7.0 
+=======
+<<<<<<< HEAD
+?? ??? 20??, PHP 5.6.0 
+=======
+?? ??? 2013, PHP 5.5.8
+
+- Core:
+  . Disallowed JMP into a finally block. (Laruence)
+  . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
+  . Fixed bug #66041 (list() fails to unpack yielded ArrayAccess object).
+    (Nikita)
+  . Fixed bug #65764 (generators/throw_rethrow FAIL with
+    ZEND_COMPILE_EXTENDED_INFO). (Nikita)
+  . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
+  . Fixed bug #66218 (zend_register_functions breaks reflection). (Remi)
+
+- Date:
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
+  . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
+  
+- DOM:
+  . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
+    Produces invalid Markup). (Mike)
+
+- Exif:
+  . Fixed bug #65873 (Integer overflow in exif_read_data()). (Stas)
+
+- Filter:
+  . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
+
+- GD:
+  . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
+    (Adam)
+    
+- PDO_odbc:
+  . Fixed bug #66311 (Stack smashing protection kills PDO/ODBC queries). 
+    (michael at orlitzky dot com)
+
+- MySQLi:
+  . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
+
+- OPCache:
+  . Fixed reavlidate_path=1 behavior to avoid caching of symlinks values.
+    (Dmitry)
+
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
+- SOAP
+  . Fixed bug #66112 (Use after free condition in SOAP extension).
+    (martin dot koegler at brz dot gv dot at)
+
+- Sockets:
+  . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
+
+- XSL
+  . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
+    function). (Mike)
+
+- ZIP:
+  . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
+
+12 Dec 2013, PHP 5.5.7
+>>>>>>> PHP-5.5
+>>>>>>> PHP-5.6
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
