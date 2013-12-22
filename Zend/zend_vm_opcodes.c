@@ -19,6 +19,7 @@
 */
 
 #include <stdio.h>
+#include <zend.h>
 
 const char *zend_vm_opcodes_map[165] = {
 	"ZEND_NOP",
@@ -187,3 +188,7 @@ const char *zend_vm_opcodes_map[165] = {
 	"ZEND_FAST_RET",
 	"ZEND_RECV_VARIADIC",
 };
+
+ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {
+	return zend_vm_opcodes_map[opcode];
+}
