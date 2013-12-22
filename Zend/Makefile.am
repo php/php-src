@@ -10,7 +10,7 @@ libZend_la_SOURCES=\
 	zend_ini_parser.y zend_ini_scanner.l \
 	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
-	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
+	zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
 	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
 	zend_ini.c zend_qsort.c zend_objects.c zend_object_handlers.c \
