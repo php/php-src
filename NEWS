@@ -60,8 +60,6 @@ PHP                                                                        NEWS
   . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
 
 12 Dec 2013, PHP 5.5.7
->>>>>>> PHP-5.5
->>>>>>> PHP-5.6
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
