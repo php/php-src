@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
+    
+- PDO_odbc:
+  . Fixed bug #66311 (Stack smashing protection kills PDO/ODBC queries). 
+    (michael at orlitzky dot com)
 
 - SNMP:
   . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
