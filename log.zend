@@ -1,0 +1,187 @@
+Recreating build dirs
+Recreating build dirs
+Recreating build dirs
+zend.c
+Zend\zend.c(555) : warning C4090: 'function' : different 'const' qualifiers
+zend_API.c
+Zend\zend_API.c(2121) : warning C4267: '=' : conversion from 'size_t' to 'zend_uint', possible loss of data
+Zend\zend_API.c(2175) : warning C4018: '<' : signed/unsigned mismatch
+Zend\zend_API.c(3500) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_API.c(3509) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_API.c(3518) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_API.c(3536) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+zend_alloc.c
+Zend\zend_alloc.c(999) : warning C4267: 'function' : conversion from 'size_t' to 'DWORD', possible loss of data
+Zend\zend_alloc.c(1765) : warning C4267: '=' : conversion from 'size_t' to 'uint', possible loss of data
+zend_ast.c
+zend_builtin_functions.c
+Zend\zend_builtin_functions.c(2093) : warning C4018: '<' : signed/unsigned mismatch
+zend_closures.c
+zend_compile.c
+Zend\zend_compile.c(976) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_compile.c(991) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_compile.c(1983) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(2040) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(2089) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(2533) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(2575) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(2687) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(3448) : warning C4018: '>=' : signed/unsigned mismatch
+Zend\zend_compile.c(5537) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(5753) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(5756) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_compile.c(7293) : warning C4267: 'function' : conversion from 'size_t' to 'uint', possible loss of data
+zend_constants.c
+zend_default_classes.c
+zend_dynamic_array.c
+zend_exceptions.c
+zend_execute.c
+Zend\zend_execute.c(774) : warning C4267: 'initializing' : conversion from 'size_t' to 'zend_uint', possible loss of data
+Zend\zend_execute.c(1013) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_execute.c(1303) : warning C4018: '<=' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(1072) : warning C4018: '>' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(1075) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(1077) : warning C4018: '>=' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(3399) : warning C4101: 'free_op1' : unreferenced local variable
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(16145) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(16149) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(18212) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(18216) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(20659) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(20663) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(23922) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(23926) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(25415) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(25419) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(26722) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(26726) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(28029) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(28033) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(29758) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(29762) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(33245) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(33249) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(35175) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(35179) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(37484) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(37488) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(40462) : warning C4018: '<' : signed/unsigned mismatch
+c:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\zend\zend_vm_execute.h(40466) : warning C4018: '<' : signed/unsigned mismatch
+zend_execute_API.c
+Zend\zend_execute_API.c(1374) : warning C4133: 'function' : incompatible types - from 'WPARAM *' to 'DWORD *'
+Zend\zend_execute_API.c(1391) : warning C4133: 'function' : incompatible types - from 'WPARAM *' to 'DWORD *'
+Zend\zend_execute_API.c(1787) : warning C4018: '<' : signed/unsigned mismatch
+zend_extensions.c
+zend_float.c
+zend_gc.c
+zend_generators.c
+Zend\zend_generators.c(55) : warning C4018: '>' : signed/unsigned mismatch
+Zend\zend_generators.c(57) : warning C4018: '>' : signed/unsigned mismatch
+zend_hash.c
+Zend\zend_hash.c(1479) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+zend_highlight.c
+zend_indent.c
+Zend\zend_indent.c(71) : warning C4018: '<' : signed/unsigned mismatch
+zend_ini.c
+zend_ini_parser.c
+zend_ini_scanner.c
+Zend/zend_ini_scanner.l(240) : warning C4267: 'function' : conversion from 'size_t' to 'unsigned int', possible loss of data
+Zend/zend_ini_scanner.l(250) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+zend_interfaces.c
+Zend\zend_interfaces.c(328) : warning C4018: '<' : signed/unsigned mismatch
+zend_iterators.c
+zend_language_parser.c
+zend_language_scanner.c
+Zend/zend_language_scanner.l(289) : warning C4018: '<' : signed/unsigned mismatch
+Zend/zend_language_scanner.l(305) : warning C4018: '<' : signed/unsigned mismatch
+Zend/zend_language_scanner.l(524) : warning C4267: 'function' : conversion from 'size_t' to 'unsigned int', possible loss of data
+Zend/zend_language_scanner.l(683) : warning C4267: 'function' : conversion from 'size_t' to 'unsigned int', possible loss of data
+Zend/zend_language_scanner.l(1787) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend/zend_language_scanner.l(1789) : warning C4018: '<' : signed/unsigned mismatch
+zend_list.c
+zend_llist.c
+zend_multibyte.c
+Zend\zend_multibyte.c(171) : warning C4090: 'function' : different 'const' qualifiers
+Zend\zend_multibyte.c(198) : warning C4090: 'function' : different 'const' qualifiers
+zend_object_handlers.c
+Zend\zend_object_handlers.c(346) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_object_handlers.c(396) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_object_handlers.c(404) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+zend_objects.c
+zend_objects_API.c
+zend_opcode.c
+Zend\zend_opcode.c(491) : warning C4018: '<' : signed/unsigned mismatch
+zend_operators.c
+zend_ptr_stack.c
+zend_qsort.c
+zend_sprintf.c
+zend_stack.c
+zend_stream.c
+zend_string.c
+zend_strtod.c
+zend_ts_hash.c
+zend_variables.c
+zend_virtual_cwd.c
+Zend\zend_virtual_cwd.c(383) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(469) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(695) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(702) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(1147) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(1181) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(1395) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+Zend\zend_virtual_cwd.c(1973) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+zend_vm_opcodes.c
+EXT com_dotnet build complete
+EXT curl build complete
+EXT enchant build complete
+EXT fileinfo build complete
+libpng_a.lib(png.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+   Creating library x64\Debug_TS\php_gd2.lib and object x64\Debug_TS\php_gd2.exp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+Generating code
+Finished generating code
+libxpm_a.lib(misc.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(misc.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Image.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Image.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Info.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Info.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(RdFToI.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(RdFToI.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Attrib.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Attrib.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(parse.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(parse.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(create.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(create.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(simx.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(simx.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(data.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(data.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(hashtab.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(hashtab.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(rgb.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(rgb.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+EXT gd build complete
+EXT gettext build complete
+EXT gmp build complete
+EXT imap build complete
+EXT intl build complete
+EXT ldap build complete
+EXT oci8_12c build complete
+EXT opcache build complete
+EXT openssl build complete
+EXT pgsql build complete
+EXT shmop build complete
+EXT snmp build complete
+EXT sockets build complete
+EXT sqlite3 build complete
+EXT tidy build complete
+EXT exif build complete
+EXT mysql build complete
+EXT mysqli build complete
+EXT pdo_firebird build complete
+EXT pdo_mysql build complete
+EXT pdo_oci build complete
+EXT pdo_odbc build complete
+EXT pdo_pgsql build complete
+EXT pdo_sqlite build complete
+EXT soap build complete
+EXT xmlrpc build complete
+EXT xsl build complete
+SAPI sapi\apache2handler (via sapi\apache2handler) build complete
+SAPI sapi\cgi build complete
+SAPI sapi\cli build complete
+	lib.exe /nologo /out:x64\Debug_TS\php5embed.lib /nologo  /debug /libpath:"C:\php-sdk\phpmaster\vc11\x64\deps\lib" x64\Debug_TS\sapi\embed\php_embed.obj x64\Debug_TS\php5ts_debug.lib   x64\Debug_TS\php5embed.lib.res
+LINK : warning LNK4044: unrecognized option '/debug'; ignored
+SAPI sapi\embed build complete

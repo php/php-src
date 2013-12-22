@@ -1,0 +1,79 @@
+Recreating build dirs
+Recreating build dirs
+Recreating build dirs
+EXT com_dotnet build complete
+EXT curl build complete
+EXT enchant build complete
+EXT fileinfo build complete
+libpng_a.lib(png.obj) : MSIL .netmodule or module compiled with /GL found; restarting link with /LTCG; add /LTCG to the link command line to improve linker performance
+   Creating library x64\Debug_TS\php_gd2.lib and object x64\Debug_TS\php_gd2.exp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+Generating code
+Finished generating code
+libxpm_a.lib(misc.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(misc.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Image.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Image.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Info.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Info.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(RdFToI.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(RdFToI.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(Attrib.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(Attrib.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(parse.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(parse.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(create.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(create.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(simx.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(simx.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(data.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(data.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(hashtab.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(hashtab.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+libxpm_a.lib(rgb.obj) : warning LNK4099: PDB 'vc110.pdb' was not found with 'libxpm_a.lib(rgb.obj)' or at 'C:\php-sdk\phpmaster\vc11\x64\str_size_and_int64\x64\Debug_TS\vc110.pdb'; linking object as if no debug info
+EXT gd build complete
+EXT gettext build complete
+EXT gmp build complete
+EXT imap build complete
+EXT intl build complete
+EXT ldap build complete
+EXT oci8_12c build complete
+ZendAccelerator.c
+ext\opcache\ZendAccelerator.c(903) : warning C4244: 'function' : conversion from '__int64' to 'uint', possible loss of data
+ext\opcache\ZendAccelerator.c(908) : warning C4267: 'function' : conversion from 'size_t' to 'uint', possible loss of data
+ext\opcache\ZendAccelerator.c(913) : warning C4267: 'function' : conversion from 'size_t' to 'uint', possible loss of data
+ext\opcache\ZendAccelerator.c(2450) : warning C4244: 'function' : conversion from 'zend_int_t' to 'zend_uint', possible loss of data
+shared_alloc_win32.c
+ext\opcache\shared_alloc_win32.c(97) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+ext\opcache\shared_alloc_win32.c(236) : warning C4267: 'function' : conversion from 'size_t' to 'DWORD', possible loss of data
+zend_accelerator_blacklist.c
+ext\opcache\zend_accelerator_blacklist.c(80) : warning C4267: 'initializing' : conversion from 'size_t' to 'int', possible loss of data
+ext\opcache\zend_accelerator_blacklist.c(348) : warning C4018: '<' : signed/unsigned mismatch
+zend_accelerator_debug.c
+zend_accelerator_hash.c
+zend_accelerator_module.c
+zend_accelerator_util_funcs.c
+zend_persist.c
+zend_persist_calc.c
+zend_shared_alloc.c
+ext\opcache\zend_shared_alloc.c(229) : warning C4267: 'function' : conversion from 'size_t' to 'int', possible loss of data
+ext\opcache\zend_shared_alloc.c(259) : warning C4267: 'function' : conversion from 'size_t' to 'int', possible loss of data
+ext\opcache\zend_shared_alloc.c(457) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+ext\opcache\zend_shared_alloc.c(459) : warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+EXT opcache build complete
+EXT openssl build complete
+EXT pgsql build complete
+EXT shmop build complete
+EXT snmp build complete
+EXT sockets build complete
+EXT sqlite3 build complete
+EXT tidy build complete
+EXT exif build complete
+EXT mysql build complete
+EXT mysqli build complete
+EXT pdo_firebird build complete
+EXT pdo_mysql build complete
+EXT pdo_oci build complete
+EXT pdo_odbc build complete
+EXT pdo_pgsql build complete
+EXT pdo_sqlite build complete
+EXT soap build complete
+EXT xmlrpc build complete
+EXT xsl build complete
+SAPI sapi\apache2handler (via sapi\apache2handler) build complete
+SAPI sapi\cgi build complete
+SAPI sapi\cli build complete
+	lib.exe /nologo /out:x64\Debug_TS\php5embed.lib /nologo  /debug /libpath:"C:\php-sdk\phpmaster\vc11\x64\deps\lib" x64\Debug_TS\sapi\embed\php_embed.obj x64\Debug_TS\php5ts_debug.lib   x64\Debug_TS\php5embed.lib.res
+LINK : warning LNK4044: unrecognized option '/debug'; ignored
+SAPI sapi\embed build complete
