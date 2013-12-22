@@ -157,7 +157,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API int zend_print_variable(zval *var) 
+ZEND_API zend_size_t zend_print_variable(zval *var)
 {
 	return zend_print_zval(var, 0);
 }

@@ -510,7 +510,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
 		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-			int last_len = *len;
+			zend_size_t last_len = *len;
 			zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 2, str, len);
 			if (last_len != *len) {
 				*len -= 2; /* remove last ', ' */

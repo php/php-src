@@ -445,7 +445,7 @@ void shutdown_scanner(TSRMLS_D);
 ZEND_API char *zend_set_compiled_filename(const char *new_compiled_filename TSRMLS_DC);
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TSRMLS_DC);
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
-ZEND_API zend_size_t zend_get_compiled_lineno(TSRMLS_D);
+ZEND_API zend_uint_t zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
@@ -715,7 +715,7 @@ int zend_get_class_fetch_type(const char *class_name, zend_size_t class_name_len
 typedef zend_bool (*zend_auto_global_callback)(const char *name, zend_size_t name_len TSRMLS_DC);
 typedef struct _zend_auto_global {
 	const char *name;
-	uint name_len;
+	zend_size_t name_len;
 	zend_auto_global_callback auto_global_callback;
 	zend_bool jit;
 	zend_bool armed;

@@ -1124,7 +1124,7 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, const char *method_name, int method_len) /* {{{ */
+static inline union _zend_function *zend_get_user_callstatic_function(zend_class_entry *ce, const char *method_name, zend_size_t method_len) /* {{{ */
 {
 	zend_internal_function *callstatic_user_call = emalloc(sizeof(zend_internal_function));
 	callstatic_user_call->type     = ZEND_INTERNAL_FUNCTION;

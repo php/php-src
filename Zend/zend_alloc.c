@@ -1745,7 +1745,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 	size_t limit,
 #if ZEND_DEBUG
 	const char *filename,
-	uint lineno,
+	zend_uint_t lineno,
 #endif
 	size_t size)
 {

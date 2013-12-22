@@ -59,7 +59,7 @@ ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
 ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data));
 ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC);
 ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...);
-ZEND_API int zend_llist_count(zend_llist *l);
+ZEND_API size_t zend_llist_count(zend_llist *l);
 ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC);
 
 /* traversal */

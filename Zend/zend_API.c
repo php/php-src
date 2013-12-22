@@ -3430,7 +3430,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 {
 	char *lname;
-	int name_len = strlen(module_name);
+	zend_size_t name_len = strlen(module_name);
 	zend_module_entry *module;
 
 	lname = zend_str_tolower_dup(module_name, name_len);

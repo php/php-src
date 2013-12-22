@@ -460,7 +460,8 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 
 ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 {
-	int value, tmp_value_len;
+	int value;
+	zend_size_t tmp_value_len;
 	char *tmp_value;
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {

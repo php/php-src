@@ -271,7 +271,7 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_size_t zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
+ZEND_API zend_uint_t zend_get_compiled_lineno(TSRMLS_D) /* {{{ */
 {
 	return CG(zend_lineno);
 }
