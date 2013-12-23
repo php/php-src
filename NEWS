@@ -41,6 +41,8 @@ PHP                                                                        NEWS
 - OPCache:
   . Fixed reavlidate_path=1 behavior to avoid caching of symlinks values.
     (Dmitry)
+  . Fixed Issue #140: "opcache.enable_file_override" doesn't respect
+    "opcache.revalidate_freq". (Dmitry).
 
 - SNMP:
   . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
