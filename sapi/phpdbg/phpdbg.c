@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -438,6 +439,35 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 	*/
 	if (phpdbg_booted) {
 		phpdbg_error("%s", message);
+
+		switch (PG(last_error_type)) {
+			case E_ERROR:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+			case E_PARSE:
+			case E_RECOVERABLE_ERROR:
+				if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
+					phpdbg_list_file(
+						zend_get_executed_filename(TSRMLS_C),
+						3,
+						zend_get_executed_lineno(TSRMLS_C)-1,
+						zend_get_executed_lineno(TSRMLS_C)
+						TSRMLS_CC
+					);
+				}
+
+				do {
+					switch (phpdbg_interactive(TSRMLS_C)) {
+						case PHPDBG_LEAVE:
+						case PHPDBG_FINISH:
+						case PHPDBG_UNTIL:
+						case PHPDBG_NEXT:
+							return;
+					}
+				} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+
+		}
 	} else fprintf(stdout, "%s\n", message);
 }
 /* }}} */
