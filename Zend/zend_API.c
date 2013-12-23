@@ -320,17 +320,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		spec_walk++;
 	}
 
-#ifdef ZEND_ENABLE_INT64
 # define ZEND_CHECK_INT_RANGE c == 'I'
-#else
-# define ZEND_CHECK_INT_RANGE c == 'I' || c == 'L'
-#endif
 
 	switch (c) {
-#ifdef ZEND_ENABLE_INT64
-		case 'l':
-		case 'L':
-#endif
 		case 'i':
 		case 'I':
 			{
@@ -348,7 +340,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), p, &d, -1)) == 0) {
-								return "long";
+								return "integer";
 							} else if (type == IS_DOUBLE) {
 								if (ZEND_CHECK_INT_RANGE) {
 									if (d > ZEND_INT_MAX) {
@@ -386,7 +378,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 					case IS_OBJECT:
 					case IS_RESOURCE:
 					default:
-						return "long";
+						return "integer";
 				}
 			}
 			break;
@@ -430,23 +422,15 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				}
 			}
 			break;
-#ifdef ZEND_USE_LEGACY_STRING_TYPES
-		case 'p': /* Deprecated, Legacy int size */
-		case 's': /* Deprecated, Legacy int size */
-#endif
 		case 'P': /* New zend_size_t size */
 		case 'S': /* New zend_size_t size */
 			{
 				char **p = va_arg(*va, char **);
 				zend_size_t pl;
 				zend_size_t *plsize;
-				int *plint;
 
-				if (c == 'p' || c == 's') {
-					plint = va_arg(*va, int *);
-				} else {
-					plsize = va_arg(*va, zend_size_t *);
-				}
+				plsize = va_arg(*va, zend_size_t *);
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 						if (check_null) {
@@ -469,14 +453,14 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 						}
 						*p = Z_STRVAL_PP(arg);
 						pl = Z_STRSIZE_PP(arg);
-						if ((c == 'p' || c == 'P') && CHECK_ZVAL_NULL_PATH(*arg)) {
+						if ((c == 'P') && CHECK_ZVAL_NULL_PATH(*arg)) {
 							return "a valid path";
 						}
 						break;
 
 					case IS_OBJECT:
 						if (parse_arg_object_to_string(arg, p, &pl, IS_STRING TSRMLS_CC) == SUCCESS) {
-							if ((c == 'p' || c == 'P') && CHECK_ZVAL_NULL_PATH(*arg)) {
+							if ((c == 'P') && CHECK_ZVAL_NULL_PATH(*arg)) {
 								return "a valid path";
 							}
 							break;
@@ -485,13 +469,10 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 					case IS_ARRAY:
 					case IS_RESOURCE:
 					default:
-						return (c == 's' || c == 'S') ? "string" : "a valid path";
+						return (c == 'S') ? "string" : "a valid path";
 				}
-				if (c == 'p' || c == 's') {
-					*plint = (int) pl;
-				} else {
-					*plsize = pl;
-				}
+
+				*plsize = pl;
 			}
 			break;
 
@@ -772,16 +753,14 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
 		switch (c) {
-			case 'l': case 'd':
-			case 's': case 'b':
+			case 'd': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
 			case 'z': case 'Z':
 			case 'C': case 'h':
 			case 'f': case 'A':
-			case 'H': case 'p':
-			case 'S': case 'P':
-			case 'i':
+			case 'H': case 'S':
+			case 'P': case 'i':
 				max_num_args++;
 				break;
 

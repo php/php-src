@@ -446,12 +446,6 @@ END_EXTERN_C()
 #define Z_DVAL(zval)			(zval).value.dval
 #define Z_STRVAL(zval)			(zval).value.str.val
 
-#ifdef ZEND_USE_LEGACY_STRING_TYPES
-#define Z_STRLEN(zval)			(zval).value.str.len
-#define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
-#define Z_STRLEN_PP(zval_pp)		Z_STRLEN(**zval_pp)
-#endif
-
 #define Z_STRSIZE(zval)			(zval).value.str.len
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_AST(zval)			(zval).value.ast
