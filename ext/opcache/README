@@ -40,7 +40,8 @@ after OPcache.
 Speed Tuning
 -------------
 
-We recommend the following configuration options for best performance.
+We recommend the following configuration options for best performance
+in a production environment.
 
 opcache.memory_consumption=128
 opcache.interned_strings_buffer=8
@@ -58,6 +59,9 @@ opcache.enable_file_override=1
 
 In some cases you may like to prefer enabling/disabling some features
 to avoid incompatibilities at the cost of some performance degradation.
+
+For development environment we would recommend setting opcache.revalidate_freq
+into 0.
 
 Configuration Directives
 ------------------------
