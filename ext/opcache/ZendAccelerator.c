@@ -877,7 +877,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	return FAILURE;
 }
 
-static inline int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
+int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
 {
 	if (ZCG(accel_directives).revalidate_freq &&
 	    (persistent_script->dynamic_members.revalidate >= ZCSG(revalidate_at))) {
