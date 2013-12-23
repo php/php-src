@@ -274,7 +274,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 								Z_STRVAL(op_array->literals[opline->op1.constant + 1].constant), 
 								Z_STRSIZE(op_array->literals[opline->op1.constant].constant) + 1, 
 								Z_HASH_P(&op_array->literals[opline->op1.constant + 1].constant),
-								(void **)&pce) == FAILURE) {
+								(void **)&pce) == FAILURE ||
+								((*pce)->type == ZEND_INTERNAL_CLASS &&
+								 (*pce)->info.internal.module->type != MODULE_PERSISTENT) ||
+								((*pce)->type == ZEND_USER_CLASS &&
+								 ZEND_CE_FILENAME(*pce) != op_array->filename)) {
 							break;
 						}
 					}
