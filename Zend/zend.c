@@ -44,10 +44,6 @@
 # define GLOBAL_CONSTANTS_TABLE		EG(zend_constants)
 #endif
 
-#if defined(ZEND_WIN32) && ZEND_DEBUG
-BOOL WINAPI IsDebuggerPresent(VOID);
-#endif
-
 /* true multithread-shared globals */
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API zend_size_t (*zend_printf)(const char *format, ...);
