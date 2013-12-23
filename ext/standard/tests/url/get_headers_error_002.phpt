@@ -39,17 +39,17 @@ echo "Done"
 
 -- Testing get_headers() function with format argument as type string --
 
-Warning: get_headers() expects parameter 2 to be long, string given in %s on line 13
+Warning: get_headers() expects parameter 2 to be integer, string given in %s on line 13
 NULL
 
 -- Testing get_headers() function with format argument as type array --
 
-Warning: get_headers() expects parameter 2 to be long, array given in %s on line 17
+Warning: get_headers() expects parameter 2 to be integer, array given in %s on line 17
 NULL
 
 -- Testing get_headers() function with format argument as type object --
 
-Warning: get_headers() expects parameter 2 to be long, object given in %s on line 26
+Warning: get_headers() expects parameter 2 to be integer, object given in %s on line 26
 NULL
 Done
 

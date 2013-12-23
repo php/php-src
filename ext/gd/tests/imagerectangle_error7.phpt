@@ -16,4 +16,4 @@ $image = imagecreatetruecolor( 100, 100 );
 imagerectangle( $image, 0, 0, 50, 50, 'wrong param' );
 ?> 
 --EXPECTF--
-Warning: imagerectangle() expects parameter 6 to be long, %s given in %s on line %d
+Warning: imagerectangle() expects parameter 6 to be integer, %s given in %s on line %d

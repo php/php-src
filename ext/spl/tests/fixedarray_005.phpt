@@ -9,4 +9,4 @@ $a = new SplFixedArray($b);
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be long, object given in %s on line %d
+Warning: SplFixedArray::__construct() expects parameter 1 to be integer, object given in %s on line %d

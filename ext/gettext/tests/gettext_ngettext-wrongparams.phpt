@@ -21,7 +21,7 @@ Warning: ngettext() expects parameter 1 to be string, array given in %s on line 
 
 Warning: ngettext() expects parameter 2 to be string, array given in %s on line 3
 
-Warning: ngettext() expects parameter 3 to be long, array given in %s on line 4
+Warning: ngettext() expects parameter 3 to be integer, array given in %s on line 4
 
 Warning: ngettext() expects exactly 3 parameters, 0 given in %s on line 5
 

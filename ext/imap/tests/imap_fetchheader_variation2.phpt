@@ -209,52 +209,52 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, array given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, array given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, array given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 24 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, array given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 25 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, object given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 26 --
@@ -269,6 +269,6 @@ bool(false)
 
 -- Iteration 28 --
 
-Warning: imap_fetchheader() expects parameter 2 to be long, resource given in %s on line %d
+Warning: imap_fetchheader() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 ===DONE===

@@ -45,9 +45,9 @@ NULL
 
 -- Testing glob() with invalid arguments --
 
-Warning: glob() expects parameter 2 to be long, string given in %s on line %d
+Warning: glob() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
-Warning: glob() expects parameter 2 to be long, string given in %s on line %d
+Warning: glob() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 Done

@@ -39,7 +39,7 @@ bool(false)
 Warning: snmp_set_valueretrieval() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 
-Warning: snmp_set_valueretrieval() expects parameter 1 to be long, %s given in %s on line %d
+Warning: snmp_set_valueretrieval() expects parameter 1 to be integer, %s given in %s on line %d
 bool(false)
 
 Warning: snmp_set_valueretrieval(): Unknown SNMP value retrieval method '67' in %s on line %d

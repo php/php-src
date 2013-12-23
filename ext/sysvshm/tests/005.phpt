@@ -51,7 +51,7 @@ bool(false)
 Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 
-Warning: shm_get_var() expects parameter 2 to be long, array given in %s005.php on line %d
+Warning: shm_get_var() expects parameter 2 to be integer, array given in %s005.php on line %d
 NULL
 string(11) "test string"
 object(stdClass)#%d (0) {

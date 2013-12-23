@@ -146,15 +146,15 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: strrpos() expects parameter 3 to be long, object given in %s on line %d
+Warning: strrpos() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: strrpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
-Warning: strrpos() expects parameter 3 to be long, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 22 --
 bool(false)

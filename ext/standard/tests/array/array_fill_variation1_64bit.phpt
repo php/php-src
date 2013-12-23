@@ -146,23 +146,23 @@ array(2) {
 }
 -- Iteration 6 --
 
-Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: array_fill() expects parameter 1 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 array(2) {
@@ -208,23 +208,23 @@ array(2) {
 }
 -- Iteration 17 --
 
-Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_fill() expects parameter 1 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: array_fill() expects parameter 1 to be long, object given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 -- Iteration 22 --
 array(2) {
@@ -242,6 +242,6 @@ array(2) {
 }
 -- Iteration 24 --
 
-Warning: array_fill() expects parameter 1 to be long, resource given in %s on line %d
+Warning: array_fill() expects parameter 1 to be integer, resource given in %s on line %d
 NULL
 Done

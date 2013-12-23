@@ -29,7 +29,7 @@ NULL
 Warning: IntlGregorianCalendar::__construct(): intlgregcal_create_instance: no variant with 4 arguments (excluding trailing NULLs) in %s on line %d
 NULL
 
-Warning: IntlGregorianCalendar::__construct() expects parameter 6 to be long, array given in %s on line %d
+Warning: IntlGregorianCalendar::__construct() expects parameter 6 to be integer, array given in %s on line %d
 
 Warning: IntlGregorianCalendar::__construct(): intlgregcal_create_instance: bad arguments in %s on line %d
 NULL

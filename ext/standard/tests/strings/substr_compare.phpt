@@ -36,6 +36,6 @@ Test
 Warning: substr_compare(): The length must be greater than zero in %s on line %d
 bool(false)
 
-Warning: substr_compare() expects parameter 4 to be long, string given in %s on line %d
+Warning: substr_compare() expects parameter 4 to be integer, string given in %s on line %d
 bool(false)
 Done

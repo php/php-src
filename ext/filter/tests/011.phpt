@@ -40,10 +40,10 @@ float(12345.7)
 string(29) "&#60;p&#62;string&#60;/p&#62;"
 bool(false)
 
-Warning: filter_var() expects parameter 2 to be long, string given in %s011.php on line %d
+Warning: filter_var() expects parameter 2 to be integer, string given in %s011.php on line %d
 NULL
 
-Warning: filter_input() expects parameter 3 to be long, string given in %s011.php on line %d
+Warning: filter_input() expects parameter 3 to be integer, string given in %s011.php on line %d
 NULL
 
 Warning: filter_var() expects at most 3 parameters, 5 given in %s011.php on line %d

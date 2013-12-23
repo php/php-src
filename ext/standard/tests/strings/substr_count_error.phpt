@@ -55,7 +55,7 @@ bool(false)
 
 Notice: Undefined variable: str in %s on line %d
 
-Warning: substr_count() expects parameter 3 to be long, string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 Notice: Undefined variable: str in %s on line %d

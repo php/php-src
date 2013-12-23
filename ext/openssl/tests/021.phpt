@@ -54,7 +54,7 @@ bool(false)
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be long, string given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 4 to be integer, string given in %s on line %d
 NULL
 
 Warning: openssl_csr_sign() expects parameter 5 to be array, string given in %s on line %d
@@ -74,7 +74,7 @@ Warning: openssl_csr_sign(): key array must be of the form array(0 => key, 1 => 
 Warning: openssl_csr_sign(): cannot get private key from parameter 3 in %s on line %d
 bool(false)
 
-Warning: openssl_csr_sign() expects parameter 4 to be long, array given in %s on line %d
+Warning: openssl_csr_sign() expects parameter 4 to be integer, array given in %s on line %d
 NULL
 resource(%d) of type (OpenSSL X.509)
 

@@ -107,22 +107,22 @@ string(20) "Jan 01 1970 05:30:00"
 
 --empty array--
 
-Warning: strftime() expects parameter 2 to be long, array given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: strftime() expects parameter 2 to be long, array given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: strftime() expects parameter 2 to be long, array given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: strftime() expects parameter 2 to be long, array given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -145,42 +145,42 @@ string(20) "Jan 01 1970 05:30:00"
 
 --empty string DQ--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: strftime() expects parameter 2 to be long, string given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: strftime() expects parameter 2 to be long, object given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: strftime() expects parameter 2 to be long, object given in %s on line %d
+Warning: strftime() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 
 --undefined var--

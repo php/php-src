@@ -162,32 +162,32 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: mb_stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: mb_stripos() expects parameter 3 to be long, object given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -198,6 +198,6 @@ int(8)
 
 -- Iteration 24 --
 
-Warning: mb_stripos() expects parameter 3 to be long, resource given in %s on line %d
+Warning: mb_stripos() expects parameter 3 to be integer, resource given in %s on line %d
 bool(false)
 Done

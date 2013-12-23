@@ -54,7 +54,7 @@ array(7) {
   }
 }
 
-Warning: filter_var() expects parameter 2 to be long, array given in %s on line %d
+Warning: filter_var() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 string(1) "1"
 string(1) "1"

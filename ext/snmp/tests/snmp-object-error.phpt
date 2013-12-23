@@ -76,8 +76,8 @@ var_dump($session->max_oids);
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given
-SNMP::__construct() expects parameter 4 to be long, string given
-SNMP::__construct() expects parameter 5 to be long, string given
+SNMP::__construct() expects parameter 4 to be integer, string given
+SNMP::__construct() expects parameter 5 to be integer, string given
 Unknown SNMP protocol version
 Exception handling
 
@@ -100,10 +100,10 @@ Warning: SNMP::get(): Invalid or uninitialized SNMP object in %s on line %d
 bool(false)
 bool(true)
 
-Warning: SNMP::walk() expects parameter 3 to be long, string given in %s on line %d
+Warning: SNMP::walk() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
-Warning: SNMP::walk() expects parameter 4 to be long, string given in %s on line %d
+Warning: SNMP::walk() expects parameter 4 to be integer, string given in %s on line %d
 bool(false)
 
 Warning: SNMP::get() expects at least 1 parameter, 0 given in %s on line %d

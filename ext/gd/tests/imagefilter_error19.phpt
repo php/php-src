@@ -14,5 +14,5 @@ $image = imagecreatetruecolor(180, 30);
 var_dump(imagefilter($image, IMG_FILTER_BRIGHTNESS, 'wrong parameter'));
 ?>
 --EXPECTF--
-Warning: imagefilter() expects parameter 3 to be long, %unicode_string_optional% given in %s on line %d
+Warning: imagefilter() expects parameter 3 to be integer, %unicode_string_optional% given in %s on line %d
 bool(false)

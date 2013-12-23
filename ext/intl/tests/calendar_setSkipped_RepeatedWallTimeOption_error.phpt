@@ -53,12 +53,12 @@ Warning: IntlCalendar::setRepeatedWallTimeOption() expects exactly 1 parameter, 
 Warning: IntlCalendar::setRepeatedWallTimeOption(): intlcal_set_repeated_wall_time_option: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::setSkippedWallTimeOption() expects parameter 1 to be long, array given in %s on line %d
+Warning: IntlCalendar::setSkippedWallTimeOption() expects parameter 1 to be integer, array given in %s on line %d
 
 Warning: IntlCalendar::setSkippedWallTimeOption(): intlcal_set_skipped_wall_time_option: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::setRepeatedWallTimeOption() expects parameter 1 to be long, array given in %s on line %d
+Warning: IntlCalendar::setRepeatedWallTimeOption() expects parameter 1 to be integer, array given in %s on line %d
 
 Warning: IntlCalendar::setRepeatedWallTimeOption(): intlcal_set_repeated_wall_time_option: bad arguments in %s on line %d
 bool(false)
