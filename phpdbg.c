@@ -25,6 +25,7 @@
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_break.h"
+#include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
@@ -609,7 +610,8 @@ const char phpdbg_ini_hardcoded[] =
 "display_errors=Off\n"
 "log_errors=On\n"
 "max_execution_time=0\n"
-"max_input_time=-1\n\0";
+"max_input_time=-1\n"
+"error_log=\n\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
