@@ -290,8 +290,9 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
 		char *format = NULL, *buffer = NULL;
+		const time_t tt = tp.tv_sec;
 
-		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tp.tv_sec));
+		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
 		asprintf(
 			&buffer, friendly, tp.tv_usec/1000);
 		asprintf(
