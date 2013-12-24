@@ -595,8 +595,8 @@ static int fcgi_read_request(fcgi_request *req)
 		unsigned char *p = buf + sizeof(fcgi_header);
 		HashPosition pos;
 		char * str_index;
-		uint str_length;
-		ulong num_index;
+		php_size_t str_length;
+		php_uint_t num_index;
 		int key_type;
 		zval ** value;
 
@@ -612,7 +612,7 @@ static int fcgi_read_request(fcgi_request *req)
 
 		zend_hash_internal_pointer_reset_ex(req->env, &pos);
 		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
-			int zlen;
+			php_size_t zlen;
 			zend_hash_move_forward_ex(req->env, &pos);
 			if (key_type != HASH_KEY_IS_STRING) {
 				continue;
@@ -621,7 +621,7 @@ static int fcgi_read_request(fcgi_request *req)
 				continue;
 			}
 			--str_length;
-			zlen = Z_STRLEN_PP(value);
+			zlen = Z_STRSIZE_PP(value);
 			if ((p + 4 + 4 + str_length + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1083,7 +1083,7 @@ void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, s
 	zvalue = pemalloc(sizeof(*zvalue), 1);
 	Z_TYPE_P(zvalue) = IS_STRING;
 	Z_STRVAL_P(zvalue) = pestrndup(value, value_len, 1);
-	Z_STRLEN_P(zvalue) = value_len;
+	Z_STRSIZE_P(zvalue) = value_len;
 	zend_hash_add(&fcgi_mgmt_vars, name, name_len + 1, &zvalue, sizeof(zvalue), NULL);
 }
 

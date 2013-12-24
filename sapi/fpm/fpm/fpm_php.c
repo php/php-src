@@ -23,7 +23,7 @@
 
 static char **limit_extensions = NULL;
 
-static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
+static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, php_int_t new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
@@ -48,7 +48,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint TSRMLS_DC) TSRMLS_DC) /* {{{ */
+static void fpm_php_disable(char *value, int (*zend_disable)(char *, php_size_t TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
 	char *s = 0, *e = value;
 
@@ -83,8 +83,8 @@ int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode) /* {{{ */
 
 	char *name = kv->key;
 	char *value = kv->value;
-	int name_len = strlen(name);
-	int value_len = strlen(value);
+	php_size_t name_len = strlen(name);
+	php_size_t value_len = strlen(value);
 
 	if (!strcmp(name, "extension") && *value) {
 		zval zv;
@@ -262,8 +262,8 @@ char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC) /* {{{ */
 {
 	zval **data, **tmp;
 	char *string_key;
-	uint string_len;
-	ulong num_key;
+	php_size_t string_len;
+	php_uint_t num_key;
 	if (!table || !key) {
 		return NULL;
 	}

@@ -295,7 +295,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 #endif
 }
 
-static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
+static php_size_t sapi_cgibin_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
 	uint remaining = str_length;
@@ -494,7 +494,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static php_size_t sapi_cgi_read_post(char *buffer, php_size_t count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
@@ -569,8 +569,8 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	fcgi_request *request;
 	HashPosition pos;
 	char *var, **val;
-	uint var_len;
-	ulong idx;
+	php_size_t var_len;
+	php_uint_t idx;
 	int filter_arg;
 
 
@@ -607,7 +607,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	     zend_hash_get_current_data_ex(request->env, (void **) &val, &pos) == SUCCESS;
 	     zend_hash_move_forward_ex(request->env, &pos)
 	) {
-		unsigned int new_val_len;
+		php_size_t new_val_len;
 
 		if (sapi_module.input_filter(filter_arg, var, val, strlen(*val), &new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(var, *val, new_val_len, array_ptr TSRMLS_CC);
@@ -617,7 +617,7 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	unsigned int php_self_len;
+	php_size_t php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -627,9 +627,9 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
-		unsigned int script_name_len = script_name ? strlen(script_name) : 0;
+		php_size_t script_name_len = script_name ? strlen(script_name) : 0;
 		char *path_info = sapi_cgibin_getenv("PATH_INFO", sizeof("PATH_INFO") - 1 TSRMLS_CC);
-		unsigned int path_info_len = path_info ? strlen(path_info) : 0;
+		php_size_t path_info_len = path_info ? strlen(path_info) : 0;
 
 		php_self_len = script_name_len + path_info_len;
 		php_self = emalloc(php_self_len + 1);
