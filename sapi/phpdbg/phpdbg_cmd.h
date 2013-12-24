@@ -55,11 +55,11 @@ struct _phpdbg_input_t {
 
 typedef struct _phpdbg_param {
 	phpdbg_param_type type;
-	long num;
-	zend_ulong addr;
+	php_int_t num;
+	php_uint_t addr;
 	struct {
 		char *name;
-		long line;
+		php_int_t line;
 	} file;
 	struct {
 		char *class;
@@ -90,7 +90,7 @@ struct _phpdbg_command_t {
 #define PHPDBG_EX(v) (EG(current_execute_data)->v) 
 
 typedef struct {
-	int num;
+	php_int_t num;
 	zend_execute_data *execute_data;
 } phpdbg_frame_t;
 /* }}} */
@@ -132,7 +132,7 @@ PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_para
 PHPDBG_API void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t*, phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t * TSRMLS_DC);
-PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
+PHPDBG_API php_uint_t phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
 PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC);
 

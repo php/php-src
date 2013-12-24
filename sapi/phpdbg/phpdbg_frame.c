@@ -46,13 +46,13 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 	EG(called_scope) = PHPDBG_EX(current_called_scope);
 } /* }}} */
 
-void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
+void phpdbg_switch_frame(php_int_t frame TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data = PHPDBG_FRAME(num)?PHPDBG_FRAME(execute_data):EG(current_execute_data);
-	int i = 0;
+	php_int_t i = 0;
 
 	if (PHPDBG_FRAME(num) == frame) {
-		phpdbg_notice("Already in frame #%d", frame);
+		phpdbg_notice("Already in frame #%pd", frame);
 		return;
 	}
 
@@ -67,7 +67,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	}
 
 	if (execute_data == NULL) {
-		phpdbg_error("No frame #%d", frame);
+		phpdbg_error("No frame #%pd", frame);
 		return;
 	}
 
@@ -186,14 +186,14 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 
 		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
 			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("frame #0: {main} at %s:%ld", Z_STRVAL_PP(file), Z_IVAL_PP(line));
+			phpdbg_write("frame #0: {main} at %s:%pd", Z_STRVAL_PP(file), Z_IVAL_PP(line));
 			break;
 		}
 
 		if (user_defined == SUCCESS) {
 			phpdbg_write("frame #%d: ", i++);
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
-			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_IVAL_PP(line));
+			phpdbg_writeln(" at %s:%pd", Z_STRVAL_PP(file), Z_IVAL_PP(line));
 		} else {
 			phpdbg_write(" => ");
 			phpdbg_dump_prototype(tmp TSRMLS_CC);

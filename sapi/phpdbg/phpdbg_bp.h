@@ -28,7 +28,7 @@ typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 #define phpdbg_breakbase(name) \
 	int         id; \
 	zend_uchar  type; \
-	zend_ulong  hits; \
+	php_uint_t  hits; \
 	zend_bool   disabled; \
 	const char *name /* }}} */
 
@@ -42,7 +42,7 @@ typedef struct _phpdbg_breakbase_t {
  */
 typedef struct _phpdbg_breakfile_t {
 	phpdbg_breakbase(filename);
-	long        line;
+	php_int_t        line;
 } phpdbg_breakfile_t;
 
 /**
@@ -70,8 +70,8 @@ typedef struct _phpdbg_breakopline_t {
 	size_t      func_len;
 	const char *class_name;
 	size_t      class_len;
-	zend_ulong  opline_num;
-	zend_ulong  opline;
+	php_uint_t  opline_num;
+	php_uint_t  opline;
 } phpdbg_breakopline_t;
 
 /**
@@ -79,7 +79,7 @@ typedef struct _phpdbg_breakopline_t {
  */
 typedef struct _phpdbg_breakline_t {
 	phpdbg_breakbase(name);
-	zend_ulong opline;
+	php_uint_t opline;
 	phpdbg_breakopline_t *base;
 } phpdbg_breakline_t;
 
@@ -88,7 +88,7 @@ typedef struct _phpdbg_breakline_t {
  */
 typedef struct _phpdbg_breakop_t {
 	phpdbg_breakbase(name);
-	zend_ulong hash;
+	php_uint_t hash;
 } phpdbg_breakop_t;
 
 /**
@@ -99,7 +99,7 @@ typedef struct _phpdbg_breakcond_t {
 	size_t          code_len;
 	zend_bool       paramed;
 	phpdbg_param_t  param;
-	zend_ulong      hash;
+	php_uint_t      hash;
 	zend_op_array  *ops;
 } phpdbg_breakcond_t;
 
@@ -109,15 +109,15 @@ PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_o
 PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Creation API */
-PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, long lineno TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, php_int_t lineno TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_symbol(const char* func_name, size_t func_name_len TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_method(const char* class_name, const char* func_name TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opcode(const char* opname, size_t opname_len TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_opline(php_uint_t opline TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, zend_ulong opline TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend_ulong opline TSRMLS_DC);
-PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong opline TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, php_uint_t opline TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, php_uint_t opline TSRMLS_DC);
+PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, php_uint_t opline TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_expression(const char* expression, size_t expression_len TSRMLS_DC);
 PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC); /* }}} */
 
@@ -126,19 +126,19 @@ PHPDBG_API phpdbg_breakbase_t* phpdbg_find_breakpoint(zend_execute_data* TSRMLS_
 
 /* {{{ Misc Breakpoint API */
 PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t* brake, zend_bool output TSRMLS_DC);
-PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC);
+PHPDBG_API void phpdbg_print_breakpoints(php_uint_t type TSRMLS_DC);
 PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t* brake TSRMLS_DC);
 PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D);
 PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D);
-PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC);
+PHPDBG_API void phpdbg_delete_breakpoint(php_uint_t num TSRMLS_DC);
 PHPDBG_API void phpdbg_enable_breakpoints(TSRMLS_D);
-PHPDBG_API void phpdbg_enable_breakpoint(zend_ulong id TSRMLS_DC);
-PHPDBG_API void phpdbg_disable_breakpoint(zend_ulong id TSRMLS_DC);
+PHPDBG_API void phpdbg_enable_breakpoint(php_uint_t id TSRMLS_DC);
+PHPDBG_API void phpdbg_disable_breakpoint(php_uint_t id TSRMLS_DC);
 PHPDBG_API void phpdbg_disable_breakpoints(TSRMLS_D); /* }}} */
 
 /* {{{ Breakbase API */
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC);
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(php_uint_t id TSRMLS_DC);
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(php_uint_t id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Exportation API */
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC); /* }}} */

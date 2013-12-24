@@ -249,9 +249,9 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 	}
 } /* }}} */
 
-PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API php_uint_t phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
-	zend_ulong hash = param->type;
+	php_uint_t hash = param->type;
 
 	switch (param->type) {
 		case STR_PARAM:

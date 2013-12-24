@@ -135,7 +135,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) /* {{{ */
 {
-	struct stat sb;
+	zend_stat_t sb;
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -266,7 +266,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM: {
-			struct stat sb;
+			zend_stat_t sb;
 
 			if (VCWD_STAT(param->str, &sb) != FAILURE) {
 				if (sb.st_mode & (S_IFREG|S_IFLNK)) {
@@ -805,7 +805,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 						"Incorrect usage of source command, see help");
 				}
 			} else {
-				struct stat sb;
+				zend_stat_t sb;
 				if (VCWD_STAT(param->str, &sb) != -1) {
 					phpdbg_try_file_init(param->str, param->len, 0 TSRMLS_CC);
 				} else phpdbg_error("Cannot stat %s", param->str);

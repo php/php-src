@@ -223,7 +223,7 @@ static PHP_FUNCTION(phpdbg_exec)
 	}
 	
 	{
-		struct stat sb;
+		zend_stat_t sb;
 		zend_bool result = 1;
 		
 		if (VCWD_STAT(exec, &sb) != FAILURE) {
@@ -293,7 +293,7 @@ static PHP_FUNCTION(phpdbg_break)
 		phpdbg_clear_param(&param TSRMLS_CC);
 
 	} else if (EG(current_execute_data) && EG(active_op_array)) {
-		zend_ulong opline_num = (EG(current_execute_data)->opline -
+		php_uint_t opline_num = (EG(current_execute_data)->opline -
 				EG(active_op_array)->opcodes);
 
 		phpdbg_set_breakpoint_opline_ex(
@@ -808,9 +808,9 @@ int main(int argc, char **argv) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *sapi_name;
 	char *ini_entries;
-	int   ini_entries_len;
+	php_size_t   ini_entries_len;
 	char **zend_extensions = NULL;
-	zend_ulong zend_extensions_len = 0L;
+	php_uint_t zend_extensions_len = 0L;
 	zend_bool ini_ignore;
 	char *ini_override;
 	char *exec;
@@ -823,7 +823,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_ulong flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
-	long cleaning = 0;
+	php_int_t cleaning = 0;
 	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
@@ -910,7 +910,7 @@ phpdbg_main:
 				ini_override = strdup(php_optarg);
 				break;
 			case 'd': {
-				int len = strlen(php_optarg);
+				size_t len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
