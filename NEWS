@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.8
+26 Dec 2013, PHP 5.5.8RC1
 
 - Core:
   . Disallowed JMP into a finally block. (Laruence)
