@@ -1261,7 +1261,7 @@ zend_vm_enter:
 					zend_hash_clean(
 						&PHPDBG_G(seek));
 					phpdbg_notice(
-						"Breaking for leave at %s:%u",
+						"Breaking for leave at %s:%pu",
 						zend_get_executed_filename(TSRMLS_C),
 						zend_get_executed_lineno(TSRMLS_C)
 					);

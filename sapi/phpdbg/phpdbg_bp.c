@@ -114,7 +114,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 {
 	HashPosition position[2];
 	HashTable **table = NULL;
-	zend_ulong id = 0L;
+	php_uint_t id = Z_I(0);
 
 	if (zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP])) {
 		phpdbg_notice(
@@ -715,12 +715,12 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	new_break.code = estrndup(expr, expr_len);
 	new_break.code_len = expr_len;
 
-	Z_STRLEN(pv) = expr_len + sizeof("return ;") - 1;
-	Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+	Z_STRSIZE(pv) = expr_len + sizeof("return ;") - 1;
+	Z_STRVAL(pv) = emalloc(Z_STRSIZE(pv) + 1);
 	memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 	memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, expr, expr_len);
-	Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-	Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+	Z_STRVAL(pv)[Z_STRSIZE(pv) - 1] = ';';
+	Z_STRVAL(pv)[Z_STRSIZE(pv)] = '\0';
 	Z_TYPE(pv) = IS_STRING;
 
 	new_break.ops = zend_compile_string(
@@ -1116,8 +1116,8 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 
 	if ((brake = phpdbg_find_breakbase_ex(num, &table, &position TSRMLS_CC))) {
 		char *key;
-		zend_uint klen;
-		zend_ulong idx;
+		php_size_t klen;
+		php_uint_t idx;
 		int type = brake->type;
 		char *name = NULL;
 		size_t name_len = 0L;
@@ -1394,8 +1394,8 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *class_table;
 			char *class_name = NULL;
-			zend_uint class_len = 0;
-			zend_ulong class_idx = 0L;
+			php_size_t class_len = 0;
+			php_uint_t class_idx = 0L;
 
 			phpdbg_writeln(SEPARATE);
 			phpdbg_writeln("Method Breakpoints:");
@@ -1473,8 +1473,8 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[3];
 			HashTable *class_table, *method_table;
 			char *class_name = NULL, *method_name = NULL;
-			zend_uint class_len = 0, method_len = 0;
-			zend_ulong class_idx = 0L, method_idx = 0L;
+			php_size_t class_len = 0, method_len = 0;
+			php_uint_t class_idx = Z_I(0), method_idx = Z_I(0);
 
 			phpdbg_writeln(SEPARATE);
 			phpdbg_writeln("Method opline Breakpoints:");
@@ -1512,8 +1512,8 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *function_table;
 			char *function_name = NULL;
-			zend_uint function_len = 0;
-			zend_ulong function_idx = 0L;
+			php_size_t function_len = 0;
+			php_uint_t function_idx = 0L;
 
 			phpdbg_writeln(SEPARATE);
 			phpdbg_writeln("Function opline Breakpoints:");
@@ -1542,8 +1542,8 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *file_table;
 			char *file_name = NULL;
-			zend_uint file_len = 0;
-			zend_ulong file_idx = 0L;
+			php_size_t file_len = 0;
+			php_uint_t file_idx = 0L;
 
 			phpdbg_writeln(SEPARATE);
 			phpdbg_writeln("File opline Breakpoints:");

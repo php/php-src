@@ -519,9 +519,9 @@ PHPDBG_HELP(register) /* {{{ */
 	if (zend_hash_num_elements(&PHPDBG_G(registered))) {
    		HashPosition position;
    		char *name = NULL;
-   		zend_uint name_len = 0;
+   		php_size_t name_len = 0;
 
-   		phpdbg_notice("Registered Functions (%d)", zend_hash_num_elements(&PHPDBG_G(registered)));
+   		phpdbg_notice("Registered Functions (%pd)", zend_hash_num_elements(&PHPDBG_G(registered)));
    		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(registered), &position);
    			zend_hash_get_current_key_ex(&PHPDBG_G(registered), &name, &name_len, NULL, 1, &position) == HASH_KEY_IS_STRING;
    			zend_hash_move_forward_ex(&PHPDBG_G(registered), &position)) {
