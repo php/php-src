@@ -137,9 +137,8 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 
 static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	zend_function *function = (zend_function*) data;
+	TSRMLS_FETCH();
 
 	destroy_zend_function(
 		function TSRMLS_CC);
