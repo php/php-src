@@ -523,7 +523,7 @@ PHP_INI_END()
 
 static PHP_GINIT_FUNCTION(sybase)
 {
-	long opt;
+	php_int_t opt;
 
 	if (cs_ctx_alloc(CTLIB_VERSION, &sybase_globals->context)!=CS_SUCCEED || ct_init(sybase_globals->context, CTLIB_VERSION)!=CS_SUCCEED) {
 		return;
@@ -629,7 +629,7 @@ PHP_RSHUTDOWN_FUNCTION(sybase)
 static int php_sybase_do_connect_internal(sybase_link *sybase, char *host, char *user, char *passwd, char *charset, char *appname TSRMLS_DC)
 {
 	CS_LOCALE *tmp_locale;
-	long packetsize;
+	php_int_t packetsize;
 
 	/* set a CS_CONNECTION record */
 	if (ct_con_alloc(SybCtG(context), &sybase->connection)!=CS_SUCCEED) {
@@ -906,7 +906,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-static int php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
+static php_int_t php_sybase_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 {
 	if (SybCtG(default_link)==-1) { /* no link opened yet, implicitly open one */
 		ht = 0;
@@ -934,7 +934,7 @@ PHP_FUNCTION(sybase_pconnect)
 
 /* }}} */
 
-inline static int php_sybase_connection_id(zval *sybase_link_index, int *id TSRMLS_DC)
+inline static int php_sybase_connection_id(zval *sybase_link_index, php_int_t *id TSRMLS_DC)
 {
 	if (NULL == sybase_link_index) {
 		if (-1 == SybCtG(default_link)) {
@@ -953,7 +953,7 @@ PHP_FUNCTION(sybase_close)
 {
 	zval *sybase_link_index = NULL;
 	sybase_link *sybase_ptr;
-	int id;
+	php_int_t id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &sybase_link_index) == FAILURE) {
 		return;
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(sybase_select_db)
 {
 	zval *sybase_link_index = NULL;
 	char *db, *cmdbuf;
-	int id;
+	php_int_t id;
 	php_size_t len;
 	sybase_link *sybase_ptr;
 
@@ -1192,7 +1192,7 @@ static int php_sybase_finish_results(sybase_result *result TSRMLS_DC)
 		ZVAL_STRINGL(&result, buf, length- 1, 1);       \
 	}
 
-static int php_sybase_fetch_result_row(sybase_result *result, int numrows TSRMLS_DC)
+static int php_sybase_fetch_result_row(sybase_result *result, php_int_t numrows TSRMLS_DC)
 {
 	int i, j;
 	CS_INT retcode;
@@ -1427,8 +1427,8 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 	zval *sybase_link_index = NULL;
 	zend_bool store = 1;
 	char *query;
-	int len;
-	php_size_t id, deadlock_count;
+	zend_size_t len;
+	php_int_t id, deadlock_count;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
 	CS_INT restype;
@@ -2043,7 +2043,7 @@ PHP_FUNCTION(sybase_result)
 	zval *field;
 	zval *sybase_result_index = NULL;
 	php_int_t row;
-	int field_offset = 0;
+	php_int_t field_offset = 0;
 	sybase_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz", &sybase_result_index, &row, &field) == FAILURE) {
@@ -2099,7 +2099,7 @@ PHP_FUNCTION(sybase_affected_rows)
 {
 	zval *sybase_link_index = NULL;
 	sybase_link *sybase_ptr;
-	int id;
+	php_int_t id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &sybase_link_index) == FAILURE) {
 		return;
@@ -2195,7 +2195,7 @@ PHP_FUNCTION(sybase_set_message_handler)
 	zval *sybase_link_index= NULL;
 	sybase_link *sybase_ptr;
 	zval **callback;
-	int id;
+	php_int_t id;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f!|r", &fci, &cache, &sybase_link_index) == FAILURE) {
 		return;
