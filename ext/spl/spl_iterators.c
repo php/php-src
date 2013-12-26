@@ -2061,7 +2061,7 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	if (use_copy) {
-		efree(subject);
+		str_efree(subject);
 	}
 } /* }}} */
 

@@ -387,6 +387,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 {
 	Bucket *p, *q;
 
+	/* empty string */
+	CG(interned_empty_string) = accel_new_interned_string("", sizeof(""), 0 TSRMLS_CC);
+
 	/* function table hash keys */
 	p = CG(function_table)->pListHead;
 	while (p) {

@@ -146,6 +146,9 @@ struct _zend_compiler_globals {
 	char *interned_strings_end;
 	char *interned_strings_top;
 	char *interned_strings_snapshot_top;
+#ifndef ZTS
+	char *interned_empty_string;
+#endif
 
 	HashTable interned_strings;
 
