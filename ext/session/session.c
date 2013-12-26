@@ -513,9 +513,9 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		PHP_MD5Final(PS(session_data_hash), &context);
 
 		php_session_decode(val, vallen TSRMLS_CC);
-		efree(val);
+		str_efree(val);
 	} else {
-			memset(PS(session_data_hash),'\0', 16);
+		memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {

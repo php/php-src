@@ -2461,14 +2461,14 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 
 	if (is_class_member) {
 		length = sizeof("::")-1 + Z_STRLEN(result->u.constant) + Z_STRLEN(name->u.constant);
-		Z_STRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), length+1);
+		Z_STRVAL(result->u.constant) = str_erealloc(Z_STRVAL(result->u.constant), length+1);
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)], "::", sizeof("::")-1);
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("::")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
 		str_efree(Z_STRVAL(name->u.constant));
 		Z_STRLEN(result->u.constant) = length;
 	} else {
 		length = sizeof("\\")-1 + Z_STRLEN(result->u.constant) + Z_STRLEN(name->u.constant);
-		Z_STRVAL(result->u.constant) = erealloc(Z_STRVAL(result->u.constant), length+1);
+		Z_STRVAL(result->u.constant) = str_erealloc(Z_STRVAL(result->u.constant), length+1);
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant)], "\\", sizeof("\\")-1);
 		memcpy(&Z_STRVAL(result->u.constant)[Z_STRLEN(result->u.constant) + sizeof("\\")-1], Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1);
 		str_efree(Z_STRVAL(name->u.constant));
