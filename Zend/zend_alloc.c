@@ -201,7 +201,7 @@ static int zend_mm_dev_zero_fd = -1;
 
 static zend_mm_storage* zend_mm_mem_mmap_zero_init(void *params)
 {
-	if (zend_mm_dev_zero_fd != -1) {
+	if (zend_mm_dev_zero_fd == -1) {
 		zend_mm_dev_zero_fd = open("/dev/zero", O_RDWR, S_IRUSR | S_IWUSR);
 	}
 	if (zend_mm_dev_zero_fd >= 0) {
