@@ -23,10 +23,10 @@ $prefix = array (
 				10.5e2,
 				null,
 				true,
-				false				
+				false
 				);
 
-for ($i = 0; $i < count($prefix); $i++) {				
+for ($i = 0; $i < count($prefix); $i++) {
 	var_dump(uniqid($prefix[$i]));
 	var_dump(uniqid($prefix[$i], true));
 	var_dump(uniqid($prefix[$i], false));
@@ -39,33 +39,33 @@ for ($i = 0; $i < count($prefix); $i++) {
 *** Testing uniqid() : basic functionality ***
 
 uniqid() without a prefix
-string(13) "%s"
+string(23) "%s.%s"
 string(23) "%s.%s"
 string(13) "%s"
 
 
 uniqid() with a prefix
-string(18) "99999%s"
+string(28) "99999%s.%s"
 string(28) "99999%s.%s"
 string(18) "99999%s"
 
-string(18) "99999%s"
+string(28) "99999%s.%s"
 string(28) "99999%s.%s"
 string(18) "99999%s"
 
-string(17) "1050%s"
+string(27) "1050%s.%s"
 string(27) "1050%s.%s"
 string(17) "1050%s"
 
-string(13) "%s"
+string(23) "%s.%s"
 string(23) "%s.%s"
 string(13) "%s"
 
-string(14) "1%s"
+string(24) "1%s.%s"
 string(24) "1%s.%s"
 string(14) "1%s"
 
-string(13) "%s"
+string(23) "%s.%s"
 string(23) "%s.%s"
 string(13) "%s"
 

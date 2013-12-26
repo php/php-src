@@ -44,11 +44,7 @@
 PHP_FUNCTION(uniqid)
 {
 	char *prefix = "";
-#if defined(__CYGWIN__)
 	zend_bool more_entropy = 1;
-#else
-	zend_bool more_entropy = 0;
-#endif
 	char *uniqid;
 	int sec, usec, prefix_len = 0;
 	struct timeval tv;
