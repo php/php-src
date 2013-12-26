@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Improved IS_VAR operands fetching. (Laruence, Dmitry)
+  . Improved empty string handling. Now ZE uses an interned string instead of
+    allocation new empty string each time. (Laruence, Dmitry)
   . Implemented internal operator overloading
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
   . Made calls from incompatible context issue an E_DEPRECATED warning instead

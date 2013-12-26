@@ -680,7 +680,11 @@ END_EXTERN_C()
 #define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
 
+#ifndef ZTS
+#define STR_EMPTY_ALLOC() CG(interned_empty_string)? CG(interned_empty_string) : estrndup("", sizeof("")-1)
+#else
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
+#endif
 
 #define STR_REALLOC(ptr, size) \
 			ptr = (char *) erealloc(ptr, size);
