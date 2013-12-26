@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Disallowed JMP into a finally block. (Laruence)
   . Added validation of class names in the autoload process. (Dmitry)
   . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
+  . Fixed ZEND_MM_MEM_TYPE=mmap_zero. (Dmitry, Tony)
   . Fixed bug #66041 (list() fails to unpack yielded ArrayAccess object).
     (Nikita)
   . Fixed bug #65764 (generators/throw_rethrow FAIL with
