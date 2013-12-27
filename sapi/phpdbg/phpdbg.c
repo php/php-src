@@ -1037,11 +1037,10 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				printf(
-					"phpdbg %s (built: %s %s)\nCopyright (c) 2013 %s\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,
-					PHPDBG_AUTHORS,
 					PHP_VERSION,
 					get_zend_version()
 				);
