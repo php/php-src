@@ -147,14 +147,14 @@ ZEND_API int _zend_hash_init(HashTable *ht, zend_uint_t nSize, dtor_func_t pDest
 
 	SET_INCONSISTENT(HT_OK);
 
-	if (nSize >= 0x80000000) {
+	if (nSize >= ZEND_INT_MAX) {
 		/* prevent overflow */
-		ht->nTableSize = 0x80000000;
+		ht->nTableSize = ZEND_INT_MAX;
 	} else {
 		while ((Z_UI(1) << i) < nSize) {
 			i++;
 		}
-		ht->nTableSize = 1 << i;
+		ht->nTableSize = Z_UI(1) << i;
 	}
 
 	ht->nTableMask = 0;	/* 0 means that ht->arBuckets is uninitialized */
