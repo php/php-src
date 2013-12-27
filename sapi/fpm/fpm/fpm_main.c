@@ -1353,7 +1353,7 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
