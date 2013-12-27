@@ -141,9 +141,9 @@ ZEND_API zend_uint_t zend_hash_func(const char *arKey, zend_size_t nKeyLength)
  
 static const Bucket *uninitialized_bucket = NULL;
 
-ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_init(HashTable *ht, zend_uint_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
-	uint i = 3;
+	zend_uint_t i = 3;
 
 	SET_INCONSISTENT(HT_OK);
 
@@ -151,7 +151,7 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor,
 		/* prevent overflow */
 		ht->nTableSize = 0x80000000;
 	} else {
-		while ((1U << i) < nSize) {
+		while ((Z_UI(1) << i) < nSize) {
 			i++;
 		}
 		ht->nTableSize = 1 << i;
@@ -172,7 +172,7 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor,
 }
 
 
-ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_init_ex(HashTable *ht, zend_uint_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
 {
 	int retval = _zend_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_CC);
 
@@ -188,10 +188,10 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 
 
 
-ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, void *pData, zend_uint_t nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	zend_uint_t h;
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -254,9 +254,9 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_siz
 	return SUCCESS;
 }
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, void *pData, zend_uint_t nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -329,9 +329,9 @@ ZEND_API int zend_hash_add_empty_element(HashTable *ht, const char *arKey, zend_
 }
 
 
-ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
+ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h, void *pData, zend_uint_t nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -416,7 +416,7 @@ static void zend_hash_do_resize(HashTable *ht)
 ZEND_API int zend_hash_rehash(HashTable *ht)
 {
 	Bucket *p;
-	uint nIndex;
+	zend_uint_t nIndex;
 
 	IS_CONSISTENT(ht);
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
@@ -436,7 +436,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, int flag)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -569,7 +569,7 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 	if (p->pLast) {
 		p->pLast->pNext = p->pNext;
 	} else {
-		uint nIndex;
+		zend_uint_t nIndex;
 
 		nIndex = p->h & ht->nTableMask;
 		ht->arBuckets[nIndex] = p->pNext;
@@ -762,7 +762,7 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 }
 
 
-ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
+ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, zend_uint_t size)
 {
 	Bucket *p;
 	void *new_entry;
@@ -793,7 +793,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 }
 
 
-ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC)
+ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, zend_uint_t size, int overwrite ZEND_FILE_LINE_DC)
 {
 	Bucket *p;
 	void *t;
@@ -830,7 +830,7 @@ static zend_bool zend_hash_replace_checker_wrapper(HashTable *target, void *sour
 }
 
 
-ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam)
+ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, zend_uint_t size, merge_checker_func_t pMergeSource, void *pParam)
 {
 	Bucket *p;
 	void *t;
@@ -858,7 +858,7 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, void **pData)
 {
 	zend_uint_t h;
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -881,7 +881,7 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_size_t 
 
 ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h, void **pData)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	ZEND_ASSERT(nKeyLength != 0);
@@ -906,7 +906,7 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_s
 ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_size_t nKeyLength)
 {
 	zend_uint_t h;
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -928,7 +928,7 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_size_
 
 ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend_size_t nKeyLength, zend_uint_t h)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	ZEND_ASSERT(nKeyLength != 0);
@@ -952,7 +952,7 @@ ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend
 
 ZEND_API int zend_hash_index_find(const HashTable *ht, zend_uint_t h, void **pData)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -973,7 +973,7 @@ ZEND_API int zend_hash_index_find(const HashTable *ht, zend_uint_t h, void **pDa
 
 ZEND_API int zend_hash_index_exists(const HashTable *ht, zend_uint_t h)
 {
-	uint nIndex;
+	zend_uint_t nIndex;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -1574,7 +1574,7 @@ void zend_hash_display_pListTail(const HashTable *ht)
 void zend_hash_display(const HashTable *ht)
 {
 	Bucket *p;
-	uint i;
+	zend_uint_t i;
 
 	if (UNEXPECTED(ht->nNumOfElements == 0)) {
 		zend_output_debug_string(0, "The hash is empty");

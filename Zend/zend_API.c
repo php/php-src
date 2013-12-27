@@ -1016,7 +1016,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 /* }}} */
 
 /* Argument parsing API -- andrei */
-ZEND_API int _array_init(zval *arg, uint size ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API int _array_init(zval *arg, zend_uint_t size ZEND_FILE_LINE_DC) /* {{{ */
 {
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));
 
