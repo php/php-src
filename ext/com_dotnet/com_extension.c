@@ -22,14 +22,14 @@
 #include "config.h"
 #endif
 
+#include <intsafe.h>
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
-
-#include <intsafe.h>
 
 ZEND_DECLARE_MODULE_GLOBALS(com_dotnet)
 static PHP_GINIT_FUNCTION(com_dotnet);
