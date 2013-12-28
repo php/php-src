@@ -29,7 +29,8 @@ PHP                                                                        NEWS
   . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
 
 - GD:
-  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()). (Laruence)
+  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
+    (Laruence, Remi)
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
     
