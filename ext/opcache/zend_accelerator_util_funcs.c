@@ -88,8 +88,8 @@ zend_persistent_script* create_persistent_script(void)
 
 static int compact_hash_table(HashTable *ht)
 {
-	uint i = 3;
-	uint nSize;
+	zend_uint_t i = 3;
+	zend_uint_t nSize;
 	Bucket **t;
 
 	if (!ht->nNumOfElements) {
@@ -97,14 +97,14 @@ static int compact_hash_table(HashTable *ht)
 		return 1;
 	}
 
-	if (ht->nNumOfElements >= 0x80000000) {
+	if (ht->nNumOfElements >= ZEND_INT_MAX) {
 		/* prevent overflow */
-		nSize = 0x80000000;
+		nSize = ZEND_INT_MAX;
 	} else {
-		while ((1U << i) < ht->nNumOfElements) {
+		while ((Z_UI(1) << i) < ht->nNumOfElements) {
 			i++;
 		}
-		nSize = 1 << i;
+		nSize = Z_UI(1) << i;
 	}
 
 	if (nSize >= ht->nTableSize) {
@@ -877,7 +877,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 #endif
 }
 
-static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, uint size, int ignore_dups, void **fail_data, void **conflict_data)
+static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, zend_uint_t size, int ignore_dups, void **fail_data, void **conflict_data)
 {
 	Bucket *p;
 	void *t;
