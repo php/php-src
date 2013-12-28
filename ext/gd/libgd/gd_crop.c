@@ -43,6 +43,7 @@ static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold);
 gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 {
 	gdImagePtr dst;
+	int y;
 
 	/* check size */
 	if (crop->width<=0 || crop->height<=0) {
@@ -78,7 +79,7 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 #if 0
 printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x, crop->y, crop->width, crop->height);
 #endif
-	int y = crop->y;
+	y = crop->y;
 	if (src->trueColor) {
 		unsigned int dst_y = 0;
 		while (y < (crop->y + (crop->height - 1))) {
