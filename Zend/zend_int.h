@@ -91,6 +91,7 @@ typedef long zend_off_t;
 #  define ZEND_UINT_FMT_SPEC "I64u"
 #  define ZEND_STRTOL_PTR _strtoi64
 #  define ZEND_STRTOUL_PTR _strtoui64
+#  define ZEND_ABS _abs64
 # else
 #  define ZEND_ITOA(i, s, len) \
 	do { \
@@ -106,6 +107,7 @@ typedef long zend_off_t;
 #  define ZEND_UINT_FMT_SPEC "llu"
 #  define ZEND_STRTOL_PTR strtoll
 #  define ZEND_STRTOUL_PTR strtoull
+#  define ZEND_ABS llabs
 # endif
 #else
 # define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
@@ -127,6 +129,7 @@ typedef long zend_off_t;
 # define ZEND_UINT_FMT_SPEC "lu"
 # define ZEND_STRTOL_PTR strtol
 # define ZEND_STRTOUL_PTR strtoul
+# define ZEND_ABS abs
 #endif
 
 
