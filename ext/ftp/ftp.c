@@ -178,6 +178,10 @@ ftp_close(ftpbuf_t *ftp)
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
 	}
+	if (ftp->stream && ftp->closestream) {
+		TSRMLS_FETCH();
+		php_stream_close(ftp->stream);
+	}
 	if (ftp->fd != -1) {
 #if HAVE_OPENSSL_EXT
 		if (ftp->ssl_active) {
