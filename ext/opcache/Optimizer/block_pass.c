@@ -1,7 +1,7 @@
 #define DEBUG_BLOCKPASS 0
 
 /* Checks if a constant (like "true") may be replaced by its value */
-static int zend_get_persistent_constant(char *name, uint name_len, zval *result, int copy TSRMLS_DC ELS_DC)
+static int zend_get_persistent_constant(char *name, zend_uint_t name_len, zval *result, int copy TSRMLS_DC ELS_DC)
 {
 	zend_constant *c;
 	char *lookup_name;
@@ -583,7 +583,7 @@ static void strip_nop(zend_code_block *block)
 
 	while (opline < end) {
 		zend_op *src;
-		int len = 0;
+		zend_size_t len = 0;
 
 		while (opline < end && opline->opcode == ZEND_NOP) {
 			opline++;
@@ -838,7 +838,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				case ZEND_JMPZNZ:
 				{
 					/* T = BOOL_NOT(X) + JMPZNZ(T,L1,L2) -> NOP, JMPZNZ(X,L2,L1) */
-					int op_t;
+					zend_uint_t op_t;
 					zend_code_block *op_b;
 
 					op_t = opline->extended_value;
@@ -907,7 +907,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			 * Float to string conversion may be affected by current
 			 * locale setting.
 			 */
-			int l;
+			zend_size_t l;
 
 			if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
 				convert_to_string_safe(&ZEND_OP1_LITERAL(opline));
@@ -944,7 +944,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				  ZEND_RESULT(VAR_SOURCE(opline->op1)).var == ZEND_OP1(opline).var) {
 			/* compress consecutive CONCATs */
 			zend_op *src = VAR_SOURCE(opline->op1);
-			int l;
+			zend_size_t l;
 
 			if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 				convert_to_string_safe(&ZEND_OP2_LITERAL(opline));
@@ -1013,7 +1013,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			/* evaluate constant expressions */
 			int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) = get_binary_op(opline->opcode);
 			zval result;
-			int er;
+			zend_int_t er;
 
             if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
                 ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_INT &&

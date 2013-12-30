@@ -270,7 +270,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 						} else if (op_array->opcodes[target].opcode == ZEND_JMPZNZ &&
 								  SAME_VAR(op_array->opcodes[target].op1, T)) {
 							/* Check for JMPZNZ with same cond variable */
-							int new_target;
+							zend_uint_t new_target;
 							CHECK_JMP2(target, continue_jmp_ex_optimization);
 							if (opline->opcode == ZEND_JMPZ_EX) {
 								new_target = ZEND_OP2(&op_array->opcodes[target]).opline_num;
@@ -398,7 +398,7 @@ continue_jmpznz_optimization:
 				/* JMPZNZ(X,L1,L2), L2: JMP(L3) => JMPZNZ(X,L1,L3), L2: JMP(L3) */
 				while (opline->extended_value < op_array->last
 						&& op_array->opcodes[opline->extended_value].opcode == ZEND_JMP) {
-					int target = opline->extended_value;
+					zend_uint_t target = opline->extended_value;
 					CHECK_JMP(target, done_jmp_optimization);
 					opline->extended_value = ZEND_OP1(&op_array->opcodes[target]).opline_num;
 				}

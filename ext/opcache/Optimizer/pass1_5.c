@@ -44,7 +44,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) = get_binary_op(opline->opcode);
 				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
 				zval result;
-				int er;
+				zend_int_t er;
 
 				if (opline->opcode == ZEND_DIV &&
 					Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_INT &&
@@ -117,7 +117,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				unary_op_type unary_op = get_unary_op(opline->opcode);
 				zval result;
 				zend_uint tv = ZEND_RESULT(opline).var;		/* temporary variable */
-				int er;
+				zend_int_t er;
 
 				er = EG(error_reporting);
 				EG(error_reporting) = 0;

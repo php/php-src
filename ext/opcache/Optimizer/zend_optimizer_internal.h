@@ -58,8 +58,8 @@ typedef struct _zend_block_source zend_block_source;
 struct _zend_code_block {
 	int                 access;
 	zend_op            *start_opline;
-	int                 start_opline_no;
-	int                 len;
+	zend_uint_t                 start_opline_no;
+	zend_size_t                 len;
 	zend_code_block    *op1_to;
 	zend_code_block    *op2_to;
 	zend_code_block    *ext_to;

@@ -98,7 +98,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 	int l_true = -1;
 	HashTable hash;
 	char *key;
-	int key_len;
+	zend_size_t key_len;
 
 	if (op_array->last_literal) {
 		info = (literal_info*)ecalloc(op_array->last_literal, sizeof(literal_info));

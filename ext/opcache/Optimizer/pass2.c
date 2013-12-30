@@ -146,7 +146,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 
 			case ZEND_JMPZNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					int opline_num;
+					zend_uint_t opline_num;
 #if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
 					if (zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC)) {
 #else
@@ -167,8 +167,8 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_CONT:
 				{
 				    zend_brk_cont_element *jmp_to;
-					int array_offset;
-					int nest_levels;
+					zend_int_t array_offset;
+					zend_int_t nest_levels;
 					int dont_optimize = 0;
 
 					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
