@@ -2183,9 +2183,9 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	int name_len;
+	php_size_t name_len;
 	char *name;
-	long flags=0, opsys, attr;
+	php_int_t flags=0, opsys, attr;
 	zip_int64_t idx;
 
 	if (!this) {
@@ -2194,7 +2194,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sii|i",
 			&name, &name_len, &opsys, &attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2221,7 +2221,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 {
 	struct zip *intern;
 	zval *this = getThis();
-	long index, flags=0, opsys, attr;
+	php_int_t index, flags=0, opsys, attr;
 	struct zip_stat sb;
 
 	if (!this) {
@@ -2230,7 +2230,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iii|i",
 			&index, &opsys, &attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2250,9 +2250,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 {
 	struct zip *intern;
 	zval *this = getThis(), *z_opsys, *z_attr;
-	int name_len;
+	zend_size_t name_len;
 	char *name;
-	long flags=0;
+	php_int_t flags=0;
 	zip_uint8_t opsys;
 	zip_uint32_t attr;
 	zip_int64_t idx;
@@ -2263,7 +2263,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Szz|i",
 			&name, &name_len, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2281,9 +2281,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 		RETURN_FALSE;
 	}
 	zval_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
+	ZVAL_INT(z_opsys, opsys);
 	zval_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZVAL_INT(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -2294,7 +2294,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 {
 	struct zip *intern;
 	zval *this = getThis(), *z_opsys, *z_attr;
-	long index, flags=0;
+	php_int_t index, flags=0;
 	zip_uint8_t opsys;
 	zip_uint32_t attr;
 	struct zip_stat sb;
@@ -2305,7 +2305,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 
 	ZIP_FROM_OBJECT(intern, this);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lzz|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "izz|i",
 			&index, &z_opsys, &z_attr, &flags) == FAILURE) {
 		return;
 	}
@@ -2316,9 +2316,9 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 		RETURN_FALSE;
 	}
 	zval_dtor(z_opsys);
-	ZVAL_LONG(z_opsys, opsys);
+	ZVAL_INT(z_opsys, opsys);
 	zval_dtor(z_attr);
-	ZVAL_LONG(z_attr, attr);
+	ZVAL_INT(z_attr, attr);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3106,27 +3106,27 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_INT("ER_DELETED",  	ZIP_ER_DELETED);	/* N Entry has been deleted */
 
 #ifdef ZIP_OPSYS_DEFAULT
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_DOS",				ZIP_OPSYS_DOS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_AMIGA",			ZIP_OPSYS_AMIGA);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OPENVMS",			ZIP_OPSYS_OPENVMS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_UNIX",				ZIP_OPSYS_UNIX);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VM_CMS",			ZIP_OPSYS_VM_CMS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ATARI_ST",			ZIP_OPSYS_ATARI_ST);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_2",				ZIP_OPSYS_OS_2);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MACINTOSH",		ZIP_OPSYS_MACINTOSH);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_Z_SYSTEM",			ZIP_OPSYS_Z_SYSTEM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_WINDOWS_NTFS",		ZIP_OPSYS_WINDOWS_NTFS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_MVS",				ZIP_OPSYS_MVS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VSE",				ZIP_OPSYS_VSE);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ACORN_RISC",		ZIP_OPSYS_ACORN_RISC);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_VFAT",				ZIP_OPSYS_VFAT);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_ALTERNATE_MVS",	ZIP_OPSYS_ALTERNATE_MVS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_BEOS",				ZIP_OPSYS_BEOS);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_TANDEM",			ZIP_OPSYS_TANDEM);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_400",			ZIP_OPSYS_OS_400);
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_OS_X",				ZIP_OPSYS_OS_X);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_DOS",				ZIP_OPSYS_DOS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_AMIGA",			ZIP_OPSYS_AMIGA);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OPENVMS",			ZIP_OPSYS_OPENVMS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_UNIX",				ZIP_OPSYS_UNIX);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VM_CMS",			ZIP_OPSYS_VM_CMS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ATARI_ST",			ZIP_OPSYS_ATARI_ST);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_2",				ZIP_OPSYS_OS_2);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_MACINTOSH",		ZIP_OPSYS_MACINTOSH);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_Z_SYSTEM",			ZIP_OPSYS_Z_SYSTEM);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_WINDOWS_NTFS",		ZIP_OPSYS_WINDOWS_NTFS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_MVS",				ZIP_OPSYS_MVS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VSE",				ZIP_OPSYS_VSE);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ACORN_RISC",		ZIP_OPSYS_ACORN_RISC);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_VFAT",				ZIP_OPSYS_VFAT);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_ALTERNATE_MVS",	ZIP_OPSYS_ALTERNATE_MVS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_BEOS",				ZIP_OPSYS_BEOS);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_TANDEM",			ZIP_OPSYS_TANDEM);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_400",			ZIP_OPSYS_OS_400);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_OS_X",				ZIP_OPSYS_OS_X);
 
-	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_DEFAULT", ZIP_OPSYS_DEFAULT);
+	REGISTER_ZIP_CLASS_CONST_INT("OPSYS_DEFAULT", ZIP_OPSYS_DEFAULT);
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
 
 	php_register_url_stream_wrapper("zip", &php_stream_zip_wrapper TSRMLS_CC);
