@@ -63,7 +63,7 @@ zip_set_file_compression(struct zip *za, zip_uint64_t idx,
     
     old_method = (e->orig == NULL ? ZIP_CM_DEFAULT : e->orig->comp_method);
     
-    /* XXX: revisit this when flags are supported, since they may require a recompression */
+    /* TODO: revisit this when flags are supported, since they may require a recompression */
     
     if (method == old_method) {
 	if (e->changes) {

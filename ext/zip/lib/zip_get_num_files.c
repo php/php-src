@@ -44,6 +44,6 @@ zip_get_num_files(struct zip *za)
     if (za == NULL)
 	return -1;
 
-    /* XXX: check for overflow */
+    /* TODO: check for overflow */
     return (int)za->nentry;
 }

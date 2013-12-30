@@ -68,7 +68,7 @@ zip_stat_index(struct zip *za, zip_uint64_t index, zip_flags_t flags,
 	st->comp_method = (zip_uint16_t)de->comp_method;
 	if (de->bitflags & ZIP_GPBF_ENCRYPTED) {
 	    if (de->bitflags & ZIP_GPBF_STRONG_ENCRYPTION) {
-		/* XXX */
+		/* TODO */
 		st->encryption_method = ZIP_EM_UNKNOWN;
 	    }
 	    else
