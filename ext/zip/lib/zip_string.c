@@ -64,7 +64,7 @@ _zip_string_equal(const struct zip_string *a, const struct zip_string *b)
     if (a->length != b->length)
 	return 0;
 
-    /* XXX: encoding */
+    /* TODO: encoding */
 
     return (memcmp(a->raw, b->raw, a->length) == 0);
 }

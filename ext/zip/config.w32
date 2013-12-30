@@ -5,6 +5,7 @@ ARG_ENABLE("zip", "ZIP support", "yes");
 
 if (PHP_ZIP != "no") {
 	if (CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS_ZIP", "..\\zlib;" + PHP_ZIP) &&
+		CHECK_HEADER_ADD_INCLUDE("zipconf.h", "CFLAGS_ZIP", configure_module_dirname + "\\lib;" + PHP_ZIP) &&
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib", "zip", PHP_ZIP) ||  CHECK_LIB("zlib.lib", "zip", PHP_ZIP))) || 
 			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "zip", PHP_ZIP)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
 		) {
@@ -26,7 +27,8 @@ if (PHP_ZIP != "no") {
 			zip_source_function.c zip_source_layered.c zip_source_open.c zip_source_pkware.c zip_source_pop.c\
 			zip_source_read.c zip_source_stat.c zip_source_window.c zip_source_zip.c zip_source_zip_new.c\
 			zip_stat.c zip_stat_index.c zip_stat_init.c zip_strerror.c zip_string.c zip_unchange.c zip_unchange_all.c\
-			zip_unchange_archive.c zip_unchange_data.c zip_utf-8.c mkstemp.c", "zip");
+			zip_unchange_archive.c zip_unchange_data.c zip_utf-8.c mkstemp.c \
+			zip_file_set_external_attributes.c zip_file_get_external_attributes.c", "zip");
 
 		AC_DEFINE('HAVE_ZIP', 1);
 		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32");

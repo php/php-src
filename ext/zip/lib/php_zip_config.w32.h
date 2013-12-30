@@ -54,4 +54,7 @@ typedef long long ssize_t;
 #  endif
 #endif
 
+# undef strcasecmp
+# define strcasecmp _strcmpi
+
 #endif /* HAD_CONFIG_H */

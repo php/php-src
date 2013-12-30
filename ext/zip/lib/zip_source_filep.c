@@ -125,7 +125,8 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 {
     struct read_file *z;
     char *buf;
-    size_t i, n;
+    zip_uint64_t n;
+    size_t i;
 
     z = (struct read_file *)state;
     buf = (char *)data;
@@ -151,11 +152,13 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 	return 0;
 	
     case ZIP_SOURCE_READ:
-	/* XXX: return INVAL if len > size_t max */
 	if (z->remain != -1)
 	    n = len > (zip_uint64_t)z->remain ? (zip_uint64_t)z->remain : len;
 	else
 	    n = len;
+            
+        if (n > SIZE_MAX)
+            n = SIZE_MAX;
 
 	if (!z->closep) {
 	    /* we might share this file with others, so let's be safe */
@@ -166,7 +169,7 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 	    }
 	}
 
-	if ((i=fread(buf, 1, n, z->f)) == 0) {
+	if ((i=fread(buf, 1, (size_t)n, z->f)) == 0) {
             if (ferror(z->f)) {
                 z->e[0] = ZIP_ER_READ;
                 z->e[1] = errno;

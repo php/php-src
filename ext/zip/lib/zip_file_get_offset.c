@@ -63,7 +63,7 @@ _zip_file_get_offset(const struct zip *za, zip_uint64_t idx, struct zip_error *e
 	return 0;
     }
 
-    /* XXX: cache? */
+    /* TODO: cache? */
     if ((size=_zip_dirent_size(za->zp, ZIP_EF_LOCAL, error)) < 0)
 	return 0;
 

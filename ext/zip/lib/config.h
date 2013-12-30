@@ -21,5 +21,9 @@
 
 #else
 /* Building in PHP tree */
-#include "php_config.h"
+# ifdef _WIN32
+#  include "config.w32.h"
+# else
+#  include "php_config.h"
+# endif
 #endif
