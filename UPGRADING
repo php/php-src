@@ -162,4 +162,5 @@ PHP X.Y UPGRADE NOTES
   overridden by setting a Connection header via the header context option.
 
 - Zip:
-  New --with-libzip option allow to use system libzip. Version > 0.11 required.
+  New --with-libzip option allow to use system libzip. Version > 0.11 required,
+  Version >= 0.11.2 recommended for all features.

@@ -95,9 +95,14 @@ PHP                                                                        NEWS
     (Mike)
 
 - Zip:
-  . update libzip to version 1.11.1.
+  . update libzip to version 1.11.2.
     PHP don't use any ilibzip private symbol anymore.  (Pierre, Remi)
   . new method ZipArchive::setPassword($password). (Pierre)
   . add --with-libzip option to build with system libzip. (Remi)
+  . new methods:
+    ZipArchive::setExternalAttributesName($name, $opsys, $attr [, $flags])
+    ZipArchive::setExternalAttributesIndex($idx, $opsys, $attr [, $flags])
+    ZipArchive::getExternalAttributesName($name, &$opsys, &$attr [, $flags])
+    ZipArchive::getExternalAttributesIndex($idx, &$opsys, &$attr [, $flags])
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
