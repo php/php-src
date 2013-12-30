@@ -113,7 +113,7 @@ compress_read(struct zip_source *src, struct deflate *ctx,
 	return 0;
 	
     ctx->zstr.next_out = (Bytef *)data;
-    ctx->zstr.avail_out = (uInt)len; /* XXX: check for overflow */
+    ctx->zstr.avail_out = (uInt)len; /* TODO: check for overflow */
 
     end = 0;
     while (!end) {
@@ -144,7 +144,7 @@ compress_read(struct zip_source *src, struct deflate *ctx,
 		else if (n == 0) {
 		    ctx->eof = 1;
 		    ctx->size = ctx->zstr.total_in;
-		    /* XXX: check against stat of src? */
+		    /* TODO: check against stat of src? */
 		}
 		else {
 		    ctx->zstr.next_in = (Bytef *)ctx->buffer;
@@ -187,7 +187,7 @@ decompress_read(struct zip_source *src, struct deflate *ctx,
 	return 0;
 	
     ctx->zstr.next_out = (Bytef *)data;
-    ctx->zstr.avail_out = (uInt)len; /* XXX: check for overflow */
+    ctx->zstr.avail_out = (uInt)len; /* TODO: check for overflow */
 
     end = 0;
     while (!end && ctx->zstr.avail_out) {
@@ -332,7 +332,7 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 	ctx->zstr.zfree = Z_NULL;
 	ctx->zstr.opaque = NULL;
 	ctx->zstr.next_in = (Bytef *)ctx->buffer;
-	ctx->zstr.avail_in = (uInt)n /* XXX: check for overflow */;
+	ctx->zstr.avail_in = (uInt)n /* TODO: check for overflow */;
 
 	/* negative value to tell zlib that there is no header */
 	if ((ret=inflateInit2(&ctx->zstr, -MAX_WBITS)) != Z_OK) {
@@ -370,7 +370,7 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 	return sizeof(int)*2;
 
     case ZIP_SOURCE_FREE:
-	/* XXX: inflateEnd if close was not called */
+	/* TODO: inflateEnd if close was not called */
 	free(ctx);
 	return 0;
 
@@ -387,6 +387,6 @@ deflate_decompress(struct zip_source *src, void *ud, void *data,
 static void
 deflate_free(struct deflate *ctx)
 {
-    /* XXX: deflateEnd if close was not called */
+    /* TODO: deflateEnd if close was not called */
     free(ctx);
 }

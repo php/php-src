@@ -45,14 +45,14 @@ static void zend_optimizer_collect_constant(HashTable **constants, zval *name, z
 	}
 	val = *value;
 	zval_copy_ctor(&val);
-	zend_hash_add(*constants, Z_STRVAL_P(name), Z_STRSIZE_P(name)+1, (void**)&val, sizeof(zval), NULL);
+	zend_hash_add(*constants, Z_STRVAL_P(name), Z_STRLEN_P(name)+1, (void**)&val, sizeof(zval), NULL);
 }
 
 static int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {
 	zval *val;
 
-	if (zend_hash_find(constants, Z_STRVAL_P(name), Z_STRSIZE_P(name)+1, (void**)&val) == SUCCESS) {
+	if (zend_hash_find(constants, Z_STRVAL_P(name), Z_STRLEN_P(name)+1, (void**)&val) == SUCCESS) {
 		*value = *val;
 		zval_copy_ctor(value);
 		return 1;
@@ -64,7 +64,7 @@ static int zend_optimizer_get_collected_constant(HashTable *constants, zval *nam
 static int zend_optimizer_lookup_cv(zend_op_array *op_array, char* name, int name_len)
 {
 	int i = 0;
-	zend_uint_t hash_value = zend_inline_hash_func(name, name_len+1);
+	ulong hash_value = zend_inline_hash_func(name, name_len+1);
 
 	while (i < op_array->last_var) {
 		if (op_array->vars[i].name == name ||
@@ -103,9 +103,9 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 	return i;
 }
 
-# define LITERAL_INT(op, val) do { \
+# define LITERAL_LONG(op, val) do { \
 		zval _c; \
-		ZVAL_INT(&_c, val); \
+		ZVAL_LONG(&_c, val); \
 		op.constant = zend_optimizer_add_literal(op_array, &_c TSRMLS_CC); \
 	} while (0)
 
@@ -127,7 +127,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 
 #else
 
-# define LITERAL_INT(op, val) ZVAL_INT(&op.u.constant, val)
+# define LITERAL_LONG(op, val) ZVAL_LONG(&op.u.constant, val)
 
 # define LITERAL_BOOL(op, val) ZVAL_BOOL(&op.u.constant, val)
 
@@ -155,21 +155,21 @@ static void update_op1_const(zend_op_array *op_array,
 				case ZEND_CATCH:
 				case ZEND_FETCH_CONSTANT:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)) + 1);
+					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					op_array->literals[opline->op1.constant].cache_slot = op_array->last_cache_slot++;
-					zend_str_tolower(Z_STRVAL_P(val), Z_STRSIZE_P(val));
+					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					op_array->literals[opline->op1.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op1.constant+1].constant), Z_STRSIZE(op_array->literals[opline->op1.constant+1].constant) + 1);
+					op_array->literals[opline->op1.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op1.constant+1].constant), Z_STRLEN(op_array->literals[opline->op1.constant+1].constant) + 1);
 					break;
 				case ZEND_DO_FCALL:
-					zend_str_tolower(Z_STRVAL_P(val), Z_STRSIZE_P(val));
+					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)) + 1);
+					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					op_array->literals[opline->op1.constant].cache_slot = op_array->last_cache_slot++;
 					break;
 				default:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRSIZE(ZEND_OP1_LITERAL(opline)) + 1);
+					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					break;
 			}
 		} else {
@@ -189,7 +189,7 @@ static void update_op2_const(zend_op_array *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 	if (Z_TYPE_P(val) == IS_STRING) {
-		Z_HASH_P(&ZEND_OP2_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRSIZE(ZEND_OP2_LITERAL(opline)) + 1);
+		Z_HASH_P(&ZEND_OP2_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1);
 		switch (opline->opcode) {
 			case ZEND_FETCH_R:
 			case ZEND_FETCH_W:
@@ -205,15 +205,15 @@ static void update_op2_const(zend_op_array *op_array,
 			case ZEND_ADD_INTERFACE:
 			case ZEND_ADD_TRAIT:
 				op_array->literals[opline->op2.constant].cache_slot = op_array->last_cache_slot++;
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRSIZE_P(val));
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRSIZE(op_array->literals[opline->op2.constant+1].constant) + 1);
+				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
 				break;
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
-				zend_str_tolower(Z_STRVAL_P(val), Z_STRSIZE_P(val));
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRSIZE(op_array->literals[opline->op2.constant+1].constant) + 1);
+				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
 				/* break missing intentionally */						
 			/*case ZEND_FETCH_CONSTANT:*/
 			case ZEND_ASSIGN_OBJ:
@@ -279,13 +279,13 @@ static void update_op2_const(zend_op_array *op_array,
 			case ZEND_FETCH_DIM_TMP_VAR:
 check_numeric:
 				{
-					zend_uint_t index;
+					ulong index;
 					int numeric = 0;
 
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRSIZE_P(val)+1, index, numeric = 1);
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(val), Z_STRLEN_P(val)+1, index, numeric = 1);
 					if (numeric) {
 						zval_dtor(val);
-						ZVAL_INT(val, index);
+						ZVAL_LONG(val, index);
 						op_array->literals[opline->op2.constant].constant = *val;
 		        	}
 				}
@@ -584,3 +584,4 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 
 	return 1;
 }
+

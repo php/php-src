@@ -38,7 +38,7 @@
 
 
 ZIP_EXTERN int
-zip_get_archive_flag(struct zip *za, unsigned int flag, zip_flags_t flags)
+zip_get_archive_flag(struct zip *za, zip_flags_t flag, zip_flags_t flags)
 {
     unsigned int fl;
 

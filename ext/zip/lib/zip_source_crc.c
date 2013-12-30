@@ -125,7 +125,7 @@ crc_read(struct zip_source *src, void *_ctx, void *data,
 	}
 	else {
 	    ctx->size += (zip_uint64_t)n;
-	    ctx->crc = (zip_uint32_t)crc32(ctx->crc, (const Bytef *)data, (uInt)n); /* XXX: check for overflow, use multiple crc calls if needed */
+	    ctx->crc = (zip_uint32_t)crc32(ctx->crc, (const Bytef *)data, (uInt)n); /* TODO: check for overflow, use multiple crc calls if needed */
 	}
 	return n;
 
@@ -139,7 +139,7 @@ crc_read(struct zip_source *src, void *_ctx, void *data,
 	    st = (struct zip_stat *)data;
 
 	    if (ctx->eof) {
-		/* XXX: Set comp_size, comp_method, encryption_method?
+		/* TODO: Set comp_size, comp_method, encryption_method?
 		        After all, this only works for uncompressed data. */
 		st->size = ctx->size;
 		st->crc = ctx->crc;

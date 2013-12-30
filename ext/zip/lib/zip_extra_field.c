@@ -78,7 +78,7 @@ _zip_ef_delete_by_id(struct zip_extra_field *ef, zip_uint16_t id, zip_uint16_t i
     head = ef;
     prev = NULL;
     for (; ef; ef=(prev ? prev->next : head)) {
-	if ((ef->flags & flags & ZIP_EF_BOTH) && ef->id == id) {
+	if ((ef->flags & flags & ZIP_EF_BOTH) && ((ef->id == id) || (id == ZIP_EXTRA_FIELD_ALL))) {
 	    if (id_idx == ZIP_EXTRA_FIELD_ALL || i == id_idx) {
 		ef->flags &= ~(flags & ZIP_EF_BOTH);
 		if ((ef->flags & ZIP_EF_BOTH) == 0) {

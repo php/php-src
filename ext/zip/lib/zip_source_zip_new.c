@@ -121,12 +121,12 @@ _zip_source_zip_new(struct zip *za, struct zip *srcza, zip_uint64_t srcidx, zip_
 	    st2.mtime = st.mtime;
 	    st2.valid = ZIP_STAT_SIZE|ZIP_STAT_COMP_SIZE|ZIP_STAT_COMP_METHOD|ZIP_STAT_MTIME;
 
-            /* XXX: check for overflow of st2.size */
+            /* TODO: check for overflow of st2.size */
 	    if ((src=_zip_source_file_or_p(za, NULL, srcza->zp, offset+start, (zip_int64_t)st2.size, 0, &st2)) == NULL)
 		return NULL;
 	}
 	else {
-            /* XXX: check for overflow of st.comp_size */
+            /* TODO: check for overflow of st.comp_size */
 	    if ((src=_zip_source_file_or_p(za, NULL, srcza->zp, offset, (zip_int64_t)st.comp_size, 0, &st)) == NULL)
 		return NULL;
 	}
@@ -134,7 +134,7 @@ _zip_source_zip_new(struct zip *za, struct zip *srcza, zip_uint64_t srcidx, zip_
 	if (enc_impl) {
 	    if ((s2=enc_impl(za, src, st.encryption_method, 0, password)) == NULL) {
 		zip_source_free(src);
-		/* XXX: set error (how?) */
+		/* TODO: set error (how?) */
 		return NULL;
 	    }
 	    src = s2;
@@ -142,7 +142,7 @@ _zip_source_zip_new(struct zip *za, struct zip *srcza, zip_uint64_t srcidx, zip_
 	if (comp_impl) {
 	    if ((s2=comp_impl(za, src, st.comp_method, 0)) == NULL) {
 		zip_source_free(src);
-		/* XXX: set error (how?) */
+		/* TODO: set error (how?) */
 		return NULL;
 	    }
 	    src = s2;
@@ -152,7 +152,7 @@ _zip_source_zip_new(struct zip *za, struct zip *srcza, zip_uint64_t srcidx, zip_
 	    /* when reading the whole file, check for crc errors */
 	    if ((s2=zip_source_crc(za, src, 1)) == NULL) {
 		zip_source_free(src);
-		/* XXX: set error (how?) */
+		/* TODO: set error (how?) */
 		return NULL;
 	    }
 	    src = s2;
@@ -161,7 +161,7 @@ _zip_source_zip_new(struct zip *za, struct zip *srcza, zip_uint64_t srcidx, zip_
 	if (start+len > 0 && (comp_impl || enc_impl)) {
 	    if ((s2=zip_source_window(za, src, start, len ? len : st.size-start)) == NULL) {
 		zip_source_free(src);
-		/* XXX: set error (how?) (why?) */
+		/* TODO: set error (how?) (why?) */
 		return NULL;
 	    }
 	    src = s2;
