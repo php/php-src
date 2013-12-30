@@ -112,6 +112,7 @@ static int le_zip_entry;
 # define add_ascii_assoc_long add_assoc_long
 #endif
 
+
 /* Flatten a path by making a relative path (to .)*/
 static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
 {
@@ -150,6 +151,15 @@ static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
 /* }}} */
 
 #ifdef PHP_ZIP_USE_OO
+
+#if PHP_VERSION_ID < 50600
+# define CWD_STATE_ALLOC(l) malloc(l)
+# define CWD_STATE_FREE(s)  free(s)
+#else
+# define CWD_STATE_ALLOC(l) emalloc(l)
+# define CWD_STATE_FREE(s)  efree(s)
+#endif
+
 /* {{{ php_zip_extract_file */
 static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len TSRMLS_DC)
 {
@@ -170,7 +180,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	size_t path_cleaned_len;
 	cwd_state new_state;
 
-	new_state.cwd = (char*)emalloc(1);
+	new_state.cwd = CWD_STATE_ALLOC(1);
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
 
@@ -207,7 +217,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
 			efree(file_basename);
-			efree(new_state.cwd);
+			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
 	}
@@ -231,7 +241,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
 				efree(file_basename);
-				efree(new_state.cwd);
+				CWD_STATE_FREE(new_state.cwd);
 			}
 			return 0;
 		}
@@ -240,7 +250,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	/* it is a standalone directory, job done */
 	if (is_dir_only) {
 		efree(file_dirname_fullpath);
-		efree(new_state.cwd);
+		CWD_STATE_FREE(new_state.cwd);
 		return 1;
 	}
 
@@ -248,13 +258,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	if (!len) {
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		efree(new_state.cwd);
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		efree(new_state.cwd);
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 
@@ -266,7 +276,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		efree(new_state.cwd);
+		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
 
@@ -301,7 +311,7 @@ done:
 	efree(fullpath);
 	efree(file_basename);
 	efree(file_dirname_fullpath);
-	efree(new_state.cwd);
+	CWD_STATE_FREE(new_state.cwd);
 
 	if (n<0) {
 		return 0;
@@ -1010,7 +1020,11 @@ static int php_zip_has_property(zval *object, zval *member, int type KEY_ARG_DC 
 			Z_SET_REFCOUNT_P(tmp, 1);
 			Z_UNSET_ISREF_P(tmp);
 			if (type == 1) {
+#if PHP_VERSION_ID >= 50699
+				retval = zend_is_true(tmp TSRMLS_CC);
+#else
 				retval = zend_is_true(tmp);
+#endif
 			} else if (type == 0) {
 				retval = (Z_TYPE_P(tmp) != IS_NULL);
 			}
