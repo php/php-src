@@ -27,6 +27,8 @@ NULL
 
 Warning: gmp_mod() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
+
+Warning: gmp_mod(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
 object(GMP)#%d (1) {
   ["num"]=>
