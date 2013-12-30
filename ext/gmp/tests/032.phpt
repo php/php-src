@@ -31,6 +31,8 @@ string(6) "476369"
 string(10) "2342340648"
 string(5) "-3334"
 string(5) "-4563"
+
+Warning: gmp_xor(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 string(15) "987657876574716"
 string(21) "987658017016065701376"
