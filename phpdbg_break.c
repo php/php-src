@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -104,7 +105,7 @@ PHPDBG_BREAK(lineno) /* {{{ */
 			if (PHPDBG_G(exec)) {
 				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			} else {
-				phpdbg_error("Execution context not set !");
+				phpdbg_error("Execution context not set!");
 			}
 		} break;
 

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -114,6 +115,12 @@ PHPDBG_API int phpdbg_is_class_method(const char *str, size_t len, char **class,
 	}
 
 	if (class != NULL) {
+	
+		if (str[0] == '\\') {
+			str++;
+			len--;
+		}
+		
 		*class = estrndup(str, sep - str);
 		(*class)[sep - str] = 0;
 	}
@@ -283,8 +290,9 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
 		char *format = NULL, *buffer = NULL;
+		const time_t tt = tp.tv_sec;
 
-		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tp.tv_sec));
+		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
 		asprintf(
 			&buffer, friendly, tp.tv_usec/1000);
 		asprintf(

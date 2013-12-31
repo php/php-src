@@ -17,7 +17,7 @@ Features
  - Userland API
  - SAPI Agnostic - Easily Integrated
  - PHP Configuration File Support
- - JIT Super Globals - Set Your Own !!
+ - JIT Super Globals - Set Your Own!!
  - Optional readline Support - Comfortable Terminal Operation
  - Remote Debugging Support - Bundled Java GUI
  - Easy Operation - See Help :)
@@ -78,8 +78,6 @@ The following switches change the default behaviour of phpdbg:
 Getting Started
 ===============
 
-See the tutorials for help [getting started with phpdbg][1].
+See the website for tutorials/documentation
 
-<img src="https://raw.github.com/krakjoe/phpdbg/master/tutorials/phpdbg.png" alt="screenshot"/>
-
-  [1]: https://github.com/krakjoe/phpdbg/blob/master/tutorials/intro.md
+http://phpdbg.com

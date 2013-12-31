@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -24,6 +25,7 @@
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_break.h"
+#include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 
@@ -82,6 +84,8 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	zend_execute = phpdbg_execute_ex;
 #endif
 
+	REGISTER_STRINGL_CONSTANT("PHPDBG_VERSION", PHPDBG_VERSION, sizeof(PHPDBG_VERSION)-1, CONST_CS|CONST_PERSISTENT);
+	
 	REGISTER_LONG_CONSTANT("PHPDBG_FILE",   FILE_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_METHOD", METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
@@ -440,6 +444,35 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 	*/
 	if (phpdbg_booted) {
 		phpdbg_error("%s", message);
+
+		switch (PG(last_error_type)) {
+			case E_ERROR:
+			case E_CORE_ERROR:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+			case E_PARSE:
+			case E_RECOVERABLE_ERROR:
+				if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
+					phpdbg_list_file(
+						zend_get_executed_filename(TSRMLS_C),
+						3,
+						zend_get_executed_lineno(TSRMLS_C)-1,
+						zend_get_executed_lineno(TSRMLS_C)
+						TSRMLS_CC
+					);
+				}
+
+				do {
+					switch (phpdbg_interactive(TSRMLS_C)) {
+						case PHPDBG_LEAVE:
+						case PHPDBG_FINISH:
+						case PHPDBG_UNTIL:
+						case PHPDBG_NEXT:
+							return;
+					}
+				} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+
+		}
 	} else fprintf(stdout, "%s\n", message);
 }
 /* }}} */
@@ -503,9 +536,14 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 	return phpdbg_write("%s", message);
 } /* }}} */
 
+#if PHP_VERSION_ID >= 50700
+static inline void php_sapi_phpdbg_flush(void *context TSRMLS_DC)  /* {{{ */
+{
+#else
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
 	TSRMLS_FETCH();
+#endif
 
 	fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
 } /* }}} */
@@ -565,6 +603,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
 #endif
+	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
 
@@ -575,7 +614,8 @@ const char phpdbg_ini_hardcoded[] =
 "display_errors=Off\n"
 "log_errors=On\n"
 "max_execution_time=0\n"
-"max_input_time=-1\n\0";
+"max_input_time=-1\n"
+"error_log=\n\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
@@ -1021,6 +1061,22 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 #endif
+
+			case 'V': {
+				sapi_startup(phpdbg);
+				phpdbg->startup(phpdbg);
+				printf(
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n%s",
+					PHPDBG_VERSION,
+					__DATE__,
+					__TIME__,
+					PHP_VERSION,
+					get_zend_version()
+				);
+				sapi_deactivate(TSRMLS_C);
+				sapi_shutdown();
+				return 0;
+			} break;
 		}
 	}
 
@@ -1257,6 +1313,12 @@ phpdbg_out:
 		}
 #endif
 
+#ifndef ZTS
+		/* force cleanup of auto and core globals */
+		zend_hash_clean(CG(auto_globals));
+		memset(
+			&core_globals, 0, sizeof(php_core_globals));
+#endif
 		if (ini_entries) {
 			free(ini_entries);
 		}

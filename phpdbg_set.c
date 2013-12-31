@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -177,7 +178,7 @@ PHPDBG_SET(oplog) /* {{{ */
 					fclose(
 						PHPDBG_G(oplog));
 				} else {
-					phpdbg_error("Oplog is not enabled !");
+					phpdbg_error("Oplog is not enabled!");
 				}
 			} break;
 		} break;

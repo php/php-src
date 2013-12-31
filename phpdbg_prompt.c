@@ -509,7 +509,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	EG(exception) = NULL;
 
 	phpdbg_error(
-		"Uncaught %s !",
+		"Uncaught %s!",
 		Z_OBJCE(exception)->name);
 
 	/* call __toString */
@@ -717,7 +717,7 @@ PHPDBG_COMMAND(print) /* {{{ */
 PHPDBG_COMMAND(info) /* {{{ */
 {
 	phpdbg_error(
-		"No information command selected !");
+		"No information command selected!");
 
 	return SUCCESS;
 } /* }}} */
@@ -725,7 +725,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 PHPDBG_COMMAND(set) /* {{{ */
 {
 	phpdbg_error(
-		"No information command selected !");
+		"No information command selected!");
 
 	return SUCCESS;
 } /* }}} */
@@ -745,7 +745,7 @@ PHPDBG_COMMAND(break) /* {{{ */
 			if (PHPDBG_G(exec)) {
 				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
 			} else {
-				phpdbg_error("Execution context not set !");
+				phpdbg_error("Execution context not set!");
 			}
 			break;
 		case METHOD_PARAM:

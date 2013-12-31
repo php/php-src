@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
+   | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -1023,7 +1024,11 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 		zend_try {
 			PHPDBG_G(flags) |= PHPDBG_IN_COND_BP;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
-			if (i_zend_is_true(retval)) {
+#if PHP_VERSION_ID >= 50700
+			if (zend_is_true(retval TSRMLS_CC)) {
+#else
+			if (zend_is_true(retval)) {
+#endif
 				breakpoint = SUCCESS;
 			}
 		} zend_catch {

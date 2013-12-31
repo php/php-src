@@ -30,7 +30,7 @@ function test($x, $y = 0) {
 $dbg = new phpdbg();
 
 var_dump(
-    $dbg->isGreat("PHP Rocks !!"));
+    $dbg->isGreat("PHP Rocks!!"));
 
 foreach (test(1,2) as $gen)
 	continue;
@@ -63,5 +63,3 @@ array_walk($array, function (&$item) {
 	else
 		$item -= 1;
 });
-
-?>
