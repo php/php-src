@@ -110,6 +110,58 @@ static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	return SUCCESS;
 }
 
+static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+	HashTable *ht;
+
+	if (watch->type != WATCH_ON_ZVAL) {
+		return FAILURE;
+	}
+
+	phpdbg_create_watchpoint(watch TSRMLS_CC);
+
+	switch (Z_TYPE_P(watch->addr.zv)) {
+		case IS_ARRAY:
+			ht = Z_ARRVAL_P(watch->addr.zv);
+			break;
+		case IS_OBJECT:
+			ht = Z_OBJPROP_P(watch->addr.zv);
+			break;
+		default:
+			return SUCCESS;
+	}
+
+	{
+		HashPosition position;
+		zval **zv;
+		zval key;
+		for (zend_hash_internal_pointer_reset_ex(ht, &position);
+		     zend_hash_get_current_data_ex(ht, (void **)&zv, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(ht, &position)) {
+			phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
+
+			new_watch->parent = watch;
+			new_watch->parent_container = ht;
+
+			zend_hash_get_current_key_zval_ex(ht, &key, &position);
+			if (Z_TYPE(key) == IS_STRING) {
+				new_watch->name_in_parent = Z_STRVAL(key);
+				new_watch->name_in_parent_len = Z_STRLEN(key);
+			} else {
+				new_watch->name_in_parent = NULL;
+				new_watch->name_in_parent_len = asprintf(&new_watch->name_in_parent, "%ld", Z_LVAL(key));
+			}
+
+			new_watch->str = NULL;
+			new_watch->str_len = asprintf(&new_watch->str, "%.*s%s%.*s%s", watch->str_len, watch->str, Z_TYPE_P(watch->addr.zv) == IS_ARRAY?"[":"->", new_watch->name_in_parent_len, new_watch->name_in_parent, Z_TYPE_P(watch->addr.zv) == IS_ARRAY?"]":"");
+
+			phpdbg_create_zval_watchpoint(*zv, new_watch);
+			phpdbg_create_recursive_watchpoint(new_watch TSRMLS_CC);
+		}
+	}
+
+	return SUCCESS;
+}
+
 static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	int ret = zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 
@@ -229,6 +281,23 @@ PHPDBG_WATCH(delete) /* {{{ */
 			if (phpdbg_delete_var_watchpoint(param->str, param->len TSRMLS_CC) == FAILURE) {
 				phpdbg_error("Nothing was deleted, no corresponding watchpoint found");
 			}
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_WATCH(recursive) /* {{{ */
+{
+	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
+		return SUCCESS;
+	}
+
+	switch (param->type) {
+		case STR_PARAM:
+			phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_recursive_watchpoint TSRMLS_CC);
 			break;
 
 		phpdbg_default_switch_case();

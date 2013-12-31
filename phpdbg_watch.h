@@ -30,13 +30,15 @@
  * Printer Forward Declarations
  */
 PHPDBG_WATCH(delete);
+PHPDBG_WATCH(recursive);
 
 /**
  * Commands
  */
 
 static const phpdbg_command_t phpdbg_watch_commands[] = {
-	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint", 'd', watch_delete, NULL, 1),
+	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",            'd', watch_delete,    NULL, 1),
+	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints", 'r', watch_recursive, NULL, 1),
 };
 
 /* Watchpoint functions/typedefs */
