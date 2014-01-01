@@ -4,6 +4,7 @@ Blacklist (with glob, quote and comments)
 opcache.enable=1
 opcache.enable_cli=1
 opcache.blacklist_filename={PWD}/opcache-*.blacklist
+opcache.file_update_protection=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
