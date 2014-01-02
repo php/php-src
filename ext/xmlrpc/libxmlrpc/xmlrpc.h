@@ -326,7 +326,7 @@ XMLRPC_VALUE XMLRPC_CreateValueBase64(const char* id, const char* s, int len);
 XMLRPC_VALUE XMLRPC_CreateValueDateTime(const char* id, time_t time);
 XMLRPC_VALUE XMLRPC_CreateValueDateTime_ISO8601(const char* id, const char *s);
 XMLRPC_VALUE XMLRPC_CreateValueDouble(const char* id, double f);
-XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, int i);
+XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, long i);
 XMLRPC_VALUE XMLRPC_CreateValueString(const char* id, const char* s, int len);
 XMLRPC_VALUE XMLRPC_CreateValueEmpty(void);
 XMLRPC_VALUE XMLRPC_CreateVector(const char* id, XMLRPC_VECTOR_TYPE type);
@@ -346,7 +346,7 @@ XMLRPC_VALUE XMLRPC_DupValueNew(XMLRPC_VALUE xSource);
 void XMLRPC_SetValueDateTime(XMLRPC_VALUE value, time_t time);
 void XMLRPC_SetValueDateTime_ISO8601(XMLRPC_VALUE value, const char* s);
 void XMLRPC_SetValueDouble(XMLRPC_VALUE value, double val);
-void XMLRPC_SetValueInt(XMLRPC_VALUE value, int val);
+void XMLRPC_SetValueInt(XMLRPC_VALUE value, long val);
 void XMLRPC_SetValueBoolean(XMLRPC_VALUE value, int val);
 const char *XMLRPC_SetValueString(XMLRPC_VALUE value, const char* s, int len);
 void XMLRPC_SetValueBase64(XMLRPC_VALUE value, const char* s, int len);
@@ -356,7 +356,7 @@ const char *XMLRPC_SetValueID_Case(XMLRPC_VALUE value, const char* id, int len, 
 /* Get Values */
 const char* XMLRPC_GetValueString(XMLRPC_VALUE value);
 int XMLRPC_GetValueStringLen(XMLRPC_VALUE value);
-int XMLRPC_GetValueInt(XMLRPC_VALUE value);
+long XMLRPC_GetValueInt(XMLRPC_VALUE value);
 int XMLRPC_GetValueBoolean(XMLRPC_VALUE value);
 double XMLRPC_GetValueDouble(XMLRPC_VALUE value);
 const char* XMLRPC_GetValueBase64(XMLRPC_VALUE value);

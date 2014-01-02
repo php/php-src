@@ -346,7 +346,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 				XMLRPC_SetValueString(xCurrent, el->text.str, el->text.len);
 			}
 			else if (!strcmp(type, TOKEN_INT)) {
-				XMLRPC_SetValueInt(xCurrent, atoi(el->text.str));
+				XMLRPC_SetValueInt(xCurrent, atol(el->text.str));
 			}
 			else if (!strcmp(type, TOKEN_BOOLEAN)) {
 				XMLRPC_SetValueBoolean(xCurrent, atoi(el->text.str));
@@ -502,7 +502,7 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 			break;
 		case xmlrpc_type_int:
 			pAttrType = TOKEN_INT;
-			snprintf(buf, BUF_SIZE, "%i", XMLRPC_GetValueInt(node));
+			snprintf(buf, BUF_SIZE, "%ld", XMLRPC_GetValueInt(node));
 			simplestring_add(&elem_val->text, buf);
 			break;
 		case xmlrpc_type_boolean:

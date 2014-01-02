@@ -90,7 +90,7 @@ typedef struct _xmlrpc_value {
    XMLRPC_VECTOR v;        /* vector type specific info                      */
    simplestring str;       /* string value buffer                            */
    simplestring id;        /* id of this value.  possibly empty.             */
-   int i;                  /* integer value.                                 */
+   long i;                 /* integer value.                                 */
    double d;               /* double value                                   */
    int iRefCount;          /* So we know when we can delete the value      . */
 } STRUCT_XMLRPC_VALUE;

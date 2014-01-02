@@ -54,6 +54,7 @@ static const char rcsid[] = "#(@) $Id$";
 #define ELEM_FAULTCODE      "faultCode"
 #define ELEM_FAULTSTRING    "faultString"
 #define ELEM_I4             "i4"
+#define ELEM_I8             "i8"
 #define ELEM_INT            "int"
 #define ELEM_MEMBER         "member"
 #define ELEM_METHODCALL     "methodCall"
@@ -125,8 +126,8 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
 		else if (!strcmp(el->name, ELEM_NAME)) {
          XMLRPC_SetValueID_Case(current_val, el->text.str, 0, xmlrpc_case_exact);
 		}
-		else if (!strcmp(el->name, ELEM_INT) || !strcmp(el->name, ELEM_I4)) {
-         XMLRPC_SetValueInt(current_val, atoi(el->text.str));
+		else if (!strcmp(el->name, ELEM_INT) || !strcmp(el->name, ELEM_I4) || !strcmp(el->name, ELEM_I8)) {
+         XMLRPC_SetValueInt(current_val, atol(el->text.str));
 		}
 		else if (!strcmp(el->name, ELEM_BOOLEAN)) {
          XMLRPC_SetValueBoolean(current_val, atoi(el->text.str));
@@ -218,7 +219,7 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             break;
          case xmlrpc_int:
             elem_val->name = strdup(ELEM_INT);
-            snprintf(buf, BUF_SIZE, "%i", XMLRPC_GetValueInt(node));
+            snprintf(buf, BUF_SIZE, "%ld", XMLRPC_GetValueInt(node));
             simplestring_add(&elem_val->text, buf);
             break;
          case xmlrpc_boolean:
