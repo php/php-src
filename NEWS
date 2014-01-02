@@ -57,6 +57,7 @@ PHP                                                                        NEWS
     (martin dot koegler at brz dot gv dot at)
 
 - Sockets:
+  . Fixed bug #66381 (__ss_family was changed on AIX 5.3). (Felipe)
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
 - XSL
