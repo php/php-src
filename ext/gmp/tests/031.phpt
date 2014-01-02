@@ -26,6 +26,8 @@ echo "Done\n";
 --EXPECTF--	
 string(2) "-1"
 string(2) "-1"
+
+Warning: gmp_com(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 string(14) "-2394876545679"
 string(3) "110"

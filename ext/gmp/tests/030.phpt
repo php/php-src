@@ -31,6 +31,8 @@ string(6) "517363"
 string(10) "2342341163"
 string(2) "-1"
 string(3) "-19"
+
+Warning: gmp_or(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 string(15) "987657876576252"
 string(21) "987658441719689394144"

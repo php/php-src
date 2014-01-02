@@ -109,6 +109,10 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
 #define phpext_sockets_ptr NULL
 #endif
 
+#if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+# define ss_family __ss_family
+#endif
+
 #endif
 
 /*

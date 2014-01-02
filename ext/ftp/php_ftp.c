@@ -963,6 +963,7 @@ PHP_FUNCTION(ftp_nb_get)
 
 	if ((ret = ftp_nb_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) == PHP_FTP_FAILED) {
 		php_stream_close(outstream);
+		ftp->stream = NULL;
 		VCWD_UNLINK(local);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_INT(PHP_FTP_FAILED);
@@ -970,6 +971,7 @@ PHP_FUNCTION(ftp_nb_get)
 
 	if (ret == PHP_FTP_FINISHED){
 		php_stream_close(outstream);
+		ftp->stream = NULL;
 	}
 
 	RETURN_INT(ret);
@@ -1003,6 +1005,7 @@ PHP_FUNCTION(ftp_nb_continue)
 
 	if (ret != PHP_FTP_MOREDATA && ftp->closestream) {
 		php_stream_close(ftp->stream);
+		ftp->stream = NULL;
 	}
 
 	if (ret == PHP_FTP_FAILED) {
@@ -1215,6 +1218,7 @@ PHP_FUNCTION(ftp_nb_put)
 
 	if (ret != PHP_FTP_MOREDATA) {
 		php_stream_close(instream);
+		ftp->stream = NULL;
 	}
 
 	if (ret == PHP_FTP_FAILED) {

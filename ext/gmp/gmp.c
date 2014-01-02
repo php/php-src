@@ -718,14 +718,14 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, php_int_t base TSRMLS_DC)
 {
 	switch (Z_TYPE_P(val)) {
 	case IS_INT:
-	case IS_BOOL:
-	case IS_CONSTANT: {
+	case IS_BOOL: {
 		mpz_set_si(gmpnumber, gmp_get_long(val));
 		return SUCCESS;
 	}
 	case IS_STRING: {
 		char *numstr = Z_STRVAL_P(val);
 		int skip_lead = 0;
+		int ret;
 
 		if (Z_STRSIZE_P(val) > 2) {
 			if (numstr[0] == '0') {
@@ -739,10 +739,18 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, php_int_t base TSRMLS_DC)
 			}
 		}
 
-		return mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), base);
+		ret = mpz_set_str(gmpnumber, (skip_lead ? &numstr[2] : numstr), base);
+		if (-1 == ret) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Unable to convert variable to GMP - string is not an integer");
+			return FAILURE;
+		}
+
+		return SUCCESS;
 	}
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert variable to GMP - wrong type");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Unable to convert variable to GMP - wrong type");
 		return FAILURE;
 	}
 }
