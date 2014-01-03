@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ ZEND_API zval zval_used_for_init; /* True global variable */
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2013 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2014 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object TSRMLS_DC) /* {{{ */
