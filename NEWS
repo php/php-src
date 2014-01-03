@@ -103,6 +103,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #64760 (var_export() does not use full precision for floating-point
     numbers) (Yasuo)
+  . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
 
 - XMLReader:
   . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
