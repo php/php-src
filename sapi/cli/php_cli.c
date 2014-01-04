@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -693,7 +693,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2013 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2014 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",

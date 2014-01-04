@@ -1,6 +1,6 @@
 /*
   zip_set_archive_comment.c -- set archive comment
-  Copyright (C) 2006-2013 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>

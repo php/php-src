@@ -1,6 +1,6 @@
 /*
   zip_filerange_crc.c -- compute CRC32 for a range of a file
-  Copyright (C) 2008-2013 Dieter Baron and Thomas Klausner
+  Copyright (C) 2008-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>

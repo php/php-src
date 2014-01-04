@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1374,10 +1374,6 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 					Z_OBJ_UNPROTECT_RECURSION(o1);
 					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
-				} else {
-					Z_OBJ_UNPROTECT_RECURSION(o1);
-					Z_OBJ_UNPROTECT_RECURSION(o2);
-					return 0;
 				}
 			}
 		}
