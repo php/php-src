@@ -1373,10 +1373,6 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 					Z_OBJ_UNPROTECT_RECURSION(o1);
 					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
-				} else {
-					Z_OBJ_UNPROTECT_RECURSION(o1);
-					Z_OBJ_UNPROTECT_RECURSION(o2);
-					return 0;
 				}
 			}
 		}
