@@ -17,6 +17,7 @@ echo basename("a:\\b:\\c:d:hello\\world:some.stream") . "\n";
 echo basename("a:/b:\\c:d:hello\\world:some.stream:\$DATA") . "\n";
 echo basename("x:y:z:hello\world:my.stream:\$DATA") . "\n";
 echo basename("a:\\b:\\c:d:hello\\world:c:\$DATA") . "\n";
+echo basename("a:\\b:\\c:d:hello\\d:world:c:\$DATA") . "\n";
 ?>
 ==DONE==
 --EXPECTF--
@@ -32,5 +33,6 @@ world:somestream
 world:some.stream
 world:some.stream:$DATA
 world:my.stream:$DATA
+world:c:$DATA
 world:c:$DATA
 ==DONE==
