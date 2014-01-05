@@ -1428,7 +1428,7 @@ PHPAPI void php_basename(const char *s, php_size_t len, char *suffix, php_size_t
 				goto quit_loop;
 			case 1:
 #if defined(PHP_WIN32) || defined(NETWARE)
-				if (*c == '/' || *c == '\\' || (*c == ':' && (c - s == 1))) {
+				if (*c == '/' || *c == '\\') {
 #else
 				if (*c == '/') {
 #endif
@@ -1436,6 +1436,19 @@ PHPAPI void php_basename(const char *s, php_size_t len, char *suffix, php_size_t
 						state = 0;
 						cend = c;
 					}
+#if defined(PHP_WIN32) || defined(NETWARE)
+				/* Catch relative paths in c:file.txt style. They're not to confuse
+				   with the NTFS streams. This part ensures also, that no drive 
+				   letter traversing happens. */
+				} else if ((*c == ':' && (c - comp == 1))) {
+					if (state == 0) {
+						comp = c;
+						state = 1;
+					} else {
+						cend = c;
+						state = 0;
+					}
+#endif
 				} else {
 					if (state == 0) {
 						comp = c;
