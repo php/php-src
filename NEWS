@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-26 Dec 2013, PHP 5.4.24 RC1
+09 Jan 2014, PHP 5.4.24
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
