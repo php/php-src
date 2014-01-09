@@ -45,7 +45,7 @@ struct php_shmop
 	int shmflg;
 	int shmatflg;
 	char *addr;
-	int size;
+	php_int_t size;
 };
 
 typedef struct {

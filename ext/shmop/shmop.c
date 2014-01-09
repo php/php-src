@@ -159,7 +159,7 @@ PHP_FUNCTION(shmop_open)
 	php_int_t key, mode, size;
 	struct php_shmop *shmop;	
 	struct shmid_ds shm;
-	int rsid;
+	php_int_t rsid;
 	char *flags;
 	php_size_t flags_len;
 
@@ -170,6 +170,11 @@ PHP_FUNCTION(shmop_open)
 	if (flags_len != 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a valid flag", flags);
 		RETURN_FALSE;
+	}
+
+	if (key > INT_MAX || key < INT_MIN) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The system's id must be between %d and %d", INT_MIN, INT_MAX);
+		goto err;
 	}
 
 	shmop = emalloc(sizeof(struct php_shmop));
@@ -202,9 +207,14 @@ PHP_FUNCTION(shmop_open)
 			goto err;
 	}
 
-	if (shmop->shmflg & IPC_CREAT && shmop->size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shared memory segment size must be greater than zero");
-		goto err;
+	if (shmop->shmflg & IPC_CREAT) {
+		if (shmop->size < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shared memory segment size must be greater than zero");
+			goto err;
+		} else if (shmop->size > INT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shared memory segment size must be less than or equal to %d", INT_MAX);
+			goto err;
+		}
 	}
 
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
@@ -242,7 +252,7 @@ PHP_FUNCTION(shmop_read)
 	struct php_shmop *shmop;
 	int type;
 	char *startaddr;
-	int bytes;
+	php_int_t bytes;
 	char *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iii", &shmid, &start, &count) == FAILURE) {
@@ -314,7 +324,7 @@ PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
 	int type;
-	int writesize;
+	php_int_t writesize;
 	php_int_t shmid, offset;
 	char *data;
 	php_size_t data_len;
