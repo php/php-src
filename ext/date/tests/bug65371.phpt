@@ -7,9 +7,9 @@ date.timezone=Europe/Berlin
 
 function p($str)
 {
-  echo $str, PHP_EOL;
-  echo strftime($str), PHP_EOL;
-  echo bin2hex($str), PHP_EOL;
+  echo $str, "\n";
+  echo strftime($str), "\n";
+  echo bin2hex($str), "\n";
   echo bin2hex(strftime($str));
 }
 
