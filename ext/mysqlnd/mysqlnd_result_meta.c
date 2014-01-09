@@ -96,7 +96,7 @@ mysqlnd_is_key_numeric(const char * key, size_t length, php_int_t *idx)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
-	unsigned int i = 0;
+	php_uint_t i = 0;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
@@ -202,7 +202,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 static void
 MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 {
-	int i;
+	php_uint_t i;
 	MYSQLND_FIELD *fields;
 	DBG_ENTER("mysqlnd_res_meta::free");
 	DBG_INF_FMT("persistent=%u", meta->persistent);
@@ -234,7 +234,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 static MYSQLND_RES_METADATA *
 MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta, zend_bool persistent TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	/* +1 is to have empty marker at the end */
 	MYSQLND_RES_METADATA * new_meta = NULL;
 	MYSQLND_FIELD * new_fields;
@@ -386,7 +386,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_result_meta_init */
 PHPAPI MYSQLND_RES_METADATA *
-mysqlnd_result_meta_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
+mysqlnd_result_meta_init(php_uint_t field_count, zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES_METADATA) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_RES_METADATA *ret = mnd_pecalloc(1, alloc_size, persistent);

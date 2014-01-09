@@ -547,7 +547,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, php_int_t colno, in
 {
 	struct pdo_column_data *col;
 	char *value = NULL;
-	php_uint_t value_len = 0;
+	php_size_t value_len = 0;
 	int caller_frees = 0;
 	int type, new_type;
 
@@ -880,7 +880,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 	}
 
 	if (return_value) {
-		int i = 0;
+		php_int_t i = 0;
 
 		if (how == PDO_FETCH_LAZY) {
 			get_lazy_object(stmt, return_value TSRMLS_CC);

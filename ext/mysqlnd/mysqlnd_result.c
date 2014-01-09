@@ -37,10 +37,10 @@
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const result TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	zval **data_cursor = result->stored_data? result->stored_data->data:NULL;
 	zval **data_begin = result->stored_data? result->stored_data->data:NULL;
-	unsigned int field_count = result->meta? result->meta->field_count : 0;
+	php_uint_t field_count = result->meta? result->meta->field_count : 0;
 	uint64_t row_count = result->stored_data? result->stored_data->row_count:0;
 	enum_func_status ret = PASS;
 	DBG_ENTER("mysqlnd_res::initialize_result_set_rest");
@@ -140,7 +140,7 @@ MYSQLND_METHOD(mysqlnd_res, unbuffered_free_last_data)(MYSQLND_RES * result TSRM
 	}
 
 	if (unbuf->last_row_data) {
-		unsigned int i, ctor_called_count = 0;
+		php_uint_t i, ctor_called_count = 0;
 		zend_bool copy_ctor_called;
 		MYSQLND_STATS *global_stats = result->conn? result->conn->stats:NULL;
 
@@ -178,15 +178,15 @@ static void
 MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 {
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
-	unsigned int field_count = result->field_count;
+	php_uint_t field_count = result->field_count;
 	int64_t row;
 
 	DBG_ENTER("mysqlnd_res::free_buffered_data");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
 
 	if (set->data) {
-		unsigned int copy_on_write_performed = 0;
-		unsigned int copy_on_write_saved = 0;
+		php_uint_t copy_on_write_performed = 0;
+		php_uint_t copy_on_write_saved = 0;
 
 		for (row = set->row_count - 1; row >= 0; row--) {
 			zval **current_row = set->data + row * field_count;
@@ -510,7 +510,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {
-					unsigned int to_log = MYSQLND_G(log_mask);
+					php_uint_t to_log = MYSQLND_G(log_mask);
 					to_log &= fields_eof->server_status;
 					DBG_INF_FMT("warnings=%u server_status=%u", fields_eof->warning_count, fields_eof->server_status);
 					conn->upsert_status->warning_count = fields_eof->warning_count;
@@ -561,7 +561,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 static php_uint_t *
 mysqlnd_fetch_lengths_buffered(MYSQLND_RES * const result TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	zval **previous_row;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
@@ -612,7 +612,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 {
 	enum_func_status	ret;
 	MYSQLND_ROW_C		retrow = NULL;
-	unsigned int		i,
+	php_uint_t		i,
 						field_count = result->field_count;
 	MYSQLND_PACKET_ROW	*row_packet = result->row_packet;
 	php_uint_t		*lengths = result->lengths;
@@ -669,7 +669,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 			if (retrow) {
 				for (i = 0; i < field_count; i++, field++, hash_key++) {
 					zval *data = result->unbuf->last_row_data[i];
-					unsigned int len;
+					php_size_t len;
 
 					if (Z_TYPE_P(data) != IS_NULL) {
 						convert_to_string(data);
@@ -725,7 +725,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_unbuffered */
 static enum_func_status
-mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, php_uint_t flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status	ret;
 	zval				*row = (zval *) param;
@@ -767,7 +767,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 			HashTable *row_ht = Z_ARRVAL_P(row);
 			MYSQLND_FIELD *field = result->meta->fields;
 			struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
-			unsigned int i, field_count = result->field_count;
+			php_uint_t i, field_count = result->field_count;
 			php_uint_t *lengths = result->lengths;
 
 			enum_func_status rc = result->m.row_decoder(result->unbuf->last_row_buffer,
@@ -781,7 +781,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 			}
 			for (i = 0; i < field_count; i++, field++, hash_key++) {
 				zval *data = result->unbuf->last_row_data[i];
-				unsigned int len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRSIZE_P(data);
+				php_size_t len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRSIZE_P(data);
 
 				if (lengths) {
 					lengths[i] = len;
@@ -924,7 +924,7 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 		zval **current_row = set->data_cursor;
 		MYSQLND_FIELD *field = result->meta->fields;
 		struct mysqlnd_field_hash_key * hash_key = result->meta->zend_hash_keys;
-		unsigned int i;
+		php_uint_t i;
 
 		if (NULL == current_row[0]) {
 			uint64_t row_num = (set->data_cursor - set->data) / result->meta->field_count;
@@ -981,9 +981,9 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_buffered */
 static enum_func_status
-mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, php_uint_t flags, zend_bool *fetched_anything TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	zval *row = (zval *) param;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 	enum_func_status ret = FAIL;
@@ -1080,7 +1080,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 {
 	enum_func_status ret;
 	MYSQLND_PACKET_ROW *row_packet = NULL;
-	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
+	php_uint_t next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
 	MYSQLND_RES_BUFFERED *set;
 
 	DBG_ENTER("mysqlnd_res::store_result_fetch_data");
@@ -1344,7 +1344,7 @@ MYSQLND_METHOD(mysqlnd_res, num_rows)(const MYSQLND_RES * const result TSRMLS_DC
 
 
 /* {{{ mysqlnd_res::num_fields */
-static unsigned int
+static php_uint_t 
 MYSQLND_METHOD(mysqlnd_res, num_fields)(const MYSQLND_RES * const result TSRMLS_DC)
 {
 	return result->field_count;
@@ -1464,7 +1464,7 @@ MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result TSRMLS_
 
 /* {{{ mysqlnd_res::fetch_into */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, unsigned int flags,
+MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, php_uint_t flags,
 										zval *return_value,
 										enum_mysqlnd_extension extension TSRMLS_DC ZEND_FILE_LINE_DC)
 {
@@ -1529,7 +1529,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result TSRMLS_DC)
 
 /* {{{ mysqlnd_res::fetch_all */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, php_uint_t flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  *row;
 	php_uint_t i = 0;
@@ -1547,7 +1547,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 	}
 
 	/* 4 is a magic value. The cast is safe, if larger then the array will be later extended - no big deal :) */
-	mysqlnd_array_init(return_value, set? (unsigned int) set->row_count : 4); 
+	mysqlnd_array_init(return_value, set? (php_uint_t) set->row_count : 4); 
 
 	do {
 		MAKE_STD_ZVAL(row);
@@ -1566,11 +1566,11 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, unsigned int flags,
 
 /* {{{ mysqlnd_res::fetch_field_data */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, unsigned int offset, zval *return_value TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_field_data)(MYSQLND_RES * result, php_uint_t offset, zval *return_value TSRMLS_DC)
 {
 	zval row;
 	zval **entry;
-	unsigned int i = 0;
+	php_uint_t i = 0;
 
 	DBG_ENTER("mysqlnd_res::fetch_field_data");
 	DBG_INF_FMT("offset=%u", offset);
@@ -1646,7 +1646,7 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_result_init */
 PHPAPI MYSQLND_RES *
-mysqlnd_result_init(unsigned int field_count, zend_bool persistent TSRMLS_DC)
+mysqlnd_result_init(php_uint_t field_count, zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_RES *ret = mnd_pecalloc(1, alloc_size, persistent);

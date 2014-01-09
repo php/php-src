@@ -92,7 +92,7 @@ mysqlnd_example_plugin_register(TSRMLS_D)
 
 static HashTable mysqlnd_registered_plugins;
 		
-static unsigned int mysqlnd_plugins_counter = 0;
+static php_uint_t mysqlnd_plugins_counter = 0;
 
 
 /* {{{ mysqlnd_plugin_subsystem_init */
@@ -128,7 +128,7 @@ mysqlnd_plugin_subsystem_end(TSRMLS_D)
 
 
 /* {{{ mysqlnd_plugin_register */
-PHPAPI unsigned int mysqlnd_plugin_register()
+PHPAPI php_uint_t mysqlnd_plugin_register()
 {
 	TSRMLS_FETCH();
 	return mysqlnd_plugin_register_ex(NULL TSRMLS_CC);
@@ -137,7 +137,7 @@ PHPAPI unsigned int mysqlnd_plugin_register()
 
 
 /* {{{ mysqlnd_plugin_register_ex */
-PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
+PHPAPI php_uint_t mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
 {
 	if (plugin) {
 		if (plugin->plugin_api_version == MYSQLND_PLUGIN_API_VERSION) {
@@ -192,7 +192,7 @@ PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, voi
 
 
 /* {{{ mysqlnd_plugin_count */
-PHPAPI unsigned int mysqlnd_plugin_count()
+PHPAPI php_uint_t mysqlnd_plugin_count()
 {
 	return mysqlnd_plugins_counter;
 }

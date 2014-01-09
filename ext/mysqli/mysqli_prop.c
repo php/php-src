@@ -88,7 +88,7 @@ static int __func(mysqli_object *obj, zval **retval TSRMLS_DC) \
 			ZVAL_INT(*retval, (php_int_t) l);\
 		} else { \
 			char *ret; \
-			int ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
+			php_size_t ret_len = spprintf(&ret, 0, __ret_type_sprint_mod, l); \
 			ZVAL_STRINGL(*retval, ret, ret_len, 0); \
 		} \
 	}\
@@ -182,7 +182,7 @@ static int link_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_INT(*retval, (php_int_t) rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
+			php_size_t l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}
@@ -271,7 +271,7 @@ static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 	if (mysql) {
 		char * stat_msg;
 #if defined(MYSQLI_USE_MYSQLND)
-		uint stat_msg_len;
+		php_size_t stat_msg_len;
 		if (mysqlnd_stat(mysql->mysql, &stat_msg, &stat_msg_len) == PASS) {
 			ZVAL_STRINGL(*retval, stat_msg, stat_msg_len, 0);
 		}
@@ -382,7 +382,7 @@ static int stmt_affected_rows_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 			ZVAL_INT(*retval, (php_int_t) rc);
 		} else {
 			char *ret;
-			int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
+			php_size_t l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, rc);
 			ZVAL_STRINGL(*retval, ret, l, 0);
 		}
 	}

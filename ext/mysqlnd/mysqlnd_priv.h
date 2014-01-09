@@ -159,11 +159,11 @@
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
 
 /* PS stuff */
-typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC);
+typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, php_size_t pack_len, zend_uchar ** row TSRMLS_DC);
 struct st_mysqlnd_perm_bind {
 	ps_field_fetch_func func;
 	/* should be signed int */
-	int					pack_len;
+	php_size_t			pack_len;
 	unsigned int		php_type;
 	zend_bool			is_possibly_blob;
 	zend_bool			can_ret_as_str_in_uni;
@@ -190,7 +190,7 @@ enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const cha
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
 void _mysqlnd_init_ps_fetch_subsystem();
 
-void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count TSRMLS_DC);
+void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, php_size_t pack_len, zend_uchar ** row, php_uint_t byte_count TSRMLS_DC);
 
 void mysqlnd_plugin_subsystem_init(TSRMLS_D);
 void mysqlnd_plugin_subsystem_end(TSRMLS_D);
@@ -211,7 +211,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const size_t db_len,
 						const MYSQLND_OPTIONS * const options,
 						php_uint_t mysql_flags,
-						unsigned int server_charset_no,
+						php_uint_t server_charset_no,
 						zend_bool use_full_blown_auth_packet,
 						const char * const auth_protocol,
 						const zend_uchar * const auth_plugin_data,

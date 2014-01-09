@@ -784,6 +784,10 @@ PHP_FUNCTION(mysqli_poll)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Negative values passed for sec and/or usec");
 		RETURN_FALSE;
 	}
+	if (sec > LONG_MAX || usec > LONG_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Values passed for sec and/or usec are too long");
+		RETURN_FALSE;
+	}
 
 	if (!r_array && !e_array) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
@@ -995,7 +999,7 @@ PHP_FUNCTION(mysqli_get_charset)
 	MY_MYSQL				*mysql;
 	zval					*mysql_link;
 	const char 				*name = NULL, *collation = NULL, *dir = NULL, *comment = NULL;
-	uint					minlength, maxlength, number, state;
+	php_uint_t					minlength, maxlength, number, state;
 #if !defined(MYSQLI_USE_MYSQLND)
 	MY_CHARSET_INFO			cs;
 #else

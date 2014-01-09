@@ -38,7 +38,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const size_t db_len,
 							  const MYSQLND_OPTIONS * const options,
 							  php_uint_t mysql_flags,
-							  unsigned int server_charset_no,
+							  php_uint_t server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
 							  const zend_uchar * const auth_plugin_data,
@@ -465,7 +465,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 static void
 mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const size_t xor_str_len)
 {
-	unsigned int i;
+	php_size_t i;
 	for (i = 0; i <= dst_len; ++i) {
 		dst[i] ^= xor_str[i % xor_str_len];
 	}

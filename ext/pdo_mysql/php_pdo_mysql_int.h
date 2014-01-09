@@ -92,7 +92,7 @@ ZEND_EXTERN_MODULE_GLOBALS(pdo_mysql)
 typedef struct {
 	const char *file;
 	int line;
-	unsigned int errcode;
+	php_uint_t errcode;
 	char *errmsg;
 } pdo_mysql_error_info;
 
@@ -132,7 +132,7 @@ typedef struct {
 #else
 	MYSQL_STMT		*stmt;
 #endif	
-	int num_params;
+	php_uint_t num_params;
 	PDO_MYSQL_PARAM_BIND	*params;
 #ifndef PDO_USE_MYSQLND
 	my_bool			*in_null;
@@ -142,12 +142,12 @@ typedef struct {
 	my_bool			*out_null;
 	php_uint_t		*out_length;
 	unsigned int		params_given;
-	unsigned		max_length:1;
+	php_size_t		max_length:1;
 } pdo_mysql_stmt;
 
 extern pdo_driver_t pdo_mysql_driver;
 
-extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
+extern php_uint_t _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__ TSRMLS_CC)
 #define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
 

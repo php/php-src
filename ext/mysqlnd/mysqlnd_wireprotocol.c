@@ -232,12 +232,12 @@ php_mysqlnd_net_store_length_size(uint64_t length)
 
 /* {{{ php_mysqlnd_read_error_from_line */
 static enum_func_status
-php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
-								char *error, int error_buf_len,
-								unsigned int *error_no, char *sqlstate TSRMLS_DC)
+php_mysqlnd_read_error_from_line(zend_uchar *buf, php_size_t buf_len,
+								char *error, php_size_t error_buf_len,
+								php_uint_t *error_no, char *sqlstate TSRMLS_DC)
 {
 	zend_uchar *p = buf;
-	int error_msg_len= 0;
+	php_size_t error_msg_len= 0;
 
 	DBG_ENTER("php_mysqlnd_read_error_from_line");
 
@@ -970,7 +970,7 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	/* Let's have some space, which we can use, if not enough, we will allocate new buffer */
 	MYSQLND_PACKET_COMMAND * packet= (MYSQLND_PACKET_COMMAND *) _packet;
 	MYSQLND_NET * net = conn->net;
-	unsigned int error_reporting = EG(error_reporting);
+	php_uint_t error_reporting = EG(error_reporting);
 	size_t sent = 0;
 
 	DBG_ENTER("php_mysqlnd_cmd_write");
@@ -1193,7 +1193,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	char *root_ptr;
 	php_uint_t len;
 	MYSQLND_FIELD *meta;
-	unsigned int i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
+	php_uint_t i, field_count = sizeof(rset_field_offsets)/sizeof(size_t);
 
 	DBG_ENTER("php_mysqlnd_rset_field_read");
 
@@ -1477,10 +1477,10 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 /* {{{ php_mysqlnd_rowp_read_binary_protocol */
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									  unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									  php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 									  zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	zend_uchar * p = row_buffer->ptr;
 	zend_uchar * null_ptr, bit;
 	zval **current_field, **end_field, **start_field;
@@ -1575,10 +1575,10 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 /* {{{ php_mysqlnd_rowp_read_text_protocol */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	zend_bool last_field_was_string = FALSE;
 	zval **current_field, **end_field, **start_field;
 	zend_uchar * p = row_buffer->ptr;
@@ -1931,7 +1931,7 @@ php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	zend_uchar *buf = (zend_uchar *) conn->net->cmd_buffer.buffer;
 	zend_uchar *p = buf;
 	zend_uchar *begin = buf;
-	unsigned int data_size;
+	php_size_t data_size;
 	MYSQLND_PACKET_PREPARE_RESPONSE *packet= (MYSQLND_PACKET_PREPARE_RESPONSE *) _packet;
 
 	DBG_ENTER("php_mysqlnd_prepare_read");

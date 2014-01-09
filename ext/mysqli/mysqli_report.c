@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_mysqli_structs.h"
 
-extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
+extern void php_mysqli_throw_sql_exception(char *sqlstate, php_int_t errorno TSRMLS_DC, char *format, ...);
 
 /* {{{ proto bool mysqli_report(int flags)
    sets report level */
@@ -47,14 +47,14 @@ PHP_FUNCTION(mysqli_report)
 /* }}} */
 
 /* {{{ void php_mysqli_report_error(char *sqlstate, int errorno, char *error) */
-void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC)
+void php_mysqli_report_error(const char *sqlstate, php_int_t errorno, const char *error TSRMLS_DC)
 {
 	php_mysqli_throw_sql_exception((char *)sqlstate, errorno TSRMLS_CC, "%s", error);
 }
 /* }}} */
 
 /* {{{ void php_mysqli_report_index() */
-void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC) {
+void php_mysqli_report_index(const char *query, php_uint_t status TSRMLS_DC) {
 	char index[15];
 
 	if (status & SERVER_QUERY_NO_GOOD_INDEX_USED) {

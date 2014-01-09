@@ -32,7 +32,7 @@
 
 #define TRACE_APPEND_STRL(val, vallen)                                   \
 	{                                                                    \
-		int l = vallen;                                                  \
+		php_size_t l = vallen;                                                  \
 		*str = (char*)erealloc(*str, *len + l + 1);                      \
 		memcpy((*str) + *len, val, l);                                   \
 		*len += l;                                                       \
@@ -53,10 +53,10 @@ static int
 mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char **str;
-	int *len;
+	php_size_t *len;
 
 	str = va_arg(args, char**);
-	len = va_arg(args, int*);
+	len = va_arg(args, php_size_t*);
 
 	/* the trivial way would be to do:
 	 * conver_to_string_ex(arg);
@@ -69,7 +69,7 @@ mysqlnd_build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_
 			TRACE_APPEND_STR("NULL, ");
 			break;
 		case IS_STRING: {
-			int l_added;
+			php_size_t l_added;
 			TRACE_APPEND_CHR('\'');
 			if (Z_STRSIZE_PP(arg) > 15) {
 				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
@@ -150,7 +150,8 @@ static int
 mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	char *s_tmp, **str;
-	int *len, *num;
+	php_size_t *len;
+	int *num;
 	php_int_t line;
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
@@ -158,7 +159,7 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 
 	level = va_arg(args, uint *);
 	str = va_arg(args, char**);
-	len = va_arg(args, int*);
+	len = va_arg(args, php_size_t*);
 	num = va_arg(args, int*);
 
 	if (!*level) {
@@ -188,7 +189,7 @@ mysqlnd_build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list args, z
 	TRACE_APPEND_KEY("function");
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
-		int last_len = *len;
+		php_size_t last_len = *len;
 		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)mysqlnd_build_trace_args, 2, str, len);
 		if (last_len != *len) {
 			*len -= 2; /* remove last ', ' */

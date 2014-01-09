@@ -679,9 +679,9 @@ static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, co
 
 	{
 		char * commented_name = NULL;
-		unsigned int commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
+		php_size_t commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
 		char * query;
-		unsigned int query_len = spprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
+		php_size_t query_len = spprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
 										  commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
 		smart_str_free(&tmp_str);
 
@@ -1656,7 +1656,7 @@ PHP_FUNCTION(mysqli_num_rows)
 /* }}} */
 
 /* {{{ mysqli_options_get_option_zval_type */
-static int mysqli_options_get_option_zval_type(int option)
+static int mysqli_options_get_option_zval_type(php_int_t option)
 {
 	switch (option) {
 #ifdef MYSQLI_USE_MYSQLND
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(mysqli_options)
 	zval			*mysql_link = NULL;
 	zval			**mysql_value;
 	php_int_t			mysql_option;
-	unsigned int	l_value;
+	php_int_t 		l_value;
 	php_int_t			ret;
 	int				expected_type;
 
@@ -2239,7 +2239,7 @@ PHP_FUNCTION(mysqli_stat)
 	zval		*mysql_link;
 	char		*stat;
 #if defined(MYSQLI_USE_MYSQLND)
-	uint		stat_len;
+	php_size_t	stat_len;
 #endif
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {

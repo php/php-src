@@ -80,7 +80,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn TSRMLS_
 		conn->options->auth_protocol = NULL;
 	}
 	if (conn->options->num_commands) {
-		unsigned int i;
+		php_uint_t i;
 		for (i = 0; i < conn->options->num_commands; i++) {
 			/* allocated with pestrdup */
 			mnd_pefree(conn->options->init_commands[i], pers);
@@ -519,7 +519,7 @@ mysqlnd_run_authentication(
 			const zend_uchar * const auth_plugin_data,
 			const size_t auth_plugin_data_len,
 			const char * const auth_protocol,
-			unsigned int charset_no,
+			php_uint_t charset_no,
 			const MYSQLND_OPTIONS * const options,
 			php_uint_t mysql_flags,
 			zend_bool silent,
@@ -678,7 +678,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 
 	DBG_ENTER("mysqlnd_conn_data::execute_init_commands");
 	if (conn->options->init_commands) {
-		unsigned int current_command = 0;
+		php_uint_t current_command = 0;
 		for (; current_command < conn->options->num_commands; ++current_command) {
 			const char * const command = conn->options->init_commands[current_command];
 			if (command) {
@@ -703,8 +703,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 
 
 /* {{{ mysqlnd_conn_data::get_updated_connect_flags */
-static unsigned int
-MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags TSRMLS_DC)
+static php_int_t
+MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, php_int_t mysql_flags TSRMLS_DC)
 {
 	MYSQLND_NET * net = conn->net;
 
@@ -748,9 +748,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 						const char * const host, const char * const user,
-						const char * const passwd, const unsigned int passwd_len,
-						const char * const db, const unsigned int db_len,
-						const unsigned int mysql_flags TSRMLS_DC)
+						const char * const passwd, const php_size_t passwd_len,
+						const char * const db, const php_size_t db_len,
+						const php_int_t mysql_flags TSRMLS_DC)
 {
 	MYSQLND_PACKET_GREET * greet_packet;
 	MYSQLND_NET * net = conn->net;
@@ -829,11 +829,11 @@ err:
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 						 const char *host, const char *user,
-						 const char *passwd, unsigned int passwd_len,
-						 const char *db, unsigned int db_len,
-						 unsigned int port,
+						 const char *passwd, php_size_t passwd_len,
+						 const char *db, php_size_t db_len,
+						 php_uint_t port,
 						 const char *socket_or_pipe,
-						 unsigned int mysql_flags
+						 php_int_t mysql_flags
 						 TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, connect);
@@ -888,7 +888,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			net->data->ssl = FALSE;
 		}
 	} else {
-		unsigned int max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
+		php_uint_t max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		conn->m->set_client_option(conn, MYSQLND_OPT_MAX_ALLOWED_PACKET, (char *)&max_allowed_size TSRMLS_CC);
 	}
 
@@ -1080,11 +1080,11 @@ err:
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 						 const char * host, const char * user,
-						 const char * passwd, unsigned int passwd_len,
-						 const char * db, unsigned int db_len,
-						 unsigned int port,
+						 const char * passwd, php_size_t passwd_len,
+						 const char * db, php_size_t db_len,
+						 php_uint_t port,
 						 const char * socket_or_pipe,
-						 unsigned int mysql_flags
+						 php_uint_t mysql_flags
 						 TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, connect);
@@ -1107,11 +1107,11 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 						 const char * host, const char * user,
-						 const char * passwd, unsigned int passwd_len,
-						 const char * db, unsigned int db_len,
-						 unsigned int port,
+						 const char * passwd, php_size_t passwd_len,
+						 const char * db, php_size_t db_len,
+						 php_uint_t port,
 						 const char * socket_or_pipe,
-						 unsigned int mysql_flags
+						 php_uint_t mysql_flags
 						 TSRMLS_DC)
 {
 	enum_func_status ret = FAIL;
@@ -1151,7 +1151,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
   Still the result from the query is PASS
 */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * query, php_size_t query_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, query);
 	enum_func_status ret = FAIL;
@@ -1176,7 +1176,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 
 /* {{{ mysqlnd_conn_data::send_query */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, php_size_t query_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, send_query);
 	enum_func_status ret = FAIL;
@@ -1267,7 +1267,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 {
 	php_socket_t this_fd;
 	php_stream *stream = NULL;
-	unsigned int cnt = 0;
+	php_uint_t cnt = 0;
 	MYSQLND **p = conn_array;
 	DBG_ENTER("mysqlnd_stream_array_to_fd_set");
 
@@ -1536,7 +1536,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const c
 
 
 /* {{{ mysqlnd_conn_data::errno */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, errno)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	return conn->error_info->error_no;
@@ -1640,7 +1640,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 
 /* {{{ mysqlnd_conn_data::select_db */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, const char * const db, unsigned int db_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, const char * const db, php_size_t db_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, select_db);
 	enum_func_status ret = FAIL;
@@ -1702,7 +1702,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn TSRMLS_DC
 
 /* {{{ mysqlnd_conn_data::statistic */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **message, unsigned int * message_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **message, php_size_t * message_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, get_server_statistics);
 	enum_func_status ret = FAIL;
@@ -1741,7 +1741,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, char **me
 
 /* {{{ mysqlnd_conn_data::kill */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int pid TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, php_uint_t pid TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, kill_connection);
 	enum_func_status ret = FAIL;
@@ -1973,7 +1973,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, set_state)(MYSQLND_CONN_DATA * const c
 
 
 /* {{{ mysqlnd_conn_data::field_count */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	return conn->field_count;
@@ -1982,7 +1982,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, field_count)(const MYSQLND_CONN_DATA * const c
 
 
 /* {{{ mysqlnd_conn_data::server_status */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, server_status)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	return conn->upsert_status->server_status;
@@ -2009,7 +2009,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, affected_rows)(const MYSQLND_CONN_DATA * const
 
 
 /* {{{ mysqlnd_conn_data::warning_count */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, warning_count)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	return conn->upsert_status->warning_count;
@@ -2034,7 +2034,7 @@ PHPAPI const char * mysqlnd_get_client_info()
 
 
 /* {{{ mysqlnd_get_client_version */
-PHPAPI unsigned int mysqlnd_get_client_version()
+PHPAPI php_uint_t mysqlnd_get_client_version()
 {
 	return MYSQLND_VERSION_ID;
 }
@@ -2060,7 +2060,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_host_info)(const MYSQLND_CONN_DATA * const
 
 
 /* {{{ mysqlnd_conn_data::get_proto_info */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_conn_data, get_proto_info)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	return conn->protocol_version;
@@ -2612,7 +2612,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_connection_stats)(const MYSQLND_CONN_DATA 
 
 /* {{{ mysqlnd_conn_data::set_autocommit */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, php_uint_t mode TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_autocommit);
 	enum_func_status ret = FAIL;
@@ -2648,7 +2648,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_D
 
 /* {{{ mysqlnd_tx_cor_options_to_string */
 static void
-MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const php_int_t mode TSRMLS_DC)
 {
 	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
 		if (str->len) {
@@ -2680,7 +2680,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_D
 
 /* {{{ mysqlnd_conn_data::tx_commit_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const php_int_t flags, const char * const name TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_commit_or_rollback);
 	enum_func_status ret = FAIL;
@@ -2694,9 +2694,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 
 			{
 				char * commented_name = NULL;
-				unsigned int commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
+				php_size_t commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
+				php_int_t query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
 													 commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
 				smart_str_free(&tmp_str);
 
@@ -2721,7 +2721,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 
 /* {{{ mysqlnd_conn_data::tx_begin */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const php_uint_t mode, const char * const name TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_begin);
 	enum_func_status ret = FAIL;
@@ -2752,9 +2752,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 
 			{
 				char * commented_name = NULL;
-				unsigned int commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
+				php_size_t commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+				php_size_t query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
 				smart_str_free(&tmp_str);
 
 				if (!query) {
@@ -2787,7 +2787,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint)(MYSQLND_CONN_DATA * conn, const 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
 			char * query;
-			unsigned int query_len;
+			php_size_t query_len;
 			if (!name) {
 				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
 				break;
@@ -2819,7 +2819,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
 			char * query;
-			unsigned int query_len;
+			php_size_t query_len;
 			if (!name) {
 				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
 				break;

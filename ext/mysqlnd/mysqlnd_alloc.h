@@ -33,14 +33,14 @@ struct st_mysqlnd_allocator_methods
 {
 	void *	(*m_emalloc)(size_t size MYSQLND_MEM_D);
 	void *	(*m_pemalloc)(size_t size, zend_bool persistent MYSQLND_MEM_D);
-	void *	(*m_ecalloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-	void *	(*m_pecalloc)(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+	void *	(*m_ecalloc)(php_uint_t nmemb, size_t size MYSQLND_MEM_D);
+	void *	(*m_pecalloc)(php_uint_t nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
 	void *	(*m_erealloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
 	void *	(*m_perealloc)(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
 	void	(*m_efree)(void *ptr MYSQLND_MEM_D);
 	void	(*m_pefree)(void *ptr, zend_bool persistent MYSQLND_MEM_D);
 	void *	(*m_malloc)(size_t size MYSQLND_MEM_D);
-	void *	(*m_calloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+	void *	(*m_calloc)(php_uint_t nmemb, size_t size MYSQLND_MEM_D);
 	void *	(*m_realloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
 	void	(*m_free)(void *ptr MYSQLND_MEM_D);
 	char *	(*m_pestrndup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
@@ -54,14 +54,14 @@ PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
 
 PHPAPI void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
 PHPAPI void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_ecalloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_pecalloc(php_uint_t nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
 PHPAPI void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 PHPAPI void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
 PHPAPI void		_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
 PHPAPI void		_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
 PHPAPI void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
+PHPAPI void *	_mysqlnd_calloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D);
 PHPAPI void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
 PHPAPI void		_mysqlnd_free(void *ptr MYSQLND_MEM_D);
 PHPAPI char *	_mysqlnd_pestrndup(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);

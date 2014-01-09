@@ -74,9 +74,9 @@ extern MYSQLI_WARNING *php_get_warnings(MYSQL * mysql TSRMLS_DC);
 
 extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
-extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
-extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
+extern void php_mysqli_report_error(const char *sqlstate, php_int_t errorno, const char *error TSRMLS_DC);
+extern void php_mysqli_report_index(const char *query, php_uint_t status TSRMLS_DC);
+extern void php_mysqli_throw_sql_exception(char *sqlstate, php_int_t errorno TSRMLS_DC, char *format, ...);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -105,7 +105,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	} else {				\
 		char *ret;			\
 		/* always used with my_ulonglong -> %llu */ \
-		int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (__val));	\
+		php_size_t l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (__val));	\
 		RETURN_STRINGL(ret, l, 0);		\
 	}					\
 }

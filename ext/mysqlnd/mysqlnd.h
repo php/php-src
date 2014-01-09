@@ -66,9 +66,9 @@
 PHPAPI void mysqlnd_library_init(TSRMLS_D);
 PHPAPI void mysqlnd_library_end(TSRMLS_D);
 
-PHPAPI unsigned int mysqlnd_plugin_register();
-PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC);
-PHPAPI unsigned int mysqlnd_plugin_count();
+PHPAPI php_uint_t mysqlnd_plugin_register();
+PHPAPI php_uint_t mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC);
+PHPAPI php_uint_t mysqlnd_plugin_count();
 PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC);
 #define mysqlnd_plugin_find(name) _mysqlnd_plugin_find((name) TSRMLS_CC);
 
@@ -89,11 +89,11 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC);
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						  const char * host, const char * user,
-						  const char * passwd, unsigned int passwd_len,
-						  const char * db, unsigned int db_len,
-						  unsigned int port,
+						  const char * passwd, php_size_t passwd_len,
+						  const char * db, php_size_t db_len,
+						  php_uint_t port,
 						  const char * socket_or_pipe,
-						  unsigned int mysql_flags
+						  php_uint_t mysql_flags
 						  TSRMLS_DC);
 
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)) TSRMLS_CC)
@@ -161,7 +161,7 @@ PHPAPI php_uint_t * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC
 
 /* mysqlnd metadata */
 PHPAPI const char *	mysqlnd_get_client_info();
-PHPAPI unsigned int	mysqlnd_get_client_version();
+PHPAPI php_uint_t	mysqlnd_get_client_version();
 
 #define mysqlnd_ssl_set(conn, key, cert, ca, capath, cipher) ((conn)->data)->m->ssl_set((conn)->data, (key), (cert), (ca), (capath), (cipher) TSRMLS_CC)
 

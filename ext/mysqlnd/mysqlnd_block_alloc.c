@@ -54,7 +54,7 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk TSRMLS_DC)
 
 /* {{{ mysqlnd_mempool_resize_chunk */
 static enum_func_status
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC)
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, php_size_t size TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
 	if (chunk->from_pool) {
@@ -112,7 +112,7 @@ mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int siz
 
 /* {{{ mysqlnd_mempool_get_chunk */
 static
-MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, unsigned int size TSRMLS_DC)
+MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, php_size_t size TSRMLS_DC)
 {
 	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");

@@ -45,7 +45,7 @@ static int
 mysqlnd_set_sock_no_delay(php_stream * stream TSRMLS_DC)
 {
 
-	int socketd = ((php_netstream_data_t*)stream->abstract)->socket;
+	php_socket_t socketd = ((php_netstream_data_t*)stream->abstract)->socket;
 	int ret = SUCCESS;
 	int flag = 1;
 	int result = setsockopt(socketd, IPPROTO_TCP,  TCP_NODELAY, (char *) &flag, sizeof(int));
@@ -1030,7 +1030,7 @@ MYSQLND_METHOD(mysqlnd_net, close_stream)(MYSQLND_NET * const net, MYSQLND_STATS
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, init)(MYSQLND_NET * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
 {
-	unsigned int buf_size;
+	php_size_t buf_size;
 	DBG_ENTER("mysqlnd_net::init");
 
 	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/

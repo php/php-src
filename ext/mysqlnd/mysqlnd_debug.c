@@ -62,8 +62,8 @@ MYSQLND_METHOD(mysqlnd_debug, log)(MYSQLND_DEBUG * self,
 	enum_func_status ret;
 	int i;
 	char * message_line;
-	unsigned int message_line_len;
-	unsigned int flags = self->flags;
+	php_size_t message_line_len;
+	php_uint_t flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
@@ -159,9 +159,9 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 	int i;
 	enum_func_status ret;
 	char * message_line, *buffer;
-	unsigned int message_line_len;
+	php_size_t message_line_len;
 	va_list args;
-	unsigned int flags = self->flags;
+	php_uint_t flags = self->flags;
 	char pid_buffer[10], time_buffer[30], file_buffer[200],
 		 line_buffer[6], level_buffer[7];
 	MYSQLND_ZTS(self);
@@ -256,7 +256,7 @@ MYSQLND_METHOD(mysqlnd_debug, log_va)(MYSQLND_DEBUG *self,
 static zend_bool
 MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 										  unsigned int line, const char * const file,
-										  const char * const func_name, unsigned int func_name_len)
+										  const char * const func_name, php_size_t func_name_len)
 {
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
@@ -322,7 +322,7 @@ struct st_mysqlnd_dbg_function_profile {
 
 /* {{{ mysqlnd_debug::func_leave */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time)
+MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, php_uint_t line, const char * const file, uint64_t call_time)
 {
 	char *func_name;
 	uint64_t * parent_non_own_time_ptr = NULL, * mine_non_own_time_ptr = NULL;
@@ -361,7 +361,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 			struct st_mysqlnd_dbg_function_profile f_profile_stack = {0};
 			struct st_mysqlnd_dbg_function_profile * f_profile = NULL;
 			uint64_t own_time = call_time - mine_non_own_time;
-			uint func_name_len = strlen(func_name);
+			php_size_t func_name_len = strlen(func_name);
 
 			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
 						func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
@@ -516,7 +516,7 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	unsigned int mode_len, i;
+	php_size_t mode_len, i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
 
 	mode_len = mode? strlen(mode) : 0;
@@ -543,7 +543,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 					self->flags |= MYSQLND_DEBUG_APPEND;
 				}
 				if (i + 1 < mode_len && mode[i+1] == ',') {
-					unsigned int j = i + 2;
+					php_size_t j = i + 2;
 #ifdef PHP_WIN32
 					if (i+4 < mode_len && mode[i+3] == ':' && (mode[i+4] == '\\' || mode[i+5] == '/')) {
 						j = i + 5;
@@ -575,7 +575,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				break;
 			case 'f': /* limit output to these functions */
 				if (i + 1 < mode_len && mode[i+1] == ',') {
-					unsigned int j = i + 2;
+					php_size_t j = i + 2;
 					i++;
 					while (j < mode_len) {
 						if (mode[j] == ':') {
@@ -588,7 +588,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 						if (mode[j] == ',' || mode[j] == ':') {
 							if (j > i + 2) {
 								char func_name[1024];
-								unsigned int func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
+								php_size_t func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
 								memcpy(func_name, mode + i + 1, func_name_len);
 								func_name[func_name_len] = '\0'; 
 
@@ -645,7 +645,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 				break;
 			case 't':
 				if (mode[i+1] == ',') {
-					unsigned int j = i + 2;
+					php_size_t j = i + 2;
 					while (j < mode_len) {
 						if (mode[j] == ':') {
 							break;

@@ -82,7 +82,7 @@ typedef struct st_mysqlnd_packet_greet {
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int	error_no;
+	php_uint_t	error_no;
 	char		*auth_protocol;
 } MYSQLND_PACKET_GREET;
 
@@ -119,7 +119,7 @@ typedef struct st_mysqlnd_packet_auth_response {
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int 	error_no;
+	php_uint_t 	error_no;
 
 	char		*new_auth_protocol;
 	size_t		new_auth_protocol_len;
@@ -149,7 +149,7 @@ typedef struct st_mysqlnd_packet_ok {
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int 	error_no;
+	php_uint_t 	error_no;
 } MYSQLND_PACKET_OK;
 
 
@@ -171,7 +171,7 @@ typedef struct st_mysqlnd_packet_eof {
 	/* If error packet, we use these */
 	char 		error[MYSQLND_ERRMSG_SIZE+1];
 	char 		sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
-	unsigned int 	error_no;
+	php_uint_t 	error_no;
 } MYSQLND_PACKET_EOF;
 /* EOF packet */
 
@@ -236,7 +236,7 @@ typedef struct st_mysqlnd_packet_row {
 	zend_bool		persistent_alloc;
 	MYSQLND_FIELD	*fields_metadata;
 	/* We need this to alloc bigger bufs in non-PS mode */
-	unsigned int	bit_fields_count;
+	php_uint_t	bit_fields_count;
 	size_t			bit_fields_total_len; /* trailing \0 not counted */
 
 	/* If error packet, we use these */
@@ -259,9 +259,9 @@ typedef struct st_mysqlnd_packet_prepare_response {
 	/* also known as field_count 0x00=OK , 0xFF=error */
 	unsigned char	error_code;
 	php_uint_t	stmt_id;
-	unsigned int	field_count;
-	unsigned int	param_count;
-	unsigned int	warning_count;
+	php_uint_t	field_count;
+	php_uint_t	param_count;
+	php_uint_t	warning_count;
 
 	/* present in case of error */
 	MYSQLND_ERROR_INFO	error_info;
@@ -307,12 +307,12 @@ PHPAPI const extern char * const mysqlnd_empty_string;
 
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+										 php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+										 php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 

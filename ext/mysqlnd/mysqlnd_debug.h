@@ -35,8 +35,8 @@ struct st_mysqlnd_debug_methods
 	enum_func_status (*log_va)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
 							   unsigned int level, const char * type, const char *format, ...);
 	zend_bool (*func_enter)(MYSQLND_DEBUG * self, unsigned int line, const char * const file,
-							const char * const func_name, unsigned int func_name_len);
-	enum_func_status (*func_leave)(MYSQLND_DEBUG * self, unsigned int line, const char * const file, uint64_t call_time);
+							const char * const func_name, php_size_t func_name_len);
+	enum_func_status (*func_leave)(MYSQLND_DEBUG * self, php_uint_t line, const char * const file, uint64_t call_time);
 	enum_func_status (*close)(MYSQLND_DEBUG * self);
 	enum_func_status (*free_handle)(MYSQLND_DEBUG * self);
 };

@@ -199,7 +199,7 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 PHPAPI void
 mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 
 	mysqlnd_array_init(return_value, stats->count);
 	for (i = 0; i < stats->count; i++) {

@@ -40,15 +40,15 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 
 enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param,
-												unsigned int flags,
+												php_uint_t flags,
 												zend_bool *fetched_anything TSRMLS_DC);
 
 enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param,
-											   unsigned int flags,
+											   php_uint_t flags,
 											   zend_bool *fetched_anything TSRMLS_DC);
 
 static void mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const stmt TSRMLS_DC);
-static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, unsigned int param_no TSRMLS_DC);
+static void mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const stmt, php_uint_t param_no TSRMLS_DC);
 
 
 /* {{{ mysqlnd_stmt::store_result */
@@ -241,7 +241,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	/* Follows parameter metadata, we have just to skip it, as libmysql does */
-	unsigned int i = 0;
+	php_uint_t i = 0;
 	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
 
@@ -357,7 +357,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt::prepare */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const query, unsigned int query_len TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const query, php_size_t query_len TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_STMT * s_to_prepare = s;
@@ -621,7 +621,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 			  bind_result();
 			  execute(); <-- here we will leak because we separate without need
 			*/
-			unsigned int i;
+			php_uint_t i;
 			for (i = 0; i < stmt->field_count; i++) {
 				if (stmt->result_bind[i].bound == TRUE) {
 					zval_copy_ctor(stmt->result_bind[i].zv);
@@ -650,7 +650,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 	}
 
 	if (stmt->param_count) {
-		unsigned int i, not_bound = 0;
+		php_uint_t i, not_bound = 0;
 		if (!stmt->param_bind) {
 			SET_STMT_ERROR(stmt, CR_PARAMS_NOT_BOUND, UNKNOWN_SQLSTATE,
 							 "No data supplied for parameters in prepared statement");
@@ -709,12 +709,12 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt_fetch_row_buffered */
 enum_func_status
-mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, php_uint_t flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
-	unsigned int field_count = result->meta->field_count;
+	php_uint_t field_count = result->meta->field_count;
 
 	DBG_ENTER("mysqlnd_stmt_fetch_row_buffered");
 	*fetched_anything = FALSE;
@@ -726,7 +726,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 	{
 		/* The user could have skipped binding - don't crash*/
 		if (stmt->result_bind) {
-			unsigned int i;
+			php_uint_t i;
 			MYSQLND_RES_METADATA * meta = result->meta;
 			zval **current_row = set->data_cursor;
 
@@ -806,7 +806,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param, unsigned int f
 
 /* {{{ mysqlnd_stmt_fetch_row_unbuffered */
 static enum_func_status
-mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, php_uint_t flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
@@ -840,7 +840,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 	  result->m.unbuffered_free_last_data() before it. The function returns always true.
 	*/
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
-		unsigned int i, field_count = result->field_count;
+		php_uint_t i, field_count = result->field_count;
 
 		if (!row_packet->skip_extraction) {
 			result->m.unbuffered_free_last_data(result TSRMLS_CC);
@@ -973,7 +973,7 @@ MYSQLND_METHOD(mysqlnd_stmt, use_result)(MYSQLND_STMT * s TSRMLS_DC)
 
 /* {{{ mysqlnd_fetch_row_cursor */
 enum_func_status
-mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int flags, zend_bool *fetched_anything TSRMLS_DC)
+mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, php_uint_t flags, zend_bool *fetched_anything TSRMLS_DC)
 {
 	enum_func_status ret;
 	MYSQLND_STMT * s = (MYSQLND_STMT *) param;
@@ -1018,7 +1018,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
-		unsigned int i, field_count = result->field_count;
+		php_uint_t i, field_count = result->field_count;
 
 		if (!row_packet->skip_extraction) {
 			result->m.unbuffered_free_last_data(result TSRMLS_CC);
@@ -1145,7 +1145,7 @@ MYSQLND_METHOD(mysqlnd_stmt, fetch)(MYSQLND_STMT * const s, zend_bool * const fe
 	  Do the binding once she does it.
 	*/
 	if (stmt->result_bind && !stmt->result_zvals_separated_once) {
-		unsigned int i;
+		php_uint_t i;
 		/*
 		  mysqlnd_stmt_store_result() has been called free the bind
 		  variables to prevent leaking of their previous content.
@@ -1185,7 +1185,7 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 	if (stmt->stmt_id) {
 		MYSQLND_CONN_DATA * conn = stmt->conn;
 		if (stmt->param_bind) {
-			unsigned int i;
+			php_uint_t i;
 			DBG_INF("resetting long data");
 			/* Reset Long Data */
 			for (i = 0; i < stmt->param_count; i++) {
@@ -1258,7 +1258,7 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt::send_long_data */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned int param_no,
+MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, php_uint_t param_no,
 							 				 const char * const data, php_uint_t length TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1392,7 +1392,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 	SET_EMPTY_ERROR(*stmt->conn->error_info);
 
 	if (stmt->param_count) {
-		unsigned int i = 0;
+		php_uint_t i = 0;
 
 		if (!param_bind) {
 			SET_STMT_ERROR(stmt, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE, "Re-binding (still) not supported");
@@ -1440,7 +1440,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_parameters)(MYSQLND_STMT * const s, MYSQLND_PA
 
 /* {{{ mysqlnd_stmt::bind_one_parameter */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigned int param_no,
+MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, php_uint_t param_no,
 												 zval * const zv, zend_uchar type TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1548,7 +1548,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 	SET_EMPTY_ERROR(*stmt->conn->error_info);
 
 	if (stmt->field_count) {
-		unsigned int i = 0;
+		php_uint_t i = 0;
 
 		if (!result_bind) {
 			DBG_ERR("no result bind passed");
@@ -1580,7 +1580,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_result)(MYSQLND_STMT * const s,
 
 /* {{{ mysqlnd_stmt::bind_result */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned int param_no TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, php_uint_t param_no TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt::bind_result");
@@ -1660,7 +1660,7 @@ MYSQLND_METHOD(mysqlnd_stmt, num_rows)(const MYSQLND_STMT * const s TSRMLS_DC)
 
 
 /* {{{ mysqlnd_stmt::warning_count */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1670,7 +1670,7 @@ MYSQLND_METHOD(mysqlnd_stmt, warning_count)(const MYSQLND_STMT * const s TSRMLS_
 
 
 /* {{{ mysqlnd_stmt::server_status */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_stmt, server_status)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1680,7 +1680,7 @@ MYSQLND_METHOD(mysqlnd_stmt, server_status)(const MYSQLND_STMT * const s TSRMLS_
 
 
 /* {{{ mysqlnd_stmt::field_count */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1690,7 +1690,7 @@ MYSQLND_METHOD(mysqlnd_stmt, field_count)(const MYSQLND_STMT * const s TSRMLS_DC
 
 
 /* {{{ mysqlnd_stmt::param_count */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1700,7 +1700,7 @@ MYSQLND_METHOD(mysqlnd_stmt, param_count)(const MYSQLND_STMT * const s TSRMLS_DC
 
 
 /* {{{ mysqlnd_stmt::errno */
-static unsigned int
+static php_uint_t
 MYSQLND_METHOD(mysqlnd_stmt, errno)(const MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
@@ -1837,7 +1837,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
-			unsigned int ival = *(unsigned int *) value;
+			php_uint_t ival = *(php_uint_t *) value;
 			if (ival > (php_uint_t) CURSOR_TYPE_READ_ONLY) {
 				SET_STMT_ERROR(stmt, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
@@ -1847,7 +1847,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_PREFETCH_ROWS: {
-			unsigned int ival = *(unsigned int *) value;
+			php_uint_t ival = *(php_uint_t *) value;
 			if (ival == 0) {
 				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
 			} else if (ival > 1) {
@@ -1960,7 +1960,7 @@ static void
 mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
-	unsigned int i;
+	php_uint_t i;
 
 	DBG_ENTER("mysqlnd_stmt_separate_result_bind");
 	if (!stmt) {
@@ -2013,7 +2013,7 @@ mysqlnd_stmt_separate_result_bind(MYSQLND_STMT * const s TSRMLS_DC)
 
 /* {{{ mysqlnd_stmt_separate_one_result_bind */
 static void
-mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, unsigned int param_no TSRMLS_DC)
+mysqlnd_stmt_separate_one_result_bind(MYSQLND_STMT * const s, php_uint_t param_no TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data:NULL;
 	DBG_ENTER("mysqlnd_stmt_separate_one_result_bind");
@@ -2074,7 +2074,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_content)(MYSQLND_STMT * const s TSRMLS_DC
 
 	/* Destroy the input bind */
 	if (stmt->param_bind) {
-		unsigned int i;
+		php_uint_t i;
 		/*
 		  Because only the bound variables can point to our internal buffers, then
 		  separate or free only them. Free is possible because the user could have

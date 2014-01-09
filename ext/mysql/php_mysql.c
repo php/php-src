@@ -1297,7 +1297,7 @@ PHP_FUNCTION(mysql_stat)
 	php_mysql_conn *mysql;
 	char *stat;
 #ifdef MYSQL_USE_MYSQLND
-	uint stat_len;
+	php_size_t stat_len;
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link) == FAILURE) {
@@ -1444,7 +1444,7 @@ PHP_FUNCTION(mysql_drop_db)
 
 /* {{{ php_mysql_do_query_general
  */
-static void php_mysql_do_query_general(char *query, int query_len, zval *mysql_link, int link_id, char *db, int use_store, zval *return_value TSRMLS_DC)
+static void php_mysql_do_query_general(char *query, php_size_t query_len, zval *mysql_link, php_int_t link_id, char *db, int use_store, zval *return_value TSRMLS_DC)
 {
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
@@ -2299,8 +2299,7 @@ PHP_FUNCTION(mysql_fetch_lengths)
 	zval *result;
 	MYSQL_RES *mysql_result;
 	mysql_row_length_type *lengths;
-	int num_fields;
-	int i;
+	php_int_t num_fields, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &result) == FAILURE) {
 		return;

@@ -566,7 +566,7 @@ struct _pdo_stmt_t {
 	 * the statement has been executed at least once.  In some cases, might
 	 * not be valid until fetch (at the driver level) has been called at least once.
 	 * */
-	int column_count;
+	php_uint_t column_count;
 	struct pdo_column_data *columns;
 	
 	/* we want to keep the dbh alive while we live, so we own a reference */

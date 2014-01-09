@@ -157,7 +157,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_ecalloc */
-void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+void * _mysqlnd_ecalloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -198,7 +198,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_pecalloc */
-void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
+void * _mysqlnd_pecalloc(php_uint_t nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -427,7 +427,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 
 
 /* {{{ _mysqlnd_calloc */
-void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+void * _mysqlnd_calloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D)
 {
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
@@ -660,7 +660,7 @@ static void * mysqlnd_zend_mm_pemalloc(size_t size, zend_bool persistent MYSQLND
 
 
 /* {{{ mysqlnd_zend_mm_ecalloc */
-static void * mysqlnd_zend_mm_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+static void * mysqlnd_zend_mm_ecalloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D)
 {
 	return ecalloc(nmemb, size);
 }
@@ -668,7 +668,7 @@ static void * mysqlnd_zend_mm_ecalloc(unsigned int nmemb, size_t size MYSQLND_ME
 
 
 /* {{{ mysqlnd_zend_mm_pecalloc */
-static void * mysqlnd_zend_mm_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
+static void * mysqlnd_zend_mm_pecalloc(php_uint_t nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D)
 {
 	return pecalloc(nmemb, size, persistent);
 }
@@ -716,7 +716,7 @@ static void * mysqlnd_zend_mm_malloc(size_t size MYSQLND_MEM_D)
 
 
 /* {{{ mysqlnd_zend_mm_calloc */
-static void * mysqlnd_zend_mm_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
+static void * mysqlnd_zend_mm_calloc(php_uint_t nmemb, size_t size MYSQLND_MEM_D)
 {
 	return calloc(nmemb, size);
 }

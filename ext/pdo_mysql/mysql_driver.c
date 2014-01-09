@@ -43,7 +43,7 @@
 #endif
 
 /* {{{ _pdo_mysql_error */
-int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC)
+php_uint_t _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err; 
@@ -436,7 +436,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_
 		case PDO_ATTR_SERVER_INFO: {
 			char *tmp;
 #if defined(PDO_USE_MYSQLND)
-			unsigned int tmp_len;
+			php_size_t tmp_len;
 
 			if (mysqlnd_stat(H->server, &tmp, &tmp_len) == PASS) {
 				ZVAL_STRINGL(return_value, tmp, tmp_len, 0);
