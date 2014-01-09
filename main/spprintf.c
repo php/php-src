@@ -367,9 +367,15 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 					modifier = LM_SIZE_T;
 #endif
 					break;
-				case 'p':
-					fmt++;
-					modifier = LM_PHP_INT_T;
+				case 'p': {
+						char __next = *(fmt+1);
+						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) { 
+							fmt++;
+							modifier = LM_PHP_INT_T;
+						} else {
+							modifier = LM_STD;
+						}
+					}
 					break;
 				case 'h':
 					fmt++;
