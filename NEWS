@@ -1,6 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.8
+?? ??? 2014, PHP 5.5.9
+
+- GD:
+  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
+    (Laruence, Remi)
+
+- OPCache:
+  . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
+    ^M as lineend). (Laruence)
+
+- Standard
+  . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
+
+- Sockets:
+  . Fixed bug #66381 (__ss_family was changed on AIX 5.3). (Felipe)
+
+- Zend Engine
+  . Fixed bug #66009 (Failed compilation of PHP extension with C++ std
+    library using VS 2012). (Anatol)
+
+09 Jan 2014, PHP 5.5.8
 
 - Core:
   . Disallowed JMP into a finally block. (Laruence)
@@ -29,8 +49,6 @@ PHP                                                                        NEWS
   . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
 
 - GD:
-  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
-    (Laruence, Remi)
   . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
     (Adam)
     
@@ -42,9 +60,7 @@ PHP                                                                        NEWS
   . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
 
 - OPCache:
-  . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
-    ^M as lineend). (Laruence)
-  . Fixed reavlidate_path=1 behavior to avoid caching of symlinks values.
+  . Fixed revalidate_path=1 behavior to avoid caching of symlinks values.
     (Dmitry)
   . Fixed Issue #140: "opcache.enable_file_override" doesn't respect
     "opcache.revalidate_freq". (Dmitry).
@@ -56,11 +72,7 @@ PHP                                                                        NEWS
   . Fixed bug #66112 (Use after free condition in SOAP extension).
     (martin dot koegler at brz dot gv dot at)
 
-- Standard
-  . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
-
 - Sockets:
-  . Fixed bug #66381 (__ss_family was changed on AIX 5.3). (Felipe)
   . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
 
 - XSL
@@ -69,10 +81,6 @@ PHP                                                                        NEWS
 
 - ZIP:
   . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
-
-- Zend Engine
-  . Fixed bug #66009 (Failed compilation of PHP extension with C++ std
-    library using VS 2012). (Anatol)
 
 12 Dec 2013, PHP 5.5.7
 
