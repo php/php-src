@@ -4072,8 +4072,7 @@ PHP_FUNCTION(array_sum)
 {
 	zval *input,
 		 **entry,
-		 entry_n,
-		 entry_m;
+		 entry_n;
 	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
@@ -4089,12 +4088,10 @@ PHP_FUNCTION(array_sum)
 		if (Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT) {
 			continue;
 		}
-		Z_IVAL(entry_m) = Z_IVAL_P(return_value);
-		Z_TYPE(entry_m) = Z_TYPE_P(return_value);
 		entry_n = **entry;
 		zval_copy_ctor(&entry_n);
 		convert_scalar_to_number(&entry_n TSRMLS_CC);
-		fast_add_function(return_value, &entry_m, &entry_n TSRMLS_CC);
+		fast_add_function(return_value, return_value, &entry_n TSRMLS_CC);
 	}
 }
 /* }}} */
