@@ -166,21 +166,24 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 }
 
 int phpdbg_btree_delete(phpdbg_btree *tree, zend_ulong idx) {
-	int i = tree->depth - 1;
+	int i = tree->depth;
 	phpdbg_btree_branch *branch = tree->branch;
 	int i_last_dual_branch = -1, last_dual_branch_branch;
 	phpdbg_btree_branch *last_dual_branch = NULL;
 
+	goto check_branch_existence;
 	do {
-		if (branch == NULL) {
-			return FAILURE;
-		}
 		if (branch->branches[0] && branch->branches[1]) {
 			last_dual_branch = branch;
 			i_last_dual_branch = i;
 			last_dual_branch_branch = (idx >> i) % 2;
 		}
 		branch = branch->branches[(idx >> i) % 2];
+
+check_branch_existence:
+		if (branch == NULL) {
+			return FAILURE;
+		}
 	} while (i--);
 
 	if (i_last_dual_branch == -1) {

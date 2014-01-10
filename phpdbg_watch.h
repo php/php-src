@@ -29,6 +29,7 @@
 /**
  * Printer Forward Declarations
  */
+PHPDBG_WATCH(array);
 PHPDBG_WATCH(delete);
 PHPDBG_WATCH(recursive);
 
@@ -37,8 +38,9 @@ PHPDBG_WATCH(recursive);
  */
 
 static const phpdbg_command_t phpdbg_watch_commands[] = {
-	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",            'd', watch_delete,    NULL, 1),
-	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints", 'r', watch_recursive, NULL, 1),
+	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     NULL, 1),
+	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    NULL, 1),
+	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, NULL, 1),
 };
 
 /* Watchpoint functions/typedefs */
@@ -80,5 +82,7 @@ int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC);
 int phpdbg_print_changed_zvals(TSRMLS_D);
 
 void phpdbg_list_watchpoints(TSRMLS_D);
+
+void phpdbg_watch_efree(void *ptr);
 
 #endif

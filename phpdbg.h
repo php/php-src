@@ -175,6 +175,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable watchpoints;                       /* watchpoints */
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
+	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */

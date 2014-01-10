@@ -101,11 +101,37 @@ void phpdbg_create_zval_watchpoint(zval *zv, phpdbg_watchpoint_t *watch) {
 	watch->type = WATCH_ON_ZVAL;
 }
 
+void phpdbg_create_ht_watchpoint(HashTable *ht, phpdbg_watchpoint_t *watch) {
+	phpdbg_create_addr_watchpoint(ht, sizeof(HashTable), watch);
+	watch->type = WATCH_ON_HASHTABLE;
+}
+
 static int phpdbg_create_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
 	phpdbg_store_watchpoint(watch TSRMLS_CC);
 	zend_hash_add(&PHPDBG_G(watchpoints), watch->str, watch->str_len, &watch, sizeof(phpdbg_watchpoint_t *), NULL);
 
 	phpdbg_activate_watchpoint(watch TSRMLS_CC);
+
+	return SUCCESS;
+}
+
+static int phpdbg_create_array_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+	HashTable *ht;
+
+	switch (Z_TYPE_P(watch->addr.zv)) {
+		case IS_ARRAY:
+			ht = Z_ARRVAL_P(watch->addr.zv);
+			break;
+		case IS_OBJECT:
+			ht = Z_OBJPROP_P(watch->addr.zv);
+			break;
+		default:
+			return FAILURE;
+	}
+
+	phpdbg_create_ht_watchpoint(Z_ARRVAL_P(watch->addr.zv), watch);
+
+	phpdbg_create_watchpoint(watch TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -134,6 +160,7 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_
 		HashPosition position;
 		zval **zv;
 		zval key;
+
 		for (zend_hash_internal_pointer_reset_ex(ht, &position);
 		     zend_hash_get_current_data_ex(ht, (void **)&zv, &position) == SUCCESS;
 		     zend_hash_move_forward_ex(ht, &position)) {
@@ -157,6 +184,20 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_
 			phpdbg_create_zval_watchpoint(*zv, new_watch);
 			phpdbg_create_recursive_watchpoint(new_watch TSRMLS_CC);
 		}
+	}
+
+	{
+		phpdbg_watchpoint_t *new_watch = emalloc(sizeof(phpdbg_watchpoint_t));
+
+		new_watch->parent = watch;
+		new_watch->parent_container = ht;
+		new_watch->name_in_parent = watch->name_in_parent;
+		new_watch->name_in_parent_len = watch->name_in_parent_len;
+		new_watch->str = watch->str;
+		new_watch->str_len = watch->str_len;
+
+		phpdbg_create_ht_watchpoint(ht, new_watch);
+		phpdbg_create_watchpoint(new_watch TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -306,6 +347,23 @@ PHPDBG_WATCH(recursive) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_WATCH(array) /* {{{ */
+{
+	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
+		return SUCCESS;
+	}
+
+	switch (param->type) {
+		case STR_PARAM:
+			phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_array_watchpoint TSRMLS_CC);
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
 		return SUCCESS;
@@ -404,11 +462,11 @@ static int phpdbg_print_changed_zval(void *llist_data) {
 	phpdbg_watch_memdump *dump = *(phpdbg_watch_memdump **)llist_data;
 	/* fetch all changes between dump->page and dump->page + dump->size */
 	phpdbg_btree_position pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), (zend_ulong)dump->page, (zend_ulong)dump->page + dump->size);
-	phpdbg_btree_result *result;
-
+	phpdbg_btree_result *result, *htresult;
+	int elementDiff;
 
 	while ((result = phpdbg_btree_next(&pos))) {
-		phpdbg_watchpoint_t *watch = result->ptr;
+		phpdbg_watchpoint_t *watch = result->ptr, *htwatch;
 		void *oldPtr = (char *)&dump->data + ((size_t)watch->addr.ptr - (size_t)dump->page);
 		if (memcmp(oldPtr, watch->addr.ptr, watch->size) != SUCCESS) {
 			PHPDBG_G(watchpoint_hit) = 1;
@@ -425,12 +483,40 @@ static int phpdbg_print_changed_zval(void *llist_data) {
 					if (((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1)) {
 						phpdbg_notice("Watchpoint %s was unset, removing watchpoint", watch->str);
 						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+
+						if (Z_TYPE_P((zval *)oldPtr) == IS_ARRAY) {
+							goto remove_ht_watch;
+						}
+
 						break;
 					}
 
 					phpdbg_write("New value: ");
 					zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
 					phpdbg_writeln("\nNew refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);
+
+					if ((htresult = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)Z_ARRVAL_P((zval *)oldPtr)))) {
+remove_ht_watch:
+						htwatch = htresult->ptr;
+						zend_hash_del(&PHPDBG_G(watchpoints), htwatch->str, htwatch->str_len);
+					}
+					
+					break;
+
+				case WATCH_ON_HASHTABLE:
+
+					elementDiff = zend_hash_num_elements((HashTable *)oldPtr) - zend_hash_num_elements(watch->addr.ht);
+					if (elementDiff) {
+						if (elementDiff < 0) {
+							phpdbg_writeln("%d elements were removed from the array", -elementDiff);
+						} else {
+							phpdbg_writeln("%d elements were added to the array", elementDiff);
+							/* TODO: add, if recursive watchpoint, the new elements to the elements to watch */
+						}
+					}
+					if (((HashTable *)oldPtr)->pInternalPointer != watch->addr.ht->pInternalPointer) {
+						phpdbg_writeln("Internal pointer of array was changed");
+					}
 					break;
 			}
 		}
@@ -459,4 +545,19 @@ void phpdbg_list_watchpoints(TSRMLS_D) {
 	     zend_hash_move_forward_ex(&PHPDBG_G(watchpoints), &position)) {
 		phpdbg_writeln("%.*s", (int)(*watch)->str_len, (*watch)->str);
 	}
+}
+
+void phpdbg_watch_efree(void *ptr) {
+	TSRMLS_FETCH();
+	phpdbg_btree_result *result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)ptr);
+
+	if (result) {
+		phpdbg_watchpoint_t *watch = result->ptr;
+
+		if (watch->addr.ptr + watch->size > ptr) {
+			zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+		}
+	}
+
+	PHPDBG_G(original_free_function)(ptr);
 }

@@ -28,6 +28,15 @@
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
+#include "zend_alloc.h"
+
+/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c */
+struct _zend_mm_heap {
+	int   use_zend_alloc;
+	void *(*_malloc)(size_t);
+	void  (*_free)(void*);
+	void *(*_realloc)(void*, size_t);
+};
 
 /* {{{ remote console headers */
 #ifndef _WIN32
@@ -1143,6 +1152,15 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
+
+		zend_mm_heap *mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
+		if (!mm_heap->use_zend_alloc) {
+			free(mm_heap);
+			mm_heap = zend_mm_startup();
+		}
+		PHPDBG_G(original_free_function) = mm_heap->_free;
+		mm_heap->_free = phpdbg_watch_efree;
+		zend_mm_set_heap(mm_heap TSRMLS_CC);
 
 		zend_activate(TSRMLS_C);
 
