@@ -585,9 +585,11 @@ non_empty_function_call_parameter_list:
 		expr_without_variable	{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	variable				{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	'&' w_variable 				{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$2, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	T_ELLIPSIS expr			{ Z_LVAL($$.u.constant) = 0;  zend_do_unpack_params(&$2, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' expr_without_variable	{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' variable					{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' '&' w_variable			{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$4, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	non_empty_function_call_parameter_list ',' T_ELLIPSIS expr			{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant);  zend_do_unpack_params(&$4, Z_LVAL($$.u.constant) TSRMLS_CC); }
 ;
 
 global_var_list:
