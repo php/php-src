@@ -1684,7 +1684,7 @@ ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array
 }
 /* }}} */
 
-zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(zend_op *opline, call_slot *call TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(zend_op *opline, call_slot *call TSRMLS_DC) /* {{{ */
 {
 	zend_uint arg_num = (opline->extended_value & ZEND_FETCH_ARG_MASK) + call->num_additional_args;
 	return ARG_SHOULD_BE_SENT_BY_REF(call->fbc, arg_num);
