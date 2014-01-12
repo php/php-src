@@ -43,6 +43,9 @@ II. Porting steps
 
  i.   Automatic replacements
  ii.  Explicit compilation enablement
+
+	#define PHP_CONSISTENT_x64 1
+
  iii. Compatibility header
  iv.  zend_parse_parameters()
  v.   Manual code fixes
