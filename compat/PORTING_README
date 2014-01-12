@@ -1,0 +1,58 @@
+This document describes the way to port the PECL extensions for <str_size_and_int64>
+
+I.   Basic changes in <str_size_and_int64>
+ i.   String length
+ ii.  Integer types
+ iii. Other datatypes
+ iv.  Macros
+ v.   Functions
+II.  Porting steps
+ i.   Automatic replacements
+ ii.  Explicit compilation enablement
+ iii. Compatibility header
+ iv.  zend_parse_parameters()
+ v.   Manual code fixes
+ vi.  Library dependencies
+III. Pitfalls
+ i.  size_t usage
+ ii. zend_parse_parameters()
+
+
+========================================
+I. Basic changes in <str_size_and_int64>
+========================================
+
+ i.   String length
+ 
+	String length is defined as zend_size_t inside Zend and aliased as php_size_t
+	anywhere else. The inclusion of php.h is necessary.
+
+ ii.  Integer types
+ 	
+	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
+	inside Zend. Both are aliased as php_int_t, php_uint_t anywhere else. The
+	inclusion of php.h is necessary.
+
+ iii. Other datatypes
+ iv.  Macros
+ v.   Functions
+
+=================
+II. Porting steps
+=================
+
+ i.   Automatic replacements
+ ii.  Explicit compilation enablement
+ iii. Compatibility header
+ iv.  zend_parse_parameters()
+ v.   Manual code fixes
+ vi.  Library dependencies
+
+=============
+III. Pitfalls
+=============
+
+ i.  size_t usage
+ ii. zend_parse_parameters()
+
+
