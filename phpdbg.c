@@ -1243,18 +1243,25 @@ phpdbg_interact:
 #ifndef _WIN32
 				/* remote client disconnected */
 				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
-
-					/* renegociate connections */
-					phpdbg_open_sockets(
-						address, listen, &server, &socket, streams);
 					
-					/* set streams */
-					if (streams[0] && streams[1]) {
-						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+					if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+						/* renegociate connections */
+						phpdbg_open_sockets(
+							address, listen, &server, &socket, streams);
+				
+						/* set streams */
+						if (streams[0] && streams[1]) {
+							PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+						}
+				
+						/* this must be forced */
+						CG(unclean_shutdown) = 0;
+					} else {
+						/* local client quit console */
+						CG(unclean_shutdown) = 0;
+						
+						goto phpdbg_out;
 					}
-					
-					/* this must be forced */
-					CG(unclean_shutdown) = 0;
 				}
 #endif
 				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
