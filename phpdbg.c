@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -146,9 +146,8 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 
 static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	zend_function *function = (zend_function*) data;
+	TSRMLS_FETCH();
 
 	destroy_zend_function(
 		function TSRMLS_CC);
@@ -667,8 +666,11 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	} else {
-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-		zend_bailout();
+		/* we quit remote consoles on recv SIGINT */
+		if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			zend_bailout();
+		}
 	}
 } /* }}} */
 
@@ -1075,7 +1077,7 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				printf(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2013 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2014 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,
@@ -1256,17 +1258,17 @@ phpdbg_main:
 		} zend_end_try();
 
 		/* initialize from file */
+		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
 			phpdbg_try_file_init(bp_tmp_file, strlen(bp_tmp_file), 0 TSRMLS_CC);
-			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
-		} zend_catch {
-			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
-			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-				goto phpdbg_out;
-			}
 		} zend_end_try();
+		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
+		
+		/* quit if init says so */
+		if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+			goto phpdbg_out;
+		}
 
 		/* step from here, not through init */
 		if (step) {
@@ -1293,39 +1295,46 @@ phpdbg_interact:
 					phpdbg_export_breakpoints(bp_tmp_fp TSRMLS_CC);
 					fclose(bp_tmp_fp);
 					cleaning = 1;
-					goto phpdbg_out;
 				} else {
 					cleaning = 0;
 				}
+
 #ifndef _WIN32
-				/* remote client disconnected */
-				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
-
-					/* renegociate connections */
-					phpdbg_open_sockets(
-						address, listen, &server, &socket, streams);
-
-					/* set streams */
-					if (streams[0] && streams[1]) {
-						PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+				if (!cleaning) {
+					/* remote client disconnected */
+					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
+					
+						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+							/* renegociate connections */
+							phpdbg_open_sockets(
+								address, listen, &server, &socket, streams);
+				
+							/* set streams */
+							if (streams[0] && streams[1]) {
+								PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+							}
+				
+							/* this must be forced */
+							CG(unclean_shutdown) = 0;
+						} else {
+							/* local consoles cannot disconnect, ignore EOF */
+							PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
+						}
 					}
-
-					/* this must be forced */
-					CG(unclean_shutdown) = 0;
 				}
 #endif
-				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-					goto phpdbg_out;
-				}
 			} zend_end_try();
-		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
-
+		} while(!cleaning && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+		
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
-
+		
+		/* this is just helpful */
+		PG(report_memleaks) = 0;
+		
 phpdbg_out:
 #ifndef _WIN32
-		if (PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED) {
+		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 			goto phpdbg_interact;
 		}
@@ -1373,7 +1382,7 @@ phpdbg_out:
 	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
-
+	
 #ifdef ZTS
 	/* bugggy */
 	/* tsrm_shutdown(); */
