@@ -29,7 +29,7 @@
 typedef long zend_int_t;
 typedef unsigned long zend_uint_t;
 typedef long zend_off_t;
-typedef size_t zend_size_t;
+typedef int zend_size_t;
 typedef struct stat zend_stat_t;
 # define ZEND_INT_MAX LONG_MAX
 # define ZEND_INT_MIN LONG_MIN
@@ -75,11 +75,13 @@ typedef struct stat zend_stat_t;
 #define PHP_UINT_MAX ZEND_UINT_MAX
 #define PHP_SIZE_MAX ZEND_SIZE_MAX
 
-# define ZEND_SIZE_MAX                              ZEND_SIZE_MAX_LONG
-# define ZEND_SIZE_MAX                              ZEND_SIZE_MAX_INT
 # define MAX_LENGTH_OF_ZEND_INT                     MAX_LENGTH_OF_LONG
 # define Z_STRSIZE                                  Z_STRLEN
+# define Z_STRSIZE_P                                Z_STRLEN_P
+# define Z_STRSIZE_PP                               Z_STRLEN_PP
 # define Z_IVAL                                     Z_LVAL
+# define Z_IVAL_P                                   Z_LVAL_P
+# define Z_IVAL_PP                                  Z_LVAL_PP
 # define IS_INT                                     IS_LONG
 # define ZVAL_INT                                   ZVAL_LONG
 # define RETVAL_INT                                 RETVAL_LONG
@@ -128,15 +130,6 @@ typedef struct stat zend_stat_t;
 # define smart_str_append_int                       smart_str_append_long
 # define cfg_get_int                                cfg_get_long
 # define pdo_attr_ival                              pdo_attr_lval
-
-
-# define zend_parse_parameters_comp        zend_parse_parameters
-# define zend_parse_method_parameters_comp zend_parse_method_parameters
-
-#else
-
-# define zend_parse_parameters_comp        zend_parse_parameters
-# define zend_parse_method_parameters_comp zend_parse_method_parameters
 
 #endif
 
