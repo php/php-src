@@ -25,29 +25,29 @@ III. Pitfalls
 I. Basic changes in <str_size_and_int64>
 ========================================
 
- For extended information, please look at the compat.h header and the wiki RFC page
- https://wiki.php.net/rfc/size_t_and_int64
+For extended information, please look at the compat.h header and the wiki RFC page
+https://wiki.php.net/rfc/size_t_and_int64
 
  i.   String length
 
- 	String lengths do no more depend on the firm 'int' datatype. The replacement
+	String lengths do no more depend on the firm 'int' datatype. The replacement
 	is a platform dependent size_t datatype.
- 
+
 	String length is defined as zend_size_t inside Zend and aliased as php_size_t
 	anywhere else. The inclusion of php.h is necessary.
 
  ii.  Integer types
 
- 	Integers do no more depend on the firm 'long' type. Instead a platform
+	Integers do no more depend on the firm 'long' type. Instead a platform
 	dependent integer type is used. That datatype is defined dynamically to
 	guarantee the consistent 64 bit support.
- 	
+
 	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
 	inside Zend. Both are aliased as php_int_t, php_uint_t anywhere else. The
 	inclusion of php.h is necessary.
 
  iii. Other datatypes
- 	zend_off_t  - portable off_t analogue
+	zend_off_t  - portable off_t analogue
 	zend_stat_t - portable 'struct stat' analogue
 
 	These datatypes are declared to be portable across platforms. Thus, direct
@@ -61,7 +61,7 @@ I. Basic changes in <str_size_and_int64>
 	zend_stat  - portable stat equivalent
 
  iv.  Macros
- 	Z_STRSIZE  - replacement for Z_STRLEN family
+	Z_STRSIZE  - replacement for Z_STRLEN family
 	Z_IVAL     - replacement for Z_LVAL family
 	Z_I        - initialize signed integer constant
 	Z_UI       - initialize unsigned integer constant
@@ -73,7 +73,7 @@ I. Basic changes in <str_size_and_int64>
 
  v.   Functions
 
- 	Various functions became syntactic renames, it concerns functions containing
+	Various functions became syntactic renames, it concerns functions containing
 	the 'long' keyword. The new portable aliases also was added.
 
 	convert_to_int, add_assoc_int, zend_ini_int, etc.
@@ -83,16 +83,16 @@ II. Porting steps
 =================
 
  i.   Automatic replacements
- 	The tool replace.php will automatically replace a number of syntactic changes
+	The tool replace.php will automatically replace a number of syntactic changes
 	in the old style extension. 
 
  ii.  Compatibility header
- 	The compat.h header has to be included after all the other headers and in any
+	The compat.h header has to be included after all the other headers and in any
 	using the new syntax.
 
  iii. zend_parse_parameters()
 
- 	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
+	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
 	replacements 'i', 'I', 'S' and 'P' was invented. The integer specs expect a
 	variable of php_int_t to be passed. The string/path length are expected to be
 	of type php_size_t.
@@ -109,14 +109,16 @@ II. Porting steps
 	}
 
  iv.  Manual code fixes
- 
-	While for many extensions the mechanic replacements will be already enough to retain
-	the compatibility, the manual code fixes might be necessary. This likely the
-	case for extensions with library dependencies, see also the pitfalls section.
+
+	While for many extensions the mechanic replacements will be already enough to
+	retain the compatibility, the manual code fixes might be necessary. Here are
+	especially to mention array API, filesystem API, unsigned string lengths. Also
+	this is likely the case for extensions with library dependencies, see also the
+	pitfalls section.
 
  v.   Library dependencies
 
- 	Libraries using incompatible data types for string sizes and integers require 
+	Libraries using incompatible data types for string sizes and integers require 
 	additional checks to ensure the correct value range. This is easy done as in the
 	example below (assumed a dependency library expects a value in integer range)
 
@@ -146,7 +148,7 @@ II. Porting steps
 
  vii. Array API
 
-	Datatype for array indexes was changed to php_uint_t.
+	Datatype for array indexes was changed to php_uint_t, for key lengths to php_size_t
 
  viii. Explicit compilation enablement
 	
