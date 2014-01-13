@@ -36,7 +36,11 @@
 #include "main/php_open_temporary_file.h"
 #include "zend_API.h"
 #include "zend_ini.h"
-#include "zend_virtual_cwd.h"
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+# include "zend_virtual_cwd.h"
+#else
+# include "TSRM/tsrm_virtual_cwd.h"
+#endif
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -387,8 +391,10 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 {
 	Bucket *p, *q;
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 	/* empty string */
 	CG(interned_empty_string) = accel_new_interned_string("", sizeof(""), 0 TSRMLS_CC);
+#endif
 
 	/* function table hash keys */
 	p = CG(function_table)->pListHead;
