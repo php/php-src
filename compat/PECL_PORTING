@@ -17,10 +17,12 @@ II.  Porting steps
  vi.   spprintf() formats
  vii.  Array API
  viii. Explicit compilation enablement
+ ix.   Misccellaneous porting steps
 III. Pitfalls
  i.   size_t usage
  ii.  zend_parse_parameters()
- iii. Misccellaneous
+ iii. Pointer difference
+ iv.  RETURN_STRINGL, RETVAL_STRINGL
 
 
 ========================================
@@ -63,15 +65,22 @@ https://wiki.php.net/rfc/size_t_and_int64
 	zend_stat  - portable stat equivalent
 
  iv.  Macros
-	Z_STRSIZE  - replacement for Z_STRLEN family
-	Z_IVAL     - replacement for Z_LVAL family
-	Z_I        - initialize signed integer constant
-	Z_UI       - initialize unsigned integer constant
+	Z_STRSIZE    - replacement for Z_STRLEN family
+	Z_IVAL       - replacement for Z_LVAL family
+	Z_I          - initialize signed integer constant
+	Z_UI         - initialize unsigned integer constant
 	ZEND_INT_MAX, ZEND_INT_MIN, ZEND_UINT_MAX, ZEND_SIZE_MAX 
-	IS_INT     - replacement for IS_LONG
-	ZVAL_INT   - replacement for ZVAL_LONG
-	RETVAL_INT - RETVAL_LONG
-	RETURN_INT - RETURN_LONG
+	IS_INT       - replacement for IS_LONG
+	ZVAL_INT     - replacement for ZVAL_LONG
+	RETVAL_INT   - RETVAL_LONG
+	RETURN_INT   - RETURN_LONG
+	ZEND_STRTOL  - portable strtol version
+	ZEND_STRTOUL - portable strtoul version
+	ZEND_ITOA    - portable itoa version
+	ZEND_ATOI    - portable atol version
+	ZEND_ABS     - portable abs version
+
+	This macros are safe to use with php_int_t
 
  v.   Functions
 
@@ -165,7 +174,15 @@ II. Porting steps
 	
 	This is not implemented yet, the build system has to be tweaked for this to happen.
 	The idea is, that an extension has to define some macros like PHP_64BIT_COMP to
-	be compiled.
+	be allowed to compile.
+
+ ix.   Misccellaneous porting steps
+
+	In general, any code dealing with string size should use php_size_t, any code dealing
+	with integer available in the userspace should use php_int_t. The other relevant
+	places are socket APIs, INI settings, global constants, class constants and properties,
+	etc.
+
 
 =============
 III. Pitfalls
@@ -205,7 +222,7 @@ III. Pitfalls
 	platforms. Especially usage of the old 'long' and 'int' datatypes can lead to
 	memory errors and crashes on 64 bit platforms.
 
- iii. Misccellaneous
+ iii. Pointer difference
 
 	When working with pointer arithmetic, the ptrdiff_t type should be used to tell the
 	difference between two pointers.
@@ -214,10 +231,17 @@ III. Pitfalls
 	char *s1 = s0;
 	ptrdiff_t d;
 
-	*s1++;
+	s1++;
 
 	d = s1 - s0; /* Correct datatype to hold the result */
 
 	Should the example happen to scale, like for instance working the bigger strings,
-	using a wrong datatype will lead to an overflow.
+	using a wrong datatype will lead to an overflow. Though be aware that ptrdiff_t is
+	unsigned.
+
+ iv.  RETURN_STRINGL, RETVAL_STRINGL
+
+	RETURN_STRINGL, RETVAL_STRINGL macros now expect php_size_t for the string length.
+	While it's theoretically possible to use any other datatype with those macros, the
+	explicit attention should be paid that the values arn't negative.
 
