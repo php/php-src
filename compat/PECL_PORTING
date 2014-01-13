@@ -8,11 +8,11 @@ I.   Basic changes in <str_size_and_int64>
  v.   Functions
 II.  Porting steps
  i.   Automatic replacements
- ii.  Explicit compilation enablement
- iii. Compatibility header
- iv.  zend_parse_parameters()
- v.   Manual code fixes
- vi.  Library dependencies
+ ii.  Compatibility header
+ iii. zend_parse_parameters()
+ iv.  Manual code fixes
+ v.   Library dependencies
+ vi.  spprintf() formats
 III. Pitfalls
  i.  size_t usage
  ii. zend_parse_parameters()
@@ -22,34 +22,123 @@ III. Pitfalls
 I. Basic changes in <str_size_and_int64>
 ========================================
 
+ For extended information, please look at the compat.h header and the wiki RFC page
+ https://wiki.php.net/rfc/size_t_and_int64
+
  i.   String length
+
+ 	String lengths do no more depend on the firm 'int' datatype. The replacement
+	is a platform dependent size_t datatype.
  
 	String length is defined as zend_size_t inside Zend and aliased as php_size_t
 	anywhere else. The inclusion of php.h is necessary.
 
  ii.  Integer types
+
+ 	Integers do no more depend on the firm 'long' type. Instead a platform
+	dependent integer type is used. That datatype is defined dynamically to
+	guarantee the consistent 64 bit support.
  	
 	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
 	inside Zend. Both are aliased as php_int_t, php_uint_t anywhere else. The
 	inclusion of php.h is necessary.
 
  iii. Other datatypes
+ 	zend_off_t  - portable file offsets
+	zend_stat_t - portable 'struct stat'
+
+	These datatypes are declared to be portable across platforms. Thus, direct
+	usage of the functions like fseek, stat, etc. is strongly not recommended.
+	Instead the portable macros should be used.
+
  iv.  Macros
+ 	Z_STRSIZE  - replacement for Z_STRLEN family
+	Z_IVAL     - replacement for Z_LVAL family
+	Z_I        - initialize signed integer constant
+	Z_UI       - initialize unsigned integer constant
+	ZEND_INT_MAX, ZEND_INT_MIN, ZEND_UINT_MAX, ZEND_SIZE_MAX 
+	IS_INT     - replacement for IS_LONG
+	ZVAL_INT   - replacement for ZVAL_LONG
+	RETVAL_INT - RETVAL_LONG
+	RETURN_INT - RETURN_LONG
+
  v.   Functions
+
+ 	Various functions became syntactic renames, it concerns functions containing
+	the 'long' keyword. The new portable aliases also was added.
+
+	zend_fseek - portable fseek equivalent
+	zend_ftell - portable ftell equivalent
+	zend_lseek - portable lseek equivalent
+	zend_fstat - portable fstat equivalent
+	zend_stat  - portable stat equivalent
+	convert_to_int, add_assoc_int, zend_ini_int, etc.
 
 =================
 II. Porting steps
 =================
 
  i.   Automatic replacements
- ii.  Explicit compilation enablement
+ 	The tool replace.php will automatically replace a number of syntactic changes
+	in the old style extension. 
 
-	#define PHP_CONSISTENT_x64 1
+ ii.  Compatibility header
+ 	The compat.h header has to be included after all the other headers and in any
+	using the new syntax.
 
- iii. Compatibility header
- iv.  zend_parse_parameters()
- v.   Manual code fixes
- vi.  Library dependencies
+ iii. zend_parse_parameters()
+
+ 	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
+	replacements 'i', 'I', 'S' and 'P' was invented. The integer specs expect a
+	variable of php_int_t to be passed. The string/path length are expected to be
+	of type php_size_t.
+
+	The recommended way to declare the argument specs is using a ternary operator,
+	eq.
+	
+	php_int_t i0, i1;
+	char *s0, p0;
+	php_size_t s0_len, p0_len;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMPAT ? "lLsp" : "iISP"), &i0, &i1, &s0, &s0_len, &p0, &p0_len) == FAILURE) {
+		return;
+	}
+
+ iv.  Manual code fixes
+ 
+	While for many extensions the mechanic replacements will be already enough to retain
+	the compatibility, the manual code fixes might be necessary. This likely the
+	case for extensions with library dependencies, see also the pitfalls section.
+
+ v.   Library dependencies
+
+ 	Libraries using incompatible data types for string sizes and integers require 
+	additional checks to ensure the correct value range. This is easy done as in the
+	example below (assumed a dependency library expects a value in integer range)
+
+	if (INT_MAX < input_arg || INT_MIN > input_arg) {
+		return;
+	}
+
+ vi.  spprintf() formats
+
+	New printf modifier 'p' was implemented to platform independently output
+	php_int_t datatype. That modifier can be used with 'd', 'u', 'x' and 'o' printf
+	format specs with spprintf, snprintf and the wrapping printf implementations.
+	To ensure compatibility, the macros ZEND_INT_FMT and ZEND_UINT_FMT should be 
+	used
+
+	php_int_t i0, i1;
+	char *s0, p0;
+	php_size_t s0_len, p0_len;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMPAT ? "lLsp" : "iISP"), &i0, &i1, &s0, &s0_len, &p0, &p0_len) == FAILURE) {
+		return;
+	}
+	if (INT_MAX < i0 || INT_MIN > i0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Value '" ZEND_INT_FMT "' is out of range", i0);
+		return;
+	}
 
 =============
 III. Pitfalls
