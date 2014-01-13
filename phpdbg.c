@@ -1257,8 +1257,10 @@ phpdbg_interact:
 						/* this must be forced */
 						CG(unclean_shutdown) = 0;
 					} else {
-						/* local consoles cannot disconnect, ignore EOF */
-						PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
+						/* local client quit console */
+						CG(unclean_shutdown) = 0;
+						
+						goto phpdbg_out;
 					}
 				}
 #endif
@@ -1273,7 +1275,7 @@ phpdbg_interact:
 		
 phpdbg_out:
 #ifndef _WIN32
-		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
+		if (PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 			goto phpdbg_interact;
 		}
@@ -1322,7 +1324,7 @@ phpdbg_out:
 	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
-	
+
 #ifdef ZTS
 	/* bugggy */
 	/* tsrm_shutdown(); */
