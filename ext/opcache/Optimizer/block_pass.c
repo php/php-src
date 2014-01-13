@@ -1057,6 +1057,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				/* BOOL */
 				result = ZEND_OP1_LITERAL(opline);
 				convert_to_boolean(&result);
+				Z_TYPE(ZEND_OP1_LITERAL(opline)) = IS_NULL;
 			}
 			PZ_SET_REFCOUNT_P(&result, 1);
 			PZ_UNSET_ISREF_P(&result);
