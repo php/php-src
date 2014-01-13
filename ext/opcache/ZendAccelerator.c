@@ -2705,14 +2705,6 @@ void accel_shutdown(TSRMLS_D)
 		return;
 	}
 
-	accel_free_ts_resources();
-	zend_shared_alloc_shutdown();
-	zend_compile_file = accelerator_orig_compile_file;
-
-	if (zend_hash_find(EG(ini_directives), "include_path", sizeof("include_path"), (void **) &ini_entry) == SUCCESS) {
-		ini_entry->on_modify = orig_include_path_on_modify;
-	}
-
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (ZCG(accel_directives).interned_strings_buffer) {
 # ifndef ZTS
@@ -2728,6 +2720,13 @@ void accel_shutdown(TSRMLS_D)
 	zend_interned_strings_restore = orig_interned_strings_restore;
 #endif
 
+	accel_free_ts_resources();
+	zend_shared_alloc_shutdown();
+	zend_compile_file = accelerator_orig_compile_file;
+
+	if (zend_hash_find(EG(ini_directives), "include_path", sizeof("include_path"), (void **) &ini_entry) == SUCCESS) {
+		ini_entry->on_modify = orig_include_path_on_modify;
+	}
 }
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
