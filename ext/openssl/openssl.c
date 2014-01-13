@@ -281,6 +281,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_encrypt, 0, 0, 4)
     ZEND_ARG_INFO(0, cipher)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_mem_encrypt, 0, 0, 4)
+    ZEND_ARG_INFO(0, indata)
+    ZEND_ARG_INFO(1, outdata)
+    ZEND_ARG_INFO(0, recipcerts)
+    ZEND_ARG_INFO(0, headers) /* array */
+    ZEND_ARG_INFO(0, flags)
+    ZEND_ARG_INFO(0, cipher)
+ZEND_END_ARG_INFO()    
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_sign, 0, 0, 5)
     ZEND_ARG_INFO(0, infile)
     ZEND_ARG_INFO(0, outfile)
@@ -294,6 +303,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 0, 3)
     ZEND_ARG_INFO(0, infilename)
     ZEND_ARG_INFO(0, outfilename)
+    ZEND_ARG_INFO(0, recipcert)
+    ZEND_ARG_INFO(0, recipkey)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_mem_decrypt, 0, 0, 3)
+    ZEND_ARG_INFO(0, indata)
+    ZEND_ARG_INFO(1, outdata)
     ZEND_ARG_INFO(0, recipcert)
     ZEND_ARG_INFO(0, recipkey)
 ZEND_END_ARG_INFO()
@@ -481,8 +497,10 @@ const zend_function_entry openssl_functions[] = {
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
 	PHP_FE(openssl_pkcs7_decrypt,		arginfo_openssl_pkcs7_decrypt)
+	PHP_FE(openssl_pkcs7_mem_decrypt,   arginfo_openssl_pkcs7_mem_decrypt)
 	PHP_FE(openssl_pkcs7_sign,			arginfo_openssl_pkcs7_sign)
 	PHP_FE(openssl_pkcs7_encrypt,		arginfo_openssl_pkcs7_encrypt)
+	PHP_FE(openssl_pkcs7_mem_encrypt,	arginfo_openssl_pkcs7_mem_encrypt)
 
 	PHP_FE(openssl_private_encrypt,		arginfo_openssl_private_encrypt)
 	PHP_FE(openssl_private_decrypt,		arginfo_openssl_private_decrypt)
@@ -4169,6 +4187,138 @@ clean_exit:
 }
 /* }}} */
 
+/* {{{ proto bool openssl_pkcs7_mem_encrypt(string indata, string &outdata, mixed recipcerts, array headers [, long flags [, long cipher]])
+   Encrypts the message in the stromg named indata with the certificates in recipcerts and output the result to the string named outdata. This function only uses memory and no physically stored files. */
+PHP_FUNCTION(openssl_pkcs7_mem_encrypt)
+{
+	zval ** zrecipcerts, * zheaders = NULL, * zout = NULL;
+	STACK_OF(X509) * recipcerts = NULL;
+	BIO * indata = NULL, * outdata = NULL;
+	long flags = 0;
+	PKCS7 * p7 = NULL;
+	HashPosition hpos;
+	zval ** zcertval;
+	X509 * cert;
+	const EVP_CIPHER *cipher = NULL;
+	long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
+	uint strindexlen;
+	ulong intindex;
+	char * strindex;
+	char * rawindata = NULL;	int rawindata_len;
+	
+	RETVAL_FALSE;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZa!|ll", 
+                &rawindata, &rawindata_len,	&zout, &zrecipcerts, &zheaders, &flags, &cipherid) == FAILURE)
+		return;
+
+	indata = BIO_new(BIO_s_mem());
+	
+	if(!BIO_write(indata, rawindata, rawindata_len)) {
+		goto clean_exit;
+	}
+
+	recipcerts = sk_X509_new_null();
+
+	/* get certs */
+	if (Z_TYPE_PP(zrecipcerts) == IS_ARRAY) {
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*zrecipcerts), &hpos);
+		while(zend_hash_get_current_data_ex(HASH_OF(*zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS) {
+			long certresource;
+
+			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource TSRMLS_CC);
+			if (cert == NULL) {
+				goto clean_exit;
+			}
+
+			if (certresource != -1) {
+				/* we shouldn't free this particular cert, as it is a resource.
+					make a copy and push that on the stack instead */
+				cert = X509_dup(cert);
+				if (cert == NULL) {
+					goto clean_exit;
+				}
+			}
+			sk_X509_push(recipcerts, cert);
+
+			zend_hash_move_forward_ex(HASH_OF(*zrecipcerts), &hpos);
+		}
+	} else {
+		/* a single certificate */
+		long certresource;
+
+		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource TSRMLS_CC);
+		if (cert == NULL) {
+			goto clean_exit;
+		}
+
+		if (certresource != -1) {
+			/* we shouldn't free this particular cert, as it is a resource.
+				make a copy and push that on the stack instead */
+			cert = X509_dup(cert);
+			if (cert == NULL) {
+				goto clean_exit;
+			}
+		}
+		sk_X509_push(recipcerts, cert);
+	}
+
+	/* sanity check the cipher */
+	cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	if (cipher == NULL) {
+		/* shouldn't happen */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get cipher");
+		goto clean_exit;
+	}
+
+	p7 = PKCS7_encrypt(recipcerts, indata, (EVP_CIPHER*)cipher, flags);
+
+	if (p7 == NULL) {
+		goto clean_exit;
+	}
+
+	outdata = BIO_new(BIO_s_mem());
+
+	/* tack on extra headers */
+	if (zheaders) {
+		zend_hash_internal_pointer_reset_ex(HASH_OF(zheaders), &hpos);
+		while(zend_hash_get_current_data_ex(HASH_OF(zheaders), (void**)&zcertval, &hpos) == SUCCESS) {
+			strindex = NULL;
+			zend_hash_get_current_key_ex(HASH_OF(zheaders), &strindex, &strindexlen, &intindex, 0, &hpos);
+
+			convert_to_string_ex(zcertval);
+
+			if (strindex) {
+				BIO_printf(outdata, "%s: %s\n", strindex, Z_STRVAL_PP(zcertval));
+			} else {
+				BIO_printf(outdata, "%s\n", Z_STRVAL_PP(zcertval));
+			}
+
+			zend_hash_move_forward_ex(HASH_OF(zheaders), &hpos);
+		}
+	}
+
+	(void)BIO_reset(indata);
+
+	/* write the encrypted data */
+	if( SMIME_write_PKCS7(outdata, p7, indata, flags) ) {
+        BUF_MEM *biobuf;
+        BIO_get_mem_ptr(outdata, &biobuf);
+		zval_dtor(zout);
+        ZVAL_STRINGL(zout, biobuf->data, biobuf->length, 1);
+        RETVAL_TRUE;
+    }
+
+clean_exit:
+	PKCS7_free(p7);
+	BIO_free(indata);
+	BIO_free(outdata);
+	if (recipcerts) {
+		sk_X509_pop_free(recipcerts, X509_free);
+	}
+}
+/* }}} */
+
 /* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers [, long flags [, string extracertsfilename]])
    Signs the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
 
@@ -4340,6 +4490,85 @@ clean_exit:
 	BIO_free(datain);
 	BIO_free(in);
 	BIO_free(out);
+	if (cert && certresval == -1) {
+		X509_free(cert);
+	}
+	if (key && keyresval == -1) {
+		EVP_PKEY_free(key);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_pkcs7_mem_decrypt(string indata, string &outdata, mixed recipcert [, mixed recipkey])
+   Decrypts the S/MIME message in the string named indata and output the results to the string named outdata.  recipcert is a CERT for one of the recipients. recipkey specifies the private key matching recipcert, if recipcert does not include the key. This function only uses memory and no physically stored files. */
+
+PHP_FUNCTION(openssl_pkcs7_mem_decrypt)
+{
+	zval ** recipcert, ** recipkey = NULL, * zout = NULL;
+	X509 * cert = NULL;
+	EVP_PKEY * key = NULL;
+	long certresval, keyresval;
+	BIO * indata = NULL, * outdata = NULL, * encindata = NULL;
+	PKCS7 * p7 = NULL;
+	char * rawindata;	int rawindata_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szZ|Z", 
+                &rawindata, &rawindata_len, &zout, &recipcert, &recipkey) == FAILURE) {
+		return;
+	}
+
+	RETVAL_FALSE;
+
+	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval TSRMLS_CC);
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to coerce parameter 3 to x509 cert");
+		goto clean_exit;
+	}
+
+	key = php_openssl_evp_from_zval(recipkey ? recipkey : recipcert, 0, "", 0, &keyresval TSRMLS_CC);
+	if (key == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to get private key");
+		goto clean_exit;
+	}
+
+	indata = BIO_new(BIO_s_mem());
+	if (indata == NULL) {
+		goto clean_exit;
+	}
+
+	encindata = BIO_new(BIO_s_mem());
+	if (encindata == NULL) {
+		goto clean_exit;
+	}
+
+	if(!BIO_write(encindata, rawindata, rawindata_len)) {
+        goto clean_exit;
+    }
+
+	outdata = BIO_new(BIO_s_mem());
+	if (indata == NULL) {
+		goto clean_exit;
+	}
+
+	p7 = SMIME_read_PKCS7(encindata, &indata);
+
+	if (p7 == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Given indata is not PKCS7!");
+		goto clean_exit;
+	}
+
+	if (PKCS7_decrypt(p7, key, cert, outdata, PKCS7_DETACHED)) { 
+        BUF_MEM *biobuf;
+        BIO_get_mem_ptr(outdata, &biobuf);
+		zval_dtor(zout);
+        ZVAL_STRINGL(zout, biobuf->data, biobuf->length, 1);
+		RETVAL_TRUE;
+	}
+clean_exit:
+	PKCS7_free(p7);
+	BIO_free(indata);
+	BIO_free(encindata);
+	BIO_free(outdata);
 	if (cert && certresval == -1) {
 		X509_free(cert);
 	}
