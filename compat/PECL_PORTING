@@ -47,8 +47,8 @@ https://wiki.php.net/rfc/size_t_and_int64
 	guarantee the consistent 64 bit support.
 
 	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
-	inside Zend. Both are aliased as php_int_t, php_uint_t anywhere else. The
-	inclusion of php.h is necessary.
+	inside Zend. Both are aliased as php_int_t and php_uint_t anywhere else,
+	respectively. The inclusion of php.h is necessary.
 
  iii. Other datatypes
 	zend_off_t  - portable off_t analogue
@@ -56,7 +56,8 @@ https://wiki.php.net/rfc/size_t_and_int64
 
 	These datatypes are declared to be portable across platforms. Thus, direct
 	usage of the functions like fseek, stat, etc. as well as direct usage of 
-	off_t and struct stat is strongly not recommended. Instead the portable macros should be used.
+	off_t and struct stat is strongly not recommended. Instead the portable
+	macros should be used.
 
 	zend_fseek - portable fseek equivalent
 	zend_ftell - portable ftell equivalent
@@ -111,7 +112,7 @@ II. Porting steps
 
 	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
 	replacements 'i', 'I', 'S' and 'P' was invented. The integer specs expect a
-	variable of type php_int_t to be passed. The string/path length are expected
+	variable of type php_int_t to be passed. The string/path lengths are expected
 	to be of type php_size_t.
 
 	The recommended way to declare the argument specs is using the ternary operator,
@@ -129,7 +130,7 @@ II. Porting steps
 
  iv.  Manual code fixes
 
-	While for many extensions the mechanic replacements will be already enough to
+	While for many extensions the mechanic replacements will do the big job to
 	retain the compatibility, the manual code fixes might be necessary. Here are
 	especially to mention array API, filesystem API, unsigned string lengths. Also
 	this is likely the case for extensions with library dependencies, see also the
