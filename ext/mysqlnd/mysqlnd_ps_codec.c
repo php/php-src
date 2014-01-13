@@ -516,14 +516,41 @@ mysqlnd_stmt_copy_it(zval *** copies, zval * original, unsigned int param_count,
 /* }}} */
 
 
+/* {{{ mysqlnd_stmt_execute_check_n_enlarge_buffer */
+static enum_func_status
+mysqlnd_stmt_execute_check_n_enlarge_buffer(zend_uchar **buf, zend_uchar **p, size_t * buf_len, zend_uchar * const provided_buffer, size_t needed_bytes TSRMLS_DC)
+{
+	const size_t overalloc = 5;
+	size_t left = (*buf_len - (*p - *buf));
+
+	if (left < (needed_bytes + overalloc)) {
+		size_t offset = *p - *buf;
+		zend_uchar *tmp_buf;
+		*buf_len = offset + needed_bytes + overalloc;
+		tmp_buf = mnd_emalloc(*buf_len);
+		if (!tmp_buf) {
+			return FAIL;
+		}
+		memcpy(tmp_buf, *buf, offset);
+		if (*buf != provided_buffer) {
+			mnd_efree(*buf);
+		}
+		*buf = tmp_buf;
+		/* Update our pos pointer */
+		*p = *buf + offset;
+	}
+	return PASS;
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_stmt_execute_store_params */
 static enum_func_status
-mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t *buf_len  TSRMLS_DC)
+mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t * buf_len TSRMLS_DC)
 {
 	MYSQLND_STMT_DATA * stmt = s->data;
 	unsigned int i = 0;
 	zend_uchar * provided_buffer = *buf;
-	size_t left = (*buf_len - (*p - *buf));
 	size_t data_size = 0;
 	zval **copies = NULL;/* if there are different types */
 	enum_func_status ret = FAIL;
@@ -534,24 +561,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 
 	{
 		unsigned int null_count = (stmt->param_count + 7) / 8;
-		/* give it some reserved space - 20 bytes */
-		if (left < (null_count + 20)) {
-			unsigned int offset = *p - *buf;
-			zend_uchar *tmp_buf;
-			*buf_len = offset + null_count + 20;
-			tmp_buf = mnd_emalloc(*buf_len);
-			if (!tmp_buf) {
-				SET_OOM_ERROR(*stmt->error_info);
-				goto end;
-			}
-			memcpy(tmp_buf, *buf, offset);
-			if (*buf != provided_buffer) {
-				mnd_efree(*buf);
-			}
-			*buf = tmp_buf;
-
-			/* Update our pos pointer */
-			*p = *buf + offset;
+		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, null_count TSRMLS_CC)) {
+			SET_OOM_ERROR(*stmt->error_info);
+			goto end;	
 		}
 		/* put `null` bytes */
 		null_byte_offset = *p - *buf;
@@ -559,7 +571,6 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		*p += null_count;
 	}
 
-	left = (*buf_len - (*p - *buf));
 /* 1. Store type information */
 	/*
 	  check if need to send the types even if stmt->send_types_to_server is 0. This is because
@@ -617,24 +628,9 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	(*p)++;
 
 	if (stmt->send_types_to_server) {
-		/* 2 bytes per type, and leave 20 bytes for future use */
-		if (left < ((stmt->param_count * 2) + 20)) {
-			unsigned int offset = *p - *buf;
-			zend_uchar *tmp_buf;
-			*buf_len = offset + stmt->param_count * 2 + 20;
-			tmp_buf = mnd_emalloc(*buf_len);
-			if (!tmp_buf) {
-				SET_OOM_ERROR(*stmt->error_info);
-				goto end;
-			}
-			memcpy(tmp_buf, *buf, offset);
-			if (*buf != provided_buffer) {
-				mnd_efree(*buf);
-			}
-			*buf = tmp_buf;
-
-			/* Update our pos pointer */
-			*p = *buf + offset;
+		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, stmt->param_count * 2 TSRMLS_CC)) {
+			SET_OOM_ERROR(*stmt->error_info);
+			goto end;	
 		}
 		for (i = 0; i < stmt->param_count; i++) {
 			short current_type = stmt->param_bind[i].type;
@@ -753,30 +749,10 @@ use_string:
 				break;
 		}
 	}
-
 	/* 2.2 Enlarge the buffer, if needed */
-	left = (*buf_len - (*p - *buf));
-	if (left < data_size) {
-		unsigned int offset = *p - *buf;
-		zend_uchar *tmp_buf;
-		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
-		tmp_buf = mnd_emalloc(*buf_len);
-		if (!tmp_buf) {
-			SET_OOM_ERROR(*stmt->error_info);
-			goto end;
-		}
-		memcpy(tmp_buf, *buf, offset);
-		/*
-		  When too many columns the buffer provided to the function might not be sufficient.
-		  In this case new buffer has been allocated above. When we allocate a buffer and then
-		  allocate a bigger one here, we should free the first one.
-		*/
-		if (*buf != provided_buffer) {
-			mnd_efree(*buf);
-		}
-		*buf = tmp_buf;
-		/* Update our pos pointer */
-		*p = *buf + offset;
+	if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, data_size TSRMLS_CC)) {
+		SET_OOM_ERROR(*stmt->error_info);
+		goto end;	
 	}
 
 	/* 2.3 Store the actual data */
@@ -884,6 +860,51 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+
+/* {{{ mysqlnd_stmt_execute_batch_generate_request */
+enum_func_status
+mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC)
+{
+	MYSQLND_STMT_DATA * stmt = s->data;
+	zend_uchar	*p = stmt->execute_cmd_buffer.buffer;
+	enum_func_status ret;
+
+	DBG_ENTER("mysqlnd_stmt_execute_batch_generate_request");
+
+	int4store(p, stmt->stmt_id);
+	p += 4;
+
+	/* flags is 4 bytes, we store just 1 */
+	int1store(p, (zend_uchar) stmt->flags);
+	p++;
+
+	int2store(p, stmt->param_count);
+	p+= 2;
+
+	int2store(p, 0); /* reserved */
+	p+= 2;
+
+	{
+		zend_uchar * provided_buffer = stmt->execute_cmd_buffer.buffer;
+		size_t provided_buffer_length = stmt->execute_cmd_buffer.length;
+		uint i= 0;
+		for (;i < 5; i++) {
+			ret = mysqlnd_stmt_execute_store_params(s, &provided_buffer, &p, &provided_buffer_length TSRMLS_CC);
+			if (ret == FAIL) {
+				break;
+			}
+
+			*free_buffer = (provided_buffer != stmt->execute_cmd_buffer.buffer);
+			*request_len = (p - provided_buffer);
+			*request = provided_buffer;
+		}
+	}
+	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
+	DBG_RETURN(ret);
+}
+/* }}} */
+
 
 /*
  * Local variables:
