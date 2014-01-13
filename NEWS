@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - OPCache:
   . Fixed bug #66474 (Optimizer bug in constant string to boolean conversion).
     (Dmitry)
+  . Fixed bug #66461 (PHP crashes if opcache.interned_strings_buffer=0).
+    (Dmitry)
   . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
     ^M as lineend). (Laruence)
 

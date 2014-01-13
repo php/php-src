@@ -2128,7 +2128,9 @@ static void accel_activate(void)
 				}
 
 #if (ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO) && !defined(ZTS)
-				accel_interned_strings_restore_state(TSRMLS_C);
+				if (ZCG(accel_directives).interned_strings_buffer) {
+					accel_interned_strings_restore_state(TSRMLS_C);
+				}
 #endif
 
 				zend_shared_alloc_restore_state();
@@ -2446,36 +2448,39 @@ static int zend_accel_init_shm(TSRMLS_D)
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
+	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
 # ifndef ZTS
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / (sizeof(Bucket) + sizeof(Bucket*) + 8 /* average string length */), NULL, NULL, 1);
-	ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
-	ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
-	ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
-	if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
-		zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
-		return FAILURE;
+	if (ZCG(accel_directives).interned_strings_buffer) {
+		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
+		ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
+		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+		if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
+			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+			return FAILURE;
+		}
+		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
+		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
+
+		orig_interned_strings_start = CG(interned_strings_start);
+		orig_interned_strings_end = CG(interned_strings_end);
+		CG(interned_strings_start) = ZCSG(interned_strings_start);
+		CG(interned_strings_end) = ZCSG(interned_strings_end);
 	}
-	ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
-	ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
-# else
-	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
 # endif
 
-	orig_interned_strings_start = CG(interned_strings_start);
-	orig_interned_strings_end = CG(interned_strings_end);
 	orig_new_interned_string = zend_new_interned_string;
 	orig_interned_strings_snapshot = zend_interned_strings_snapshot;
 	orig_interned_strings_restore = zend_interned_strings_restore;
-
-	CG(interned_strings_start) = ZCSG(interned_strings_start);
-	CG(interned_strings_end) = ZCSG(interned_strings_end);
 	zend_new_interned_string = accel_new_interned_string_for_php;
 	zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
 	zend_interned_strings_restore = accel_interned_strings_restore_for_php;
 
 # ifndef ZTS
-	accel_use_shm_interned_strings(TSRMLS_C);
-	accel_interned_strings_save_state(TSRMLS_C);
+	if (ZCG(accel_directives).interned_strings_buffer) {
+		accel_use_shm_interned_strings(TSRMLS_C);
+		accel_interned_strings_save_state(TSRMLS_C);
+	}
 # endif
 
 #endif
@@ -2709,13 +2714,15 @@ void accel_shutdown(TSRMLS_D)
 	}
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	if (ZCG(accel_directives).interned_strings_buffer) {
 # ifndef ZTS
-	zend_hash_clean(CG(function_table));
-	zend_hash_clean(CG(class_table));
-	zend_hash_clean(EG(zend_constants));
+		zend_hash_clean(CG(function_table));
+		zend_hash_clean(CG(class_table));
+		zend_hash_clean(EG(zend_constants));
 # endif
-	CG(interned_strings_start) = orig_interned_strings_start;
-	CG(interned_strings_end) = orig_interned_strings_end;
+		CG(interned_strings_start) = orig_interned_strings_start;
+		CG(interned_strings_end) = orig_interned_strings_end;
+	}
 	zend_new_interned_string = orig_new_interned_string;
 	zend_interned_strings_snapshot = orig_interned_strings_snapshot;
 	zend_interned_strings_restore = orig_interned_strings_restore;
