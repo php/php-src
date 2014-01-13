@@ -433,7 +433,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					zval t;
 					
 					if (zend_get_persistent_constant(Z_STRVAL(ZEND_OP1_LITERAL(opline - 1)),
-						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 0 TSRMLS_CC)) {
+						Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)), &t, 1 TSRMLS_CC)) {
 						if (replace_var_by_const(op_array, opline + 1, ZEND_RESULT(opline).var, &t TSRMLS_CC)) {
 							literal_dtor(&ZEND_OP1_LITERAL(opline - 1));
 							MAKE_NOP((opline - 1));
