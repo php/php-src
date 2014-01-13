@@ -7,15 +7,18 @@ I.   Basic changes in <str_size_and_int64>
  iv.  Macros
  v.   Functions
 II.  Porting steps
- i.   Automatic replacements
- ii.  Compatibility header
- iii. zend_parse_parameters()
- iv.  Manual code fixes
- v.   Library dependencies
- vi.  spprintf() formats
+ i.    Automatic replacements
+ ii.   Compatibility header
+ iii.  zend_parse_parameters()
+ iv.   Manual code fixes
+ v.    Library dependencies
+ vi.   spprintf() formats
+ vii.  Array API
+ viii. Explicit compilation enablement
 III. Pitfalls
- i.  size_t usage
- ii. zend_parse_parameters()
+ i.   size_t usage
+ ii.  zend_parse_parameters()
+ iii. Misccellaneous
 
 
 ========================================
@@ -44,12 +47,18 @@ I. Basic changes in <str_size_and_int64>
 	inclusion of php.h is necessary.
 
  iii. Other datatypes
- 	zend_off_t  - portable file offsets
-	zend_stat_t - portable 'struct stat'
+ 	zend_off_t  - portable off_t analogue
+	zend_stat_t - portable 'struct stat' analogue
 
 	These datatypes are declared to be portable across platforms. Thus, direct
-	usage of the functions like fseek, stat, etc. is strongly not recommended.
-	Instead the portable macros should be used.
+	usage of the functions like fseek, stat, etc. as well as direct usage of 
+	off_t and struct stat is strongly not recommended. Instead the portable macros should be used.
+
+	zend_fseek - portable fseek equivalent
+	zend_ftell - portable ftell equivalent
+	zend_lseek - portable lseek equivalent
+	zend_fstat - portable fstat equivalent
+	zend_stat  - portable stat equivalent
 
  iv.  Macros
  	Z_STRSIZE  - replacement for Z_STRLEN family
@@ -67,11 +76,6 @@ I. Basic changes in <str_size_and_int64>
  	Various functions became syntactic renames, it concerns functions containing
 	the 'long' keyword. The new portable aliases also was added.
 
-	zend_fseek - portable fseek equivalent
-	zend_ftell - portable ftell equivalent
-	zend_lseek - portable lseek equivalent
-	zend_fstat - portable fstat equivalent
-	zend_stat  - portable stat equivalent
 	convert_to_int, add_assoc_int, zend_ini_int, etc.
 
 =================
@@ -140,11 +144,55 @@ II. Porting steps
 		return;
 	}
 
+ vii. Array API
+
+	Datatype for array indexes was changed to php_uint_t.
+
+ viii. Explicit compilation enablement
+	
+	This is not implemented yet, the build system has to be tweaked for this to happen.
+	The idea is, that an extension has to define some macros like PHP_64BIT_COMP to
+	be compiled.
+
 =============
 III. Pitfalls
 =============
 
- i.  size_t usage
- ii. zend_parse_parameters()
+ i.   size_t usage
+	
+	php_size_t is mapped to the platform dependent size_t datatype, which is unsigned.
+	The following code will not work as maybe expected, when max_len is negative
 
+	char *s0;
+	php_size_t s0_len;
+	php_int_t max_len;
+
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMPAT ? "sl" : "iS"), &s0, &s0_len, &max_len) == FAILURE) {
+		return;
+	}
+	if (s0_len > max_len) {
+		return;
+	}
+
+	The reason is, that for the comparsion max_len will be converted to an unsigned value
+	which most likely will be PHP_SIZE_MAX. The correct check could look like
+
+	if (max_len >= 0 && s0_len > max_len) {
+		return;
+	}
+
+	Please note, that php_size_t is used not only for string length with zpp, but also
+	widely for array keys and at many other places. Please check the corresponding APIs
+	to ensure the datatype needed. Predominantly string size uses php_size_t now.
+
+ ii.  zend_parse_parameters()
+
+	The new integer and string format specs are strictly bound to the php_int_t and
+	php_size_t datatypes. Those datatypes have the variable width on different
+	platforms. Especially usage of the old 'long' and 'int' datatypes can lead to
+	memory errors and crashes on 64 bit platforms.
+
+ iii. Misccellaneous
+
+	TODO ptrdiff_t example
 
