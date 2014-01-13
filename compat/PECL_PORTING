@@ -1,4 +1,6 @@
-This document describes the way to port the PECL extensions for <str_size_and_int64>
+This document describes the way to port the PECL extensions for <str_size_and_int64>.
+After undertaking the steps suggested, the same  PECL extension source should be
+compatible with both older and <str_size_and_int64> codebase.
 
 I.   Basic changes in <str_size_and_int64>
  i.   String length
@@ -83,28 +85,36 @@ II. Porting steps
 =================
 
  i.   Automatic replacements
+
 	The tool replace.php will automatically replace a number of syntactic changes
-	in the old style extension. 
+	in the old style extension. Note, that only simple cases are processed, for 
+	complicated cases the manual intrusion is unavoidable. Still, this tool will
+	save a lot of time while porting.
 
  ii.  Compatibility header
-	The compat.h header has to be included after all the other headers and in any
-	using the new syntax.
+
+	The compat.h header, once copied into the extension source and included, will
+	compensate many of the syntactic differences. The right place for the 
+	inclusion might depend on the concrete extension code, while in general it
+	might make sense to include it after all the other headers.
 
  iii. zend_parse_parameters()
 
 	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
 	replacements 'i', 'I', 'S' and 'P' was invented. The integer specs expect a
-	variable of php_int_t to be passed. The string/path length are expected to be
-	of type php_size_t.
+	variable of type php_int_t to be passed. The string/path length are expected
+	to be of type php_size_t.
 
-	The recommended way to declare the argument specs is using a ternary operator,
+	The recommended way to declare the argument specs is using the ternary operator,
 	eq.
 	
+	#define COMP (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
+
 	php_int_t i0, i1;
 	char *s0, p0;
 	php_size_t s0_len, p0_len;
 
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMPAT ? "lLsp" : "iISP"), &i0, &i1, &s0, &s0_len, &p0, &p0_len) == FAILURE) {
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMP ? "lLsp" : "iISP"), &i0, &i1, &s0, &s0_len, &p0, &p0_len) == FAILURE) {
 		return;
 	}
 
@@ -120,7 +130,8 @@ II. Porting steps
 
 	Libraries using incompatible data types for string sizes and integers require 
 	additional checks to ensure the correct value range. This is easy done as in the
-	example below (assumed a dependency library expects a value in integer range)
+	example below (assumed the function argument is of type php_int_t and the
+	dependency library expects a value in integer range)
 
 	if (INT_MAX < input_arg || INT_MIN > input_arg) {
 		return;
@@ -190,11 +201,23 @@ III. Pitfalls
  ii.  zend_parse_parameters()
 
 	The new integer and string format specs are strictly bound to the php_int_t and
-	php_size_t datatypes. Those datatypes have the variable width on different
+	php_size_t datatypes. Those datatypes have variable sizes on different
 	platforms. Especially usage of the old 'long' and 'int' datatypes can lead to
 	memory errors and crashes on 64 bit platforms.
 
  iii. Misccellaneous
 
-	TODO ptrdiff_t example
+	When working with pointer arithmetic, the ptrdiff_t type should be used to tell the
+	difference between two pointers.
+
+	char *s0 = "hello"
+	char *s1 = s0;
+	ptrdiff_t d;
+
+	*s1++;
+
+	d = s1 - s0; /* Correct datatype to hold the result */
+
+	Should the example happen to scale, like for instance working the bigger strings,
+	using a wrong datatype will lead to an overflow.
 
