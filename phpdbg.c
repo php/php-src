@@ -654,8 +654,11 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
 		}
 	} else {
-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
-		zend_bailout();
+		/* we quit remote consoles on recv SIGINT */
+		if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			zend_bailout();
+		}
 	}
 } /* }}} */
 
@@ -1270,6 +1273,9 @@ phpdbg_interact:
 		
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
+		
+		/* this is just helpful */
+		PG(report_memleaks) = 0;
 		
 phpdbg_out:
 #ifndef _WIN32
