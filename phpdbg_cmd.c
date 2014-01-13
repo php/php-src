@@ -467,32 +467,43 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 		}
 
 		if (buffered == NULL) {
-#ifndef HAVE_LIBREADLINE
-			char buf[PHPDBG_MAX_CMD];
-			if ((!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && !phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) ||
-				!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
-				/* the user has gone away */
-				phpdbg_error("Failed to read console!");
+disconnect:
+			if (0) {
 				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
 				zend_bailout();
 				return NULL;
 			}
 
+#ifndef HAVE_LIBREADLINE
+			char buf[PHPDBG_MAX_CMD];
+			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+				if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_CC))) {
+					goto disconnect;
+				}
+			}
+			
+			/* note: EOF is ignored */
+readline:	
+			if (!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
+				/* the user has gone away */
+				if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+					goto disconnect;
+				} else goto readline;
+			}
+
 			cmd = buf;
 #else
+			/* note: EOF makes readline write prompt again in local console mode */
+readline:
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				char buf[PHPDBG_MAX_CMD];
 				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
 					cmd = buf;
-				} else cmd = NULL;
+				} else goto disconnect;
 			} else cmd = readline(phpdbg_get_prompt(TSRMLS_C));
 
 			if (!cmd) {
-				/* the user has gone away */
-				phpdbg_error("Failed to read console!");
-				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
-				zend_bailout();
-				return NULL;
+				goto readline;
 			}
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
