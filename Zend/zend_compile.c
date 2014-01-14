@@ -1947,6 +1947,10 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 				}
 			}
 		}
+	} else {
+		if (cur_arg_info->is_arrayof) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Array of type hints must specify a type");
+		}
 	}
 }
 /* }}} */
