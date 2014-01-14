@@ -608,7 +608,7 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	return 0;
 }
 
-ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_kind, zval *given, zval *arg TSRMLS_DC)
+ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_kind, zval *offender, zval *arg TSRMLS_DC)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname = zf->common.function_name;
@@ -616,10 +616,10 @@ ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *
 	const char *fclass;
 	const char *given_kind = "none";
 	
-	if (given != NULL) {
-		if (Z_TYPE_P(given) == IS_OBJECT) {
-			given_kind = Z_OBJCE_P(given)->name;
-		} else given_kind = zend_zval_type_name(given);
+	if (offender != NULL) {
+		if (Z_TYPE_P(offender) == IS_OBJECT) {
+			given_kind = Z_OBJCE_P(offender)->name;
+		} else given_kind = zend_zval_type_name(offender);
 	}
 
 	if (zf->common.scope) {
@@ -633,11 +633,11 @@ ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *
 	if (ptr && ptr->op_array) {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must be an array of %s, %s %s, called in %s on line %d and defined", 
 			arg_num, fclass, fsep, fname, need_kind, given_kind, 
-			(arg == given) ? "given" : "found", ptr->op_array->filename, ptr->opline->lineno);
+			(arg == offender) ? "given" : "found", ptr->op_array->filename, ptr->opline->lineno);
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must be an array of %s, %s %s", 
 			arg_num, fclass, fsep, fname, need_kind, given_kind, 
-			(arg == given) ? "given" : "found");
+			(arg == offender) ? "given" : "found");
 	}
 	
 	return 0;
@@ -647,6 +647,10 @@ static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg
 {
 	zval **member;
 	HashPosition position;
+	
+	if (Z_TYPE_P(arg) == IS_NULL && cur_arg_info->allow_null) {
+		return SUCCESS;
+	}
 	
 	if (Z_TYPE_P(arg) != IS_ARRAY) {
 		*offender = arg;
