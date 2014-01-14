@@ -19,7 +19,7 @@
    |          Chris Kings-Lynne <chriskl@php.net> (v3 protocol)           | 
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 #include <stdlib.h>
@@ -1505,6 +1505,16 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
+				add_assoc_string(return_value, "server_encoding", (char*)PQparameterStatus(pgsql, "server_encoding"), 1);
+				add_assoc_string(return_value, "application_name", (char*)PQparameterStatus(pgsql, "application_name"), 1);
+				add_assoc_string(return_value, "is_superuser", (char*)PQparameterStatus(pgsql, "is_superuser"), 1);
+				add_assoc_string(return_value, "session_authorization", (char*)PQparameterStatus(pgsql, "session_authorization"), 1);
+				add_assoc_string(return_value, "DateStyle", (char*)PQparameterStatus(pgsql, "DateStyle"), 1);
+				add_assoc_string(return_value, "IntervalStyle", (char*)PQparameterStatus(pgsql, "IntervalStyle"), 1);
+				add_assoc_string(return_value, "TimeZone", (char*)PQparameterStatus(pgsql, "TimeZone"), 1);
+				add_assoc_string(return_value, "integer_datetimes", (char*)PQparameterStatus(pgsql, "integer_datetimes"), 1);
+				add_assoc_string(return_value, "standard_conforming_strings", (char*)PQparameterStatus(pgsql, "standard_conforming_strings"), 1);
+				add_assoc_string(return_value, "server_encoding", (char*)PQparameterStatus(pgsql, "server_encoding"), 1);
 			}
 #endif
 #endif

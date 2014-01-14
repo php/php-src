@@ -73,6 +73,9 @@ PHP                                                                        NEWS
   . Included phpdbg sapi (RFC: https://wiki.php.net/rfc/phpdbg).
     (Felipe Pena, Joe Watkins and Bob Weinand)
 
+- pgsql:
+  . pg_version() returns full report which obtained by PQparameterStatus().
+
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
     (Yasuo)
