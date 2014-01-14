@@ -670,22 +670,20 @@ static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg
 				*offender = *member;
 				return FAILURE;
 			}
-		} else if (cur_arg_info->type_hint) {
-			switch (cur_arg_info->type_hint) {
-				case IS_ARRAY: 
-					if (Z_TYPE_PP(member) != IS_ARRAY) {
-						*offender = *member;
-						return FAILURE;
-					}
-				break;
-				
-				case IS_CALLABLE:
-					if (!zend_is_callable(*member, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC)) {
-						*offender = *member;
-						return FAILURE;
-					}
-				break;
-			}
+		} else switch (cur_arg_info->type_hint) {
+			case IS_ARRAY: 
+				if (Z_TYPE_PP(member) != IS_ARRAY) {
+					*offender = *member;
+					return FAILURE;
+				}
+			break;
+			
+			case IS_CALLABLE:
+				if (!zend_is_callable(*member, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC)) {
+					*offender = *member;
+					return FAILURE;
+				}
+			break;
 		}
 	}
 	
