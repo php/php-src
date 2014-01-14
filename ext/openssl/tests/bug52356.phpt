@@ -48,10 +48,12 @@ var_dump( $bEncryptionStatus );
 $bEncryptionStatus = openssl_pkcs7_mem_encrypt( $sMessage, $sEncryptedMessage, $aMultiCerts, $aHeaders );
 var_dump( $bEncryptionStatus );
 
+echo "\n";
 echo "# Starting up decrypt tests\n";
 $sDecryptedMessage = "";
 $bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sCertdata, $sKeydata );
 $sShouldBeSuccessful = $sDecryptedMessage;
+var_dump( $sShouldBeSuccessful === $sMessage );
 var_dump( $bDecryptionStatus );
 $bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sCertdata, $sWrong );
 var_dump( $bDecryptionStatus );
@@ -61,14 +63,33 @@ $bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedM
 var_dump( $bDecryptionStatus );
 $bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sWrong, $sDecryptedMessage, $sCertdata, $sKeydata ); 
 var_dump( $bDecryptionStatus );
-$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEmpty, $sDecryptedMessage, $sCertdata, $sKeydata);
+$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEmpty, $sDecryptedMessage, $sCertdata, $sKeydata );
 var_dump( $bDecryptionStatus );
-$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sEmpty, $sKeydata);
+$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sEmpty, $sKeydata );
 var_dump( $bDecryptionStatus );
-$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sCertdata, $sEmpty);
+$bDecryptionStatus = openssl_pkcs7_mem_decrypt( $sEncryptedMessage, $sDecryptedMessage, $sCertdata, $sEmpty );
 var_dump( $bDecryptionStatus );
 
-var_dump( $sShouldBeSuccessful === $sMessage );
+echo "\n";
+echo "# Starting up sign tests\n";
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sKeydata, $aHeaders );
+var_dump( $bSignStatus );
+var_dump( trim($sSignedMessage) != '' );
+$sSuccessfulSignedMessage = $sSignedMessage;
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sKeydata, $aAssocHeaders );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sKeydata, $aEmpty );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sKeydata, $sWrong );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sWrong, $sKeydata, $aHeaders );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sEmpty, $sKeydata, $aHeaders );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sKeydata, $sEmpty );
+var_dump( $bSignStatus );
+$bSignStatus = openssl_pkcs7_mem_sign( $sMessage, $sSignedMessage, $sCertdata, $sWrong, $aHeaders );
+var_dump( $bSignStatus );
 
 ?>
 --EXPECTF--
@@ -87,7 +108,9 @@ bool(false)
 Warning: openssl_pkcs7_mem_encrypt() expects parameter 4 to be array, string given in %s on line %d
 bool(false)
 bool(true)
+
 # Starting up decrypt tests
+bool(true)
 bool(true)
 
 Warning: openssl_pkcs7_mem_decrypt(): unable to get private key in %s on line %d
@@ -108,4 +131,24 @@ bool(false)
 
 Warning: openssl_pkcs7_mem_decrypt(): unable to get private key in %s on line %d
 bool(false)
+
+# Starting up sign tests
 bool(true)
+bool(true)
+bool(true)
+bool(true)
+
+Warning: openssl_pkcs7_mem_sign() expects parameter 5 to be array, string given in %s on line %d
+NULL
+
+Warning: openssl_pkcs7_mem_sign(): error getting cert in %s on line %d
+bool(false)
+
+Warning: openssl_pkcs7_mem_sign(): error getting cert in %s on line %d
+bool(false)
+
+Warning: openssl_pkcs7_mem_sign() expects parameter 5 to be array, string given in %s on line %d
+NULL
+
+Warning: openssl_pkcs7_mem_sign(): error getting private key in %s on line %d
+bool(false)
