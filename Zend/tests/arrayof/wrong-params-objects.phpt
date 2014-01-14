@@ -1,5 +1,5 @@
 --TEST--
-Basic arrayof tests (objects, error)
+test wrong class in arrayof arg
 --FILE--
 <?php
 class My {}

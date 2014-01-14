@@ -1,5 +1,5 @@
 --TEST--
-Basic arrayof test (reference, error)
+test arrayof reference
 --FILE--
 <?php
 function test(array[] &$arrays) {

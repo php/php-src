@@ -1,5 +1,5 @@
 --TEST--
-Basic arrayof test (hint for array, short syntax, error)
+test arrayof wrong type
 --FILE--
 <?php
 function test([] $array) {
