@@ -37,6 +37,13 @@ function test5(array[] ... $arrays) {
 }
 
 var_dump(test5([array(), array()], [array(), array()]));
+
+function test6(array[] &$arrays) {
+	return $arrays;
+}
+
+$arrays = [array(), array()];
+var_dump(test6($arrays));
 ?>
 --EXPECT--
 array(3) {
@@ -108,4 +115,11 @@ array(2) {
     }
   }
 }
-
+array(2) {
+  [0]=>
+  array(0) {
+  }
+  [1]=>
+  array(0) {
+  }
+}
