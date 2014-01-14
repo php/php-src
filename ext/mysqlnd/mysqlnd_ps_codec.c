@@ -521,7 +521,7 @@ static void
 mysqlnd_stmt_free_copies(MYSQLND_STMT_DATA * stmt, zval ** copies TSRMLS_DC)
 {
 	if (copies) {
-		unsigned int i;
+		php_uint_t i;
 		for (i = 0; i < stmt->param_count; i++) {
 			if (copies[i]) {
 				zval_ptr_dtor(&copies[i]);
@@ -666,11 +666,11 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval ** copies, zend_
 static enum_func_status
 mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval *** copies_param, size_t * data_size TSRMLS_DC)
 {
-	unsigned int i;
+	php_uint_t i;
 	DBG_ENTER("mysqlnd_stmt_execute_calculate_param_values_size");
 
 	for (i = 0; i < stmt->param_count; i++) {
-		zval ** copies;
+		zval ** copies = NULL;
 		php_uint_t j;
 		zval *the_var = stmt->param_bind[i].zv;
 
@@ -763,7 +763,7 @@ end:
 static void
 mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval ** copies, zend_uchar ** buf, zend_uchar ** p, size_t null_byte_offset)
 {
-	unsigned int i;
+	php_uint_t i;
 	for (i = 0; i < stmt->param_count; i++) {
 		zval * data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 		/* Handle long data */
@@ -836,7 +836,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar ** buf, zend_ucha
 	DBG_ENTER("mysqlnd_stmt_execute_store_params");
 
 	{
-		unsigned int null_count = (stmt->param_count + 7) / 8;
+		php_uint_t null_count = (stmt->param_count + 7) / 8;
 		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, null_count TSRMLS_CC)) {
 			SET_OOM_ERROR(*stmt->error_info);
 			goto end;	
