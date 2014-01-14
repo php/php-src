@@ -1,5 +1,5 @@
 --TEST--
-Basic arrayof test (null, error)
+test null passed as arrayof arg
 --FILE--
 <?php
 function test(array[] $arrays) {
