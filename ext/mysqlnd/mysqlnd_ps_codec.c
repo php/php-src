@@ -670,7 +670,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 	DBG_ENTER("mysqlnd_stmt_execute_calculate_param_values_size");
 
 	for (i = 0; i < stmt->param_count; i++) {
-		zval ** copies;
+		zval ** copies = NULL;
 		unsigned int j;
 		zval *the_var = stmt->param_bind[i].zv;
 
