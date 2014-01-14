@@ -188,7 +188,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
-%token T_ARRAYOF		 "arrayof (T_ARRAYOF)"
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
@@ -410,7 +409,7 @@ is_variadic:
 
 is_arrayof:
 		/* empty */ { $$.op_type = 0; }
-	|	T_ARRAYOF   { $$.op_type = 1; }
+	|	'[' ']'   { $$.op_type = 1; }
 ;
 
 unticked_function_declaration_statement:
