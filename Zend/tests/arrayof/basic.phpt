@@ -31,6 +31,12 @@ function test4(array[] $arrays, $something, IFace[] $faces) {
 }
 
 var_dump(test4([array(), array()], true, [new Two(), new One()]));
+
+function test5(array[] ... $arrays) {
+	return $arrays;
+}
+
+var_dump(test5([array(), array()], [array(), array()]));
 ?>
 --EXPECT--
 array(3) {
@@ -79,6 +85,26 @@ array(3) {
     }
     [1]=>
     object(One)#3 (0) {
+    }
+  }
+}
+array(2) {
+  [0]=>
+  array(2) {
+    [0]=>
+    array(0) {
+    }
+    [1]=>
+    array(0) {
+    }
+  }
+  [1]=>
+  array(2) {
+    [0]=>
+    array(0) {
+    }
+    [1]=>
+    array(0) {
     }
   }
 }
