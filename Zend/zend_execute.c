@@ -608,12 +608,48 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	return 0;
 }
 
+ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_kind, zval *given, zval *arg TSRMLS_DC)
+{
+	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
+	const char *fname = zf->common.function_name;
+	char *fsep;
+	const char *fclass;
+	const char *given_kind = "none";
+	
+	if (given != NULL) {
+		if (Z_TYPE_P(given) == IS_OBJECT) {
+			given_kind = Z_OBJCE_P(given)->name;
+		} else given_kind = zend_zval_type_name(given);
+	}
+
+	if (zf->common.scope) {
+		fsep =  "::";
+		fclass = zf->common.scope->name;
+	} else {
+		fsep =  "";
+		fclass = "";
+	}
+
+	if (ptr && ptr->op_array) {
+		zend_error(error_type, "Argument %d passed to %s%s%s() must be an array of %s, %s %s, called in %s on line %d and defined", 
+			arg_num, fclass, fsep, fname, need_kind, given_kind, 
+			(arg == given) ? "given" : "found", ptr->op_array->filename, ptr->opline->lineno);
+	} else {
+		zend_error(error_type, "Argument %d passed to %s%s%s() must be an array of %s, %s %s", 
+			arg_num, fclass, fsep, fname, need_kind, given_kind, 
+			(arg == given) ? "given" : "found");
+	}
+	
+	return 0;
+}
+
 static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg, zend_class_entry *ce, zval **offender TSRMLS_DC)
 {
 	zval **member;
 	HashPosition position;
 	
 	if (Z_TYPE_P(arg) != IS_ARRAY) {
+		*offender = arg;
 		return FAILURE;
 	}
 	
@@ -682,9 +718,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 		if (cur_arg_info->is_arrayof) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			if (zend_verify_arg_arrayof(cur_arg_info, arg, ce, &offender TSRMLS_CC) != SUCCESS) {
-				if (Z_TYPE_P(offender) == IS_OBJECT) {
-					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of ", class_name, "member of class ", Z_OBJCE_P(offender)->name TSRMLS_CC);	
-				} else return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of ", class_name, "member of type ", zend_zval_type_name(offender) TSRMLS_CC);
+				return zend_verify_arg_arrayof_error(E_RECOVERABLE_ERROR, zf, arg_num, class_name, offender, arg TSRMLS_CC);
 			}
 		} else {
 			if (Z_TYPE_P(arg) == IS_OBJECT) {
@@ -702,19 +736,15 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_ARRAY:
 				if (!arg) {
 					if (cur_arg_info->is_arrayof) {
-						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
+						return zend_verify_arg_arrayof_error(E_RECOVERABLE_ERROR, zf, arg_num, "arrays", NULL, arg TSRMLS_CC);
 					} else {
-						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of arrays", "", "none", "" TSRMLS_CC);
+						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
 					}
 				}
 				
 				if (cur_arg_info->is_arrayof) {
 					if (zend_verify_arg_arrayof(cur_arg_info, arg, NULL, &offender TSRMLS_CC) != SUCCESS) {
-						if (Z_TYPE_P(offender) == IS_OBJECT) {
-							return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of arrays ", "", "member of class ", Z_OBJCE_P(offender)->name TSRMLS_CC);	
-						} else {
-							return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of arrays ", "", "member of type ", zend_zval_type_name(offender) TSRMLS_CC);
-						}
+						return zend_verify_arg_arrayof_error(E_RECOVERABLE_ERROR, zf, arg_num, "arrays", offender, arg TSRMLS_CC);
 					}
 				} else {
 					if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
@@ -726,7 +756,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_CALLABLE:
 				if (!arg) {
 					if (cur_arg_info->is_arrayof) {
-						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of callables", "", "none", "" TSRMLS_CC);
+						return zend_verify_arg_arrayof_error(E_RECOVERABLE_ERROR, zf, arg_num, "callables", NULL, arg TSRMLS_CC);
 					} else {
 						return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", "none", "" TSRMLS_CC);
 					}
@@ -734,11 +764,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				
 				if (cur_arg_info->is_arrayof) {
 					if (zend_verify_arg_arrayof(cur_arg_info, arg, NULL, &offender TSRMLS_CC) != SUCCESS) {
-						if (Z_TYPE_P(offender) == IS_OBJECT) {
-							return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of callables", "", "member of class ", Z_OBJCE_P(offender)->name TSRMLS_CC);	
-						} else {
-							return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be an array of callables", "", "member of type ", zend_zval_type_name(offender) TSRMLS_CC);
-						}
+						return zend_verify_arg_arrayof_error(E_RECOVERABLE_ERROR, zf, arg_num, "callables", offender, arg TSRMLS_CC);
 					}
 				} else {
 					if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
