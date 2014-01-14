@@ -102,9 +102,9 @@ typedef long zend_off_t;
 #  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
 #  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_INT_FMT "%lld"
-#  define ZEND_UINT_FMT "%llu"
+#  define ZEND_UINT_FMT "%lu"
 #  define ZEND_INT_FMT_SPEC "lld"
-#  define ZEND_UINT_FMT_SPEC "llu"
+#  define ZEND_UINT_FMT_SPEC "lu"
 #  define ZEND_STRTOL_PTR strtoll
 #  define ZEND_STRTOUL_PTR strtoull
 #  define ZEND_ABS llabs
