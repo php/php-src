@@ -1,5 +1,5 @@
 --TEST--
-Basic arrayof error (simple types)
+Basic arrayof test (simple types, error)
 --FILE--
 <?php
 function test(array[] $arrays) {

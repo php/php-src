@@ -564,10 +564,10 @@ non_empty_parameter_list:
 ;
 
 parameter:
-		optional_class_type is_reference is_variadic is_arrayof T_VARIABLE
-			{ zend_do_receive_param(ZEND_RECV, &$5, NULL, &$1, $2.op_type, $3.op_type, $4.op_type TSRMLS_CC); }
-	|	optional_class_type is_reference is_variadic is_arrayof T_VARIABLE '=' static_scalar
-			{ zend_do_receive_param(ZEND_RECV_INIT, &$5, &$7, &$1, $2.op_type, $3.op_type, $4.op_type TSRMLS_CC); }
+		optional_class_type is_arrayof is_reference is_variadic T_VARIABLE
+			{ zend_do_receive_param(ZEND_RECV, &$5, NULL, &$1, $3.op_type, $4.op_type, $2.op_type TSRMLS_CC); }
+	|	optional_class_type is_arrayof is_reference is_variadic T_VARIABLE '=' static_scalar
+			{ zend_do_receive_param(ZEND_RECV_INIT, &$5, &$7, &$1, $3.op_type, $4.op_type, $2.op_type TSRMLS_CC); }
 ;
 
 
