@@ -673,7 +673,7 @@ static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg
 		} else if (cur_arg_info->type_hint) {
 			switch (cur_arg_info->type_hint) {
 				case IS_ARRAY: 
-					if (!member || Z_TYPE_PP(member) != IS_ARRAY) {
+					if (Z_TYPE_PP(member) != IS_ARRAY) {
 						*offender = *member;
 						return FAILURE;
 					}
