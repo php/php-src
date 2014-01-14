@@ -238,7 +238,7 @@ III. Pitfalls
 
 	Should the example happen to scale, like for instance working the bigger strings,
 	using a wrong datatype will lead to an overflow. Though be aware that ptrdiff_t is
-	unsigned.
+	signed, so can be negative.
 
  iv.  RETURN_STRINGL, RETVAL_STRINGL
 
