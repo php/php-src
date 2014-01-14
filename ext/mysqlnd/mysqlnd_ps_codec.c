@@ -638,17 +638,17 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval ** copies, zend_
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
-			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_INT) {
 				const zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 				/*
-				  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
+				  In case of IS_INT we do nothing, it is ok, in case of string, we just need to set current_type.
 				  The actual transformation has been performed several dozens line above.
 				*/
 				if (Z_TYPE_P(tmp_data) == IS_STRING) {
 					current_type = MYSQL_TYPE_VAR_STRING;
 					/*
 					  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
-					  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
+					  we force convert_to_int_ex in all cases, thus the type will be right in the next switch.
 					  if the type is however not long, then we will do a goto in the next switch.
 					  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 					*/
