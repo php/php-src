@@ -188,6 +188,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
+%token T_ARRAYOF		 "arrayof (T_ARRAYOF)"
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
@@ -407,6 +408,11 @@ is_variadic:
 	|	T_ELLIPSIS  { $$.op_type = 1; }
 ;
 
+is_arrayof:
+		/* empty */ { $$.op_type = 0; }
+	|	T_ARRAYOF   { $$.op_type = 1; }
+;
+
 unticked_function_declaration_statement:
 		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
 		'(' parameter_list ')'
@@ -559,10 +565,10 @@ non_empty_parameter_list:
 ;
 
 parameter:
-		optional_class_type is_reference is_variadic T_VARIABLE
-			{ zend_do_receive_param(ZEND_RECV, &$4, NULL, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
-	|	optional_class_type is_reference is_variadic T_VARIABLE '=' static_scalar
-			{ zend_do_receive_param(ZEND_RECV_INIT, &$4, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
+		optional_class_type is_reference is_variadic is_arrayof T_VARIABLE
+			{ zend_do_receive_param(ZEND_RECV, &$5, NULL, &$1, $2.op_type, $3.op_type, $4.op_type TSRMLS_CC); }
+	|	optional_class_type is_reference is_variadic is_arrayof T_VARIABLE '=' static_scalar
+			{ zend_do_receive_param(ZEND_RECV_INIT, &$5, &$7, &$1, $2.op_type, $3.op_type, $4.op_type TSRMLS_CC); }
 ;
 
 

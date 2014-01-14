@@ -241,6 +241,7 @@ typedef struct _zend_arg_info {
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
+	zend_bool is_arrayof;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_arg_info,
@@ -256,6 +257,7 @@ typedef struct _zend_internal_function_info {
 	zend_bool return_reference;
 	zend_bool _allow_null;
 	zend_bool _is_variadic;
+	zend_bool _is_arrayof;
 } zend_internal_function_info;
 
 typedef struct _zend_compiled_variable {
@@ -509,7 +511,7 @@ void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRM
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic, zend_bool is_arrayof TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, const znode *expr TSRMLS_DC);

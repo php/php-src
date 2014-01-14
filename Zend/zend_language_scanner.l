@@ -1327,6 +1327,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DOUBLE_ARROW;
 }
 
+<ST_IN_SCRIPTING>"["{TABS_AND_SPACES}"]" {
+	return T_ARRAYOF;
+}
+
 <ST_IN_SCRIPTING>"list" {
 	return T_LIST;
 }
