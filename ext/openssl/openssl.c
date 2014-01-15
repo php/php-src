@@ -311,7 +311,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_mem_sign, 0, 0, 5)
     ZEND_ARG_INFO(0, indata)
-    ZEND_ARG_INFO(1, zoutdata)
+    ZEND_ARG_INFO(1, outdata)
     ZEND_ARG_INFO(0, signcert)
     ZEND_ARG_INFO(0, signkey)
     ZEND_ARG_INFO(0, headers) /* array */
@@ -3976,14 +3976,14 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	long flags = 0;
 	char * filename; int filename_len;
 	char * extracerts = NULL; int extracerts_len = 0;
-	char * signersfilename = NULL; int signersfilename_len = 0;
-	char * datafilename = NULL; int datafilename_len = 0;
+	char * outfilename = NULL; int outfilename_len = 0;
+	char * contentfilename = NULL; int contentfilename_len = 0;
 	
 	RETVAL_LONG(-1);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl|papp", &filename, &filename_len,
-				&flags, &signersfilename, &signersfilename_len, &cainfo,
-				&extracerts, &extracerts_len, &datafilename, &datafilename_len) == FAILURE) {
+				&flags, &outfilename, &outfilename_len, &cainfo,
+				&extracerts, &extracerts_len, &contentfilename, &contentfilename_len) == FAILURE) {
 		return;
 	}
 	
@@ -4017,13 +4017,13 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		goto clean_exit;
 	}
 
-	if (datafilename) {
+	if (contentfilename) {
 
-		if (php_openssl_open_base_dir_chk(datafilename TSRMLS_CC)) {
+		if (php_openssl_open_base_dir_chk(contentfilename TSRMLS_CC)) {
 			goto clean_exit;
 		}
 
-		dataout = BIO_new_file(datafilename, "w");
+		dataout = BIO_new_file(contentfilename, "w");
 		if (dataout == NULL) {
 			goto clean_exit;
 		}
@@ -4036,14 +4036,14 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 		RETVAL_TRUE;
 
-		if (signersfilename) {
+		if (outfilename) {
 			BIO *certout;
 		
-			if (php_openssl_open_base_dir_chk(signersfilename TSRMLS_CC)) {
+			if (php_openssl_open_base_dir_chk(outfilename TSRMLS_CC)) {
 				goto clean_exit;
 			}
 		
-			certout = BIO_new_file(signersfilename, "w");
+			certout = BIO_new_file(outfilename, "w");
 			if (certout) {
 				int i;
 				signers = PKCS7_get0_signers(p7, NULL, flags);
@@ -4054,7 +4054,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				BIO_free(certout);
 				sk_X509_free(signers);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "signature OK, but cannot open %s for writing", signersfilename);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "signature OK, but cannot open %s for writing", outfilename);
 				RETVAL_LONG(-1);
 			}
 		}
