@@ -367,6 +367,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
+#if HAVE_PG_LO_TRUNCATE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_truncate, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, size)
+ZEND_END_ARG_INFO()
+#endif
+
 #if HAVE_PQSETERRORVERBOSITY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
@@ -661,6 +668,9 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
 	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
 	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
+#if HAVE_PG_LO_TRUNCATE
+	PHP_FE(pg_lo_truncate,	arginfo_pg_lo_truncate)
+#endif
 	/* utility functions */
 #if HAVE_PQESCAPE
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
@@ -3614,7 +3624,7 @@ PHP_FUNCTION(pg_lo_export)
 PHP_FUNCTION(pg_lo_seek)
 {
 	zval *pgsql_id = NULL;
-	long offset = 0, whence = SEEK_CUR;
+	long result, offset = 0, whence = SEEK_CUR;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3628,7 +3638,16 @@ PHP_FUNCTION(pg_lo_seek)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
-	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence) > -1) {
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	} else {
+		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	}
+#else
+	result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+#endif
+	if (result > -1) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3641,7 +3660,7 @@ PHP_FUNCTION(pg_lo_seek)
 PHP_FUNCTION(pg_lo_tell)
 {
 	zval *pgsql_id = NULL;
-	int offset = 0;
+	long offset = 0;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3651,10 +3670,53 @@ PHP_FUNCTION(pg_lo_tell)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
+	} else {
+		offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+	}
+#else
 	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+#endif
 	RETURN_LONG(offset);
 }
 /* }}} */
+
+#if HAVE_PG_LO_TRUNCATE
+/* {{{ proto bool pg_lo_truncate(resource large_object, int size)
+   Truncate large object to size */
+PHP_FUNCTION(pg_lo_truncate)
+{
+	zval *pgsql_id = NULL;
+	size_t size;
+	pgLofp *pgsql;
+	int argc = ZEND_NUM_ARGS();
+	int result;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "rl", &pgsql_id, &size) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
+
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
+	} else {
+		result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+	}
+#else
+	result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+#endif
+	if (!result) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
 
 #if HAVE_PQSETERRORVERBOSITY
 /* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
