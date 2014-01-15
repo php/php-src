@@ -1112,7 +1112,9 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 			char *new_key = zend_shared_alloc(key_length + 1);
 			if (new_key) {
 				memcpy(new_key, key, key_length + 1);
-				zend_accel_hash_update(&ZCSG(hash), new_key, key_length + 1, 1, bucket);
+				if (zend_accel_hash_update(&ZCSG(hash), new_key, key_length + 1, 1, bucket)) {
+					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", new_key);
+				}
 			} else {
 				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM TSRMLS_CC);
 			}
@@ -1196,16 +1198,21 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
-	if (bucket && !ZCG(accel_directives).revalidate_path &&
-	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
-	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
-	    (new_persistent_script->full_path_len != key_length ||
-	     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
-		/* link key to the same persistent script in hash table */
-		if (!zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
-			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
-			ZSMMG(memory_exhausted) = 1;
-			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH TSRMLS_CC);
+	if (bucket) {
+		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
+		if (!ZCG(accel_directives).revalidate_path &&
+		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
+		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
+		    (new_persistent_script->full_path_len != key_length ||
+		     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
+			/* link key to the same persistent script in hash table */
+			if (zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
+				zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", key);
+			} else {
+				zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
+				ZSMMG(memory_exhausted) = 1;
+				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH TSRMLS_CC);
+			}
 		}
 	}
 
