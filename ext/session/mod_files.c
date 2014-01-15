@@ -342,6 +342,7 @@ PS_READ_FUNC(files)
 			PS(send_cookie) = 1;
 		}
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 
 	ps_files_open(data, PS(id) TSRMLS_CC);

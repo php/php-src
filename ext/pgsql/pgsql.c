@@ -372,6 +372,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
 
+#if HAVE_PG_LO_TRUNCATE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_truncate, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, size)
+ZEND_END_ARG_INFO()
+#endif
+
 #if HAVE_PQSETERRORVERBOSITY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
 	ZEND_ARG_INFO(0, connection)
@@ -666,6 +673,9 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
 	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
 	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
+#if HAVE_PG_LO_TRUNCATE
+	PHP_FE(pg_lo_truncate,	arginfo_pg_lo_truncate)
+#endif
 	/* utility functions */
 #if HAVE_PQESCAPE
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
@@ -1512,17 +1522,29 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			add_assoc_int(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
+				/* 8.0 or grater supports protorol version 3 */
+				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
-				add_assoc_string(return_value, "server_encoding", (char*)PQparameterStatus(pgsql, "server_encoding"), 1);
-				add_assoc_string(return_value, "application_name", (char*)PQparameterStatus(pgsql, "application_name"), 1);
-				add_assoc_string(return_value, "is_superuser", (char*)PQparameterStatus(pgsql, "is_superuser"), 1);
-				add_assoc_string(return_value, "session_authorization", (char*)PQparameterStatus(pgsql, "session_authorization"), 1);
-				add_assoc_string(return_value, "DateStyle", (char*)PQparameterStatus(pgsql, "DateStyle"), 1);
-				add_assoc_string(return_value, "IntervalStyle", (char*)PQparameterStatus(pgsql, "IntervalStyle"), 1);
-				add_assoc_string(return_value, "TimeZone", (char*)PQparameterStatus(pgsql, "TimeZone"), 1);
-				add_assoc_string(return_value, "integer_datetimes", (char*)PQparameterStatus(pgsql, "integer_datetimes"), 1);
-				add_assoc_string(return_value, "standard_conforming_strings", (char*)PQparameterStatus(pgsql, "standard_conforming_strings"), 1);
-				add_assoc_string(return_value, "server_encoding", (char*)PQparameterStatus(pgsql, "server_encoding"), 1);
+				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
+				add_assoc_string(return_value, "server_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
+				add_assoc_string(return_value, "client_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
+				add_assoc_string(return_value, "is_superuser", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
+				add_assoc_string(return_value, "session_authorization", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
+				add_assoc_string(return_value, "DateStyle", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
+				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
+				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
+				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
+				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "application_name");
+				add_assoc_string(return_value, "application_name", tmp ? tmp : "", 1);
 			}
 #endif
 #endif
@@ -3625,7 +3647,7 @@ PHP_FUNCTION(pg_lo_export)
 PHP_FUNCTION(pg_lo_seek)
 {
 	zval *pgsql_id = NULL;
-	php_int_t offset = 0, whence = SEEK_CUR;
+	php_int_t result, offset = 0, whence = SEEK_CUR;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3639,7 +3661,16 @@ PHP_FUNCTION(pg_lo_seek)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
-	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence) > -1) {
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	} else {
+		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	}
+#else
+	result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+#endif
+	if (result > -1) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3652,7 +3683,7 @@ PHP_FUNCTION(pg_lo_seek)
 PHP_FUNCTION(pg_lo_tell)
 {
 	zval *pgsql_id = NULL;
-	int offset = 0;
+	long offset = 0;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3662,10 +3693,53 @@ PHP_FUNCTION(pg_lo_tell)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
+	} else {
+		offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+	}
+#else
 	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+#endif
 	RETURN_INT(offset);
 }
 /* }}} */
+
+#if HAVE_PG_LO_TRUNCATE
+/* {{{ proto bool pg_lo_truncate(resource large_object, int size)
+   Truncate large object to size */
+PHP_FUNCTION(pg_lo_truncate)
+{
+	zval *pgsql_id = NULL;
+	size_t size;
+	pgLofp *pgsql;
+	int argc = ZEND_NUM_ARGS();
+	int result;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "rl", &pgsql_id, &size) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
+
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
+	} else {
+		result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+	}
+#else
+	result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+#endif
+	if (!result) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
 
 #if HAVE_PQSETERRORVERBOSITY
 /* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
