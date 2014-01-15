@@ -371,6 +371,7 @@ PS_READ_FUNC(mm)
 			PS(send_cookie) = 1;
 		}
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 
 	sd = ps_sd_lookup(data, PS(id), 0);
