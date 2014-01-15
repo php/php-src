@@ -492,17 +492,25 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	php_session_reset_id(TSRMLS_C);
-	PS(session_status) = php_session_active;
+	/* Set session ID for compatibility for older/3rd party save handlers */
+	if (!PS(use_strict_mode)) {
+		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
+	}
 
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
-		/* It's better to rase error for this, but disabled error for better compatibility */
+		/* It's better to raise error for this, but disabled error for better compatibility */
 		/*
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		*/
+	}
+	/* Set session ID if session read didn't activated session */
+	if (PS(use_strict_mode) && PS(session_status) != php_session_active) {
+		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 	if (val) {
 		php_session_decode(val, vallen TSRMLS_CC);

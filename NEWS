@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
     ^M as lineend). (Laruence)
 
+- Session
+  . Fixed session module is sending multiple set-cookie headers when
+    session.use_strict_mode=1 (Yasuo)
+
 - Standard
   . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
 
