@@ -75,6 +75,9 @@ PHP                                                                        NEWS
 
 - pgsql:
   . pg_version() returns full report which obtained by PQparameterStatus().
+    (Yasuo)
+  . Added pg_lo_truncate(). (Yasuo)
+  . Added 64bit large object support for PostgreSQL 9.3 and later. (Yasuo)
 
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
