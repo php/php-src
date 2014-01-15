@@ -1504,38 +1504,29 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
+				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
-				if ((tmp = (char*)PQparameterStatus(pgsql, "server_encoding"))) {
-					add_assoc_string(return_value, "server_encoding", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "application_name"))) {
-					add_assoc_string(return_value, "application_name", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "is_superuser"))) {
-					add_assoc_string(return_value, "is_superuser", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "session_authorization"))) {
-					add_assoc_string(return_value, "session_authorization", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "DateStyle"))) {
-					add_assoc_string(return_value, "DateStyle", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle"))) {
-					add_assoc_string(return_value, "IntervalStyle", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "TimeZone"))) {
-					add_assoc_string(return_value, "TimeZone", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes"))) {
-					add_assoc_string(return_value, "integer_datetimes", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings"))) {
-					add_assoc_string(return_value, "standard_conforming_strings", tmp, 1);
-				}
-				if ((tmp = (char*)PQparameterStatus(pgsql, "server_encoding"))) {
-					add_assoc_string(return_value, "server_encoding", tmp, 1);
-				}
+				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
+				add_assoc_string(return_value, "server_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
+				add_assoc_string(return_value, "client_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
+				add_assoc_string(return_value, "is_superuser", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
+				add_assoc_string(return_value, "session_authorization", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
+				add_assoc_string(return_value, "DateStyle", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
+				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
+				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
+				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
+				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "application_name");
+				add_assoc_string(return_value, "application_name", tmp ? tmp : "", 1);
 			}
 #endif
 #endif
