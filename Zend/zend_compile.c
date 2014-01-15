@@ -1930,7 +1930,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
-			} else  {
+			} else {
 				cur_arg_info->type_hint = IS_OBJECT;
 				if (ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant))) {
 					zend_resolve_class_name(class_type TSRMLS_CC);
