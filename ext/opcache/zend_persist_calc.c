@@ -212,7 +212,7 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 			if (op_array->arg_info[i].class_name) {
 				ADD_INTERNED_STRING(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
 			}
-
+			ADD_DUP_SIZE(op_array->arg_info[i].is_arrayof, sizeof(zend_bool));
 		}
 	}
 
