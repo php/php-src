@@ -402,6 +402,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				if (op_array->arg_info[i].class_name) {
 					zend_accel_store_interned_string(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
 				}
+				zend_accel_store(op_array->arg_info[i].is_arrayof, sizeof(zend_bool));
 			}
 		}
 	}
