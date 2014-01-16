@@ -1257,7 +1257,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
-	unsigned	ret;
+	unsigned	ret = 0;
 	zval		lzval = zval_used_for_init;
 
 	if (Z_TYPE_P(zv) == IS_LONG) {

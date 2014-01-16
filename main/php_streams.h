@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -242,7 +242,7 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
-#define php_stream_get_resource_id(stream)		(stream)->rsrc_id
+#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->rsrc_id
 #if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
 # define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }

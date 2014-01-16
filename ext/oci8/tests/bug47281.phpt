@@ -6,9 +6,9 @@ $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on t
 require(dirname(__FILE__).'/skipif.inc');
 // error3.phpt obsoletes this test for newer Oracle client versions
 // Assume runtime client version is >= compile time client version
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
+preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
 if (!isset($matches[0]) ||
-    ($matches[0] > 11 || ($matches[0] == 11 && $matches[1] > 2) || ($matches[0] == 11 && $matches[1] == 2 && $matches[3] >= 3)
+    ($matches[1] > 11 || ($matches[1] == 11 && $matches[2] > 2) || ($matches[1] == 11 && $matches[2] == 2 && $matches[4] >= 3)
      )) {
     die("skip test works only with Oracle 11.2.0.2 or earlier Oracle client libraries");
 }

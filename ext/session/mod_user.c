@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -188,7 +188,7 @@ PS_CREATE_SID_FUNC(user)
 	/* maintain backwards compatibility */
 	if (PSF(create_sid) != NULL) {
 		char *id = NULL;
-		STDVARS;
+		zval *retval = NULL;
 
 		retval = ps_call_handler(PSF(create_sid), 0, NULL TSRMLS_CC);
 

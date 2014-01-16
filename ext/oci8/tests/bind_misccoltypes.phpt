@@ -4,9 +4,6 @@ Bind miscellaneous column types using default types
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-if (preg_match('/^1[012]\./', oci_client_version()) != 1) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
-}
 ?> 
 --FILE--
 <?php

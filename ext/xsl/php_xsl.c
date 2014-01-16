@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -57,8 +57,8 @@ zend_module_entry xsl_module_entry = {
 	xsl_functions,
 	PHP_MINIT(xsl),
 	PHP_MSHUTDOWN(xsl),
-	PHP_RINIT(xsl),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(xsl),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(xsl),
 #if ZEND_MODULE_API_NO >= 20010901
 	"0.1", /* Replace with version number for your extension */
@@ -170,6 +170,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
 				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_object_php);
+	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
 
 	REGISTER_LONG_CONSTANT("XSL_CLONE_AUTO",      0,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSL_CLONE_NEVER",    -1,     CONST_CS | CONST_PERSISTENT);
@@ -273,29 +274,11 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 				   (const xmlChar *) "http://php.net/xsl");
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
 				   (const xmlChar *) "http://php.net/xsl");
-
+	xsltSetGenericErrorFunc(NULL, NULL);
 	xsltCleanupGlobals();
 
 	UNREGISTER_INI_ENTRIES();
 
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(xsl)
-{
-	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
-	return SUCCESS;
-}
-/* }}} */
-
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(xsl)
-{
-	xsltSetGenericErrorFunc(NULL, NULL);
 	return SUCCESS;
 }
 /* }}} */

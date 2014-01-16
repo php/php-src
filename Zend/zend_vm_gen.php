@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ $header_text = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -218,7 +218,7 @@ $op2_is_tmp_free = array(
 $op1_free_op = array(
 	"ANY"    => "FREE_OP(free_op1)",
 	"TMP"    => "zval_dtor(free_op1.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -227,7 +227,7 @@ $op1_free_op = array(
 $op2_free_op = array(
 	"ANY"    => "FREE_OP(free_op2)",
 	"TMP"    => "zval_dtor(free_op2.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -236,7 +236,7 @@ $op2_free_op = array(
 $op1_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op1)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -245,33 +245,33 @@ $op1_free_op_if_var = array(
 $op2_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op2)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 
 $op1_free_op_var_ptr = array(
-	"ANY"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"ANY"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"VAR"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op1_free_op_var_ptr_fast = $op1_free_op_var_ptr;
-$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op1.var)";
+$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op1.var)";
 
 $op2_free_op_var_ptr = array(
-	"ANY"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"ANY"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"VAR"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op2_free_op_var_ptr_fast = $op2_free_op_var_ptr;
-$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op2.var)";
+$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op2.var)";
 
 $list    = array(); // list of opcode handlers and helpers in original order
 $opcodes = array(); // opcode handlers by code
@@ -911,9 +911,15 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#undef CHECK_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-							out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
-							out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
-							out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+							if (ZEND_VM_SPEC) {
+								out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+							} else {
+								out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+							}
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
@@ -1201,13 +1207,39 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
+	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n\n");
+	
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
 		fputs($f,"#define $op $code\n");
 	}
+
+	fputs($f, "\n#endif\n");
 	fclose($f);
 	echo "zend_vm_opcodes.h generated successfully.\n";
+
+	// zend_vm_opcodes.c
+	$f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
+
+	// Insert header
+	out($f, $GLOBALS['header_text']);
+	fputs($f,"#include <stdio.h>\n");
+	fputs($f,"#include <zend.h>\n\n");
+	
+	fputs($f,"const char *zend_vm_opcodes_map[".($max_opcode + 1)."] = {\n");
+	for ($i = 0; $i <= $max_opcode; $i++) {
+		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
+	}
+	fputs($f, "};\n\n");
+	
+    fputs($f, "ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {\n");
+    fputs($f, "\treturn zend_vm_opcodes_map[opcode];\n");
+    fputs($f, "}\n");
+    
+	fclose($f);
+	echo "zend_vm_opcodes.c generated successfully.\n";
 
 	// Generate zend_vm_execute.h
 	$f = fopen(__DIR__ . "/zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
@@ -1216,8 +1248,26 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	out($f, "#ifdef ZEND_WIN32\n");
 	// Suppress free_op1 warnings on Windows
-	out($f, "#ifdef ZEND_WIN32\n# pragma warning(once : 4101)\n#endif\n");
+	out($f, "# pragma warning(once : 4101)\n");
+	if (ZEND_VM_SPEC) {
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6235)\n");
+		// Suppress (<zero> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6237)\n");
+		// Suppress (<non-zero constant> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6239)\n");
+		// Suppress (<expression> && <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6240)\n");
+		// Suppress (<non-zero constant> || <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6285)\n");
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6286)\n");
+		// Suppress constant with constant comparsion warnings on windows
+		out($f, "# pragma warning(once : 6326)\n");
+	}
+	out($f, "#endif\n");
 	
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");

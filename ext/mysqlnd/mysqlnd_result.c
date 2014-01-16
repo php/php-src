@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -415,6 +415,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 				DBG_INF("UPSERT");
 				conn->last_query_type = QUERY_UPSERT;
 				conn->field_count = rset_header->field_count;
+				memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 				conn->upsert_status->warning_count = rset_header->warning_count;
 				conn->upsert_status->server_status = rset_header->server_status;
 				conn->upsert_status->affected_rows = rset_header->affected_rows;
@@ -702,6 +703,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -828,6 +830,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1175,6 +1178,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	/* Finally clean */
 	if (row_packet->eof) { 
+		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 		conn->upsert_status->warning_count = row_packet->warning_count;
 		conn->upsert_status->server_status = row_packet->server_status;
 	}

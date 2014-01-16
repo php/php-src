@@ -4,7 +4,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1011,7 +1011,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 
 PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
 {
-	char *encoded;
+	char *encoded = NULL;
 	int encoded_len;
 	smart_str val;
 	

@@ -94,6 +94,8 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
   AC_CHECK_LIB(pq, lo_create, AC_DEFINE(HAVE_PG_LO_CREATE,1,[PostgreSQL 8.1 or later]))
   AC_CHECK_LIB(pq, lo_import_with_oid, AC_DEFINE(HAVE_PG_LO_IMPORT_WITH_OID,1,[PostgreSQL 8.4 or later]))
+  AC_CHECK_LIB(pq, lo_truncate, AC_DEFINE(HAVE_PG_LO_TRUNCATE,1,[PostgreSQL 8.3 or later]))
+  AC_CHECK_LIB(pq, lo_truncate64, AC_DEFINE(HAVE_PG_LO64,1,[PostgreSQL 9.3 or later]))
   AC_CHECK_LIB(pq, PQescapeLiteral, AC_DEFINE(HAVE_PQESCAPELITERAL,1,[PostgreSQL 9.0 or later]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS

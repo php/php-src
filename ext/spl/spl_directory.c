@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -836,7 +836,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		int valid = 0;
 		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_valid, "valid", &retval);
 		if (retval) {
-			valid = zend_is_true(retval);
+			valid = zend_is_true(retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
@@ -1497,7 +1497,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 		if (!allow_links && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
 			php_stat(intern->file_name, intern->file_name_len, FS_IS_LINK, return_value TSRMLS_CC);
-			if (zend_is_true(return_value)) {
+			if (zend_is_true(return_value TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 		}
@@ -2290,7 +2290,7 @@ SPL_METHOD(SplFileObject, __construct)
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|sbr", 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|sbr!", 
 			&intern->file_name, &intern->file_name_len,
 			&intern->u.file.open_mode, &intern->u.file.open_mode_len, 
 			&use_include_path, &intern->u.file.zcontext) == FAILURE) {		
@@ -2938,8 +2938,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fgetss, 0, 0, 0)
 	ZEND_ARG_INFO(0, allowable_tags)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 1, 0, 1) 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fscanf, 0, 0, 1) 
 	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1) 

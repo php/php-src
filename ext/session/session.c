@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -286,7 +286,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-	void *hash_context;
+	void *hash_context = NULL;
 #endif
 	unsigned char *digest;
 	int digest_len;
@@ -492,17 +492,25 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	php_session_reset_id(TSRMLS_C);
-	PS(session_status) = php_session_active;
+	/* Set session ID for compatibility for older/3rd party save handlers */
+	if (!PS(use_strict_mode)) {
+		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
+	}
 
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
 	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
-		/* It's better to rase error for this, but disabled error for better compatibility */
+		/* It's better to raise error for this, but disabled error for better compatibility */
 		/*
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		*/
+	}
+	/* Set session ID if session read didn't activated session */
+	if (PS(use_strict_mode) && PS(session_status) != php_session_active) {
+		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 	if (val) {
 		PHP_MD5_CTX context;
@@ -513,9 +521,9 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		PHP_MD5Final(PS(session_data_hash), &context);
 
 		php_session_decode(val, vallen TSRMLS_CC);
-		efree(val);
+		str_efree(val);
 	} else {
-			memset(PS(session_data_hash),'\0', 16);
+		memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
@@ -682,11 +690,10 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	/* Numeric session.name won't work at all */
-	if (PG(modules_activated) &&
-		(!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
+	if ((!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
 		int err_type;
 
-		if (stage == ZEND_INI_STAGE_RUNTIME) {
+		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
 			err_type = E_WARNING;
 		} else {
 			err_type = E_ERROR;
@@ -849,6 +856,44 @@ PHP_INI_END()
 /* ***************
    * Serializers *
    *************** */
+PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
+{
+	smart_str buf = {0};
+	php_serialize_data_t var_hash;
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+	php_var_serialize(&buf, &PS(http_session_vars), &var_hash TSRMLS_CC);
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+	if (newlen) {
+		*newlen = buf.len;
+	}
+	smart_str_0(&buf);
+	*newstr = buf.c;
+	return SUCCESS;
+}
+/* }}} */
+
+PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
+{
+	const char *endptr = val + vallen;
+	zval *session_vars;
+	php_unserialize_data_t var_hash;
+
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	ALLOC_INIT_ZVAL(session_vars);
+	php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+	}
+	if (Z_TYPE_P(session_vars) == IS_NULL) {
+		array_init(session_vars);
+	}
+	PS(http_session_vars) = session_vars;
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
+	return SUCCESS;
+}
+/* }}} */
 
 #define PS_BIN_NR_OF_BITS 8
 #define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
@@ -1030,10 +1075,11 @@ break_outer_loop:
 }
 /* }}} */
 
-#define MAX_SERIALIZERS 10
-#define PREDEFINED_SERIALIZERS 2
+#define MAX_SERIALIZERS 32
+#define PREDEFINED_SERIALIZERS 3
 
 static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
+	PS_SERIALIZER_ENTRY(php_serialize),
 	PS_SERIALIZER_ENTRY(php),
 	PS_SERIALIZER_ENTRY(php_binary)
 };

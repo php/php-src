@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2013 The PHP Group                                |
+  | Copyright (c) 2005-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -685,11 +685,7 @@ PHP_METHOD(Phar, webPhar)
 		ZVAL_STRINGL(params, entry, entry_len, 1);
 		zp[0] = &params;
 
-#if PHP_VERSION_ID < 50300
-		if (FAILURE == zend_fcall_info_init(rewrite, &fci, &fcc TSRMLS_CC)) {
-#else
 		if (FAILURE == zend_fcall_info_init(rewrite, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
-#endif
 			zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar error: invalid rewrite callback");
 
 			if (free_pathinfo) {
@@ -701,11 +697,7 @@ PHP_METHOD(Phar, webPhar)
 
 		fci.param_count = 1;
 		fci.params = zp;
-#if PHP_VERSION_ID < 50300
-		++(params->refcount);
-#else
 		Z_ADDREF_P(params);
-#endif
 		fci.retval_ptr_ptr = &retval_ptr;
 
 		if (FAILURE == zend_call_function(&fci, &fcc TSRMLS_CC)) {
@@ -729,11 +721,6 @@ PHP_METHOD(Phar, webPhar)
 		}
 
 		switch (Z_TYPE_P(retval_ptr)) {
-#if PHP_VERSION_ID >= 60000
-			case IS_UNICODE:
-				zval_unicode_to_string(retval_ptr TSRMLS_CC);
-				/* break intentionally omitted */
-#endif
 			case IS_STRING:
 				efree(entry);
 
@@ -1155,11 +1142,7 @@ PHP_METHOD(Phar, __construct)
 #else
 	char *fname, *alias = NULL, *error, *arch = NULL, *entry = NULL, *save_fname;
 	int fname_len, alias_len = 0, arch_len, entry_len, is_data;
-#if PHP_VERSION_ID < 50300
-	long flags = 0;
-#else
 	long flags = SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS;
-#endif
 	long format = 0;
 	phar_archive_object *phar_obj;
 	phar_archive_data   *phar_data;
@@ -1459,11 +1442,6 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 	}
 
 	switch (Z_TYPE_PP(value)) {
-#if PHP_VERSION_ID >= 60000
-		case IS_UNICODE:
-			zval_unicode_to_string(*(value) TSRMLS_CC);
-			/* break intentionally omitted */
-#endif
 		case IS_STRING:
 			break;
 		case IS_RESOURCE:
@@ -1514,13 +1492,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 
 				switch (intern->type) {
 					case SPL_FS_DIR:
-#if PHP_VERSION_ID >= 60000
-						test = spl_filesystem_object_get_path(intern, NULL, NULL TSRMLS_CC).s;
-#elif PHP_VERSION_ID >= 50300
 						test = spl_filesystem_object_get_path(intern, NULL TSRMLS_CC);
-#else
-						test = intern->path;
-#endif
 						fname_len = spprintf(&fname, 0, "%s%c%s", test, DEFAULT_SLASH, intern->u.dir.entry.d_name);
 						php_stat(fname, fname_len, FS_IS_DIR, &dummy TSRMLS_CC);
 
@@ -1545,25 +1517,7 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 						goto phar_spl_fileinfo;
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
-#if PHP_VERSION_ID >= 60000
-						if (intern->file_name_type == IS_UNICODE) {
-							zval zv;
-
-							INIT_ZVAL(zv);
-							Z_UNIVAL(zv) = intern->file_name;
-							Z_UNILEN(zv) = intern->file_name_len;
-							Z_TYPE(zv) = IS_UNICODE;
-
-							zval_copy_ctor(&zv);
-							zval_unicode_to_string(&zv TSRMLS_CC);
-							fname = expand_filepath(Z_STRVAL(zv), NULL TSRMLS_CC);
-							ezfree(Z_UNIVAL(zv));
-						} else {
-							fname = expand_filepath(intern->file_name.s, NULL TSRMLS_CC);
-						}
-#else
 						fname = expand_filepath(intern->file_name, NULL TSRMLS_CC);
-#endif
 						if (!fname) {
 							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Could not resolve file path");
 							return ZEND_HASH_APPLY_STOP;
@@ -1753,7 +1707,7 @@ after_open_fp:
 		data->internal_file->fp_type = PHAR_UFP;
 		data->internal_file->offset_abs = data->internal_file->offset = php_stream_tell(p_obj->fp);
 		data->fp = NULL;
-		phar_stream_copy_to_stream(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
+		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
 	}
@@ -1816,11 +1770,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	INIT_PZVAL(&arg);
 	ZVAL_STRINGL(&arg, dir, dir_len, 0);
 	INIT_PZVAL(&arg2);
-#if PHP_VERSION_ID < 50300
-	ZVAL_LONG(&arg2, 0);
-#else
 	ZVAL_LONG(&arg2, SPL_FILE_DIR_SKIPDOTS|SPL_FILE_DIR_UNIXPATHS);
-#endif
 
 	zend_call_method_with_2_params(&iter, spl_ce_RecursiveDirectoryIterator, 
 			&spl_ce_RecursiveDirectoryIterator->constructor, "__construct", NULL, &arg, &arg2);
@@ -2047,7 +1997,7 @@ static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp TSRMLS
 		link = entry;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC,
 			"Cannot convert phar archive \"%s\", unable to copy entry \"%s\" contents", entry->phar->fname, entry->filename);
 		return FAILURE;
@@ -2313,11 +2263,7 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 		ALLOC_ZVAL(phar->metadata);
 		*phar->metadata = *t;
 		zval_copy_ctor(phar->metadata);
-#if PHP_VERSION_ID < 50300
-		phar->metadata->refcount = 1;
-#else
 		Z_SET_REFCOUNT_P(phar->metadata, 1);
-#endif
 
 		phar->metadata_len = 0;
 	}
@@ -2365,11 +2311,7 @@ no_copy:
 			ALLOC_ZVAL(newentry.metadata);
 			*newentry.metadata = *t;
 			zval_copy_ctor(newentry.metadata);
-#if PHP_VERSION_ID < 50300
-			newentry.metadata->refcount = 1;
-#else
 			Z_SET_REFCOUNT_P(newentry.metadata, 1);
-#endif
 
 			newentry.metadata_str.c = NULL;
 			newentry.metadata_str.len = 0;
@@ -3552,11 +3494,7 @@ PHP_METHOD(Phar, copy)
 		ALLOC_ZVAL(newentry.metadata);
 		*newentry.metadata = *t;
 		zval_copy_ctor(newentry.metadata);
-#if PHP_VERSION_ID < 50300
-		newentry.metadata->refcount = 1;
-#else
 		Z_SET_REFCOUNT_P(newentry.metadata, 1);
-#endif
 
 		newentry.metadata_str.c = NULL;
 		newentry.metadata_str.len = 0;
@@ -3713,7 +3651,7 @@ static void phar_add_file(phar_archive_data **pphar, char *filename, int filenam
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "Entry %s could not be written to", filename);
 					return;
 				}
-				phar_stream_copy_to_stream(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
+				php_stream_copy_to_stream_ex(contents_file, data->fp, PHP_STREAM_COPY_ALL, &contents_len);
 			}
 
 			data->internal_file->compressed_filesize = data->internal_file->uncompressed_filesize = contents_len;
@@ -4286,7 +4224,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 		return FAILURE;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0 TSRMLS_CC), fp, entry->uncompressed_filesize, NULL)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", copying contents failed", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
@@ -4371,11 +4309,6 @@ PHP_METHOD(Phar, extractTo)
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_NULL:
 				goto all_files;
-#if PHP_VERSION_ID >= 60000
-			case IS_UNICODE:
-				zval_unicode_to_string(zval_files TSRMLS_CC);
-				/* break intentionally omitted */
-#endif
 			case IS_STRING:
 				filename = Z_STRVAL_P(zval_files);
 				filename_len = Z_STRLEN_P(zval_files);
@@ -4389,11 +4322,6 @@ PHP_METHOD(Phar, extractTo)
 					zval **zval_file;
 					if (zend_hash_index_find(Z_ARRVAL_P(zval_files), i, (void **) &zval_file) == SUCCESS) {
 						switch (Z_TYPE_PP(zval_file)) {
-#if PHP_VERSION_ID >= 60000
-							case IS_UNICODE:
-								zval_unicode_to_string(*(zval_file) TSRMLS_CC);
-								/* break intentionally omitted */
-#endif
 							case IS_STRING:
 								break;
 							default:
@@ -5414,11 +5342,7 @@ zend_function_entry phar_exception_methods[] = {
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
-#if PHP_VERSION_ID < 50200
-# define phar_exception_get_default() zend_exception_get_default()
-#else
-# define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
-#endif
+#define phar_exception_get_default() zend_exception_get_default(TSRMLS_C)
 
 void phar_object_init(TSRMLS_D) /* {{{ */
 {

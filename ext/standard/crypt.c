@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -272,6 +272,8 @@ PHP_FUNCTION(crypt)
 
 	if (salt_in) {
 		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash.");
 	}
 
 	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */

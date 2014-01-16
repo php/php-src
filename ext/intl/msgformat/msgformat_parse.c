@@ -93,7 +93,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	int         spattern_len = 0;
 	char       *pattern = NULL;
 	int         pattern_len = 0;
-	char       *slocale = NULL;
+	const char *slocale = NULL;
 	int         slocale_len = 0;
 	char       *source = NULL;
 	int         src_len = 0;

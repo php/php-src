@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,8 +91,6 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_globals_ctor(&sapi_globals);
 #endif
 
-	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
-
 #ifdef PHP_WIN32
 	tsrm_win32_startup();
 #endif
@@ -109,8 +107,6 @@ SAPI_API void sapi_shutdown(void)
 #endif
 
 	reentrancy_shutdown();
-
-	virtual_cwd_shutdown();
 
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();
@@ -137,6 +133,7 @@ PHP_FUNCTION(header_register_callback)
 		efree(callback_name);
 		RETURN_FALSE;
 	}
+
 	efree(callback_name);
 
 	if (SG(callback_func)) {
@@ -144,10 +141,10 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	Z_ADDREF_P(callback_func);
-
 	SG(callback_func) = callback_func;
-	
+
+	Z_ADDREF_P(SG(callback_func));
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -156,34 +153,36 @@ static void sapi_run_header_callback(TSRMLS_D)
 {
 	int   error;
 	zend_fcall_info fci;
+	char *callback_name = NULL;
+	char *callback_error = NULL;
 	zval *retval_ptr = NULL;
-
-	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
-	fci.object_ptr = NULL;
-	fci.function_name = SG(callback_func);
-	fci.retval_ptr_ptr = &retval_ptr;
-	fci.param_count = 0;
-	fci.params = NULL;
-	fci.no_separation = 0;
-	fci.symbol_table = NULL;
-
-	error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
-	if (error == FAILURE) {
+	
+	if (zend_fcall_info_init(SG(callback_func), 0, &fci, &SG(fci_cache), &callback_name, &callback_error TSRMLS_CC) == SUCCESS) {
+		fci.retval_ptr_ptr = &retval_ptr;
+		
+		error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
+		if (error == FAILURE) {
+			goto callback_failed;
+		} else if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
+	} else {
+callback_failed:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
-	} else if (retval_ptr) {
-		zval_ptr_dtor(&retval_ptr);
 	}
+	
+	if (callback_name) {
+		efree(callback_name);
+	}
+	if (callback_error) {
+		efree(callback_error);
+	}	
 }
 
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
 	if (SG(request_info).post_entry && SG(request_info).content_type_dup) {
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg TSRMLS_CC);
-		if (SG(request_info).post_data) {
-			efree(SG(request_info).post_data);
-			SG(request_info).post_data = NULL;
-		}
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
 	}
@@ -249,39 +248,63 @@ static void sapi_read_post_data(TSRMLS_D)
 	}
 }
 
+SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
+{
+	int read_bytes;
+
+	if (!sapi_module.read_post) {
+		return -1;
+	}
+
+	read_bytes = sapi_module.read_post(buffer, buflen TSRMLS_CC);
+
+	if (read_bytes > 0) {
+		/* gogo */
+		SG(read_post_bytes) += read_bytes;
+	}
+	if (read_bytes < buflen) {
+		/* done */
+		SG(post_read) = 1;
+	}
+
+	return read_bytes;
+}
 
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
-	int read_bytes;
-	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
-
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
-	SG(request_info).post_data = emalloc(allocated_bytes);
 
-	for (;;) {
-		read_bytes = sapi_module.read_post(SG(request_info).post_data+SG(read_post_bytes), SAPI_POST_BLOCK_SIZE TSRMLS_CC);
-		if (read_bytes<=0) {
-			break;
+
+	SG(request_info).request_body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
+
+	if (sapi_module.read_post) {
+		int read_bytes;
+
+		for (;;) {
+			char buffer[SAPI_POST_BLOCK_SIZE];
+
+			read_bytes = sapi_read_post_block(buffer, SAPI_POST_BLOCK_SIZE TSRMLS_CC);
+
+			if (read_bytes > 0) {
+				php_stream_write(SG(request_info).request_body, buffer, read_bytes);
+			}
+
+			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
+				break;
+			}
+
+			if (read_bytes < SAPI_POST_BLOCK_SIZE) {
+				/* done */
+				break;
+			}
 		}
-		SG(read_post_bytes) += read_bytes;
-		if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
-			break;
-		}
-		if (read_bytes < SAPI_POST_BLOCK_SIZE) {
-			break;
-		}
-		if (SG(read_post_bytes)+SAPI_POST_BLOCK_SIZE >= allocated_bytes) {
-			allocated_bytes = SG(read_post_bytes)+SAPI_POST_BLOCK_SIZE+1;
-			SG(request_info).post_data = erealloc(SG(request_info).post_data, allocated_bytes);
-		}
+		php_stream_rewind(SG(request_info).request_body);
 	}
-	SG(request_info).post_data[SG(read_post_bytes)] = 0;  /* terminating NULL */
-	SG(request_info).post_data_length = SG(read_post_bytes);
 }
 
 
@@ -387,8 +410,7 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(read_post_bytes) = 0;
-	SG(request_info).post_data = NULL;
-	SG(request_info).raw_post_data = NULL;
+	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
@@ -433,8 +455,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(callback_run) = 0;
 	SG(callback_func) = NULL;
 	SG(read_post_bytes) = 0;
-	SG(request_info).post_data = NULL;
-	SG(request_info).raw_post_data = NULL;
+	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
@@ -452,20 +473,13 @@ SAPI_API void sapi_activate(TSRMLS_D)
 
 	/* Handle request method */
 	if (SG(server_context)) {
-		if (PG(enable_post_data_reading) && SG(request_info).request_method) {
-			if (SG(request_info).content_type && !strcmp(SG(request_info).request_method, "POST")) {
-				/* HTTP POST may contain form data to be processed into variables
-				 * depending on given content type */
-				sapi_read_post_data(TSRMLS_C);
-			} else {
-				/* Any other method with content payload will fill $HTTP_RAW_POST_DATA 
-				 * if it is enabled by always_populate_raw_post_data. 
-				 * It's up to the webserver to decide whether to allow a method or not. */
-				SG(request_info).content_type_dup = NULL;
-				if (sapi_module.default_post_reader) {
-					sapi_module.default_post_reader(TSRMLS_C);
-				}
-			}
+		if (PG(enable_post_data_reading)
+		&& 	SG(request_info).content_type
+		&&  SG(request_info).request_method
+		&& !strcmp(SG(request_info).request_method, "POST")) {
+			/* HTTP POST may contain form data to be processed into variables
+			 * depending on given content type */
+			sapi_read_post_data(TSRMLS_C);
 		} else {
 			SG(request_info).content_type_dup = NULL;
 		}
@@ -494,22 +508,19 @@ static void sapi_send_headers_free(TSRMLS_D)
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
-	if (SG(request_info).post_data) {
-		efree(SG(request_info).post_data);
-	}  else 	if (SG(server_context)) {
-		if(sapi_module.read_post) { 
+	if (SG(request_info).request_body) {
+		SG(request_info).request_body = NULL;
+	} else if (SG(server_context)) {
+		if (!SG(post_read)) {
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
 			int read_bytes;
 
-			while((read_bytes = sapi_module.read_post(dummy, sizeof(dummy)-1 TSRMLS_CC)) > 0) {
-				SG(read_post_bytes) += read_bytes;
-			}
+			do {
+				read_bytes = sapi_read_post_block(dummy, SAPI_POST_BLOCK_SIZE TSRMLS_CC);
+			} while (SAPI_POST_BLOCK_SIZE == read_bytes);
 		}
 	}
-	if (SG(request_info).raw_post_data) {
-		efree(SG(request_info).raw_post_data);
-	} 
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
 	}
@@ -988,7 +999,7 @@ SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, ch
 SAPI_API int sapi_flush(TSRMLS_D)
 {
 	if (sapi_module.flush) {
-		sapi_module.flush(SG(server_context));
+		sapi_module.flush(SG(server_context) TSRMLS_CC);
 		return SUCCESS;
 	} else {
 		return FAILURE;

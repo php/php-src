@@ -134,7 +134,7 @@ int
 mbfl_filt_conv_jis2004_wchar(int c, mbfl_convert_filter *filter)
 {
 	int k;
-	int c1, c2, s, s1, s2, w = 0, w1;
+	int c1, c2, s, s1 = 0, s2 = 0, w = 0, w1;
 
 retry:
 	switch (filter->status & 0xf) {

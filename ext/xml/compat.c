@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,7 +39,7 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 	if (URI) {
 			/* Use libxml functions otherwise its memory deallocation is screwed up */
 			*qualified = xmlStrdup(URI);
-			*qualified = xmlStrncat(*qualified, parser->_ns_seperator, 1);
+			*qualified = xmlStrncat(*qualified, parser->_ns_separator, 1);
 			*qualified = xmlStrncat(*qualified, name, xmlStrlen(name));
 	} else {
 		*qualified = xmlStrdup(name);
@@ -469,7 +469,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser = (XML_Parser) emalloc(sizeof(struct _XML_Parser));
 	memset(parser, 0, sizeof(struct _XML_Parser));
 	parser->use_namespace = 0;
-	parser->_ns_seperator = NULL;
+	parser->_ns_separator = NULL;
 
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
@@ -491,7 +491,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	if (sep != NULL) {
 		parser->use_namespace = 1;
 		parser->parser->sax2 = 1;
-		parser->_ns_seperator = xmlStrdup(sep);
+		parser->_ns_separator = xmlStrdup(sep);
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt 
 		so must be set in the handlers */
@@ -619,109 +619,109 @@ XML_GetErrorCode(XML_Parser parser)
 }
 
 static const XML_Char *const error_mapping[] = {
-	"No error",
-	"No memory",
-	"Invalid document start",
-	"Empty document",
-	"Not well-formed (invalid token)",
-	"Invalid document end",
-	"Invalid hexadecimal character reference",
-	"Invalid decimal character reference",
-	"Invalid character reference",
-	"Invalid character",
-	"XML_ERR_CHARREF_AT_EOF",
-	"XML_ERR_CHARREF_IN_PROLOG",
-	"XML_ERR_CHARREF_IN_EPILOG",
-	"XML_ERR_CHARREF_IN_DTD",
-	"XML_ERR_ENTITYREF_AT_EOF",
-	"XML_ERR_ENTITYREF_IN_PROLOG",
-	"XML_ERR_ENTITYREF_IN_EPILOG",
-	"XML_ERR_ENTITYREF_IN_DTD",
-	"PEReference at end of document",
-	"PEReference in prolog",
-	"PEReference in epilog",
-	"PEReference: forbidden within markup decl in internal subset",
-	"XML_ERR_ENTITYREF_NO_NAME",
-	"EntityRef: expecting ';'",
-	"PEReference: no name",
-	"PEReference: expecting ';'",
-	"Undeclared entity error",
-	"Undeclared entity warning",
-	"Unparsed Entity",
-	"XML_ERR_ENTITY_IS_EXTERNAL",
-	"XML_ERR_ENTITY_IS_PARAMETER",
-	"Unknown encoding",
-	"Unsupported encoding",
-	"String not started expecting ' or \"",
-	"String not closed expecting \" or '",
-	"Namespace declaration error",
-	"EntityValue: \" or ' expected",
-	"EntityValue: \" or ' expected",
-	"< in attribute",
-	"Attribute not started",
-	"Attribute not finished",
-	"Attribute without value",
-	"Attribute redefined",
-	"SystemLiteral \" or ' expected",
-	"SystemLiteral \" or ' expected",
-	/* "XML_ERR_COMMENT_NOT_STARTED", <= eliminated on purpose */
-	"Comment not finished",
-	"Processing Instruction not started",
-	"Processing Instruction not finished",
-	"NOTATION: Name expected here",
-	"'>' required to close NOTATION declaration",
-	"'(' required to start ATTLIST enumeration",
-	"'(' required to start ATTLIST enumeration",
-	"MixedContentDecl : '|' or ')*' expected",
-	"XML_ERR_MIXED_NOT_FINISHED",
-	"ELEMENT in DTD not started",
-	"ELEMENT in DTD not finished",
-	"XML declaration not started",
-	"XML declaration not finished",
-	"XML_ERR_CONDSEC_NOT_STARTED",
-	"XML conditional section not closed",
-	"Content error in the external subset",
-	"DOCTYPE not finished",
-	"Sequence ']]>' not allowed in content",
-	"CDATA not finished",
-	"Reserved XML Name",
-	"Space required",
-	"XML_ERR_SEPARATOR_REQUIRED",
-	"NmToken expected in ATTLIST enumeration",
-	"XML_ERR_NAME_REQUIRED",
-	"MixedContentDecl : '#PCDATA' expected",
-	"SYSTEM or PUBLIC, the URI is missing",
-	"PUBLIC, the Public Identifier is missing",
-	"< required",
-	"> required",
-	"</ required",
-	"= required",
-	"Mismatched tag",
-	"Tag not finished",
-	"standalone accepts only 'yes' or 'no'",
-	"Invalid XML encoding name",
-	"Comment must not contain '--' (double-hyphen)",
-	"Invalid encoding",
-	"external parsed entities cannot be standalone",
-	"XML conditional section '[' expected",
-	"Entity value required",
-	"chunk is not well balanced",
-	"extra content at the end of well balanced chunk",
-    "XML_ERR_ENTITY_CHAR_ERROR",
-    "PEReferences forbidden in internal subset",
-    "Detected an entity reference loop",
-    "XML_ERR_ENTITY_BOUNDARY",
-    "Invalid URI",
-    "Fragment not allowed",
-    "XML_WAR_CATALOG_PI",
-    "XML_ERR_NO_DTD",
-    "conditional section INCLUDE or IGNORE keyword expected", /* 95 */
-    "Version in XML Declaration missing", /* 96 */
-    "XML_WAR_UNKNOWN_VERSION", /* 97 */
-    "XML_WAR_LANG_VALUE", /* 98 */
-    "XML_WAR_NS_URI", /* 99 */
-    "XML_WAR_NS_URI_RELATIVE", /* 100 */
-    "Missing encoding in text declaration" /* 101 */
+	(const XML_Char *)"No error",
+	(const XML_Char *)"No memory",
+	(const XML_Char *)"Invalid document start",
+	(const XML_Char *)"Empty document",
+	(const XML_Char *)"Not well-formed (invalid token)",
+	(const XML_Char *)"Invalid document end",
+	(const XML_Char *)"Invalid hexadecimal character reference",
+	(const XML_Char *)"Invalid decimal character reference",
+	(const XML_Char *)"Invalid character reference",
+	(const XML_Char *)"Invalid character",
+	(const XML_Char *)"XML_ERR_CHARREF_AT_EOF",
+	(const XML_Char *)"XML_ERR_CHARREF_IN_PROLOG",
+	(const XML_Char *)"XML_ERR_CHARREF_IN_EPILOG",
+	(const XML_Char *)"XML_ERR_CHARREF_IN_DTD",
+	(const XML_Char *)"XML_ERR_ENTITYREF_AT_EOF",
+	(const XML_Char *)"XML_ERR_ENTITYREF_IN_PROLOG",
+	(const XML_Char *)"XML_ERR_ENTITYREF_IN_EPILOG",
+	(const XML_Char *)"XML_ERR_ENTITYREF_IN_DTD",
+	(const XML_Char *)"PEReference at end of document",
+	(const XML_Char *)"PEReference in prolog",
+	(const XML_Char *)"PEReference in epilog",
+	(const XML_Char *)"PEReference: forbidden within markup decl in internal subset",
+	(const XML_Char *)"XML_ERR_ENTITYREF_NO_NAME",
+	(const XML_Char *)"EntityRef: expecting ';'",
+	(const XML_Char *)"PEReference: no name",
+	(const XML_Char *)"PEReference: expecting ';'",
+	(const XML_Char *)"Undeclared entity error",
+	(const XML_Char *)"Undeclared entity warning",
+	(const XML_Char *)"Unparsed Entity",
+	(const XML_Char *)"XML_ERR_ENTITY_IS_EXTERNAL",
+	(const XML_Char *)"XML_ERR_ENTITY_IS_PARAMETER",
+	(const XML_Char *)"Unknown encoding",
+	(const XML_Char *)"Unsupported encoding",
+	(const XML_Char *)"String not started expecting ' or \"",
+	(const XML_Char *)"String not closed expecting \" or '",
+	(const XML_Char *)"Namespace declaration error",
+	(const XML_Char *)"EntityValue: \" or ' expected",
+	(const XML_Char *)"EntityValue: \" or ' expected",
+	(const XML_Char *)"< in attribute",
+	(const XML_Char *)"Attribute not started",
+	(const XML_Char *)"Attribute not finished",
+	(const XML_Char *)"Attribute without value",
+	(const XML_Char *)"Attribute redefined",
+	(const XML_Char *)"SystemLiteral \" or ' expected",
+	(const XML_Char *)"SystemLiteral \" or ' expected",
+	/* (const XML_Char *)"XML_ERR_COMMENT_NOT_STARTED", <= eliminated on purpose */
+	(const XML_Char *)"Comment not finished",
+	(const XML_Char *)"Processing Instruction not started",
+	(const XML_Char *)"Processing Instruction not finished",
+	(const XML_Char *)"NOTATION: Name expected here",
+	(const XML_Char *)"'>' required to close NOTATION declaration",
+	(const XML_Char *)"'(' required to start ATTLIST enumeration",
+	(const XML_Char *)"'(' required to start ATTLIST enumeration",
+	(const XML_Char *)"MixedContentDecl : '|' or ')*' expected",
+	(const XML_Char *)"XML_ERR_MIXED_NOT_FINISHED",
+	(const XML_Char *)"ELEMENT in DTD not started",
+	(const XML_Char *)"ELEMENT in DTD not finished",
+	(const XML_Char *)"XML declaration not started",
+	(const XML_Char *)"XML declaration not finished",
+	(const XML_Char *)"XML_ERR_CONDSEC_NOT_STARTED",
+	(const XML_Char *)"XML conditional section not closed",
+	(const XML_Char *)"Content error in the external subset",
+	(const XML_Char *)"DOCTYPE not finished",
+	(const XML_Char *)"Sequence ']]>' not allowed in content",
+	(const XML_Char *)"CDATA not finished",
+	(const XML_Char *)"Reserved XML Name",
+	(const XML_Char *)"Space required",
+	(const XML_Char *)"XML_ERR_SEPARATOR_REQUIRED",
+	(const XML_Char *)"NmToken expected in ATTLIST enumeration",
+	(const XML_Char *)"XML_ERR_NAME_REQUIRED",
+	(const XML_Char *)"MixedContentDecl : '#PCDATA' expected",
+	(const XML_Char *)"SYSTEM or PUBLIC, the URI is missing",
+	(const XML_Char *)"PUBLIC, the Public Identifier is missing",
+	(const XML_Char *)"< required",
+	(const XML_Char *)"> required",
+	(const XML_Char *)"</ required",
+	(const XML_Char *)"= required",
+	(const XML_Char *)"Mismatched tag",
+	(const XML_Char *)"Tag not finished",
+	(const XML_Char *)"standalone accepts only 'yes' or 'no'",
+	(const XML_Char *)"Invalid XML encoding name",
+	(const XML_Char *)"Comment must not contain '--' (double-hyphen)",
+	(const XML_Char *)"Invalid encoding",
+	(const XML_Char *)"external parsed entities cannot be standalone",
+	(const XML_Char *)"XML conditional section '[' expected",
+	(const XML_Char *)"Entity value required",
+	(const XML_Char *)"chunk is not well balanced",
+	(const XML_Char *)"extra content at the end of well balanced chunk",
+	(const XML_Char *)"XML_ERR_ENTITY_CHAR_ERROR",
+	(const XML_Char *)"PEReferences forbidden in internal subset",
+	(const XML_Char *)"Detected an entity reference loop",
+	(const XML_Char *)"XML_ERR_ENTITY_BOUNDARY",
+	(const XML_Char *)"Invalid URI",
+	(const XML_Char *)"Fragment not allowed",
+	(const XML_Char *)"XML_WAR_CATALOG_PI",
+	(const XML_Char *)"XML_ERR_NO_DTD",
+	(const XML_Char *)"conditional section INCLUDE or IGNORE keyword expected", /* 95 */
+	(const XML_Char *)"Version in XML Declaration missing", /* 96 */
+	(const XML_Char *)"XML_WAR_UNKNOWN_VERSION", /* 97 */
+	(const XML_Char *)"XML_WAR_LANG_VALUE", /* 98 */
+	(const XML_Char *)"XML_WAR_NS_URI", /* 99 */
+	(const XML_Char *)"XML_WAR_NS_URI_RELATIVE", /* 100 */
+	(const XML_Char *)"Missing encoding in text declaration" /* 101 */
 };
 
 PHPAPI const XML_Char *
@@ -770,8 +770,8 @@ PHPAPI void
 XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
-		if (parser->_ns_seperator) {
-			xmlFree(parser->_ns_seperator);
+		if (parser->_ns_separator) {
+			xmlFree(parser->_ns_separator);
 		}
 	}
 	if (parser->parser->myDoc) {

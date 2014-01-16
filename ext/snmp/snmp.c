@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -514,7 +514,7 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
 	va_list args;
-	php_snmp_object *snmp_object;
+	php_snmp_object *snmp_object = NULL;
 
 	if (object) {
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -533,7 +533,7 @@ static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type,
 	}
 
 	if (object && (snmp_object->exceptions_enabled & type)) {
-		zend_throw_exception_ex(php_snmp_exception_ce, type, snmp_object->snmp_errstr TSRMLS_CC);
+		zend_throw_exception_ex(php_snmp_exception_ce, type TSRMLS_CC, snmp_object->snmp_errstr);
 	} else {
 		va_start(args, format);
 		php_verror(docref, "", E_WARNING, format, args TSRMLS_CC);
@@ -896,6 +896,12 @@ retry:
 					keepwalking = 1;
 				}
 			} else {
+				if (st & SNMP_CMD_WALK && response->errstat == SNMP_ERR_TOOBIG && objid_query->max_repetitions > 1) { /* Answer will not fit into single packet */
+					objid_query->max_repetitions /= 2;
+					snmp_free_pdu(response);
+					keepwalking = 1;
+					continue;
+				}
 				if (!(st & SNMP_CMD_WALK) || response->errstat != SNMP_ERR_NOSUCHNAME || Z_TYPE_P(return_value) == IS_BOOL) {
 					for (	count=1, vars = response->variables;
 						vars && count != response->errindex;

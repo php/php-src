@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -170,10 +170,14 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
 	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,
 	STREAM_CRYPTO_METHOD_TLS_CLIENT,
+	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
+	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
 	STREAM_CRYPTO_METHOD_SSLv2_SERVER,
 	STREAM_CRYPTO_METHOD_SSLv3_SERVER,
 	STREAM_CRYPTO_METHOD_SSLv23_SERVER,
-	STREAM_CRYPTO_METHOD_TLS_SERVER
+	STREAM_CRYPTO_METHOD_TLS_SERVER,
+	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,
+	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
 } php_stream_xport_crypt_method_t;
 
 BEGIN_EXTERN_C()

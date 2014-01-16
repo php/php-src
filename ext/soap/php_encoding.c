@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1189,7 +1189,7 @@ static xmlNodePtr to_xml_bool(encodeTypePtr type, zval *data, int style, xmlNode
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	if (zend_is_true(data)) {
+	if (zend_is_true(data TSRMLS_CC)) {
 		xmlNodeSetContent(ret, BAD_CAST("true"));
 	} else {
 		xmlNodeSetContent(ret, BAD_CAST("false"));

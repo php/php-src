@@ -82,7 +82,7 @@ do {
 		dba_close($dba_reader);
 	}
 	if (($db_file = dba_popen($db_filename, 'r'.($lock_flag==''?'':'-'), $handler))!==FALSE) {
-		if ($handler == 'dbm') {
+		if ($handler == 'dbm' || $handler == "tcadb") {
 			dba_close($db_file);
 		}
 	}

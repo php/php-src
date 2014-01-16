@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2013 The PHP Group                                |
+  | Copyright (c) 2005-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -783,7 +783,7 @@ static int phar_tar_writeheaders(void *pDest, void *argument TSRMLS_DC) /* {{{ *
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize, NULL)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
 			}
@@ -1288,7 +1288,7 @@ nostub:
 
 			if (!filter) {
 				/* copy contents uncompressed rather than lose them */
-				phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+				php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 				php_stream_close(newfile);
 				if (error) {
 					spprintf(error, 4096, "unable to compress all contents of phar \"%s\" using zlib, PHP versions older than 5.2.6 have a buggy zlib", phar->fname);
@@ -1297,7 +1297,7 @@ nostub:
 			}
 
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
@@ -1308,14 +1308,14 @@ nostub:
 
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else {
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			/* we could also reopen the file in "rb" mode but there is no need for that */
 			php_stream_close(newfile);
 		}

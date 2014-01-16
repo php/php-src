@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -117,7 +117,7 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data TSRMLS_CC)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result) TSRMLS_CC)
 
-PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC);
+PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num TSRMLS_DC);
 
 #define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data TSRMLS_CC)
 #define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data TSRMLS_CC)

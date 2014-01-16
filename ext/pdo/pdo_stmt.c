@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1146,7 +1146,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							return 0;
-						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
+						} else if (ce->unserialize(&return_value, ce, (unsigned char *)(Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : ""), Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							zval_dtor(return_value);
@@ -1876,7 +1876,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
 	long mode = PDO_FETCH_BOTH;
-	int flags, argc = ZEND_NUM_ARGS() - skip;
+	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
 	zval ***args;
 	zend_class_entry **cep;
 	int retval;

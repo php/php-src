@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -72,11 +72,11 @@ enum pdo_param_type {
 	/* get_col ptr should point to a zval*
 	   and the driver is responsible for adding correct type information to get_column_meta()
 	 */
-	PDO_PARAM_ZVAL
-};
+	PDO_PARAM_ZVAL,
 
-/* magic flag to denote a parameter as being input/output */
-#define	PDO_PARAM_INPUT_OUTPUT 	0x80000000	
+	/* magic flag to denote a parameter as being input/output */
+	PDO_PARAM_INPUT_OUTPUT = 0x80000000
+};
 
 #define PDO_PARAM_FLAGS			0xFFFF0000
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -222,6 +222,52 @@ static void zend_destroy_property_info(zend_property_info *property_info)
 	}
 }
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
+{
+	int i;
+	zend_ast *node;
+
+	if (ast->kind == ZEND_CONST) {
+		node = emalloc(sizeof(zend_ast) + sizeof(zval));
+		node->kind = ZEND_CONST;
+		node->children = 0;
+		node->u.val = (zval*)(node + 1);
+		*node->u.val = *ast->u.val;
+		if ((Z_TYPE_P(ast->u.val) & IS_CONSTANT_TYPE_MASK) >= IS_ARRAY) {
+			switch ((Z_TYPE_P(ast->u.val) & IS_CONSTANT_TYPE_MASK)) {
+				case IS_STRING:
+			    case IS_CONSTANT:
+					Z_STRVAL_P(node->u.val) = (char *) interned_estrndup(Z_STRVAL_P(ast->u.val), Z_STRLEN_P(ast->u.val));
+					break;
+				case IS_ARRAY:
+			    case IS_CONSTANT_ARRAY:
+					if (ast->u.val->value.ht && ast->u.val->value.ht != &EG(symbol_table)) {
+						ALLOC_HASHTABLE(node->u.val->value.ht);
+						zend_hash_clone_zval(node->u.val->value.ht, ast->u.val->value.ht, 0);
+					}
+					break;
+			    case IS_CONSTANT_AST:
+			    	Z_AST_P(node->u.val) = zend_ast_clone(Z_AST_P(ast->u.val) TSRMLS_CC);
+			    	break;
+			}
+		}
+	} else {
+		node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		node->kind = ast->kind;
+		node->children = ast->children;
+		for (i = 0; i < ast->children; i++) {
+			if ((&ast->u.child)[i]) {
+				(&node->u.child)[i] = zend_ast_clone((&ast->u.child)[i] TSRMLS_CC);
+			} else {
+				(&node->u.child)[i] = NULL;
+			}
+		}
+	}
+	return node;
+}
+#endif
+
 static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 {
 	zval *ret, **ret_ptr = NULL;
@@ -259,6 +305,11 @@ static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 					zend_hash_clone_zval(ret->value.ht, src->value.ht, 0);
 				}
 				break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		    case IS_CONSTANT_AST:
+		    	Z_AST_P(ret) = zend_ast_clone(Z_AST_P(ret) TSRMLS_CC);
+		    	break;
+#endif
 		}
 	}
 	return ret;
@@ -376,6 +427,11 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 						zend_hash_clone_zval(ppz->value.ht, ((zval*)p->pDataPtr)->value.ht, 0);
 					}
 					break;
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+			    case IS_CONSTANT_AST:
+			    	Z_AST_P(ppz) = zend_ast_clone(Z_AST_P(ppz) TSRMLS_CC);
+			    	break;
+#endif
 			}
 		}
 
@@ -478,7 +534,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 			if (accel_xlat_get(new_entry->scope, new_ce) == SUCCESS) {
 				new_entry->scope = *new_ce;
 			} else {
-				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s. Please call Zend Support", ce->name, new_entry->function_name);
+				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s", ce->name, new_entry->function_name);
 			}
 		}
 
@@ -487,7 +543,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 			if (accel_xlat_get(new_entry->prototype, new_prototype) == SUCCESS) {
 				new_entry->prototype = *new_prototype;
 			} else {
-				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s. Please call Zend Support", ce->name, new_entry->function_name);
+				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s", ce->name, new_entry->function_name);
 			}
 		}
 
@@ -589,7 +645,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		} else if (accel_xlat_get(prop_info->ce, new_ce) == SUCCESS) {
 			prop_info->ce = *new_ce;
 		} else {
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s. Please call Zend Support", ce->name, prop_info->name);
+			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s", ce->name, prop_info->name);
 		}
 
 		p = p->pListNext;
@@ -621,7 +677,7 @@ static int zend_prepare_function_for_execution(zend_op_array *op_array)
 		if (accel_xlat_get(ce->handler, new_func) == SUCCESS) { \
 			ce->handler = *new_func; \
 		} else { \
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s. Please call Zend Support", ce->name); \
+			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s", ce->name); \
 		} \
 	} \
 }
@@ -710,7 +766,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		if (accel_xlat_get(ce->parent, new_ce) == SUCCESS) {
 			ce->parent = *new_ce;
 		} else {
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s. Please call Zend Support", ce->name);
+			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s", ce->name);
 		}
 	}
 
@@ -835,7 +891,19 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 				}
 			} else {
 				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
-					/* Mangled key, ignore and wait for runtime */
+					/* Mangled key */
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+					if (((zend_function*)p->pData)->common.fn_flags & ZEND_ACC_CLOSURE) {
+						/* update closure */
+						if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+							if (pCopyConstructor) {
+								pCopyConstructor(t);
+							}
+						}
+					} else {
+						/* ignore and wait for runtime */
+					} 
+#endif
 				} else if (!ignore_dups && zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS) {
 					*fail_data = p->pData;
 					*conflict_data = t;

@@ -600,7 +600,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 {
 	zval **data;
 	zval *subitem, *subentries;
-	int i, j = -1, last = -1, obj_cnt = 0;
+	int i;
 	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
@@ -616,13 +616,12 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		unsigned char *to_add;
-		int to_add_len;
+		int to_add_len = 0;
 
 
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
 		nid = OBJ_obj2nid(obj);
-		obj_cnt = 0;
 
 		if (shortname) {
 			sname = (char *) OBJ_nid2sn(nid);
@@ -637,9 +636,9 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			to_add = ASN1_STRING_data(str);
 			to_add_len = ASN1_STRING_length(str);
 		}
-		
+
 		if (to_add_len != -1) {
-			if (zend_hash_find(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, (void**)&data) == SUCCESS) {	
+			if (zend_hash_find(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, (void**)&data) == SUCCESS) {
 				if (Z_TYPE_PP(data) == IS_ARRAY) {
 					subentries = *data;
 					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);

@@ -10,6 +10,7 @@ display_errors=false
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 	if (!function_exists("file_get_contents"))
 		die ("skip file_get_contents function is not found");
+	if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,6 +57,11 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 					obj->dtor(obj->object, i TSRMLS_CC);
 					obj = &objects->object_buckets[i].bucket.obj;
 					obj->refcount--;
+
+					if (obj->refcount == 0) {
+						/* in case gc_collect_cycle is triggered before free_storage */
+						GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
+					}
 				}
 			}
 		}

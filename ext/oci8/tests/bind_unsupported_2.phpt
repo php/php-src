@@ -3,10 +3,6 @@ Bind with various unsupported 10g+ bind types
 --SKIPIF--
 <?php 
 if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (isset($matches[0]) && $matches[0] < 10) {
-	die ("skip expected output only valid for Oracle 10g+ clients");
-}
 ?>
 --FILE--
 <?php

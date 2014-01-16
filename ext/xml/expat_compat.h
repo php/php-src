@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,9 @@
 #include <libxml/tree.h>
 #include <libxml/hash.h>
 
+/* For compatibility with the misspelled version. */
+#define _ns_seperator _ns_separator
+
 typedef xmlChar XML_Char;
 
 typedef void (*XML_StartElementHandler)(void *, const XML_Char *, const XML_Char **);
@@ -61,7 +64,7 @@ typedef struct _XML_Memory_Handling_Suite {
 typedef struct _XML_Parser {
 	int use_namespace;
 
-	xmlChar *_ns_seperator;
+	xmlChar *_ns_separator;
 
 	void *user;
 	xmlParserCtxtPtr parser;

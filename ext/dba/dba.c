@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -226,12 +226,17 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		*key_free = *key_str;
 		return len;
 	} else {
-		*key_free = NULL;
+		zval tmp = *key;
+		int len;
 
-		convert_to_string(key);
-		*key_str = Z_STRVAL_P(key);
+		zval_copy_ctor(&tmp);
+		convert_to_string(&tmp);
 
-		return Z_STRLEN_P(key);
+		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		len = Z_STRLEN(tmp);
+
+		zval_dtor(&tmp);
+		return len;
 	}
 }
 /* }}} */
@@ -294,6 +299,14 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 #define DBA_WRITE_CHECK \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		RETURN_FALSE; \
+	}
+
+/* the same check, but with a call to DBA_ID_DONE before returning */
+#define DBA_WRITE_CHECK_WITH_ID \
+	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		DBA_ID_DONE; \
 		RETURN_FALSE; \
 	}
 
@@ -557,7 +570,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	DBA_FETCH_RESOURCE(info, &id);
 
-	DBA_WRITE_CHECK;
+	DBA_WRITE_CHECK_WITH_ID;
 
 	if (info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS) {
 		DBA_ID_DONE;
@@ -612,7 +625,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
-	char *opened_path, *lock_name;
+	char *opened_path = NULL;
+	char *lock_name;
 	
 	if(ac < 2) {
 		WRONG_PARAM_COUNT;
@@ -835,8 +849,10 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (!persistent) {
 					info->lock.name = opened_path;
 				} else {
-					info->lock.name = pestrdup(opened_path, persistent);
-					efree(opened_path);
+					if (opened_path) {
+						info->lock.name = pestrdup(opened_path, persistent);
+						efree(opened_path);
+					}
 				}
 			}
 		}
@@ -1110,7 +1126,7 @@ PHP_FUNCTION(dba_delete)
 {
 	DBA_ID_GET2;
 	
-	DBA_WRITE_CHECK;
+	DBA_WRITE_CHECK_WITH_ID;
 	
 	if(info->hnd->delete(info, key_str, key_len TSRMLS_CC) == SUCCESS)
 	{

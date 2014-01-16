@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -80,6 +80,9 @@
 # endif
 # include <direct.h>
 #else
+# ifndef MAXPATHLEN
+#  define MAXPATHLEN     4096
+# endif
 # include <sys/param.h>
 #endif
 
@@ -89,6 +92,7 @@
 #define PHP_5_3_X_API_NO		220090626
 #define PHP_5_4_X_API_NO		220100525
 #define PHP_5_5_X_API_NO		220121212
+#define PHP_5_6_X_API_NO		220131106
 
 /*** file locking ***/
 #ifndef ZEND_WIN32
@@ -100,7 +104,7 @@ extern int lock_file;
 # elif defined(__svr4__)
 #  define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len}
-# elif defined(__linux__) || defined(__hpux)
+# elif defined(__linux__) || defined(__hpux) || defined(__GNU__)
 #  define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len, 0}
 # elif defined(_AIX)
@@ -111,6 +115,12 @@ extern int lock_file;
 #   define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len}
 #  endif
+# elif defined(HAVE_FLOCK_BSD)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {start, len, -1, type, whence}
+# elif defined(HAVE_FLOCK_LINUX)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {type, whence, start, len}
 # else
 #  error "Don't know how to define struct flock"
 # endif
@@ -220,6 +230,7 @@ typedef struct _zend_accel_directives {
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	unsigned long  revalidate_freq;
+	unsigned long  file_update_protection;
 	char          *error_log;
 #ifdef ZEND_WIN32
 	char          *mmap_base;
@@ -320,12 +331,14 @@ extern char *zps_api_failure_reason;
 void accel_shutdown(TSRMLS_D);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
+int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC);
 int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC);
 int  zend_accel_script_optimize(zend_persistent_script *persistent_script TSRMLS_DC);
 int  accelerator_shm_read_lock(TSRMLS_D);
 void accelerator_shm_read_unlock(TSRMLS_D);
 
 char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len TSRMLS_DC);
+zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
 # define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -681,8 +681,8 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 
 	++offset;
 	while (op < end) {
-		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-			&& op->op1.num == (long)offset)
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT 
+		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (long)offset)
 		{
 			return op;
 		}
@@ -714,6 +714,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	}
 	if (arg_info->pass_by_reference) {
 		string_write(str, "&", sizeof("&")-1);
+	}
+	if (arg_info->is_variadic) {
+		string_write(str, "...", sizeof("...")-1);
 	}
 	if (arg_info->name) {
 		string_printf(str, "$%s", arg_info->name);
@@ -1105,29 +1108,26 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_free(&str_constants);
 	}
 
-	if (module->functions && module->functions->fname) {
+	{
+		HashPosition iterator;
 		zend_function *fptr;
-		const zend_function_entry *func = module->functions;
+		int first = 1;
 
-		string_printf(str, "\n  - Functions {\n");
-
-		/* Is there a better way of doing this? */
-		while (func->fname) {
-			int fname_len = strlen(func->fname);
-			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-		
-			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
-				func++;
-				efree(lc_name);
-				continue;
+		zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
+		while (zend_hash_get_current_data_ex(CG(function_table), (void **) &fptr, &iterator) == SUCCESS) {
+			if (fptr->common.type==ZEND_INTERNAL_FUNCTION
+				&& fptr->internal_function.module == module) {
+				if (first) {
+					string_printf(str, "\n  - Functions {\n");
+					first = 0;
+				}
+				_function_string(str, fptr, NULL, "    " TSRMLS_CC);
 			}
-
-			_function_string(str, fptr, NULL, "    " TSRMLS_CC);
-			efree(lc_name);
-			func++;
+			zend_hash_move_forward_ex(CG(function_table), &iterator);
 		}
-		string_printf(str, "%s  }\n", indent);
+		if (!first) {
+			string_printf(str, "%s  }\n", indent);
+		}
 	}
 
 	{
@@ -2596,8 +2596,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
-			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
+	if (!IS_CONSTANT_TYPE(Z_TYPE_P(return_value))) {
 		zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
@@ -2649,6 +2648,22 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		RETURN_STRINGL(Z_STRVAL_P(precv->op2.zv), Z_STRLEN_P(precv->op2.zv), 1);
 	}
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isVariadic()
+   Returns whether this parameter is a variadic parameter */
+ZEND_METHOD(reflection_parameter, isVariadic)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->is_variadic);
 }
 /* }}} */
 
@@ -3095,6 +3110,14 @@ ZEND_METHOD(reflection_function, isGenerator)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::isVariadic()
+   Returns whether this function is variadic */
+ZEND_METHOD(reflection_function, isVariadic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionFunction::inNamespace()
    Returns whether this function is defined in namespace */
 ZEND_METHOD(reflection_function, inNamespace)
@@ -3387,7 +3410,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
-		if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		if (IS_CONSTANT_TYPE(Z_TYPE_P(prop_copy))) {
 			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
 		}
 
@@ -5264,6 +5287,9 @@ ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;
 	zend_module_entry *module;
+	HashPosition iterator;
+	zval *function;
+	zend_function *fptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -5271,29 +5297,15 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	if (module->functions) {
-		zval *function;
-		zend_function *fptr;
-		const zend_function_entry *func = module->functions;
-
-		/* Is there a better way of doing this? */
-		while (func->fname) {
-			int fname_len = strlen(func->fname);
-			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-			
-			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
-				func++;
-				efree(lc_name);
-				continue;
-			}
-
+	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
+	while (zend_hash_get_current_data_ex(CG(function_table), (void **) &fptr, &iterator) == SUCCESS) {
+		if (fptr->common.type==ZEND_INTERNAL_FUNCTION
+			&& fptr->internal_function.module == module) {
 			ALLOC_ZVAL(function);
 			reflection_function_factory(fptr, NULL, function TSRMLS_CC);
-			add_assoc_zval_ex(return_value, func->fname, fname_len+1, function);
-			func++;
-			efree(lc_name);
+			add_assoc_zval(return_value, fptr->common.function_name, function);
 		}
+		zend_hash_move_forward_ex(CG(function_table), &iterator);
 	}
 }
 /* }}} */
@@ -5720,6 +5732,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isGenerator, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
@@ -6022,6 +6035,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isVariadic, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

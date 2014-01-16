@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
    |          Chris Kings-Lynne <chriskl@php.net> (v3 protocol)           | 
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 #include <stdlib.h>
@@ -63,6 +63,7 @@
 #define PGSQL_MAX_LENGTH_OF_LONG   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
 
+#if LONG_MAX < UINT_MAX
 #define PGSQL_RETURN_OID(oid) do { \
 	if (oid > LONG_MAX) { \
 		smart_str s = {0}; \
@@ -72,7 +73,9 @@
 	} \
 	RETURN_LONG((long)oid); \
 } while(0)
-
+#else
+#define PGSQL_RETURN_OID(oid) (RETURN_LONG((long)oid))
+#endif
 
 #if HAVE_PQSETNONBLOCKING
 #define PQ_SETNONBLOCKING(pg_link, flag) PQsetnonblocking(pg_link, flag)
@@ -363,6 +366,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_tell, 0, 0, 1)
 	ZEND_ARG_INFO(0, large_object)
 ZEND_END_ARG_INFO()
+
+#if HAVE_PG_LO_TRUNCATE
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_lo_truncate, 0, 0, 1)
+	ZEND_ARG_INFO(0, large_object)
+	ZEND_ARG_INFO(0, size)
+ZEND_END_ARG_INFO()
+#endif
 
 #if HAVE_PQSETERRORVERBOSITY
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pg_set_error_verbosity, 0, 0, 0)
@@ -658,6 +668,9 @@ const zend_function_entry pgsql_functions[] = {
 	PHP_FE(pg_lo_export,	arginfo_pg_lo_export)
 	PHP_FE(pg_lo_seek,		arginfo_pg_lo_seek)
 	PHP_FE(pg_lo_tell,		arginfo_pg_lo_tell)
+#if HAVE_PG_LO_TRUNCATE
+	PHP_FE(pg_lo_truncate,	arginfo_pg_lo_truncate)
+#endif
 	/* utility functions */
 #if HAVE_PQESCAPE
 	PHP_FE(pg_escape_string,	arginfo_pg_escape_string)
@@ -1501,7 +1514,29 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
+				/* 8.0 or grater supports protorol version 3 */
+				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
+				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
+				add_assoc_string(return_value, "server_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
+				add_assoc_string(return_value, "client_encoding", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
+				add_assoc_string(return_value, "is_superuser", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
+				add_assoc_string(return_value, "session_authorization", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
+				add_assoc_string(return_value, "DateStyle", tmp, 1);
+				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
+				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
+				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
+				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
+				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "", 1);
+				tmp = (char*)PQparameterStatus(pgsql, "application_name");
+				add_assoc_string(return_value, "application_name", tmp ? tmp : "", 1);
 			}
 #endif
 #endif
@@ -2636,7 +2671,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 					Bucket *p;
 	
 					fci.param_count = 0;
-					fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
+					fci.params = safe_emalloc(sizeof(zval***), ht->nNumOfElements, 0);
 					p = ht->pListHead;
 					while (p != NULL) {
 						fci.params[fci.param_count++] = (zval**)p->pData;
@@ -3589,7 +3624,7 @@ PHP_FUNCTION(pg_lo_export)
 PHP_FUNCTION(pg_lo_seek)
 {
 	zval *pgsql_id = NULL;
-	long offset = 0, whence = SEEK_CUR;
+	long result, offset = 0, whence = SEEK_CUR;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3603,7 +3638,16 @@ PHP_FUNCTION(pg_lo_seek)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
-	if (lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence) > -1) {
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	} else {
+		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+	}
+#else
+	result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+#endif
+	if (result > -1) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -3616,7 +3660,7 @@ PHP_FUNCTION(pg_lo_seek)
 PHP_FUNCTION(pg_lo_tell)
 {
 	zval *pgsql_id = NULL;
-	int offset = 0;
+	long offset = 0;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3626,10 +3670,53 @@ PHP_FUNCTION(pg_lo_tell)
 
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		offset = lo_tell64((PGconn *)pgsql->conn, pgsql->lofd);
+	} else {
+		offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+	}
+#else
 	offset = lo_tell((PGconn *)pgsql->conn, pgsql->lofd);
+#endif
 	RETURN_LONG(offset);
 }
 /* }}} */
+
+#if HAVE_PG_LO_TRUNCATE
+/* {{{ proto bool pg_lo_truncate(resource large_object, int size)
+   Truncate large object to size */
+PHP_FUNCTION(pg_lo_truncate)
+{
+	zval *pgsql_id = NULL;
+	size_t size;
+	pgLofp *pgsql;
+	int argc = ZEND_NUM_ARGS();
+	int result;
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "rl", &pgsql_id, &size) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, &pgsql_id, -1, "PostgreSQL large object", le_lofp);
+
+#if HAVE_PG_LO64
+	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
+		result = lo_truncate64((PGconn *)pgsql->conn, pgsql->lofd, size);
+	} else {
+		result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+	}
+#else
+	result = lo_truncate((PGconn *)pgsql->conn, pgsql->lofd, size);
+#endif
+	if (!result) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
 
 #if HAVE_PQSETERRORVERBOSITY
 /* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
@@ -4152,7 +4239,7 @@ PHP_FUNCTION(pg_escape_bytea)
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
 	if (pgsql_link != NULL || id != -1) {
 		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-		to = (char *)PQescapeByteaConn(pgsql, from, (size_t)from_len, &to_len);
+		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
 	} else
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
@@ -4347,7 +4434,7 @@ static char* php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 #endif
 
 static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) {
-	char *from = NULL, *to = NULL, *tmp = NULL;
+	char *from = NULL, *to = NULL;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
 	int from_len;
@@ -4380,17 +4467,22 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 		RETURN_FALSE;
 	}
 #ifdef HAVE_PQESCAPELITERAL
-	if (escape_literal) {
-		tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
-	} else {
-		tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
+	/* Use a block with a local var to avoid unused variable warnings */
+	{
+		char *tmp;
+
+		if (escape_literal) {
+			tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
+		} else {
+			tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
+		}
+		if (!tmp) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
+			RETURN_FALSE;
+		}
+		to = estrdup(tmp);
+		PQfreemem(tmp);
 	}
-	if (!tmp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
-		RETURN_FALSE;
-	}
-	to = estrdup(tmp);
-	PQfreemem(tmp);
 #else 
 	to = php_pgsql_PQescapeInternal(pgsql, from, (size_t)from_len, escape_literal);
 	if (!to) {
@@ -5121,7 +5213,9 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 #else
 	new_len = PQescapeString(escaped, tmp_name2, strlen(tmp_name2));
 #endif
-	smart_str_appends(&querystr, escaped);
+	if (new_len) {
+		smart_str_appends(&querystr, escaped);
+	}
 	efree(escaped);
 
 	smart_str_appends(&querystr, "' AND c.relnamespace = n.oid AND n.nspname = '");
@@ -5131,7 +5225,9 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 #else
 	new_len = PQescapeString(escaped, tmp_name, strlen(tmp_name));
 #endif
-	smart_str_appends(&querystr, escaped);
+	if (new_len) {
+		smart_str_appends(&querystr, escaped);
+	}
 	efree(escaped);
 
 	smart_str_appends(&querystr, "' AND a.atttypid = t.oid ORDER BY a.attnum;");
@@ -5924,9 +6020,9 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							size_t to_len;
 							smart_str s = {0};
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
-							tmp = PQescapeByteaConn(pg_link, Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+							tmp = PQescapeByteaConn(pg_link, (unsigned char *)Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
 #else
-							tmp = PQescapeBytea(Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+							tmp = PQescapeBytea(Z_STRVAL_PP(val), (unsigned char *)Z_STRLEN_PP(val), &to_len);
 #endif
 							Z_TYPE_P(new_val) = IS_STRING;
 							Z_STRLEN_P(new_val) = to_len-1; /* PQescapeBytea's to_len includes additional '\0' */

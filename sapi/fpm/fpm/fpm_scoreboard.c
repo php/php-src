@@ -111,7 +111,7 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 			scoreboard->max_children_reached = max_children_reached;
 		}
 		if (slow_rq > 0) {
-			scoreboard->slow_rq += slow_rq;
+			scoreboard->slow_rq = slow_rq;
 		}
 	} else {
 		if (scoreboard->idle + idle > 0) {
@@ -136,6 +136,12 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 			scoreboard->max_children_reached += max_children_reached;
 		} else {
 			scoreboard->max_children_reached = 0;
+		}
+
+		if (scoreboard->slow_rq + slow_rq > 0) {
+			scoreboard->slow_rq += slow_rq;
+		} else {
+			scoreboard->slow_rq = 0;
 		}
 	}
 

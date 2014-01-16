@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -137,19 +137,16 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 void timelib_update_from_sse(timelib_time *tm)
 {
 	timelib_sll sse;
+	int z = tm->z;
+	signed int dst = tm->dst;
 
 	sse = tm->sse;
 	
 	switch (tm->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET: {
-			int z = tm->z;
-			signed int dst = tm->dst;
-			
 			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60) + (tm->dst * 3600));
 
-			tm->z = z;
-			tm->dst = dst;
 			goto cleanup;
 		}
 
@@ -171,6 +168,8 @@ cleanup:
 	tm->sse = sse;
 	tm->is_localtime = 1;
 	tm->have_zone = 1;
+	tm->z = z;
+	tm->dst = dst;
 }
 
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)

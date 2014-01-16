@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2148,10 +2148,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 /* }}} */
 
 /* {{{ context API */
-PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context TSRMLS_DC)
 {
 	php_stream_context *oldcontext = stream->context;
-	TSRMLS_FETCH();
 
 	stream->context = context;
 

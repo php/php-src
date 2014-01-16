@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@
 #  endif
 # endif /* osf alpha */
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 #include "oci8_dtrace_gen.h"
 #endif
 
@@ -141,7 +141,7 @@ typedef struct {
 	OCIAuthInfo	   *authinfo;					/* Cached authinfo handle for OCISessionGet */
 	OCIError	   *err;						/* private error handle */
 	php_oci_spool  *private_spool;				/* private session pool (for persistent) */
-	sword			errcode;					/* last errcode */
+	sb4				errcode;					/* last ORA- error number */
 
 	HashTable	   *descriptors;				/* descriptors hash, used to flush all the LOBs using this connection on commit */
 	ulong			descriptor_count;			/* used to index the descriptors hash table.  Not an accurate count */
@@ -156,6 +156,9 @@ typedef struct {
 	time_t			idle_expiry;				/* time when the connection will be considered as expired */
 	time_t		   *next_pingp;					/* (pointer to) time of the next ping */
 	char		   *hash_key;					/* hashed details of the connection */
+#ifdef HAVE_OCI8_DTRACE
+	char		   *client_id;					/* The oci_set_client_identifier() value */
+#endif
 } php_oci_connection;
 /* }}} */
 
@@ -213,7 +216,7 @@ typedef struct {
 	struct php_oci_statement *impres_child_stmt;/* child of current Implicit Result Set statement handle */
 	ub4                  impres_count;          /* count of remaining Implicit Result children on parent statement handle */
 	php_oci_connection	*connection;			/* parent connection handle */
-	sword				 errcode;				/* last errcode*/
+	sb4					 errcode;				/* last ORA- error number */
 	OCIError			*err;					/* private error handle */
 	OCIStmt				*stmt;					/* statement handle */
 	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor recieved from Oracle */
@@ -285,49 +288,19 @@ typedef struct {
 
 /* {{{ macros */
 
-#ifdef HAVE_DTRACE
-#define PHP_OCI_CALL(func_uc, func, params)								\
-	do {																\
-		if (DTRACE_OCI8_ ## func_uc ## _START_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _START();						\
-		}																\
-		OCI_G(in_call) = 1;												\
-		func params;													\
-		OCI_G(in_call) = 0;												\
-		if (DTRACE_OCI8_ ## func_uc ## _DONE_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _DONE();							\
-		}																\
-	} while (0)
-#else /* HAVE_DTRACE */
-#define PHP_OCI_CALL(func_uc, func, params)								\
+#define PHP_OCI_CALL(func, params)								\
 	do {																\
 		OCI_G(in_call) = 1;												\
 		func params;													\
 		OCI_G(in_call) = 0;												\
 	} while (0)
-#endif /* HAVE_DTRACE */
 
-#ifdef HAVE_DTRACE
-#define PHP_OCI_CALL_RETURN(func_uc, __retval, func, params)			\
-	do {																\
-		if (DTRACE_OCI8_ ## func_uc ## _START_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _START();						\
-		}																\
-		OCI_G(in_call) = 1;												\
-		__retval = func params;											\
-		OCI_G(in_call) = 0;												\
-		if (DTRACE_OCI8_ ## func_uc ## _DONE_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _DONE();							\
-		}																\
-	} while (0)
-#else /* HAVE_DTRACE */
-#define PHP_OCI_CALL_RETURN(func_uc, __retval, func, params)			\
+#define PHP_OCI_CALL_RETURN(__retval, func, params)			\
 	do {																\
 		OCI_G(in_call) = 1;												\
 		__retval = func params;											\
 		OCI_G(in_call) = 0;												\
 	} while (0)
-#endif /* HAVE_DTRACE */
 
 /* Check for errors that indicate the connection to the DB is no
  * longer valid.  If it isn't, then the PHP connection is marked to be
@@ -340,6 +313,7 @@ typedef struct {
  */
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
 	do {										  \
+		ub4 serverStatus = OCI_SERVER_NORMAL;	  \
 		switch (errcode) {						  \
 			case  1013:							  \
 				zend_bailout();					  \
@@ -369,8 +343,7 @@ typedef struct {
 				break;							  \
 			default:										\
 			{												\
-				ub4 serverStatus = OCI_SERVER_NORMAL;		\
-				PHP_OCI_CALL(OCIATTRGET, OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
+				PHP_OCI_CALL(OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
 										  (ub4 *)0, OCI_ATTR_SERVER_STATUS, (connection)->err)); \
 				if (serverStatus != OCI_SERVER_NORMAL) {	\
 					(connection)->is_open = 0;				\
@@ -378,6 +351,7 @@ typedef struct {
 			}												\
 			break;											\
 		}													\
+		php_oci_dtrace_check_connection(connection, errcode, serverStatus); \
 	} while (0)
 
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
@@ -441,6 +415,7 @@ void php_oci_client_get_version(char **version TSRMLS_DC);
 int php_oci_server_get_version(php_oci_connection *connection, char **version TSRMLS_DC);
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args);
 int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSRMLS_DC);
+void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode, ub4 serverStatus);
 
 /* }}} */
 
@@ -463,11 +438,7 @@ int php_oci_lob_append(php_oci_descriptor *descriptor_dest, php_oci_descriptor *
 int php_oci_lob_truncate(php_oci_descriptor *descriptor, long new_lob_length TSRMLS_DC);
 int php_oci_lob_erase(php_oci_descriptor *descriptor, long offset, ub4 length, ub4 *bytes_erased TSRMLS_DC);
 int php_oci_lob_is_equal(php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result TSRMLS_DC);
-#if defined(HAVE_OCI_LOB_READ2)
 sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp);
-#else
-sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece);
-#endif
 /* }}} */
 
 /* {{{ collection related prototypes */
@@ -521,10 +492,8 @@ php_oci_bind *php_oci_bind_array_helper_date(zval *var, long max_table_length, p
 /* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
-	sword		 errcode;						/* global last error code (used when connect fails, for example) */
+	sb4			 errcode;						/* global last ORA- error number. Used when connect fails, for example */
 	OCIError	*err;							/* global error handle */
-
-	zend_bool	 debug_mode;					/* debug mode flag */
 
 	long		 max_persistent;				/* maximum number of persistent connections per process */
 	long		 num_persistent;				/* number of existing persistent connections */

@@ -104,8 +104,6 @@ NULL
 
 Warning: ocifreestatement() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
-
-Warning: ociinternaldebug() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 Warning: ocinumcols() expects exactly 1 parameter, 0 given in %s on line %d

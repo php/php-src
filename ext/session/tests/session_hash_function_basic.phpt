@@ -2,6 +2,8 @@
 Test session.hash_function ini setting : basic functionality
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+session.hash_bits_per_character=4
 --FILE--
 <?php
 

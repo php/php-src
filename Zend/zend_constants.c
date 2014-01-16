@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -38,9 +38,7 @@ void free_zend_constant(zend_constant *c)
 
 void copy_zend_constant(zend_constant *c)
 {
-	if (!IS_INTERNED(c->name)) {
-		c->name = zend_strndup(c->name, c->name_len - 1);
-	}
+	c->name = str_strndup(c->name, c->name_len - 1);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	}
@@ -474,7 +472,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	char *lowercase_name = NULL;
 	char *name;
 	int ret = SUCCESS;
-	ulong chash = 0;
+	ulong chash;
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
@@ -486,23 +484,18 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		zend_str_tolower(lowercase_name, c->name_len-1);
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 		name = lowercase_name;
-		chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 	} else {
 		char *slash = strrchr(c->name, '\\');
-		if(slash) {
+		if (slash) {
 			lowercase_name = estrndup(c->name, c->name_len-1);
 			zend_str_tolower(lowercase_name, slash-c->name);
 			lowercase_name = (char*)zend_new_interned_string(lowercase_name, c->name_len, 1 TSRMLS_CC);
 			name = lowercase_name;
-			
-			chash = IS_INTERNED(lowercase_name) ? INTERNED_HASH(lowercase_name) : 0;
 		} else {
 			name = c->name;
 		}
 	}
-	if (chash == 0) {
-		chash = zend_hash_func(name, c->name_len);
-	}
+	chash = str_hash(name, c->name_len-1);
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
 	if ((c->name_len == sizeof("__COMPILER_HALT_OFFSET__")
@@ -521,8 +514,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		}
 		ret = FAILURE;
 	}
-	if (lowercase_name && !IS_INTERNED(lowercase_name)) {
-		efree(lowercase_name);
+	if (lowercase_name) {
+		str_efree(lowercase_name);
 	}
 	return ret;
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -368,7 +368,7 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 static zend_object_value spl_dllist_object_new_ex(zend_class_entry *class_type, spl_dllist_object **obj, zval *orig, int clone_orig TSRMLS_DC) /* {{{ */
 {
-	zend_object_value  retval;
+	zend_object_value  retval = {0};
 	spl_dllist_object *intern;
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
@@ -603,7 +603,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -626,7 +626,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -649,7 +649,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -672,7 +672,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	zval *value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -695,7 +695,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 	long count;
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -710,7 +710,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
 	long count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -750,7 +750,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 {
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 

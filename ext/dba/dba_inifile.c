@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -124,14 +124,15 @@ DBA_EXISTS_FUNC(inifile)
 DBA_DELETE_FUNC(inifile)
 {
 	int res;
+	zend_bool found = 0;
 
 	INIFILE_DATA;
 	INIFILE_GKEY;
 
-	res =  inifile_delete(dba, &ini_key TSRMLS_CC);
+	res =  inifile_delete_ex(dba, &ini_key, &found TSRMLS_CC);
 
 	INIFILE_DONE;
-	return (res == -1 ? FAILURE : SUCCESS);
+	return (res == -1 || !found ? FAILURE : SUCCESS);
 }
 
 DBA_FIRSTKEY_FUNC(inifile)

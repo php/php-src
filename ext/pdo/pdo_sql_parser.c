@@ -4,7 +4,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -77,7 +77,7 @@ yy2:
 yy3:
 	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
-	if (yych >= 0x01) goto yy41;
+	if (yych >= 0x01) goto yy43;
 yy4:
 #line 63 "ext/pdo/pdo_sql_parser.re"
 	{ SKIP_ONE(PDO_PARSER_TEXT); }
@@ -86,7 +86,7 @@ yy5:
 	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych <= 0x00) goto yy4;
-	goto yy36;
+	goto yy38;
 yy6:
 	yych = *++YYCURSOR;
 	switch (yych) {
@@ -153,21 +153,19 @@ yy6:
 	case 'x':
 	case 'y':
 	case 'z':	goto yy32;
-	case ':':
-	case '?':	goto yy29;
+	case ':':	goto yy35;
 	default:	goto yy4;
 	}
 yy7:
 	++YYCURSOR;
 	switch ((yych = *YYCURSOR)) {
-	case ':':
 	case '?':	goto yy29;
 	default:	goto yy8;
 	}
 yy8:
 #line 62 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND_POS); }
-#line 171 "ext/pdo/pdo_sql_parser.c"
+#line 169 "ext/pdo/pdo_sql_parser.c"
 yy9:
 	++YYCURSOR;
 	switch ((yych = *YYCURSOR)) {
@@ -177,7 +175,7 @@ yy9:
 yy10:
 #line 65 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 181 "ext/pdo/pdo_sql_parser.c"
+#line 179 "ext/pdo/pdo_sql_parser.c"
 yy11:
 	yych = *++YYCURSOR;
 	switch (yych) {
@@ -214,7 +212,7 @@ yy14:
 yy16:
 #line 64 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 218 "ext/pdo/pdo_sql_parser.c"
+#line 216 "ext/pdo/pdo_sql_parser.c"
 yy17:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -288,14 +286,13 @@ yy29:
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 	switch (yych) {
-	case ':':
 	case '?':	goto yy29;
 	default:	goto yy31;
 	}
 yy31:
 #line 60 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 299 "ext/pdo/pdo_sql_parser.c"
+#line 296 "ext/pdo/pdo_sql_parser.c"
 yy32:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -369,51 +366,59 @@ yy32:
 yy34:
 #line 61 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_BIND); }
-#line 373 "ext/pdo/pdo_sql_parser.c"
+#line 370 "ext/pdo/pdo_sql_parser.c"
 yy35:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy36:
 	switch (yych) {
-	case 0x00:	goto yy2;
-	case '\'':	goto yy38;
-	case '\\':	goto yy37;
-	default:	goto yy35;
+	case ':':	goto yy35;
+	default:	goto yy31;
 	}
 yy37:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-	if (yych <= 0x00) goto yy2;
-	goto yy35;
 yy38:
-	++YYCURSOR;
-#line 59 "ext/pdo/pdo_sql_parser.re"
-	{ RET(PDO_PARSER_TEXT); }
-#line 395 "ext/pdo/pdo_sql_parser.c"
-yy40:
+	switch (yych) {
+	case 0x00:	goto yy2;
+	case '\'':	goto yy40;
+	case '\\':	goto yy39;
+	default:	goto yy37;
+	}
+yy39:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-yy41:
-	switch (yych) {
-	case 0x00:	goto yy2;
-	case '"':	goto yy43;
-	case '\\':	goto yy42;
-	default:	goto yy40;
-	}
+	if (yych <= 0x00) goto yy2;
+	goto yy37;
+yy40:
+	++YYCURSOR;
+#line 59 "ext/pdo/pdo_sql_parser.re"
+	{ RET(PDO_PARSER_TEXT); }
+#line 400 "ext/pdo/pdo_sql_parser.c"
 yy42:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
-	if (yych <= 0x00) goto yy2;
-	goto yy40;
 yy43:
+	switch (yych) {
+	case 0x00:	goto yy2;
+	case '"':	goto yy45;
+	case '\\':	goto yy44;
+	default:	goto yy42;
+	}
+yy44:
+	++YYCURSOR;
+	if (YYLIMIT <= YYCURSOR) YYFILL(1);
+	yych = *YYCURSOR;
+	if (yych <= 0x00) goto yy2;
+	goto yy42;
+yy45:
 	++YYCURSOR;
 #line 58 "ext/pdo/pdo_sql_parser.re"
 	{ RET(PDO_PARSER_TEXT); }
-#line 417 "ext/pdo/pdo_sql_parser.c"
+#line 422 "ext/pdo/pdo_sql_parser.c"
 }
 #line 66 "ext/pdo/pdo_sql_parser.re"
 	
@@ -581,7 +586,9 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					switch (Z_TYPE_P(param->parameter)) {
+					zval tmp_param = *param->parameter;
+					zval_copy_ctor(&tmp_param);
+					switch (Z_TYPE(tmp_param)) {
 						case IS_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
@@ -589,20 +596,20 @@ safe:
 							break;
 
 						case IS_BOOL:
-							convert_to_long(param->parameter);
-
+							convert_to_long(&tmp_param);
+							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:
-							convert_to_string(param->parameter);
-							plc->qlen = Z_STRLEN_P(param->parameter);
-							plc->quoted = Z_STRVAL_P(param->parameter);
-							plc->freeq = 0;
+							convert_to_string(&tmp_param);
+							plc->qlen = Z_STRLEN(tmp_param);
+							plc->quoted = estrdup(Z_STRVAL(tmp_param));
+							plc->freeq = 1;
 							break;
 
 						default:
-							convert_to_string(param->parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-									Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
+							convert_to_string(&tmp_param);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
+									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
@@ -611,6 +618,7 @@ safe:
 							}
 							plc->freeq = 1;
 					}
+					zval_dtor(&tmp_param);
 				}
 			} else {
 				plc->quoted = Z_STRVAL_P(param->parameter);

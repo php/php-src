@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.6.0-dev"
+#define ZEND_VERSION "2.7.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -193,7 +193,7 @@ char *alloca ();
 #endif
 #define restrict __restrict__
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -317,6 +317,7 @@ typedef struct _zend_object {
 } zend_object;
 
 #include "zend_object_handlers.h"
+#include "zend_ast.h"
 
 typedef union _zvalue_value {
 	long lval;					/* long value */
@@ -327,6 +328,7 @@ typedef union _zvalue_value {
 	} str;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
+	zend_ast *ast;
 } zvalue_value;
 
 struct _zval_struct {
@@ -548,7 +550,7 @@ typedef struct _zend_utility_functions {
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
-	void (*ticks_function)(int ticks);
+	void (*ticks_function)(int ticks TSRMLS_DC);
 	void (*on_timeout)(int seconds TSRMLS_DC);
 	int (*stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 	int (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
@@ -587,7 +589,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
-#define IS_CALLABLE	10
+#define IS_CONSTANT_AST		10
+#define IS_CALLABLE	11
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f
@@ -596,6 +599,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100
+
+#define IS_CONSTANT_TYPE(type) (((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
@@ -651,12 +656,14 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
 
-void zend_activate(TSRMLS_D);
-void zend_deactivate(TSRMLS_D);
-void zend_call_destructors(TSRMLS_D);
-void zend_activate_modules(TSRMLS_D);
-void zend_deactivate_modules(TSRMLS_D);
-void zend_post_deactivate_modules(TSRMLS_D);
+BEGIN_EXTERN_C()
+ZEND_API void zend_activate(TSRMLS_D);
+ZEND_API void zend_deactivate(TSRMLS_D);
+ZEND_API void zend_call_destructors(TSRMLS_D);
+ZEND_API void zend_activate_modules(TSRMLS_D);
+ZEND_API void zend_deactivate_modules(TSRMLS_D);
+ZEND_API void zend_post_deactivate_modules(TSRMLS_D);
+END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)
@@ -670,10 +677,14 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
 
+#ifndef ZTS
+#define STR_EMPTY_ALLOC() CG(interned_empty_string)? CG(interned_empty_string) : estrndup("", sizeof("")-1)
+#else
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
+#endif
 
 #define STR_REALLOC(ptr, size) \
 			ptr = (char *) erealloc(ptr, size);
@@ -683,7 +694,7 @@ END_EXTERN_C()
 #define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
-#define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
+#define ZEND_PUTC(c)					zend_write(&(c), 1)
 
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
@@ -691,7 +702,7 @@ extern ZEND_API zend_write_func_t zend_write;
 extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path TSRMLS_DC);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
-extern ZEND_API void (*zend_ticks_function)(int ticks);
+extern ZEND_API void (*zend_ticks_function)(int ticks TSRMLS_DC);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);

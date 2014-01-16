@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -270,6 +270,12 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 		P = (pdo_oci_bound_param*)param->driver_data;
 
 		switch (event_type) {
+			case PDO_PARAM_EVT_FETCH_PRE:
+			case PDO_PARAM_EVT_FETCH_POST:
+			case PDO_PARAM_EVT_NORMALIZE:
+				/* Do nothing */
+				break;
+
 			case PDO_PARAM_EVT_FREE:
 				P = param->driver_data;
 				if (P) {

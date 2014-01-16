@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -138,5 +138,7 @@ int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, 
 
 /* from interval.c */
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
+timelib_time *timelib_add(timelib_time *t, timelib_rel_time *interval);
+timelib_time *timelib_sub(timelib_time *t, timelib_rel_time *interval);
 
 #endif

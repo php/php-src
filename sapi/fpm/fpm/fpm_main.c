@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -315,7 +315,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static void sapi_cgibin_flush(void *server_context)
+static void sapi_cgibin_flush(void *server_context TSRMLS_DC)
 {
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
@@ -498,8 +498,11 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
+	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	if (remaining < count_bytes) {
+		count_bytes = remaining;
+	}
 	while (read_bytes < count_bytes) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		if (request_body_fd == -1) {
@@ -1350,7 +1353,7 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1721,9 +1724,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
@@ -1982,8 +1985,9 @@ fastcgi_request_done:
 out:
 
 	SG(server_context) = NULL;
+	php_module_shutdown(TSRMLS_C);
+
 	if (parent) {
-		php_module_shutdown(TSRMLS_C);
 		sapi_shutdown();
 	}
 

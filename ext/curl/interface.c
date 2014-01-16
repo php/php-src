@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1717,9 +1717,9 @@ static void curl_free_post(void **post)
 
 /* {{{ curl_free_slist
  */
-static void curl_free_slist(void **slist)
+static void curl_free_slist(void *slist)
 {
-	curl_slist_free_all((struct curl_slist *) *slist);
+	curl_slist_free_all(*((struct curl_slist **) slist));
 }
 /* }}} */
 
@@ -1790,9 +1790,11 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->read->stream = NULL;
 
 	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
-	zend_llist_init(&(*ch)->to_free->slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
 	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
 	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
+
+	(*ch)->to_free->slist = emalloc(sizeof(HashTable));
+	zend_hash_init((*ch)->to_free->slist, 4, NULL, curl_free_slist, 0);
 }
 /* }}} */
 
@@ -2043,6 +2045,7 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 #endif
 
+	efree(dupch->to_free->slist);
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;
 
@@ -2438,7 +2441,7 @@ string_copy:
 
 			ph = HASH_OF(*zvalue);
 			if (!ph) {
-				char *name;
+				char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 						name = "CURLOPT_HTTPHEADER";
@@ -2488,7 +2491,7 @@ string_copy:
 					return 1;
 				}
 			}
-			zend_llist_add_element(&ch->to_free->slist, &slist);
+			zend_hash_index_update(ch->to_free->slist, (ulong) option, &slist, sizeof(struct curl_slist *), NULL);
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -2501,6 +2504,7 @@ string_copy:
 
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
@@ -2508,6 +2512,7 @@ string_copy:
 					return 1;
 				}
 			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 
@@ -3266,8 +3271,9 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	/* cURL destructors should be invoked only by last curl handle */
 	if (Z_REFCOUNT_P(ch->clone) <= 1) {
 		zend_llist_clean(&ch->to_free->str);
-		zend_llist_clean(&ch->to_free->slist);
 		zend_llist_clean(&ch->to_free->post);
+		zend_hash_destroy(ch->to_free->slist);
+		efree(ch->to_free->slist);
 		efree(ch->to_free);
 		FREE_ZVAL(ch->clone);
 	} else {

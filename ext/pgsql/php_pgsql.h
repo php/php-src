@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,6 +157,9 @@ PHP_FUNCTION(pg_lo_import);
 PHP_FUNCTION(pg_lo_export);
 PHP_FUNCTION(pg_lo_seek);
 PHP_FUNCTION(pg_lo_tell);
+#if HAVE_PG_LO_TRUNCATE
+PHP_FUNCTION(pg_lo_truncate);
+#endif
 
 /* debugging functions */
 PHP_FUNCTION(pg_trace);

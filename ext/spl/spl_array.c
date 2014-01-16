@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -166,7 +166,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 /* {{{ spl_array_object_new_ex */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
 {
-	zend_object_value retval;
+	zend_object_value retval = {0};
 	spl_array_object *intern;
 	zval *tmp;
 	zend_class_entry * parent = class_type;
@@ -599,7 +599,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_has, "offsetExists", &rv, offset);
 		zval_ptr_dtor(&offset);
-		if (rv && zend_is_true(rv)) {
+		if (rv && zend_is_true(rv TSRMLS_CC)) {
 			zval_ptr_dtor(&rv);
 			return 1;
 		}
@@ -620,7 +620,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 						case 2:
 							return 1;
 						default:
-							return zend_is_true(*tmp);
+							return zend_is_true(*tmp TSRMLS_CC);
 					}
 				}
 			}
@@ -643,7 +643,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 						case 2:
 							return 1;
 						default:
-							return zend_is_true(*tmp);
+							return zend_is_true(*tmp TSRMLS_CC);
 					}
 				}
 				return 0;

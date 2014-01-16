@@ -134,7 +134,7 @@ if (VCVERS >= 1400) {
 	// disable annoying warnings.  In addition, time_t defaults
 	// to 64-bit.  Ask for 32-bit.
 	if (X64) {
-		ADD_FLAG('CFLAGS', ' /wd4996 /Wp64 ');
+		ADD_FLAG('CFLAGS', ' /wd4996 ');
 	} else {
 		ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
 	}

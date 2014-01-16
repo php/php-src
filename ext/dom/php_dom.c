@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -448,7 +448,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 			Z_SET_REFCOUNT_P(tmp, 1);
 			Z_UNSET_ISREF_P(tmp);
 			if (check_empty == 1) {
-				retval = zend_is_true(tmp);
+				retval = zend_is_true(tmp TSRMLS_CC);
 			} else if (check_empty == 0) {
 				retval = (Z_TYPE_P(tmp) != IS_NULL);
 			}
@@ -1089,7 +1089,11 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 void dom_objects_free_storage(void *object TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
+#if defined(__GNUC__) && __GNUC__ >= 3
+	int retcount __attribute__((unused)); /* keep compiler quiet */
+#else
 	int retcount;
+#endif
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 

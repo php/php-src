@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -385,7 +385,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
 				my_bool tmp;
 #else
-				uint tmp = 0;
+				ulong tmp = 0;
 #endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*

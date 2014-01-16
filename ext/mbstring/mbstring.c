@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -402,10 +402,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_kana, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 1, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_convert_variables, 0, 0, 3)
 	ZEND_ARG_INFO(0, to)
 	ZEND_ARG_INFO(0, from)
-	ZEND_ARG_INFO(1, ...)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_encode_numericentity, 0, 0, 2)

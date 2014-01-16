@@ -161,9 +161,8 @@ PHP_FUNCTION( resourcebundle_create )
 /* {{{ resourcebundle_array_fetch */
 static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback TSRMLS_DC) 
 {
-	int32_t     meindex;
-	char *      mekey;
-	long        mekeylen;
+	int32_t     meindex = 0;
+	char *      mekey = NULL;
     zend_bool    is_numeric = 0;
 	char         *pbuf;
 	ResourceBundle_object *rb;
@@ -177,7 +176,6 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else if(Z_TYPE_P(offset) == IS_STRING) {
 		mekey = Z_STRVAL_P(offset);
-		mekeylen = Z_STRLEN_P(offset);
 		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
 		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,	

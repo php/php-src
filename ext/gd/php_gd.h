@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,7 +59,7 @@
 
 PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
-PHPAPI extern const char php_sig_png[3];
+PHPAPI extern const char php_sig_png[8];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -288,11 +288,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_reset, 0)
 	ZEND_ARG_INFO(1, arg)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_current, ZEND_SEND_PREFER_REF)
+ZEND_BEGIN_ARG_INFO(arginfo_current, 0)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arg)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_key, ZEND_SEND_PREFER_REF)
+ZEND_BEGIN_ARG_INFO(arginfo_key, 0)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arg)
 ZEND_END_ARG_INFO()
 
@@ -564,13 +564,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_udiff_uassoc, 0)
 	ZEND_ARG_INFO(0, callback_key_comp_func)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, ZEND_SEND_PREFER_REF, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1) /* ARRAY_INFO(0, arg1, 0) */
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr2)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, more_array_and_sort_options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
@@ -595,6 +596,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_filter, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_INFO(0, callback)
+    ZEND_ARG_INFO(0, use_keys)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_map, 0, 0, 2)
@@ -1139,10 +1141,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetss, 0, 0, 1)
 	ZEND_ARG_INFO(0, allowable_tags)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fscanf, 1, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fscanf, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, format)
-	ZEND_ARG_INFO(1, ...)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_fwrite, 0, 0, 2)
@@ -1789,8 +1791,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_number_format, 0, 0, 1)
 	ZEND_ARG_INFO(0, number)
 	ZEND_ARG_INFO(0, num_decimal_places)
-	ZEND_ARG_INFO(0, dec_seperator)
-	ZEND_ARG_INFO(0, thousands_seperator)
+	ZEND_ARG_INFO(0, dec_separator)
+	ZEND_ARG_INFO(0, thousands_separator)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_fmod, 0)
@@ -2450,10 +2452,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_str_pad, 0, 0, 2)
 	ZEND_ARG_INFO(0, pad_type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sscanf, 1, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sscanf, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, format)
-	ZEND_ARG_INFO(1, ...)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_str_rot13, 0)
@@ -3640,6 +3642,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)
+	BASIC_ADD_SUBMODULE(streams)
 	BASIC_MINIT_SUBMODULE(file)
 	BASIC_MINIT_SUBMODULE(pack)
 	BASIC_MINIT_SUBMODULE(browscap)
@@ -5748,7 +5751,7 @@ PHP_FUNCTION(register_tick_function)
 		zend_llist_init(BG(user_tick_functions),
 						sizeof(user_tick_function_entry),
 						(llist_dtor_func_t) user_tick_function_dtor, 0);
-		php_add_tick_function(run_user_tick_functions);
+		php_add_tick_function(run_user_tick_functions TSRMLS_CC);
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
@@ -5776,7 +5779,7 @@ PHP_FUNCTION(unregister_tick_function)
 		return;
 	}
 
-	if (Z_TYPE_P(function) != IS_ARRAY) {
+	if (Z_TYPE_P(function) != IS_ARRAY && Z_TYPE_P(function) != IS_OBJECT) {
 		convert_to_string(function);
 	}
 

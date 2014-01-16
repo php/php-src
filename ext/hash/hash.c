@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -986,6 +986,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("snefru",		&php_hash_snefru_ops);
 	php_hash_register_algo("snefru256",		&php_hash_snefru_ops);
 	php_hash_register_algo("gost",			&php_hash_gost_ops);
+	php_hash_register_algo("gost-crypto",		&php_hash_gost_crypto_ops);
 	php_hash_register_algo("adler32",		&php_hash_adler32_ops);
 	php_hash_register_algo("crc32",			&php_hash_crc32_ops);
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1226,7 +1226,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
 }
 /* }}} */
 
-/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]])
+/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_separator, string thousands_separator]])
    Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {

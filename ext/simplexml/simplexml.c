@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1070,7 +1070,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 	int              namelen;
 	int              test;
 	char 		 use_iter;
-	zval            *iter_data;
+	zval            *iter_data = NULL;
 
 	use_iter = 0;
 

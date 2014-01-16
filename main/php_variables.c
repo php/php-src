@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,11 +23,15 @@
 #include "php.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/credits.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_variables.h"
 #include "php_globals.h"
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
+#ifdef PHP_WIN32
+# include "win32/php_inttypes.h"
+#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC);
@@ -55,7 +59,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array TSRMLS_DC)
 {
 	char *p = NULL;
-	char *ip;		/* index pointer */
+	char *ip = NULL;		/* index pointer */
 	char *index;
 	char *var, *var_orig;
 	int var_len, index_len;
@@ -228,44 +232,115 @@ plain_var:
 	free_alloca(var_orig, use_heap);
 }
 
+typedef struct post_var_data {
+	smart_str str;
+	char *ptr;
+	char *end;
+	uint64_t cnt;
+} post_var_data_t;
+
+static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSRMLS_DC)
+{
+	char *ksep, *vsep;
+	size_t klen, vlen;
+	/* FIXME: string-size_t */
+	unsigned int new_vlen;
+
+	if (var->ptr >= var->end) {
+		return 0;
+	}
+
+	vsep = memchr(var->ptr, '&', var->end - var->ptr);
+	if (!vsep) {
+		if (!eof) {
+			return 0;
+		} else {
+			vsep = var->end;
+		}
+	}
+
+	ksep = memchr(var->ptr, '=', vsep - var->ptr);
+	if (ksep) {
+		*ksep = '\0';
+		/* "foo=bar&" or "foo=&" */
+		klen = ksep - var->ptr;
+		vlen = vsep - ++ksep;
+	} else {
+		ksep = "";
+		/* "foo&" */
+		klen = vsep - var->ptr;
+		vlen = 0;
+	}
+
+
+	php_url_decode(var->ptr, klen);
+	if (vlen) {
+		vlen = php_url_decode(ksep, vlen);
+	}
+
+	if (sapi_module.input_filter(PARSE_POST, var->ptr, &ksep, vlen, &new_vlen TSRMLS_CC)) {
+		php_register_variable_safe(var->ptr, ksep, new_vlen, arr TSRMLS_CC);
+	}
+
+	var->ptr = vsep + (vsep != var->end);
+	return 1;
+}
+
+static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof TSRMLS_DC)
+{
+	uint64_t max_vars = PG(max_input_vars);
+
+	vars->ptr = vars->str.c;
+	vars->end = vars->str.c + vars->str.len;
+	while (add_post_var(arr, vars, eof TSRMLS_CC)) {
+		if (++vars->cnt > max_vars) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"Input variables exceeded %" PRIu64 ". "
+					"To increase the limit change max_input_vars in php.ini.",
+					max_vars);
+			return FAILURE;
+		}
+	}
+
+	if (!eof) {
+		memmove(vars->str.c, vars->ptr, vars->str.len = vars->end - vars->ptr);
+	}
+	return SUCCESS;
+}
+
 SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 {
-	char *var, *val, *e, *s, *p;
-	zval *array_ptr = (zval *) arg;
-	long count = 0;
+	zval *arr = (zval *) arg;
+	php_stream *s = SG(request_info).request_body;
+	post_var_data_t post_data;
 
-	if (SG(request_info).post_data == NULL) {
-		return;
-	}	
+	if (s && SUCCESS == php_stream_rewind(s)) {
+		memset(&post_data, 0, sizeof(post_data));
 
-	s = SG(request_info).post_data;
-	e = s + SG(request_info).post_data_length;
+		while (!php_stream_eof(s)) {
+			char buf[BUFSIZ] = {0};
+			size_t len = php_stream_read(s, buf, BUFSIZ);
 
-	while (s < e && (p = memchr(s, '&', (e - s)))) {
-last_value:
-		if ((val = memchr(s, '=', (p - s)))) { /* have a value */
-			unsigned int val_len, new_val_len;
+			if (len && len != (size_t) -1) {
+				smart_str_appendl(&post_data.str, buf, len);
 
-			if (++count > PG(max_input_vars)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
-				return;
+				if (SUCCESS != add_post_vars(arr, &post_data, 0 TSRMLS_CC)) {
+					if (post_data.str.c) {
+						efree(post_data.str.c);
+					}
+					return;
+				}
 			}
-			var = s;
 
-			php_url_decode(var, (val - s));
-			val++;
-			val_len = php_url_decode(val, (p - val));
-			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(PARSE_POST, var, &val, val_len, &new_val_len TSRMLS_CC)) {
-				php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+			if (len != BUFSIZ){
+				break;
 			}
-			efree(val);
 		}
-		s = p + 1;
-	}
-	if (s < e) {
-		p = e;
-		goto last_value;
+
+		add_post_vars(arr, &post_data, 1 TSRMLS_CC);
+		if (post_data.str.c) {
+			efree(post_data.str.c);
+		}
 	}
 }
 

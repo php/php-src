@@ -3011,7 +3011,6 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 int gdImagePaletteToTrueColor(gdImagePtr src)
 {
 	unsigned int y;
-	unsigned char alloc_y = 0;
 	unsigned int yy;
 
 	if (src == NULL) {

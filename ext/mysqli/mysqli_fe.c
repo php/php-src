@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,23 +43,28 @@
 #define MYSQLI_ZEND_ARG_OBJ_INFO_STMT() ZEND_ARG_INFO(0, stmt)
 #endif
 
-ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_result, 0)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_mysqli_stmt_bind_param, 0)
 	MYSQLI_ZEND_ARG_OBJ_INFO_STMT()
 	ZEND_ARG_INFO(0, types)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_result, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_class_mysqli_stmt_bind_param, 0)
 	ZEND_ARG_INFO(0, types)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 1)
+ZEND_BEGIN_ARG_INFO(all_args_force_by_ref, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_poll, 0, 0, 4)

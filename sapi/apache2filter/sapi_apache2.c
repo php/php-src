@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -245,14 +245,13 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 }
 
 static void
-php_apache_sapi_flush(void *server_context)
+php_apache_sapi_flush(void *server_context TSRMLS_DC)
 {
 	php_struct *ctx;
 	apr_bucket_brigade *bb;
 	apr_bucket_alloc_t *ba;
 	apr_bucket *b;
 	ap_filter_t *f; /* output filters */
-	TSRMLS_FETCH();
 
 	ctx = server_context;
 
