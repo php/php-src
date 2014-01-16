@@ -409,7 +409,7 @@ is_variadic:
 
 is_arrayof:
 		/* empty */ { $$.op_type = 0; }
-	|	'[' ']'   { $$.op_type = 1; }
+	|	'[' ']'     { $$.op_type = 1; }
 ;
 
 unticked_function_declaration_statement:
