@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #66286 (Incorrect object comparison with inheritance). (Nikita)
 
+- Session:
+  . Fixed bug #66481 (Calls to session_name() segfault when session.name is
+    null). (Laruence)
+
 ?? ??? 2013, PHP 5.4.24
 
 - Core:

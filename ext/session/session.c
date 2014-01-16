@@ -618,11 +618,10 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	/* Numeric session.name won't work at all */
-	if (PG(modules_activated) &&
-		(!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
+	if ((!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
 		int err_type;
 
-		if (stage == ZEND_INI_STAGE_RUNTIME) {
+		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
 			err_type = E_WARNING;
 		} else {
 			err_type = E_ERROR;
