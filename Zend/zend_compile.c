@@ -1625,7 +1625,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 			} else if ((name_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_WARNING, "The magic method __debug_info() must have public visibility and cannot be static");
+					zend_error(E_WARNING, "The magic method __debugInfo() must have public visibility and cannot be static");
 				}
 			}
 		} else {
@@ -1689,9 +1689,9 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				}
 			} else if ((name_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1))) {
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
-					zend_error(E_WARNING, "The magic method __debug_info() must have public visibility and cannot be static");
+					zend_error(E_WARNING, "The magic method __debugInfo() must have public visibility and cannot be static");
 				}
-				CG(active_class_entry)->__debug_info = (zend_function *) CG(active_op_array);
+				CG(active_class_entry)->__debugInfo = (zend_function *) CG(active_op_array);
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
@@ -3965,7 +3965,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 	} else if (!strncmp(mname, ZEND_TOSTRING_FUNC_NAME, mname_len)) {
 		ce->__tostring = fe;
 	} else if (!strncmp(mname, ZEND_DEBUGINFO_FUNC_NAME, mname_len)) {
-		ce->__debug_info = fe;
+		ce->__debugInfo = fe;
 	} else if (ce->name_length + 1 == mname_len) {
 		char *lowercase_name = emalloc(ce->name_length + 1);
 		zend_str_tolower_copy(lowercase_name, ce->name, ce->name_length);

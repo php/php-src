@@ -2034,7 +2034,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
-	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debug_info = NULL;
+	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL;
 	const char *lowercase_name;
 	int fname_len;
 	const char *lc_class_name = NULL;
@@ -2184,7 +2184,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			} else if ((fname_len == sizeof(ZEND_ISSET_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_ISSET_FUNC_NAME, sizeof(ZEND_ISSET_FUNC_NAME) - 1)) {
 				__isset = reg_function;
 			} else if ((fname_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && !memcmp(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME) - 1)) {
-				__debug_info = reg_function;
+				__debugInfo = reg_function;
 			} else {
 				reg_function = NULL;
 			}
@@ -2223,7 +2223,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__set = __set;
 		scope->__unset = __unset;
 		scope->__isset = __isset;
-		scope->__debug_info = __debug_info;
+		scope->__debugInfo = __debugInfo;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
 			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
@@ -2287,9 +2287,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			__isset->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
-		if (__debug_info) {
-			if (__debug_info->common.fn_flags & ZEND_ACC_STATIC) {
-				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __debug_info->common.function_name);
+		if (__debugInfo) {
+			if (__debugInfo->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Method %s::%s() cannot be static", scope->name, __debugInfo->common.function_name);
 			}
 		}
 		efree((char*)lc_class_name);

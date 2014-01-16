@@ -141,14 +141,14 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval *retval = NULL;
 
-	if (!ce->__debug_info) {
+	if (!ce->__debugInfo) {
 		*is_temp = 0;
 		return Z_OBJ_HANDLER_P(object, get_properties)
 			? Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC)
 			: NULL;
 	}
 
-	zend_call_method_with_0_params(&object, ce, &ce->__debug_info, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	zend_call_method_with_0_params(&object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
 	if (retval && Z_TYPE_P(retval) == IS_ARRAY) {
 		HashTable *ht = Z_ARRVAL_P(retval);
 		if (Z_REFCOUNT_P(retval) <= 1) {
