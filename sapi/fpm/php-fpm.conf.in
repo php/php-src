@@ -185,7 +185,7 @@ listen = 127.0.0.1:9000
 ;       - The pool processes will inherit the master process priority
 ;         unless it specified otherwise
 ; Default Value: no set
-; priority = -19
+; process.priority = -19
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
