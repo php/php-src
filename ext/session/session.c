@@ -668,6 +668,13 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
+	/* Don't accept a blank session name from php.ini or -d session.name= */
+	if (!PG(modules_activated) && !new_value_length) {
+		/* Force the default value. */
+		new_value = "PHPSESSID";
+		new_value_length = 9;
+	}
+
 	/* Numeric session.name won't work at all */
 	if (PG(modules_activated) &&
 		(!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
