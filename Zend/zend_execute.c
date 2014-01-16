@@ -667,12 +667,14 @@ ZEND_API int zend_verify_arg_arrayof_error(int error_type, const zend_function *
 
 static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg, zend_class_entry *ce, zval **offender, HashPosition *position TSRMLS_DC)
 {
-	zval **member;
+	zval         **member;
+	zend_ulong   elements = 0L;
+	
 	if (Z_TYPE_P(arg) == IS_NULL && cur_arg_info->allow_null) {
 		return SUCCESS;
 	}
 	
-	if (Z_TYPE_P(arg) != IS_ARRAY) {
+	if (Z_TYPE_P(arg) != IS_ARRAY && Z_TYPE_P(arg) != IS_CONSTANT_ARRAY) {
 		*offender = arg;
 		return FAILURE;
 	}
@@ -705,6 +707,7 @@ static inline int zend_verify_arg_arrayof(zend_arg_info *cur_arg_info, zval *arg
 				}
 			break;
 		}
+		elements++;
 	}
 	
 	return SUCCESS;
