@@ -55,7 +55,7 @@ struct fpm_globals_s {
 	int test_successful;
 	int heartbeat;
 	int run_as_root;
-        int force_stderr;
+	int force_stderr;
 	int send_config_pipe[2];
 };
 

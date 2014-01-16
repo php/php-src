@@ -157,7 +157,7 @@ static const opt_struct OPTIONS[] = {
 	{'R', 0, "allow-to-run-as-root"},
 	{'D', 0, "daemonize"},
 	{'F', 0, "nodaemonize"},
-        {'O', 0, "force-stderr"},
+	{'O', 0, "force-stderr"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -1575,7 +1575,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int force_daemon = -1;
-        int force_stderr = 0;
+	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
 
@@ -1704,9 +1704,9 @@ int main(int argc, char *argv[])
 				force_daemon = 0;
 				break;
 
-                        case 'O': /* force stderr even on non tty */
-                                force_stderr = 1;
-                                break;
+			case 'O': /* force stderr even on non tty */
+				force_stderr = 1;
+				break;
 
 			default:
 			case 'h':
