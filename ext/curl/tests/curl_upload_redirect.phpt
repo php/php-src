@@ -6,7 +6,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 --SKIPIF--
 <?php 
 if (!extension_loaded("curl")) exit("skip curl extension not loaded");
-putenv('PHP_CURL_HTTP_REMOTE_SERVER=http://localhost:85');
 if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_REMOTE_SERVER env variable is not defined");
 ?>
 --FILE--
@@ -17,8 +16,6 @@ if (false === getenv('PHP_CURL_HTTP_REMOTE_SERVER'))  exit("skip PHP_CURL_HTTP_R
  * Alias to functions: 
  */
 
-putenv('PHP_CURL_HTTP_REMOTE_SERVER=http://localhost:85');
-	
   $host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
 
   // start testing
