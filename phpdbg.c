@@ -1242,25 +1242,28 @@ phpdbg_interact:
 				} else {
 					cleaning = 0;
 				}
+
 #ifndef _WIN32
-				/* remote client disconnected */
-				if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
+				if (!cleaning) {
+					/* remote client disconnected */
+					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 					
-					if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
-						/* renegociate connections */
-						phpdbg_open_sockets(
-							address, listen, &server, &socket, streams);
+						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+							/* renegociate connections */
+							phpdbg_open_sockets(
+								address, listen, &server, &socket, streams);
 				
-						/* set streams */
-						if (streams[0] && streams[1]) {
-							PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+							/* set streams */
+							if (streams[0] && streams[1]) {
+								PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
+							}
+				
+							/* this must be forced */
+							CG(unclean_shutdown) = 0;
+						} else {
+							/* local consoles cannot disconnect, ignore EOF */
+							PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 						}
-				
-						/* this must be forced */
-						CG(unclean_shutdown) = 0;
-					} else {
-						/* local consoles cannot disconnect, ignore EOF */
-						PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 					}
 				}
 #endif
