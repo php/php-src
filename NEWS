@@ -15,8 +15,8 @@ PHP                                                                        NEWS
     ^M as lineend). (Laruence)
 
 - Session
-  . Fixed session module is sending multiple set-cookie headers when
-    session.use_strict_mode=1 (Yasuo)
+  . Fixed bug #66469 (Session module is sending multiple set-cookie headers when
+    session.use_strict_mode=1) (Yasuo)
   . Fixed bug #66481 (Segfaults on session_name()).
     (cmcdermottroe at engineyard dot com, Yasuo)
 
