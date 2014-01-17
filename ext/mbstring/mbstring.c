@@ -1238,6 +1238,10 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		}
 		MBSTRG(http_input_list) = NULL;
 		MBSTRG(http_input_list_size) = 0;
+		if (SUCCESS == php_mb_parse_encoding_list(SG(input_encoding), strlen(SG(input_encoding))+1, &list, &size, 1 TSRMLS_CC)) {
+			MBSTRG(http_input_list) = list;
+			MBSTRG(http_input_list_size) = 0;
+		}
 		return SUCCESS;
 	}
 
@@ -1261,18 +1265,20 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	const mbfl_encoding *encoding;
 
 	if (new_value == NULL || new_value_length == 0) {
-		MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-		MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-		return SUCCESS;
+		encoding = mbfl_name2encoding(SG(output_encoding));
+		if (!encoding) {
+			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
+			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
+			return SUCCESS;
+		}
+	} else {
+		encoding = mbfl_name2encoding(new_value);
+		if (!encoding) {
+			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
+			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
+			return FAILURE;
+		}
 	}
-
-	encoding = mbfl_name2encoding(new_value);
-	if (!encoding) {
-		MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
-		MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
-		return FAILURE;
-	}
-
 	MBSTRG(http_output_encoding) = encoding;
 	MBSTRG(current_http_output_encoding) = encoding;
 	return SUCCESS;
@@ -1324,8 +1330,8 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 	{
 		const char *enc_name = new_value;
 		if (FAILURE == php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC)) {
-			/* falls back to EUC-JP if an unknown encoding name is given */
-			enc_name = "EUC-JP";
+			/* falls back to UTF-8 if an unknown encoding name is given */
+			enc_name = "UTF-8";
 			php_mb_regex_set_default_mbctype(enc_name TSRMLS_CC);
 		}
 		php_mb_regex_set_mbctype(new_value TSRMLS_CC);
@@ -1343,7 +1349,11 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 	}
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
 			|| stage == PHP_INI_STAGE_RUNTIME) {
-		return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+		if (new_value_length) {
+			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
+		} else {
+			return _php_mb_ini_mbstring_internal_encoding_set(SG(internal_encoding), strlen(SG(internal_encoding))+1 TSRMLS_CC);
+		}
 	} else {
 		/* the corresponding mbstring globals needs to be set according to the
 		 * ini value in the later stage because it never falls back to the
