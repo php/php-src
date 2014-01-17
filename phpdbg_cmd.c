@@ -477,7 +477,7 @@ disconnect:
 #ifndef HAVE_LIBREADLINE
 			char buf[PHPDBG_MAX_CMD];
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-				if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_CC))) {
+				if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
 			}
