@@ -1202,17 +1202,17 @@ phpdbg_main:
 		} zend_end_try();
 
 		/* initialize from file */
+		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
 			phpdbg_try_file_init(bp_tmp_file, strlen(bp_tmp_file), 0 TSRMLS_CC);
-			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
-		} zend_catch {
-			PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
-			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-				goto phpdbg_out;
-			}
 		} zend_end_try();
+		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
+		
+		/* quit if init says so */
+		if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+			goto phpdbg_out;
+		}
 
 		/* step from here, not through init */
 		if (step) {
@@ -1239,7 +1239,6 @@ phpdbg_interact:
 					phpdbg_export_breakpoints(bp_tmp_fp TSRMLS_CC);
 					fclose(bp_tmp_fp);
 					cleaning = 1;
-					goto phpdbg_out;
 				} else {
 					cleaning = 0;
 				}
@@ -1265,11 +1264,8 @@ phpdbg_interact:
 					}
 				}
 #endif
-				if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-					goto phpdbg_out;
-				}
 			} zend_end_try();
-		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+		} while(!cleaning && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 		
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
