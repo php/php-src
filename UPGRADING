@@ -38,6 +38,9 @@ PHP X.Y UPGRADE NOTES
 - Added dedicated syntax for variadic functions.
   (https://wiki.php.net/rfc/variadics)
 
+- Added support for argument unpacking to complement the variadic syntax.
+  (https://wiki.php.net/rfc/argument_unpacking)
+
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
 
@@ -47,6 +50,9 @@ PHP X.Y UPGRADE NOTES
   option).
 
 - Added openssl crypto method stream context option.
+
+- Added use function and use const.
+  (https://wiki.php.net/rfc/use_function)
 
 ========================================
 2. Changes in SAPI modules
