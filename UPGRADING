@@ -20,16 +20,6 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Core:
-  Removed $HTTP_RAW_POST_DATA global variable. Restore backwards compatibility 
-  by:
-  <?php
-  global $HTTP_RAW_POST_DATA;
-  if (!isset($HTTP_RAW_POST_DATA)) {
-      $HTTP_RAW_POST_DATA = file_get_contents("php://input");
-  }
-  ?>
-
 - JSON:
   json_decode() no longer accepts non-lowercase variants of lone JSON true,
   false or null values. For example, True or FALSE will now cause json_decode to
@@ -148,7 +138,9 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core:
-  Removed always_populate_raw_post_data.
+  Changed always_populate_raw_post_data to throw a deprecation warning when
+  enabled and to recognize ohe value -1 for never populating the global 
+  $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
 
 ========================================
 11. Other Changes
