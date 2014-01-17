@@ -51,13 +51,19 @@ void intl_convert_utf8_to_utf16(
 	UChar*      dst_buf = NULL;
 	int32_t     dst_len = 0;
 
+	if (src_len > INT32_MAX) {
+		*target     = NULL;
+		*target_len = 0;
+		return;
+	}
+
 	/* If *target is NULL determine required destination buffer size (pre-flighting).
 	 * Otherwise, attempt to convert source string; if *target buffer is not large enough
 	 * it will be resized appropriately.
 	 */
 	*status = U_ZERO_ERROR;
 
-	u_strFromUTF8( *target, *target_len, &dst_len, src, src_len, status );
+	u_strFromUTF8( *target, (int32_t)*target_len, &dst_len, src, (int32_t)src_len, status );
 
 	if( *status == U_ZERO_ERROR )
 	{
@@ -79,7 +85,7 @@ void intl_convert_utf8_to_utf16(
 
 	/* Convert source string from UTF-8 to UTF-16. */
 	*status = U_ZERO_ERROR;
-	u_strFromUTF8( dst_buf, dst_len+1, NULL, src, src_len, status );
+	u_strFromUTF8( dst_buf, dst_len+1, NULL, src, (int32_t)src_len, status );
 	if( U_FAILURE( *status ) )
 	{
 		efree( dst_buf );
@@ -115,9 +121,15 @@ void intl_convert_utf16_to_utf8(
 	char*       dst_buf = NULL;
 	int32_t     dst_len;
 
+	if ((php_int_t)src_len > INT32_MAX || (php_int_t)src_len < INT32_MIN) {
+		target     = NULL;
+		target_len = 0;
+		return;
+	}
+
 	/* Determine required destination buffer size (pre-flighting). */
 	*status = U_ZERO_ERROR;
-	u_strToUTF8( NULL, 0, &dst_len, src, src_len, status );
+	u_strToUTF8( NULL, 0, &dst_len, src, (int32_t)src_len, status );
 
 	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
@@ -131,7 +143,7 @@ void intl_convert_utf16_to_utf8(
 
 	/* Convert source string from UTF-8 to UTF-16. */
 	*status = U_ZERO_ERROR;
-	u_strToUTF8( dst_buf, dst_len, NULL, src, src_len, status );
+	u_strToUTF8( dst_buf, dst_len, NULL, src, (int32_t)src_len, status );
 	if( U_FAILURE( *status ) )
 	{
 		efree( dst_buf );

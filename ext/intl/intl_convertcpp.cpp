@@ -29,14 +29,22 @@ int intl_stringFromChar(UnicodeString &ret, char *str, php_size_t str_len, UErro
 {
 	//the number of UTF-16 code units is not larger than that of UTF-8 code
 	//units, + 1 for the terminator
-	int32_t capacity = str_len + 1;
+	int32_t capacity;
 
 	//no check necessary -- if NULL will fail ahead
-	UChar	*utf16 = ret.getBuffer(capacity);
+	UChar	*utf16;
 	int32_t utf16_len = 0;
+
+	if (str_len > INT32_MAX) {
+		return FAILURE;
+	}
+
+	capacity = (int32_t)(str_len + 1);
+	utf16 = ret.getBuffer(capacity);
+
 	*status = U_ZERO_ERROR;
 	u_strFromUTF8WithSub(utf16, ret.getCapacity(), &utf16_len,
-		str, str_len, U_SENTINEL /* no substitution */, NULL,
+		str, (int32_t)str_len, U_SENTINEL /* no substitution */, NULL,
 		status);
 	ret.releaseBuffer(utf16_len);
 	if (U_FAILURE(*status)) {

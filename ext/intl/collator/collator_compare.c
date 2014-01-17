@@ -55,6 +55,16 @@ PHP_FUNCTION( collator_compare )
 		RETURN_FALSE;
 	}
 
+	if (str1_len > INT32_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "The first string to compare is too long");
+
+		RETURN_FALSE;
+	} else if (str1_len > INT32_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "The second string to compare is too long");
+
+		RETURN_FALSE;
+	}
+
 	/* Fetch the object. */
 	COLLATOR_METHOD_FETCH_OBJECT;
 
@@ -110,8 +120,8 @@ PHP_FUNCTION( collator_compare )
 	/* Then compare them. */
 	result = ucol_strcoll(
 		co->ucoll,
-		ustr1, ustr1_len,
-		ustr2, ustr2_len );
+		ustr1, (int32_t)ustr1_len,
+		ustr2, (int32_t)ustr2_len );
 
 	if( ustr1 )
 		efree( ustr1 );
