@@ -1947,8 +1947,12 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	}
 
 	num_args = opline->extended_value + EX(call)->num_additional_args;
-	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-	zend_vm_stack_push((void*)(zend_uintptr_t) num_args TSRMLS_CC);
+	if (EX(call)->num_additional_args) {
+		EX(function_state).arguments = zend_vm_stack_push_args(num_args TSRMLS_CC);
+	} else {
+		EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
+		zend_vm_stack_push((void*)(zend_uintptr_t) num_args TSRMLS_CC);
+	}
 	LOAD_OPLINE();
 
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
