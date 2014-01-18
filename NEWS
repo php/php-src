@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.9
 
+- Core:
+  . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
+
 - GD:
   . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
     (Laruence, Remi)
