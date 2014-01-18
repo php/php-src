@@ -52,13 +52,15 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 		case IS_VAR:
 		case IS_TMP_VAR: {
 			zend_ulong id = 0, *pid = NULL;
-			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
-				id = zend_hash_num_elements(vars);
-				zend_hash_index_update(
-					vars, (zend_ulong) ops->vars - op->var,
-					(void**) &id,
-					sizeof(zend_ulong), NULL);
-			} else id = *pid;
+			if (vars != NULL) {
+				if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
+					id = zend_hash_num_elements(vars);
+					zend_hash_index_update(
+						vars, (zend_ulong) ops->vars - op->var,
+						(void**) &id,
+						sizeof(zend_ulong), NULL);
+				} else id = *pid;
+			}
 			asprintf(&decode, "@%lu", id);
 		} break;
 
