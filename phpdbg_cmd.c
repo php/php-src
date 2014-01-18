@@ -582,6 +582,8 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 				(command->alias == *input->argv[0]->string))) {
 
 				phpdbg_param_t param;
+				phpdbg_command_t *initial_last_cmd;
+				phpdbg_param_t initial_last_param;
 
 				param.type = EMPTY_PARAM;
 
@@ -644,15 +646,20 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 					}
 				}
 
+				PHPDBG_G(lparam) = param;
+				initial_last_param = PHPDBG_G(lparam);
+				initial_last_cmd = (phpdbg_command_t *)PHPDBG_G(lcmd);
+				PHPDBG_G(lcmd) = (phpdbg_command_t *)command;
+
 				rc = command->handler(&param, input TSRMLS_CC);
 
 				/* only set last command when it is worth it! */
-				if ((rc != FAILURE) &&
-					!(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
-					PHPDBG_G(lcmd) = (phpdbg_command_t*) command;
-					phpdbg_clear_param(
-						&PHPDBG_G(lparam) TSRMLS_CC);
-					PHPDBG_G(lparam) = param;
+				if (rc != FAILURE && !(PHPDBG_G(flags) & PHPDBG_IS_INITIALIZING)) {
+					phpdbg_clear_param(&initial_last_param TSRMLS_CC);
+				} else if (PHPDBG_G(lcmd) == command && !memcmp(&PHPDBG_G(lparam),& initial_last_param, sizeof(phpdbg_param_t))) {
+					PHPDBG_G(lparam) = initial_last_param;
+					PHPDBG_G(lcmd) = initial_last_cmd;
+					phpdbg_clear_param(&param TSRMLS_CC);
 				}
 				break;
 			}
