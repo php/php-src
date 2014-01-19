@@ -459,6 +459,9 @@ PHPDBG_API phpdbg_input_t *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	phpdbg_input_t *buffer = NULL;
 	char *cmd = NULL;
+#ifndef HAVE_LIBREADLINE
+	char buf[PHPDBG_MAX_CMD];
+#endif
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) &&
@@ -475,7 +478,6 @@ disconnect:
 			}
 
 #ifndef HAVE_LIBREADLINE
-			char buf[PHPDBG_MAX_CMD];
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;

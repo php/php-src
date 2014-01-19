@@ -1159,6 +1159,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	pdo_pgsql_db_handle *H;
 	int ret = 0;
 	char *conn_str, *p, *e;
+	char *tmp_pass;
 	php_int_t connect_timeout = 30;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
@@ -1180,18 +1181,44 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		connect_timeout = pdo_attr_ival(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 	}
 
+	if (dbh->password) {
+		if (dbh->password[0] != '\'' && dbh->password[strlen(dbh->password) - 1] != '\'') {
+			char *pwd = dbh->password;
+			int pos = 1;
+
+			tmp_pass = safe_emalloc(2, strlen(dbh->password), 3);
+			tmp_pass[0] = '\'';
+
+			while (*pwd != '\0') {
+				if (*pwd == '\\' || *pwd == '\'') {
+					tmp_pass[pos++] = '\\';
+				}
+
+				tmp_pass[pos++] = *pwd++;
+			}
+
+			tmp_pass[pos++] = '\'';
+			tmp_pass[pos] = '\0';
+		} else {
+			tmp_pass = dbh->password;
+		}
+	}
+
 	/* support both full connection string & connection string + login and/or password */
 	if (dbh->username && dbh->password) {
-		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%pd", dbh->data_source, dbh->username, dbh->password, connect_timeout);
+		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%pd", dbh->data_source, dbh->username, tmp_pass, connect_timeout);
 	} else if (dbh->username) {
 		spprintf(&conn_str, 0, "%s user=%s connect_timeout=%pd", dbh->data_source, dbh->username, connect_timeout);
 	} else if (dbh->password) {
-		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%pd", dbh->data_source, dbh->password, connect_timeout);
+		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%pd", dbh->data_source, tmp_pass, connect_timeout);
 	} else {
 		spprintf(&conn_str, 0, "%s connect_timeout=%pd", (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);
+	if (dbh->password && tmp_pass != dbh->password) {
+		efree(tmp_pass);
+	}
 
 	efree(conn_str);
 
