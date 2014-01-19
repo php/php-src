@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #66286 (Incorrect object comparison with inheritance). (Nikita)
   . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
 
+- PDO_pgsql:
+  . Fixed bug #62479 (PDO-psql cannot connect if password contains spaces) (willfitch, iliaa)
+
 - Session:
   . Fixed bug #66481 (Calls to session_name() segfault when session.name is
     null). (Laruence)
