@@ -567,6 +567,12 @@ PHPDBG_COMMAND(run) /* {{{ */
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 
+		/* clean up from last execution */
+		zend_execute_data *ex = EG(current_execute_data);
+		if (ex && ex->symbol_table) {
+			zend_hash_clean(ex->symbol_table);
+		}
+
 		/* clean seek state */
 		PHPDBG_G(flags) &= ~PHPDBG_SEEK_MASK;
 		zend_hash_clean(
