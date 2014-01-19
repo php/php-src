@@ -657,9 +657,9 @@ PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t *command, phpdbg_input_t *in
 					}
 				}
 
-				PHPDBG_G(lparam) = param;
 				initial_last_param = PHPDBG_G(lparam);
 				initial_last_cmd = (phpdbg_command_t *)PHPDBG_G(lcmd);
+				PHPDBG_G(lparam) = param;
 				PHPDBG_G(lcmd) = (phpdbg_command_t *)command;
 
 				rc = command->handler(&param, input TSRMLS_CC);
