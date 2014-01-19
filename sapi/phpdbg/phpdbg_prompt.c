@@ -551,7 +551,8 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_op **orig_opline = EG(opline_ptr);
 		zend_op_array *orig_op_array = EG(active_op_array);
 		zval **orig_retval_ptr = EG(return_value_ptr_ptr);
-
+		zend_bool restore = 1;
+		
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
 				phpdbg_error("Failed to compile %s, cannot run", PHPDBG_G(exec));
@@ -586,18 +587,19 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				phpdbg_error("Caught exit/error from VM");
-				goto out;
+				restore = 0;
 			}
 		} zend_end_try();
 
-		if (EG(exception)) {
-			phpdbg_handle_exception(TSRMLS_C);
+		if (restore) {
+			if (EG(exception)) {
+				phpdbg_handle_exception(TSRMLS_C);
+			}
+
+			EG(active_op_array) = orig_op_array;
+			EG(opline_ptr) = orig_opline;
+			EG(return_value_ptr_ptr) = orig_retval_ptr;
 		}
-
-		EG(active_op_array) = orig_op_array;
-		EG(opline_ptr) = orig_opline;
-		EG(return_value_ptr_ptr) = orig_retval_ptr;
-
 	} else {
 		phpdbg_error("Nothing to execute!");
 	}
