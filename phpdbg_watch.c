@@ -39,11 +39,11 @@ typedef struct {
 
 #define MEMDUMP_SIZE(size) (sizeof(phpdbg_watch_memdump) - sizeof(void *) + (size))
 
-static inline void *phpdbg_get_page_boundary(void *addr) {
+static zend_always_inline void *phpdbg_get_page_boundary(void *addr) {
 	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
 }
 
-static inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
+static zend_always_inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
 	return (size_t)phpdbg_get_page_boundary(addr + size - 1) - (size_t)phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
 }
 
@@ -381,22 +381,19 @@ int phpdbg_delete_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 }
 
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC) {
-	void *addr;
 	void *page;
 	phpdbg_watch_memdump *dump;
 	phpdbg_watchpoint_t *watch;
 	size_t size;
 
-	addr = info->si_addr;
-
-	watch = phpdbg_check_for_watchpoint(addr TSRMLS_CC);
+	watch = phpdbg_check_for_watchpoint(info->si_addr TSRMLS_CC);
 
 	if (watch == NULL) {
 		return FAILURE;
 	}
 
-	page = phpdbg_get_page_boundary(addr);
-	size = phpdbg_get_total_page_size(addr, watch->size);
+	page = phpdbg_get_page_boundary(watch->addr.ptr);
+	size = phpdbg_get_total_page_size(watch->addr.ptr, watch->size);
 
 	/* re-enable writing */
 	mprotect(page, size, PROT_NONE | PROT_READ | PROT_WRITE);
@@ -495,8 +492,12 @@ static int phpdbg_print_changed_zval(void *llist_data) {
 					zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
 					phpdbg_writeln("\nNew refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);
 
-					if ((htresult = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)Z_ARRVAL_P((zval *)oldPtr)))) {
+					if (Z_TYPE_P((zval *)oldPtr) != IS_ARRAY || Z_ARRVAL_P(watch->addr.zv) == Z_ARRVAL_P((zval *)oldPtr)) {
+						break;
+					}
+
 remove_ht_watch:
+					if ((htresult = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)Z_ARRVAL_P((zval *)oldPtr)))) {
 						htwatch = htresult->ptr;
 						zend_hash_del(&PHPDBG_G(watchpoints), htwatch->str, htwatch->str_len);
 					}
