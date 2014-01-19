@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.3.29
 
+- PDO_pgsql:
+  . Fixed bug #62479 (PDO-psql cannot connect if password contains spaces)
+
 12 Dec 2013, PHP 5.3.28
 
 - Openssl:
