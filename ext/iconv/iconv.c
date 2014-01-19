@@ -229,7 +229,7 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 	if (new_value_length) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(input_encoding), strlen(SG(input_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, PG(input_encoding), strlen(PG(input_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -243,7 +243,7 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 	if (new_value_length) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(output_encoding), strlen(SG(output_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, PG(output_encoding), strlen(PG(output_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -257,7 +257,7 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 	if (new_value_length) {
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
-		OnUpdateString(entry, SG(internal_encoding), strlen(SG(internal_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		OnUpdateString(entry, PG(internal_encoding), strlen(PG(internal_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -266,9 +266,9 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("iconv.input_encoding",    ICONV_INPUT_ENCODING,    PHP_INI_ALL, OnUpdateInputEncoding, input_encoding,    zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.output_encoding",   ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateOutputEncoding, output_encoding,   zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.input_encoding",    "",    PHP_INI_ALL, OnUpdateInputEncoding, input_encoding,    zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.output_encoding",   "",   PHP_INI_ALL, OnUpdateOutputEncoding, output_encoding,   zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.internal_encoding", "", PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
 PHP_INI_END()
 /* }}} */
 

@@ -29,6 +29,7 @@
 #define PHP_API_VERSION 20131106
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
+#define PHP_DEFAULT_CHARSET "UTF-8"
 
 #include "php_version.h"
 #include "zend.h"

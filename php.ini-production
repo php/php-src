@@ -690,7 +690,21 @@ default_mimetype = "text/html"
 
 ; PHP's default character set is set to empty.
 ; http://php.net/default-charset
-;default_charset = "UTF-8"
+default_charset = "UTF-8"
+
+; PHP input character encoding is set to empty
+; http://php.net/input-encoding
+input_encoding = ""
+
+; PHP internal character encoding is set to empty
+; If empty, default_charset is used
+; http://php.net/internal-encoding
+internal_encoding = ""
+
+; PHP output character encoding is set to empty
+; mbstring or iconv output handler is used
+; http://php.net/input-encoding
+ouptt_encoding = ""
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
 ; to disable this feature and it will be removed in a future version.
@@ -942,9 +956,17 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-;iconv.input_encoding = ISO-8859-1
-;iconv.internal_encoding = ISO-8859-1
-;iconv.output_encoding = ISO-8859-1
+; Use of this INI entory is deprecated, use global input_encoding instead.
+; If empty, input_encoding is used.
+;iconv.input_encoding =
+
+; Use of this INI entory is deprecated, use global ouput_encoding instead.
+; If empty, output_encoding is used.
+;iconv.internal_encoding =
+
+; Use of this INI entory is deprecated, use global internal_encoding instead.
+; If empty, internal_encoding is used.
+;iconv.output_encoding =
 
 [intl]
 ;intl.default_locale =
@@ -1735,18 +1757,24 @@ mssql.secure_connection = Off
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
+; Use of this INI entory is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
-; Some encoding cannot work as internal encoding.
-; (e.g. SJIS, BIG5, ISO-2022-*)
+; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
+; If empty, default_charset or internal_encoding is used in order.
 ; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = UTF-8
+;mbstring.internal_encoding =
 
+; Use of this INI entory is deprecated, use global input_encoding instead.
 ; http input encoding.
+; Default to pass. If empty, input_encoding is used.
+; mbstring.encoding_traslation = On is needed to use this setting.
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = UTF-8
+;mbstring.http_input = pass
 
-; http output encoding. mb_output_handler must be
-; registered as output buffer to function
+; Use of this INI entory is deprecated, use global output_encoding instead.
+; http output encoding.
+; mb_output_handler must be registered as output buffer to function.
+; Default to pass. If empty, output_encoding is used.
 ; http://php.net/mbstring.http-output
 ;mbstring.http_output = pass
 
