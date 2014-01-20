@@ -695,19 +695,19 @@ default_charset = "UTF-8"
 ; PHP internal character encoding is set to empty.
 ; If empty, default_charset is used.
 ; http://php.net/internal-encoding
-internal_encoding =
+;internal_encoding =
 
 ; PHP input character encoding is set to empty.
 ; If empty, default_charset is used.
 ; http://php.net/input-encoding
-input_encoding =
+;input_encoding =
 
 ; PHP output character encoding is set to empty.
 ; If empty, default_charset is used.
 ; mbstring or iconv output handler is used.
 ; See also output_buffer.
 ; http://php.net/output-encoding
-output_encoding =
+;output_encoding =
 
 ; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
 ; to disable this feature and it will be removed in a future version.
@@ -1757,6 +1757,7 @@ mssql.secure_connection = Off
 
 [mbstring]
 ; language for internal character representation.
+; This affects mb_send_mail() and mbstrig.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
@@ -1790,7 +1791,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; auto means
+; "auto" detect order is changed accoding to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
@@ -1811,6 +1812,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
+; Default: Off
 ;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()

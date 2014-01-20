@@ -1292,39 +1292,9 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 	const mbfl_encoding *encoding;
 
 	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
-  		switch (MBSTRG(language)) {
-  			case mbfl_no_language_uni:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
-  				break;
-  			case mbfl_no_language_japanese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_jp);
-  				break;
-  			case mbfl_no_language_korean:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_kr);
-  				break;
-  			case mbfl_no_language_simplified_chinese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_cn);
-  				break;
-  			case mbfl_no_language_traditional_chinese:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_euc_tw);
-  				break;
-  			case mbfl_no_language_russian:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_koi8r);
-  				break;
-  			case mbfl_no_language_german:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_15);
-  				break;
-  			case mbfl_no_language_armenian:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_armscii8);
-  				break;
-  			case mbfl_no_language_turkish:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_9);
-  				break;
-  			default:
-  				encoding = mbfl_no2encoding(mbfl_no_encoding_8859_1);
-  				break;
-  		}
-  	}
+		/* falls back to UTF-8 if an unkown encoding name is given */
+		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
+	}
 	MBSTRG(internal_encoding) = encoding;
 	MBSTRG(current_internal_encoding) = encoding;
 #if HAVE_MBREGEX
@@ -2173,8 +2143,10 @@ PHP_FUNCTION(mb_output_handler)
  
  	/* feed the string */
  	mbfl_string_init(&string);
- 	string.no_language = MBSTRG(language);
- 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	/* these are not needed. convd has encoding info.
+	string.no_language = MBSTRG(language);
+	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
+	*/
  	string.val = (unsigned char *)arg_string;
  	string.len = arg_string_len;
  	mbfl_buffer_converter_feed(MBSTRG(outconv), &string);
