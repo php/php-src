@@ -114,6 +114,9 @@
 #ifndef DNS_T_A6
 #define DNS_T_A6	38
 #endif
+#ifndef DNS_T_SPF
+#define DNS_T_SPF	99
+#endif
 
 #ifndef DNS_T_ANY
 #define DNS_T_ANY	255
@@ -275,7 +278,7 @@ static char *php_gethostbyname(char *name)
 /* }}} */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
-# define PHP_DNS_NUM_TYPES	12	/* Number of DNS Types Supported by PHP currently */
+# define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
 
 # define PHP_DNS_A      0x00000001
 # define PHP_DNS_NS     0x00000002
@@ -283,6 +286,7 @@ static char *php_gethostbyname(char *name)
 # define PHP_DNS_SOA    0x00000020
 # define PHP_DNS_PTR    0x00000800
 # define PHP_DNS_HINFO  0x00001000
+# define PHP_DNS_SPF    0x00002000
 # define PHP_DNS_MX     0x00004000
 # define PHP_DNS_TXT    0x00008000
 # define PHP_DNS_A6     0x01000000
@@ -290,7 +294,7 @@ static char *php_gethostbyname(char *name)
 # define PHP_DNS_NAPTR  0x04000000
 # define PHP_DNS_AAAA   0x08000000
 # define PHP_DNS_ANY    0x10000000
-# define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
+# define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_SPF|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
@@ -374,6 +378,7 @@ PHP_FUNCTION(dns_check_record)
 		else if (!strcasecmp("ANY",   rectype)) type = DNS_T_ANY;
 		else if (!strcasecmp("SOA",   rectype)) type = DNS_T_SOA;
 		else if (!strcasecmp("TXT",   rectype)) type = DNS_T_TXT;
+		else if (!strcasecmp("SPF",   rectype)) type = DNS_T_SPF;
 		else if (!strcasecmp("CNAME", rectype)) type = DNS_T_CNAME;
 		else if (!strcasecmp("AAAA",  rectype)) type = DNS_T_AAAA;
 		else if (!strcasecmp("SRV",   rectype)) type = DNS_T_SRV;
@@ -515,6 +520,30 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				cp += dlen;
 
 				add_assoc_stringl(*subarray, "txt", tp, (dlen>0)?dlen - 1:0, 0);
+				add_assoc_zval(*subarray, "entries", entries);
+			}
+			break;
+		case DNS_T_SPF:
+			{
+				int ll = 0;
+				zval *entries = NULL;
+
+				add_assoc_string(*subarray, "type", "SPF", 1);
+				tp = emalloc(dlen + 1);
+
+				MAKE_STD_ZVAL(entries);
+				array_init(entries);
+
+				while (ll < dlen) {
+					n = cp[ll];
+					memcpy(tp + ll , cp + ll + 1, n);
+					add_next_index_stringl(entries, cp + ll + 1, n, 1);
+					ll = ll + n + 1;
+				}
+				tp[dlen] = '\0';
+				cp += dlen;
+
+				add_assoc_stringl(*subarray, "spf", tp, (dlen>0)?dlen - 1:0, 0);
 				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
@@ -791,6 +820,9 @@ PHP_FUNCTION(dns_get_record)
 			case 11:
 				type_to_fetch = type_param&PHP_DNS_A6	 ? DNS_T_A6 : 0;
 				break;
+			case 12:
+				type_to_fetch = type_param&PHP_DNS_SPF   ? DNS_T_SPF   : 0;
+				break;
 			case PHP_DNS_NUM_TYPES:
 				store_results = 0;
 				continue;
@@ -992,6 +1024,7 @@ PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_MX",    PHP_DNS_MX,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_TXT",   PHP_DNS_TXT,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_SPF",   PHP_DNS_SPF,   CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
