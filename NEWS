@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
     ^M as lineend). (Laruence)
 
+- Readline
+  . Fixed Bug #66412 (readline_clear_history() with libedit causes segfault after
+    #65714). (Remi)
+
 - Session
   . Fixed bug #66469 (Session module is sending multiple set-cookie headers when
     session.use_strict_mode=1) (Yasuo)
