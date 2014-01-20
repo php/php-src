@@ -2,7 +2,7 @@
 readline_write_history(): Basic test
 --SKIPIF--
 <?php if (!extension_loaded("readline") || !function_exists('readline_add_history')) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
+if (READLINE_LIB != "libedit") die("skip libedit only");
 ?>
 --FILE--
 <?php
@@ -21,7 +21,8 @@ unlink($name);
 
 ?>
 --EXPECT--
-string(8) "foo
+string(21) "_HiStOrY_V2_
+foo
 
 1
 
