@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   . Implemented constant scalar expressions (with support for constants)
     (RFC: https://wiki.php.net/rfc/const_scalar_exprs). (Bob)
   . Fixed bug #65784 (Segfault with finally). (Laruence, Dmitry)
+  . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
