@@ -395,7 +395,7 @@ static PHP_FUNCTION(bzopen)
 	} else if (Z_TYPE_PP(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		int fd;
-		int stream_mode_len;
+		php_size_t stream_mode_len;
 
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
@@ -495,6 +495,17 @@ static PHP_FUNCTION(bzcompress)
 		return;
 	}
 
+	if (source_len > UINT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The string to compress is too large");
+		RETURN_INT(BZ_PARAM_ERROR);
+	} else if (argc > 1 && zblock_size > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid block size");
+		RETURN_INT(BZ_PARAM_ERROR);
+	} else if (argc > 2 && zwork_factor > INT_MAX) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid work factor");
+		RETURN_INT(BZ_PARAM_ERROR);
+	}
+
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
 	   + .01 x length of data + 600 which is the largest size the results of the compression 
 	   could possibly be, at least that's what the libbz2 docs say (thanks to jeremy@nirvani.net 
@@ -546,10 +557,15 @@ static PHP_FUNCTION(bzdecompress)
 		RETURN_FALSE;
 	}
 
+	if (source_len > UINT_MAX/2) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The string to decompress is too large");
+		RETURN_FALSE;
+	}
+
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
-	if (BZ2_bzDecompressInit(&bzs, 0, small) != BZ_OK) {
+	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
 
