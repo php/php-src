@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.25
+23 Jan 2013, PHP 5.4.25 RC1
 
 - Core:
   . Fixed bug #66286 (Incorrect object comparison with inheritance). (Nikita)
