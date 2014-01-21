@@ -37,6 +37,7 @@ test_open_basedir_after("readlink");
 ?>
 --CLEAN--
 <?php
+chdir(__DIR__);
 require_once "open_basedir.inc";
 delete_directories();
 ?>
