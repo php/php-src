@@ -31,6 +31,9 @@
           echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
       }
       break;
+    case 'redirect_upload':
+      header('Location: /get.php?test=upload');
+      break;
     default:
       echo "Hello World!\n";
       echo "Hello World!";
