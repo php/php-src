@@ -56,7 +56,8 @@ spaces) (willfitch, iliaa)
   . Fixed bug #66218 (zend_register_functions breaks reflection). (Remi)
 
 - Date:
-  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval) (CVE-2013-6712). 
+    (Remi)
   . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
   
 - DOM:
