@@ -49,3 +49,4 @@ Stack trace:
 #1 {main}
   thrown in %s on line %d
 close: goodbye cruel world
+
