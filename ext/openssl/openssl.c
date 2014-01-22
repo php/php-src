@@ -58,7 +58,7 @@
 #define timezone _timezone	/* timezone is called _timezone in LibC */
 #endif
 
-#define DEFAULT_KEY_LENGTH	512
+#define DEFAULT_KEY_LENGTH	2048
 #define MIN_KEY_LENGTH		384
 
 #define OPENSSL_ALGO_SHA1 	1
@@ -3450,6 +3450,15 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			assert(pkey->pkey.dh != NULL);
 
 			if (NULL == pkey->pkey.dh->p || NULL == pkey->pkey.dh->priv_key) {
+				return 0;
+			}
+			break;
+#endif
+#ifdef EVP_PKEY_EC
+		case EVP_PKEY_EC:
+			assert(pkey->pkey.ec != NULL);
+
+			if ( NULL == EC_KEY_get0_private_key(pkey->pkey.ec)) {
 				return 0;
 			}
 			break;
