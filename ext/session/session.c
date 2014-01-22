@@ -1280,7 +1280,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
  * It must be directly removed from SG(sapi_header) because sapi_add_header_ex()
  * removes all of matching cookie. i.e. It deletes all of Set-Cookie headers.
  */
-static void php_session_remove_cookie() {
+static void php_session_remove_cookie(TSRMLS_D) {
 	sapi_header_struct *header;
 	zend_llist *l = &SG(sapi_headers).headers;
 	zend_llist_element *next;
@@ -1386,7 +1386,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 
 	smart_str_0(&ncookie);
 
-	php_session_remove_cookie(); /* remove already sent session ID cookie */
+	php_session_remove_cookie(TSRMLS_C); /* remove already sent session ID cookie */
 	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0 TSRMLS_CC);
 }
 /* }}} */
