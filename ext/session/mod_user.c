@@ -64,7 +64,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 
 #define STDVARS								\
 	zval *retval = NULL;					\
-	int ret = FAILURE
+	php_int_t ret = FAILURE
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
 

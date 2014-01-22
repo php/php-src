@@ -289,7 +289,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	void *hash_context = NULL;
 #endif
 	unsigned char *digest;
-	int digest_len;
+	php_size_t digest_len;
 	int j;
 	char *buf, *outid;
 	struct timeval tv;
@@ -537,7 +537,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 
 static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 {
-	int ret = FAILURE;
+	php_int_t ret = FAILURE;
 
 	IF_SESSION_VARS() {
  		if (PS(mod_data) || PS(mod_user_implemented)) {

@@ -45,24 +45,24 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
 
 typedef struct ps_module_struct {
 	const char *s_name;
-	int (*s_open)(PS_OPEN_ARGS);
-	int (*s_close)(PS_CLOSE_ARGS);
-	int (*s_read)(PS_READ_ARGS);
-	int (*s_write)(PS_WRITE_ARGS);
-	int (*s_destroy)(PS_DESTROY_ARGS);
-	int (*s_gc)(PS_GC_ARGS);
+	php_int_t (*s_open)(PS_OPEN_ARGS);
+	php_int_t (*s_close)(PS_CLOSE_ARGS);
+	php_int_t (*s_read)(PS_READ_ARGS);
+	php_int_t (*s_write)(PS_WRITE_ARGS);
+	php_int_t (*s_destroy)(PS_DESTROY_ARGS);
+	php_int_t (*s_gc)(PS_GC_ARGS);
 	char *(*s_create_sid)(PS_CREATE_SID_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
 #define PS_SET_MOD_DATA(a) *mod_data = (a)
 
-#define PS_OPEN_FUNC(x) 	int ps_open_##x(PS_OPEN_ARGS)
-#define PS_CLOSE_FUNC(x) 	int ps_close_##x(PS_CLOSE_ARGS)
-#define PS_READ_FUNC(x) 	int ps_read_##x(PS_READ_ARGS)
-#define PS_WRITE_FUNC(x) 	int ps_write_##x(PS_WRITE_ARGS)
-#define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
-#define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
+#define PS_OPEN_FUNC(x) 	php_int_t ps_open_##x(PS_OPEN_ARGS)
+#define PS_CLOSE_FUNC(x) 	php_int_t ps_close_##x(PS_CLOSE_ARGS)
+#define PS_READ_FUNC(x) 	php_int_t ps_read_##x(PS_READ_ARGS)
+#define PS_WRITE_FUNC(x) 	php_int_t ps_write_##x(PS_WRITE_ARGS)
+#define PS_DESTROY_FUNC(x) 	php_int_t ps_delete_##x(PS_DESTROY_ARGS)
+#define PS_GC_FUNC(x) 		php_int_t ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	char *ps_create_sid_##x(PS_CREATE_SID_ARGS)
 
 #define PS_FUNCS(x) \
