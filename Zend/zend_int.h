@@ -25,6 +25,7 @@
 #ifndef ZEND_WIN32
 /* this probably needs more on non windows, like for C++ and C99*/
 # include <stdint.h>
+# include <inttypes.h>
 #endif
 
 /* This is the heart of the whole int64 enablement in zval. Based on this
