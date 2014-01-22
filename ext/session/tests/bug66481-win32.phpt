@@ -14,3 +14,4 @@ var_dump(session_name("bar"));
 Warning: PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
 string(9) "PHPSESSID"
 string(3) "foo"
+PHP Warning:  PHP Startup: session.name cannot be a numeric or empty '' in Unknown on line 0
