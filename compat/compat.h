@@ -22,9 +22,9 @@
 #define PHP_SIZE_INT_COMPAT_H
 
 /* XXX change the check accordingly to the vote results */
-#define PHP_NEED_COMPAT (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
+#define PHP_NEED_STRSIZE_COMPAT (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
 
-#if PHP_NEED_COMPAT || PHP_FORCE_COMPAT
+#if PHP_NEED_STRSIZE_COMPAT || PHP_FORCE_STRSIZE_COMPAT
 
 typedef long zend_int_t;
 typedef unsigned long zend_uint_t;
