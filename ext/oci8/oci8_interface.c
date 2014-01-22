@@ -529,7 +529,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 		
 		if (ZEND_NUM_ARGS() == 2) {
-			data_len = MIN(data_len, write_len);
+			data_len = write_len <= 0 ? 0 : MIN(data_len, (php_size_t)write_len);
 		}
 	}
 	else {
@@ -538,7 +538,7 @@ PHP_FUNCTION(oci_lob_write)
 		}
 
 		if (ZEND_NUM_ARGS() == 3) {
-			data_len = MIN(data_len, write_len);
+			data_len = write_len <= 0 ? 0 : MIN(data_len, (php_size_t)write_len);
 		}
 	}
 	
@@ -549,7 +549,7 @@ PHP_FUNCTION(oci_lob_write)
 	
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(*tmp, descriptor);
 	
-	if (data_len <= 0) {
+	if (data_len == 0) {
 		RETURN_INT(0);
 	}
 	

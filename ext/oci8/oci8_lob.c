@@ -63,7 +63,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, php_int_
 			/* these three are allowed */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown descriptor type " ZEND_INT_FMT, type);
 			return NULL;
 			break;
 	}
@@ -634,7 +634,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, php_int_t flush_flag TSRML
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid flag value: %ld", flush_flag);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid flag value: " ZEND_INT_FMT, flush_flag);
 			return 1;
 			break;
 	}
@@ -918,7 +918,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, php_int_t type, char 
 			/* only these two are allowed */
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid temporary lob type: %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid temporary lob type: " ZEND_INT_FMT, type);
 			return 1;
 			break;
 	}

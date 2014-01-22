@@ -1454,7 +1454,7 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 		convert_to_int(&tmp);
 		column = php_oci_statement_get_column(statement, Z_IVAL(tmp), NULL, 0 TSRMLS_CC);
 		if (!column) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"%pd\"", Z_IVAL(tmp));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column index \"" ZEND_INT_FMT "\"", Z_IVAL(tmp));
 			zval_dtor(&tmp);
 			return NULL;
 		}
@@ -1520,7 +1520,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, php_siz
 	convert_to_array(var);
 
 	if (maxlength < -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid max length value (%pu)", maxlength);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid max length value (" ZEND_INT_FMT ")", maxlength);
 		return 1;
 	}
 	
@@ -1551,7 +1551,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, php_siz
 			bind = php_oci_bind_array_helper_date(var, max_table_length, statement->connection TSRMLS_CC);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: " ZEND_INT_FMT, type);
 			return 1;
 			break;
 	}
@@ -1627,7 +1627,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, php_int_t max_table_le
 		zend_hash_internal_pointer_reset(hash);
 		while (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_string_ex(entry);
-			if (Z_STRSIZE_PP(entry) > maxlength) {
+			if (maxlength < 0 || (maxlength >= 0 && Z_STRSIZE_PP(entry) > maxlength)) {
 				maxlength = Z_STRSIZE_PP(entry) + 1;
 			}
 			zend_hash_move_forward(hash);
