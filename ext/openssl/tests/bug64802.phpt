@@ -8,12 +8,6 @@ if (!extension_loaded("openssl")) die("skip");
 <?php
 $cert = file_get_contents(__DIR__.'/bug64802.pem');
 $r = openssl_x509_parse($cert,$use_short_names=true);
-<<<<<<< HEAD
-var_dump( count($r['subject'])>1 );
-?>
---EXPECTF--
-bool(true)
-=======
 sort($r['subject']);
 var_dump( $r['subject'] );
 ?>
@@ -60,4 +54,3 @@ array(11) {
     string(12) "www.rdio.com"
   }
 }
->>>>>>> upstream/master
