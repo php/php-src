@@ -73,6 +73,12 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 				 OCI_DEFAULT
 				)
 		);
+#ifdef HAVE_OCI8_DTRACE
+		if (DTRACE_OCI8_SQLTEXT_ENABLED()) {
+			DTRACE_OCI8_SQLTEXT(connection, connection->client_id, statement, query);
+		}
+#endif /* HAVE_OCI8_DTRACE */
+
 		if (errstatus != OCI_SUCCESS) {
 			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 
