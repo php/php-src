@@ -47,5 +47,6 @@ Fatal error: Uncaught exception 'Exception' in %s
 Stack trace:
 #0 [internal function]: write('%s', '')
 #1 {main}
-  thrown in %s/ext/session/tests/bug60634_error_4.php on line 20
+  thrown in %s on line %d
 close: goodbye cruel world
+
