@@ -92,6 +92,7 @@ typedef struct stat zend_stat_t;
 # define REGISTER_MAIN_INT_CONSTANT                 REGISTER_MAIN_LONG_CONSTANT
 # define HASH_KEY_IS_INT                            HASH_KEY_IS_LONG
 # define convert_to_int                             convert_to_long
+# define convert_to_int_ex                          convert_to_long_ex
 # define add_assoc_int                              add_assoc_long
 # define add_property_int                           add_property_long
 # define zendi_convert_to_int                       zendi_convert_to_long
