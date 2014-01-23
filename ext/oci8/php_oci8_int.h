@@ -56,6 +56,29 @@
 #endif
 /* }}} */
 
+/* Compatibility with pre-PHP 5.6 types: https://wiki.php.net/rfc/size_t_and_int64 */
+#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
+typedef long zend_int_t;
+typedef unsigned long zend_uint_t;
+typedef int zend_size_t;
+# define php_size_t			   zend_size_t
+# define php_int_t			   zend_int_t
+# define php_uint_t			   zend_uint_t
+# define Z_STRSIZE_P		   Z_STRLEN_P
+# define Z_STRSIZE_PP		   Z_STRLEN_PP
+# define Z_IVAL				   Z_LVAL
+# define Z_IVAL_P			   Z_LVAL_P
+# define Z_IVAL_PP			   Z_LVAL_PP
+# define ZVAL_INT			   ZVAL_LONG
+# define RETURN_INT			   RETURN_LONG
+# define REGISTER_INT_CONSTANT REGISTER_LONG_CONSTANT
+# define convert_to_int		   convert_to_long
+# define convert_to_int_ex	   convert_to_long_ex
+# define add_assoc_int		   add_assoc_long
+# define add_next_index_int	   add_next_index_long
+# define ZEND_INT_FMT		   "%ld"
+#endif /* compatibility with pre-PHP 5.6 types */
+
 #include "ext/standard/php_string.h"
 #include <oci.h>
 
