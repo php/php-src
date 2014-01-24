@@ -686,7 +686,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 						goto end;
 					}
 				}
-				break; 
+				break;
 			}
 		}
 
@@ -830,7 +830,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		unsigned int null_count = (stmt->param_count + 7) / 8;
 		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, null_count TSRMLS_CC)) {
 			SET_OOM_ERROR(*stmt->error_info);
-			goto end;	
+			goto end;
 		}
 		/* put `null` bytes */
 		null_byte_offset = *p - *buf;
@@ -850,13 +850,13 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		goto end;
 	}
 
-	int1store(*p, stmt->send_types_to_server); 
+	int1store(*p, stmt->send_types_to_server);
 	(*p)++;
 
 	if (stmt->send_types_to_server) {
 		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, stmt->param_count * 2 TSRMLS_CC)) {
 			SET_OOM_ERROR(*stmt->error_info);
-			goto end;	
+			goto end;
 		}
 		mysqlnd_stmt_execute_store_types(stmt, copies, p);
 	}
@@ -872,7 +872,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 	/* 2.2 Enlarge the buffer, if needed */
 	if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, data_size TSRMLS_CC)) {
 		SET_OOM_ERROR(*stmt->error_info);
-		goto end;	
+		goto end;
 	}
 
 	/* 2.3 Store the actual data */
