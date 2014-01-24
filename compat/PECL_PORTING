@@ -115,7 +115,7 @@ II. Porting steps
 	variable of type php_int_t to be passed. The string/path lengths are expected
 	to be of type php_size_t.
 
-	The recommended way to declare the argument specs is using the ternary operator,
+	A possible way to declare the argument specs were using the ternary operator,
 	eq.
 	
 	#define COMP (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
@@ -128,6 +128,7 @@ II. Porting steps
 		return;
 	}
 
+
  iv.  Manual code fixes
 
 	While for many extensions the mechanic replacements will do the big job to
@@ -135,6 +136,12 @@ II. Porting steps
 	especially to mention array API, filesystem API, unsigned string lengths. Also
 	this is likely the case for extensions with library dependencies, see also the
 	pitfalls section.
+
+	After adjusting the variable types in zpp, the first places you automatically should
+	look for are the functions where you pass the parameters. Especially those accepting 
+	integers by reference might be broken. If those functions are your own implementations,
+	it might make sense you to adapt the function signatures. In case of some library
+	functions an intermediate variable of an appropriate type can be used.
 
  v.   Library dependencies
 
@@ -166,6 +173,14 @@ II. Porting steps
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Value '" ZEND_INT_FMT "' is out of range", i0);
 		return;
 	}
+
+
+	Please note, that the replacement tool will not do automatic replacements for the %ld
+	and other specs. It's up to the porter where such replacement were appropriate.
+	To ease the process, some automatic still could be used, like here how it could
+	be done in vim
+
+	:%s,%ld," ZEND_INT_FMT ",g
 
  vii. Array API
 
