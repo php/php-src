@@ -670,6 +670,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 	unsigned int i;
 	DBG_ENTER("mysqlnd_stmt_execute_calculate_param_values_size");
 	for (i = 0; i < stmt->param_count; i++) {
+		unsigned short is_longlong = 0;
 		unsigned int j;
 		zval *the_var = stmt->param_bind[i].zv;
 
@@ -702,15 +703,8 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 				}
 				break;
 			case MYSQL_TYPE_LONGLONG:
-				{
-					zval *tmp_data = (*copies_param && (*copies_param)[i])? (*copies_param)[i]: stmt->param_bind[i].zv;
-					if (Z_TYPE_P(tmp_data) == IS_STRING) {
-						goto use_string;
-					}
-					convert_to_long_ex(&tmp_data);
-				}
-				*data_size += 8;
-				break;
+				is_longlong = 4;
+				/* fall-through */
 			case MYSQL_TYPE_LONG:
 				{
 					zval *tmp_data = (*copies_param && (*copies_param)[i])? (*copies_param)[i]: stmt->param_bind[i].zv;
@@ -719,7 +713,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 					}
 					convert_to_long_ex(&tmp_data);
 				}
-				*data_size += 4;
+				*data_size += 4 + is_longlong;
 				break;
 			case MYSQL_TYPE_LONG_BLOB:
 				if (!(stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED)) {
