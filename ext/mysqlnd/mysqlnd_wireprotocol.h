@@ -302,6 +302,7 @@ PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * c
 
 php_uint_t	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
+size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
 PHPAPI const extern char * const mysqlnd_empty_string;
 
