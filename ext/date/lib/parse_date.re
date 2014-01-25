@@ -750,7 +750,7 @@ const static timelib_tz_lookup_table* zone_search(const char *word, long gmtoffs
 	/* Still didn't find anything, let's find the zone solely based on
 	 * offset/isdst then */
 	for (fmp = timelib_timezone_fallbackmap; fmp->name; fmp++) {
-		if ((fmp->gmtoffset * 3600) == gmtoffset && fmp->type == isdst) {
+		if ((fmp->gmtoffset * 60) == gmtoffset && fmp->type == isdst) {
 			return fmp;
 		}
 	}
