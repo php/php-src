@@ -1094,9 +1094,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tempnam, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tempnam, 0, 0, 2)
 	ZEND_ARG_INFO(0, dir)
 	ZEND_ARG_INFO(0, prefix)
+	ZEND_ARG_INFO(0, suffix)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_tmpfile, 0)

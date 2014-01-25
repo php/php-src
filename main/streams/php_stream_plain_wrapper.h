@@ -45,8 +45,8 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen_tmpfile()	_php_stream_fopen_tmpfile(0 STREAMS_CC TSRMLS_CC)
 
-PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path STREAMS_DC TSRMLS_DC);
-#define php_stream_fopen_temporary_file(dir, pfx, opened_path)	_php_stream_fopen_temporary_file((dir), (pfx), (opened_path) STREAMS_CC TSRMLS_CC)
+PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char *pfx, const char *suffix, char **opened_path STREAMS_DC TSRMLS_DC);
+#define php_stream_fopen_temporary_file(dir, pfx, opened_path, suffix)	_php_stream_fopen_temporary_file((dir), (pfx), (suffix), (opened_path) STREAMS_CC TSRMLS_CC)
 
 /* This is a utility API for extensions that are opening a stream, converting it
  * to a FILE* and then closing it again.  Be warned that fileno() on the result

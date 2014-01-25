@@ -1003,7 +1003,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				/* in non-debug mode we have no problem with 0-length files */
 				{
 #endif
-					fd = php_open_temporary_fd_ex(PG(upload_tmp_dir), "php", &temp_filename, 1 TSRMLS_CC);
+					fd = php_open_temporary_fd_ex(PG(upload_tmp_dir), "php", &temp_filename, "", 1 TSRMLS_CC);
 					upload_cnt--;
 					if (fd == -1) {
 						sapi_module.sapi_error(E_WARNING, "File upload error - unable to create a temporary file");

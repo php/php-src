@@ -799,18 +799,18 @@ parse_eol:
 }
 /* }}} */
 
-/* {{{ proto string tempnam(string dir, string prefix)
+/* {{{ proto string tempnam(string dir, string prefix [, string suffix])
    Create a unique filename in a directory */
 PHP_FUNCTION(tempnam)
 {
-	char *dir, *prefix;
-	int dir_len, prefix_len;
+	char *dir, *prefix, *suffix = "";
+	int dir_len, prefix_len, suffix_len = 0;
 	size_t p_len;
 	char *opened_path;
 	char *p;
 	int fd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps|s", &dir, &dir_len, &prefix, &prefix_len, &suffix, &suffix_len) == FAILURE) {
 		return;
 	}
 
@@ -825,7 +825,7 @@ PHP_FUNCTION(tempnam)
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, suffix, 1 TSRMLS_CC)) >= 0) {
 		close(fd);
 		RETVAL_STRING(opened_path, 0);
 	}
