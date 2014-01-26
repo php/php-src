@@ -172,6 +172,12 @@ typedef struct timelib_time {
 	                              *  2 TimeZone abbreviation */
 } timelib_time;
 
+typedef struct timelib_abbr_info {
+	timelib_sll  utc_offset;
+	char        *abbr;
+	int          dst;
+} timelib_abbr_info;
+
 typedef struct timelib_error_message {
 	int         position;
 	char        character;
