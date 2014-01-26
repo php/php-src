@@ -166,9 +166,10 @@ User Functions/Methods Naming Conventions
 Internal Function Naming Convensions
 ----------------------
 
-1.  Exposed module API must be named 'php_modulename_function()' to avoid
-    symbol collision. They should be in lowercase, with words underscore
-    delimited. Exposed API must be defined in 'php_modulename.h'.
+1.  Functions that are part of the external API should be named
+    'php_modulename_function()' to avoid symbol collision. They should be in
+    lowercase, with words underscore delimited. Exposed API must be defined
+    in 'php_modulename.h'.
 
     PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
 
@@ -179,7 +180,7 @@ Internal Function Naming Convensions
 
 2.  Main module source file must be named 'modulename.c'.
 
-3.  Header file that are used by other sources must be named 'php_modulename.h'.
+3.  Header file that is used by other sources must be named 'php_modulename.h'.
 
 
 Syntax and indentation
