@@ -214,6 +214,34 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 	tm->have_zone = 1;
 }
 
+void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset)
+{
+	if (t->tz_abbr) {
+		free(t->tz_abbr);
+	}
+	t->tz_abbr = NULL;
+
+	t->z = utc_offset;
+	t->have_zone = 1;
+	t->zone_type = TIMELIB_ZONETYPE_OFFSET;
+	t->dst = 0;
+	t->tz_info = NULL;
+}
+
+void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info)
+{
+	if (t->tz_abbr) {
+		free(t->tz_abbr);
+	}
+	t->tz_abbr = strdup(abbr_info.abbr);
+
+	t->z = abbr_info.utc_offset;
+	t->have_zone = 1;
+	t->zone_type = TIMELIB_ZONETYPE_ABBR;
+	t->dst = abbr_info.dst;
+	t->tz_info = NULL;
+}
+
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
 {
 	timelib_time_offset *gmt_offset;
