@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.10
 
+- LDAP:
+  . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
+  (Ondřej Hošek)
+
 ?? ??? 2014, PHP 5.5.9
 
 - Core:
