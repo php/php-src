@@ -91,7 +91,7 @@ FORMAT OF FUNCTION DEFINITIONS FILE
 
     module_name_function(int arg1, int arg2 [, int arg3 [, int arg4]])
 
-  Arguments arg1 and arg2 is required.
+  Arguments arg1 and arg2 are required.
   Arguments arg3 and arg4 are optional.
 
   If possible, the function definition should also contain it's return type
