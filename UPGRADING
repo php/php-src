@@ -621,6 +621,7 @@ c. New functions
   - LDAP:
     - ldap_control_paged_result()
     - ldap_control_paged_result_response()
+    - ldap_modify_batch (5.4.26)
 
   - libxml:
     - libxml_set_external_entity_loader()

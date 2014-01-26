@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.26
 
+- LDAP:
+  . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
+  (Ondřej Hošek)
+
 ?? ??? 2013, PHP 5.4.25
 
 - Core:
@@ -9,7 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). 
     (Will Fitch)
 
-- mysqlnd
+- mysqlnd:
   . Fixed bug #66283 (Segmentation fault after memory_limit). (Johannes)
 
 - PDO_pgsql:
