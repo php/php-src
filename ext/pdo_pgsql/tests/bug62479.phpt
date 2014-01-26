@@ -30,7 +30,7 @@ $testQuery = 'SELECT 1 as verification';
 // Create temp user with space in password
 $sql = sprintf($template, 'my password');
 $pdo->query($sql);
-$testConn = new PDO($_ENV['PDOTEST_DSN'], $user, "my password");
+$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "my password");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
@@ -42,7 +42,7 @@ $pdo->query($dropUser);
 $sql = sprintf($template, "my pass''word");
 $pdo->query($sql);
 
-$testConn = new PDO($_ENV['PDOTEST_DSN'], $user, "my pass'word");
+$testConn = new PDO($conf['ENV']['PDOTEST_DSN'], $user, "my pass'word");
 $result = $testConn->query($testQuery)->fetch();
 $check = $result[0];
 var_dump($check);
