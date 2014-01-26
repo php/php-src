@@ -7,13 +7,15 @@
 
 /* Options stuff*/
 $shortopts = NULL;
-$longopts = array('type:', 'custom:', 'help::');
+$longopts = array('type:', 'custom:', 'help::', 'reverse', 'zpp');
 
 $options = getopt($shortopts, $longopts);
 
 $repl_type = isset($options['type']) ? $options['type'] : 'ext';
 $custom_defs_fname = isset($options['custom']) ? $options['custom'] : NULL;
 $fname = $argv[count($argv)-1];
+$reverse_replace = isset($options['reverse']);
+$replace_zpp = isset($options['zpp']);
 
 /* Options validation */
 if (isset($options['help'])) {
@@ -31,9 +33,12 @@ if (isset($options['help'])) {
 
 
 /* Process file */
+$file_contents = file_get_contents($fname);
+
+/* simple macro replacements */
 $replacements = array(
-	'ZEND_SIZE_MAX_LONG'                     => 'ZEND_SIZE_MAX',
-	'ZEND_SIZE_MAX_INT'                      => 'ZEND_SIZE_MAX',
+	/*'ZEND_SIZE_MAX_LONG'                     => 'ZEND_SIZE_MAX',
+	'ZEND_SIZE_MAX_INT'                      => 'ZEND_SIZE_MAX',*/
 	'MAX_LENGTH_OF_LONG'                     => 'MAX_LENGTH_OF_ZEND_INT',
 	'Z_STRLEN'                               => 'Z_STRSIZE',
 	'Z_LVAL'                                 => 'Z_IVAL',
@@ -88,9 +93,58 @@ $replacements = array(
 	'pdo_attr_lval'                          => 'pdo_attr_ival',
 );
 
-$code_old = file_get_contents($fname);
-$code_new = str_replace(array_keys($replacements), array_values($replacements), $code_old);
-if (false === file_put_contents($fname, $code_new)) {
+if ($reverse_replace) {
+	$file_contents = str_replace(array_values($replacements), array_keys($replacements), $file_contents);
+} else {
+	$file_contents = str_replace(array_keys($replacements), array_values($replacements), $file_contents);
+}
+
+/* zpp spec replacements */
+if ($replace_zpp) {
+	$zpp_map = array(
+		'l' => 'i',
+		'L' => 'I',
+		'p' => 'P',
+		's' => 'S',
+	);
+
+	$ptr = array(
+		"/zend_parse_parameters\(.*\s+TSRMLS_CC,\s*\"([a-zA-Z\*+\|\/!]+)\"/msxU",
+		"/zend_parse_parameters_ex\(.*,\s*.*\s+TSRMLS_CC,\s*\"([a-zA-Z\*+\|\/!]+)\"/msxU",
+		"/zend_parse_method_parameters\(.*\s+TSRMLS_CC,\s*.*,\s*\"([a-zA-Z\*+\|\/!]+)\"/msxU",
+		"/zend_parse_method_parameters_ex\(.*,\s*.*\s+TSRMLS_CC,\s*.*,\s*\"([a-zA-Z\*+\|\/!]+)\"/msxU",
+	);
+
+	$raw_specs = $specs = array();
+
+	foreach ($ptr as $p) {
+		if (0 < preg_match_all($p, $file_contents, $m)) {
+			$raw_specs = array_merge($raw_specs, $m[1]);
+		}
+	}
+
+	$raw_specs = array_unique($raw_specs);
+
+	foreach ($raw_specs as $item) {
+		if ($reverse_replace) {
+			$rep = str_replace(array_values($zpp_map), array_keys($zpp_map), $item);
+		} else {
+			$rep = str_replace(array_keys($zpp_map), array_values($zpp_map), $item);
+		}
+
+		if ($rep != $item) {
+			$specs['"' . $item . '"'] = '"' . str_replace(array_values($zpp_map), array_keys($zpp_map), $item) . '"';
+		}
+	}
+
+	if ($reverse_replace) {
+		$file_contents = str_replace(array_keys($specs), array_values($specs), $file_contents);
+	} else {
+		$file_contents = str_replace(array_values($specs), array_keys($specs), $file_contents);
+	}
+}
+
+if (false === file_put_contents($fname, $file_contents)) {
 	print_error("couldnt write into '$fname'");
 }
 
