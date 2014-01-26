@@ -156,10 +156,10 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_INT_CONSTANT("LDAP_DEREF_ALWAYS", LDAP_DEREF_ALWAYS, CONST_PERSISTENT | CONST_CS);
 
 	/* Constants to be used with ldap_modify_batch() */
-	REGISTER_LONG_CONSTANT("LDAP_MODIFY_BATCH_ADD", LDAP_MODIFY_BATCH_ADD, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("LDAP_MODIFY_BATCH_REMOVE", LDAP_MODIFY_BATCH_REMOVE, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("LDAP_MODIFY_BATCH_REMOVE_ALL", LDAP_MODIFY_BATCH_REMOVE_ALL, CONST_PERSISTENT | CONST_CS);
-	REGISTER_LONG_CONSTANT("LDAP_MODIFY_BATCH_REPLACE", LDAP_MODIFY_BATCH_REPLACE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("LDAP_MODIFY_BATCH_ADD", LDAP_MODIFY_BATCH_ADD, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("LDAP_MODIFY_BATCH_REMOVE", LDAP_MODIFY_BATCH_REMOVE, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("LDAP_MODIFY_BATCH_REMOVE_ALL", LDAP_MODIFY_BATCH_REMOVE_ALL, CONST_PERSISTENT | CONST_CS);
+	REGISTER_INT_CONSTANT("LDAP_MODIFY_BATCH_REPLACE", LDAP_MODIFY_BATCH_REPLACE, CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_ATTRIB", LDAP_MODIFY_BATCH_ATTRIB, CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_MODTYPE", LDAP_MODIFY_BATCH_MODTYPE, CONST_PERSISTENT | CONST_CS);
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_VALUES", LDAP_MODIFY_BATCH_VALUES, CONST_PERSISTENT | CONST_CS);
@@ -1453,9 +1453,9 @@ PHP_FUNCTION(ldap_delete)
 
 /* {{{ _ldap_str_equal_to_const
  */
-static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *cstr)
+static int _ldap_str_equal_to_const(const char *str, php_size_t str_len, const char *cstr)
 {
-	int i;
+	php_size_t i;
 
 	if (strlen(cstr) != str_len)
 		return 0;
@@ -1472,9 +1472,9 @@ static int _ldap_str_equal_to_const(const char *str, uint str_len, const char *c
 
 /* {{{ _ldap_strlen_max
  */
-static int _ldap_strlen_max(const char *str, uint max_len)
+static php_size_t _ldap_strlen_max(const char *str, php_size_t max_len)
 {
-	int i;
+	php_size_t i;
 
 	for (i = 0; i < max_len; ++i) {
 		if (str[i] == '\0') {
@@ -1509,7 +1509,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	zval *attrib, *modtype, *vals;
 	zval **fetched;
 	char *dn;
-	int dn_len;
+	php_size_t dn_len;
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
@@ -1539,7 +1539,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsa", &link, &dn, &dn_len, &mods) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rSa", &link, &dn, &dn_len, &mods) != SUCCESS) {
 		return;
 	}
 
@@ -1548,11 +1548,11 @@ PHP_FUNCTION(ldap_modify_batch)
 	/* perform validation */
 	{
 		char *modkey;
-		uint modkeylen;
-		long modtype;
+		php_size_t modkeylen;
+		php_uint_t modtype;
 
 		/* to store the wrongly-typed keys */
-		ulong tmpUlong;
+		php_uint_t tmpUlong;
 
 		/* make sure the DN contains no NUL bytes */
 		if (_ldap_strlen_max(dn, dn_len) != dn_len) {
@@ -1562,7 +1562,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		/* make sure the top level is a normal array */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(mods));
-		if (zend_hash_get_current_key_type(Z_ARRVAL_P(mods)) != HASH_KEY_IS_LONG) {
+		if (zend_hash_get_current_key_type(Z_ARRVAL_P(mods)) != HASH_KEY_IS_INT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Modifications array must not be string-indexed");
 			RETURN_FALSE;
 		}
@@ -1617,19 +1617,19 @@ PHP_FUNCTION(ldap_modify_batch)
 						RETURN_FALSE;
 					}
 
-					if (Z_STRLEN_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRLEN_P(modinfo))) {
+					if (Z_STRSIZE_P(modinfo) != _ldap_strlen_max(Z_STRVAL_P(modinfo), Z_STRSIZE_P(modinfo))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "A '" LDAP_MODIFY_BATCH_ATTRIB "' value must not contain NUL bytes");
 						RETURN_FALSE;
 					}
 				}
 				else if (_ldap_str_equal_to_const(modkey, modkeylen, LDAP_MODIFY_BATCH_MODTYPE)) {
-					if (Z_TYPE_P(modinfo) != IS_LONG) {
+					if (Z_TYPE_P(modinfo) != IS_INT) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "A '" LDAP_MODIFY_BATCH_MODTYPE "' value must be a long");
 						RETURN_FALSE;
 					}
 
 					/* is the value in range? */
-					modtype = Z_LVAL_P(modinfo);
+					modtype = Z_IVAL_P(modinfo);
 					if (
 						modtype != LDAP_MODIFY_BATCH_ADD &&
 						modtype != LDAP_MODIFY_BATCH_REMOVE &&
@@ -1669,7 +1669,7 @@ PHP_FUNCTION(ldap_modify_batch)
 					}
 
 					/* are its keys integers? */
-					if (zend_hash_get_current_key_type(Z_ARRVAL_P(modinfo)) != HASH_KEY_IS_LONG) {
+					if (zend_hash_get_current_key_type(Z_ARRVAL_P(modinfo)) != HASH_KEY_IS_INT) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "A '" LDAP_MODIFY_BATCH_VALUES "' array must not be string-indexed");
 						RETURN_FALSE;
 					}
@@ -1713,7 +1713,7 @@ PHP_FUNCTION(ldap_modify_batch)
 		_ldap_hash_fetch(mod, LDAP_MODIFY_BATCH_VALUES, &vals);
 
 		/* map the modification type */
-		switch (Z_LVAL_P(modtype)) {
+		switch (Z_IVAL_P(modtype)) {
 			case LDAP_MODIFY_BATCH_ADD:
 				oper = LDAP_MOD_ADD;
 				break;
@@ -1731,9 +1731,9 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		/* fill in the basic info */
 		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
-		ldap_mods[i]->mod_type = estrndup(Z_STRVAL_P(attrib), Z_STRLEN_P(attrib));
+		ldap_mods[i]->mod_type = estrndup(Z_STRVAL_P(attrib), Z_STRSIZE_P(attrib));
 
-		if (Z_LVAL_P(modtype) == LDAP_MODIFY_BATCH_REMOVE_ALL) {
+		if (Z_IVAL_P(modtype) == LDAP_MODIFY_BATCH_REMOVE_ALL) {
 			/* no values */
 			ldap_mods[i]->mod_bvalues = NULL;
 		}
@@ -1752,8 +1752,8 @@ PHP_FUNCTION(ldap_modify_batch)
 				ldap_mods[i]->mod_bvalues[j] = safe_emalloc(1, sizeof(struct berval), 0);
 
 				/* fill it */
-				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRLEN_P(modval);
-				ldap_mods[i]->mod_bvalues[j]->bv_val = estrndup(Z_STRVAL_P(modval), Z_STRLEN_P(modval));
+				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRSIZE_P(modval);
+				ldap_mods[i]->mod_bvalues[j]->bv_val = estrndup(Z_STRVAL_P(modval), Z_STRSIZE_P(modval));
 			}
 
 			/* NULL-terminate values */
