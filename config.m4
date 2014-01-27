@@ -20,9 +20,14 @@ if test "$PHP_PHPDBG" != "no"; then
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
   PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c"
 
+  if test "$PHP_READLINE" != "no"; then
+  	PHPDBG_EXTRA_LIBS="-lreadline"
+  fi
+  
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
-
+  PHP_SUBST(PHPDBG_EXTRA_LIBS)
+  
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
 
