@@ -266,9 +266,9 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("iconv.input_encoding",    NULL, PHP_INI_ALL, OnUpdateInputEncoding,    input_encoding,    zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.output_encoding",   NULL, PHP_INI_ALL, OnUpdateOutputEncoding,   output_encoding,   zend_iconv_globals, iconv_globals)
-	STD_PHP_INI_ENTRY("iconv.internal_encoding", NULL, PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.input_encoding",    "", PHP_INI_ALL, OnUpdateInputEncoding,    input_encoding,    zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.output_encoding",   "", PHP_INI_ALL, OnUpdateOutputEncoding,   output_encoding,   zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.internal_encoding", "", PHP_INI_ALL, OnUpdateInternalEncoding, internal_encoding, zend_iconv_globals, iconv_globals)
 PHP_INI_END()
 /* }}} */
 
