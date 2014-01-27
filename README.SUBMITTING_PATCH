@@ -50,6 +50,17 @@ Please make the mail subject prefix "[PATCH]".  If attaching a patch,
 ensure it has a file extension of ".txt".  This is because only MIME
 attachments of type 'text/*' are accepted.
 
+The preferred way to propose PHP patch is sending pull request from
+github.
+
+https://github.com/php/php-src
+
+Fork the official PHP repository and send a pull request. A
+notification will be sent to the pull request mailing list. Sending a
+note to PHP Internals list (internals@lists.php.net) may help getting
+more feedback and quicker turnaround.  You can also add pull requests
+to bug reports at http://bugs.php.net/.
+
 
 PHP Documentation Patches
 -------------------------
