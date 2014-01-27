@@ -43,7 +43,7 @@ if (!$fp) {
 }
 
 $prev = "----123
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Content-Disposition: form-data; name=\"file1\"; filename=\"file1.txt\"\n\n";
 $post = "\n----123--\n";
 $total = $length + strlen($prev) + strlen($post);
