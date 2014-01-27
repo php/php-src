@@ -51,6 +51,8 @@ PHP X.Y UPGRADE NOTES
 
 - Added openssl crypto method stream context option.
 
+- Added openssl peer verification support for SAN x509 extension
+
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
 

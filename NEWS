@@ -66,7 +66,10 @@ PHP                                                                        NEWS
   . Added certificate fingerprint support. (Tjerk Meesters)
   . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
   . Fixed bug #65729 (CN_match gives false positive). (Tjerk Meesters)
-  
+  . Peer name verification matches SAN DNS names for certs using
+    the Subject Alternative Name x509 extension. (Daniel Lowrey)
+  . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
+
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
   . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
