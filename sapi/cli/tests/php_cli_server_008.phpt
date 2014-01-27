@@ -1,4 +1,4 @@
-%--TEST--
+--TEST--
 SERVER_PROTOCOL header availability
 --SKIPIF--
 <?php
