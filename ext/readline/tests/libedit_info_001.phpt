@@ -1,8 +1,8 @@
 --TEST--
 readline_info(): Basic test
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip");
-if (READLINE_LIB == "libedit") die("skip readline only");
+<?php if (!extension_loaded("readline")) die("skip"); 
+if (READLINE_LIB != "libedit") die("skip libedit only");
 ?>
 --FILE--
 <?php
@@ -19,35 +19,25 @@ var_dump(readline_info('attempted_completion_over'));
 
 ?>
 --EXPECTF--
-array(11) {
+array(6) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
   int(0)
   ["end"]=>
   int(0)
-  ["mark"]=>
-  int(0)
-  ["done"]=>
-  int(0)
-  ["pending_input"]=>
-  int(0)
-  ["prompt"]=>
-  string(0) ""
-  ["terminal_name"]=>
-  string(0) ""
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>
-  string(5) "other"
+  string(0) ""
   ["attempted_completion_over"]=>
   int(0)
 }
 NULL
 NULL
 string(0) ""
-string(5) "other"
-string(5) "other"
+string(0) ""
+string(0) ""
 string(1) "1"
 int(0)
 int(1)

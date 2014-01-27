@@ -187,9 +187,11 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 	if (set->data) {
 		unsigned int copy_on_write_performed = 0;
 		unsigned int copy_on_write_saved = 0;
+		zval **data = set->data;
+		set->data = NULL; /* prevent double free if following loop is interrupted */
 
 		for (row = set->row_count - 1; row >= 0; row--) {
-			zval **current_row = set->data + row * field_count;
+			zval **current_row = data + row * field_count;
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
 			int64_t col;
 
@@ -211,8 +213,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_COPY_ON_WRITE_PERFORMED, copy_on_write_performed,
 											  STAT_COPY_ON_WRITE_SAVED, copy_on_write_saved);
-		mnd_efree(set->data);
-		set->data = NULL;
+		mnd_efree(data);
 	}
 
 	if (set->row_buffers) {
