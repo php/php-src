@@ -145,6 +145,7 @@ typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
+        php_curl_seek  *seek;
 #if CURLOPT_PASSWDFUNCTION != 0
 	zval           *passwd;
 #endif

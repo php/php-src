@@ -1026,6 +1026,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLPAUSE_SEND_CONT);
 	REGISTER_CURL_CONSTANT(CURL_READFUNC_PAUSE);
 	REGISTER_CURL_CONSTANT(CURL_WRITEFUNC_PAUSE);
+	REGISTER_CURL_CONSTANT(CURLOPT_SEEKFUNCTION);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
@@ -1558,6 +1559,87 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 }
 /* }}} */
 
+/* {{{ curl_seek
+ */
+static int curl_seek(void *ctx, curl_off_t offset, int origin)
+{
+	php_curl       *ch = (php_curl *) ctx;
+	php_curl_seek  *t  = ch->handlers->seek;
+	int             status = CURL_SEEKFUNC_CANTSEEK;
+
+	switch (t->method) {
+		case PHP_CURL_DIRECT:
+			if (t->fp) {
+				if (fseek(t->fp, offset, origin) == 0)
+				{
+					return CURL_SEEKFUNC_OK;
+				}
+			}
+			break;
+		case PHP_CURL_USER: {
+			zval **argv[4];
+			zval  *handle = NULL;
+			zval  *zfd = NULL;
+			zval  *zoffset = NULL;
+			zval  *zorigin = NULL;
+			zval  *retval_ptr;
+			int   error;
+			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
+
+			MAKE_STD_ZVAL(handle);
+			MAKE_STD_ZVAL(zfd);
+			MAKE_STD_ZVAL(zoffset);
+			MAKE_STD_ZVAL(zorigin);
+
+			ZVAL_RESOURCE(handle, ch->id);
+			zend_list_addref(ch->id);
+			ZVAL_RESOURCE(zfd, t->fd);
+			zend_list_addref(t->fd);
+			ZVAL_LONG(zoffset, (int) offset);
+			ZVAL_LONG(zorigin, (int) origin);
+
+			argv[0] = &handle;
+			argv[1] = &zfd;
+			argv[2] = &zoffset;
+			argv[3] = &zorigin;
+
+			fci.size = sizeof(fci);
+			fci.function_table = EG(function_table);
+			fci.function_name = t->func_name;
+			fci.object_ptr = NULL;
+			fci.retval_ptr_ptr = &retval_ptr;
+			fci.param_count = 4;
+			fci.params = argv;
+			fci.no_separation = 0;
+			fci.symbol_table = NULL;
+
+			ch->in_callback = 1;
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
+			ch->in_callback = 0;
+			if (error == FAILURE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_SEEKFUNCTION");
+			} else if (retval_ptr) {
+				if (Z_TYPE_P(retval_ptr) != IS_BOOL) {
+					convert_to_boolean_ex(&retval_ptr);
+				}
+				if (Z_LVAL_P(retval_ptr) == 1)
+				{
+					status = CURL_SEEKFUNC_OK;
+				}
+				zval_ptr_dtor(&retval_ptr);
+			}
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(argv[2]);
+			zval_ptr_dtor(argv[3]);
+		}
+		break;
+	}
+	return status;
+}
+/* }}} */
+
 /* {{{ curl_write_header
  */
 static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
@@ -1776,6 +1858,7 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->write        = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->write_header = ecalloc(1, sizeof(php_curl_write));
 	(*ch)->handlers->read         = ecalloc(1, sizeof(php_curl_read));
+	(*ch)->handlers->seek         = ecalloc(1, sizeof(php_curl_seek));
 	(*ch)->handlers->progress     = NULL;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
 	(*ch)->handlers->fnmatch      = NULL;
@@ -1888,6 +1971,8 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION,     curl_write);
 	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_READFUNCTION,      curl_read);
+	curl_easy_setopt(ch->cp, CURLOPT_SEEKFUNCTION,      curl_seek);
+	curl_easy_setopt(ch->cp, CURLOPT_SEEKDATA,          ch);
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
@@ -2705,6 +2790,16 @@ string_copy:
 			zval_add_ref(zvalue);
 			ch->handlers->read->func_name = *zvalue;
 			ch->handlers->read->method = PHP_CURL_USER;
+			break;
+
+		case CURLOPT_SEEKFUNCTION:
+			if (ch->handlers->seek->func_name) {
+				zval_ptr_dtor(&ch->handlers->seek->func_name);
+				ch->handlers->seek->fci_cache = empty_fcall_info_cache;
+			}
+			zval_add_ref(zvalue);
+			ch->handlers->seek->func_name = *zvalue;
+			ch->handlers->seek->method = PHP_CURL_USER;
 			break;
 
 		case CURLOPT_RETURNTRANSFER:
