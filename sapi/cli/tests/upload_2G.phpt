@@ -79,7 +79,7 @@ HTTP/1.1 200 OK
 Host: %s
 Connection: close
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 array(1) {
   ["file1"]=>
