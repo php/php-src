@@ -953,12 +953,12 @@ cli_server.color = On
 ; If empty, input_encoding is used.
 ;iconv.input_encoding =
 
-; Use of this INI entory is deprecated, use global ouput_encoding instead.
-; If empty, output_encoding is used.
-;iconv.internal_encoding =
-
 ; Use of this INI entory is deprecated, use global internal_encoding instead.
 ; If empty, internal_encoding is used.
+;iconv.internal_encoding =
+
+; Use of this INI entory is deprecated, use global output_encoding instead.
+; If empty, output_encoding is used.
 ;iconv.output_encoding =
 
 [intl]
