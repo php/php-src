@@ -159,9 +159,11 @@ II. Porting steps
 
  vi.  spprintf() formats
 
-	New printf modifier 'p' was implemented to platform independently output
-	php_int_t datatype. That modifier can be used with 'd', 'u', 'x' and 'o' printf
-	format specs with spprintf, snprintf and the wrapping printf implementations.
+	New printf modifier 'p' was implemented to platform independently output php_int_t,
+	php_uint_t and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+	printf format specs with spprintf, snprintf and the wrapping printf implementations.
+	%pu is sufficient for both php_uint_t and php_size_t.
+
 	To ensure compatibility, the macros ZEND_INT_FMT and ZEND_UINT_FMT should be 
 	used
 
@@ -184,6 +186,9 @@ II. Porting steps
 	be done in vim
 
 	:%s,%ld," ZEND_INT_FMT ",g
+
+	With this in mind, the code using %p spec to output pointer address might
+	need to be enclosed into #ifdef when it unlickily followed by 'd', 'u', 'x' or 'o'.
 
  vii. Array API
 
@@ -267,14 +272,13 @@ III. Pitfalls
  v.   Bitwise operations
 
         Especialy some bitshift operations might bring unexpected results when mixing 32 and
-	64 bit variables or constants. For example this snippet works different on 32 and
-	64 bit platforms
+	64 bit variables or constants. Here's the example snippet
 
 	php_int_t var = 1 << 31;
 
 	While a 32 bit variable can hold bits from 0 to 31, a 64 bit variable can hold bits
 	from 0 to 63. So with the snippet above the result the max negative value of 32 bit
-	integer. To have it working correct way, an explicit cast
+	integer. To have it working correct way on 64 bit, an explicit cast
 
 	php_int_t var = (php_int_t)1 << 31;
 
