@@ -593,6 +593,8 @@ enum php_mysqlnd_server_command
 	COM_SET_OPTION = 27,
 	COM_STMT_FETCH = 28,
 	COM_DAEMON,
+	COM_BINLOG_DUMP_GTID,
+	COM_RESET_CONNECTION,
 	COM_END
 };
 
