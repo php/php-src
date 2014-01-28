@@ -479,7 +479,7 @@ disconnect:
 
 #ifndef HAVE_LIBREADLINE
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-				if (!phpdbg_write(phpdbg_get_prompt(TSRMLS_C))) {
+				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
 			}
