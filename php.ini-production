@@ -1733,7 +1733,7 @@ mssql.secure_connection = Off
 
 ; Use of this INI entory is deprecated, use global input_encoding instead.
 ; http input encoding.
-; Default to pass. If empty, input_encoding is used.
+; If empty, input_encoding is used.
 ; mbstring.encoding_traslation = On is needed to use this setting.
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
@@ -1741,7 +1741,7 @@ mssql.secure_connection = Off
 ; Use of this INI entory is deprecated, use global output_encoding instead.
 ; http output encoding.
 ; mb_output_handler must be registered as output buffer to function.
-; Default to pass. If empty, output_encoding is used.
+; If empty, output_encoding is used.
 ; http://php.net/mbstring.http-output
 ;mbstring.http_output =
 
