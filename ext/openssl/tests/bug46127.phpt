@@ -45,7 +45,10 @@ if ($pid == 0) { // child
 
 // client or failed
 sleep(1);
-$sock = fsockopen('ssl://127.0.0.1', $port, $errno, $errstr);
+$ctx = stream_context_create(['ssl' => [
+    'verify_peer' => false
+]]);
+$sock = stream_socket_client("ssl://127.0.0.1:{$port}", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
 if (!$sock) exit;
 
 echo fgets($sock);
