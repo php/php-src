@@ -23,6 +23,7 @@ III. Pitfalls
  ii.  zend_parse_parameters()
  iii. Pointer difference
  iv.  RETURN_STRINGL, RETVAL_STRINGL
+ v.   Bitwise operations
 
 
 ========================================
@@ -260,4 +261,25 @@ III. Pitfalls
 	RETURN_STRINGL, RETVAL_STRINGL macros now expect php_size_t for the string length.
 	While it's theoretically possible to use any other datatype with those macros, the
 	explicit attention should be paid that the values arn't negative.
+
+ v.   Bitwise operations
+
+        Especialy some bitshift operations might bring unexpected results when mixing 32 and
+	64 bit variables or constants. For example this snippet works different on 32 and
+	64 bit platforms
+
+	php_int_t var = 1 << 31;
+
+	While a 32 bit variable can hold bits from 0 to 31, a 64 bit variable can hold bits
+	from 0 to 63. So with the snippet above the result the max negative value of 32 bit
+	integer. To have it working correct way, an explicit cast
+
+	php_int_t var = (php_int_t)1 << 31;
+
+	or the special macros in case of a constant
+
+	php_int_t var = Z_I(1) << 31;
+
+	can be used.
+
 
