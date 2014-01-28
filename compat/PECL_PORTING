@@ -36,7 +36,8 @@ https://wiki.php.net/rfc/size_t_and_int64
  i.   String length
 
 	String lengths do no more depend on the firm 'int' datatype. The replacement
-	is a platform dependent size_t datatype.
+	is a platform dependent size_t datatype. The string length in zval is no more
+	int but php_size_t.
 
 	String length is defined as zend_size_t inside Zend and aliased as php_size_t
 	anywhere else. The inclusion of php.h is necessary.
@@ -45,7 +46,8 @@ https://wiki.php.net/rfc/size_t_and_int64
 
 	Integers do no more depend on the firm 'long' type. Instead a platform
 	dependent integer type is used. That datatype is defined dynamically to
-	guarantee the consistent 64 bit support.
+	guarantee the consistent 64 bit support. The zval field representing user
+	land integer it bound to php_int_t.
 
 	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
 	inside Zend. Both are aliased as php_int_t and php_uint_t anywhere else,
@@ -176,7 +178,7 @@ II. Porting steps
 	}
 
 
-	Please note, that the replacement tool will not do automatic replacements for the %ld
+	Please note, that replace.php  will not do automatic replacements for the %ld
 	and other specs. It's up to the porter where such replacement were appropriate.
 	To ease the process, some automatic still could be used, like here how it could
 	be done in vim
