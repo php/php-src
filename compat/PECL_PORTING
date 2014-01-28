@@ -104,6 +104,8 @@ II. Porting steps
 	complicated cases the manual intrusion is unavoidable. Still, this tool will
 	save a lot of time while porting.
 
+	XXX more on replace.php and it's modes 
+
  ii.  Compatibility header
 
 	The compat.h header, once copied into the extension source and included, will

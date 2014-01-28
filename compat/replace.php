@@ -13,7 +13,7 @@ $options = getopt($shortopts, $longopts);
 
 $repl_type = isset($options['type']) ? $options['type'] : 'ext';
 $custom_defs_fname = isset($options['custom']) ? $options['custom'] : NULL;
-$fname = $argv[count($argv)-1];
+$fname = (count($argv) < 2) ? NULL : $argv[count($argv)-1];
 $reverse_replace = isset($options['reverse']);
 $replace_zpp = isset($options['zpp']);
 
@@ -151,8 +151,11 @@ if (false === file_put_contents($fname, $file_contents)) {
 /* Helpers */
 function print_usage($code = 0)
 {
+	echo "Replacement tool for old vs. new macro names and more." . PHP_EOL;
 	echo "Usage: replace.php [OPTIONS] file" . PHP_EOL;
 	echo "  --custom  Path to custom replacement definitions file, optional." . PHP_EOL;
+	echo "  --reverse Replace the new names with the old ones, so reverse, optional." . PHP_EOL;
+	echo "  --zpp     Along with macro names replace the zpp format specs, optional." . PHP_EOL;  
 	echo "  --help    This help." . PHP_EOL;
 	echo PHP_EOL;
 
