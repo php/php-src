@@ -69,6 +69,8 @@ PHP                                                                        NEWS
   . Peer name verification matches SAN DNS names for certs using
     the Subject Alternative Name x509 extension. (Daniel Lowrey)
   . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
+  . Peer certificates now verified by default in client socket operations
+    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
 
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
