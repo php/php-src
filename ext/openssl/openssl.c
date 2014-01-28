@@ -5129,9 +5129,9 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 	return 0;
 }
 
-static zend_bool matches_san_list(X509 *peer, const char *subject_name)
+static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC)
 {
-	int i;
+	int i, san_name_len;
 	zend_bool is_match = 0;
 	unsigned char *cert_name;
 
@@ -5140,12 +5140,22 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name)
 
 	for (i = 0; i < alt_name_count; i++) {
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
-
-		if (GEN_DNS == san->type) {
-			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
-			is_match = matches_wildcard_name(subject_name, (char *) cert_name);
-			OPENSSL_free(cert_name);
+		if (san->type != GEN_DNS) {
+			/* we only care about DNS names */
+			continue;
 		}
+
+		san_name_len = ASN1_STRING_length(san->d.dNSName);
+		ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+
+		/* prevent null byte poisoning */
+		if (san_name_len != strlen(cert_name)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer SAN entry is malformed");
+		} else {
+			is_match = strcasecmp(subject_name, cert_name) == 0;
+		}
+
+		OPENSSL_free(cert_name);
 
 		if (is_match) {
 			break;
@@ -5226,7 +5236,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	GET_VER_OPT_STRING("CN_match", cnmatch);
 
 	if (cnmatch) {
-		if (matches_san_list(peer, cnmatch)) {
+		if (matches_san_list(peer, cnmatch TSRMLS_CC)) {
 			return SUCCESS;
 		} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
 			return SUCCESS;
@@ -5829,3 +5839,4 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+

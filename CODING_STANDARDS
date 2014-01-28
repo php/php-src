@@ -82,7 +82,7 @@ Exceptions:
     library may need to control or free the memory, or when the memory in
     question needs to survive between multiple requests.
 
-Naming Conventions
+User Functions/Methods Naming Conventions
 ------------------
 
 1.  Function names for user-level functions should be enclosed with in
@@ -163,6 +163,26 @@ Naming Conventions
     'foobar'
     'foo_bar'
 
+Internal Function Naming Convensions
+----------------------
+
+1.  Functions that are part of the external API should be named
+    'php_modulename_function()' to avoid symbol collision. They should be in
+    lowercase, with words underscore delimited. Exposed API must be defined
+    in 'php_modulename.h'.
+
+    PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
+
+    Unexposed module function should be static and should not be defined in
+    'php_modulename.h'.
+
+    static int php_session_destroy(TSRMLS_D)
+
+2.  Main module source file must be named 'modulename.c'.
+
+3.  Header file that is used by other sources must be named 'php_modulename.h'.
+
+
 Syntax and indentation
 ----------------------
 
@@ -181,9 +201,9 @@ Syntax and indentation
     of PHP or one of its standard modules, please maintain the K&R
     style.  This applies to just about everything, starting with
     indentation and comment styles and up to function declaration
-    syntax. Also see Indentstyle_.
+    syntax. Also see Indentstyle.
 
-.. _Indentstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
+    Indentstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
 
 3.  Be generous with whitespace and braces.  Keep one empty line between the
     variable declaration section and the statements in a block, as well as
