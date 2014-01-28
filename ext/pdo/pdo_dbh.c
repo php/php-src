@@ -196,7 +196,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
+/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -1226,7 +1226,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 /* }}} */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, passwd)
