@@ -561,6 +561,10 @@ enum mysqlnd_packet_type
 };
 
 
+/*
+  After adding new elements please update
+  `mysqlnd_command_to_text` in mysqlnd_wireprotocol.c
+*/
 enum php_mysqlnd_server_command
 {
 	COM_SLEEP = 0,
@@ -593,6 +597,8 @@ enum php_mysqlnd_server_command
 	COM_SET_OPTION = 27,
 	COM_STMT_FETCH = 28,
 	COM_DAEMON,
+	COM_BINLOG_DUMP_GTID,
+	COM_RESET_CONNECTION,
 	COM_END
 };
 
