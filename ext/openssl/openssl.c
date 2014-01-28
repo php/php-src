@@ -5131,7 +5131,8 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 
 static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC)
 {
-	int i, san_name_len;
+	int i;
+	php_size_t san_name_len;
 	zend_bool is_match = 0;
 	unsigned char *cert_name;
 
