@@ -269,6 +269,10 @@ SOURCE=.\zend_variables.c
 
 SOURCE=.\zend_vm_opcodes.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\zend_virtual_cwd.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -436,10 +440,6 @@ SOURCE=.\zend_ts_hash.h
 # Begin Source File
 
 SOURCE=.\zend_variables.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\zend_virtual_cwd.c
 # End Source File
 # End Group
 # Begin Group "Parsers"
