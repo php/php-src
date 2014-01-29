@@ -105,9 +105,12 @@ II. Porting steps
 	save a lot of time while porting.
 
 	To mention are also the following options
-	--zpp        will replace "lLsp" with "iISP" at appropriate places only
-	--zpp-compat will replace things like
-	"slO" with (PHP_NEED_STRSIZE_COMPAT ? "slO" : "SiO")
+	--macros     replace old vs. new macro/function names
+	--zpp        replace "lLsp" with "iISP" at appropriate places only
+	--zpp-compat replace things like
+	             "slO" with (PHP_NEED_STRSIZE_COMPAT ? "slO" : "SiO")
+
+	The macro and zpp options are separated and don't have to be used together.
 
 	The PHP_NEED_STRSIZE_COMPAT is defined in the compat.h for versions lower than
 	<str_size_and_int64>.
