@@ -131,13 +131,16 @@ if ($replace_zpp || $replace_zpp_compat) {
 	foreach ($raw_specs as $item) {
 		if ($reverse_replace) {
 			$rep = str_replace(array_values($zpp_map), array_keys($zpp_map), $item);
+			if ($rep != $item) {
+				$specs['"' . $rep . '"'] = '"' . $item .'"';
+			}
 		} else {
 			$rep = str_replace(array_keys($zpp_map), array_values($zpp_map), $item);
+			if ($rep != $item) {
+				$specs['"' . $item . '"'] = '"' . $rep .'"';
+			}
 		}
 
-		if ($rep != $item) {
-			$specs['"' . $item . '"'] = '"' . $rep .'"';
-		}
 	}
 	
 	if ($replace_zpp_compat) {
