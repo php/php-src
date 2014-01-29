@@ -7,7 +7,7 @@
 
 /* Options stuff*/
 $shortopts = NULL;
-$longopts = array('type:', 'custom:', 'help::', 'reverse', 'zpp');
+$longopts = array('type:', 'custom:', 'help::', 'reverse', 'zpp', 'zpp-compat');
 
 $options = getopt($shortopts, $longopts);
 
@@ -16,6 +16,7 @@ $custom_defs_fname = isset($options['custom']) ? $options['custom'] : NULL;
 $fname = (count($argv) < 2) ? NULL : $argv[count($argv)-1];
 $reverse_replace = isset($options['reverse']);
 $replace_zpp = isset($options['zpp']);
+$replace_zpp_compat = isset($options['zpp-compat']);
 
 /* Options validation */
 if (isset($options['help'])) {
@@ -26,6 +27,8 @@ if (isset($options['help'])) {
 	print_error("Invalid filename '$fname'");
 /*} else if (!is_null($custom_defs_fname) && !file_exists($custom_defs_fname)) {
 	print_error("Invalid custom replacement definitions file");*/
+} else if ($replace_zpp && $replace_zpp_compat) {
+	print_error("--zpp and --zpp-compat cannot be used at the same time");
 } else if (!is_null($custom_defs_fname)) {
 	/* XXX uncomment the above when it's implemented */
 	print_error("Processing of custom replacement definitions is not implemented yet, feel free to supply a patch");
@@ -100,7 +103,7 @@ if ($reverse_replace) {
 }
 
 /* zpp spec replacements */
-if ($replace_zpp) {
+if ($replace_zpp || $replace_zpp_compat) {
 	$zpp_map = array(
 		'l' => 'i',
 		'L' => 'I',
@@ -133,14 +136,26 @@ if ($replace_zpp) {
 		}
 
 		if ($rep != $item) {
-			$specs['"' . $item . '"'] = '"' . str_replace(array_values($zpp_map), array_keys($zpp_map), $item) . '"';
+			$specs['"' . $item . '"'] = '"' . $rep .'"';
 		}
 	}
-
-	if ($reverse_replace) {
-		$file_contents = str_replace(array_keys($specs), array_values($specs), $file_contents);
+	
+	if ($replace_zpp_compat) {
+		if ($reverse_replace) {
+			echo "WARNING: reverse replace with --zpp-compat is ommited";
+		} else {
+			foreach ($specs as $spec0 => $spec1) {
+				$specs[$spec0] = "(PHP_NEED_STRSIZE_COMPAT ? $spec0 : $spec1)";
+			}
+			$file_contents = str_replace(array_keys($specs), array_values($specs), $file_contents);
+		}
 	} else {
-		$file_contents = str_replace(array_values($specs), array_keys($specs), $file_contents);
+
+		if ($reverse_replace) {
+			$file_contents = str_replace(array_values($specs), array_keys($specs), $file_contents);
+		} else {
+			$file_contents = str_replace(array_keys($specs), array_values($specs), $file_contents);
+		}
 	}
 }
 
@@ -153,9 +168,10 @@ function print_usage($code = 0)
 {
 	echo "Replacement tool for old vs. new macro names and more." . PHP_EOL;
 	echo "Usage: replace.php [OPTIONS] file" . PHP_EOL;
-	echo "  --custom  Path to custom replacement definitions file, optional." . PHP_EOL;
-	echo "  --reverse Replace the new names with the old ones, so reverse, optional." . PHP_EOL;
-	echo "  --zpp     Along with macro names replace the zpp format specs, optional." . PHP_EOL;  
+	echo "  --custom      Path to custom replacement definitions file, optional." . PHP_EOL;
+	echo "  --reverse     Replace the new names with the old ones, so reverse, optional." . PHP_EOL;
+	echo "  --zpp         Along with macro names replace the zpp format specs, optional." . PHP_EOL;  
+	echo "  --zpp-compat  Same as --zpp but will add both old and new specs for compat, optional." . PHP_EOL;  
 	echo "  --help    This help." . PHP_EOL;
 	echo PHP_EOL;
 
@@ -164,7 +180,7 @@ function print_usage($code = 0)
 
 function print_error($str)
 {
-	echo $str . PHP_EOL;
+	echo "ERROR: " . $str . PHP_EOL;
 	exit(3);
 }
 
