@@ -923,18 +923,6 @@ static int get_crypto_method(php_stream_context *ctx) {
 static char * get_url_name(const char *resourcename, size_t resourcenamelen, int is_persistent TSRMLS_DC) {
 	php_url *url;
 
-	if (ctx) {
-		zval **val = NULL;
-
-		if (php_stream_context_get_option(ctx, "ssl", "SNI_enabled", &val) == SUCCESS && !zend_is_true(*val TSRMLS_CC)) {
-			return NULL;
-		}
-		if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {
-			convert_to_string_ex(val);
-			return pestrdup(Z_STRVAL_PP(val), is_persistent);
-		}
-	}
-
 	if (!resourcename) {
 		return NULL;
 	}
