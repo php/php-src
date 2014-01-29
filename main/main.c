@@ -937,7 +937,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 #endif
 
 /* {{{ php_html_puts */
-PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
+PHPAPI void php_html_puts(const char *str, php_size_t size TSRMLS_DC)
 {
 	zend_html_puts(str, size TSRMLS_CC);
 }

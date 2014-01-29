@@ -136,7 +136,7 @@ struct _php_core_globals {
 	int last_error_type;
 	char *last_error_message;
 	char *last_error_file;
-	int  last_error_lineno;
+	php_size_t  last_error_lineno;
 
 	char *disable_functions;
 	char *disable_classes;
