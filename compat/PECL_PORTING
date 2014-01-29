@@ -104,7 +104,19 @@ II. Porting steps
 	complicated cases the manual intrusion is unavoidable. Still, this tool will
 	save a lot of time while porting.
 
-	XXX more on replace.php and it's modes 
+	To mention are also the following options
+	--zpp        will replace "lLsp" with "iISP" at appropriate places only
+	--zpp-compat will replace things like
+	"slO" with (PHP_NEED_STRSIZE_COMPAT ? "slO" : "SiO")
+
+	The PHP_NEED_STRSIZE_COMPAT is defined in the compat.h for versions lower than
+	<str_size_and_int64>.
+
+	You can also use --reverse if you want to have all the changes back to old. One
+	exception though is when the --zpp-compat is used - this case isn't yet
+	implemented as if some used a custom macros name instead of
+	PHP_NEED_STRSIZE_COMPAT or some other custom #ifdef, it will be hard to catch.
+	Though it should be implemented to cover the standard case.
 
  ii.  Compatibility header
 
