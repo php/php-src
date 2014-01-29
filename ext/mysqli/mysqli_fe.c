@@ -373,6 +373,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_no_options, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 
 /* {{{ mysqli_functions[]
  *
@@ -425,6 +428,7 @@ const zend_function_entry mysqli_functions[] = {
 #endif
 	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_only_link)
+	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_host_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_proto_info,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_get_server_info,						arginfo_mysqli_only_link)
