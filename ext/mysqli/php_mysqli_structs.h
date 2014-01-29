@@ -334,6 +334,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	HashTable		*report_ht;
 	php_uint_t	multi_query;
 	php_uint_t	embedded;
+	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 
