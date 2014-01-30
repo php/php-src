@@ -22,9 +22,9 @@
 #define PHP_SIZE_INT_COMPAT_H
 
 /* XXX change the check accordingly to the vote results */
-#define PHP_NEED_STRSIZE_COMPAT (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
+#define PHP_NEED_STRSIZE_COMPAT (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6) || defined(PHP_FORCE_STRSIZE_COMPAT)
 
-#if PHP_NEED_STRSIZE_COMPAT || PHP_FORCE_STRSIZE_COMPAT
+#if PHP_NEED_STRSIZE_COMPAT
 
 typedef long zend_int_t;
 typedef unsigned long zend_uint_t;
@@ -131,6 +131,12 @@ typedef struct stat zend_stat_t;
 # define smart_str_append_int                       smart_str_append_long
 # define cfg_get_int                                cfg_get_long
 # define pdo_attr_ival                              pdo_attr_lval
+
+# define ZPP_FMT_COMPAT(old_fmt, new_fmt) old_fmt
+
+#else
+
+# define ZPP_FMT_COMPAT(old_fmt, new_fmt) new_fmt
 
 #endif
 

@@ -154,7 +154,7 @@ if ($replace_zpp || $replace_zpp_compat) {
 			echo "WARNING: reverse replace with --zpp-compat is ommited";
 		} else {
 			foreach ($specs as $spec0 => $spec1) {
-				$specs[$spec0] = "(PHP_NEED_STRSIZE_COMPAT ? $spec0 : $spec1)";
+				$specs[$spec0] = "ZPP_FMT_COMPAT($spec0, $spec1)";
 			}
 			$file_contents = str_replace(array_keys($specs), array_values($specs), $file_contents);
 		}

@@ -132,6 +132,10 @@ II. Porting steps
 	inclusion might depend on the concrete extension code, while in general it
 	might make sense to include it after all the other headers.
 
+	The header itself might of course need some customization for concrete code. The
+	basic version provides macros PHP_NEED_STRSIZE_COMPAT, which will evaluate to
+	true when compiling with versions lover than <str_size_and_int64>.
+
  iii. zend_parse_parameters()
 
 	The arg specs 'l', 'L', 's' and 'p' are not available anymore. As their
@@ -151,6 +155,11 @@ II. Porting steps
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, (COMP ? "lLsp" : "iISP"), &i0, &i1, &s0, &s0_len, &p0, &p0_len) == FAILURE) {
 		return;
 	}
+
+	Another way implemented when using the standard compat.h and replace.php --zpp-compat
+	will automatically replace the old specs with the macros like
+
+	ZPP_FMT_COMPAT("lSsp", "iISP")
 
 
  iv.  Manual code fixes
