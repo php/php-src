@@ -63,7 +63,7 @@ rmdir($file_path);
 echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
-*** Testing tempnam() with obscure suffixes ***
+*** Testing tempnam() with suffixes ***
 -- Iteration 0 --
 File name is => %s/prefix%s
 File permissions are => 100600
