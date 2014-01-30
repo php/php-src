@@ -307,6 +307,7 @@ function print_usage($code = 0)
 	echo "  --macros      Replace old vs. new macro names, optional." . PHP_EOL;
 	echo "  --zpp         Replace the zpp format specs, optional." . PHP_EOL;  
 	echo "  --zpp-compat  Same as --zpp but will add both old and new specs for compat, optional." . PHP_EOL;  
+	echo "  --zpp-vars    Do the best and replace the datatypes on zpp vars, might go insane, optional." . PHP_EOL;
 	echo "  --help        This help." . PHP_EOL;
 	echo PHP_EOL;
 	echo "Example: " . PHP_EOL;
