@@ -112,7 +112,9 @@ II. Porting steps
 	--macros     replace old vs. new macro/function names
 	--zpp        replace "lLsp" with "iISP" at appropriate places only
 	--zpp-compat replace things like
-	             "slO" with (PHP_NEED_STRSIZE_COMPAT ? "slO" : "SiO")
+	             "slO" with ZPP_FMT_COMPAT("slO", "SiO")
+	--zpp-vars   replace datatypes for vars passed to zpp calls. Dont expect this
+	             this option to be the swiss knife! Verify after it!
 
 	The macro and zpp options are separated and don't have to be used together.
 
@@ -120,10 +122,15 @@ II. Porting steps
 	<str_size_and_int64>.
 
 	You can also use --reverse if you want to have all the changes back to old. One
-	exception though is when the --zpp-compat is used - this case isn't yet
-	implemented as if some used a custom macros name instead of
-	PHP_NEED_STRSIZE_COMPAT or some other custom #ifdef, it will be hard to catch.
-	Though it should be implemented to cover the standard case.
+	exception though is when --zpp-compat or --zpp-vars is used - this case isn't
+	yet implemented. For instance, if some used a custom macros name instead of
+	ZPP_FMT_COMPAT or some other custom #ifdef, it will be hard to catch.
+
+	The replacements with --zpp-vars might go totally insane depending on code
+	formatting, so revert might be too complex. However one var daclaration per
+	line should be very good replaceable. Also, --zpp-vars will give you some
+	warnings where it couldn't replace the corresponding var type, despite it could
+	be parsed, you should go through those.
 
  ii.  Compatibility header
 
