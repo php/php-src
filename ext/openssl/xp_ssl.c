@@ -469,7 +469,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 		if (sslsock->is_client
 			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
-				|| zend_is_true(*val))
+				|| zend_is_true(*val TSRMLS_CC))
 		) {
 			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
 				convert_to_string_ex(val);
