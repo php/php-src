@@ -18,6 +18,7 @@ II.  Porting steps
  vii.  Array API
  viii. Explicit compilation enablement
  ix.   Misccellaneous porting steps
+ x.    Follow the white rabbit
 III. Pitfalls
  i.   size_t usage
  ii.  zend_parse_parameters()
@@ -58,7 +59,7 @@ https://wiki.php.net/rfc/size_t_and_int64
 	zend_stat_t - portable 'struct stat' analogue
 
 	These datatypes are declared to be portable across platforms. Thus, direct
-	usage of the functions like fseek, stat, etc. as well as direct usage of 
+	usage of the functions like fseek, stat, etc. as well as direct usage of
 	off_t and struct stat is strongly not recommended. Instead the portable
 	macros should be used.
 
@@ -73,7 +74,7 @@ https://wiki.php.net/rfc/size_t_and_int64
 	Z_IVAL       - replacement for Z_LVAL family
 	Z_I          - initialize signed integer constant
 	Z_UI         - initialize unsigned integer constant
-	ZEND_INT_MAX, ZEND_INT_MIN, ZEND_UINT_MAX, ZEND_SIZE_MAX 
+	ZEND_INT_MAX, ZEND_INT_MIN, ZEND_UINT_MAX, ZEND_SIZE_MAX
 	IS_INT       - replacement for IS_LONG
 	ZVAL_INT     - replacement for ZVAL_LONG
 	RETVAL_INT   - RETVAL_LONG
@@ -85,6 +86,9 @@ https://wiki.php.net/rfc/size_t_and_int64
 	ZEND_ABS     - portable abs version
 
 	This macros are safe to use with php_int_t
+
+	SIZEOF_ZEND_INT should be used Instead of SIZEOF_LONG with php_int_t
+	while checking the size.
 
  v.   Functions
 
@@ -100,7 +104,7 @@ II. Porting steps
  i.   Automatic replacements
 
 	The tool replace.php will automatically replace a number of syntactic changes
-	in the old style extension. Note, that only simple cases are processed, for 
+	in the old style extension. Note, that only simple cases are processed, for
 	complicated cases the manual intrusion is unavoidable. Still, this tool will
 	save a lot of time while porting.
 
@@ -124,7 +128,7 @@ II. Porting steps
  ii.  Compatibility header
 
 	The compat.h header, once copied into the extension source and included, will
-	compensate many of the syntactic differences. The right place for the 
+	compensate many of the syntactic differences. The right place for the
 	inclusion might depend on the concrete extension code, while in general it
 	might make sense to include it after all the other headers.
 
@@ -137,7 +141,7 @@ II. Porting steps
 
 	A possible way to declare the argument specs were using the ternary operator,
 	eq.
-	
+
 	#define COMP (PHP_MAJOR_VERSION < 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 6)
 
 	php_int_t i0, i1;
@@ -158,14 +162,14 @@ II. Porting steps
 	pitfalls section.
 
 	After adjusting the variable types in zpp, the first places you automatically should
-	look for are the functions where you pass the parameters. Especially those accepting 
+	look for are the functions where you pass the parameters. Especially those accepting
 	integers by reference might be broken. If those functions are your own implementations,
 	it might make sense you to adapt the function signatures. In case of some library
 	functions an intermediate variable of an appropriate type can be used.
 
  v.   Library dependencies
 
-	Libraries using incompatible data types for string sizes and integers require 
+	Libraries using incompatible data types for string sizes and integers require
 	additional checks to ensure the correct value range. This is easy done as in the
 	example below (assumed the function argument is of type php_int_t and the
 	dependency library expects a value in integer range)
@@ -181,7 +185,7 @@ II. Porting steps
 	printf format specs with spprintf, snprintf and the wrapping printf implementations.
 	%pu is sufficient for both php_uint_t and php_size_t.
 
-	To ensure compatibility, the macros ZEND_INT_FMT and ZEND_UINT_FMT should be 
+	To ensure compatibility, the macros ZEND_INT_FMT and ZEND_UINT_FMT should be
 	used
 
 	php_int_t i0, i1;
@@ -209,28 +213,52 @@ II. Porting steps
 
  vii. Array API
 
-	Datatype for array indexes was changed to php_uint_t, for key lengths to php_size_t
+	Datatype for array indexes was changed to php_uint_t, for key lengths to php_size_t.
+	As many places in the array API expect such kind of variables to be passed as
+	pointers, it's important them to be of the correct datatype.
 
  viii. Explicit compilation enablement
-	
+
 	This is not implemented yet, the build system has to be tweaked for this to happen.
 	The idea is, that an extension has to define some macros like PHP_64BIT_COMP to
 	be allowed to compile.
 
  ix.   Misccellaneous porting steps
 
-	In general, any code dealing with string size should use php_size_t, any code dealing
-	with integer available in the userspace should use php_int_t. The other relevant
-	places are socket APIs, INI settings, global constants, class constants and properties,
-	etc.
+	In general, any code dealing with string or object size should use php_size_t, any
+	code dealing with integer available in the userspace should use php_int_t. The
+	other relevant units are
 
+	- socket APIs
+	- INI settings
+	- global constants, class constants and properties
+	- resources
+	- Zend list and llist API
+	- local extension specific helper functions
+	- local extension specific datatypes
+
+ x.    Follow the white rabbit
+
+	While this document and the porting tools are being developed to the best of one's
+	knowledge and belief, it's indispensable to follow the warnings of your compiler.
+	While porting, debug mode should be always enabled and care should be taken
+	specifically about the warnings like
+
+	- signed/unsigned mismatch
+	- incompatible pointer types
+	- precision loss, like
+		- assignment to variables of smaller type (say like int64_t to int)
+		- passing of function args of bigger type (same as above)
+	- erroneous printf formats
+
+	Having any kind of improvement ideas, please don't hesitate sharing them!
 
 =============
 III. Pitfalls
 =============
 
  i.   size_t usage
-	
+
 	php_size_t is mapped to the platform dependent size_t datatype, which is unsigned.
 	The following code will not work as maybe expected, when max_len is negative
 
