@@ -449,17 +449,6 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	return 0;
 }
 
-static void enable_server_name_indication(php_stream_context *ctx, php_openssl_netstream_data_t *sslsock)
-{
-	zval **val = NULL;
-
-	if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {
-		convert_to_string_ex(val);
-		SSL_set_tlsext_host_name(sslsock->ssl_handle, &val);
-	} else if (sslsock->url_name) {
-		SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
-	}
-}
 
 static inline int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
@@ -467,7 +456,6 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		TSRMLS_DC)
 {
 	int n, retry = 1;
-	zval **val = NULL;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		struct timeval	start_time,
@@ -475,13 +463,20 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		int				blocked		= sslsock->s.is_blocked,
 						has_timeout = 0;
 
-#if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
+#if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
+
+		zval **val;
 
 		if (sslsock->is_client
 			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
-			|| zend_is_true(*val TSRMLS_CC))
+				|| zend_is_true(*val))
 		) {
-			enable_server_name_indication(stream->context, sslsock);
+			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
+				convert_to_string_ex(val);
+				SSL_set_tlsext_host_name(sslsock->ssl_handle, &val);
+			} else if (sslsock->url_name) {
+				SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
+			}
 		}
 
 #endif
