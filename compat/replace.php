@@ -7,7 +7,7 @@
 
 /* Options stuff*/
 $shortopts = NULL;
-$longopts = array('type:', 'custom:', 'help::', 'reverse', 'zpp', 'zpp-compat', 'macros');
+$longopts = array('type:', 'custom:', 'help::', 'reverse', 'zpp', 'zpp-compat', 'macros', 'zpp-vars');
 
 $options = getopt($shortopts, $longopts);
 
@@ -18,13 +18,14 @@ $reverse_replace = isset($options['reverse']);
 $replace_zpp = isset($options['zpp']);
 $replace_zpp_compat = isset($options['zpp-compat']);
 $replace_macros = isset($options['macros']);
+$replace_zpp_vars = isset($options['zpp-vars']);
 
 /* Options validation */
 if (isset($options['help'])) {
 	print_usage(0);
 } else if (!in_array($repl_type, array('ext', 'zend_ext'))) {
 	print_error("Invalid replacement type '$repl_type'");
-} else if (!$replace_macros && !($replace_zpp || $replace_zpp_compat)) {
+} else if (!$replace_macros && !($replace_zpp || $replace_zpp_compat) && ! $replace_zpp_vars) {
 	echo "No replacement options specified, nothing to do." . PHP_EOL . PHP_EOL;
 	print_usage(3);
 } else if ($replace_zpp && $replace_zpp_compat) {
@@ -41,6 +42,129 @@ if (isset($options['help'])) {
 
 /* Process file */
 $file_contents = file_get_contents($fname);
+
+/* replace zpp variable types */
+/* XXX handle more complicated cases */
+if ($replace_zpp_vars && !$reverse_replace) {
+	$ptr = array(
+		"/zend_parse_parameters\(.*\s+TSRMLS_CC,\s*\"([a-zA-Z\*+\|\/!]+)\"\s*,\s*(.*)\)/msxU",
+		"/zend_parse_parameters_ex\(.*,\s*.*\s+TSRMLS_CC,\s*\"([a-zA-Z\*+\|\/!]+)\"\s*,\s*(.*)\)/msxU",
+		"/zend_parse_method_parameters\(.*\s+TSRMLS_CC,\s*.*,\s*\"([a-zA-Z\*+\|\/!]+)\"\s*,\s*(.*)\)/msxU",
+		"/zend_parse_method_parameters_ex\(.*,\s*.*\s+TSRMLS_CC,\s*.*,\s*\"([a-zA-Z\*+\|\/!]+)\"\s*,\s*(.*)\)/msxU",
+	);
+
+	$vars = array();
+
+	foreach ($ptr as $p) {
+		/* XXX Warn about the cases we could find even if we don't replace them */
+		if (0 < preg_match_all($p, $file_contents, $m)) {
+			/* get specs and var names in one array */
+			for ($i = 0; $i < count($m[0]); $i++) {
+				$vars[$m[1][$i]] = array();
+
+				$tmp = explode(',', str_replace(' ', '', $m[2][$i]));
+				if (!is_array($tmp)) {
+					echo "WARNING: parse error, zpp spec exist but var names couldn't be parsed" . PHP_EOL;	
+					continue;
+				}
+
+				foreach ($tmp as $it) {
+					while ($it && !preg_match(',^[a-z0-9_]+$,i', $it)) {
+						$it = substr($it, 1);
+					}
+					$vars[$m[1][$i]][] = $it;
+				}
+			}
+		}
+	}
+
+	/* compute var ingexes */
+	$var_idx = array();
+	/* XXX this loop might need to be fixed at some places! */
+	foreach ($vars as $spec => $var) {
+		$var_idx[$spec] = array();
+		$var_idx[$spec]['php_int_t'] = array();
+		$var_idx[$spec]['php_size_t'] = array();
+		for ($i = 0, $pos = 0; $i < strlen($spec); $i++, $pos++) {
+			switch($spec[$i]) {
+				case 'l':
+				case 'L':
+					$var_idx[$spec]['php_int_t'][] = $pos;
+					break;
+				case 's':
+				case 'p':
+					$pos++;
+					$var_idx[$spec]['php_size_t'][] = $pos;
+					break;
+
+				case 'a':
+				case 'A':
+				case 'b':
+				case 'C':
+				case 'd':
+				case 'h':
+				case 'H':
+				case 'o':
+				case 'r':
+				case 'Z':
+				case 'z':
+				case '*':
+				case '+':
+					break;
+				case '|':
+				case '/':
+				case '!':
+					$pos--;
+					break;
+
+				case 'f':
+				case 'O':
+					$pos++;
+					break;
+
+				default:
+					echo "WARNING: unknown zpp spec '" . $spec[$i] . "'" . PHP_EOL;
+					break;
+			}
+		}
+		if (empty($var_idx)) {
+			unset($var_idx);
+		}
+	}
+
+	/* got indexes and got vars, 1st simple case to match */
+	$search_replace = array();
+	foreach ($var_idx as $spec => $data) {
+		/* handle direct matches with single variable declaration */
+		foreach ($data['php_int_t'] as $idx) {
+			$var = $vars[$spec][$idx];
+			$cnt = preg_match(",(long\s+$var.*;),msxU", $file_contents, $m);
+			if (1 == $cnt) {
+				/* XXX probably better to use preg_replace instead of str_replace here */
+				$search_replace[$m[1]] = str_replace('long', 'php_int_t', $m[1]);
+			} else {
+				echo "WARNING: variable $var needs to be php_int_t but couldn't be automatically replaced" . PHP_EOL;
+			}
+		}
+		foreach ($data['php_size_t'] as $idx) {
+			$var = $vars[$spec][$idx];
+			$cnt = preg_match(",(int\s+$var.*;),msxU", $file_contents, $m);
+			if (1 == $cnt) {
+				/* XXX probably better to use preg_replace instead of str_replace here */
+				$search_replace[$m[1]] = str_replace('int', 'php_size_t', $m[1]);;
+			} else {
+				echo "WARNING: variable $var needs to be php_size_t but couldn't be automatically replaced" . PHP_EOL;
+			}
+		}
+	}
+	$file_contents = str_replace(array_keys($search_replace), array_values($search_replace), $file_contents);
+
+	/* XXX more cases here to go, var_dump($vars, var_idx); to see what data does already exist at this point */
+
+} else if ($reverse_replace) {
+	echo "WARNING: reverse replace for zpp vars isn't implemented, feel free to supply patch" . PHP_EOL;
+}
+
 
 /* simple macro replacements */
 if ($replace_macros) {
@@ -167,6 +291,7 @@ if ($replace_zpp || $replace_zpp_compat) {
 		}
 	}
 }
+
 
 if (false === file_put_contents($fname, $file_contents)) {
 	print_error("couldnt write into '$fname'");
