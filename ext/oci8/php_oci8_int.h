@@ -276,7 +276,7 @@ typedef struct {
 	} array;
 	sb2					 indicator;				/* -1 means NULL */
 	ub2					 retcode;
-	ub4					 dummy_len;				/* a dummy var to store alenpp value in bind OUT callback */
+	ub4					 bind_len;				/* to store alenpp value in bind OUT callback */
 } php_oci_bind;
 /* }}} */
 

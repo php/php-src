@@ -915,6 +915,17 @@ int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 		 */
 		return 0;
 	}	
+	if (Z_TYPE_P(bind->zval) == IS_STRING) {
+		/* bind_len is used in php_oci_bind_out_callback for ub4 API
+		 * compatibility and used in php_oci_bind_post_exec.  So it
+		 * needs to be set here for the cases when the callback isn't
+		 * invoked. */
+		if (Z_STRSIZE_P(bind->zval) > SB4MAXVAL) { /* value_sz is sb4 */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long to bind");
+			*(int *)result = 1;
+		}
+		bind->bind_len = (ub4)Z_STRSIZE_P(bind->zval);
+	}
 	switch (bind->type) {
 		case SQLT_NTY:
 		case SQLT_BFILEE:
@@ -973,21 +984,24 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 	if (bind->indicator == -1) { /* NULL */
 		zval *val = bind->zval;
 		if (Z_TYPE_P(val) == IS_STRING) {
-			*Z_STRVAL_P(val) = '\0'; /* XXX avoid warning in debug mode */
+			*Z_STRVAL_P(val) = '\0'; /* avoid warning in debug mode */
 		}
 		zval_dtor(val);
 		ZVAL_NULL(val);
-	} else if (Z_TYPE_P(bind->zval) == IS_STRING
-			   && Z_STRSIZE_P(bind->zval) > 0
-			   && Z_STRVAL_P(bind->zval)[ Z_STRSIZE_P(bind->zval) ] != '\0') {
-		/* The post- PHP 5.3 feature for "interned" strings disallows
-		 * their reallocation but (i) any IN binds either interned or
-		 * not should already be null terminated and (ii) for OUT
-		 * binds, php_oci_bind_out_callback() should have allocated a
-		 * new string that we can modify here.
-		 */
-		Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRSIZE_P(bind->zval)+1);
-		Z_STRVAL_P(bind->zval)[ Z_STRSIZE_P(bind->zval) ] = '\0';
+	} else if (Z_TYPE_P(bind->zval) == IS_STRING) {
+		Z_STRSIZE_P(bind->zval) = bind->bind_len;
+		if (Z_STRSIZE_P(bind->zval) > 0
+			&& Z_STRVAL_P(bind->zval)[Z_STRSIZE_P(bind->zval)] != '\0') {
+			/* The post- PHP 5.3 feature for "interned" strings disallows
+			 * their reallocation but (i) any IN binds either interned or
+			 * not should already be null terminated and (ii) for OUT
+			 * binds, php_oci_bind_out_callback() should have allocated a
+			 * new string that we can modify here.
+			 */
+			if (Z_STRSIZE_P(bind->zval) < ZEND_SIZE_MAX)
+				Z_STRVAL_P(bind->zval) = erealloc(Z_STRVAL_P(bind->zval), Z_STRSIZE_P(bind->zval)+1);
+			Z_STRVAL_P(bind->zval)[Z_STRSIZE_P(bind->zval)] = '\0';
+		}
 	} else if (Z_TYPE_P(bind->zval) == IS_ARRAY) {
 		ub4 i;
 		zval **entry;
@@ -1075,7 +1089,7 @@ int php_oci_bind_post_exec(void *data TSRMLS_DC)
 		}
 	}
 
-	return 0;
+	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -1163,8 +1177,21 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, php_size_t na
 			if (Z_TYPE_P(var) != IS_NULL) {
 				convert_to_string(var);
 			}
+
 			if (maxlength == -1) {
-				value_sz = (Z_TYPE_P(var) == IS_STRING) ? Z_STRSIZE_P(var) : 0;
+				if (Z_TYPE_P(var) == IS_STRING) {
+					if (Z_STRSIZE_P(var) > SB4MAXVAL) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long to bind");
+						return 1;
+					} else {
+						value_sz = Z_STRSIZE_P(var);
+					}
+				} else {
+					value_sz = 0;
+				}
+			} else if (maxlength > SB4MAXVAL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long to bind");
+				return 1;
 			} else {
 				value_sz = maxlength;
 			}
@@ -1316,11 +1343,15 @@ sb4 php_oci_bind_in_callback(
 		*alenp = -1;
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else	if ((phpbind->descriptor == 0) && (phpbind->statement == 0)) {
+		if (Z_STRSIZE_P(val) > SB4MAXVAL) { /* OCIBindByName uses sb4 value_sz */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "String too long to bind");
+			return OCI_ERROR;
+		}
 		/* "normal string bind */
 		convert_to_string(val);
 
 		*bufpp = Z_STRVAL_P(val);
-		*alenp = Z_STRSIZE_P(val);
+		*alenp = phpbind->bind_len = (ub4)Z_STRSIZE_P(val);
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else if (phpbind->statement != 0) {
 		/* RSET */
@@ -1367,7 +1398,7 @@ sb4 php_oci_bind_out_callback(
 		/* Processing for ref-cursor out binds */
 		if (phpbind->statement != NULL) {
 			*bufpp = phpbind->statement;
-			*alenpp = &phpbind->dummy_len;
+			*alenpp = &phpbind->bind_len; /* not used */
 			*piecep = OCI_ONE_PIECE;
 			*rcodepp = &phpbind->retcode;
 			*indpp = &phpbind->indicator;
@@ -1392,7 +1423,7 @@ sb4 php_oci_bind_out_callback(
 		PHP_OCI_ZVAL_TO_DESCRIPTOR_EX(*tmp, desc);
 		desc->lob_size = -1;	/* force OCI8 to update cached size */
 
-		*alenpp = &phpbind->dummy_len;
+		*alenpp = &phpbind->bind_len;  /* not used */
 		*bufpp = phpbind->descriptor;
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
@@ -1402,11 +1433,11 @@ sb4 php_oci_bind_out_callback(
 		convert_to_string(val);
 		zval_dtor(val);
 		
-		Z_STRSIZE_P(val) = PHP_OCI_PIECE_SIZE; /* 64K-1 is max XXX */
-		Z_STRVAL_P(val) = ecalloc(1, Z_STRSIZE_P(phpbind->zval) + 1);
+		phpbind->bind_len = PHP_OCI_PIECE_SIZE; /* 64K-1 is max */
+		Z_STRVAL_P(val) = ecalloc(1, phpbind->bind_len + 1);
 		
-		/* XXX we assume that zend-zval len has 4 bytes */
-		*alenpp = (ub4*) &Z_STRSIZE_P(phpbind->zval);
+		/* The length will be assigned to Z_STRSIZE_P(phpbind->zval) in php_oci_bind_post_exec */
+		*alenpp = &phpbind->bind_len; 
 		*bufpp = Z_STRVAL_P(phpbind->zval);
 		*piecep = OCI_ONE_PIECE;
 		*rcodepp = &phpbind->retcode;
@@ -1627,7 +1658,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, php_int_t max_table_le
 		zend_hash_internal_pointer_reset(hash);
 		while (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_string_ex(entry);
-			if (maxlength < 0 || (maxlength >= 0 && Z_STRSIZE_PP(entry) > maxlength)) {
+			if (maxlength < 0 || (maxlength >= 0 && Z_STRSIZE_PP(entry) > maxlength && Z_STRSIZE_PP(entry) < ZEND_INT_MAX)) {
 				maxlength = Z_STRSIZE_PP(entry) + 1;
 			}
 			zend_hash_move_forward(hash);
@@ -1650,7 +1681,7 @@ php_oci_bind *php_oci_bind_array_helper_string(zval *var, php_int_t max_table_le
 	for (i = 0; i < bind->array.current_length; i++) {
 		if (zend_hash_get_current_data(hash, (void **) &entry) != FAILURE) {
 			convert_to_string_ex(entry);
-			bind->array.element_lengths[i] = Z_STRSIZE_PP(entry);
+			bind->array.element_lengths[i] = Z_STRSIZE_PP(entry) > UB2MAXVAL ? UB2MAXVAL : Z_STRSIZE_PP(entry);
 			if (Z_STRSIZE_PP(entry) == 0) {
 				bind->array.indicators[i] = -1;
 			}
