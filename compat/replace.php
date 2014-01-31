@@ -226,6 +226,10 @@ if ($replace_macros) {
 	);
 
 	if ($reverse_replace) {
+		/* cleanup also mess when convering back and forth */
+		$replacements['INTERNAL'] = 'LONGERNAL';
+		$replacements['INTERACTIVE'] = 'LONGERACTIVE';
+		$replacements['INTEGER'] = 'LONGEGER';
 		$file_contents = str_replace(array_values($replacements), array_keys($replacements), $file_contents);
 	} else {
 		$file_contents = str_replace(array_keys($replacements), array_values($replacements), $file_contents);
