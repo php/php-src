@@ -86,7 +86,7 @@ foreach($inputs as $input) {
     var_dump(session_start());
     $_SESSION[$input] = "Hello World!";
     var_dump(session_encode());
-    var_dump(session_destroy());
+    var_dump(session_destroy(TRUE));
     $iterator++;
 };
 

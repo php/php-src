@@ -74,7 +74,7 @@ session_start();
 var_dump($baz);
 var_dump($arr);
 
-session_destroy();
+session_destroy(TRUE);
 ?>
 --EXPECTF--
 OPEN: PHPSESSID

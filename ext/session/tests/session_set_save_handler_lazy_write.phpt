@@ -1,5 +1,5 @@
 --TEST--
-Test session_set_save_handler() function : test write short circuit
+Test session_set_save_handler() function : test feature
 --INI--
 session.save_path=
 session.name=PHPSESSID
@@ -16,14 +16,14 @@ ob_start();
  * Source code : ext/session/session.c
  */
 
-echo "*** Testing session_set_save_handler() : test write short circuit ***\n";
+echo "*** Testing session_set_save_handler() : test lazy_write ***\n";
 
 require_once "save_handler.inc";
 $path = dirname(__FILE__);
 session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
-session_start();
+session_start(['lazy_write'=>true]);
 $session_id = session_id();
 $_SESSION["Blah"] = "Hello World!";
 $_SESSION["Foo"] = FALSE;
@@ -37,7 +37,7 @@ var_dump($_SESSION);
 echo "Starting session again..!\n";
 session_id($session_id);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
-session_start();
+session_start(['lazy_write'=>true]);
 var_dump($_SESSION);
 $_SESSION['Bar'] = 'Foo';
 session_write_close();
@@ -45,15 +45,20 @@ session_write_close();
 echo "Starting session again..!\n";
 session_id($session_id);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
-session_start();
+session_start(['lazy_write'=>true]);
 var_dump($_SESSION);
-// $_SESSION should be the same and should skip write()
+// $_SESSION should be the same, but no "update" should call write()
 session_write_close();
+
+// Cleanup
+session_id($session_id);
+session_start();
+session_destroy(TRUE);
 
 ob_end_flush();
 ?>
 --EXPECTF--
-*** Testing session_set_save_handler() : test write short circuit ***
+*** Testing session_set_save_handler() : test lazy_write ***
 
 Open [%s,PHPSESSID]
 Read [%s,%s]
@@ -101,4 +106,9 @@ array(4) {
   ["Bar"]=>
   string(3) "Foo"
 }
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
+Close [%s,PHPSESSID]
+Open [%s,PHPSESSID]
+Read [%s,%s]
+Destroy [%s,%s]
 Close [%s,PHPSESSID]

@@ -61,7 +61,7 @@ typedef struct {
 } ps_files;
 
 ps_module ps_mod_files = {
-	PS_MOD_SID(files)
+	PS_MOD_5_6(files)
 };
 
 
@@ -105,14 +105,17 @@ static void ps_files_close(ps_files *data)
 #ifdef PHP_WIN32
 		/* On Win32 locked files that are closed without being explicitly unlocked
 		   will be unlocked only when "system resources become available". */
-		flock(data->fd, LOCK_UN);
+		if (!PS(minimize_lock)) {
+			flock(data->fd, LOCK_UN);
+		}
 #endif
 		close(data->fd);
 		data->fd = -1;
 	}
 }
 
-static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
+
+static int ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
 
@@ -126,11 +129,11 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 
 		if (php_session_valid_key(key) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
-			return;
+			return FAILURE;
 		}
 
 		if (!ps_files_path_create(buf, sizeof(buf), data, key)) {
-			return;
+			return FAILURE;
 		}
 
 		data->lastkey = estrdup(key);
@@ -143,19 +146,32 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 			if (PG(open_basedir)) {
 				struct stat sbuf;
 
-				if (fstat(data->fd, &sbuf)) {
+				if (fstat(data->fd, &sbuf) ||
+					(S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC))) {
 					close(data->fd);
 					data->fd = -1;
-					return;
-				}
-				if (S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
-					close(data->fd);
-					data->fd = -1;
-					return;
+					return FAILURE;
 				}
 			}
 #endif
+
 			flock(data->fd, LOCK_EX);
+			if (PS(lazy_write) > 0) {
+				struct utimbuf newtimebuf;
+				struct utimbuf *newtime = &newtimebuf;
+				int ret;
+
+#ifdef HAVE_UTIME_NULL
+				newtime = NULL;
+#else
+				newtime->modtime = newtime->actime = time(NULL);
+#endif
+				ret = VCWD_UTIME(buf, newtime);
+				if (ret == -1) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Utime failed in ps_files_open(): %s", strerror(errno));
+				}
+			}
+
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC
@@ -165,11 +181,16 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
 #endif
+			return SUCCESS;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
+			return FAILURE;
 		}
 	}
+
+	return SUCCESS;
 }
+
 
 static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 {
@@ -224,6 +245,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	return (nrdels);
 }
 
+
 static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
@@ -241,6 +263,12 @@ static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
 
 #define PS_FILES_DATA ps_files *data = PS_GET_MOD_DATA()
 
+
+/*
+ * Open save handler. Setup resources that are needed by the handler.
+ * Files save handler supports splitting session data into multiple
+ * directories.
+ */
 PS_OPEN_FUNC(files)
 {
 	ps_files *data;
@@ -305,6 +333,10 @@ PS_OPEN_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * Close save handler and clean up used resources.
+ */
 PS_CLOSE_FUNC(files)
 {
 	PS_FILES_DATA;
@@ -322,33 +354,21 @@ PS_CLOSE_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * Read specific session ID from session storage.
+ * PS_READ_FUNC() may have use_strict_mode support in it.
+ * Alternatively, save handler may use PS_VALIDATE_SID() to check
+ * session data existence.
+ */
 PS_READ_FUNC(files)
 {
 	long n;
 	struct stat sbuf;
 	PS_FILES_DATA;
 
-	/* If strict mode, check session id existence */
-	if (PS(use_strict_mode) &&
-		ps_files_key_exists(data, key TSRMLS_CC) == FAILURE) {
-		/* key points to PS(id), but cannot change here. */
-		if (key) {
-			efree(PS(id));
-			PS(id) = NULL;
-		}
-		PS(id) = PS(mod)->s_create_sid((void **)&data, NULL TSRMLS_CC);
-		if (!PS(id)) {
-			return FAILURE;
-		}
-		if (PS(use_cookies)) {
-			PS(send_cookie) = 1;
-		}
-		php_session_reset_id(TSRMLS_C);
-		PS(session_status) = php_session_active;
-	}
-
-	ps_files_open(data, PS(id) TSRMLS_CC);
-	if (data->fd < 0) {
+	/* ps_files_open() must be called by PS_READ_FUNC(), since session ID is not known for PS_OPEN_FUNC() */
+	if (ps_files_open(data, key TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -371,6 +391,9 @@ PS_READ_FUNC(files)
 	lseek(data->fd, 0, SEEK_SET);
 	n = read(data->fd, *val, sbuf.st_size);
 #endif
+	if (PS(minimize_lock)) {
+		flock(data->fd, LOCK_UN);
+	}
 
 	if (n != sbuf.st_size) {
 		if (n == -1) {
@@ -385,19 +408,28 @@ PS_READ_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * lazy_write is supported by session module. PS_WRITE_FUNC() should
+ * write session data unconditionally.
+ */
 PS_WRITE_FUNC(files)
 {
 	long n;
 	PS_FILES_DATA;
+	struct stat sbuf;
 
-	ps_files_open(data, key TSRMLS_CC);
 	if (data->fd < 0) {
-		return FAILURE;
+		if (ps_files_open(data, key TSRMLS_CC) == FAILURE) {
+			return FAILURE;
+		}
+	} else if (PS(minimize_lock)) {
+		flock(data->fd, LOCK_EX);
 	}
 
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
-
-	if (vallen < (int)data->st_size) {
+	fstat(data->fd, &sbuf);
+	if (vallen < (int)sbuf.st_size) {
 		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
@@ -407,6 +439,9 @@ PS_WRITE_FUNC(files)
 	lseek(data->fd, 0, SEEK_SET);
 	n = write(data->fd, val, vallen);
 #endif
+	if (PS(minimize_lock)) {
+		flock(data->fd, LOCK_UN);
+	}
 
 	if (n != vallen) {
 		if (n == -1) {
@@ -420,6 +455,23 @@ PS_WRITE_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * Files save handler updates mtime at PS_READ_FUNC(), so
+ * PS_UPDATE_FUNC() may return SUCCESS simply. Other save
+ * handler that requires updating last access time should
+ * update last access time stamp here.
+ */
+PS_UPDATE_FUNC(files)
+{
+	return SUCCESS;
+}
+
+
+/*
+ * lazy_destroy is done by session module. PS_DESTROY_FUNC()
+ * should delete session unconditionally.
+ */
 PS_DESTROY_FUNC(files)
 {
 	char buf[MAXPATHLEN];
@@ -444,6 +496,12 @@ PS_DESTROY_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * Full GC support requires to delete all expired session by this function.
+ * Files save handler does not delete session when multiple directory is
+ * used.
+ */
 PS_GC_FUNC(files)
 {
 	PS_FILES_DATA;
@@ -459,6 +517,12 @@ PS_GC_FUNC(files)
 	return SUCCESS;
 }
 
+
+/*
+ * Default php_session_create_id() does not check collision.
+ * Return valid session ID string.
+ * Return NULL for failure.
+ */
 PS_CREATE_SID_FUNC(files)
 {
 	char *sid;
@@ -480,6 +544,17 @@ PS_CREATE_SID_FUNC(files)
 	} while(!sid);
 
 	return sid;
+}
+
+
+/* use_strict_mode support
+   Return SUCCESS for valid(already exsting session).
+   Return FAILURE for invalid(non-existing session). */
+PS_VALIDATE_SID_FUNC(files)
+{
+	PS_FILES_DATA;
+
+	return ps_files_key_exists(data, key TSRMLS_CC);
 }
 
 

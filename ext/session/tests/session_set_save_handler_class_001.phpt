@@ -25,10 +25,35 @@ class MySession extends SessionHandler {
 		echo 'Open ', session_id(), "\n";
 		return parent::open($path, $name);
 	}
+	public function create_sid() {
+		++$this->i;
+		echo 'Create SID ', session_id(), "\n";
+		return parent::create_sid();
+	}
+	public function validateSid($key) {
+		++$this->i;
+		echo 'Validate SID ', session_id(), "\n";
+		return parent::validateSid($key);
+	}
 	public function read($key) {
 		++$this->i;
 		echo 'Read ', session_id(), "\n";
 		return parent::read($key);
+	}
+	public function write($key, $data) {
+		++$this->i;
+		echo 'Write ', session_id(), "\n";
+		return parent::write($key, $data);
+	}
+	public function update($key, $data) {
+		++$this->i;
+		echo 'Write ', session_id(), "\n";
+		return parent::update($key);
+	}
+	public function close() {
+		++$this->i;
+		echo 'Close ', session_id(), "\n";
+		return parent::close();
 	}
 }
 
@@ -49,20 +74,29 @@ var_dump($_SESSION);
 
 session_write_close();
 session_unset();
+var_dump($handler->i);
 
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 
+Create SID 
+Validate SID %s
 Read %s
 string(%d) "%s"
 string(5) "files"
 string(4) "user"
-int(2)
+int(4)
 array(0) {
 }
+Write %s
+Close %s
 Open %s
+Validate SID %s
 Read %s
 array(1) {
   ["foo"]=>
   string(5) "hello"
 }
+Write %s
+Close %s
+int(11)

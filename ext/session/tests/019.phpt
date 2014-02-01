@@ -43,7 +43,7 @@ $_SESSION["o2"]->inc();
 
 var_dump($_SESSION);
 
-session_destroy();
+session_destroy(TRUE);
 ?>
 --EXPECTF--
 

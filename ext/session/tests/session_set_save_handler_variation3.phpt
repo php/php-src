@@ -21,7 +21,7 @@ require_once "save_handler.inc";
 $path = dirname(__FILE__);
 session_save_path($path);
 var_dump(session_set_save_handler("open", "close", "read", "write", "destroy", "gc"));
-var_dump(session_destroy());
+var_dump(session_destroy(TRUE));
 
 ob_end_flush();
 ?>

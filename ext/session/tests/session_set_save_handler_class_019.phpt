@@ -1,5 +1,5 @@
 --TEST--
-Test session_set_save_handler() : full handler implementation
+Test session_set_save_handler() function: class with update
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
@@ -11,12 +11,12 @@ session.name=PHPSESSID
 ob_start();
 
 /*
- * Prototype : bool session_set_save_handler(SessionHandler $handler [, bool $register_shutdown_function = true])
+ * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
  * Description : Sets user-level session storage functions
  * Source code : ext/session/session.c
  */
 
-echo "*** Testing session_set_save_handler() : full handler implementation ***\n";
+echo "*** Testing session_set_save_handler() function: class with update ***\n";
 
 class MySession2 extends SessionHandler {
 	public $path;
@@ -55,36 +55,20 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function create_sid() {
-		return session_create_id();
+		return 'my_sid';
 	}
 
 	public function validate_sid($id) {
-		return (strlen($id)>0);
+		return 'my_sid'===$id;
 	}
 
 	public function update($id, $data) {
-		return touch($this->path . $id);
+		echo "UPDATE called\n";
+		return true;
 	}
 }
 
 $handler = new MySession2;
-session_set_save_handler(array($handler, 'open'), array($handler, 'close'),
-	array($handler, 'read'), array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc'));
-session_start();
-
-$_SESSION['foo'] = "hello";
-
-var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
-
-session_write_close();
-session_unset();
-
-session_start();
-var_dump($_SESSION);
-
-session_write_close();
-session_unset();
-
 session_set_save_handler($handler);
 session_start();
 
@@ -95,15 +79,15 @@ var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
 session_write_close();
 session_unset();
 
-session_start();
+session_start(['lazy_write'=>true]);
 var_dump($_SESSION);
 
 session_write_close();
 session_unset();
 
 --EXPECTF--
-*** Testing session_set_save_handler() : full handler implementation ***
-string(%d) "%s"
+*** Testing session_set_save_handler() function: class with update ***
+string(%d) "my_sid"
 string(4) "user"
 array(1) {
   ["foo"]=>
@@ -113,13 +97,4 @@ array(1) {
   ["foo"]=>
   string(5) "hello"
 }
-string(%d) "%s"
-string(4) "user"
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
+UPDATE called

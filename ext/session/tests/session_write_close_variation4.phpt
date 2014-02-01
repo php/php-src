@@ -31,7 +31,7 @@ var_dump(session_id());
 var_dump(session_write_close());
 var_dump(session_id());
 var_dump(session_start());
-var_dump(session_destroy());
+var_dump(session_destroy(TRUE));
 
 echo "Done";
 ob_end_flush();

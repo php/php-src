@@ -13,23 +13,18 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_set_save_handler(callback $open, callback $close, callback $read, callback $write, callback $destroy, callback $gc)
  * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
-function noisy_gc($maxlifetime) {
-	echo("GC [".$maxlifetime."]\n");
-	gc($maxlifetime);
-}
-
 require_once "save_handler.inc";
 $path = dirname(__FILE__);
 session_save_path($path);
-session_set_save_handler("open", "close", "read", "write", "destroy", "noisy_gc");
+session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update", "feature");
 
 session_start();
 $_SESSION["Blah"] = "Hello World!";
@@ -39,11 +34,16 @@ var_dump($_SESSION);
 $session_id = session_id();
 var_dump(session_write_close());
 
-session_set_save_handler("open", "close", "read", "write", "destroy", "noisy_gc");
+session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update", "feature");
+session_id($session_id);
+session_start(['lazy_write'=>TRUE]);
+var_dump($_SESSION);
+session_commit();
+
+// Cleanup
 session_id($session_id);
 session_start();
-var_dump($_SESSION);
-var_dump(session_destroy(TRUE));
+session_destroy(TRUE);
 
 ob_end_flush();
 ?>
@@ -51,8 +51,9 @@ ob_end_flush();
 *** Testing session_set_save_handler() : variation ***
 
 Open [%s,PHPSESSID]
+CreateID [PHPT-%s]
+ValidateID [%s,PHPT-%s]
 Read [%s,%s]
-GC [0]
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
@@ -65,8 +66,8 @@ Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
 NULL
 Open [%s,PHPSESSID]
+ValidateID [%s,PHPT-%s]
 Read [%s,%s]
-GC [0]
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
@@ -75,9 +76,12 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-Destroy [%s,%s]
-
-Warning: unlink(%s): No such file or directory in %s on line %d
+Update [%s,PHPT-%s]
 Close [%s,PHPSESSID]
-bool(true)
+Open [%s,PHPSESSID]
+ValidateID [%s,PHPT-%s]
+Read [%s,PHPT-%s]
+Destroy [%s,PHPT-%s]
 
+Warning: unlink(%s/session_test_PHPT-%s): No such file or directory in %s/save_handler.inc on line 45
+Close [%s,PHPSESSID]

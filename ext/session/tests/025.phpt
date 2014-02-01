@@ -96,7 +96,7 @@ session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, 
 session_start();
 var_dump($baz); var_dump($arr); var_dump($c);
 
-session_destroy();
+session_destroy(TRUE);
 ?>
 --EXPECTF--
 OPEN: PHPSESSID

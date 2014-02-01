@@ -23,25 +23,25 @@
 #include "mod_user.h"
 
 ps_module ps_mod_user = {
-	PS_MOD_SID(user)
+	PS_MOD_5_6(user)
 };
 
-#define SESS_ZVAL_LONG(val, a)						\
+#define SESS_ZVAL_LONG(a, val)							\
 {													\
 	MAKE_STD_ZVAL(a);								\
 	ZVAL_LONG(a, val);								\
 }
 
-#define SESS_ZVAL_STRING(vl, a)						\
-{													\
-	char *__vl = vl;								\
-	SESS_ZVAL_STRINGN(__vl, strlen(__vl), a);		\
-}
-
-#define SESS_ZVAL_STRINGN(vl, ln, a)				\
+#define SESS_ZVAL_STRING(a, val)						\
 {													\
 	MAKE_STD_ZVAL(a);								\
-	ZVAL_STRINGL(a, vl, ln, 1);						\
+	ZVAL_STRING(a, val, 1);							\
+}
+
+#define SESS_ZVAL_STRINGL(a, val, len)				\
+{													\
+	MAKE_STD_ZVAL(a);								\
+	ZVAL_STRINGL(a, val, len, 1);					\
 }
 
 static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
@@ -84,12 +84,11 @@ PS_OPEN_FUNC(user)
 	if (PSF(open) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"user session functions not defined");
-			
 		return FAILURE;
 	}
 
-	SESS_ZVAL_STRING((char*)save_path, args[0]);
-	SESS_ZVAL_STRING((char*)session_name, args[1]);
+	SESS_ZVAL_STRING(args[0], save_path);
+	SESS_ZVAL_STRING(args[1], session_name);
 
 	retval = ps_call_handler(PSF(open), 2, args TSRMLS_CC);
 	PS(mod_user_implemented) = 1;
@@ -130,7 +129,7 @@ PS_READ_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STRING(args[0], key);
 
 	retval = ps_call_handler(PSF(read), 1, args TSRMLS_CC);
 
@@ -151,8 +150,8 @@ PS_WRITE_FUNC(user)
 	zval *args[2];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
-	SESS_ZVAL_STRINGN((char*)val, vallen, args[1]);
+	SESS_ZVAL_STRING(args[0], key);
+	SESS_ZVAL_STRINGL(args[1], val, vallen);
 
 	retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
 
@@ -164,7 +163,7 @@ PS_DESTROY_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_STRING((char*)key, args[0]);
+	SESS_ZVAL_STRING(args[0], key);
 
 	retval = ps_call_handler(PSF(destroy), 1, args TSRMLS_CC);
 
@@ -176,7 +175,7 @@ PS_GC_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	SESS_ZVAL_LONG(maxlifetime, args[0]);
+	SESS_ZVAL_LONG(args[0], maxlifetime);
 
 	retval = ps_call_handler(PSF(gc), 1, args TSRMLS_CC);
 
@@ -213,6 +212,42 @@ PS_CREATE_SID_FUNC(user)
 
 	/* function as defined by PS_MOD */
 	return php_session_create_id(mod_data, newlen TSRMLS_CC);
+}
+
+PS_VALIDATE_SID_FUNC(user)
+{
+	/* maintain backwards compatibility */
+	if (PSF(validate_sid) != NULL) {
+		zval *args[1];
+		STDVARS;
+
+		SESS_ZVAL_STRING(args[0], key);
+
+		retval = ps_call_handler(PSF(validate_sid), 1, args TSRMLS_CC);
+
+		FINISH;
+	}
+
+	/* dummy function as defined by PS_MOD */
+	return php_session_validate_sid(mod_data, key TSRMLS_CC);
+}
+
+PS_UPDATE_FUNC(user)
+{
+	zval *args[2];
+	STDVARS;
+
+	SESS_ZVAL_STRING(args[0], key);
+	SESS_ZVAL_STRINGL(args[1], val, vallen);
+
+	/* maintain backwards compatibility */
+	if (PSF(update) != NULL) {
+		retval = ps_call_handler(PSF(update), 2, args TSRMLS_CC);
+	} else {
+		retval = ps_call_handler(PSF(write), 2, args TSRMLS_CC);
+	}
+
+	FINISH;
 }
 
 /*

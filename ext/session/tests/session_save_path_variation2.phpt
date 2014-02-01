@@ -22,7 +22,7 @@ ini_set("session.save_path", "/blah");
 var_dump(ini_get("session.save_path"));
 var_dump(session_start());
 var_dump(ini_get("session.save_path"));
-var_dump(session_destroy());
+var_dump(session_destroy(TRUE));
 var_dump(ini_get("session.save_path"));
 
 echo "Done";

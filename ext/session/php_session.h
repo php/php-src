@@ -27,21 +27,23 @@
 # include "ext/hash/php_hash.h"
 #endif
 
-#define PHP_SESSION_API 20020330
+#define PHP_SESSION_API 20140120
 
 /* To check php_session_valid_key()/php_session_reset_id() */
 #define PHP_SESSION_STRICT 1
 
-#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
-#define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
-#define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen TSRMLS_DC
-#define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
-#define PS_DESTROY_ARGS void **mod_data, const char *key TSRMLS_DC
-#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
-#define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
+/* save handler macros */
+#define PS_NUM_APIS      10
 
-/* default create id function */
-PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
+#define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
+#define PS_CLOSE_ARGS    void **mod_data TSRMLS_DC
+#define PS_READ_ARGS     void **mod_data, const char *key, char **val, int *vallen TSRMLS_DC
+#define PS_WRITE_ARGS    void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
+#define PS_DESTROY_ARGS  void **mod_data, const char *key TSRMLS_DC
+#define PS_GC_ARGS       void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
+#define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
+#define PS_VALIDATE_SID_ARGS void **mod_data, const char *key TSRMLS_DC
+#define PS_UPDATE_ARGS   void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
 
 typedef struct ps_module_struct {
 	const char *s_name;
@@ -52,6 +54,8 @@ typedef struct ps_module_struct {
 	int (*s_destroy)(PS_DESTROY_ARGS);
 	int (*s_gc)(PS_GC_ARGS);
 	char *(*s_create_sid)(PS_CREATE_SID_ARGS);
+	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
+	int (*s_update)(PS_UPDATE_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
@@ -64,21 +68,27 @@ typedef struct ps_module_struct {
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	char *ps_create_sid_##x(PS_CREATE_SID_ARGS)
+#define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
+#define PS_UPDATE_FUNC(x) 	int ps_update_##x(PS_UPDATE_ARGS)
 
+/* legacy save handler module definitions */
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
 	PS_READ_FUNC(x); \
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
-	PS_GC_FUNC(x);	\
-	PS_CREATE_SID_FUNC(x)
+	PS_GC_FUNC(x); \
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x); \
+	PS_UPDATE_FUNC(x);
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, php_session_create_id
+		ps_delete_##x, ps_gc_##x, php_session_create_id, \
+		php_session_validate_sid, php_session_update
 
-/* SID creation enabled module handler definitions */
+/* SID creation enabled save handler module definitions */
 #define PS_FUNCS_SID(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -86,11 +96,32 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x); \
-	PS_CREATE_SID_FUNC(x)
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x); \
+	PS_UPDATE_FUNC(x);
 
 #define PS_MOD_SID(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x
+		ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
+		php_session_validate_sid, php_session_update
+
+/* PHP 5.6 save handler module efinitions */
+#define PS_FUNCS_5_6(x) \
+	PS_OPEN_FUNC(x); \
+	PS_CLOSE_FUNC(x); \
+	PS_READ_FUNC(x); \
+	PS_WRITE_FUNC(x); \
+	PS_DESTROY_FUNC(x); \
+	PS_GC_FUNC(x); \
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x); \
+	PS_UPDATE_FUNC(x);
+
+#define PS_MOD_5_6(x) \
+	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
+		ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
+		ps_validate_sid_##x, ps_update_##x
+
 
 typedef enum {
 	php_session_disabled,
@@ -99,7 +130,6 @@ typedef enum {
 } php_session_status;
 
 typedef struct _php_session_rfc1867_progress {
-
 	size_t    sname_len;
 	zval      sid;
 	smart_str key;
@@ -119,29 +149,23 @@ typedef struct _php_session_rfc1867_progress {
 } php_session_rfc1867_progress;
 
 typedef struct _php_ps_globals {
-	char *save_path;
-	char *session_name;
-	char *id;
-	char *extern_referer_chk;
-	char *entropy_file;
-	char *cache_limiter;
-	long entropy_length;
-	long cookie_lifetime;
-	char *cookie_path;
-	char *cookie_domain;
-	zend_bool  cookie_secure;
-	zend_bool  cookie_httponly;
-	ps_module *mod;
-	ps_module *default_mod;
-	void *mod_data;
+	/* internal data */
+	int  module_number;
+	char *id;                        /* session ID */
 	php_session_status session_status;
-	long gc_probability;
-	long gc_divisor;
-	long gc_maxlifetime;
-	int module_number;
-	long cache_expire;
+	ps_module *default_mod;          /* previous save handler */
+	void      *mod_data;             /* save handler data */
+	int       mod_user_implemented;
+	int       mod_user_is_open;
+	int       send_cookie;
+	int       define_sid;            /* define SID constant or not */
+	long      lazy_destroy;          /* delay time until actually delete destroyed session data */
+	zend_bool lazy_write;            /* supress session data write if data is unchanged */
+	zend_bool read_only;             /* read session and close immediately */
+	zend_bool minimize_lock;         /* lock session data entirely or unlock when unnecessaly */
+	zend_bool invalid_session_id;    /* OBSOLETE: allow save handler to report about an invalid session id and request id regeneration. */
 	union {
-		zval *names[7];
+		zval *names[PS_NUM_APIS];
 		struct {
 			zval *ps_open;
 			zval *ps_close;
@@ -150,37 +174,52 @@ typedef struct _php_ps_globals {
 			zval *ps_destroy;
 			zval *ps_gc;
 			zval *ps_create_sid;
+			zval *ps_validate_sid;
+			zval *ps_update;
 		} name;
 	} mod_user_names;
-	int mod_user_implemented;
-	int mod_user_is_open;
-	const struct ps_serializer_struct *serializer;
+	char *session_vars;
+	int   session_vars_len;
 	zval *http_session_vars;
+	php_session_rfc1867_progress *rfc1867_progress; /* upload progress data */
+
+	/* php.ini */
+	char      *save_path;
+	char      *session_name;
+	char      *extern_referer_chk;
+	char      *entropy_file;
+	char      *cache_limiter;
+	long      entropy_length;
+	long      cookie_lifetime;
+	char      *cookie_path;
+	char      *cookie_domain;
+	zend_bool cookie_secure;
+	zend_bool cookie_httponly;
+	ps_module *mod;            /* save handler */
+	const struct ps_serializer_struct *serializer;
+	long      gc_probability;
+	long      gc_divisor;
+	long      gc_maxlifetime;
+	long      cache_expire;
 	zend_bool auto_start;
 	zend_bool use_cookies;
 	zend_bool use_only_cookies;
-	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
-	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
-
-	long hash_func;
+	zend_bool use_strict_mode;  /* whether or not PHP accepts unknown session ids */
+	zend_bool use_trans_sid;    /* contains the INI value of whether to use trans-sid */
+	zend_bool apply_trans_sid;  /* whether or not to enable trans-sid for the current request */
+	long      hash_func;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
 	php_hash_ops *hash_ops;
 #endif
 	long hash_bits_per_character;
-	int send_cookie;
-	int define_sid;
-	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
 
-	php_session_rfc1867_progress *rfc1867_progress;
+	/* upload progress */
 	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
 	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
 	smart_str rfc1867_name;    /* session.upload_progress.name */
 	long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
-
-	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	unsigned char session_data_hash[16]; /* binary MD5 hash length */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -217,6 +256,12 @@ typedef struct ps_serializer_struct {
 
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
+
+/* default create id function */
+PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
+/* Dummuy PS module function */
+PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
+PHPAPI int php_session_update(PS_UPDATE_ARGS);
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
@@ -290,6 +335,9 @@ extern zend_class_entry *php_session_iface_entry;
 #define PS_SID_IFACE_NAME "SessionIdInterface"
 extern zend_class_entry *php_session_id_iface_entry;
 
+#define PS_5_6_IFACE_NAME "SessionHandler56Interface"
+extern zend_class_entry *php_session_5_6_iface_entry;
+
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
@@ -297,5 +345,7 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
+extern PHP_METHOD(SessionHandler, validateSid);
+extern PHP_METHOD(SessionHandler, update);
 
 #endif

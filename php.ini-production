@@ -1395,7 +1395,7 @@ session.save_handler = files
 ; applications from session fixation via session adoption vulnerability. It is
 ; disabled by default for maximum compatibility, but enabling it is encouraged.
 ; https://wiki.php.net/rfc/strict_sessions
-session.use_strict_mode = 0
+session.use_strict_mode = 1
 
 ; Whether to use cookies.
 ; http://php.net/session.use-cookies
@@ -1433,7 +1433,7 @@ session.cookie_domain =
 
 ; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Handler used to serialize data.  php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
@@ -1526,7 +1526,7 @@ session.use_trans_sid = 0
 ; the hash extension. A list of available hashes is returned by the hash_algos()
 ; function.
 ; http://php.net/session.hash-function
-session.hash_function = 0
+session.hash_function = 1
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.

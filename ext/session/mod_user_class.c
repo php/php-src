@@ -157,3 +157,36 @@ PHP_METHOD(SessionHandler, create_sid)
 	RETURN_STRING(id, 0);
 }
 /* }}} */
+
+/* {{{ proto char SessionHandler::validateSid(string id)
+   Simply return TRUE */
+PHP_METHOD(SessionHandler, validateSid)
+{
+	char *key;
+	int key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+
+	RETVAL_BOOL(1);
+}
+/* }}} */
+
+/* {{{ proto bool SessionHandler::update(string id, string data)
+   Simply call write */
+PHP_METHOD(SessionHandler, update)
+{
+	char *key, *val;
+	int key_len, val_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &val, &val_len) == FAILURE) {
+		return;
+	}
+
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
+}
+/* }}} */
+

@@ -23,12 +23,12 @@ $_SESSION['person'] = 'julia';
 $_SESSION['age'] = 6;
 
 var_dump($_SESSION);
-var_dump(session_destroy());
+var_dump(session_destroy(TRUE));
 var_dump($_SESSION);
 session_start();
 var_dump($_SESSION);
 
-session_destroy();
+session_destroy(TRUE);
 echo "Done";
 ob_end_flush();
 ?>

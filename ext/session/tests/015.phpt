@@ -21,7 +21,7 @@ session_start();
 ?>
 <a href="/link?<?php echo SID; ?>">
 <?php
-session_destroy();
+session_destroy(TRUE);
 ?>
 --EXPECT--
 <a href="/link?PHPSESSID=abtest&PHPSESSID=abtest">
