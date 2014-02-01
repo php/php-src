@@ -2326,7 +2326,7 @@ static PHP_FUNCTION(session_start)
 		PS(read_only) = 0;
 		php_session_set_opt_bool(options, PS(read_only),       "read_only"); /* this does not have to be PS() */
 		php_session_set_opt_bool(options, PS(lazy_write),      "lazy_write");
-		php_session_set_opt_bool(options, PS(minimize_lock),   "unlock");
+		php_session_set_opt_bool(options, PS(minimize_lock),   "unsafe_lock");
 		if (zend_hash_find(Z_ARRVAL_P(options), "lazy_destroy", sizeof("lazy_destroy"), (void **)&entry) == SUCCESS) {
 			convert_to_long(*entry);
 			if (Z_LVAL_PP(entry) < 0) {
