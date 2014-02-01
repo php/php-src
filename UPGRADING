@@ -28,6 +28,17 @@ PHP X.Y UPGRADE NOTES
   containing non-lowercase values inside JSON arrays or objects has never been
   accepted.
 
+- openssl:
+  To prevent Man-in-the-Middle attacks against encrypted transfers client
+  streams now verify peer certificates by default. Previous versions
+  required users to manually enable peer verification. As a result of this
+  change, existing code using ssl:// or tls:// stream wrappers (e.g.
+  file_get_contents(), fsockopen(), stream_socket_client()) may no longer
+  connect successfully without manually disabling peer verification via the
+  stream context's "verify_peer" setting. Encrypted transfers delegate to
+  operating system certificate stores by default, so many/most users *should*
+  be unaffected by this transparent security enhancement.
+
 ========================================
 2. New Features
 ========================================
@@ -50,6 +61,8 @@ PHP X.Y UPGRADE NOTES
   option).
 
 - Added openssl crypto method stream context option.
+
+- Added openssl peer verification support for SAN x509 extension
 
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)

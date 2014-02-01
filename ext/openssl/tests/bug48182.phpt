@@ -13,8 +13,7 @@ function ssl_server($port) {
 	$host = 'ssl://127.0.0.1'.':'.$port;
 	$flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
 	$data = "Sending bug48182\n";
-
-	$pem = dirname(__FILE__) . '/bug46127.pem';
+	$pem = dirname(__FILE__) . '/bug54992.pem';
 	$ssl_params = array( 'verify_peer' => false, 'allow_self_signed' => true, 'local_cert' => $pem);
 	$ssl = array('ssl' => $ssl_params);
 
@@ -47,8 +46,11 @@ function ssl_async_client($port) {
 	$host = 'ssl://127.0.0.1'.':'.$port;
 	$flags = STREAM_CLIENT_CONNECT | STREAM_CLIENT_ASYNC_CONNECT;
 	$data = "Sending data over to SSL server in async mode with contents like Hello World\n";
-
-	$socket = stream_socket_client($host, $errno, $errstr, 10, $flags);
+	$context = stream_context_create(array('ssl' => array(
+		'cafile' => dirname(__FILE__) . '/bug54992-ca.pem',
+		'CN_match' => 'bug54992.local'
+	)));
+	$socket = stream_socket_client($host, $errno, $errstr, 10, $flags, $context);
 	stream_set_blocking($socket, 0);
 
 	while ($socket && $data) {
