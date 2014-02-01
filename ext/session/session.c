@@ -620,7 +620,9 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 			PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 			PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name));
 			php_session_read_data(&val, &vallen TSRMLS_CC);
-			php_session_decode(val, vallen TSRMLS_CC);
+			if (val) {
+				php_session_decode(val, vallen TSRMLS_CC);
+			}
 		}
 		if (val) {
 			str_efree(val);
