@@ -1,5 +1,5 @@
 --TEST--
-Test session_set_save_handler() function : test feature
+Test session_set_save_handler() function : test lazy_write
 --INI--
 session.save_path=
 session.name=PHPSESSID
