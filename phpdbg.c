@@ -833,7 +833,7 @@ int main(int argc, char **argv) /* {{{ */
 	int step = 0;
 
 #ifdef _WIN32
-	char *bp_tmp_file;
+	char *bp_tmp_file = NULL;
 #else
 	char bp_tmp_file[] = "/tmp/phpdbg.XXXXXX";
 #endif
@@ -877,14 +877,23 @@ int main(int argc, char **argv) /* {{{ */
 
 phpdbg_main:
 	if (!cleaning) {
+	
 #ifdef _WIN32
 		bp_tmp_file = malloc(L_tmpnam);
 
-		tmpnam(bp_tmp_file);
+		if (bp_tmp_file) {
+			if (!tmpnam(bp_tmp_file)) {
+				free(bp_tmp_file);
+				bp_tmp_file = NULL;
+			}
+		}
 #else
-		mkstemp(bp_tmp_file);
+		if (!mkstemp(bp_tmp_file)) {
+			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
+		}
 #endif
-		if (bp_tmp_file == NULL) {
+		
+		if (!bp_tmp_file) {
 			phpdbg_error("Unable to create temporary file");
 		}
 	}
