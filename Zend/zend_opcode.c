@@ -699,6 +699,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
+			case ZEND_ASSERT_CHECK:
 			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
 				break;

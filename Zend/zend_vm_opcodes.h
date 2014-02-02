@@ -171,5 +171,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_FAST_RET                        163
 #define ZEND_RECV_VARIADIC                   164
 #define ZEND_SEND_UNPACK                     165
+#define ZEND_ASSERT_CHECK                    166
 
 #endif

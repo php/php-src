@@ -5659,4 +5659,24 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 	}
 }
 
+ZEND_VM_HANDLER(166, ZEND_ASSERT_CHECK, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (!EG(assertions)) {
+		if (RETURN_VALUE_USED((opline->op1.jmp_addr-1))) {
+			zval *ret;
+
+			MAKE_STD_ZVAL(ret);
+			Z_SET_REFCOUNT_P(ret, 0);
+			ZVAL_BOOL(ret, 1);
+			PZVAL_LOCK(ret);
+			AI_SET_PTR(&EX_T((opline->op1.jmp_addr-1)->result.var), ret);
+		}
+		ZEND_VM_JMP(opline->op1.jmp_addr);
+	} else {
+		ZEND_VM_NEXT_OPCODE();
+	}
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

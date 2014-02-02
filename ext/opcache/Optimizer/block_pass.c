@@ -119,6 +119,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				START_BLOCK_OP(opno + 1);
 				break;
 #endif
+#ifdef ZEND_ASSERT_CHECK
+			case ZEND_ASSERT_CHECK:
+				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
+				START_BLOCK_OP(opno + 1);
+				break;
+#endif
 			case ZEND_JMP:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
 				/* break missing intentionally */
@@ -267,6 +273,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 					if (opline->extended_value) {
 						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					}
+					break;
+#endif
+#ifdef ZEND_ASSERT_CHECK
+				case ZEND_ASSERT_CHECK:
+					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					cur_block->follow_to = &blocks[opno];
 					break;
 #endif
 				case ZEND_JMP:

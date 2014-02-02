@@ -1969,6 +1969,22 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	}
 
 	lcname = zend_str_tolower_dup(Z_STRVAL(function_name->u.constant), Z_STRLEN(function_name->u.constant));
+
+	if (Z_STRLEN(function_name->u.constant) == sizeof("assert")-1 &&
+	    memcmp(lcname, "assert", sizeof("assert")-1) == 0) {
+		
+		int op_number = get_next_op_number(CG(active_op_array));
+		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		opline->opcode = ZEND_ASSERT_CHECK;
+		opline->extended_value = 0;
+		SET_UNUSED(opline->op1);
+		SET_UNUSED(opline->op2);
+		opline->op2.ptr = (void*)LANG_SCNG(yy_text);
+
+		function_name->EA = op_number;
+	}
+
 	if ((zend_hash_find(CG(function_table), lcname, Z_STRLEN(function_name->u.constant)+1, (void **) &function)==FAILURE) ||
 	 	((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS) &&
  		(function->type == ZEND_INTERNAL_FUNCTION))) {
@@ -2538,19 +2554,85 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 }
 /* }}} */
 
+static inline void zend_copy_assertion_text(zval *target, const char *start_statement, const char *end_statement TSRMLS_DC)  /* {{{ */
+{
+	char *str;
+	const char *statement = start_statement;
+	size_t statement_length = end_statement - start_statement;
+
+	while (statement && isspace(*statement)) {
+		statement_length--;
+		statement++;
+	}
+
+	while (end_statement && isspace(*end_statement)) {
+		statement_length--;
+		end_statement--;
+	}
+
+	str = emalloc(sizeof("assert") + statement_length + 1);
+	memcpy(str, "assert", sizeof("assert") - 1);
+	memcpy(str + sizeof("assert") - 1, statement, statement_length + 1);
+	str[sizeof("assert") + statement_length] = 0;
+	ZVAL_STRINGL(target, str, sizeof("assert") + statement_length, 0);
+}
+/* }}} */
+
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+	long arg_num = Z_LVAL(argument_list->u.constant);
 
 	if (is_method && function_name && function_name->op_type == IS_UNUSED) {
 		/* clone */
-		if (Z_LVAL(argument_list->u.constant) != 0) {
+		if (arg_num != 0) {
 			zend_error(E_WARNING, "Clone method does not require arguments");
 		}
 		opline = &CG(active_op_array)->opcodes[Z_LVAL(function_name->u.constant)];
 	} else {
 		zend_function **function_ptr_ptr;
 		zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
+		
+		if (!is_method &&
+		    function_name->op_type==IS_CONST &&
+		    Z_STRLEN(function_name->u.constant) == sizeof("assert")-1 &&
+   		    memcmp(Z_STRVAL(function_name->u.constant), "assert", sizeof("assert")-1) == 0) {
+
+			int assert_op_number = function_name->EA;
+
+			if (arg_num == 1) {				
+				int last_op_number = get_next_op_number(CG(active_op_array));
+				zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number-1];
+
+				if (last_op->opcode != ZEND_SEND_VAL ||
+				    last_op->op1_type != IS_CONST ||
+				    Z_TYPE(CONSTANT(last_op->op1.constant)) != IS_STRING) {
+
+					zval message;
+
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					opline->opcode = ZEND_SEND_VAL;
+        
+					zend_copy_assertion_text(
+						&message,
+						(const char*)CG(active_op_array)->opcodes[assert_op_number].op2.ptr,
+						(const char*)LANG_SCNG(yy_text) TSRMLS_CC);
+					opline->op1_type = IS_CONST;
+					opline->op1.constant = zend_add_literal(CG(active_op_array), &message TSRMLS_CC);
+					CALCULATE_LITERAL_HASH(opline->op1.constant);
+					opline->op2.opline_num = 2;
+					opline->extended_value = !is_dynamic_fcall ? ZEND_DO_FCALL : ZEND_DO_FCALL_BY_NAME;
+					SET_UNUSED(opline->op2);
+					arg_num = 2;
+					CG(context).used_stack++;
+				}
+			}
+			
+			CG(active_op_array)->opcodes[assert_op_number].op1.opline_num =
+				get_next_op_number(CG(active_op_array)) + 1;
+			CG(active_op_array)->opcodes[assert_op_number].op2.ptr =
+				NULL;
+		}
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		if (*function_ptr_ptr) {
@@ -2580,12 +2662,12 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 	GET_NODE(result, opline->result);
 
 	zend_stack_del_top(&CG(function_call_stack));
-	opline->extended_value = Z_LVAL(argument_list->u.constant);
+	opline->extended_value = arg_num;
 
 	if (CG(context).used_stack + 1 > CG(active_op_array)->used_stack) {
 		CG(active_op_array)->used_stack = CG(context).used_stack + 1;
 	}
-	CG(context).used_stack -= Z_LVAL(argument_list->u.constant);
+	CG(context).used_stack -= arg_num;
 }
 /* }}} */
 

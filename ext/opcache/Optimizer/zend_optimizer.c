@@ -474,6 +474,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 		}
 #endif
 		switch (opline->opcode) {
+#ifdef ZEND_ASSERT_CHECK
+			case ZEND_ASSERT_CHECK:
+#endif
 			case ZEND_JMP:
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 			case ZEND_GOTO:
@@ -515,6 +518,9 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 		}
 #endif
 		switch (opline->opcode) {
+#ifdef ZEND_ASSERT_CHECK
+			case ZEND_ASSERT_CHECK:
+#endif
 			case ZEND_JMP:
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 			case ZEND_GOTO:

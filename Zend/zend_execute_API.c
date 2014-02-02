@@ -1299,6 +1299,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
+			case ZEND_ASSERT_CHECK:
 				opline->op1.jmp_addr = &CG(active_op_array)->opcodes[opline->op1.opline_num];
 				break;
 			case ZEND_JMPZ:
