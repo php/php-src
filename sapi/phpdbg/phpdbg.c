@@ -892,9 +892,11 @@ phpdbg_main:
 			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
 		}
 #endif
-		
+
 		if (!bp_tmp_file) {
-			phpdbg_error("Unable to create temporary file");
+			phpdbg_error(
+				"Unable to create temporary file");
+			return 1;
 		}
 	}
 	ini_entries = NULL;
