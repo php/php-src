@@ -57,7 +57,6 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
 	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 2),
 	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
-	PHPDBG_COMMAND_D(aliases, "show alias list",                          'a', NULL, 0),
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   1),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
 	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, 1),
@@ -904,76 +903,6 @@ PHPDBG_COMMAND(clear) /* {{{ */
 	phpdbg_writeln("Conditionals\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
 
 	phpdbg_clear_breakpoints(TSRMLS_C);
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_COMMAND(aliases) /* {{{ */
-{
-	const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
-
-	phpdbg_help_header();
-	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
-	while (prompt_command && prompt_command->name) {
-		if (prompt_command->alias) {
-			if (prompt_command->subs) {
-				const phpdbg_command_t *sub_command = prompt_command->subs;
-				phpdbg_writeln(EMPTY);
-				phpdbg_writeln(" %c -> %9s", prompt_command->alias, prompt_command->name);
-				while (sub_command && sub_command->name) {
-					if (sub_command->alias) {
-						phpdbg_writeln(" |-------- %c -> %15s\t%s", sub_command->alias,
-							sub_command->name, sub_command->tip);
-					}
-					++sub_command;
-				}
-				phpdbg_writeln(EMPTY);
-			} else {
-				phpdbg_writeln(" %c -> %9s\t\t\t%s", prompt_command->alias,
-					prompt_command->name, prompt_command->tip);
-			}
-		}
-
-		++prompt_command;
-	}
-	phpdbg_help_footer();
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_COMMAND(help) /* {{{ */
-{
-	switch (param->type) {
-		case EMPTY_PARAM: {
-			const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
-			const phpdbg_command_t *help_command = phpdbg_help_commands;
-
-			phpdbg_help_header();
-			phpdbg_writeln("To get help regarding a specific command type \"help command\"");
-
-			phpdbg_notice("Commands");
-
-			while (prompt_command && prompt_command->name) {
-				phpdbg_writeln(
-					" %10s\t%s", prompt_command->name, prompt_command->tip);
-				++prompt_command;
-			}
-
-			phpdbg_notice("Help Commands");
-
-			while (help_command && help_command->name) {
-				phpdbg_writeln(" %10s\t%s", help_command->name, help_command->tip);
-				++help_command;
-			}
-
-			phpdbg_help_footer();
-		} break;
-
-		default: {
-			phpdbg_error(
-				"No help can be found for the subject \"%s\"", param->str);
-		}
-	}
 
 	return SUCCESS;
 } /* }}} */
