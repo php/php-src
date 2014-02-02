@@ -149,7 +149,7 @@
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
 #define PHPDBG_URL "http://phpdbg.com"
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.3.1"
+#define PHPDBG_VERSION "0.3.2"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 /* }}} */
 
