@@ -171,10 +171,6 @@ SOURCE=.\tsrm_strtok_r.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tsrm_virtual_cwd.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\tsrm_win32.h
 # End Source File
 # End Group

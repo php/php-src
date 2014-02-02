@@ -87,6 +87,9 @@ struct fpm_worker_pool_config_s {
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;
 	struct key_value_s *php_values;
+#ifdef HAVE_APPARMOR
+	char *apparmor_hat;
+#endif
 };
 
 struct ini_value_parser_s {

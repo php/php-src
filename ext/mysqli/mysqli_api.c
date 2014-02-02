@@ -599,10 +599,20 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 #if defined(MYSQLI_USE_MYSQLND)
 				mysqlnd_end_psession(mysql->mysql);
 #endif
-				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
+				if (MyG(rollback_on_cached_plink) &&
+#if !defined(MYSQLI_USE_MYSQLND)
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
+#else
+					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
+#endif
+				{
+					mysqli_close(mysql->mysql, close_type);			
+				} else {
+					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+					MyG(num_inactive_persistent)++;
+				}
 				MyG(num_active_persistent)--;
-				MyG(num_inactive_persistent)++;
 			}
 		}
 		mysql->persistent = FALSE;

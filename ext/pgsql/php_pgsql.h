@@ -157,6 +157,9 @@ PHP_FUNCTION(pg_lo_import);
 PHP_FUNCTION(pg_lo_export);
 PHP_FUNCTION(pg_lo_seek);
 PHP_FUNCTION(pg_lo_tell);
+#if HAVE_PG_LO_TRUNCATE
+PHP_FUNCTION(pg_lo_truncate);
+#endif
 
 /* debugging functions */
 PHP_FUNCTION(pg_trace);

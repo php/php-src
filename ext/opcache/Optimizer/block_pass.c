@@ -1057,6 +1057,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				/* BOOL */
 				result = ZEND_OP1_LITERAL(opline);
 				convert_to_boolean(&result);
+				Z_TYPE(ZEND_OP1_LITERAL(opline)) = IS_NULL;
 			}
 			PZ_SET_REFCOUNT_P(&result, 1);
 			PZ_UNSET_ISREF_P(&result);
@@ -1908,7 +1909,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			if (RESULT_USED(opline)) {
 				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
 				    (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 				     opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
 					(opline->opcode == ZEND_OP_DATA && ZEND_RESULT_TYPE(opline) == IS_TMP_VAR) ||
 					opline->opcode == ZEND_ADD_ARRAY_ELEMENT)) {
 					/* these opcodes use the result as argument */
@@ -1993,7 +1996,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 			if (opline->opcode == ZEND_RECV ||
                 opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
                 opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
                 opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;

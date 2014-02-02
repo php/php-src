@@ -354,6 +354,11 @@ PHP_FUNCTION(readline_clear_history)
 		return;
 	}
 
+#if HAVE_LIBEDIT
+	/* clear_history is the only function where rl_initialize
+	   is not call to ensure correct allocation */
+	using_history();
+#endif
 	clear_history();
 
 	RETURN_TRUE;

@@ -7,6 +7,7 @@ opcache.blacklist_filename={PWD}/opcache-*.blacklist
 opcache.file_update_protection=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+<?php if (substr(PHP_OS, 0, 3) == 'WIN') { die('skip not for Windows'); } ?>
 --FILE--
 <?php
 $conf = opcache_get_configuration();
