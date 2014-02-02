@@ -130,7 +130,7 @@ PHPDBG_LIST(class) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_file(const char *filename, php_int_t count, php_int_t offset, int highlight TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(const char *filename, php_int_t count, php_int_t offset, php_int_t highlight TSRMLS_DC) /* {{{ */
 {
 	unsigned char *mem, *pos, *last_pos, *end_pos;
 	zend_stat_t st;
