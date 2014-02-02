@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,11 @@
 #include "main/php_open_temporary_file.h"
 #include "zend_API.h"
 #include "zend_ini.h"
-#include "zend_virtual_cwd.h"
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+# include "zend_virtual_cwd.h"
+#else
+# include "TSRM/tsrm_virtual_cwd.h"
+#endif
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -387,8 +391,10 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 {
 	Bucket *p, *q;
 
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 	/* empty string */
 	CG(interned_empty_string) = accel_new_interned_string("", sizeof(""), 0 TSRMLS_CC);
+#endif
 
 	/* function table hash keys */
 	p = CG(function_table)->pListHead;
@@ -1115,7 +1121,9 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 			char *new_key = zend_shared_alloc(key_length + 1);
 			if (new_key) {
 				memcpy(new_key, key, key_length + 1);
-				zend_accel_hash_update(&ZCSG(hash), new_key, key_length + 1, 1, bucket);
+				if (zend_accel_hash_update(&ZCSG(hash), new_key, key_length + 1, 1, bucket)) {
+					zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", new_key);
+				}
 			} else {
 				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM TSRMLS_CC);
 			}
@@ -1203,16 +1211,21 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
-	if (bucket && !ZCG(accel_directives).revalidate_path &&
-	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
-	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
-	    (new_persistent_script->full_path_len != key_length ||
-	     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
-		/* link key to the same persistent script in hash table */
-		if (!zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
-			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
-			ZSMMG(memory_exhausted) = 1;
-			zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH TSRMLS_CC);
+	if (bucket) {
+		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
+		if (!ZCG(accel_directives).revalidate_path &&
+		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
+		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
+		    (new_persistent_script->full_path_len != key_length ||
+		     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
+			/* link key to the same persistent script in hash table */
+			if (zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
+				zend_accel_error(ACCEL_LOG_INFO, "Added key '%s'", key);
+			} else {
+				zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
+				ZSMMG(memory_exhausted) = 1;
+				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH TSRMLS_CC);
+			}
 		}
 	}
 
@@ -2135,7 +2148,9 @@ static void accel_activate(void)
 				}
 
 #if (ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO) && !defined(ZTS)
-				accel_interned_strings_restore_state(TSRMLS_C);
+				if (ZCG(accel_directives).interned_strings_buffer) {
+					accel_interned_strings_restore_state(TSRMLS_C);
+				}
 #endif
 
 				zend_shared_alloc_restore_state();
@@ -2453,36 +2468,39 @@ static int zend_accel_init_shm(TSRMLS_D)
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
+	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
 # ifndef ZTS
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / (sizeof(Bucket) + sizeof(Bucket*) + 8 /* average string length */), NULL, NULL, 1);
-	ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
-	ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
-	ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
-	if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
-		zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
-		return FAILURE;
+	if (ZCG(accel_directives).interned_strings_buffer) {
+		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
+		ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
+		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+		if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
+			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+			return FAILURE;
+		}
+		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
+		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
+
+		orig_interned_strings_start = CG(interned_strings_start);
+		orig_interned_strings_end = CG(interned_strings_end);
+		CG(interned_strings_start) = ZCSG(interned_strings_start);
+		CG(interned_strings_end) = ZCSG(interned_strings_end);
 	}
-	ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
-	ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
-# else
-	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
 # endif
 
-	orig_interned_strings_start = CG(interned_strings_start);
-	orig_interned_strings_end = CG(interned_strings_end);
 	orig_new_interned_string = zend_new_interned_string;
 	orig_interned_strings_snapshot = zend_interned_strings_snapshot;
 	orig_interned_strings_restore = zend_interned_strings_restore;
-
-	CG(interned_strings_start) = ZCSG(interned_strings_start);
-	CG(interned_strings_end) = ZCSG(interned_strings_end);
 	zend_new_interned_string = accel_new_interned_string_for_php;
 	zend_interned_strings_snapshot = accel_interned_strings_snapshot_for_php;
 	zend_interned_strings_restore = accel_interned_strings_restore_for_php;
 
 # ifndef ZTS
-	accel_use_shm_interned_strings(TSRMLS_C);
-	accel_interned_strings_save_state(TSRMLS_C);
+	if (ZCG(accel_directives).interned_strings_buffer) {
+		accel_use_shm_interned_strings(TSRMLS_C);
+		accel_interned_strings_save_state(TSRMLS_C);
+	}
 # endif
 
 #endif
@@ -2707,6 +2725,21 @@ void accel_shutdown(TSRMLS_D)
 		return;
 	}
 
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	if (ZCG(accel_directives).interned_strings_buffer) {
+# ifndef ZTS
+		zend_hash_clean(CG(function_table));
+		zend_hash_clean(CG(class_table));
+		zend_hash_clean(EG(zend_constants));
+# endif
+		CG(interned_strings_start) = orig_interned_strings_start;
+		CG(interned_strings_end) = orig_interned_strings_end;
+	}
+	zend_new_interned_string = orig_new_interned_string;
+	zend_interned_strings_snapshot = orig_interned_strings_snapshot;
+	zend_interned_strings_restore = orig_interned_strings_restore;
+#endif
+
 	accel_free_ts_resources();
 	zend_shared_alloc_shutdown();
 	zend_compile_file = accelerator_orig_compile_file;
@@ -2714,20 +2747,6 @@ void accel_shutdown(TSRMLS_D)
 	if (zend_hash_find(EG(ini_directives), "include_path", sizeof("include_path"), (void **) &ini_entry) == SUCCESS) {
 		ini_entry->on_modify = orig_include_path_on_modify;
 	}
-
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-# ifndef ZTS
-	zend_hash_clean(CG(function_table));
-	zend_hash_clean(CG(class_table));
-	zend_hash_clean(EG(zend_constants));
-# endif
-	CG(interned_strings_start) = orig_interned_strings_start;
-	CG(interned_strings_end) = orig_interned_strings_end;
-	zend_new_interned_string = orig_new_interned_string;
-	zend_interned_strings_snapshot = orig_interned_strings_snapshot;
-	zend_interned_strings_restore = orig_interned_strings_restore;
-#endif
-
 }
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
@@ -2797,7 +2816,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_VERSION,					/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2013",				/* copyright */
+	"Copyright (c) 1999-2014",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

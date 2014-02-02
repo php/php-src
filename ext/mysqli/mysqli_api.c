@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -599,10 +599,20 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 #if defined(MYSQLI_USE_MYSQLND)
 				mysqlnd_end_psession(mysql->mysql);
 #endif
-				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
+				if (MyG(rollback_on_cached_plink) &&
+#if !defined(MYSQLI_USE_MYSQLND)
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
+#else
+					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
+#endif
+				{
+					mysqli_close(mysql->mysql, close_type);			
+				} else {
+					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+					MyG(num_inactive_persistent)++;
+				}
 				MyG(num_active_persistent)--;
-				MyG(num_inactive_persistent)++;
 			}
 		}
 		mysql->persistent = FALSE;

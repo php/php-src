@@ -1,7 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.6.0 
+?? ??? 2014, PHP 5.6.0 Alpha 2
+- mysqli
+  . Added new function mysqli_get_links_stats() as well as new INI variable
+    mysqli.rollback_on_cached_plink of type bool (Andrey)
 
+
+23 Jan 2014, PHP 5.6.0 Alpha 1
 - CLI server:
   . Added some MIME types to the CLI web server. (Chris Jones)
 
@@ -16,9 +21,10 @@ PHP                                                                        NEWS
 	(Gustavo)
   . Uploads equal or greater than 2GB in size are now accepted.
     (Ralf Lang, Mike)
-  . Reduced POST data memory usage by 200-300%. Removed INI setting
-    always_populate_raw_post_data and the $HTTP_RAW_POST_DATA global
-    variable. (Mike)
+  . Reduced POST data memory usage by 200-300%. Changed INI setting
+    always_populate_raw_post_data to throw a deprecation warning when enabling
+	and to accept -1 for never populating the $HTTP_RAW_POST_DATA global 
+	variable, which will be the default in future PHP versions. (Mike)
   . Implemented dedicated syntax for variadic functions
     (RFC: https://wiki.php.net/rfc/variadics). (Nikita)
   . Fixed bug #50333 Improving multi-threaded scalability by using
@@ -26,6 +32,7 @@ PHP                                                                        NEWS
   . Implemented constant scalar expressions (with support for constants)
     (RFC: https://wiki.php.net/rfc/const_scalar_exprs). (Bob)
   . Fixed bug #65784 (Segfault with finally). (Laruence, Dmitry)
+  . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
@@ -63,7 +70,12 @@ PHP                                                                        NEWS
   . Added certificate fingerprint support. (Tjerk Meesters)
   . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
   . Fixed bug #65729 (CN_match gives false positive). (Tjerk Meesters)
-  
+  . Peer name verification matches SAN DNS names for certs using
+    the Subject Alternative Name x509 extension. (Daniel Lowrey)
+  . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
+  . Peer certificates now verified by default in client socket operations
+    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
   . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
@@ -72,6 +84,12 @@ PHP                                                                        NEWS
 - phpdbg:
   . Included phpdbg sapi (RFC: https://wiki.php.net/rfc/phpdbg).
     (Felipe Pena, Joe Watkins and Bob Weinand)
+
+- pgsql:
+  . pg_version() returns full report which obtained by PQparameterStatus().
+    (Yasuo)
+  . Added pg_lo_truncate(). (Yasuo)
+  . Added 64bit large object support for PostgreSQL 9.3 and later. (Yasuo)
 
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)

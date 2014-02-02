@@ -292,7 +292,7 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	} else {
 		fpm_globals.error_log_fd = fd;
 #if HAVE_UNISTD_H
-		if (fpm_global_config.daemonize || !isatty(STDERR_FILENO)) {
+		if (fpm_global_config.daemonize || (!isatty(STDERR_FILENO) && !fpm_globals.force_stderr)) {
 #else
 		if (fpm_global_config.daemonize) {
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1437,6 +1437,19 @@ PHPAPI void php_basename(const char *s, size_t len, char *suffix, size_t sufflen
 						state = 0;
 						cend = c;
 					}
+#if defined(PHP_WIN32) || defined(NETWARE)
+				/* Catch relative paths in c:file.txt style. They're not to confuse
+				   with the NTFS streams. This part ensures also, that no drive 
+				   letter traversing happens. */
+				} else if ((*c == ':' && (c - comp == 1))) {
+					if (state == 0) {
+						comp = c;
+						state = 1;
+					} else {
+						cend = c;
+						state = 0;
+					}
+#endif
 				} else {
 					if (state == 0) {
 						comp = c;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1683,6 +1683,49 @@ ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array
 	return i_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
 }
 /* }}} */
+
+static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(zend_op *opline, call_slot *call TSRMLS_DC) /* {{{ */
+{
+	zend_uint arg_num = (opline->extended_value & ZEND_FETCH_ARG_MASK) + call->num_additional_args;
+	return ARG_SHOULD_BE_SENT_BY_REF(call->fbc, arg_num);
+}
+/* }}} */
+
+static void **zend_vm_stack_push_args_with_copy(int count TSRMLS_DC) /* {{{ */
+{
+	zend_vm_stack p = EG(argument_stack);
+
+	zend_vm_stack_extend(count + 1 TSRMLS_CC);
+
+	EG(argument_stack)->top += count;
+	*(EG(argument_stack)->top) = (void*)(zend_uintptr_t)count;
+	while (count-- > 0) {
+		void *data = *(--p->top);
+
+		if (UNEXPECTED(p->top == ZEND_VM_STACK_ELEMETS(p))) {
+			zend_vm_stack r = p;
+
+			EG(argument_stack)->prev = p->prev;
+			p = p->prev;
+			efree(r);
+		}
+		*(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + count) = data;
+	}
+	return EG(argument_stack)->top++;
+}
+/* }}} */
+
+static zend_always_inline void** zend_vm_stack_push_args(int count TSRMLS_DC) /* {{{ */
+{
+	if (UNEXPECTED(EG(argument_stack)->top - ZEND_VM_STACK_ELEMETS(EG(argument_stack)) < count)
+		|| UNEXPECTED(EG(argument_stack)->top == EG(argument_stack)->end)) {
+		return zend_vm_stack_push_args_with_copy(count TSRMLS_CC);
+	}
+	*(EG(argument_stack)->top) = (void*)(zend_uintptr_t)count;
+	return EG(argument_stack)->top++;
+}
+/* }}} */
+
 
 #define ZEND_VM_NEXT_OPCODE() \
 	CHECK_SYMBOL_TABLES() \

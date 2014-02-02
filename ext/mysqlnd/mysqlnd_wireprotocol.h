@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -302,6 +302,7 @@ PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * c
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length);
+size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
 PHPAPI const extern char * const mysqlnd_empty_string;
 

@@ -536,6 +536,22 @@ AC_DEFUN([AC_FPM_SELECT],
 ])
 dnl }}}
 
+AC_DEFUN([AC_FPM_APPARMOR],
+[
+	AC_MSG_CHECKING([for apparmor])
+
+	SAVED_LIBS="$LIBS"
+	LIBS="$LIBS -lapparmor"
+
+	AC_TRY_LINK([ #include <sys/apparmor.h> ], [change_hat("test", 0);], [
+		AC_DEFINE([HAVE_APPARMOR], 1, [do we have apparmor support?])
+		AC_MSG_RESULT([yes])
+	], [
+		LIBS="$SAVED_LIBS"
+		AC_MSG_RESULT([no])
+	])
+])
+
 
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
@@ -547,14 +563,15 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-	AC_FPM_SYSCONF
-	AC_FPM_TIMES
-	AC_FPM_KQUEUE
-	AC_FPM_PORT
-	AC_FPM_DEVPOLL
-	AC_FPM_EPOLL
-	AC_FPM_POLL
-	AC_FPM_SELECT
+  AC_FPM_SYSCONF
+  AC_FPM_TIMES
+  AC_FPM_KQUEUE
+  AC_FPM_PORT
+  AC_FPM_DEVPOLL
+  AC_FPM_EPOLL
+  AC_FPM_POLL
+  AC_FPM_SELECT
+  AC_FPM_APPARMOR
 
   PHP_ARG_WITH(fpm-user,,
   [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)

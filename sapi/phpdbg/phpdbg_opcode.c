@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,13 +52,15 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 		case IS_VAR:
 		case IS_TMP_VAR: {
 			zend_ulong id = 0, *pid = NULL;
-			if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
-				id = zend_hash_num_elements(vars);
-				zend_hash_index_update(
-					vars, (zend_ulong) ops->vars - op->var,
-					(void**) &id,
-					sizeof(zend_ulong), NULL);
-			} else id = *pid;
+			if (vars != NULL) {
+				if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
+					id = zend_hash_num_elements(vars);
+					zend_hash_index_update(
+						vars, (zend_ulong) ops->vars - op->var,
+						(void**) &id,
+						sizeof(zend_ulong), NULL);
+				} else id = *pid;
+			}
 			asprintf(&decode, "@%lu", id);
 		} break;
 

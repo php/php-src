@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,11 +33,13 @@
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 # define ADD_INTERNED_STRING(str, len) do { \
-		const char *tmp = accel_new_interned_string((str), (len), !IS_INTERNED((str)) TSRMLS_CC); \
-		if (tmp != (str)) { \
-			(str) = (char*)tmp; \
-		} else { \
-			ADD_DUP_SIZE((str), (len)); \
+		if (!IS_INTERNED(str)) { \
+			const char *tmp = accel_new_interned_string((str), (len), 1 TSRMLS_CC); \
+			if (tmp != (str)) { \
+				(str) = (char*)tmp; \
+			} else { \
+				ADD_DUP_SIZE((str), (len)); \
+			} \
 		} \
 	} while (0)
 #else

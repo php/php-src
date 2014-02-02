@@ -126,7 +126,12 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 					call_stack[call - 1].opline = NULL;
 				}
 				break;
-
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+			case ZEND_SEND_UNPACK:
+				call_stack[call - 1].func = NULL;
+				call_stack[call - 1].opline = NULL;
+				break;
+#endif
 			default:
 				break;
 		}

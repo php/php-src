@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -90,7 +90,8 @@ const char * const mysqlnd_command_to_text[COM_END] =
   "TIME", "DELAYED_INSERT", "CHANGE_USER", "BINLOG_DUMP",
   "TABLE_DUMP", "CONNECT_OUT", "REGISTER_SLAVE",
   "STMT_PREPARE", "STMT_EXECUTE", "STMT_SEND_LONG_DATA", "STMT_CLOSE",
-  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON"
+  "STMT_RESET", "SET_OPTION", "STMT_FETCH", "DAEMON", "BINLOG_DUMP_GTID",
+  "RESET_CONNECTION"
 };
 /* }}} */
 

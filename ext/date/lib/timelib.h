@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,6 +92,8 @@ int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
 void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts);
 void timelib_unixtime2local(timelib_time *tm, timelib_sll ts);
 void timelib_update_from_sse(timelib_time *tm);
+void timelib_set_timezone_from_offset(timelib_time *t, timelib_sll utc_offset);
+void timelib_set_timezone_from_abbr(timelib_time *t, timelib_abbr_info abbr_info);
 void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz);
 
 /* From parse_tz.c */
