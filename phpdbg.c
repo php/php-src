@@ -831,7 +831,13 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
-	char *bp_tmp_file;
+
+#ifdef _WIN32
+	char *bp_tmp_file = NULL;
+#else
+	char bp_tmp_file[] = "/tmp/phpdbg.XXXXXX";
+#endif
+
 #ifndef _WIN32
 	char *address;
 	int listen[2];
@@ -871,10 +877,23 @@ int main(int argc, char **argv) /* {{{ */
 
 phpdbg_main:
 	if (!cleaning) {
+	
+#ifdef _WIN32
 		bp_tmp_file = malloc(L_tmpnam);
 
-		tmpnam(bp_tmp_file);
-		if (bp_tmp_file == NULL) {
+		if (bp_tmp_file) {
+			if (!tmpnam(bp_tmp_file)) {
+				free(bp_tmp_file);
+				bp_tmp_file = NULL;
+			}
+		}
+#else
+		if (!mkstemp(bp_tmp_file)) {
+			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
+		}
+#endif
+		
+		if (!bp_tmp_file) {
 			phpdbg_error("Unable to create temporary file");
 		}
 	}
@@ -1317,7 +1336,11 @@ phpdbg_out:
 		free(sapi_name);
 	}
 	
+#ifdef _WIN32
 	free(bp_tmp_file);
+#else
+	unlink(bp_tmp_file);
+#endif
 
 	return 0;
 } /* }}} */
