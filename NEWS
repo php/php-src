@@ -75,6 +75,7 @@ PHP                                                                        NEWS
   . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
   . Peer certificates now verified by default in client socket operations
     (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+  . Added SPKAC support. (Jason Gerfen)
 
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
