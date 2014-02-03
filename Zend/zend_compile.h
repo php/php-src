@@ -275,8 +275,8 @@ struct _zend_op_array {
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	zend_size_t num_args;
+	zend_size_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
@@ -332,8 +332,8 @@ typedef struct _zend_internal_function {
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
-	zend_uint num_args;
-	zend_uint required_num_args;
+	zend_size_t num_args;
+	zend_size_t required_num_args;
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
@@ -352,8 +352,8 @@ typedef union _zend_function {
 		zend_class_entry *scope;
 		zend_uint fn_flags;
 		union _zend_function *prototype;
-		zend_uint num_args;
-		zend_uint required_num_args;
+		zend_size_t num_args;
+		zend_size_t required_num_args;
 		zend_arg_info *arg_info;
 	} common;
 

@@ -2150,7 +2150,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
-			int i;
+			zend_size_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
 				if (reg_function->common.arg_info[i].class_name ||
 				    reg_function->common.arg_info[i].type_hint) {
