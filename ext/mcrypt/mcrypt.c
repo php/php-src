@@ -49,6 +49,13 @@ typedef struct _php_mcrypt {
 	zend_bool init;
 } php_mcrypt;
 
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND,
+	ARANDOM
+} iv_source;
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, cipher)
@@ -537,12 +544,6 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 }
 /* }}} */
 
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND,
-	ARANDOM
-} iv_source;
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory)
    Opens the module of the algorithm and the mode to be used */
