@@ -585,7 +585,7 @@ ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ze
 	}
 }
 
-ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC)
+ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_size_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC)
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname = zf->common.function_name;
@@ -608,7 +608,7 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	return 0;
 }
 
-static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, zend_uint_t fetch_type TSRMLS_DC)
+static inline int zend_verify_arg_type(zend_function *zf, zend_size_t arg_num, zval *arg, zend_uint_t fetch_type TSRMLS_DC)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -771,9 +771,9 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC)
 {
 	zval *str = T->str_offset.str;
-	zend_uint offset = T->str_offset.offset;
+	zend_uint_t offset = T->str_offset.offset;
 	if (Z_TYPE_P(str) == IS_STRING) {
-		if ((int)offset < 0) {
+		if ((zend_int_t)offset < 0) {
 			zend_error(E_WARNING, "Illegal string offset:  %d", offset);
 			return 0;
 		}
@@ -997,7 +997,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 {
 	zval **retval;
 	char *offset_key;
-	int offset_key_length;
+	zend_size_t offset_key_length;
 	zend_uint_t hval;
 
 	switch (dim->type) {
@@ -1601,7 +1601,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		/* Prepend the regular stack frame with a copy of prev_execute_data
 		 * and the passed arguments
 		 */
-		int args_count = zend_vm_stack_get_args_count_ex(EG(current_execute_data));
+		zend_size_t args_count = zend_vm_stack_get_args_count_ex(EG(current_execute_data));
 		size_t args_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval*)) * (args_count + 1);
 
 		total_size += args_size + execute_data_size;
