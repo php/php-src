@@ -1791,7 +1791,7 @@ static void zend_mm_safe_error(zend_mm_heap *heap,
 					lineno,
 #endif
 					size);
-				fprintf(stderr, " in %s on line %d\n", error_filename, error_lineno);
+				fprintf(stderr, " in %s on line " ZEND_UINT_FMT "\n", error_filename, error_lineno);
 			}
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef PHP_WIN32

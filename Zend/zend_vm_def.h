@@ -3065,7 +3065,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
 		zend_size_t arg_num = opline->op2.num + EX(call)->num_additional_args;
 		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", arg_num);
+			zend_error_noreturn(E_ERROR, "Cannot pass parameter %pu by reference", arg_num);
 		}
 	}
 
@@ -3332,7 +3332,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 
 				if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 					zend_error(
-						E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
+						E_WARNING, "Cannot pass by-reference argument %pu of %s%s%s()"
 						" by unpacking a Traversable, passing by-value instead", arg_num,
 						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name : "",
 						EX(call)->fbc->common.scope ? "::" : "",
@@ -3393,7 +3393,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 			ptr = EX(prev_execute_data);
 
 			if(ptr && ptr->op_array) {
-				zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %d and defined", opline->op1.num, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
+				zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %pu and defined", opline->op1.num, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename, ptr->opline->lineno);
 			} else {
 				zend_error(E_WARNING, "Missing argument %u for %s%s%s()", opline->op1.num, class_name, space, get_active_function_name(TSRMLS_C));
 			}
