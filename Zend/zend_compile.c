@@ -973,7 +973,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 			    last_op->result.var == variable->u.op.var) {
 				if (last_op->opcode == ZEND_FETCH_OBJ_W) {
 					if (n > 0) {
-						int opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
+						zend_size_t opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
 						*opline = *last_op;
 						MAKE_NOP(last_op);
 						/* last_op = opline; */
@@ -988,7 +988,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 					return;
 				} else if (last_op->opcode == ZEND_FETCH_DIM_W) {
 					if (n > 0) {
-						int opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
+						zend_size_t opline_no = (opline-CG(active_op_array)->opcodes)/sizeof(*opline);
 						*opline = *last_op;
 						MAKE_NOP(last_op);
 						/* last_op = opline; */

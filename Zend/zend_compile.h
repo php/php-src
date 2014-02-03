@@ -78,7 +78,7 @@ typedef struct _zend_literal {
 typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
-	zend_uint      num;
+	zend_size_t     num;
 	zend_uint_t     hash;
 	zend_uint      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
