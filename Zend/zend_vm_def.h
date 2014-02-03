@@ -3063,7 +3063,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 
 	SAVE_OPLINE();
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		zend_size_t arg_num = opline->op2.num + EX(call)->num_additional_args;
 		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", arg_num);
 		}
@@ -3126,7 +3126,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *varptr;
-	int arg_num;
+	zend_size_t arg_num;
 
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
@@ -3193,7 +3193,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
 	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) { 
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		zend_size_t arg_num = opline->op2.num + EX(call)->num_additional_args;
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 		}
@@ -3214,7 +3214,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
 	USE_OPLINE
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
+		zend_size_t arg_num = opline->op2.num + EX(call)->num_additional_args;
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
 			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
 		}
@@ -3228,7 +3228,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *args;
-	int arg_num;
+	zend_size_t arg_num;
 	SAVE_OPLINE();
 
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -3374,7 +3374,7 @@ ZEND_VM_C_LABEL(unpack_iter_dtor):
 ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
+	zend_size_t arg_num = opline->op1.num;
 	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 
 	SAVE_OPLINE();
@@ -3416,7 +3416,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	USE_OPLINE
 	zval *assignment_value;
-	zend_uint arg_num = opline->op1.num;
+	zend_size_t arg_num = opline->op1.num;
 	zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 	zval **var_ptr;
 
@@ -3448,8 +3448,8 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 {
 	USE_OPLINE
-	zend_uint arg_num = opline->op1.num;
-	zend_uint arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
+	zend_size_t arg_num = opline->op1.num;
+	zend_size_t arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
 	zval **var_ptr, *params;
 
 	SAVE_OPLINE();

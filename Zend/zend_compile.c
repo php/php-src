@@ -3188,7 +3188,7 @@ static void do_inherit_method(zend_function *function) /* {{{ */
 
 static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
-	zend_uint i, num_args;
+	zend_size_t i, num_args;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -3352,7 +3352,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 
 	*(offset++) = '(';
 	if (fptr->common.arg_info) {
-		zend_uint i, required;
+		zend_size_t i, required;
 		zend_arg_info *arg_info = fptr->common.arg_info;
 
 		required = fptr->common.required_num_args;
@@ -3401,7 +3401,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				memcpy(offset, arg_info->name, arg_info->name_len);
 				offset += arg_info->name_len;
 			} else {
-				zend_uint idx = i;
+				zend_size_t idx = i;
 				memcpy(offset, "param", 5);
 				offset += 5;
 				do {
@@ -3416,14 +3416,14 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 				if (fptr->type == ZEND_USER_FUNCTION) {
 					zend_op *precv = NULL;
 					{
-						zend_uint idx  = i;
+						zend_size_t idx  = i;
 						zend_op *op = ((zend_op_array *)fptr)->opcodes;
 						zend_op *end = op + ((zend_op_array *)fptr)->last;
 
 						++idx;
 						while (op < end) {
 							if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-									&& op->op1.num == (long)idx)
+									&& op->op1.num == idx)
 							{
 								precv = op;
 							}
