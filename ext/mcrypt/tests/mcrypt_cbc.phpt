@@ -18,6 +18,7 @@ echo trim(mcrypt_cbc($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 mcrypt_cbc($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 
 --EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 

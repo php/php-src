@@ -11,7 +11,8 @@ $iv3 = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB)
 echo strlen($iv1) . "\n";
 echo strlen($iv2) . "\n";
 echo strlen($iv3) . "\n";
---EXPECT--
+--EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 16
 16
 16

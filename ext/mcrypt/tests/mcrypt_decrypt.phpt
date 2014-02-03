@@ -20,6 +20,7 @@ mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC);
 
 var_dump(strpos(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv), "Testfest") !== false);
 --EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 PHP Testfest 2008
 
 Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
