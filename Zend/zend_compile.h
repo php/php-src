@@ -227,11 +227,11 @@ char *zend_visibility_string(zend_uint fn_flags);
 typedef struct _zend_property_info {
 	zend_uint flags;
 	const char *name;
-	int name_length;
+	zend_size_t name_length;
 	zend_uint_t h;
 	int offset;
 	const char *doc_comment;
-	int doc_comment_len;
+	zend_size_t doc_comment_len;
 	zend_class_entry *ce;
 } zend_property_info;
 
