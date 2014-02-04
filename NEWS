@@ -5,6 +5,9 @@ PHP                                                                        NEWS
   . Added new function mysqli_get_links_stats() as well as new INI variable
     mysqli.rollback_on_cached_plink of type bool (Andrey)
 
+- PCRE:
+  . Upgraded to PCRE 8.34. (Anatol)
+
 
 23 Jan 2014, PHP 5.6.0 Alpha 1
 - CLI server:
