@@ -582,7 +582,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval *** copi
 			copies = *copies_param;
 			/*
 			  if it doesn't fit in a long send it as a string.
-			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > PHP_INT_MAX
+			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 			*/
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_INT) {
 				zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
@@ -600,7 +600,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval *** copi
 
 				/*
 				  if it doesn't fit in a long send it as a string.
-				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > PHP_INT_MAX
+				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
 				if (Z_DVAL_P(tmp_data_copy) > PHP_INT_MAX || Z_DVAL_P(tmp_data_copy) < PHP_INT_MIN) {
