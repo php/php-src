@@ -2680,7 +2680,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_D
 
 /* {{{ mysqlnd_conn_data::tx_commit_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const php_int_t flags, const char * const name TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const php_uint_t flags, const char * const name TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_commit_or_rollback);
 	enum_func_status ret = FAIL;

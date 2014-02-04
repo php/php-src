@@ -484,7 +484,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_begin)(MYSQLND_CONN_DATA * conn, const php_uint_t mode, const char * const name TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const php_int_t flags, const char * const name TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const php_uint_t flags, const char * const name TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * tmp_str, const php_int_t mode TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
