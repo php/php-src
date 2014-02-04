@@ -1,6 +1,8 @@
 /-- This set of tests checks local-specific features, using the fr_FR locale. 
     It is not Perl-compatible. There is different version called wintestinput3
   f  or use on Windows, where the locale is called "french". --/
+  
+< forbid 8W 
 
 /^[\w]+/
     *** Failers
