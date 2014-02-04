@@ -40,6 +40,12 @@ array(1) {
   string(1) "1"
 }
 bool(true)
-array(0) {
+array(3) {
+  [5]=>
+  string(1) "a"
+  ["xyz"]=>
+  string(2) "q6"
+  [6]=>
+  string(3) "h20"
 }
-bool(true)
+bool(false)
