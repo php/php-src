@@ -346,6 +346,7 @@ strings to make sure that UTF-8 support works on EBCDIC platforms. */
 #define STRING_Xan0 STR_X STR_a STR_n "\0"
 #define STRING_Xps0 STR_X STR_p STR_s "\0"
 #define STRING_Xsp0 STR_X STR_s STR_p "\0"
+#define STRING_Xuc0 STR_X STR_u STR_c "\0"
 #define STRING_Xwd0 STR_X STR_w STR_d "\0"
 #define STRING_Yi0 STR_Y STR_i "\0"
 #define STRING_Z0 STR_Z "\0"
@@ -493,6 +494,7 @@ const char PRIV(utt_names)[] =
   STRING_Xan0
   STRING_Xps0
   STRING_Xsp0
+  STRING_Xuc0
   STRING_Xwd0
   STRING_Yi0
   STRING_Z0
@@ -640,12 +642,13 @@ const ucp_type_table PRIV(utt)[] = {
   { 1011, PT_ALNUM, 0 },
   { 1015, PT_PXSPACE, 0 },
   { 1019, PT_SPACE, 0 },
-  { 1023, PT_WORD, 0 },
-  { 1027, PT_SC, ucp_Yi },
-  { 1030, PT_GC, ucp_Z },
-  { 1032, PT_PC, ucp_Zl },
-  { 1035, PT_PC, ucp_Zp },
-  { 1038, PT_PC, ucp_Zs }
+  { 1023, PT_UCNC, 0 },
+  { 1027, PT_WORD, 0 },
+  { 1031, PT_SC, ucp_Yi },
+  { 1034, PT_GC, ucp_Z },
+  { 1036, PT_PC, ucp_Zl },
+  { 1039, PT_PC, ucp_Zp },
+  { 1042, PT_PC, ucp_Zs }
 };
 
 const int PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);
