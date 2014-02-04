@@ -1,6 +1,77 @@
 News about PCRE releases
 ------------------------
 
+Release 8.34 15-December-2013
+-----------------------------
+
+As well as fixing the inevitable bugs, performance has been improved by
+refactoring and extending the amount of "auto-possessification" that PCRE does.
+Other notable changes:
+
+.  Implemented PCRE_INFO_MATCH_EMPTY, which yields 1 if the pattern can match
+   an empty string. If it can, pcretest shows this in its information output.
+
+.  A back reference to a named subpattern when there is more than one of the
+   same name now checks them in the order in which they appear in the pattern.
+   The first one that is set is used for the reference. Previously only the
+   first one was inspected. This change makes PCRE more compatible with Perl.
+
+.  Unicode character properties were updated from Unicode 6.3.0.
+
+.  The character VT has been added to the set of characters that match \s and
+   are generally treated as white space, following this same change in Perl
+   5.18. There is now no difference between "Perl space" and "POSIX space".
+
+.  Perl has changed its handling of \8 and \9. If there is no previously
+   encountered capturing group of those numbers, they are treated as the
+   literal characters 8 and 9 instead of a binary zero followed by the
+   literals. PCRE now does the same.
+
+.  Following Perl, added \o{} to specify codepoints in octal, making it
+   possible to specify values greater than 0777 and also making them
+   unambiguous.
+
+.  In UCP mode, \s was not matching two of the characters that Perl matches,
+   namely NEL (U+0085) and MONGOLIAN VOWEL SEPARATOR (U+180E), though they
+   were matched by \h.
+
+.  Add JIT support for the 64 bit TileGX architecture.
+
+.  Upgraded the handling of the POSIX classes [:graph:], [:print:], and
+   [:punct:] when PCRE_UCP is set so as to include the same characters as Perl
+   does in Unicode mode.
+
+.  Perl no longer allows group names to start with digits, so I have made this
+   change also in PCRE.
+
+.  Added support for [[:<:]] and [[:>:]] as used in the BSD POSIX library to
+   mean "start of word" and "end of word", respectively, as a transition aid.
+
+
+Release 8.33 28-May-2013
+--------------------------
+
+A number of bugs are fixed, and some performance improvements have been made.
+There are also some new features, of which these are the most important:
+
+.  The behaviour of the backtracking verbs has been rationalized and
+   documented in more detail.
+
+.  JIT now supports callouts and all of the backtracking verbs.
+
+.  Unicode validation has been updated in the light of Unicode Corrigendum #9,
+   which points out that "non characters" are not "characters that may not
+   appear in Unicode strings" but rather "characters that are reserved for
+   internal use and have only local meaning".
+
+.  (*LIMIT_MATCH=d) and (*LIMIT_RECURSION=d) have been added so that the
+   creator of a pattern can specify lower (but not higher) limits for the
+   matching process.
+
+.  The PCRE_NEVER_UTF option is available to prevent pattern-writers from using
+   the (*UTF) feature, as this could be a security issue.
+
+
 Release 8.32 30-November-2012
 -----------------------------
 
