@@ -475,7 +475,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		) {
 			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
 				convert_to_string_ex(val);
-				SSL_set_tlsext_host_name(sslsock->ssl_handle, &val);
+				SSL_set_tlsext_host_name(sslsock->ssl_handle, Z_STRVAL_PP(val));
 			} else if (sslsock->url_name) {
 				SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
 			}
