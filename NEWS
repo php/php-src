@@ -1,12 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.26
+?? ??? 2014, PHP 5.4.26
 
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
 
-?? ??? 2013, PHP 5.4.25
+?? ??? 2014, PHP 5.4.25
 
 - Core:
   . Fixed bug #66286 (Incorrect object comparison with inheritance). (Nikita)
@@ -24,7 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #66481 (Calls to session_name() segfault when session.name is
     null). (Laruence)
 
-10 Jan 2013, PHP 5.4.24
+10 Jan 2014, PHP 5.4.24
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
