@@ -1,8 +1,8 @@
 --TEST--
-numfmt_format() icu >= 4.8
+numfmt_format() icu >= 52.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0 || version_compare(INTL_ICU_VERSION, '52.1') >= 0) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -111,7 +111,7 @@ Locale is: fr
 '1 234 567,89 ¤'
 '123 456 789 ?%'
 '1,23456789123457E6'
-'un million deux-cent-trente-quatre-mille-cinq-cent-soixante-sept virgule huit neuf un deux trois quatre cinq sept'
+'un million deux cent trente-quatre mille cinq cent soixante-sept virgule huit neuf un deux trois quatre cinq sept'
 '1 234 567e'
 '1 234 567'
 '#####.###'
