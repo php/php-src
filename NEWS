@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
 
+- PCRE:
+  . Upgraded to PCRE 8.34. (Anatol)
+
 ?? ??? 2014, PHP 5.5.9
 
 - Core:
@@ -25,9 +28,6 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
     ^M as lineend). (Laruence)
-
-- PCRE:
-  . Upgraded to PCRE 8.34. (Anatol)
 
 - PDO_pgsql:
   . Fixed bug #62479 (PDO-psql cannot connect if password contains
