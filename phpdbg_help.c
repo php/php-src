@@ -22,12 +22,6 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
-#include "phpdbg_print.h"
-#include "phpdbg_utils.h"
-#include "phpdbg_break.h"
-#include "phpdbg_list.h"
-#include "phpdbg_info.h"
-#include "phpdbg_set.h"
 #include "zend.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -45,8 +39,9 @@ const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_END_COMMAND
 };  /* }}} */
 
-/* {{{ pretty_format.  Takes a text string, expands any formatting escapes and wrap the text */
-static char *pretty_format(char *text TSRMLS_DC) {
+/* {{{ pretty_print.  Formatting escapes and wrapping text in a string before printing it. */
+void pretty_print(char *text TSRMLS_DC)
+{
 	char *new, *p, *q;
 
 	const char  *prompt_escape = phpdbg_get_prompt(TSRMLS_C);
@@ -64,7 +59,7 @@ static char *pretty_format(char *text TSRMLS_DC) {
 
 	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
-    unsigned int line_count = 0;          /* number printable chars on current line */
+	unsigned int line_count = 0;          /* number printable chars on current line */
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -85,12 +80,12 @@ static char *pretty_format(char *text TSRMLS_DC) {
 	 * Second pass substitutes the bold and prompt escape sequences and line wrap
 	 *
 	 * ** toggles bold on and off if PHPDBG_IS_COLOURED flag is set
-     * $P substitutes the prompt sequence
-     * Lines are wrapped by replacing the last blank with a CR before <term width>
-     * characters.  (This defaults to 100 if the width can't be detected).  In the
-     * pathelogical case where no blanks are found, then the wrap occurs at the 
-     * first blank.   
-     */	
+	 * $P substitutes the prompt sequence
+	 * Lines are wrapped by replacing the last blank with a CR before <term width>
+	 * characters.  (This defaults to 100 if the width can't be detected).  In the
+	 * pathelogical case where no blanks are found, then the wrap occurs at the
+	 * first blank.
+	 */
 	for (p = text, q = new; *p; p++) {
 		if ( UNEXPECTED(*p == ' ') ) {
 			last_new_blank = q;
@@ -102,7 +97,7 @@ static char *pretty_format(char *text TSRMLS_DC) {
 			last_blank_count = 0;
 			line_count = 0;
 		} else if ( UNEXPECTED(p[0] == '*') && p[1] == '*' ) {
-			if (bold_escape_len) {		
+			if (bold_escape_len) {
 				in_bold = !in_bold;
 				memcpy (q, in_bold ? bold_on_escape : bold_off_escape, bold_escape_len);
 				q += bold_escape_len;
@@ -133,136 +128,136 @@ static char *pretty_format(char *text TSRMLS_DC) {
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size)); 
+		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
 	}
-	return new;
+
+	(void) phpdbg_write("%s\n", new);
+	efree(new);
 }  /* }}} */
 
+/* {{{ summary_print.  Print a summary line giving, the command, its alias and tip */
+void summary_print(phpdbg_command_t const * const cmd TSRMLS_DC)
+{
+	char *summary;
+	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n",
+	         cmd->name, cmd->alias, cmd->tip);
+	pretty_print(summary TSRMLS_CC);
+	efree(summary);
+}
+
 /* {{{ get_help. Retries and formats text from the phpdbg help text table */
-static char *get_help(const char * const key TSRMLS_DC) {
-	phpdbg_help_text_t *p = phpdbg_help_text;
+static char *get_help(const char * const key TSRMLS_DC)
+{
+	phpdbg_help_text_t *p;
 
-	/* note that phpdbg_help_text is collated in key order */
-	for( ;p->key[0]<key[0]; p++ ) {}  /* skip to matching first char */
+	/* Note that phpdbg_help_text is not assumed to be collated in key order.  This is an
+	   inconvience that means that help can't be logically grouped Not worth
+	   the savings */
 
-	while (p->key[0]==key[0]) {
-		if (!strcmp(p->key+1, key+1)) {
+	for (p = phpdbg_help_text; p->key; p++) {
+		if (!strcmp(p->key, key)) {
 			return p->text;
 		}
-		p++;
 	}
-	return estrdup("");   /* return empty string to denote no match found */
+	return "";   /* return empty string to denote no match found */
 } /* }}} */
 
-/* {{{ get_command.  Return one or more matching commands from a command table.
+/* {{{ get_command.  Return number of matching commands from a command table.
  * Unlike the command parser, the help search is sloppy that is partial matches can occur
- *   * Any single character key is taken as an alias and only an exact match is allowed
+ *   * Any single character key is taken as an alias.
  *   * Other keys are matched again the table on the first len characters.
- *   * This means that non-unique keys can generate multiple matches
- *   * The command summary is an emalloced string containing one line for each match
- *   * The function only returns a command entry if a unique match occurs.
- *
- * The rationale here is to assist users in finding help on commands. So "h fr" will
- * generate a summary line for "help frame" and return the frame record.  But "h cl" will
- * generate two summary records for the "clear" and "clean" and a NULL command record. 
+ *   * This means that non-unique keys can generate multiple matches.
+ *   * The first matching command is returned as an OUT parameter. *
+ * The rationale here is to assist users in finding help on commands. So unique matches
+ * will be used to generate a help message but non-unique one will be used to list alternatives.
  */
-#define ALIAS_FMT "Command: **%s**  Alias: **%c**  **%s**\n"
-static const phpdbg_command_t *get_command(
-			const char *key, size_t len,            /* pointer and length of key */ 
-			char **command_summary,                 /* address of command summary text */
-			const phpdbg_command_t * const commands /* command table to be scanned */
-            TSRMLS_DC) {
-	const phpdbg_command_t *c, *c_found;
+static int get_command(
+			const char *key, size_t len,            /* pointer and length of key */
+			phpdbg_command_t const **command,       /* address of first matching command  */
+		    phpdbg_command_t const * const commands /* command table to be scanned */
+			TSRMLS_DC)
+{
+	const phpdbg_command_t *c;
 	unsigned int num_matches = 0;
-	char *summary;
 
 	if (len == 1) {
 		for (c=commands; c->name; c++) {
 			if (c->alias == key[0]) {
 				num_matches++;
-				if (command_summary) {
-					spprintf(&summary, 0, ALIAS_FMT, c->name, c->alias, c->tip);
+				if ( num_matches == 1 && command) {
+					*command = c;
 				}
-				c_found = c;	
-				break;
 			}
 		}
 	} else {
 		for (c=commands; c->name; c++) {
 			if (!strncmp(c->name, key, len)) {
 				++num_matches;
-				c_found = c;	
-				if (command_summary) {
-					if (num_matches == 1) {
-						spprintf(&summary, 0, ALIAS_FMT, c->name, c->alias, c->tip);
-					} else { /* num_matches > 1 */
-						/* very rare so "keep it simple" string concat of summaries */
-						char *tmp = summary;
-						spprintf(&summary, 0, "%s" ALIAS_FMT, tmp, c->name, c->alias, c->tip);	
-						efree(tmp);
-					}
+				if ( num_matches == 1 && command) {
+					*command = c;
 				}
 			}
 		}
 	}
 
-	if (command_summary) {
-		*command_summary = (num_matches > 0) ? summary : NULL;
-	} 
-	return (num_matches == 1) ? c_found : NULL;  /* NULL return denotes no single match found */
+	return num_matches;
 
-} /* }}} */
+} /* }}} */	
 
 PHPDBG_COMMAND(help) /* {{{ */
 {
-	char *banner, *help_text, *pretty_banner, *pretty_help_text;
-	const phpdbg_command_t *cmd;
+	phpdbg_command_t const *cmd;
+	int n;
 
 	if (param->type == EMPTY_PARAM) {
-		char * help_text = pretty_format(get_help("_overview" TSRMLS_CC) TSRMLS_CC);
-		phpdbg_write("\n%s\n", help_text);
-		efree(help_text);
+		pretty_print(get_help("overview!" TSRMLS_CC) TSRMLS_CC);
 		return SUCCESS;
 	}
 
 	if (param->type == STR_PARAM) {
-	    cmd = get_command( param->str, param->len, &banner, phpdbg_prompt_commands TSRMLS_CC);
+	    n = get_command( param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
 
-		if (banner) {
-			pretty_banner = pretty_format(banner TSRMLS_CC);
-			help_text = get_help((cmd ? cmd->name : "_ZZ_duplicate") TSRMLS_CC);
-			pretty_help_text = pretty_format(help_text TSRMLS_CC);
-			phpdbg_write("%s\n%s\n", pretty_banner, pretty_help_text);
-			efree(banner);
-			efree(pretty_banner);
-			efree(pretty_help_text);
+		if (n==1) {
+			summary_print(cmd TSRMLS_CC);
+			pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
 			return SUCCESS;
 
-		} else if (param->type == STR_PARAM) {
-			cmd = get_command( param->str, param->len, NULL, phpdbg_help_commands TSRMLS_CC);
-			if (cmd) {
-				char *name;
-				spprintf(&name, cmd->name_len+2, "_%s", cmd->name);
-				help_text = get_help(name TSRMLS_CC);
-				pretty_help_text = pretty_format(help_text TSRMLS_CC);
-				phpdbg_write("%s\n", pretty_help_text);
-				efree(pretty_help_text);
-				efree(name);
+		} else if (n>1) {
+			if (param->len > 1) {
+				for (cmd=phpdbg_prompt_commands; cmd->name; cmd++) {
+					if (!strncmp(cmd->name, param->str, param->len)) {
+						summary_print(cmd TSRMLS_CC);
+					}
+				}
+				pretty_print(get_help("duplicate!" TSRMLS_CC) TSRMLS_CC);
 				return SUCCESS;
+			} else {
+				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
+				return FAILURE;
+			}
+
+		} else { /* no prompt command found so try help topic */
+		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands TSRMLS_CC);
+
+			if (n>0) {
+				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
+					return cmd->handler(param, NULL TSRMLS_CC);
+				} else {
+					pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
+					return SUCCESS;
+				}
 			}
 		}
 	}
-
+ 
 	phpdbg_error("No help can be found for the subject \"%s\"", param->str);
 	return FAILURE;
-
 
 } /* }}} */
 
 PHPDBG_HELP(aliases) /* {{{ */
 {
 	const phpdbg_command_t *c, *c_sub;
-	char *help_text;
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
@@ -274,48 +269,99 @@ PHPDBG_HELP(aliases) /* {{{ */
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln(" %c %c   %s %-*s  %s", 
+						phpdbg_writeln(" %c %c   %s %-*s  %s",
 							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
-		 		phpdbg_writeln(EMPTY);
 			}
 		}
 	}
 
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
-    c = get_command( "h", 1, NULL, phpdbg_prompt_commands TSRMLS_CC);
+	(void) get_command( "h", 1, &	c, phpdbg_prompt_commands TSRMLS_CC);
+/* In function ‘phpdbg_do_help_aliases’:
+274:2: warning: passing argument 3 of ‘get_command’ from incompatible pointer type [enabled by default]
+180:12: note: expected ‘struct phpdbg_command_t **’ but argument is of type ‘const struct phpdbg_command_t **’ */
 	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
+
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln(" %c %c   %s %-*s  %s", 
+			phpdbg_writeln(" %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
-	help_text = pretty_format(get_help("_ZZ_aliases" TSRMLS_CC) TSRMLS_CC);
-	phpdbg_write("\n%s\n", help_text);
-	efree(help_text);
 
+	pretty_print(get_help("aliases!" TSRMLS_CC) TSRMLS_CC);
 	return SUCCESS;
 } /* }}} */
 
 
-/* {{{ Help Text Table 
+/* {{{ Help Text Table
  * Contains help text entries keyed by a lowercase ascii key.
  * Text is in ascii and enriched by a simple markup:
  *   ** toggles bold font emphasis.
  *   $P insert an bold phpdbg> prompt.
- *   \  escapes the following character. Note that this is itself escaped inside string 
+ *   \  escapes the following character. Note that this is itself escaped inside string
  *      constants so \\\\ is required to output a single \ e.g. as in namespace names.
  *
  * Text will be wrapped according to the STDOUT terminal width, so paragraphs are
- * flowed using the C stringizing and the CR definition.  Also note that entries 
+ * flowed using the C stringizing and the CR definition.  Also note that entries
  * are collated in alphabetic order on key.
- */ 
+ *
+ * Also note the convention that help text not directly referenceable as a help param
+ * has a key ending in !
+ */
 #define CR "\n"
 phpdbg_help_text_t phpdbg_help_text[] = {
-{"_options",
+
+/******************************** General Help Topics ********************************/
+{"overview!", CR
+"**phpdbg** is a lightweight, powerful and easy to use debugging platform for PHP5.4+" CR
+"It supports the following commands:" CR CR
+
+"**Information**" CR
+"  **list**     list PHP source" CR
+"  **info**     displays information on the debug session" CR
+"  **help**     provide help on a topic" CR
+"  **print**    print argument " CR
+"  **frame**    select a stack frame and print a stack frame summary" CR CR
+
+"**Compilation**" CR
+"  **compile**  compile a PHP source" CR CR
+
+"**Starting and Stopping Execution**" CR
+"  **exec**     set execution context" CR
+"  **clean**    clean the execution environment" CR
+"  **run**      attempt execution" CR
+"  **eval**     evaluate some code" CR
+"  **step**     Enable or disable per opcode stepping mode" CR
+"  **next**     continue execution" CR
+"  **until**    continue execution up to the given location" CR
+"  **finish**   continue up to end of the current execution frame" CR
+"  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
+"  **break**    set a breakpoint at the specified target" CR
+"  **clear**    clear one or all breakpoints" CR CR
+
+"**Miscellaneous**" CR
+"  **quiet**    silence some output" CR
+"  **set**      set the phpdbg configuration" CR
+"  **source**   execute a phpdbginit script" CR
+"  **register** register a phpdbginit function as a command alias" CR
+"  **shell**    shell a command" CR
+"  **quit**     exit phpdbg" CR CR
+
+"Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
+"for example **help list** or **h l**.  Note that help will also match partial commands if unique "
+"(and list out options if not unique), so **help clea** will give help on the **clean** command, "
+"but **help cl** will list the summary for **clean** and **clear**." CR CR
+
+"Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
+"Type **help syntax** for a general introduction to the command syntax." CR
+"Type **help options** for a list of phpdbg command line options." CR
+"Type **help phpdbginit** to show how to customise the debugger environment."
+},
+{"options", CR
 "Below are the command line options supported by phpdbg" CR CR
                           /* note the extra 4 space index in because of the extra **** */
 "**Command Line Options and Flags**" CR
@@ -349,54 +395,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "interface/port." CR CR
 
 "Specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2."
-}, 
+},
 
-{"_overview", 
-"**phpdbg** is a lightweight, powerful and easy to use debugging platform for PHP5.4+" CR
-"It supports the following commands:" CR CR
-
-"**Information**" CR
-"  **list**     list PHP source" CR
-"  **info**     displays information on the debug session" CR
-"  **help**     provide help on a topic" CR
-"  **print**    print argument " CR
-"  **frame**    select a stack frame and print a stack frame summary" CR CR
-
-"**Compilation**" CR
-"  **compile**  compile a PHP source" CR CR
-
-"**Starting and Stopping Execution**" CR
-"  **exec**     set execution context" CR
-"  **clean**    clean the execution environment" CR
-"  **run**      attempt execution" CR
-"  **eval**     evaluate some code" CR
-"  **stepping** Enable or disable per opcode stepping mode" CR
-"  **next**     continue execution" CR
-"  **until**    continue execution up to the given location" CR
-"  **finish**   continue up to end of the current execution frame" CR
-"  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
-"  **break**    set a breakpoint at the specified target" CR
-"  **clear**    clear one or all breakpoints" CR CR
-
-"**Miscellaneous**" CR
-"  **quiet**    silence some output" CR
-"  **set**      set the phpdbg configuration" CR
-"  **source**   execute a phpdbginit script" CR
-"  **register** register a phpdbginit function as a command alias" CR
-"  **shell**    shell a command" CR
-"  **quit**     exit phpdbg" CR CR
-
-"Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
-"for example **help list** or **h l**.  Note that help will also match partial commands if unique "
-"(and list out options if not unique), so **help clea** will give help on the **clean** command, "
-"but **help cl** will list the summary for **clean** and **clear**." CR CR
-
-"Type **help aliases** to show a full alias list, including any registered phpdginit functions" CR
-"Type **help syntax** for a general introduction to the command syntax." CR
-"Type **help options** for a list of phpdbg command line options." CR
-"Type **help phpdbginit** to show how to customise the debugger environment."
-}, 
-{"_phpdbginit", 
+{"phpdbginit", CR
 "Phpdgb uses an debugger script file to initialize the debugger context.  By default, phpdbg looks "
 "for the file named **.phpdbginit** in the current working directory.  This location can be "
 "overridden on the command line using the **-i** switch (see **help options** for a more "
@@ -404,14 +405,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Debugger scripts can also be executed using the **script** command." CR CR
 
-"A script file can contain a sequence of valid debugger commands, comments and embedded PHP code. " "Comment lines are prefixed by the **#** character. PHP code is delimited by the start and end "
-"escape tags **<:** and **:>**." CR CR
+"A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
+"code. " CR CR 
 
-"**Examples**" CR CR
-//********Need decent script example
-}, 
+"Comment lines are prefixed by the **#** character.  Note that comments are only allowed in script "
+"files and not in interactive sessions." CR CR 
 
-{"_syntax", 
+"PHP code is delimited by the start and end escape tags **<:** and **:>**. PHP code can be used "
+"to define application context for a debugging session and also to extend the debugger by defining "
+"and **register** PHP functions as new commands." CR CR
+
+"Also note that executing a **clear** command will cause the current **phpdbginit** to be reparsed "
+"/ reloaded."
+},
+
+{"syntax", CR
 "All **phpdbg** commands are case sensitive.  Commands start with a keyword, and some keywords "
 "(**break**, **info**, **set**, **print** and **list**) may include a subcommand keyword.  All "
 "keywords have a single letter alias (most lowercase, some uppercase) that may be used instead "
@@ -420,7 +428,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Some commands take one or more optional arguments which are interpreted in the context of the "
 "command. In some cases the format of the argument enables the secondard keyword to be omitted." CR CR
-	
+
 "Type **help** for an overview of all commands and type **help <command>** to get detailed help "
 "on any specific command." CR CR
 
@@ -454,20 +462,22 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "     $P #This is a comment" CR
 "     Comments introduced by the **#** character are only allowed in **phpdbginit** script files."
-}, 
+},
 
-{"_ZZ_aliases", 
+/******************************** Help Codicils ********************************/
+{"aliases!", CR
 "Note that aliases can be used for either command or sub-command keywords or both, so **info b** "
 "is a synomyn for **info break** and **l func** for **list func**, etc." CR CR
 
 "Note that help will also accept any alias as a parameter and provide help on that command, for example **h p** will provide help on the print command."
-}, 
+},
 
-{"_ZZ_duplicate", 
+{"duplicate!", CR
 "Parameter is not unique. For detailed help select help on one of the above commands."
-}, 
+},
 
-{"back", 
+/******************************** Help on Commands ********************************/
+{"back",
 "Provide a formatted backtrace using the standard debug_backtrace() functionality.  An optional "
 "unsigned integer argument specifying the maximum number of frames to be traced; if omitted then "
 "a complete backtrace is given." CR CR
@@ -479,7 +489,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "A backtrace can be executed at any time during execution."
 },
 
-{"break", 
+{"break",
 "Breakpoints can be set at a range of targets within the execution environment.  Execution will "
 "be paused if the program flow hits a breakpoint.  The break target can be one of the following "
 "types:" CR CR
@@ -568,9 +578,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "as they significantly slow execution." CR CR
 
 "Note: An address is only valid for the current compilation."
-}, 
+},
 
-{"clean", 
+{"clean",
 "Classes, constants or functions can only be declared once in PHP.  You may experience errors "
 "during a debug session if you attempt to recompile a PHP source.  The clean command clears "
 "the Zend runtime tables which holds the sets of compiled classes, constants and functions, "
@@ -579,18 +589,18 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Note that you cannot selectively trim any of these resource pools. You can only do a complete "
 "clean."
-}, 
+},
 
-{"clear", 
+{"clear",
 "Clearing breakpoints means you can once again run code without interruption." CR CR
 
 "Note: use break delete N to clear a specific breakpoint." CR CR
 
 "Note: if all breakpoints are cleared, then the PHP script will run until normal completion."
-}, 
+},
 
-{"compile", 
-"The execution context can be pre-compiled before execution, to provide the opportunity to "
+{"compile",
+"The execution context may be pre-compiled before execution to provide an opportunity to "
 "inspect the generated opcode output.  The execution context must be defined before the compile "
 "command can be used.  Use the command **exec** to set the execution context." CR CR
 
@@ -600,13 +610,12 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Note: Then that it is usually necessary to issue a **clean** command to reset the environment prior "
 "to compilation."
-}, 
-//********** Needs rewriting -- don't like -- careful thought  -- what happens if you evaluate a function during execution, with and without breakpoints, with and without stepping ??
+},
 
-{"eval", 
-"The **eval** command takes a string expression which it evaluates and then displays. Note that "
-"**eval** allows assignments and other write statements, thus enabling you to change the "
-"environment during execution, so care is needed here." CR CR
+{"eval",
+"The **eval** command takes a string expression which it evaluates and then displays. It "
+"evaluates in the context of the lowest (that is the executing) frame, unless this has first "
+"been explicitly changed by issuing a **frame** command. " CR CR
 
 "**Examples**" CR CR
 "    $P eval $variable" CR
@@ -617,39 +626,42 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P E $variable = \"Hello phpdbg :)\"" CR
 "    Will set $variable in the current scope" CR CR
 
-"Note: **eval** will evaluate in the lowest (that is the executing) frame, unless this has first "
-"been explicitly changed by issuing a **frame** command. " CR CR
+"Note that **eval** allows any valid PHP expression including assignments, function calls and "
+"other write statements.  This enables you to change the environment during execution, so care "
+"is needed here.  You can even call PHP functions which have breakpoints defined. " CR CR
 
-"Note: **eval** will always show the result; do not prefix the code with **return**"
-}, 
+"Note: **eval** will always show the result, so do not prefix the code with **return**"
+},
 
-{"exec", 
-"The **exec** command sets the execution context, that is the script to be executed." CR
-
-"The execution context must be defined either by executing the **exec** command or by using the "
+{"exec",
+"The **exec** command sets the execution context, that is the script to be executed.  The " 
+"execution context must be defined either by executing the **exec** command or by using the "
 "**-e** command line option before the script can be compiled or run." CR CR
 
 "Note that the **exec** command also can be used to replace a previously defined execution "
-"context." CR CR 
+"context." CR CR
 
 "**Examples**" CR CR
 
 "    $P exec /tmp/script.php" CR
 "    $P e /tmp/script.php" CR
 "    Set the execution context to **/tmp/script.php**"
-}, 
+},
 
 //*********** Does F skip any breakpoints lower stack frames or only the current??
-{"finish", 
+{"finish",
 "The **finish** command causes control to be passed back to the vm, continuing execution.  Any "
 "breakpoints that are encountered within the current stack frame will be skipped.  Execution "
 "will then continue until the next breakpoint after leaving the stack frame or unitil "
 "completion of the script" CR CR
 
-"Note **finish** will trigger a \"not executing\" error if not executing."
-}, 
+"Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
+"skipped. "CR CR
 
-{"frame", 
+"Note **finish** will trigger a \"not executing\" error if not executing."
+},
+
+{"frame",
 "The **frame** takes an optional integer argument. If omitted, then the current frame is displayed "
 "If specified then the current scope is set to the corresponding frame listed in a **back** trace. " "This can be used to allowing access to the variables in a higher stack frame than that currently "
 "being executed." CR CR
@@ -661,9 +673,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "Note that this frame scope is discarded when execution continues, with the execution frame "
 "then reset to the lowest executiong frame."
-}, 
+},
 
-{"info", 
+{"info",
 "**info** commands provide quick access to various types of information about the PHP environment" CR
 "Specific info commands are show below:" CR CR
 
@@ -679,9 +691,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 // ******** same issue about breakpoints in called frames
-{"leave", 
+{"leave",
 "The **leave** command causes control to be passed back to the vm, continuing execution.  Any "
-"breakpoints that are encountered within the current stack frame will be skipped.  In effect a " 
+"breakpoints that are encountered within the current stack frame will be skipped.  In effect a "
 "temporary breakpoint is associated with any return opcode, so that a break in execution occurs "
 "before leaving the current stack frame. This allows inspection / modification of any frame "
 "variables including the return value before it is returned" CR CR
@@ -690,9 +702,14 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P leave" CR
 "    $P L" CR CR
-}, 
 
-{"list", 
+"Note when **step**ping is enabled, any opcode steps within the current stack frame are also "
+"skipped. "CR CR
+
+"Note **leave** will trigger a \"not executing\" error if not executing."
+},
+
+{"list",
 "The list command displays source code for the given argument.  The target type is specficied by "
 "a second subcommand keyword:" CR CR
 
@@ -734,13 +751,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 //*********** what is the difference between n and s ???
-{"next", 
+{"next",
 "The **next** command causes control to be passed back to the vm, continuing execution.  The next "
 "opline will be executed if **step 1** is set.  Otherwise execution will continue to the next "
 "breakpoint or script completion" CR CR
 
 "Note **next** will trigger a \"not running\" error if not executing."
-}, 
+},
 
 {"print",
 "By default, print will show information about the current execution context." CR
@@ -786,7 +803,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Print the instructions for the current stack"
 },
 
-{"quiet", 
+{"quiet",
 "Setting quietness on will stop the OPLINE output during execution" CR CR
 
 "**Examples**" CR CR
@@ -801,7 +818,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Note: Quietness is disabled automatically while stepping"
 },
 
-{"register", 
+{"register",
 //******* Needs a general explanation of the how registered functions work
 "Register any global function for use as a command in phpdbg console" CR CR
 
@@ -813,7 +830,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Note: arguments passed as strings, return (if present) print_r'd on console"
 },
 
-{"run", 
+{"run",
 "Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
 "or completion of the script"
 "**Examples**" CR CR
@@ -828,7 +845,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "in progress\" error."
 },
 
-{"set", 
+{"set",
 "The **set** command is used to configure how phpdbg looks and behaves.  Specific set commands "
 "are as follows:" CR CR
 
@@ -859,9 +876,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     $P s b 4 off" CR
 "     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." CR
 //*********** check oplog syntax
-}, 
+},
 
-{"shell", 
+{"shell",
 //************ Check ! notation
 "Direct access to shell commands saves having to switch windows/consoles" CR CR
 
@@ -870,9 +887,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P - ls /usr/src/php-src" CR
 "    Will execute ls /usr/src/php-src, displaying the output in the console"
 //*********** what does this mean????Note: read only commands please!
-}, 
+},
 
-{"source", 
+{"source",
 "Sourcing a **phpdbginit** script during your debugging session might save some time." CR CR
 
 "The source command can also be used to export breakpoints to a phpdbginit file." CR CR
@@ -897,17 +914,26 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P s 1" CR
 "    Will enable stepping" CR CR
 
-"While stepping is enabled you are presented with an interactive prompt after the execution of each opcode"
+"While stepping is enabled you are presented with an interactive prompt after the execution of "
+"each opcode." CR CR
+
+"Note that when executing the **finish** and **leave** commands, and oplines within the current "
+"execution frame will be skipped in line with the command behaviour. Stepping will resume on exit "
+"from the current frame." 
 },
 
-{"until", 
-//******* More explanation needed -- how does until play with step 1 ??
+{"until",
 "The **until** command causes control to be passed back to the vm, continuing execution.  Any "
-"breakpoints that are encountered before the the next source line will be skipped.  Execution "
+"breakpoints that are encountered before the next source line will be skipped.  Execution "
 "will then continue until the next breakpoint or completion of the script" CR CR
+
+"Note when **step**ping is enabled, any opcode steps within the current line are also skipped. "CR CR
+
+"Note that if the next line is **not** executed then **all** subsequent breakpoints will be "
+"skipped. " CR CR
 
 "Note **until** will trigger a \"not executing\" error if not executing."
 
 },
-{"|", NULL /* end of table marker */}
+{NULL, NULL /* end of table marker */}
 };  /* }}} */
