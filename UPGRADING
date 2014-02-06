@@ -43,7 +43,7 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
-- Added constant scalar expressions syntax
+- Added constant scalar expressions syntax.
   (https://wiki.php.net/rfc/const_scalar_exprs)
 
 - Added dedicated syntax for variadic functions.
@@ -51,6 +51,9 @@ PHP X.Y UPGRADE NOTES
 
 - Added support for argument unpacking to complement the variadic syntax.
   (https://wiki.php.net/rfc/argument_unpacking)
+
+- Added T_POW (**) operator.
+  (https://wiki.php.net/rfc/pow-operator)
 
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
