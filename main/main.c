@@ -179,7 +179,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(PG(memory_limit));
+	return zend_set_memory_limit(PG(memory_limit) TSRMLS_CC);
 }
 /* }}} */
 
@@ -460,40 +460,6 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
-/* {{{ PHP_INI_MH
- */
-static PHP_INI_MH(OnChangeAlwaysPopulateRawPostData)
-{
-	signed char *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (signed char *) (base+(size_t) mh_arg1);
-
-	*p = zend_atol(new_value, new_value_length);
-	if (new_value_length == 2 && strcasecmp("on", new_value) == 0) {
-		*p = (signed char) 1;
-	}
-	else if (new_value_length == 3 && strcasecmp("yes", new_value) == 0) {
-		*p = (signed char) 1;
-	}
-	else if (new_value_length == 4 && strcasecmp("true", new_value) == 0) {
-		*p = (signed char) 1;
-	}
-	else if (new_value_length == 5 && strcasecmp("never", new_value) == 0) {
-		*p = (signed char) -1;
-	}
-	else {
-		*p = (signed char) atoi(new_value);
-	}
-	return SUCCESS;
-}
-/* }}} */
 
 /* Need to be read from the environment (?):
  * PHP_AUTO_PREPEND_FILE
@@ -596,7 +562,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("allow_url_fopen",		"1",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_fopen,		php_core_globals,		core_globals)
 	STD_PHP_INI_BOOLEAN("allow_url_include",	"0",		PHP_INI_SYSTEM,		OnUpdateBool,		allow_url_include,		php_core_globals,		core_globals)
 	STD_PHP_INI_BOOLEAN("enable_post_data_reading",	"1",	PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnUpdateBool,	enable_post_data_reading,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("always_populate_raw_post_data", "0",	PHP_INI_SYSTEM|PHP_INI_PERDIR,	OnChangeAlwaysPopulateRawPostData,	always_populate_raw_post_data,	php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("realpath_cache_size",	"16K",		PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_size_limit,	virtual_cwd_globals,	cwd_globals)
 	STD_PHP_INI_ENTRY("realpath_cache_ttl",		"120",		PHP_INI_SYSTEM,		OnUpdateLong,	realpath_cache_ttl,			virtual_cwd_globals,	cwd_globals)
@@ -1201,7 +1166,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					CG(parse_error) = 0;
 				} else {
 					/* restore memory limit */
-					zend_set_memory_limit(PG(memory_limit));
+					zend_set_memory_limit(PG(memory_limit) TSRMLS_CC);
 					efree(buffer);
 					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 					zend_bailout();
@@ -1828,7 +1793,7 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 7.5 free last error information */
+	/* 8. free last error information */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1838,34 +1803,34 @@ void php_request_shutdown(void *dummy)
 		PG(last_error_file) = NULL;
 	}
 
-	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
 
-	/* 8. Call all extensions post-RSHUTDOWN functions */
+	/* 10. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules(TSRMLS_C);
 	} zend_end_try();
 
-	/* 9. SAPI related shutdown (free stuff) */
+	/* 11. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 9.5 free virtual CWD memory */
+	/* 12. free virtual CWD memory */
 	virtual_cwd_deactivate(TSRMLS_C);
 
-	/* 10. Destroy stream hashes */
+	/* 13. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes(TSRMLS_C);
 	} zend_end_try();
 
-	/* 11. Free Willy (here be crashes) */
+	/* 14. Free Willy (here be crashes) */
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
 	zend_interned_strings_restore(TSRMLS_C);
 
-	/* 12. Reset max_execution_time */
+	/* 15. Reset max_execution_time */
 	zend_try {
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
@@ -2678,9 +2643,9 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 #ifdef PHP_WIN32
 /* {{{ dummy_indent
    just so that this symbol gets exported... */
-PHPAPI void dummy_indent(void)
+PHPAPI void dummy_indent(TSRMLS_D)
 {
-	zend_indent();
+	zend_indent(TSRMLS_C);
 }
 /* }}} */
 #endif

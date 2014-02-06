@@ -29,6 +29,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
+#include "zend_hash.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -188,7 +189,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zval_ptr_dtor(&value);
 
 	if (retval) {
-		result = i_zend_is_true(retval) ? SUCCESS : FAILURE;
+		result = i_zend_is_true(retval TSRMLS_CC) ? SUCCESS : FAILURE;
 		zval_ptr_dtor(&retval);
 		return result;
 	} else {
@@ -693,12 +694,12 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(&object, ce, NULL, "offsetexists", &retval, offset);
 		if (EXPECTED(retval != NULL)) {
-			result = i_zend_is_true(retval);
+			result = i_zend_is_true(retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
 			if (check_empty && result && EXPECTED(!EG(exception))) {
 				zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
 				if (retval) {
-					result = i_zend_is_true(retval);
+					result = i_zend_is_true(retval TSRMLS_CC);
 					zval_ptr_dtor(&retval);
 				}
 			}
@@ -1442,7 +1443,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			guard->in_isset = 1; /* prevent circular getting */
 			rv = zend_std_call_issetter(object, member TSRMLS_CC);
 			if (rv) {
-				result = zend_is_true(rv);
+				result = zend_is_true(rv TSRMLS_CC);
 				zval_ptr_dtor(&rv);
 				if (has_set_exists && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !guard->in_get) {
@@ -1451,7 +1452,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 						guard->in_get = 0;
 						if (rv) {
 							Z_ADDREF_P(rv);
-							result = i_zend_is_true(rv);
+							result = i_zend_is_true(rv TSRMLS_CC);
 							zval_ptr_dtor(&rv);
 						} else {
 							result = 0;
@@ -1470,7 +1471,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			result = (Z_TYPE_PP(value) != IS_NULL);
 			break;
 		default:
-			result = zend_is_true(*value);
+			result = zend_is_true(*value TSRMLS_CC);
 			break;
 		case 2:
 			result = 1;

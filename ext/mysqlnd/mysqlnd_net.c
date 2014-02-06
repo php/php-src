@@ -900,7 +900,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher, 0);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, context TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, context);
+#endif
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1 TSRMLS_CC) < 0)
 	{
@@ -916,7 +920,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, NULL TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, NULL);
+#endif
 
 	if (net->data->options.timeout_read) {
 		struct timeval tv;

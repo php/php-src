@@ -1466,7 +1466,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 		case ZEND_JMPNZ:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ) {
 					should_jmp = !should_jmp;
 				}
@@ -1609,7 +1614,12 @@ next_target:
 		case ZEND_JMPZ_EX:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ_EX) {
 					should_jmp = !should_jmp;
 				}
@@ -1730,7 +1740,11 @@ next_target_ex:
 			}
 
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC)) {
+#else
 				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op))) {
+#endif
 					/* JMPZNZ(false,L1,L2) -> JMP(L1) */
 					zend_code_block *todel;
 

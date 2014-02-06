@@ -28,7 +28,7 @@
 /* The first number is the engine version and the rest is the date.
  * This way engine 2/3 API no. is always greater than engine 1 API no..
  */
-#define ZEND_EXTENSION_API_NO	220131226
+#define ZEND_EXTENSION_API_NO	220131227
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -94,7 +94,7 @@ struct _zend_extension {
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_get_resource_handle(zend_extension *extension);
-ZEND_API void zend_extension_dispatch_message(int message, void *arg);
+ZEND_API void zend_extension_dispatch_message(int message, void *arg TSRMLS_DC);
 END_EXTERN_C()
 
 #define ZEND_EXTMSG_NEW_EXTENSION		1
@@ -117,8 +117,8 @@ int zend_startup_extensions(void);
 void zend_shutdown_extensions(TSRMLS_D);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_load_extension(const char *path);
-ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
+ZEND_API int zend_load_extension(const char *path TSRMLS_DC);
+ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle TSRMLS_DC);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
 END_EXTERN_C()
 

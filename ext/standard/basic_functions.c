@@ -5751,7 +5751,7 @@ PHP_FUNCTION(register_tick_function)
 		zend_llist_init(BG(user_tick_functions),
 						sizeof(user_tick_function_entry),
 						(llist_dtor_func_t) user_tick_function_dtor, 0);
-		php_add_tick_function(run_user_tick_functions);
+		php_add_tick_function(run_user_tick_functions TSRMLS_CC);
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {

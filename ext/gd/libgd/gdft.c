@@ -1050,7 +1050,15 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		}
 
 		/* transform glyph image */
-		FT_Get_Glyph(slot, &image);
+		if (FT_Get_Glyph(slot, &image)) {
+			if (tmpstr) {
+				gdFree(tmpstr);
+			}
+			gdCacheDelete(tc_cache);
+			gdMutexUnlock(gdFontCacheMutex);
+			return "Problem loading glyph";
+		}
+
 		if (brect) { /* only if need brect */
 			FT_Glyph_Get_CBox(image, ft_glyph_bbox_gridfit, &glyph_bbox);
 			glyph_bbox.xMin += penf.x;

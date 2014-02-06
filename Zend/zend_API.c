@@ -2313,10 +2313,8 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 }
 /* }}} */
 
-ZEND_API int zend_startup_module(zend_module_entry *module) /* {{{ */
+ZEND_API int zend_startup_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	TSRMLS_FETCH();
-
 	if ((module = zend_register_internal_module(module TSRMLS_CC)) != NULL && zend_startup_module_ex(module TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}

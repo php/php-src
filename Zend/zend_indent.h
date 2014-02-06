@@ -23,7 +23,7 @@
 #define ZEND_INDENT_H
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_indent(void);
+ZEND_API void zend_indent(TSRMLS_D);
 END_EXTERN_C()
 
 #endif /* ZEND_INDENT_H */

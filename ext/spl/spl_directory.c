@@ -836,7 +836,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		int valid = 0;
 		zend_call_method_with_0_params(&this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_valid, "valid", &retval);
 		if (retval) {
-			valid = zend_is_true(retval);
+			valid = zend_is_true(retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
 		}
 		if (!valid) {
@@ -1497,7 +1497,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 		spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 		if (!allow_links && !(intern->flags & SPL_FILE_DIR_FOLLOW_SYMLINKS)) {
 			php_stat(intern->file_name, intern->file_name_len, FS_IS_LINK, return_value TSRMLS_CC);
-			if (zend_is_true(return_value)) {
+			if (zend_is_true(return_value TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 		}

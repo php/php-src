@@ -1383,6 +1383,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_MUL_EQUAL;
 }
 
+<ST_IN_SCRIPTING>"*\*" {
+	return T_POW;
+}
+
+<ST_IN_SCRIPTING>"*\*=" {
+	return T_POW_EQUAL;
+}
+
 <ST_IN_SCRIPTING>"/=" {
 	return T_DIV_EQUAL;
 }

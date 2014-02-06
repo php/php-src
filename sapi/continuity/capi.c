@@ -462,7 +462,7 @@ int phpFinit(lstTset * opt)
    core_globals = ts_resource(core_globals_id);
 
    logFmsg(0, "mod/php: PHP Interface v3 (module)");
-   logFmsg(0, "mod/php: Copyright (c) 1999-2005 The PHP Group. All rights reserved.");
+   logFmsg(0, "mod/php: Copyright (c) 1999-2013 The PHP Group. All rights reserved.");
 
    sapi_startup(&capi_sapi_module);
    capi_sapi_module.startup(&capi_sapi_module);

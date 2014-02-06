@@ -407,7 +407,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "no_ticket", &val) && 
-				zend_is_true(*val)
+				zend_is_true(*val TSRMLS_CC)
 		) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
 		}
@@ -420,7 +420,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "disable_compression", &val) &&
-				zend_is_true(*val)
+				zend_is_true(*val TSRMLS_CC)
 		) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
 		}
@@ -471,7 +471,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 		if (sslsock->is_client
 			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
-				|| zend_is_true(*val))
+				|| zend_is_true(*val TSRMLS_CC))
 		) {
 			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
 				convert_to_string_ex(val);
@@ -578,7 +578,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					if (SUCCESS == php_stream_context_get_option(
 								stream->context, "ssl",
 								"capture_peer_cert", &val) &&
-							zend_is_true(*val)) {
+							zend_is_true(*val TSRMLS_CC)) {
 						MAKE_STD_ZVAL(zcert);
 						ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, 
 									php_openssl_get_x509_list_id() TSRMLS_CC));
@@ -592,7 +592,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					if (SUCCESS == php_stream_context_get_option(
 								stream->context, "ssl",
 								"capture_peer_cert_chain", &val) &&
-							zend_is_true(*val)) {
+							zend_is_true(*val TSRMLS_CC)) {
 						zval *arr;
 						STACK_OF(X509) *chain;
 

@@ -324,14 +324,14 @@ static int sapi_fcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_cgi_flush(void *server_context)
+static void sapi_cgi_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void sapi_fcgi_flush(void *server_context)
+static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
@@ -928,7 +928,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 				php_handle_aborted_connection();
 			}
 		} else {
-			sapi_cgi_flush(SG(server_context));
+			sapi_cgi_flush(SG(server_context) TSRMLS_CC);
 		}
 	}
 	return SUCCESS;
@@ -2240,7 +2240,7 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
+							zend_load_extension(php_optarg TSRMLS_CC);
 							break;
 
 						default:
@@ -2493,7 +2493,7 @@ consult the installation file that came with this distribution, or visit \n\
 				/* Zeev might want to do something with this one day */
 				case PHP_MODE_INDENT:
 					open_file_for_scanning(&file_handle TSRMLS_CC);
-					zend_indent();
+					zend_indent(TSRMLS_C);
 					zend_file_handle_dtor(&file_handle TSRMLS_CC);
 					php_output_teardown();
 					return SUCCESS;
