@@ -12,7 +12,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Upgraded to PCRE 8.34. (Anatol)
 
-?? ??? 2014, PHP 5.5.9
+06 Feb 2014, PHP 5.5.9
 
 - Core:
   . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
