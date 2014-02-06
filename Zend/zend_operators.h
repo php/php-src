@@ -132,7 +132,8 @@ static zend_always_inline zend_int_t zend_dval_to_ival(double d)
 static inline zend_uchar is_numeric_string_ex(const char *str, zend_size_t length, zend_int_t *lval, double *dval, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
-	int base = 10, digits = 0, dp_or_e = 0;
+	int base = 10, dp_or_e = 0;
+	ptrdiff_t digits = 0;
 	double local_dval = 0.0;
 	zend_uchar type;
 

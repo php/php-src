@@ -23,7 +23,7 @@
 #define ZEND_PTR_STACK_H
 
 typedef struct _zend_ptr_stack {
-	int top, max;
+	ptrdiff_t top, max;
 	void **elements;
 	void **top_element;
 	zend_bool persistent;

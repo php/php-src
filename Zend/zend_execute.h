@@ -252,7 +252,7 @@ static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 			EG(argument_stack)->top += ZEND_MM_ALIGNED_SIZE(sizeof(void*)) / sizeof(void*);
 		}
 	} else {
-		ZEND_VM_STACK_GROW_IF_NEEDED((int)size);
+		ZEND_VM_STACK_GROW_IF_NEEDED(size);
 	}
 	ret = (void*)EG(argument_stack)->top;
 	EG(argument_stack)->top += size;
@@ -298,7 +298,7 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC)
 {
 	void **p = EG(argument_stack)->top - 1;
- 	void **end = p - (int)(zend_uintptr_t)*p;
+ 	void **end = p - (ptrdiff_t)(zend_uintptr_t)*p;
 
 	while (p != end) {
 		zval *q = (zval *) *(--p);
@@ -325,7 +325,7 @@ static zend_always_inline zend_size_t zend_vm_stack_get_args_count_ex(zend_execu
 static zend_always_inline zval** zend_vm_stack_get_arg_ex(zend_execute_data *ex, zend_size_t requested_arg)
 {
 	void **p = ex->function_state.arguments;
-	int arg_count = (int)(zend_uintptr_t) *p;
+	zend_int_t arg_count = (zend_int_t)(zend_uintptr_t) *p;
 
 	if (UNEXPECTED(requested_arg > arg_count)) {
 		return NULL;
