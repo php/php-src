@@ -969,32 +969,32 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
-			case TYPE_PAIR(IS_LONG, IS_LONG):
-				if (Z_LVAL_P(op2) >= 0) {
-					long l1 = 1, l2 = Z_LVAL_P(op1), i = Z_LVAL_P(op2);
+			case TYPE_PAIR(IS_INT, IS_INT):
+				if (Z_IVAL_P(op2) >= 0) {
+					zend_int_t l1 = 1, l2 = Z_IVAL_P(op1), i = Z_IVAL_P(op2);
 
 					if (i == 0) {
-						ZVAL_LONG(result, 1L);
+						ZVAL_INT(result, 1L);
 						return SUCCESS;
 					} else if (l2 == 0) {
-						ZVAL_LONG(result, 0);
+						ZVAL_INT(result, 0);
 						return SUCCESS;
 					}
 
 					while (i >= 1) {
-						long overflow;
+						zend_int_t overflow;
 						double dval = 0.0;
 
 						if (i % 2) {
 							--i;
-							ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
+							ZEND_SIGNED_MULTIPLY_INT(l1, l2, l1, dval, overflow);
 							if (overflow) {
 								ZVAL_DOUBLE(result, dval * pow(l2, i));
 								return SUCCESS;
 							}
 						} else {
 							i /= 2;
-							ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
+							ZEND_SIGNED_MULTIPLY_INT(l2, l2, l2, dval, overflow);
 							if (overflow) {
 								ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
 								return SUCCESS;
@@ -1002,18 +1002,18 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 						}
 					}
 					/* i == 0 */
-					ZVAL_LONG(result, l1);
+					ZVAL_INT(result, l1);
 				} else {
-					ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+					ZVAL_DOUBLE(result, pow((double)Z_IVAL_P(op1), (double)Z_IVAL_P(op2)));
 				}
 				return SUCCESS;
 
-			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
-				ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+			case TYPE_PAIR(IS_INT, IS_DOUBLE):
+				ZVAL_DOUBLE(result, pow((double)Z_IVAL_P(op1), Z_DVAL_P(op2)));
 				return SUCCESS;
 
-			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
-				ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+			case TYPE_PAIR(IS_DOUBLE, IS_INT):
+				ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_IVAL_P(op2)));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
@@ -1025,12 +1025,12 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 					if (Z_TYPE_P(op1) == IS_ARRAY) {
-						ZVAL_LONG(op1, 0);
+						ZVAL_INT(op1, 0);
 					} else {
 						zendi_convert_scalar_to_number(op1, op1_copy, result);
 					}
 					if (Z_TYPE_P(op2) == IS_ARRAY) {
-						ZVAL_LONG(op2, 0);
+						ZVAL_INT(op2, 0);
 					} else {
 						zendi_convert_scalar_to_number(op2, op2_copy, result);
 					}
