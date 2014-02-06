@@ -1025,12 +1025,14 @@ ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 					if (Z_TYPE_P(op1) == IS_ARRAY) {
-						ZVAL_INT(op1, 0);
+						ZVAL_INT(result, 0);
+						return SUCCESS;
 					} else {
 						zendi_convert_scalar_to_number(op1, op1_copy, result);
 					}
 					if (Z_TYPE_P(op2) == IS_ARRAY) {
-						ZVAL_INT(op2, 0);
+						ZVAL_INT(result, 1L);
+						return SUCCESS;
 					} else {
 						zendi_convert_scalar_to_number(op2, op2_copy, result);
 					}
