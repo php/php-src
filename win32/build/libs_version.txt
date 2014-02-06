@@ -3,7 +3,7 @@ cclient-2007e
 freetype-2.4.10
 icu-49.1.2
 jpeglib-8
-libcurl-7.30.0
+libcurl-7.35.0
 libiconv-1.14
 libmcrypt-2.5.8
 libmpir-2.5.1
