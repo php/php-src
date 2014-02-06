@@ -604,43 +604,7 @@ PHP_FUNCTION(pow)
 		return;
 	}
 
-	/* make sure we're dealing with numbers */
-	convert_scalar_to_number(zbase TSRMLS_CC);
-	convert_scalar_to_number(zexp TSRMLS_CC);
-
-	/* if both base and exponent were longs, we'll try to get a long out */
-	if (Z_TYPE_P(zbase) == IS_INT && Z_TYPE_P(zexp) == IS_INT && Z_IVAL_P(zexp) >= 0) {
-		php_int_t l1 = 1, l2 = Z_IVAL_P(zbase), i = Z_IVAL_P(zexp);
-		
-		if (i == 0) {
-			RETURN_INT(1L);
-		} else if (l2 == 0) {
-			RETURN_INT(0);
-		}
-
-		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
-		while (i >= 1) {
-			php_int_t overflow;
-			double dval = 0.0;
-
-			if (i % 2) {
-				--i;
-				ZEND_SIGNED_MULTIPLY_INT(l1,l2,l1,dval,overflow);
-				if (overflow) RETURN_DOUBLE(dval * pow(l2,i));
-			} else {
-				i /= 2;
-				ZEND_SIGNED_MULTIPLY_INT(l2,l2,l2,dval,overflow);
-				if (overflow) RETURN_DOUBLE((double)l1 * pow(dval,i));
-			}
-			if (i == 0) {
-				RETURN_INT(l1);
-			}
-		}
-	}
-	convert_to_double(zbase);
-	convert_to_double(zexp);
-	
-	RETURN_DOUBLE(pow(Z_DVAL_P(zbase), Z_DVAL_P(zexp)));
+	pow_function(return_value, zbase, zexp TSRMLS_CC);
 }
 /* }}} */
 

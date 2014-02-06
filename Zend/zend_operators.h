@@ -47,6 +47,7 @@ BEGIN_EXTERN_C()
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
