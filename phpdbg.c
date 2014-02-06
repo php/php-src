@@ -887,17 +887,17 @@ phpdbg_main:
 				bp_tmp_file = NULL;
 			}
 		}
+
+		if (!bp_tmp_file) {
+			phpdbg_error("Unable to create temporary file");
+			return 1;
+		}
 #else
 		if (!mkstemp(bp_tmp_file)) {
 			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
 		}
 #endif
 
-		if (!bp_tmp_file) {
-			phpdbg_error(
-				"Unable to create temporary file");
-			return 1;
-		}
 	}
 	ini_entries = NULL;
 	ini_entries_len = 0;
