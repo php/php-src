@@ -30,7 +30,7 @@ ZEND_API int zend_stack_init(zend_stack *stack)
 	return SUCCESS;
 }
 
-ZEND_API int zend_stack_push(zend_stack *stack, const void *element, int size)
+ZEND_API zend_size_t zend_stack_push(zend_stack *stack, const void *element, zend_size_t size)
 {
 	if (stack->top >= stack->max) {		/* we need to allocate more memory */
 		stack->elements = (void **) erealloc(stack->elements,
@@ -90,7 +90,7 @@ ZEND_API int zend_stack_is_empty(const zend_stack *stack)
 
 ZEND_API int zend_stack_destroy(zend_stack *stack)
 {
-	int i;
+	zend_size_t i;
 
 	if (stack->elements) {
 		for (i = 0; i < stack->top; i++) {
@@ -110,7 +110,7 @@ ZEND_API void **zend_stack_base(const zend_stack *stack)
 }
 
 
-ZEND_API int zend_stack_count(const zend_stack *stack)
+ZEND_API zend_size_t zend_stack_count(const zend_stack *stack)
 {
 	return stack->top;
 }
@@ -118,11 +118,11 @@ ZEND_API int zend_stack_count(const zend_stack *stack)
 
 ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function)(void *element))
 {
-	int i;
+	zend_size_t i;
 
 	switch (type) {
 		case ZEND_STACK_APPLY_TOPDOWN:
-			for (i=stack->top-1; i>=0; i--) {
+			for (i=stack->top-1; i < ZEND_SIZE_MAX; i--) {
 				if (apply_function(stack->elements[i])) {
 					break;
 				}
@@ -141,11 +141,11 @@ ZEND_API void zend_stack_apply(zend_stack *stack, int type, int (*apply_function
 
 ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*apply_function)(void *element, void *arg), void *arg)
 {
-	int i;
+	zend_size_t i;
 
 	switch (type) {
 		case ZEND_STACK_APPLY_TOPDOWN:
-			for (i=stack->top-1; i>=0; i--) {
+			for (i = stack->top - 1; i < ZEND_SIZE_MAX; i--) {
 				if (apply_function(stack->elements[i], arg)) {
 					break;
 				}
