@@ -224,7 +224,7 @@ ZEND_API int zend_hash_minmax(const HashTable *ht, compare_func_t compar, int fl
 #define zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite)					\
 	_zend_hash_merge(target, source, pCopyConstructor, tmp, size, overwrite ZEND_FILE_LINE_CC)
 
-ZEND_API int zend_hash_num_elements(const HashTable *ht);
+ZEND_API zend_uint_t zend_hash_num_elements(const HashTable *ht);
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
@@ -263,7 +263,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht);
 
 static inline zend_uint_t zend_inline_hash_func(const char *arKey, zend_size_t nKeyLength)
 {
-	register zend_uint_t hash = 5381;
+	register zend_uint_t hash = Z_UI(5381);
 
 	/* variant with the hash unrolled eight times */
 	for (; nKeyLength >= 8; nKeyLength -= 8) {

@@ -991,7 +991,7 @@ ZEND_API int zend_hash_index_exists(const HashTable *ht, zend_uint_t h)
 }
 
 
-ZEND_API int zend_hash_num_elements(const HashTable *ht)
+ZEND_API zend_uint_t zend_hash_num_elements(const HashTable *ht)
 {
 	IS_CONSISTENT(ht);
 
@@ -1440,7 +1440,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC)
 {
 	Bucket *p1, *p2 = NULL;
-	int result;
+	ptrdiff_t result;
 	void *pData2;
 
 	IS_CONSISTENT(ht1);
