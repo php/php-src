@@ -420,14 +420,24 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"syntax", CR
-"All **phpdbg** commands are case sensitive.  Commands start with a keyword, and some keywords "
-"(**break**, **info**, **set**, **print** and **list**) may include a subcommand keyword.  All "
-"keywords have a single letter alias (most lowercase, some uppercase) that may be used instead "
-"of spelling out the keyword in full.  Note that keywords cannot be abbreviated other than by "
-"substitution by the alias." CR CR
+"All **phpdbg** commands are case sensitive.  Commands start with a keyword, and some (**break**, "
+"**info**, **set**, **print** and **list**) may include a subcommand keyword.  All keywords are "
+"lower case but also have a single letter alias that may be used as an alternative to typing in the"
+"keyword in full.  Note some aliases are uppercase, and that keywords cannot be abbreviated other "
+"than by substitution by the alias." CR CR
 
-"Some commands take one or more optional arguments which are interpreted in the context of the "
-"command. In some cases the format of the argument enables the secondard keyword to be omitted." CR CR
+"Some commands take an argument.  Arguments are typed according to their format:" CR
+"     *  **omitted**" CR
+"     *  **address**      **0x** followed by a hex string" CR
+"     *  **number**       an optionally signed number" CR
+"     *  **method**       a valid **Class::methodName** expression" CR
+"     *  **func#op**      a valid **Function name** follow by # and an integer" CR
+"     *  **method#op**    a valid **Class::methodName** follow by # and an integer" CR
+"     *  **string**       a general string" CR
+"     *  **function**     a valid **Function name**" CR
+"     *  **File-line**    a valid **filename** follow by : and an integer" CR CR
+
+"In some cases the type of the argument enables the second keyword to be omitted." CR CR
 
 "Type **help** for an overview of all commands and type **help <command>** to get detailed help "
 "on any specific command." CR CR
@@ -505,8 +515,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **at**       **A**     specify breakpoint by location and condition" CR
 "  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
 
-"The syntax of the target argument is dependent on the target type and in the case of file, func "
-"method, and address targets the target keyword or alias is optional and can be omitted." CR CR
+"The syntax of the target argument is dependent on the target type and in the case of address, "
+"file, func, line and method targets the target keyword or alias is optional and can be omitted." CR CR
 
 "**Break on** takes a string argument which must be a valid PHP expression." CR CR
 
@@ -514,7 +524,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "and address types.  The second is a valid PHP expression which will trigger the break in "
 "execution, if evaluated as true in a boolean context at the specified target." CR CR
 
-"Note that breakpoints can also be temporarily enabled and disabled by the set break command." CR CR
+"Note that breakpoints can also be disabled and re-enabled by the **set break** command." CR CR
 
 "**Examples**" CR CR
 "    $P break file test.php:100" CR
@@ -863,23 +873,22 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Color elements can be one of **prompt**, **notice**, or **error**." CR CR
 
 "**Examples**" CR CR
-"     $P s C on" CR
+"     $P S C on" CR
 "     Set colors on" CR CR
 
 "     $P set p >" CR
 "     $P set color prompt white-bold" CR
 "     Set the prompt to a bold >" CR CR
 
-"     $P s c error red-bold" CR
+"     $P S c error red-bold" CR
 "     Use red bold for errors" CR
 "     " CR
-"     $P s b 4 off" CR
+"     $P S b 4 off" CR
 "     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." CR
 //*********** check oplog syntax
 },
 
 {"shell",
-//************ Check ! notation
 "Direct access to shell commands saves having to switch windows/consoles" CR CR
 
 "**Examples**" CR CR
