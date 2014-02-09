@@ -103,9 +103,9 @@ typedef long zend_off_t;
 #  define ZEND_STRTOI(s0, s1, base) strtoll((s0), (s1), (base))
 #  define ZEND_STRTOUI(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_INT_FMT "%" PRId64
-#  define ZEND_UINT_FMT "%lu"
+#  define ZEND_UINT_FMT "%" PRIu64
 #  define ZEND_INT_FMT_SPEC PRId64
-#  define ZEND_UINT_FMT_SPEC "lu"
+#  define ZEND_UINT_FMT_SPEC PRIu64
 #  define ZEND_STRTOI_PTR strtoll
 #  define ZEND_STRTOUI_PTR strtoull
 #  define ZEND_ABS llabs
