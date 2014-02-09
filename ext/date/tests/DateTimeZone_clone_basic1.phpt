@@ -31,15 +31,15 @@ if ($clone != $orig) {
 *** Testing clone on DateTime objects ***
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
-  int(3)
+  int(2)
   ["timezone"]=>
-  string(3) "UTC"
+  string(3) "GMT"
 }
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
-  int(3)
+  int(2)
   ["timezone"]=>
-  string(3) "UTC"
+  string(3) "GMT"
 }
 TEST PASSED : Objects equal but not indetical
 ===DONE===
