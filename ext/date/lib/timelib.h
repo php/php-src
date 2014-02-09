@@ -105,6 +105,7 @@ timelib_sll timelib_get_current_offset(timelib_time *t);
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
 const timelib_tzdb *timelib_builtin_db(void);
 const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count);
+long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper);
 
 /* From timelib.c */
 timelib_tzinfo* timelib_tzinfo_ctor(char *name);
