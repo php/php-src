@@ -2097,11 +2097,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_server_version)(const MYSQLND_CONN_DATA * 
 		return 0;
 	}
 
-	major = ZEND_STRTOL(p, &p, 10);
+	major = ZEND_STRTOI(p, &p, 10);
 	p += 1; /* consume the dot */
-	minor = ZEND_STRTOL(p, &p, 10);
+	minor = ZEND_STRTOI(p, &p, 10);
 	p += 1; /* consume the dot */
-	patch = ZEND_STRTOL(p, &p, 10);
+	patch = ZEND_STRTOI(p, &p, 10);
 
 	return (php_uint_t)(major * 10000L + (php_uint_t)(minor * 100L + patch));
 }

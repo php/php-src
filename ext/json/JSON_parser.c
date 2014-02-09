@@ -328,7 +328,7 @@ static void json_create_zval(zval **z, smart_str *buf, int type, php_int_t optio
 			}
 		}
 
-		ZVAL_INT(*z, ZEND_STRTOL(buf->c, NULL, 10));
+		ZVAL_INT(*z, ZEND_STRTOI(buf->c, NULL, 10));
     }
     else if (type == IS_DOUBLE)
     {

@@ -190,7 +190,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		max_memory = PHP_STREAM_MAX_MEM;
 		if (!strncasecmp(path, "/maxmemory:", 11)) {
 			path += 11;
-			max_memory = ZEND_STRTOL(path, NULL, 10);
+			max_memory = ZEND_STRTOI(path, NULL, 10);
 			if (max_memory < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
 				return NULL;
@@ -303,7 +303,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 
 		start = &path[3];
-		fildes_ori = ZEND_STRTOL(start, &end, 10);
+		fildes_ori = ZEND_STRTOI(start, &end, 10);
 		if (end == start || *end != '\0') {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
 				"php://fd/ stream must be specified in the form php://fd/<orig fd>");

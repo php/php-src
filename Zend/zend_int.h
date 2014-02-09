@@ -84,14 +84,14 @@ typedef long zend_off_t;
 # ifdef PHP_WIN32
 #  define ZEND_ITOA(i, s, len) _i64toa_s((i), (s), (len), 10)
 #  define ZEND_ATOI(i, s) i = _atoi64((s))
-#  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
-#  define ZEND_STRTOUL(s0, s1, base) _strtoui64((s0), (s1), (base))
+#  define ZEND_STRTOI(s0, s1, base) _strtoi64((s0), (s1), (base))
+#  define ZEND_STRTOUI(s0, s1, base) _strtoui64((s0), (s1), (base))
 #  define ZEND_INT_FMT "%I64d"
 #  define ZEND_UINT_FMT "%I64u"
 #  define ZEND_INT_FMT_SPEC "I64d"
 #  define ZEND_UINT_FMT_SPEC "I64u"
-#  define ZEND_STRTOL_PTR _strtoi64
-#  define ZEND_STRTOUL_PTR _strtoui64
+#  define ZEND_STRTOI_PTR _strtoi64
+#  define ZEND_STRTOUI_PTR _strtoui64
 #  define ZEND_ABS _abs64
 # else
 #  define ZEND_ITOA(i, s, len) \
@@ -100,19 +100,19 @@ typedef long zend_off_t;
 		(s)[st] = '\0'; \
  	} while (0)
 #  define ZEND_ATOI(i, s) (i) = atoll((s))
-#  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
-#  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
+#  define ZEND_STRTOI(s0, s1, base) strtoll((s0), (s1), (base))
+#  define ZEND_STRTOUI(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_INT_FMT "%" PRId64
 #  define ZEND_UINT_FMT "%lu"
 #  define ZEND_INT_FMT_SPEC PRId64
 #  define ZEND_UINT_FMT_SPEC "lu"
-#  define ZEND_STRTOL_PTR strtoll
-#  define ZEND_STRTOUL_PTR strtoull
+#  define ZEND_STRTOI_PTR strtoll
+#  define ZEND_STRTOUI_PTR strtoull
 #  define ZEND_ABS llabs
 # endif
 #else
-# define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
-# define ZEND_STRTOUL(s0, s1, base) strtoul((s0), (s1), (base))
+# define ZEND_STRTOI(s0, s1, base) strtol((s0), (s1), (base))
+# define ZEND_STRTOUI(s0, s1, base) strtoul((s0), (s1), (base))
 # ifdef PHP_WIN32
 #  define ZEND_ITOA(i, s, len) _ltoa_s((i), (s), (len), 10)
 #  define ZEND_ATOI(i, s) i = atol((s))
@@ -128,8 +128,8 @@ typedef long zend_off_t;
 # define ZEND_UINT_FMT "%lu"
 # define ZEND_INT_FMT_SPEC "ld"
 # define ZEND_UINT_FMT_SPEC "lu"
-# define ZEND_STRTOL_PTR strtol
-# define ZEND_STRTOUL_PTR strtoul
+# define ZEND_STRTOI_PTR strtol
+# define ZEND_STRTOUI_PTR strtoul
 # define ZEND_ABS abs
 #endif
 

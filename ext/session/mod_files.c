@@ -272,7 +272,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 1) {
 		errno = 0;
-		dirdepth = (size_t) ZEND_STRTOL(argv[0], NULL, 10);
+		dirdepth = (size_t) ZEND_STRTOI(argv[0], NULL, 10);
 		if (errno == ERANGE) {
 			php_error(E_WARNING, "The first parameter in session.save_path is invalid");
 			return FAILURE;
@@ -281,7 +281,7 @@ PS_OPEN_FUNC(files)
 
 	if (argc > 2) {
 		errno = 0;
-		filemode = ZEND_STRTOL(argv[1], NULL, 8);
+		filemode = ZEND_STRTOI(argv[1], NULL, 8);
 		if (errno == ERANGE || filemode < 0 || filemode > 07777) {
 			php_error(E_WARNING, "The second parameter in session.save_path is invalid");
 			return FAILURE;

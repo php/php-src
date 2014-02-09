@@ -189,7 +189,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, php_size_t length)
 			php_int_t port;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = ZEND_STRTOL(port_buf, NULL, 10);
+			port = ZEND_STRTOI(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
 			} else {
@@ -283,7 +283,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, php_size_t length)
 				php_int_t port;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = ZEND_STRTOL(port_buf, NULL, 10);
+				port = ZEND_STRTOI(port_buf, NULL, 10);
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {

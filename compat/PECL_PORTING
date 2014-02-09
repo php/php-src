@@ -79,8 +79,8 @@ https://wiki.php.net/rfc/size_t_and_int64
 	ZVAL_INT     - replacement for ZVAL_LONG
 	RETVAL_INT   - RETVAL_LONG
 	RETURN_INT   - RETURN_LONG
-	ZEND_STRTOL  - portable strtol version
-	ZEND_STRTOUL - portable strtoul version
+	ZEND_STRTOI  - portable strtol version
+	ZEND_STRTOUI - portable strtoul version
 	ZEND_ITOA    - portable itoa version
 	ZEND_ATOI    - portable atol version
 	ZEND_ABS     - portable abs version

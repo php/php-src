@@ -38,8 +38,8 @@ typedef struct stat zend_stat_t;
 # define Z_I(i) i
 # define Z_UI(i) i
 # define SIZEOF_ZEND_INT SIZEOF_LONG
-# define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
-# define ZEND_STRTOUL(s0, s1, base) strtoul((s0), (s1), (base))
+# define ZEND_STRTOI(s0, s1, base) strtol((s0), (s1), (base))
+# define ZEND_STRTOUI(s0, s1, base) strtoul((s0), (s1), (base))
 # ifdef PHP_WIN32
 #  define ZEND_ITOA(i, s, len) _ltoa_s((i), (s), (len), 10)
 #  define ZEND_ATOI(i, s) i = atol((s))
@@ -55,8 +55,8 @@ typedef struct stat zend_stat_t;
 # define ZEND_UINT_FMT "%lu"
 # define ZEND_INT_FMT_SPEC "ld"
 # define ZEND_UINT_FMT_SPEC "lu"
-# define ZEND_STRTOL_PTR strtol
-# define ZEND_STRTOUL_PTR strtoul
+# define ZEND_STRTOI_PTR strtol
+# define ZEND_STRTOUI_PTR strtoul
 # define ZEND_ABS abs
 # define zend_fseek fseek
 # define zend_ftell ftell

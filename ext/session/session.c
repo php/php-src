@@ -720,7 +720,7 @@ static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 	PS(hash_ops) = NULL;
 #endif
 
-	val = ZEND_STRTOL(new_value, &endptr, 10);
+	val = ZEND_STRTOI(new_value, &endptr, 10);
 	if (endptr && (*endptr == '\0')) {
 		/* Numeric value */
 		PS(hash_func) = val ? 1 : 0;

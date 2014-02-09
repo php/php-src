@@ -356,7 +356,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = ZEND_STRTOUL(format-1, &end, 10);
+			value = ZEND_STRTOUI(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -403,7 +403,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &format, 10);
+			value = ZEND_STRTOUI(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -594,7 +594,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	char *ch, sch;
 	int  flags;
 	char buf[64];	/* Temporary buffer to hold scanned number
-					 * strings before they are passed to ZEND_STRTOUL() */
+					 * strings before they are passed to ZEND_STRTOUI() */
 
 	/* do some sanity checking */
 	if ((varStart > argCount) || (varStart < 0)){
@@ -709,7 +709,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUL(format-1, &end, 10);
+			value = ZEND_STRTOUI(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -721,7 +721,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = ZEND_STRTOUL(format-1, &format, 10);
+			width = ZEND_STRTOUI(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
@@ -762,29 +762,29 @@ literal:
 			case 'D':
 				op = 'i';
 				base = 10;
-				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
 				break;
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
 				break;
 			case 'o':
 				op = 'i';
 				base = 8;
-				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
 				break;
 			case 'x':
 			case 'X':
 				op = 'i';
 				base = 16;
-				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
 				break;
 			case 'u':
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (php_int_t (*)())ZEND_STRTOUL_PTR;
+				fn = (php_int_t (*)())ZEND_STRTOUI_PTR;
 				break;
 
 			case 'f':

@@ -324,7 +324,7 @@ inline static int
 php_sprintf_getnumber(char *buffer, php_size_t *pos)
 {
 	char *endptr;
-	register php_int_t num = ZEND_STRTOL(&buffer[*pos], &endptr, 10);
+	register php_int_t num = ZEND_STRTOI(&buffer[*pos], &endptr, 10);
 	register php_size_t i = 0;
 
 	if (endptr != NULL) {

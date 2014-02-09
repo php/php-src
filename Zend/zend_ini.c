@@ -352,9 +352,9 @@ ZEND_API zend_int_t zend_ini_int(char *name, zend_size_t name_length, int orig) 
 
 	if (zend_hash_find(EG(ini_directives), name, name_length, (void **) &ini_entry) == SUCCESS) {
 		if (orig && ini_entry->modified) {
-			return (ini_entry->orig_value ? ZEND_STRTOL(ini_entry->orig_value, NULL, 0) : 0);
+			return (ini_entry->orig_value ? ZEND_STRTOI(ini_entry->orig_value, NULL, 0) : 0);
 		} else {
-			return (ini_entry->value      ? ZEND_STRTOL(ini_entry->value, NULL, 0)      : 0);
+			return (ini_entry->value      ? ZEND_STRTOI(ini_entry->value, NULL, 0)      : 0);
 		}
 	}
 

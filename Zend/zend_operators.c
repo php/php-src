@@ -86,7 +86,7 @@ ZEND_API int zend_atoi(const char *str, zend_size_t str_len) /* {{{ */
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOL(str, NULL, 0);
+	retval = ZEND_STRTOI(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
@@ -114,7 +114,7 @@ ZEND_API zend_int_t zend_atol(const char *str, zend_size_t str_len) /* {{{ */
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = ZEND_STRTOL(str, NULL, 0);
+	retval = ZEND_STRTOI(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
@@ -263,7 +263,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_IVAL(holder) = zend_dval_to_ival(Z_DVAL_P(op));	\
 				break;												\
 			case IS_STRING:											\
-				Z_IVAL(holder) = ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10);	\
+				Z_IVAL(holder) = ZEND_STRTOI(Z_STRVAL_P(op), NULL, 10);	\
 				break;												\
 			case IS_ARRAY:											\
 				Z_IVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
@@ -390,7 +390,7 @@ ZEND_API void convert_to_int_base(zval *op, int base) /* {{{ */
 			{
 				char *strval = Z_STRVAL_P(op);
 
-				Z_IVAL_P(op) = ZEND_STRTOL(strval, NULL, base);
+				Z_IVAL_P(op) = ZEND_STRTOI(strval, NULL, base);
 				str_efree(strval);
 			}
 			break;

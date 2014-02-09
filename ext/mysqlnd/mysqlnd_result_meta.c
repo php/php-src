@@ -74,12 +74,12 @@ mysqlnd_is_key_numeric(const char * key, size_t length, php_int_t *idx)
 			}
 			if (tmp==end && *tmp=='\0') { /* a numeric index */
 				if (*key=='-') {
-					*idx = ZEND_STRTOL(key, NULL, 10);
+					*idx = ZEND_STRTOI(key, NULL, 10);
 					if (*idx!=PHP_INT_MIN) {
 						return TRUE;
 					}
 				} else {
-					*idx = ZEND_STRTOL(key, NULL, 10);
+					*idx = ZEND_STRTOI(key, NULL, 10);
 					if (*idx!=PHP_INT_MAX) {
 						return TRUE;
 					}

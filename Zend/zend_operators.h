@@ -254,7 +254,7 @@ process_double:
 		}
 
 		if (lval) {
-			*lval = ZEND_STRTOL(str, NULL, base);
+			*lval = ZEND_STRTOI(str, NULL, base);
 		}
 
 		return IS_INT;
