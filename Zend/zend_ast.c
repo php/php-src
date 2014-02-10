@@ -28,8 +28,7 @@ ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
 	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zval));
 	ast->kind = ZEND_CONST;
 	ast->children = 0;
-	ast->u.val = (zval*)(ast + 1);
-	INIT_PZVAL_COPY(ast->u.val, zv);
+	ZVAL_COPY_VALUE(&ast->u.val, zv);
 	return ast;
 }
 
@@ -68,7 +67,7 @@ ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 	int i;
 
 	if (ast->kind == ZEND_CONST) {
-		return !IS_CONSTANT_TYPE(Z_TYPE_P(ast->u.val));
+		return !IS_CONSTANT_TYPE(Z_TYPE(ast->u.val));
 	} else {
 		for (i = 0; i < ast->children; i++) {
 			if ((&ast->u.child)[i]) {
@@ -223,10 +222,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op2);
 			break;
 		case ZEND_CONST:
-			*result = *ast->u.val;
-			zval_copy_ctor(result);
+			ZVAL_DUP(result, &ast->u.val);
 			if (IS_CONSTANT_TYPE(Z_TYPE_P(result))) {
-				zval_update_constant_ex(&result, (void *) 1, scope TSRMLS_CC);
+				zval_update_constant_ex(result, (void *) 1, scope TSRMLS_CC);
 			}
 			break;
 		case ZEND_BOOL_AND:
@@ -287,8 +285,8 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 	if (ast == NULL) {
 		return NULL;
 	} else if (ast->kind == ZEND_CONST) {
-		zend_ast *copy = zend_ast_create_constant(ast->u.val);
-		zval_copy_ctor(copy->u.val);
+		zend_ast *copy = zend_ast_create_constant(&ast->u.val);
+		zval_copy_ctor(&copy->u.val);
 		return copy;
 	} else {
 		switch (ast->children) {
@@ -317,7 +315,7 @@ ZEND_API void zend_ast_destroy(zend_ast *ast)
 	int i;
 
 	if (ast->kind == ZEND_CONST) {
-		zval_dtor(ast->u.val);
+		zval_dtor(&ast->u.val);
 	} else {
 		for (i = 0; i < ast->children; i++) {
 			if ((&ast->u.child)[i]) {

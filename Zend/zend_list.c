@@ -31,88 +31,46 @@ ZEND_API int le_index_ptr;
 /* true global */
 static HashTable list_destructors;
 
-
-ZEND_API int zend_list_insert(void *ptr, int type TSRMLS_DC)
+ZEND_API zval *zend_list_insert(void *ptr, int type TSRMLS_DC)
 {
 	int index;
-	zend_rsrc_list_entry le;
-
-	le.ptr=ptr;
-	le.type=type;
-	le.refcount=1;
+	zval zv;
 
 	index = zend_hash_next_free_element(&EG(regular_list));
-
-	zend_hash_index_update(&EG(regular_list), index, (void *) &le, sizeof(zend_rsrc_list_entry), NULL);
-	return index;
+	ZVAL_NEW_RES(&zv, index, ptr, type);
+	return zend_hash_index_update(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int _zend_list_delete(int id TSRMLS_DC)
+ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC)
 {
-	zend_rsrc_list_entry *le;
-	
-	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
-/*		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1); */
-		if (--le->refcount<=0) {
-			return zend_hash_index_del(&EG(regular_list), id);
-		} else {
-			return SUCCESS;
-		}
+	if (res->gc.refcount <= 0) {
+		return zend_hash_index_del(&EG(regular_list), res->handle);
 	} else {
-		return FAILURE;
-	}
-}
-
-
-ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
-{
-	zend_rsrc_list_entry *le;
-
-	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
-		*type = le->type;
-		return le->ptr;
-	} else {
-		*type = -1;
-		return NULL;
-	}
-}
-
-ZEND_API int _zend_list_addref(int id TSRMLS_DC)
-{
-	zend_rsrc_list_entry *le;
-	
-	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
-/*		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1); */
-		le->refcount++;
 		return SUCCESS;
-	} else {
-		return FAILURE;
 	}
 }
 
-
-ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC)
+ZEND_API zend_resource* zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC)
 {
-	int rsrc_id;
+	zval *zv;
 
-	rsrc_id = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
+	zv = zend_list_insert(rsrc_pointer, rsrc_type TSRMLS_CC);
 	
 	if (rsrc_result) {
-		rsrc_result->value.lval = rsrc_id;
-		rsrc_result->type = IS_RESOURCE;
+		ZVAL_COPY_VALUE(rsrc_result, zv);
+		return Z_RES_P(rsrc_result);
+	} else {
+		return Z_RES_P(zv);
 	}
-
-	return rsrc_id;
 }
 
-
-ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource(zval *passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
 {
-	int id;
 	int actual_resource_type;
-	void *resource;
+//	void *resource;
 	va_list resource_types;
 	int i;
+	zend_resource *res;
 	const char *space;
 	const char *class_name;
 
@@ -123,26 +81,25 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 				zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
-		} else if ((*passed_id)->type != IS_RESOURCE) {
+		} else if (Z_TYPE_P(passed_id) != IS_RESOURCE) {
 			if (resource_type_name) {
 				class_name = get_active_class_name(&space TSRMLS_CC);
 				zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), resource_type_name);
 			}
 			return NULL;
 		}
-		id = (*passed_id)->value.lval;
 	} else {
-		id = default_id;
-	}
-
-	resource = zend_list_find(id, &actual_resource_type);
-	if (!resource) {
-		if (resource_type_name) {
-			class_name = get_active_class_name(&space TSRMLS_CC);
-			zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), id, resource_type_name);
+		passed_id = zend_hash_index_find(&EG(regular_list), default_id);
+		if (!passed_id) {
+			if (resource_type_name) {
+				class_name = get_active_class_name(&space TSRMLS_CC);
+				zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(TSRMLS_C), default_id, resource_type_name);
+			}
+			return NULL;
 		}
-		return NULL;
 	}
+	res = Z_RES_P(passed_id);
+	actual_resource_type = res->type;
 
 	va_start(resource_types, num_resource_types);
 	for (i=0; i<num_resource_types; i++) {
@@ -151,7 +108,7 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 			if (found_resource_type) {
 				*found_resource_type = actual_resource_type;
 			}
-			return resource;
+			return res->ptr;
 		}
 	}
 	va_end(resource_types);
@@ -164,58 +121,57 @@ ZEND_API void *zend_fetch_resource(zval **passed_id TSRMLS_DC, int default_id, c
 	return NULL;
 }
 
-
-void list_entry_destructor(void *ptr)
+void list_entry_destructor(zval *zv)
 {
-	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) ptr;
+	zend_resource *res = Z_RES_P(zv);
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
 	
-	if (zend_hash_index_find(&list_destructors, le->type, (void **) &ld)==SUCCESS) {
+	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+	if (ld) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
 				if (ld->list_dtor) {
-					(ld->list_dtor)(le->ptr);
+					(ld->list_dtor)(res->ptr);
 				}
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
 				if (ld->list_dtor_ex) {
-					ld->list_dtor_ex(le TSRMLS_CC);
+					ld->list_dtor_ex(res->ptr TSRMLS_CC);
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", le->type);
+		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", res->type);
 	}
 }
 
-
-void plist_entry_destructor(void *ptr)
+void plist_entry_destructor(zval *zv)
 {
-	zend_rsrc_list_entry *le = (zend_rsrc_list_entry *) ptr;
+	zend_resource *res = Z_RES_P(zv);
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
 
-	if (zend_hash_index_find(&list_destructors, le->type, (void **) &ld)==SUCCESS) {
+	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+	if (ld) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
 				if (ld->plist_dtor) {
-					(ld->plist_dtor)(le->ptr);
+					(ld->plist_dtor)(res->ptr);
 				}
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
 				if (ld->plist_dtor_ex) {
-					ld->plist_dtor_ex(le TSRMLS_CC);
+					ld->plist_dtor_ex(res TSRMLS_CC);
 				}
 				break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)", le->type);
+		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)", res->type);
 	}
 }
-
 
 int zend_init_rsrc_list(TSRMLS_D)
 {
@@ -239,9 +195,9 @@ void zend_destroy_rsrc_list(HashTable *ht TSRMLS_DC)
 	zend_hash_graceful_reverse_destroy(ht);
 }
 
-static int clean_module_resource(zend_rsrc_list_entry *le, int *resource_id TSRMLS_DC)
+static int clean_module_resource(zval *zv, int *resource_id TSRMLS_DC)
 {
-	if (le->type == *resource_id) {
+	if (Z_RES_TYPE_P(zv) == *resource_id) {
 		return 1;
 	} else {
 		return 0;
@@ -249,8 +205,9 @@ static int clean_module_resource(zend_rsrc_list_entry *le, int *resource_id TSRM
 }
 
 
-static int zend_clean_module_rsrc_dtors_cb(zend_rsrc_list_dtors_entry *ld, int *module_number TSRMLS_DC)
+static int zend_clean_module_rsrc_dtors_cb(zval *zv, int *module_number TSRMLS_DC)
 {
+	zend_rsrc_list_dtors_entry *ld = Z_PTR_P(zv);	
 	if (ld->module_number == *module_number) {
 		zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) clean_module_resource, (void *) &(ld->resource_id) TSRMLS_CC);
 		return 1;
@@ -268,21 +225,20 @@ void zend_clean_module_rsrc_dtors(int module_number TSRMLS_DC)
 
 ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number)
 {
-	zend_rsrc_list_dtors_entry lde;
+	zend_rsrc_list_dtors_entry *lde;
+	zval zv;
 	
-#if 0
-	printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
-#endif
+	lde = emalloc(sizeof(zend_rsrc_list_dtors_entry));
+	lde->list_dtor=(void (*)(void *)) ld;
+	lde->plist_dtor=(void (*)(void *)) pld;
+	lde->list_dtor_ex = lde->plist_dtor_ex = NULL;
+	lde->module_number = module_number;
+	lde->resource_id = list_destructors.nNextFreeElement;
+	lde->type = ZEND_RESOURCE_LIST_TYPE_STD;
+	lde->type_name = NULL;
+	ZVAL_PTR(&zv, lde);
 	
-	lde.list_dtor=(void (*)(void *)) ld;
-	lde.plist_dtor=(void (*)(void *)) pld;
-	lde.list_dtor_ex = lde.plist_dtor_ex = NULL;
-	lde.module_number = module_number;
-	lde.resource_id = list_destructors.nNextFreeElement;
-	lde.type = ZEND_RESOURCE_LIST_TYPE_STD;
-	lde.type_name = NULL;
-	
-	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
+	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
 		return FAILURE;
 	}
 	return list_destructors.nNextFreeElement-1;
@@ -291,38 +247,34 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number)
 {
-	zend_rsrc_list_dtors_entry lde;
+	zend_rsrc_list_dtors_entry *lde;
+	zval zv;
 	
-#if 0
-	printf("Registering destructors %d for module %d\n", list_destructors.nNextFreeElement, module_number);
-#endif
-
-	lde.list_dtor = NULL;
-	lde.plist_dtor = NULL;
-	lde.list_dtor_ex = ld;
-	lde.plist_dtor_ex = pld;
-	lde.module_number = module_number;
-	lde.resource_id = list_destructors.nNextFreeElement;
-	lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
-	lde.type_name = type_name;
+	lde = emalloc(sizeof(zend_rsrc_list_dtors_entry));	
+	lde->list_dtor = NULL;
+	lde->plist_dtor = NULL;
+	lde->list_dtor_ex = ld;
+	lde->plist_dtor_ex = pld;
+	lde->module_number = module_number;
+	lde->resource_id = list_destructors.nNextFreeElement;
+	lde->type = ZEND_RESOURCE_LIST_TYPE_EX;
+	lde->type_name = type_name;
+	ZVAL_PTR(&zv, lde);
 	
-	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
+	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
 		return FAILURE;
 	}
 	return list_destructors.nNextFreeElement-1;
 }
 
-ZEND_API int zend_fetch_list_dtor_id(char *type_name)
+ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 {
 	zend_rsrc_list_dtors_entry *lde;
 	HashPosition pos;
 
 	zend_hash_internal_pointer_reset_ex(&list_destructors, &pos);
-	while (zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
+	while ((lde = zend_hash_get_current_data_ptr_ex(&list_destructors, &pos)) != NULL) {
 		if (lde->type_name && (strcmp(type_name, lde->type_name) == 0)) {
-#if 0
-			printf("Found resource id %d for resource type %s\n", (*lde).resource_id, type_name);
-#endif
 			return lde->resource_id;
 		}
 		zend_hash_move_forward_ex(&list_destructors, &pos);
@@ -348,15 +300,12 @@ void zend_destroy_rsrc_list_dtors(void)
 }
 
 
-const char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC)
+const char *zend_rsrc_list_get_rsrc_type(zend_resource *res TSRMLS_DC)
 {
 	zend_rsrc_list_dtors_entry *lde;
-	int rsrc_type;
 
-	if (!zend_list_find(resource, &rsrc_type))
-		return NULL;
-
-	if (zend_hash_index_find(&list_destructors, rsrc_type, (void **) &lde)==SUCCESS) {
+	lde = zend_hash_index_find_ptr(&list_destructors, res->type);
+	if (lde) {
 		return lde->type_name;
 	} else {
 		return NULL;

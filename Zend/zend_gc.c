@@ -30,6 +30,18 @@ ZEND_API int gc_globals_id;
 ZEND_API zend_gc_globals gc_globals;
 #endif
 
+#define GC_REMOVE_FROM_BUFFER(current) \
+	gc_remove_from_buffer((current) TSRMLS_CC)
+
+static zend_always_inline void gc_remove_from_buffer(gc_root_buffer *root TSRMLS_DC)
+{
+	root->next->prev = root->prev;
+	root->prev->next = root->next;
+	root->prev = GC_G(unused);
+	GC_G(unused) = root;
+	GC_BENCH_DEC(root_buf_length);
+}
+
 static void root_buffer_dtor(zend_gc_globals *gc_globals TSRMLS_DC)
 {
 	if (gc_globals->buf) {
@@ -108,7 +120,7 @@ ZEND_API void gc_reset(TSRMLS_D)
 
 	if (GC_G(buf)) {
 		GC_G(unused) = NULL;
-		GC_G(first_unused) = GC_G(buf);
+		GC_G(first_unused) = GC_G(buf) + 1;
 
 		GC_G(zval_to_free) = NULL;
 	} else {
@@ -127,29 +139,23 @@ ZEND_API void gc_init(TSRMLS_D)
 	}
 }
 
-ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
+ZEND_API void gc_zval_possible_root(zend_refcounted *ref TSRMLS_DC)
 {
 	if (UNEXPECTED(GC_G(free_list) != NULL &&
-	               GC_ZVAL_ADDRESS(zv) != NULL &&
-		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
-		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
-		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
+	               GC_ADDRESS(ref->u.v.buffer) &&
+		           GC_GET_COLOR(ref->u.v.buffer) == GC_BLACK &&
+		           GC_ADDRESS(ref->u.v.buffer) >= GC_G(last_unused) - GC_G(buf))) {
 		/* The given zval is a garbage that is going to be deleted by
 		 * currently running GC */
 		return;
 	}
 
-	if (zv->type == IS_OBJECT) {
-		GC_ZOBJ_CHECK_POSSIBLE_ROOT(zv);
-		return;
-	}
-
 	GC_BENCH_INC(zval_possible_root);
 
-	if (GC_ZVAL_GET_COLOR(zv) != GC_PURPLE) {
-		GC_ZVAL_SET_PURPLE(zv);
+	if (GC_GET_COLOR(ref->u.v.buffer) != GC_PURPLE) {
+		GC_SET_PURPLE(ref->u.v.buffer);
 
-		if (!GC_ZVAL_ADDRESS(zv)) {
+		if (!GC_ADDRESS(ref->u.v.buffer)) {
 			gc_root_buffer *newRoot = GC_G(unused);
 
 			if (newRoot) {
@@ -159,17 +165,17 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 				GC_G(first_unused)++;
 			} else {
 				if (!GC_G(gc_enabled)) {
-					GC_ZVAL_SET_BLACK(zv);
+					GC_SET_BLACK(ref->u.v.buffer);
 					return;
 				}
-				zv->refcount__gc++;
+				ref->refcount++;
 				gc_collect_cycles(TSRMLS_C);
-				zv->refcount__gc--;
+				ref->refcount--;
 				newRoot = GC_G(unused);
 				if (!newRoot) {
 					return;
 				}
-				GC_ZVAL_SET_PURPLE(zv);
+				GC_SET_PURPLE(ref->u.v.buffer);
 				GC_G(unused) = newRoot->prev;
 			}
 
@@ -178,10 +184,9 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 			GC_G(roots).next->prev = newRoot;
 			GC_G(roots).next = newRoot;
 
-			GC_ZVAL_SET_ADDRESS(zv, newRoot);
+			GC_SET_ADDRESS(ref->u.v.buffer, newRoot - GC_G(buf));
 
-			newRoot->handle = 0;
-			newRoot->u.pz = zv;
+			newRoot->ref = ref;
 
 			GC_BENCH_INC(zval_buffered);
 			GC_BENCH_INC(root_buf_length);
@@ -190,6 +195,8 @@ ZEND_API void gc_zval_possible_root(zval *zv TSRMLS_DC)
 	}
 }
 
+//???
+#if 0
 ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 {
 	struct _store_object *obj;
@@ -245,33 +252,37 @@ ZEND_API void gc_zobj_possible_root(zval *zv TSRMLS_DC)
 		}
 	}
 }
+#endif
 
-ZEND_API void gc_remove_zval_from_buffer(zval *zv TSRMLS_DC)
+ZEND_API void gc_remove_zval_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
-	gc_root_buffer* root_buffer = GC_ADDRESS(((zval_gc_info*)zv)->u.buffered);
+//???	gc_root_buffer* root_buffer = GC_ADDRESS(ref->u.v.buffer);
 
 	if (UNEXPECTED(GC_G(free_list) != NULL &&
-		           GC_ZVAL_GET_COLOR(zv) == GC_BLACK) &&
-		           (GC_ZVAL_ADDRESS(zv) < GC_G(buf) ||
-		            GC_ZVAL_ADDRESS(zv) >= GC_G(last_unused))) {
+		           GC_GET_COLOR(ref->u.v.buffer) == GC_BLACK &&
+		           GC_ADDRESS(ref->u.v.buffer) >= GC_G(last_unused) - GC_G(buf))) {
 		/* The given zval is a garbage that is going to be deleted by
 		 * currently running GC */
-		if (GC_G(next_to_free) == (zval_gc_info*)zv) {
-			GC_G(next_to_free) = ((zval_gc_info*)zv)->u.next;
-		}
+//???		if (GC_G(next_to_free) == (zval_gc_info*)zv) {
+//???			GC_G(next_to_free) = ((zval_gc_info*)zv)->u.next;
+//???		}
 		return;
 	}
 	GC_BENCH_INC(zval_remove_from_buffer);
-	GC_REMOVE_FROM_BUFFER(root_buffer);
-	((zval_gc_info*)zv)->u.buffered = NULL;
+	GC_REMOVE_FROM_BUFFER(GC_G(buf) + GC_ADDRESS(ref->u.v.buffer));
+	ref->u.v.buffer = 0;
 }
 
+//???
+#if 0
 static void zval_scan_black(zval *pz TSRMLS_DC)
 {
+	HashTable *ht;
+	uint idx;
 	Bucket *p;
 
 tail_call:
-	p = NULL;
+	ht = NULL;
 	GC_ZVAL_SET_BLACK(pz);
 
 	if (Z_TYPE_P(pz) == IS_OBJECT && EG(objects_store).object_buckets) {
@@ -306,32 +317,35 @@ tail_call:
 				if (!props) {
 					return;
 				}
-				p = props->pListHead;
+				ht = props;
 			}
 		}
 	} else if (Z_TYPE_P(pz) == IS_ARRAY) {
 		if (Z_ARRVAL_P(pz) != &EG(symbol_table)) {
-			p = Z_ARRVAL_P(pz)->pListHead;
+			ht = Z_ARRVAL_P(pz);
 		}
 	}
-	while (p != NULL) {
-		pz = *(zval**)p->pData;
+	if (!ht) return;
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (!p->xData) continue;
+		pz = (zval*)p->xData;
 		if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 			pz->refcount__gc++;
 		}
 		if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
-			if (p->pListNext == NULL) {
+			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
 				zval_scan_black(pz TSRMLS_CC);
 			}
 		}
-		p = p->pListNext;
 	}
 }
 
 static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 {
+	uint idx;
 	Bucket *p;
 	zend_object_get_gc_t get_gc;
 
@@ -356,27 +370,29 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 		if (!props) {
 			return;
 		}
-		p = props->pListHead;
-		while (p != NULL) {
-			pz = *(zval**)p->pData;
+		for (idx = 0; idx < props->nNumUsed; idx++) {
+			p = props->arData + idx;
+			if (!p->xData) continue;
+			pz = (zval*)p->xData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc++;
 			}
 			if (GC_ZVAL_GET_COLOR(pz) != GC_BLACK) {
 				zval_scan_black(pz TSRMLS_CC);
 			}
-			p = p->pListNext;
 		}
 	}
 }
 
 static void zval_mark_grey(zval *pz TSRMLS_DC)
 {
+    HashTable *ht;
+    uint idx;
 	Bucket *p;
 
 tail_call:
 	if (GC_ZVAL_GET_COLOR(pz) != GC_GREY) {
-		p = NULL;
+		ht = NULL;
 		GC_BENCH_INC(zval_marked_grey);
 		GC_ZVAL_SET_COLOR(pz, GC_GREY);
 
@@ -411,33 +427,36 @@ tail_call:
 					if (!props) {
 						return;
 					}
-					p = props->pListHead;
+					ht = props;
 				}
 			}
 		} else if (Z_TYPE_P(pz) == IS_ARRAY) {
 			if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
 				GC_ZVAL_SET_BLACK(pz);
 			} else {
-				p = Z_ARRVAL_P(pz)->pListHead;
+				ht = Z_ARRVAL_P(pz);
 			}
 		}
-		while (p != NULL) {
-			pz = *(zval**)p->pData;
+		if (!ht) return;
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (!p->xData) continue;
+			pz = (zval*)p->xData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc--;
 			}
-			if (p->pListNext == NULL) {
+			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
 				zval_mark_grey(pz TSRMLS_CC);
 			}
-			p = p->pListNext;
 		}
 	}
 }
 
 static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 {
+	uint idx;
 	Bucket *p;
 	zend_object_get_gc_t get_gc;
 
@@ -462,14 +481,14 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 			if (!props) {
 				return;
 			}
-			p = props->pListHead;
-			while (p != NULL) {
-				pz = *(zval**)p->pData;
+			for (idx = 0; idx < props->nNumUsed; idx++) {
+				p = props->arData + idx;
+				if (!p->xData) continue;
+				pz = (zval*)p->xData;
 				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 					pz->refcount__gc--;
 				}
 				zval_mark_grey(pz TSRMLS_CC);
-				p = p->pListNext;
 			}
 		}
 	}
@@ -510,11 +529,13 @@ static void gc_mark_roots(TSRMLS_D)
 
 static void zval_scan(zval *pz TSRMLS_DC)
 {
+    HashTable *ht;
+    uint idx;
 	Bucket *p;
 
 tail_call:	
 	if (GC_ZVAL_GET_COLOR(pz) == GC_GREY) {
-		p = NULL;
+		ht = NULL;
 		if (pz->refcount__gc > 0) {
 			zval_scan_black(pz TSRMLS_CC);
 		} else {
@@ -548,7 +569,7 @@ tail_call:
 							if (!props) {
 								return;
 							}
-							p = props->pListHead;
+							ht = props;
 						}
 					}
 				}
@@ -556,24 +577,27 @@ tail_call:
 				if (Z_ARRVAL_P(pz) == &EG(symbol_table)) {
 					GC_ZVAL_SET_BLACK(pz);
 				} else {
-					p = Z_ARRVAL_P(pz)->pListHead;
+					ht = Z_ARRVAL_P(pz);
 				}
 			}
 		}
-		while (p != NULL) {
-			if (p->pListNext == NULL) {
-				pz = *(zval**)p->pData;
+		if (!ht) return;
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (!p->xData) continue;
+			if (idx == ht->nNumUsed-1) {
+				pz = (zval*)p->xData;
 				goto tail_call;
 			} else {
-				zval_scan(*(zval**)p->pData TSRMLS_CC);
+				zval_scan((zval*)p->xData TSRMLS_CC);
 			}
-			p = p->pListNext;
 		}
 	}
 }
 
 static void zobj_scan(zval *pz TSRMLS_DC)
 {
+	uint idx;
 	Bucket *p;
 	zend_object_get_gc_t get_gc;
 
@@ -600,10 +624,10 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 					if (!props) {
 						return;
 					}
-					p = props->pListHead;
-					while (p != NULL) {
-						zval_scan(*(zval**)p->pData TSRMLS_CC);
-						p = p->pListNext;
+					for (idx = 0; idx < props->nNumUsed; idx++) {						
+						p = props->arData + idx;
+						if (!p->xData) continue;
+						zval_scan((zval*)p->xData TSRMLS_CC);
 					}
 				}
 			}
@@ -632,11 +656,13 @@ static void gc_scan_roots(TSRMLS_D)
 
 static void zval_collect_white(zval *pz TSRMLS_DC)
 {
+	HashTable *ht;
+	uint idx;
 	Bucket *p;
 
 tail_call:
 	if (((zval_gc_info*)(pz))->u.buffered == (gc_root_buffer*)GC_WHITE) {
-		p = NULL;
+		ht = NULL;
 		GC_ZVAL_SET_BLACK(pz);
 
 		if (Z_TYPE_P(pz) == IS_OBJECT && EG(objects_store).object_buckets) {
@@ -678,12 +704,12 @@ tail_call:
 					if (!props) {
 						return;
 					}
-					p = props->pListHead;
+					ht = props;
 				}
 			}
 		} else {
 			if (Z_TYPE_P(pz) == IS_ARRAY) {
-				p = Z_ARRVAL_P(pz)->pListHead;
+				ht = Z_ARRVAL_P(pz);
 			}
 		}
 
@@ -692,23 +718,27 @@ tail_call:
 		((zval_gc_info*)pz)->u.next = GC_G(zval_to_free);
 		GC_G(zval_to_free) = (zval_gc_info*)pz;
 
-		while (p != NULL) {
-			pz = *(zval**)p->pData;
+		if (!ht) return;
+
+		for (idx = 0; idx < ht->nNumUsed; idx++) {
+			p = ht->arData + idx;
+			if (!p->xData) continue;
+			pz = (zval*)p->xData;
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc++;
 			}
-			if (p->pListNext == NULL) {
+			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
 				zval_collect_white(pz TSRMLS_CC);
 			}
-			p = p->pListNext;
 		}
 	}
 }
 
 static void zobj_collect_white(zval *pz TSRMLS_DC)
 {
+	uint idx;
 	Bucket *p;
 
 	if (EG(objects_store).object_buckets) {
@@ -737,14 +767,14 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 				if (!props) {
 					return;
 				}
-				p = props->pListHead;
-				while (p != NULL) {
-					pz = *(zval**)p->pData;
+				for (idx = 0; idx < props->nNumUsed; idx++) {
+					p = props->arData + idx;
+					if (!p->xData) continue;
+					pz = (zval*)p->xData;
 					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 						pz->refcount__gc++;
 					}
 					zval_collect_white(pz TSRMLS_CC);
-					p = p->pListNext;
 				}
 			}
 		}
@@ -776,11 +806,15 @@ static void gc_collect_roots(TSRMLS_D)
 		current = current->next;
 	}
 }
+#endif
 
 #define FREE_LIST_END ((zval_gc_info*)(~(zend_uintptr_t)GC_COLOR))
 
 ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
+//???
+	return 0;
+#if 0
 	int count = 0;
 
 	if (GC_G(roots).next != &GC_G(roots)) {
@@ -857,6 +891,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 	}
 
 	return count;
+#endif
 }
 
 /*

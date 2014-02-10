@@ -131,11 +131,9 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 /* Eat trailing whitespace */
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
-#define zend_ini_copy_value(retval, str, len) {  \
-	Z_STRVAL_P(retval) = zend_strndup(str, len); \
-	Z_STRLEN_P(retval) = len;                    \
-	Z_TYPE_P(retval) = IS_STRING;                \
-}
+#define zend_ini_copy_value(retval, str, len)	\
+	ZVAL_STR(retval, STR_INIT(str, len, 1))
+
 
 #define RETURN_TOKEN(type, str, len) {           \
 	zend_ini_copy_value(ini_lval, str, len);     \

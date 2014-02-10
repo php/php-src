@@ -490,7 +490,7 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	/* Create and register 'IntlGregorianCalendar' class. */
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
-		Calendar_ce_ptr, NULL TSRMLS_CC);
+		Calendar_ce_ptr TSRMLS_CC);
 	if (!GregorianCalendar_ce_ptr) {
 		//can't happen know without bigger problems before
 		php_error_docref0(NULL TSRMLS_CC, E_ERROR,

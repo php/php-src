@@ -277,35 +277,34 @@ static void accel_interned_strings_restore_for_php(TSRMLS_D)
 #ifndef ZTS
 static void accel_interned_strings_restore_state(TSRMLS_D)
 {
-	unsigned int i;
+    uint idx = ZCSG(interned_strings).nNumUsed;
+    uint nIndex;
+    Bucket *p;
 
-	for (i = 0; i < ZCSG(interned_strings).nTableSize; i++) {
-		ZCSG(interned_strings).arBuckets[i] = ZCSG(interned_strings_saved_state).arBuckets[i];
-		if (ZCSG(interned_strings).arBuckets[i]) {
-			ZCSG(interned_strings).arBuckets[i]->pLast = NULL;
-		}
+	ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_top);
+    while (idx > 0) {
+    	idx--;
+		p = ZCSG(interned_strings).arData + idx;
+		if ((char*)p->xData < ZCSG(interned_strings_top)) break;
+		ZCSG(interned_strings).nNumUsed--;
+		ZCSG(interned_strings).nNumOfElements--;
+
+		nIndex = p->h & ZCSG(interned_strings).nTableMask;
+		if (ZCSG(interned_strings).arHash[nIndex].idx == idx) {
+			ZCSG(interned_strings).arHash[nIndex].idx = p->next;
+		} else {
+			uint prev = ZCSG(interned_strings).arHash[nIndex].idx;
+			while (ZCSG(interned_strings).arData[prev].next != idx) {
+				prev = ZCSG(interned_strings).arData[prev].next;
+ 			}
+			ZCSG(interned_strings).arData[prev].next = p->next;
+ 		}
 	}
-	ZCSG(interned_strings).pListHead = ZCSG(interned_strings_saved_state).pListHead;
-	ZCSG(interned_strings).pListTail = ZCSG(interned_strings_saved_state).pListTail;
-	if (ZCSG(interned_strings).pListHead) {
-		ZCSG(interned_strings).pListHead->pListLast = NULL;
-	}
-	if (ZCSG(interned_strings).pListTail) {
-		ZCSG(interned_strings).pListTail->pListNext = NULL;
-	}
-	ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_state).top;
 }
 
 static void accel_interned_strings_save_state(TSRMLS_D)
 {
-	ZCSG(interned_strings_saved_state).arBuckets = (Bucket**)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
-	if (!ZCSG(interned_strings_saved_state).arBuckets) {
-		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
-	}
-	memcpy(ZCSG(interned_strings_saved_state).arBuckets, ZCSG(interned_strings).arBuckets, ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
-	ZCSG(interned_strings_saved_state).pListHead = ZCSG(interned_strings).pListHead;
-	ZCSG(interned_strings_saved_state).pListTail = ZCSG(interned_strings).pListTail;
-	ZCSG(interned_strings_saved_state).top = ZCSG(interned_strings_top);
+	ZCSG(interned_strings_saved_top) = ZCSG(interned_strings_top);
 }
 #endif
 
@@ -315,7 +314,9 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 #ifndef ZTS
 	ulong h;
 	uint nIndex;
+	uint idx;
 	Bucket *p;
+	zend_string_info *info;
 
 	if (arKey >= ZCSG(interned_strings_start) && arKey < ZCSG(interned_strings_end)) {
 		/* this is already an interned string */
@@ -326,8 +327,9 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 	nIndex = h & ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
-	p = ZCSG(interned_strings).arBuckets[nIndex];
-	while (p != NULL) {
+	idx = ZCSG(interned_strings).arHash[nIndex].idx;
+	while (idx != INVALID_IDX) {
+		p = ZCSG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->nKeyLength == (uint)nKeyLength)) {
 			if (!memcmp(p->arKey, arKey, nKeyLength)) {
 				if (free_src) {
@@ -336,7 +338,7 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 				return p->arKey;
 			}
 		}
-		p = p->pNext;
+		idx = p->next;
 	}
 
 	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength) >=
@@ -346,34 +348,19 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 	}
 
 	/* create new interning string in shared interned strings buffer */
-	p = (Bucket *) ZCSG(interned_strings_top);
-	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength);
+	info = (zend_string_info *) ZCSG(interned_strings_top);
+	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string_info) + nKeyLength);
+	memcpy((char*)(info + 1), arKey, nKeyLength);
 
-	p->arKey = (char*)(p + 1);
-	memcpy((char*)p->arKey, arKey, nKeyLength);
-	p->nKeyLength = nKeyLength;
-	p->h = h;
-	p->pData = &p->pDataPtr;
-	p->pDataPtr = p;
-
-	p->pNext = ZCSG(interned_strings).arBuckets[nIndex];
-	p->pLast = NULL;
-	if (p->pNext) {
-		p->pNext->pLast = p;
-	}
-	ZCSG(interned_strings).arBuckets[nIndex] = p;
-
-	p->pListLast = ZCSG(interned_strings).pListTail;
-	ZCSG(interned_strings).pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!ZCSG(interned_strings).pListHead) {
-		ZCSG(interned_strings).pListHead = p;
-	}
-
+	idx = ZCSG(interned_strings).nNumUsed++;
 	ZCSG(interned_strings).nNumOfElements++;
+	p = ZCSG(interned_strings).arData + idx;
+	p->xData = info + 1;
+	p->h = h;
+	p->nKeyLength = nKeyLength;
+	p->next = ZCSG(interned_strings).arHash[nIndex].idx;
+	ZCSG(interned_strings).arHash[nIndex].idx = idx;
+	p->arKey = (const char*)(info + 1);
 
 	if (free_src) {
 		efree((char*)arKey);
@@ -389,6 +376,7 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_use_shm_interned_strings(TSRMLS_D)
 {
+	uint idx, j;
 	Bucket *p, *q;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
@@ -397,18 +385,19 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 #endif
 
 	/* function table hash keys */
-	p = CG(function_table)->pListHead;
-	while (p) {
+	for (idx = 0; idx < CG(function_table)->nNumUsed; idx++) {		
+		p = CG(function_table)->arData + idx;
+		if (!p->xData) continue;
 		if (p->nKeyLength) {
 			p->arKey = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
 		}
-		p = p->pListNext;
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
-	p = CG(class_table)->pListHead;
-	while (p) {
-		zend_class_entry *ce = (zend_class_entry*)(p->pDataPtr);
+	for (idx = 0; idx < CG(class_table)->nNumUsed; idx++) {		
+		p = CG(class_table)->arData + idx;
+		if (!p->xData) continue;
+		zend_class_entry *ce = (zend_class_entry*)(p->xData);
 
 		if (p->nKeyLength) {
 			p->arKey = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
@@ -418,59 +407,62 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 			ce->name = accel_new_interned_string(ce->name, ce->name_length + 1, 0 TSRMLS_CC);
 		}
 
-		q = ce->properties_info.pListHead;
-		while (q) {
-			zend_property_info *info = (zend_property_info*)(q->pData);
+		for (j = 0; j < ce->properties_info.nNumUsed; j++) {
+			zend_property_info *info;
 
-			if (q->nKeyLength) {
+			q = ce->properties_info.arData + j;
+			if (!q->xData) continue;
+			
+			info = (zend_property_info*)(q->xData);
+
+			if (q->nKeyLength) {				
 				q->arKey = accel_new_interned_string(q->arKey, q->nKeyLength, 0 TSRMLS_CC);
 			}
 
 			if (info->name) {
 				info->name = accel_new_interned_string(info->name, info->name_length + 1, 0 TSRMLS_CC);
 			}
-
-			q = q->pListNext;
 		}
 
-		q =	ce->function_table.pListHead;
-		while (q) {
+		for (j = 0; j < ce->function_table.nNumUsed; j++) {
+			q = ce->function_table.arData + j;
+			if (!q->xData) continue;
 			if (q->nKeyLength) {
 				q->arKey = accel_new_interned_string(q->arKey, q->nKeyLength, 0 TSRMLS_CC);
 			}
-			q = q->pListNext;
 		}
 
-		q =	ce->constants_table.pListHead;
-		while (q) {
+		for (j = 0; j < ce->constants_table.nNumUsed; j++) {
+			q = ce->constants_table.arData + j;
+			if (!q->xData) continue;
 			if (q->nKeyLength) {
 				q->arKey = accel_new_interned_string(q->arKey, q->nKeyLength, 0 TSRMLS_CC);
 			}
-			q = q->pListNext;
 		}
-
-		p = p->pListNext;
 	}
 
 	/* constant hash keys */
-	p = EG(zend_constants)->pListHead;
-	while (p) {
+	for (idx = 0; idx < EG(zend_constants)->nNumUsed; idx++) {		
+		p = EG(zend_constants)->arData + idx;
+		if (!p->xData) continue;
 		if (p->nKeyLength) {
 			p->arKey = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
 		}
-		p = p->pListNext;
 	}
 
 	/* auto globals hash keys and names */
-	p = CG(auto_globals)->pListHead;
-	while (p) {
-		zend_auto_global *auto_global = (zend_auto_global*)p->pData;
+	for (idx = 0; idx < CG(auto_globals)->nNumUsed; idx++) {		
+		zend_auto_global *auto_global;
+
+		p = CG(auto_globals)->arData + idx;
+		if (!p->xData) continue;
+		
+		auto_global = (zend_auto_global*)p->xData;
 
 		auto_global->name = accel_new_interned_string(auto_global->name, auto_global->name_len + 1, 0 TSRMLS_CC);
 		if (p->nKeyLength) {
 			p->arKey = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
 		}
-		p = p->pListNext;
 	}
 }
 #endif
@@ -2190,11 +2182,13 @@ static void accel_activate(void)
 
 static void accel_fast_hash_destroy(HashTable *ht)
 {
-	Bucket *p = ht->pListHead;
-
-	while (p != NULL) {
-		ht->pDestructor(p->pData);
-		p = p->pListNext;
+	uint idx;
+	Bucket *p;
+	
+	for (idx = 0; idx < ht->nNumUsed; idx++) {	
+		p = ht->arData + idx;
+		if (!p->xData) continue;
+		ht->pDestructor(&p->xData);
 	}
 }
 
@@ -2473,12 +2467,14 @@ static int zend_accel_init_shm(TSRMLS_D)
 	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / (sizeof(Bucket) + sizeof(Bucket*) + 8 /* average string length */), NULL, NULL, 1);
 	if (ZCG(accel_directives).interned_strings_buffer) {
 		ZCSG(interned_strings).nTableMask = ZCSG(interned_strings).nTableSize - 1;
-		ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
+		ZCSG(interned_strings).arData = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket));
+		ZCSG(interned_strings).arHash = (HashBucket*)zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(HashBucket));
 		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
-		if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
+		if (!ZCSG(interned_strings).arData || !ZCSG(interned_strings_start)) {
 			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
 			return FAILURE;
 		}
+		memset(ZCSG(interned_strings).arHash, INVALID_IDX, ZCSG(interned_strings).nTableSize * sizeof(HashBucket));
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 

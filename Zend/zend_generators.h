@@ -45,11 +45,11 @@ typedef struct _zend_generator {
 	zend_vm_stack stack;
 
 	/* Current value */
-	zval *value;
+	zval value;
 	/* Current key */
-	zval *key;
+	zval key;
 	/* Variable to put sent value into */
-	zval **send_target;
+	zval *send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	long largest_used_integer_key;
 
@@ -62,7 +62,7 @@ static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 
 void zend_register_generator_ce(TSRMLS_D);
-ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
 ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC);
 

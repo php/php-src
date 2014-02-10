@@ -54,89 +54,43 @@ static void zend_persist_zval_ptr(zval **zp TSRMLS_DC);
 static void zend_persist_zval(zval *z TSRMLS_DC);
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-static const Bucket *uninitialized_bucket = NULL;
+static const HashBucket uninitialized_bucket = {INVALID_IDX};
 #endif
 
 static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElement TSRMLS_DC), size_t el_size TSRMLS_DC)
 {
-	Bucket *p = ht->pListHead;
-	uint i;
+	uint idx;
+	Bucket *p;
 
-	while (p) {
-		Bucket *q = p;
+	if (!ht->nTableMask) {
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
+		return;
+	}
+	zend_accel_store(ht->arData, sizeof(Bucket) * ht->nTableSize);
+	if (!(ht->flags & HASH_FLAG_PACKED)) {
+		zend_accel_store(ht->arHash, sizeof(HashBucket) * ht->nTableSize);
+	} else {
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
+	}
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (!p->xData) continue;
 
 		/* persist bucket and key */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		p = zend_accel_memdup(p, sizeof(Bucket));
 		if (p->nKeyLength) {
-			p->arKey = zend_accel_memdup_interned_string(p->arKey, p->nKeyLength);
+			zend_accel_store_interned_string(p->arKey, p->nKeyLength);
 		}
-#else
-		p = zend_accel_memdup(p, sizeof(Bucket) - 1 + p->nKeyLength);
-#endif
 
 		/* persist data pointer in bucket */
-		if (!p->pDataPtr) {
-			zend_accel_store(p->pData, el_size);
-		} else {
-			/* Update p->pData to point to the new p->pDataPtr address, after the bucket relocation */
-			p->pData = &p->pDataPtr;
+		if (ht->flags & HASH_FLAG_BIG_DATA) {
+			zend_accel_store(p->xData, el_size);
 		}
 
 		/* persist the data itself */
 		if (pPersistElement) {
-			pPersistElement(p->pData TSRMLS_CC);
+			pPersistElement(HASH_DATA(ht, p) TSRMLS_CC);
 		}
-
-		/* update linked lists */
-		if (p->pLast) {
-			p->pLast->pNext = p;
-		}
-		if (p->pNext) {
-			p->pNext->pLast = p;
-		}
-		if (p->pListLast) {
-			p->pListLast->pListNext = p;
-		}
-		if (p->pListNext) {
-			p->pListNext->pListLast = p;
-		}
-
-		p = p->pListNext;
-
-		/* delete the old non-persistent bucket */
-		efree(q);
 	}
-
-	/* update linked lists */
-	if (ht->pListHead) {
-		ht->pListHead = zend_shared_alloc_get_xlat_entry(ht->pListHead);
-	}
-	if (ht->pListTail) {
-		ht->pListTail = zend_shared_alloc_get_xlat_entry(ht->pListTail);
-	}
-	if (ht->pInternalPointer) {
-		ht->pInternalPointer = zend_shared_alloc_get_xlat_entry(ht->pInternalPointer);
-	}
-
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	/* Check if HastTable is initialized */
-	if (ht->nTableMask) {
-#endif
-		if (ht->nNumOfElements) {
-			/* update hash table */
-			for (i = 0; i < ht->nTableSize; i++) {
-				if (ht->arBuckets[i]) {
-					ht->arBuckets[i] = zend_shared_alloc_get_xlat_entry(ht->arBuckets[i]);
-				}
-			}
-		}
-		zend_accel_store(ht->arBuckets, sizeof(Bucket*) * ht->nTableSize);
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	} else {
-		ht->arBuckets = (Bucket**)&uninitialized_bucket;
-	}
-#endif
 }
 
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO

@@ -109,7 +109,7 @@ static void php_output_header(TSRMLS_D)
 	if (!SG(headers_sent)) {
 		if (!OG(output_start_filename)) {
 			if (zend_is_compiling(TSRMLS_C)) {
-				OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
+				OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C)->val;
 				OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
 			} else if (zend_is_executing(TSRMLS_C)) {
 				OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
@@ -126,6 +126,12 @@ static void php_output_header(TSRMLS_D)
 }
 /* }}} */
 
+static void reverse_conflict_dtor(zval *zv)
+{
+	HashTable *ht = Z_PTR_P(zv);
+	zend_hash_destroy(ht);
+}
+
 /* {{{ void php_output_startup(void)
  * Set up module globals and initalize the conflict and reverse conflict hash tables */
 PHPAPI void php_output_startup(void)
@@ -133,7 +139,7 @@ PHPAPI void php_output_startup(void)
 	ZEND_INIT_MODULE_GLOBALS(output, php_output_init_globals, NULL);
 	zend_hash_init(&php_output_handler_aliases, 0, NULL, NULL, 1);
 	zend_hash_init(&php_output_handler_conflicts, 0, NULL, NULL, 1);
-	zend_hash_init(&php_output_handler_reverse_conflicts, 0, NULL, (void (*)(void *)) zend_hash_destroy, 1);
+	zend_hash_init(&php_output_handler_reverse_conflicts, 0, NULL, reverse_conflict_dtor, 1);
 	php_output_direct = php_output_stdout;
 }
 /* }}} */
@@ -371,7 +377,7 @@ PHPAPI int php_output_get_level(TSRMLS_D)
 PHPAPI int php_output_get_contents(zval *p TSRMLS_DC)
 {
 	if (OG(active)) {
-		ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used, 1);
+		ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used);
 		return SUCCESS;
 	} else {
 		ZVAL_NULL(p);
@@ -472,7 +478,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 {
 	char *handler_name = NULL, *error = NULL;
 	php_output_handler *handler = NULL;
-	php_output_handler_alias_ctor_t *alias = NULL;
+	php_output_handler_alias_ctor_t alias = NULL;
 	php_output_handler_user_func_t *user = NULL;
 
 	switch (Z_TYPE_P(output_handler)) {
@@ -481,7 +487,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			break;
 		case IS_STRING:
 			if (Z_STRLEN_P(output_handler) && (alias = php_output_handler_alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler) TSRMLS_CC))) {
-				handler = (*alias)(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags TSRMLS_CC);
+				handler = alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags TSRMLS_CC);
 				break;
 			}
 		default:
@@ -538,22 +544,22 @@ PHPAPI int php_output_handler_start(php_output_handler *handler TSRMLS_DC)
 {
 	HashPosition pos;
 	HashTable *rconflicts;
-	php_output_handler_conflict_check_t *conflict;
+	php_output_handler_conflict_check_t conflict;
 
 	if (php_output_lock_error(PHP_OUTPUT_HANDLER_START TSRMLS_CC) || !handler) {
 		return FAILURE;
 	}
-	if (SUCCESS == zend_hash_find(&php_output_handler_conflicts, handler->name, handler->name_len+1, (void *) &conflict)) {
-		if (SUCCESS != (*conflict)(handler->name, handler->name_len TSRMLS_CC)) {
+	if (NULL != (conflict = zend_hash_str_find_ptr(&php_output_handler_conflicts, handler->name, handler->name_len))) {
+		if (SUCCESS != conflict(handler->name, handler->name_len TSRMLS_CC)) {
 			return FAILURE;
 		}
 	}
-	if (SUCCESS == zend_hash_find(&php_output_handler_reverse_conflicts, handler->name, handler->name_len+1, (void *) &rconflicts)) {
+	if (NULL != (rconflicts = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, handler->name, handler->name_len))) {
 		for (zend_hash_internal_pointer_reset_ex(rconflicts, &pos);
-			zend_hash_get_current_data_ex(rconflicts, (void *) &conflict, &pos) == SUCCESS;
+			(conflict = zend_hash_get_current_data_ptr_ex(rconflicts, &pos)) != NULL;
 			zend_hash_move_forward_ex(rconflicts, &pos)
 		) {
-			if (SUCCESS != (*conflict)(handler->name, handler->name_len TSRMLS_CC)) {
+			if (SUCCESS != conflict(handler->name, handler->name_len TSRMLS_CC)) {
 				return FAILURE;
 			}
 		}
@@ -612,7 +618,7 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 		zend_error(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
 		return FAILURE;
 	}
-	return zend_hash_update(&php_output_handler_conflicts, name, name_len+1, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL);
+	return zend_hash_str_update_ptr(&php_output_handler_conflicts, name, name_len, check_func) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -627,15 +633,15 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 		return FAILURE;
 	}
 
-	if (SUCCESS == zend_hash_find(&php_output_handler_reverse_conflicts, name, name_len+1, (void *) &rev_ptr)) {
-		return zend_hash_next_index_insert(rev_ptr, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL);
+	if (SUCCESS == (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
+		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
 		zend_hash_init(&rev, 1, NULL, NULL, 1);
-		if (SUCCESS != zend_hash_next_index_insert(&rev, &check_func, sizeof(php_output_handler_conflict_check_t *), NULL)) {
+		if (SUCCESS != zend_hash_next_index_insert_ptr(&rev, check_func)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
-		if (SUCCESS != zend_hash_update(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable), NULL)) {
+		if (SUCCESS != zend_hash_str_update_mem(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable))) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
@@ -646,12 +652,9 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 
 /* {{{ php_output_handler_alias_ctor_t php_output_handler_alias(zval *name TSRMLS_DC)
  * Get an internal output handler for a user handler if it exists */
-PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *name, size_t name_len TSRMLS_DC)
+PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *name, size_t name_len TSRMLS_DC)
 {
-	php_output_handler_alias_ctor_t *func = NULL;
-
-	zend_hash_find(&php_output_handler_aliases, name, name_len+1, (void *) &func);
-	return func;
+	return zend_hash_str_find_ptr(&php_output_handler_aliases, name, name_len);
 }
 /* }}} */
 
@@ -663,7 +666,7 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 		zend_error(E_ERROR, "Cannot register an output handler alias outside of MINIT");
 		return FAILURE;
 	}
-	return zend_hash_update(&php_output_handler_aliases, name, name_len+1, &func, sizeof(php_output_handler_alias_ctor_t *), NULL);
+	return zend_hash_str_update_ptr(&php_output_handler_aliases, name, name_len, func) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -700,10 +703,12 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg TSR
  * Destroy an output handler */
 PHPAPI void php_output_handler_dtor(php_output_handler *handler TSRMLS_DC)
 {
-	STR_FREE(handler->name);
-	STR_FREE(handler->buffer.data);
+//???	STR_FREE(handler->name);
+	if (handler->name) efree(handler->name);
+//???	STR_FREE(handler->buffer.data);
+	if (handler->buffer.data) efree(handler->buffer.data);
 	if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-		zval_ptr_dtor(&handler->func.user->zoh);
+		zval_ptr_dtor(handler->func.user->zoh);
 		efree(handler->func.user);
 	}
 	if (handler->dtor && handler->opaq) {
@@ -950,23 +955,21 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 
 		OG(running) = handler;
 		if (handler->flags & PHP_OUTPUT_HANDLER_USER) {
-			zval *retval = NULL, *ob_data, *ob_mode;
+			zval retval, ob_data, ob_mode;
 
-			MAKE_STD_ZVAL(ob_data);
-			ZVAL_STRINGL(ob_data, handler->buffer.data, handler->buffer.used, 1);
-			MAKE_STD_ZVAL(ob_mode);
-			ZVAL_LONG(ob_mode, (long) context->op);
+			ZVAL_STRINGL(&ob_data, handler->buffer.data, handler->buffer.used);
+			ZVAL_LONG(&ob_mode, (long) context->op);
 			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 2, &ob_data, &ob_mode);
 
-#define PHP_OUTPUT_USER_SUCCESS(retval) (retval && !(Z_TYPE_P(retval) == IS_BOOL && Z_BVAL_P(retval)==0))
+#define PHP_OUTPUT_USER_SUCCESS(retval) ((Z_TYPE(retval) != IS_UNDEF) && !(Z_TYPE(retval) == IS_BOOL && Z_BVAL(retval)==0))
 			if (SUCCESS == zend_fcall_info_call(&handler->func.user->fci, &handler->func.user->fcc, &retval, NULL TSRMLS_CC) && PHP_OUTPUT_USER_SUCCESS(retval)) {
 				/* user handler may have returned TRUE */
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
-				if (Z_TYPE_P(retval) != IS_BOOL) {
+				if (Z_TYPE(retval) != IS_BOOL) {
 					convert_to_string_ex(&retval);
-					if (Z_STRLEN_P(retval)) {
-						context->out.data = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-						context->out.used = Z_STRLEN_P(retval);
+					if (Z_STRLEN(retval)) {
+						context->out.data = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+						context->out.used = Z_STRLEN(retval);
 						context->out.free = 1;
 						status = PHP_OUTPUT_HANDLER_SUCCESS;
 					}
@@ -979,9 +982,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 0);
 			zval_ptr_dtor(&ob_data);
 			zval_ptr_dtor(&ob_mode);
-			if (retval) {
-				zval_ptr_dtor(&retval);
-			}
+			zval_ptr_dtor(&retval);
 
 		} else {
 
@@ -1179,11 +1180,9 @@ static int php_output_stack_apply_status(void *h, void *z)
  * Returns an array with the status of the output handler */
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry)
 {
-	if (!entry) {
-		MAKE_STD_ZVAL(entry);
-		array_init(entry);
-	}
+	ZEND_ASSERT(entry != NULL);
 
+	array_init(entry);
 	add_assoc_stringl(entry, "name", handler->name, handler->name_len, 1);
 	add_assoc_long(entry, "type", (long) (handler->flags & 0xf));
 	add_assoc_long(entry, "flags", (long) handler->flags);

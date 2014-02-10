@@ -759,14 +759,15 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		fci->retval_ptr_ptr = &stmt->fetch.cls.retval_ptr;
 		if (stmt->fetch.cls.ctor_args) {
 			HashTable *ht = Z_ARRVAL_P(stmt->fetch.cls.ctor_args);
+			uint idx;
 			Bucket *p;
 
 			fci->param_count = 0;
 			fci->params = safe_emalloc(sizeof(zval**), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci->params[fci->param_count++] = (zval**)p->pData;
-				p = p->pListNext;
+			for (idx = 0; idx < ht->nNumUsed; idx++) {
+				p = ht->arData + idx;
+				if (!p->xData) continue;
+				fci->params[fci->param_count++] = (zval**)&p->xData;
 			}
 		} else {
 			fci->param_count = 0;

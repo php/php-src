@@ -40,7 +40,7 @@ struct _zend_ast {
 	unsigned short kind;
 	unsigned short children;
 	union {
-		zval     *val;
+		zval      val;
 		zend_ast *child;
 	} u;
 };

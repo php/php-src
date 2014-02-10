@@ -191,12 +191,12 @@ struct _php_stream  {
 
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
-	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
+	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
 	int fgetss_state;		/* for fgetss to handle multiline tags */
 	int is_persistent;
 	char mode[16];			/* "rwb" etc. ala stdio */
-	int rsrc_id;			/* used for auto-cleanup */
+	zend_resource *res;		/* used for auto-cleanup */
 	int in_free;			/* to prevent recursion during free */
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
@@ -242,17 +242,17 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
-#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->rsrc_id
+#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
 #if ZEND_DEBUG
 /* use this to tell the stream that it is OK if we don't explicitly close it */
 # define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); (stream)->__exposed++; }
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->res); (stream)->__exposed++; }
 #else
 # define php_stream_auto_cleanup(stream)	/* nothing */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->res); }
 #endif
 
 #define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())

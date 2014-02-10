@@ -258,6 +258,7 @@ static zend_object_value spl_object_storage_new_ex(zend_class_entry *class_type,
 
 	intern = emalloc(sizeof(spl_SplObjectStorage));
 	memset(intern, 0, sizeof(spl_SplObjectStorage));
+	intern->pos = INVALID_IDX;
 	*obj = intern;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);

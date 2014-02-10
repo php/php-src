@@ -51,45 +51,43 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC);
 
 static uint zend_hash_persist_calc(HashTable *ht, int (*pPersistElement)(void *pElement TSRMLS_DC), size_t el_size TSRMLS_DC)
 {
-	Bucket *p = ht->pListHead;
+	uint idx;
+	Bucket *p;
 	START_SIZE();
 
-	while (p) {
+	if (!ht->nTableMask) {
+		RETURN_SIZE();
+	}
+	ADD_DUP_SIZE(ht->arData, sizeof(Bucket) * ht->nTableSize);
+	if (!(ht->flags & HASH_FLAG_PACKED)) {
+		ADD_DUP_SIZE(ht->arHash, sizeof(HashBucket) * ht->nTableSize);
+	}
+
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (!p->xData) continue;
+
 		/* persist bucket and key */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		ADD_DUP_SIZE(p, sizeof(Bucket));
 		if (p->nKeyLength) {
 			const char *tmp = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
 			if (tmp != p->arKey) {
+				efree(p->arKey);
 				p->arKey = tmp;
 			} else {
 				ADD_DUP_SIZE(p->arKey, p->nKeyLength);
 			}
 		}
-#else
-		ADD_DUP_SIZE(p, sizeof(Bucket) - 1 + p->nKeyLength);
-#endif
 
 		/* persist data pointer in bucket */
-		if (!p->pDataPtr) {
-			ADD_DUP_SIZE(p->pData, el_size);
+		if (ht->flags & HASH_FLAG_BIG_DATA) {
+			ADD_DUP_SIZE(p->xData, el_size);
 		}
 
 		/* persist the data itself */
 		if (pPersistElement) {
-			ADD_SIZE(pPersistElement(p->pData TSRMLS_CC));
+			ADD_SIZE(pPersistElement(HASH_DATA(ht, p) TSRMLS_CC));
 		}
-
-		p = p->pListNext;
 	}
-
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	if (ht->nTableMask) {
-		ADD_DUP_SIZE(ht->arBuckets, sizeof(Bucket*) * ht->nTableSize);
-	}
-#else
-	ADD_DUP_SIZE(ht->arBuckets, sizeof(Bucket*) * ht->nTableSize);
-#endif
 
 	RETURN_SIZE();
 }

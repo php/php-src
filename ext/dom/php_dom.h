@@ -127,7 +127,7 @@ int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece,
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = dom_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+entry = zend_register_internal_class_ex(&ce, parent_ce TSRMLS_CC);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \

@@ -103,7 +103,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data **pphar = NULL, *phar;
 
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arBuckets && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
+		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.arHash && FAILURE == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **)&pphar)) {
 			pphar = NULL;
 		}
 		if (PHAR_G(readonly) && (!pphar || !(*pphar)->is_data)) {
@@ -609,7 +609,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		php_url_free(resource);
 		return SUCCESS;
 	}
-	if (!phar->manifest.arBuckets) {
+	if (!phar->manifest.arHash) {
 		php_url_free(resource);
 		return FAILURE;
 	}
@@ -626,7 +626,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		return SUCCESS;
 	}
 	/* check for mounted directories */
-	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (phar->mounted_dirs.arHash && zend_hash_num_elements(&phar->mounted_dirs)) {
 		char *str_key;
 		ulong unused;
 		uint keylen;

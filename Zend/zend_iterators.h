@@ -36,7 +36,7 @@ typedef struct _zend_object_iterator_funcs {
 	int (*valid)(zend_object_iterator *iter TSRMLS_DC);
 
 	/* fetch the item data for the current element */
-	void (*get_current_data)(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+	zval *(*get_current_data)(zend_object_iterator *iter TSRMLS_DC);
 
 	/* fetch the key for the current element (optional, may be NULL). The key
 	 * should be written into the provided zval* using the ZVAL_* macros. If

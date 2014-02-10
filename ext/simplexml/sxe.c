@@ -199,7 +199,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLElement = *pce;
 
 	INIT_CLASS_ENTRY_EX(sxi, "SimpleXMLIterator", strlen("SimpleXMLIterator"), funcs_SimpleXMLIterator);
-	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement, NULL TSRMLS_CC);
+	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement TSRMLS_CC);
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator TSRMLS_CC, 1, spl_ce_RecursiveIterator);

@@ -228,7 +228,8 @@ PHP_FUNCTION(base64_encode)
 	}
 	result = php_base64_encode((unsigned char*)str, str_len, &ret_length);
 	if (result != NULL) {
-		RETVAL_STRINGL((char*)result, ret_length, 0);
+//???		RETVAL_STRINGL((char*)result, ret_length, 0);
+		RETVAL_STRINGL((char*)result, ret_length);
 	} else {
 		RETURN_FALSE;
 	}
@@ -249,7 +250,8 @@ PHP_FUNCTION(base64_decode)
 	}
 	result = php_base64_decode_ex((unsigned char*)str, str_len, &ret_length, strict);
 	if (result != NULL) {
-		RETVAL_STRINGL((char*)result, ret_length, 0);
+//???		RETVAL_STRINGL((char*)result, ret_length, 0);
+		RETVAL_STRINGL((char*)result, ret_length);
 	} else {
 		RETURN_FALSE;
 	}

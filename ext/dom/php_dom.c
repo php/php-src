@@ -671,7 +671,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
 	INIT_CLASS_ENTRY(ce, "DOMException", php_dom_domexception_class_functions);
-	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC TSRMLS_CC);
 
@@ -760,7 +760,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	INIT_CLASS_ENTRY(ce, "DOMNodeList", php_dom_nodelist_class_functions);
 	ce.create_object = dom_nnodemap_objects_new;
-	dom_nodelist_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	dom_nodelist_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
 	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
 	zend_class_implements(dom_nodelist_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 
@@ -770,7 +770,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", php_dom_namednodemap_class_functions);
 	ce.create_object = dom_nnodemap_objects_new;
-	dom_namednodemap_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	dom_namednodemap_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
 	dom_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
 	zend_class_implements(dom_namednodemap_class_entry TSRMLS_CC, 1, zend_ce_traversable);
 
@@ -898,7 +898,7 @@ PHP_MINIT_FUNCTION(dom)
 #if defined(LIBXML_XPATH_ENABLED)
 	INIT_CLASS_ENTRY(ce, "DOMXPath", php_dom_xpath_class_functions);
 	ce.create_object = dom_xpath_objects_new;
-	dom_xpath_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	dom_xpath_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
 
 	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, NULL, 1);
 	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", dom_xpath_document_read, NULL TSRMLS_CC);

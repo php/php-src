@@ -129,7 +129,7 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC);
 int module_registry_request_startup(zend_module_entry *module TSRMLS_DC);
 int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC);
 
-#define ZEND_MODULE_DTOR (void (*)(void *)) module_destructor
+#define ZEND_MODULE_DTOR (void (*)(zval *)) module_destructor
 #endif
 
 /*

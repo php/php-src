@@ -51,11 +51,11 @@ static zend_object_handlers iterator_object_handlers = {
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
-	str_free(zend_iterator_class_entry.name);
-	zend_iterator_class_entry.name = "__iterator_wrapper";
+//???	STR_RELEASE(zend_iterator_class_entry.name);
+//???	zend_iterator_class_entry.name = STR_INIT("__iterator_wrapper", sizeof("__iterator_wrapper")-1, 0);
 }
 
-static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
 {
 	zend_object_iterator *iter = (zend_object_iterator*)object;
 	iter->funcs->dtor(iter TSRMLS_CC);
@@ -63,6 +63,9 @@ static void iter_wrapper_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 
 ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 {
+//???
+	return NULL;
+#if 0
 	zval *wrapped;
 
 	MAKE_STD_ZVAL(wrapped);
@@ -71,6 +74,7 @@ ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
 	Z_OBJ_HT_P(wrapped) = &iterator_object_handlers;
 
 	return wrapped;
+#endif
 }
 
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
@@ -79,7 +83,7 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 	switch (Z_TYPE_P(array_ptr)) {
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
-				*iter = (zend_object_iterator *)zend_object_store_get_object(array_ptr TSRMLS_CC);
+				*iter = (zend_object_iterator *)Z_OBJ_P(array_ptr);
 				return ZEND_ITER_OBJECT;
 			}
 			if (Z_OBJPROP_P(array_ptr)) {

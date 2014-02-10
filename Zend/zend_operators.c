@@ -186,21 +186,24 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
-				char *strval;
+				zend_string *str;
 
-				strval = Z_STRVAL_P(op);
-				if ((Z_TYPE_P(op)=is_numeric_string(strval, Z_STRLEN_P(op), &Z_LVAL_P(op), &Z_DVAL_P(op), 1)) == 0) {
+				str = Z_STR_P(op);
+				if ((Z_TYPE_P(op)=is_numeric_string(str->val, str->len, &Z_LVAL_P(op), &Z_DVAL_P(op), 1)) == 0) {
 					ZVAL_LONG(op, 0);
 				}
-				str_efree(strval);
+				STR_RELEASE(str);
 				break;
 			}
 		case IS_BOOL:
 			Z_TYPE_P(op) = IS_LONG;
 			break;
 		case IS_RESOURCE:
-			zend_list_delete(Z_LVAL_P(op));
-			Z_TYPE_P(op) = IS_LONG;
+			{
+				long l = Z_RES_HANDLE_P(op);
+				zval_ptr_dtor(op);
+				ZVAL_LONG(op, l);
+			}
 			break;
 		case IS_OBJECT:
 			convert_to_long_base(op, 10);
@@ -238,8 +241,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				(op) = &(holder);											\
 				break;														\
 			case IS_OBJECT:													\
-				(holder) = (*(op));											\
-				zval_copy_ctor(&(holder));									\
+				ZVAL_DUP(&(holder), op);										\
 				convert_to_long_base(&(holder), 10);						\
 				if (Z_TYPE(holder) == IS_LONG) {							\
 					(op) = &(holder);										\
@@ -269,8 +271,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
 			case IS_OBJECT:											\
-				(holder) = (*(op));									\
-				zval_copy_ctor(&(holder));							\
+				ZVAL_DUP(&(holder), (op));							\
 				convert_to_long_base(&(holder), 10);				\
 				break;												\
 			case IS_BOOL:											\
@@ -316,8 +317,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_LVAL(holder) = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
 				break;												\
 			case IS_OBJECT:											\
-				(holder) = (*(op));									\
-				zval_copy_ctor(&(holder));							\
+				ZVAL_DUP(&(holder), (op));							\
 				convert_to_boolean(&(holder));						\
 				break;												\
 			default:												\
@@ -336,7 +336,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 		zval dst;																			\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
 			zend_error(E_RECOVERABLE_ERROR,													\
-				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name,		\
+				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
 			zend_get_type_by_const(ctype));													\
 		} else {																			\
 			zval_dtor(op);																	\
@@ -349,8 +349,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 			if (Z_TYPE_P(newop) != IS_OBJECT) {												\
 				/* for safety - avoid loop */												\
 				zval_dtor(op);																\
-				*op = *newop;																\
-				FREE_ZVAL(newop);															\
+				ZVAL_COPY_VALUE(op, newop);													\
 				conv_func(op);																\
 			}																				\
 		}																					\
@@ -376,8 +375,9 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 				TSRMLS_FETCH();
-
-				zend_list_delete(Z_LVAL_P(op));
+				long l = Z_RES_HANDLE_P(op);
+				zval_ptr_dtor(op);
+				Z_LVAL_P(op) =  l;
 			}
 			/* break missing intentionally */
 		case IS_BOOL:
@@ -388,10 +388,10 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_STRING:
 			{
-				char *strval = Z_STRVAL_P(op);
+				zend_string *str = Z_STR_P(op);
 
-				Z_LVAL_P(op) = strtol(strval, NULL, base);
-				str_efree(strval);
+				Z_LVAL_P(op) = strtol(str->val, NULL, base);
+				STR_RELEASE(str);
 			}
 			break;
 		case IS_ARRAY:
@@ -409,7 +409,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 				if (Z_TYPE_P(op) == IS_LONG) {
 					return;
 				}
-				zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name);
+				zend_error(E_NOTICE, "Object of class %s could not be converted to int", Z_OBJCE_P(op)->name->val);
 
 				zval_dtor(op);
 				ZVAL_LONG(op, retval);
@@ -436,10 +436,11 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 				TSRMLS_FETCH();
-
-				zend_list_delete(Z_LVAL_P(op));
+				double d = (double) Z_RES_HANDLE_P(op);
+				zval_ptr_dtor(op);
+				Z_DVAL_P(op) = d;
 			}
-			/* break missing intentionally */
+			break;
 		case IS_BOOL:
 		case IS_LONG:
 			Z_DVAL_P(op) = (double) Z_LVAL_P(op);
@@ -448,10 +449,10 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 			break;
 		case IS_STRING:
 			{
-				char *strval = Z_STRVAL_P(op);
+				zend_string *str = Z_STR_P(op);
 
-				Z_DVAL_P(op) = zend_strtod(strval, NULL);
-				str_efree(strval);
+				Z_DVAL_P(op) = zend_strtod(str->val, NULL);
+				STR_RELEASE(str);
 			}
 			break;
 		case IS_ARRAY:
@@ -469,7 +470,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 				if (Z_TYPE_P(op) == IS_DOUBLE) {
 					return;
 				}
-				zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
+				zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name->val);
 
 				zval_dtor(op);
 				ZVAL_DOUBLE(op, retval);
@@ -489,17 +490,15 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 {
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
-			zval *org;
+			zval org;
 			TSRMLS_FETCH();
 
-			ALLOC_ZVAL(org);
-			*org = *op;
-			if (Z_OBJ_HT_P(op)->cast_object(org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
-				zval_dtor(org);
+			ZVAL_COPY_VALUE(&org, op);
+			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL TSRMLS_CC) == SUCCESS) {
+				zval_dtor(&org);
 				return;
 			}
-			*op = *org;
-			FREE_ZVAL(org);
+			ZVAL_COPY_VALUE(op, &org);
 		}
 	}
 
@@ -520,10 +519,12 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 				TSRMLS_FETCH();
+				long l = (Z_RES_HANDLE_P(op) ? 1 : 0);
 
-				zend_list_delete(Z_LVAL_P(op));
+				zval_ptr_dtor(op);
+				Z_LVAL_P(op) = l;
 			}
-			/* break missing intentionally */
+			break;
 		case IS_LONG:
 			Z_LVAL_P(op) = (Z_LVAL_P(op) ? 1 : 0);
 			break;
@@ -532,15 +533,15 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 			break;
 		case IS_STRING:
 			{
-				char *strval = Z_STRVAL_P(op);
+				zend_string *str = Z_STR_P(op);
 
-				if (Z_STRLEN_P(op) == 0
-					|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+				if (str->len == 0
+					|| (str->len == 1 && str->val[0] == '0')) {
 					Z_LVAL_P(op) = 0;
 				} else {
 					Z_LVAL_P(op) = 1;
 				}
-				str_efree(strval);
+				STR_RELEASE(str);
 			}
 			break;
 		case IS_ARRAY:
@@ -579,7 +580,7 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_DOUBLE: {
 			TSRMLS_FETCH();
 			dval = Z_DVAL_P(op);
-			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*H", (int) EG(precision), dval);
+			Z_STRLEN_P(op) = zend_spprintf((char**)&Z_STRVAL_P(op), 0, "%.*H", (int) EG(precision), dval);
 			/* %H already handles removing trailing zeros from the fractional part, yay */
 			break;
 		}
@@ -597,45 +598,55 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
-			Z_STRVAL_P(op) = STR_EMPTY_ALLOC();
-			Z_STRLEN_P(op) = 0;
+			Z_STR_P(op) = STR_EMPTY_ALLOC();
 			break;
 		case IS_STRING:
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
-				Z_STRVAL_P(op) = estrndup_rel("1", 1);
-				Z_STRLEN_P(op) = 1;
+				Z_STR_P(op) = STR_INIT("1", 1, 0);
 			} else {
-				Z_STRVAL_P(op) = STR_EMPTY_ALLOC();
-				Z_STRLEN_P(op) = 0;
+				Z_STR_P(op) = STR_EMPTY_ALLOC();
 			}
 			break;
 		case IS_RESOURCE: {
 			long tmp = Z_LVAL_P(op);
+			char *str;
+			int len;
 			TSRMLS_FETCH();
 
-			zend_list_delete(Z_LVAL_P(op));
-			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "Resource id #%ld", tmp);
+			zval_ptr_dtor(op);
+			len = zend_spprintf(&str, 0, "Resource id #%ld", tmp);
+			Z_STR_P(op) = STR_INIT(str, len, 0);
+			efree(str);
 			break;
 		}
-		case IS_LONG:
+		case IS_LONG: {
+			char *str;
+			int len;
 			lval = Z_LVAL_P(op);
 
-			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%ld", lval);
+			len = zend_spprintf(&str, 0, "%ld", lval);
+			Z_STR_P(op) = STR_INIT(str, len, 0);
+			efree(str);
 			break;
+		}
 		case IS_DOUBLE: {
+			char *str;
+			int len;
 			TSRMLS_FETCH();
+
 			dval = Z_DVAL_P(op);
-			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*G", (int) EG(precision), dval);
+			len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
+			Z_STR_P(op) = STR_INIT(str, len, 0);
+			efree(str);
 			break;
 		}
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			zval_dtor(op);
-			Z_STRVAL_P(op) = estrndup_rel("Array", sizeof("Array")-1);
-			Z_STRLEN_P(op) = sizeof("Array")-1;
+			Z_STR_P(op) = STR_INIT("Array", sizeof("Array")-1, 0);
 			break;
 		case IS_OBJECT: {
 			TSRMLS_FETCH();
@@ -646,10 +657,9 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 				return;
 			}
 
-			zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name);
+			zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name->val);
 			zval_dtor(op);
-			Z_STRVAL_P(op) = estrndup_rel("Object", sizeof("Object")-1);
-			Z_STRLEN_P(op) = sizeof("Object")-1;
+			Z_STR_P(op) = STR_INIT("Object", sizeof("Object")-1, 0);
 			break;
 		}
 		default:
@@ -663,22 +673,20 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 
 static void convert_scalar_to_array(zval *op, int type TSRMLS_DC) /* {{{ */
 {
-	zval *entry;
+	zval entry;
 
-	ALLOC_ZVAL(entry);
-	*entry = *op;
-	INIT_PZVAL(entry);
+	ZVAL_COPY_VALUE(&entry, op);
 
 	switch (type) {
 		case IS_ARRAY:
-			ALLOC_HASHTABLE(Z_ARRVAL_P(op));
+			ZVAL_NEW_ARR(op);
 			zend_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_index_update(Z_ARRVAL_P(op), 0, (void *) &entry, sizeof(zval *), NULL);
+			zend_hash_index_update(Z_ARRVAL_P(op), 0, &entry);
 			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		case IS_OBJECT:
 			object_init(op);
-			zend_hash_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar"), (void *) &entry, sizeof(zval *), NULL);
+			zend_hash_str_update(Z_OBJPROP_P(op), "scalar", sizeof("scalar")-1, &entry);
 			break;
 	}
 }
@@ -694,41 +702,36 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 /* OBJECTS_OPTIMIZE */
 		case IS_OBJECT:
 			{
-				zval *tmp;
-				HashTable *ht;
+				zval arr;
 
-				ALLOC_HASHTABLE(ht);
-				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+				ZVAL_NEW_ARR(&arr);
+				zend_hash_init(Z_ARRVAL(arr), 0, NULL, ZVAL_PTR_DTOR, 0);
 				if (Z_OBJCE_P(op) == zend_ce_closure) {
 					convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
 					if (Z_TYPE_P(op) == IS_ARRAY) {
-						zend_hash_destroy(ht);
-						FREE_HASHTABLE(ht);
+						zval_dtor(&arr);
 						return;
 					}
 				} else if (Z_OBJ_HT_P(op)->get_properties) {
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op TSRMLS_CC);
 					if (obj_ht) {
-						zend_hash_copy(ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+						zend_hash_copy(Z_ARRVAL(arr), obj_ht, zval_add_ref);
 					}
 				} else {
 					convert_object_to_type(op, IS_ARRAY, convert_to_array);
 
 					if (Z_TYPE_P(op) == IS_ARRAY) {
-						zend_hash_destroy(ht);
-						FREE_HASHTABLE(ht);
+						zval_dtor(&arr);
 						return;
 					}
 				}
 				zval_dtor(op);
-				Z_TYPE_P(op) = IS_ARRAY;
-				Z_ARRVAL_P(op) = ht;
+				ZVAL_COPY_VALUE(op, &arr);
 			}
 			break;
 		case IS_NULL:
-			ALLOC_HASHTABLE(Z_ARRVAL_P(op));
+			ZVAL_NEW_ARR(op);
 			zend_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
-			Z_TYPE_P(op) = IS_ARRAY;
 			break;
 		default:
 			convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
@@ -761,13 +764,13 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 
 ZEND_API void multi_convert_to_long_ex(int argc, ...) /* {{{ */
 {
-	zval **arg;
+	zval *arg;
 	va_list ap;
 
 	va_start(ap, argc);
 
 	while (argc--) {
-		arg = va_arg(ap, zval **);
+		arg = va_arg(ap, zval *);
 		convert_to_long_ex(arg);
 	}
 
@@ -777,13 +780,13 @@ ZEND_API void multi_convert_to_long_ex(int argc, ...) /* {{{ */
 
 ZEND_API void multi_convert_to_double_ex(int argc, ...) /* {{{ */
 {
-	zval **arg;
+	zval *arg;
 	va_list ap;
 
 	va_start(ap, argc);
 
 	while (argc--) {
-		arg = va_arg(ap, zval **);
+		arg = va_arg(ap, zval *);
 		convert_to_double_ex(arg);
 	}
 
@@ -793,13 +796,13 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...) /* {{{ */
 
 ZEND_API void multi_convert_to_string_ex(int argc, ...) /* {{{ */
 {
-	zval **arg;
+	zval *arg;
 	va_list ap;
 
 	va_start(ap, argc);
 
 	while (argc--) {
-		arg = va_arg(ap, zval **);
+		arg = va_arg(ap, zval *);
 		convert_to_string_ex(arg);
 	}
 
@@ -840,20 +843,16 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) + Z_DVAL_P(op2));
 				return SUCCESS;
 
-			case TYPE_PAIR(IS_ARRAY, IS_ARRAY): {
-				zval *tmp;
-
+			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
 				if ((result == op1) && (result == op2)) {
 					/* $a += $a */
 					return SUCCESS;
 				}
 				if (result != op1) {
-					*result = *op1;
-					zval_copy_ctor(result);
+					ZVAL_DUP(result, op1);
 				}
-				zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), (void (*)(void *pData)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+				zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 				return SUCCESS;
-			}
 
 			default:
 				if (!converted) {
@@ -1112,8 +1111,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 			zval op1_copy = *op1;
 
 			Z_TYPE_P(result) = IS_STRING;
-			Z_STRVAL_P(result) = estrndup(Z_STRVAL(op1_copy), Z_STRLEN(op1_copy));
-			Z_STRLEN_P(result) = Z_STRLEN(op1_copy);
+			Z_STR_P(result) = STR_DUP(Z_STR(op1_copy), 0);
 			for (i = 0; i < Z_STRLEN(op1_copy); i++) {
 				Z_STRVAL_P(result)[i] = ~Z_STRVAL(op1_copy)[i];
 			}
@@ -1135,8 +1133,8 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
-		char *result_str;
-		int i, result_len;
+		zend_string *str;
+		int i;
 
 		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
 			longer = op1;
@@ -1146,17 +1144,14 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 			shorter = op1;
 		}
 
-		Z_TYPE_P(result) = IS_STRING;
-		result_len = Z_STRLEN_P(longer);
-		result_str = estrndup(Z_STRVAL_P(longer), Z_STRLEN_P(longer));
+		str = STR_DUP(Z_STR_P(longer), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			result_str[i] |= Z_STRVAL_P(shorter)[i];
+			str->val[i] |= Z_STRVAL_P(shorter)[i];
 		}
 		if (result==op1) {
-			str_efree(Z_STRVAL_P(result));
+			STR_RELEASE(Z_STR_P(result));
 		}
-		Z_STRVAL_P(result) = result_str;
-		Z_STRLEN_P(result) = result_len;
+		ZVAL_STR(result, str);
 		return SUCCESS;
 	}
 
@@ -1182,8 +1177,8 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
-		char *result_str;
-		int i, result_len;
+		zend_string *str;
+		int i;
 
 		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
 			longer = op1;
@@ -1193,17 +1188,14 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			shorter = op1;
 		}
 
-		Z_TYPE_P(result) = IS_STRING;
-		result_len = Z_STRLEN_P(shorter);
-		result_str = estrndup(Z_STRVAL_P(shorter), Z_STRLEN_P(shorter));
+		str = STR_DUP(Z_STR_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			result_str[i] &= Z_STRVAL_P(longer)[i];
+			str->val[i] &= Z_STRVAL_P(longer)[i];
 		}
 		if (result==op1) {
-			str_efree(Z_STRVAL_P(result));
+			STR_RELEASE(Z_STR_P(result));
 		}
-		Z_STRVAL_P(result) = result_str;
-		Z_STRLEN_P(result) = result_len;
+		ZVAL_STR(result, str);
 		return SUCCESS;
 	}
 
@@ -1229,8 +1221,8 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
-		char *result_str;
-		int i, result_len;
+		zend_string *str;
+		int i;
 
 		if (Z_STRLEN_P(op1) >= Z_STRLEN_P(op2)) {
 			longer = op1;
@@ -1240,17 +1232,14 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			shorter = op1;
 		}
 
-		Z_TYPE_P(result) = IS_STRING;
-		result_len = Z_STRLEN_P(shorter);
-		result_str = estrndup(Z_STRVAL_P(shorter), Z_STRLEN_P(shorter));
+		str = STR_DUP(Z_STR_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			result_str[i] ^= Z_STRVAL_P(longer)[i];
+			str->val[i] ^= Z_STRVAL_P(longer)[i];
 		}
 		if (result==op1) {
-			str_efree(Z_STRVAL_P(result));
+			STR_RELEASE(Z_STR_P(result));
 		}
-		Z_STRVAL_P(result) = result_str;
-		Z_STRLEN_P(result) = result_len;
+		ZVAL_STR(result, str);
 		return SUCCESS;
 	}
 
@@ -1313,11 +1302,11 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + 1;
-	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
+	zend_string *buf = STR_EREALLOC(Z_STR_P(op1), length + 1);
 
-	buf[length - 1] = (char) Z_LVAL_P(op2);
-	buf[length] = 0;
-	ZVAL_STRINGL(result, buf, length, 0);
+	buf->val[length - 1] = (char) Z_LVAL_P(op2);
+	buf->val[length] = 0;
+	ZVAL_STR(result, buf);
 	return SUCCESS;
 }
 /* }}} */
@@ -1326,11 +1315,11 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-	char *buf = str_erealloc(Z_STRVAL_P(op1), length + 1);
+	zend_string *buf = STR_EREALLOC(Z_STR_P(op1), length + 1);
 
-	memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-	buf[length] = 0;
-	ZVAL_STRINGL(result, buf, length, 0);
+	memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	buf->val[length] = 0;
+	ZVAL_STR(result, buf);
 	return SUCCESS;
 }
 /* }}} */
@@ -1363,28 +1352,26 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	if (use_copy2) {
 		op2 = &op2_copy;
 	}
-	if (result==op1 && !IS_INTERNED(Z_STRVAL_P(op1))) {	/* special case, perform operations on result */
+	if (result==op1 && !IS_INTERNED(Z_STR_P(op1))) {	/* special case, perform operations on result */
 		uint res_len = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
 		if (Z_STRLEN_P(result) < 0 || (int) (Z_STRLEN_P(op1) + Z_STRLEN_P(op2)) < 0) {
-			efree(Z_STRVAL_P(result));
 			ZVAL_EMPTY_STRING(result);
 			zend_error(E_ERROR, "String size overflow");
 		}
 
-		Z_STRVAL_P(result) = erealloc(Z_STRVAL_P(result), res_len+1);
+		Z_STR_P(result) = STR_EREALLOC(Z_STR_P(result), res_len+1);
 
 		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(result), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		Z_STRVAL_P(result)[res_len]=0;
-		Z_STRLEN_P(result) = res_len;
 	} else {
 		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-		char *buf = (char *) emalloc(length + 1);
+		zend_string *buf = STR_ALLOC(length, 0);
 
-		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-		memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-		buf[length] = 0;
-		ZVAL_STRINGL(result, buf, length, 0);
+		memcpy(buf->val, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+		memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		buf->val[length] = 0;
+		ZVAL_STR(result, buf);
 	}
 	if (use_copy1) {
 		zval_dtor(op1);
@@ -1480,11 +1467,8 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 {
 	zval op1_copy, op2_copy;
 
-	op1_copy = *op1;
-	zval_copy_ctor(&op1_copy);
-
-	op2_copy = *op2;
-	zval_copy_ctor(&op2_copy);
+	ZVAL_DUP(&op1_copy, op1);
+	ZVAL_DUP(&op2_copy, op2);
 
 	convert_to_double(&op1_copy);
 	convert_to_double(&op2_copy);
@@ -1500,9 +1484,9 @@ static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
 	if (Z_REFCOUNT_P(op) == 0) {
 		GC_REMOVE_ZVAL_FROM_BUFFER(op);
 		zval_dtor(op);
-		FREE_ZVAL(op);
+//???		FREE_ZVAL(op);
 	} else {
-		zval_ptr_dtor(&op);
+		zval_ptr_dtor(op);
 	}
 }
 /* }}} */
@@ -1512,7 +1496,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 	int ret;
 	int converted = 0;
 	zval op1_copy, op2_copy;
-	zval *op_free;
+	zval *op_free, tmp_free;
 
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
@@ -1587,7 +1571,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
-					if (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
+					if (Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
 						/* object handles are identical, apparently this is the same object */
 						ZVAL_LONG(result, 0);
 						return SUCCESS;
@@ -1604,14 +1588,13 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
-						ALLOC_INIT_ZVAL(op_free);
-						if (Z_OBJ_HT_P(op1)->cast_object(op1, op_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
+						if (Z_OBJ_HT_P(op1)->cast_object(op1, &tmp_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
-							zend_free_obj_get_result(op_free TSRMLS_CC);
+							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
 							return SUCCESS;
 						}
-						ret = compare_function(result, op_free, op2 TSRMLS_CC);
-						zend_free_obj_get_result(op_free TSRMLS_CC);
+						ret = compare_function(result, &tmp_free, op2 TSRMLS_CC);
+						zend_free_obj_get_result(&tmp_free TSRMLS_CC);
 						return ret;
 					}
 				}
@@ -1622,14 +1605,13 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
-						ALLOC_INIT_ZVAL(op_free);
-						if (Z_OBJ_HT_P(op2)->cast_object(op2, op_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
+						if (Z_OBJ_HT_P(op2)->cast_object(op2, &tmp_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
-							zend_free_obj_get_result(op_free TSRMLS_CC);
+							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
 							return SUCCESS;
 						}
-						ret = compare_function(result, op1, op_free TSRMLS_CC);
-						zend_free_obj_get_result(op_free TSRMLS_CC);
+						ret = compare_function(result, op1, &tmp_free TSRMLS_CC);
+						zend_free_obj_get_result(&tmp_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) == IS_OBJECT) {
 						ZVAL_LONG(result, 1);
@@ -1725,7 +1707,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
-				Z_LVAL_P(result) = (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2));
+				Z_LVAL_P(result) = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			} else {
 				Z_LVAL_P(result) = 0;
 			}
@@ -1824,21 +1806,24 @@ static void increment_string(zval *str) /* {{{ */
 {
 	int carry=0;
 	int pos=Z_STRLEN_P(str)-1;
-	char *s=Z_STRVAL_P(str);
-	char *t;
+	char *s;
+	zend_string *t;
 	int last=0; /* Shut up the compiler warning */
 	int ch;
 
 	if (Z_STRLEN_P(str) == 0) {
-		str_efree(Z_STRVAL_P(str));
-		Z_STRVAL_P(str) = estrndup("1", sizeof("1")-1);
-		Z_STRLEN_P(str) = 1;
+		STR_RELEASE(Z_STR_P(str));
+		Z_STR_P(str) = STR_INIT("1", sizeof("1")-1, 0);
 		return;
 	}
 
-	if (IS_INTERNED(s)) {
-		Z_STRVAL_P(str) = s = estrndup(s, Z_STRLEN_P(str));
+	if (IS_INTERNED(Z_STR_P(str))) {
+		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
+	} else if (Z_REFCOUNT_P(str) > 1) {
+		Z_DELREF_P(str);
+		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
 	}
+	s = Z_STRVAL_P(str);
 
 	while (pos >= 0) {
 		ch = s[pos];
@@ -1880,23 +1865,22 @@ static void increment_string(zval *str) /* {{{ */
 	}
 
 	if (carry) {
-		t = (char *) emalloc(Z_STRLEN_P(str)+1+1);
-		memcpy(t+1, Z_STRVAL_P(str), Z_STRLEN_P(str));
-		Z_STRLEN_P(str)++;
-		t[Z_STRLEN_P(str)] = '\0';
+		t = STR_ALLOC(Z_STRLEN_P(str)+1, 0);
+		memcpy(t->val + 1, Z_STRVAL_P(str), Z_STRLEN_P(str));
+		t->val[Z_STRLEN_P(str) + 1] = '\0';
 		switch (last) {
 			case NUMERIC:
-				t[0] = '1';
+				t->val[0] = '1';
 				break;
 			case UPPER_CASE:
-				t[0] = 'A';
+				t->val[0] = 'A';
 				break;
 			case LOWER_CASE:
-				t[0] = 'a';
+				t->val[0] = 'a';
 				break;
 		}
-		str_efree(Z_STRVAL_P(str));
-		Z_STRVAL_P(str) = t;
+		STR_FREE(Z_STR_P(str));
+		ZVAL_STR(str, t);
 	}
 }
 /* }}} */
@@ -1925,7 +1909,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
-						str_efree(Z_STRVAL_P(op1));
+						STR_RELEASE(Z_STR_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
@@ -1935,7 +1919,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 						}
 						break;
 					case IS_DOUBLE:
-						str_efree(Z_STRVAL_P(op1));
+						STR_RELEASE(Z_STR_P(op1));
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
@@ -1947,13 +1931,12 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval *op2;
+				zval op2;
 				int res;
 				TSRMLS_FETCH();
 
-				MAKE_STD_ZVAL(op2);
-				ZVAL_LONG(op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, op2 TSRMLS_CC);
+				ZVAL_LONG(&op2, 1);
+				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2 TSRMLS_CC);
 				zval_ptr_dtor(&op2);
 
 				return res;
@@ -1985,13 +1968,13 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 			break;
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
-				str_efree(Z_STRVAL_P(op1));
+				STR_RELEASE(Z_STR_P(op1));
 				ZVAL_LONG(op1, -1);
 				break;
 			}
 			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 				case IS_LONG:
-					str_efree(Z_STRVAL_P(op1));
+					STR_RELEASE(Z_STR_P(op1));
 					if (lval == LONG_MIN) {
 						double d = (double)lval;
 						ZVAL_DOUBLE(op1, d-1);
@@ -2000,20 +1983,19 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 					}
 					break;
 				case IS_DOUBLE:
-					str_efree(Z_STRVAL_P(op1));
+					STR_RELEASE(Z_STR_P(op1));
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
 			}
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval *op2;
+				zval op2;
 				int res;
 				TSRMLS_FETCH();
 
-				MAKE_STD_ZVAL(op2);
-				ZVAL_LONG(op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, op2 TSRMLS_CC);
+				ZVAL_LONG(&op2, 1);
+				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2 TSRMLS_CC);
 				zval_ptr_dtor(&op2);
 
 				return res;
@@ -2302,7 +2284,7 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC) /
 {
 	Z_TYPE_P(result) = IS_LONG;
 
-	if (Z_OBJ_HANDLE_P(o1) == Z_OBJ_HANDLE_P(o2)) {
+	if (Z_OBJ_P(o1) == Z_OBJ_P(o2)) {
 		Z_LVAL_P(result) = 0;
 		return;
 	}
@@ -2318,8 +2300,12 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC) /
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
 	TSRMLS_FETCH();
+	char *str;
+	int len;
 
-	Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
+	len = zend_spprintf(&str, 0, "%.*G", (int) EG(precision), (double)Z_DVAL_P(op));
+	Z_STR_P(op) = STR_INIT(str, len, 0);
+	efree(str);
 }
 /* }}} */
 

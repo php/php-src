@@ -107,17 +107,17 @@ static void
 mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 {
 	HashTable *ht = mysqlnd_reverse_api_get_api_list(TSRMLS_C);
+	uint idx;
 	Bucket *p;
 
-	p = ht->pListHead;
-	while(p != NULL) {
-		MYSQLND_REVERSE_API * ext = *(MYSQLND_REVERSE_API **) p->pData;
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (!p->xData) continue;
+		MYSQLND_REVERSE_API * ext = (MYSQLND_REVERSE_API *) p->xData;
 		if (buffer->len) {
 			smart_str_appendc(buffer, ',');
 		}
 		smart_str_appends(buffer, ext->module->name);
-
-		p = p->pListNext;
 	}
 }
 /* }}} */

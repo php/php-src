@@ -76,7 +76,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
 	op_array->doc_comment = NULL;
-	op_array->doc_comment_len = 0;
 
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
@@ -165,10 +164,12 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 		int i;
 
 		for (i = 0; i < ce->default_static_members_count; i++) {
-			if (ce->static_members_table[i]) {
-				zval *p = ce->static_members_table[i];
-				ce->static_members_table[i] = NULL;
-				zval_ptr_dtor(&p);
+			if (Z_TYPE(ce->static_members_table[i]) != IS_UNDEF) {
+				zval tmp;
+
+				ZVAL_COPY_VALUE(&tmp, &ce->static_members_table[i]);
+				ZVAL_UNDEF(&ce->static_members_table[i]);
+				zval_ptr_dtor(&tmp);
 			}
 		}
 		ce->static_members_table = NULL;
@@ -279,7 +280,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				int i;
 
 				for (i = 0; i < ce->default_properties_count; i++) {
-					if (ce->default_properties_table[i]) {
+					if (Z_TYPE(ce->default_properties_table[i]) != IS_UNDEF) {
 						zval_ptr_dtor(&ce->default_properties_table[i]);
 				    }
 				}
@@ -289,14 +290,14 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				int i;
 
 				for (i = 0; i < ce->default_static_members_count; i++) {
-					if (ce->default_static_members_table[i]) {
+					if (Z_TYPE(ce->default_static_members_table[i]) != IS_UNDEF) {
 						zval_ptr_dtor(&ce->default_static_members_table[i]);
 					}
 				}
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			str_efree(ce->name);
+			STR_RELEASE(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -315,7 +316,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				int i;
 
 				for (i = 0; i < ce->default_properties_count; i++) {
-					if (ce->default_properties_table[i]) {
+					if (Z_TYPE(ce->default_properties_table[i]) != IS_UNDEF) {
 						zval_internal_ptr_dtor(&ce->default_properties_table[i]);
 					}
 				}
@@ -330,7 +331,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			str_free(ce->name);
+			STR_RELEASE(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0) {
@@ -371,7 +372,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			str_efree(op_array->vars[i].name);
+			STR_RELEASE(op_array->vars[i]);
 		}
 		efree(op_array->vars);
 	}
@@ -403,9 +404,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	if (op_array->arg_info) {
 		for (i=0; i<op_array->num_args; i++) {
-			str_efree(op_array->arg_info[i].name);
+//???			str_efree(op_array->arg_info[i].name);
+			efree((char*)op_array->arg_info[i].name);
 			if (op_array->arg_info[i].class_name) {
-				str_efree(op_array->arg_info[i].class_name);
+//???				str_efree(op_array->arg_info[i].class_name);
+				efree((char*)op_array->arg_info[i].class_name);
 			}
 		}
 		efree(op_array->arg_info);
@@ -671,7 +674,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).vars_size != op_array->last_var) {
-		op_array->vars = (zend_compiled_variable *) erealloc(op_array->vars, sizeof(zend_compiled_variable)*op_array->last_var);
+		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
 	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).opcodes_size != op_array->last) {
@@ -732,9 +735,9 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {
-	printf("Class %s:\n", class_entry->name);
+	printf("Class %s:\n", class_entry->name->val);
 	zend_hash_apply(&class_entry->function_table, (apply_func_t) pass_two TSRMLS_CC);
-	printf("End of class %s.\n\n", class_entry->name);
+	printf("End of class %s.\n\n", class_entry->name->val);
 	return 0;
 }
 

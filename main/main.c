@@ -853,15 +853,14 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	if (PG(track_errors) && module_initialized &&
-			(!EG(user_error_handler) || !(EG(user_error_handler_error_reporting) & type))) {
+			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 		if (EG(active_symbol_table)) {
-			zval *tmp;
-			ALLOC_INIT_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
+			zval tmp;
+			ZVAL_STRINGL(&tmp, buffer, buffer_len);
+			zend_hash_str_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
 		}
 	}
 	efree(buffer);
@@ -1188,10 +1187,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 		if (EG(active_symbol_table)) {
-			zval *tmp;
-			ALLOC_INIT_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, buffer, buffer_len, 1);
-			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(zval *), NULL);
+			zval tmp;
+			ZVAL_STRINGL(&tmp, buffer, buffer_len);
+			zend_hash_str_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
 		}
 	}
 
@@ -1269,6 +1267,7 @@ PHP_FUNCTION(set_time_limit)
 	long new_timeout;
 	char *new_timeout_str;
 	int new_timeout_strlen;
+	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
 		return;
@@ -1276,11 +1275,13 @@ PHP_FUNCTION(set_time_limit)
 
 	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, "%ld", new_timeout);
 
-	if (zend_alter_ini_entry_ex("max_execution_time", sizeof("max_execution_time"), new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
+	key = STR_INIT("max_execution_time", sizeof("max_execution_time")-1, 0);
+	if (zend_alter_ini_entry_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
+	STR_FREE(key);
 	efree(new_timeout_str);
 }
 /* }}} */
@@ -1576,11 +1577,10 @@ int php_request_startup(TSRMLS_D)
 		}
 
 		if (PG(output_handler) && PG(output_handler)[0]) {
-			zval *oh;
+			zval oh;
 
-			MAKE_STD_ZVAL(oh);
-			ZVAL_STRING(oh, PG(output_handler), 1);
-			php_output_start_user(oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+			ZVAL_STRING(&oh, PG(output_handler));
+			php_output_start_user(&oh, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 			zval_ptr_dtor(&oh);
 		} else if (PG(output_buffering)) {
 			php_output_start_user(NULL, PG(output_buffering) > 1 ? PG(output_buffering) : 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
@@ -1691,9 +1691,7 @@ void php_request_shutdown_for_hook(void *dummy)
 		int i;
 
 		for (i = 0; i < NUM_TRACK_VARS; i++) {
-			if (PG(http_globals)[i]) {
-				zval_ptr_dtor(&PG(http_globals)[i]);
-			}
+			zval_ptr_dtor(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -1787,9 +1785,7 @@ void php_request_shutdown(void *dummy)
 		int i;
 
 		for (i=0; i<NUM_TRACK_VARS; i++) {
-			if (PG(http_globals)[i]) {
-				zval_ptr_dtor(&PG(http_globals)[i]);
-			}
+			zval_ptr_dtor(&PG(http_globals)[i]);
 		}
 	} zend_end_try();
 
@@ -2237,7 +2233,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* register additional functions */
 	if (sapi_module.additional_functions) {
-		if (zend_hash_find(&module_registry, "standard", sizeof("standard"), (void**)&module)==SUCCESS) {
+		if ((module = zend_hash_str_find_ptr(&module_registry, "standard", sizeof("standard")-1)) != NULL) {
 			EG(current_module) = module;
 			zend_register_functions(NULL, sapi_module.additional_functions, NULL, MODULE_PERSISTENT TSRMLS_CC);
 			EG(current_module) = NULL;
@@ -2249,7 +2245,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	php_disable_classes(TSRMLS_C);
 
 	/* make core report what it should */
-	if (zend_hash_find(&module_registry, "core", sizeof("core"), (void**)&module)==SUCCESS) {
+	if ((module = zend_hash_str_find_ptr(&module_registry, "core", sizeof("core")-1)) != NULL) {
 		module->version = PHP_VERSION;
 		module->info_func = PHP_MINFO(php_core);
 	}
@@ -2470,11 +2466,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
 			int realfile_len;
-			int dummy = 1;
 
 			if (expand_filepath(primary_file->filename, realfile TSRMLS_CC)) {
 				realfile_len =  strlen(realfile);
-				zend_hash_add(&EG(included_files), realfile, realfile_len+1, (void *)&dummy, sizeof(int), NULL);
+				zend_hash_str_add_empty_element(&EG(included_files), realfile, realfile_len);
 				primary_file->opened_path = estrndup(realfile, realfile_len);
 			}
 		}
@@ -2525,7 +2520,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 /* {{{ php_execute_simple_script
  */
-PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC)
+PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret TSRMLS_DC)
 {
 	char *old_cwd;
 	ALLOCA_FLAG(use_heap)

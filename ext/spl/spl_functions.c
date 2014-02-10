@@ -58,7 +58,7 @@ PHPAPI void spl_register_sub_class(zend_class_entry ** ppce, zend_class_entry * 
 	zend_class_entry ce;
 	
 	INIT_CLASS_ENTRY_EX(ce, class_name, strlen(class_name), function_list);
-	*ppce = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+	*ppce = zend_register_internal_class_ex(&ce, parent_ce TSRMLS_CC);
 
 	/* entries changed by initialize */
 	if (obj_ctor) {

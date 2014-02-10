@@ -182,11 +182,11 @@ static int print_module_info(zend_module_entry *module TSRMLS_DC) /* {{{ */
 
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
+	Bucket *f = (Bucket *) a;
+	Bucket *s = (Bucket *) b;
 
-	return strcasecmp(((zend_module_entry *)f->pData)->name,
-				  ((zend_module_entry *)s->pData)->name);
+	return strcasecmp(((zend_module_entry *)f->xData)->name,
+				  ((zend_module_entry *)s->xData)->name);
 }
 /* }}} */
 
@@ -1087,6 +1087,8 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 				break;
 			}
+//???
+#if 0
 			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
@@ -1161,6 +1163,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					efree(lcname);
 					break;
 				}
+#endif
 			case PHP_MODE_SHOW_INI_CONFIG:
 				{
 					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);

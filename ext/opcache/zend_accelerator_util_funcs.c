@@ -42,7 +42,7 @@ typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-static const Bucket *uninitialized_bucket = NULL;
+static const HashBucket uninitialized_bucket = {INVALID_IDX};
 #endif
 
 static int zend_prepare_function_for_execution(zend_op_array *op_array);
@@ -89,10 +89,13 @@ zend_persistent_script* create_persistent_script(void)
 static int compact_hash_table(HashTable *ht)
 {
 	uint i = 3;
+	uint j;
 	uint nSize;
-	Bucket **t;
+	Bucket *d;
+	HashBucket *h;
+	Bucket *p;
 
-	if (!ht->nNumOfElements) {
+	if (!ht->nNumOfElements || (ht->flags & HASH_FLAG_PACKED)) {
 		/* Empty tables don't allocate space for Buckets */
 		return 1;
 	}
@@ -112,14 +115,25 @@ static int compact_hash_table(HashTable *ht)
 		return 1;
 	}
 
-	t = (Bucket **)pemalloc(nSize * sizeof(Bucket *), ht->persistent);
-	if (!t) {
+	d = (Bucket *)pemalloc(nSize * sizeof(Bucket), ht->flags & HASH_FLAG_PERSISTENT);
+	h = (HashBucket *)pemalloc(nSize * sizeof(HashBucket), ht->flags & HASH_FLAG_PERSISTENT);
+	if (!d || !h) {
 		return 0;
 	}
 
-	pefree(ht->arBuckets, ht->persistent);
+	for (i = 0, j = 0; i < ht->nNumUsed; i++) {
+		p = ht->arData + i;
+		if (p->xData) {
+			d[j++] = *p;
+		}
+	}
+	ht->nNumUsed = j;
 
-	ht->arBuckets = t;
+	pefree(ht->arData, ht->flags & HASH_FLAG_PERSISTENT);
+	pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
+
+	ht->arData = d;
+	ht->arHash = h;
 	ht->nTableSize = nSize;
 	ht->nTableMask = ht->nTableSize - 1;
 	zend_hash_rehash(ht);
@@ -317,114 +331,104 @@ static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 {
-	Bucket *p, *q, **prev;
+	uint idx;
+	Bucket *p, *q;
 	ulong nIndex;
 	zval *ppz;
 	TSRMLS_FETCH();
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
+	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
 #if ZEND_DEBUG
 	ht->inconsistent = 0;
 #endif
-	ht->persistent = 0;
-	ht->arBuckets = NULL;
-	ht->pListHead = NULL;
-	ht->pListTail = NULL;
-	ht->pInternalPointer = NULL;
+	ht->flags = HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_PTR_DATA;
+	ht->arData = NULL;
+	ht->arHash = NULL;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 	ht->nApplyCount = 0;
-	ht->bApplyProtection = 1;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
-		ht->arBuckets = (Bucket**)&uninitialized_bucket;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
 		return;
 	}
 #endif
 
-	ht->arBuckets = (Bucket **) ecalloc(ht->nTableSize, sizeof(Bucket *));
+	ht->arData = (Bucket *) ecalloc(ht->nTableSize, sizeof(Bucket));
+	if (source->flags & HASH_FLAG_PACKED) {
+		ht->flags |= HASH_FLAG_PACKED;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
+	} else {
+		ht->arHash = (HashBucket *) ecalloc(ht->nTableSize, sizeof(HashBucket));
+		memset(ht->arHash, INVALID_IDX, sizeof(HashBucket) * ht->nTableSize);
+	}
 
-	prev = &ht->pListHead;
-	p = source->pListHead;
-	while (p) {
+	for (idx = 0; idx < source->nNumUsed; idx++) {
+		p = source->arData + idx;
+		if (!p->xData) continue;
 		nIndex = p->h & ht->nTableMask;
 
-		/* Create bucket and initialize key */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		if (!p->nKeyLength) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = NULL;
-		} else if (IS_INTERNED(p->arKey)) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = p->arKey;
+		/* Insert into hash collision list */
+		if (source->flags & HASH_FLAG_PACKED) {
+			q = ht->arData + p->h;
+			ht->nNumUsed = p->h + 1;
 		} else {
-			q = (Bucket *) emalloc(sizeof(Bucket) + p->nKeyLength);
-			q->arKey = ((char*)q) + sizeof(Bucket);
-			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
+			q = ht->arData + ht->nNumUsed;
+			q->next = ht->arHash[nIndex].idx;
+			ht->arHash[nIndex].idx = ht->nNumUsed++;
 		}
-#else
-		q = (Bucket *) emalloc(sizeof(Bucket) - 1 + p->nKeyLength);
-		if (p->nKeyLength) {
-			memcpy(q->arKey, p->arKey, p->nKeyLength);
-		}
-#endif
+
+		/* Initialize key */
 		q->h = p->h;
 		q->nKeyLength = p->nKeyLength;
-
-		/* Insert into hash collision list */
-		q->pNext = ht->arBuckets[nIndex];
-		q->pLast = NULL;
-		if (q->pNext) {
-			q->pNext->pLast = q;
+		if (!p->nKeyLength) {
+			q->arKey = NULL;
+		} else if (IS_INTERNED(p->arKey)) {
+			q->arKey = p->arKey;
+		} else {
+			q->arKey = (const char *) emalloc(p->nKeyLength);
+			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
 		}
-		ht->arBuckets[nIndex] = q;
-
-		/* Insert into global list */
-		q->pListLast = ht->pListTail;
-		ht->pListTail = q;
-		q->pListNext = NULL;
-		*prev = q;
-		prev = &q->pListNext;
 
 		/* Copy data */
-		q->pData = &q->pDataPtr;
 		if (!bind) {
 			ALLOC_ZVAL(ppz);
-			*ppz = *((zval*)p->pDataPtr);
+			*ppz = *((zval*)p->xData);
 			INIT_PZVAL(ppz);
-		} else if (Z_REFCOUNT_P((zval*)p->pDataPtr) == 1) {
+		} else if (Z_REFCOUNT_P((zval*)p->xData) == 1) {
 			ALLOC_ZVAL(ppz);
-			*ppz = *((zval*)p->pDataPtr);
-		} else if (accel_xlat_get(p->pDataPtr, ppz) != SUCCESS) {
+			*ppz = *((zval*)p->xData);
+		} else if (accel_xlat_get(p->xData, ppz) != SUCCESS) {
 			ALLOC_ZVAL(ppz);
-			*ppz = *((zval*)p->pDataPtr);
-			accel_xlat_set(p->pDataPtr, ppz);
+			*ppz = *((zval*)p->xData);
+			accel_xlat_set(p->xData, ppz);
 		} else {
-			q->pDataPtr = *(void**)ppz;
-			p = p->pListNext;
+			q->xData = *(void**)ppz;
 			continue;
 		}
-		q->pDataPtr = (void*)ppz;
+		q->xData = (void*)ppz;
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-		if ((Z_TYPE_P((zval*)p->pDataPtr) & IS_CONSTANT_TYPE_MASK) >= IS_ARRAY) {
-			switch ((Z_TYPE_P((zval*)p->pDataPtr) & IS_CONSTANT_TYPE_MASK)) {
+		if ((Z_TYPE_P((zval*)p->xData) & IS_CONSTANT_TYPE_MASK) >= IS_ARRAY) {
+			switch ((Z_TYPE_P((zval*)p->xData) & IS_CONSTANT_TYPE_MASK)) {
 #else
-		if ((Z_TYPE_P((zval*)p->pDataPtr) & ~IS_CONSTANT_INDEX) >= IS_ARRAY) {
-			switch ((Z_TYPE_P((zval*)p->pDataPtr) & ~IS_CONSTANT_INDEX)) {
+		if ((Z_TYPE_P((zval*)p->xData) & ~IS_CONSTANT_INDEX) >= IS_ARRAY) {
+			switch ((Z_TYPE_P((zval*)p->xData) & ~IS_CONSTANT_INDEX)) {
 #endif
 				case IS_STRING:
 			    case IS_CONSTANT:
-					Z_STRVAL_P(ppz) = (char *) interned_estrndup(Z_STRVAL_P((zval*)p->pDataPtr), Z_STRLEN_P((zval*)p->pDataPtr));
+					Z_STRVAL_P(ppz) = (char *) interned_estrndup(Z_STRVAL_P((zval*)p->xData), Z_STRLEN_P((zval*)p->xData));
 					break;
 				case IS_ARRAY:
 			    case IS_CONSTANT_ARRAY:
-					if (((zval*)p->pDataPtr)->value.ht && ((zval*)p->pDataPtr)->value.ht != &EG(symbol_table)) {
+					if (((zval*)p->xData)->value.ht && ((zval*)p->xData)->value.ht != &EG(symbol_table)) {
 						ALLOC_HASHTABLE(ppz->value.ht);
-						zend_hash_clone_zval(ppz->value.ht, ((zval*)p->pDataPtr)->value.ht, 0);
+						zend_hash_clone_zval(ppz->value.ht, ((zval*)p->xData)->value.ht, 0);
 					}
 					break;
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
@@ -434,15 +438,13 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 #endif
 			}
 		}
-
-		p = p->pListNext;
 	}
-	ht->pInternalPointer = ht->pListHead;
 }
 
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce TSRMLS_DC)
 {
-	Bucket *p, *q, **prev;
+	uint idx;
+	Bucket *p, *q;
 	ulong nIndex;
 	zend_class_entry **new_ce;
 	zend_function** new_prototype;
@@ -450,80 +452,70 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
+	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
 #if ZEND_DEBUG
 	ht->inconsistent = 0;
 #endif
-	ht->persistent = 0;
-	ht->pListHead = NULL;
-	ht->pListTail = NULL;
-	ht->pInternalPointer = NULL;
+	ht->flags = HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_BIG_DATA;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 	ht->nApplyCount = 0;
-	ht->bApplyProtection = 1;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
-		ht->arBuckets = (Bucket**)&uninitialized_bucket;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
 		return;
 	}
 #endif
 
-	ht->arBuckets = (Bucket **) ecalloc(ht->nTableSize, sizeof(Bucket *));
+	ht->arData = (Bucket *) ecalloc(ht->nTableSize, sizeof(Bucket));
+	if (source->flags & HASH_FLAG_PACKED) {
+		ht->flags |= HASH_FLAG_PACKED;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
+	} else {
+		ht->arHash = (HashBucket *) ecalloc(ht->nTableSize, sizeof(HashBucket));
+		memset(ht->arHash, INVALID_IDX, sizeof(HashBucket) * ht->nTableSize);
+	}
 
-	prev = &ht->pListHead;
-	p = source->pListHead;
-	while (p) {
+	for (idx = 0; idx < source->nNumUsed; idx++) {		
+		p = source->arData + idx;
+		if (!p->xData) continue;
+
 		nIndex = p->h & ht->nTableMask;
 
-		/* Create bucket and initialize key */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		if (!p->nKeyLength) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = NULL;
-		} else if (IS_INTERNED(p->arKey)) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = p->arKey;
+		/* Insert into hash collision list */
+		if (source->flags & HASH_FLAG_PACKED) {
+			q = ht->arData + p->h;
+			ht->nNumUsed = p->h + 1;
 		} else {
-			q = (Bucket *) emalloc(sizeof(Bucket) + p->nKeyLength);
-			q->arKey = ((char*)q) + sizeof(Bucket);
-			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
+			q = ht->arData + ht->nNumUsed;
+			q->next = ht->arHash[nIndex].idx;
+			ht->arHash[nIndex].idx = ht->nNumUsed++;
 		}
-#else
-		q = (Bucket *) emalloc(sizeof(Bucket) - 1 + p->nKeyLength);
-		if (p->nKeyLength) {
-			memcpy(q->arKey, p->arKey, p->nKeyLength);
-		}
-#endif
+
+		/* Initialize key */
 		q->h = p->h;
 		q->nKeyLength = p->nKeyLength;
-
-		/* Insert into hash collision list */
-		q->pNext = ht->arBuckets[nIndex];
-		q->pLast = NULL;
-		if (q->pNext) {
-			q->pNext->pLast = q;
+		if (!p->nKeyLength) {
+			q->arKey = NULL;
+		} else if (IS_INTERNED(p->arKey)) {
+			q->arKey = p->arKey;
+		} else {
+			q->arKey = (const char *) emalloc(p->nKeyLength);
+			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
 		}
-		ht->arBuckets[nIndex] = q;
-
-		/* Insert into global list */
-		q->pListLast = ht->pListTail;
-		ht->pListTail = q;
-		q->pListNext = NULL;
-		*prev = q;
-		prev = &q->pListNext;
 
 		/* Copy data */
-		q->pData = (void *) emalloc(sizeof(zend_function));
-		new_entry = (zend_op_array*)q->pData;
-		*new_entry = *(zend_op_array*)p->pData;
-		q->pDataPtr = NULL;
+		q->xData = (void *) emalloc(sizeof(zend_function));
+		new_entry = (zend_op_array*)q->xData;
+		*new_entry = *(zend_op_array*)p->xData;
 
 		/* Copy constructor */
 		/* we use refcount to show that op_array is referenced from several places */
 		if (new_entry->refcount != NULL) {
-			accel_xlat_set(p->pData, new_entry);
+			accel_xlat_set(p->xData, new_entry);
 		}
 
 		zend_prepare_function_for_execution(new_entry);
@@ -546,90 +538,78 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s", ce->name, new_entry->function_name);
 			}
 		}
-
-		p = p->pListNext;
 	}
-	ht->pInternalPointer = ht->pListHead;
 }
 
 static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce TSRMLS_DC)
 {
-	Bucket *p, *q, **prev;
+	uint idx;
+	Bucket *p, *q;
 	ulong nIndex;
 	zend_class_entry **new_ce;
 	zend_property_info *prop_info;
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
+	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = (dtor_func_t) zend_destroy_property_info;
 #if ZEND_DEBUG
 	ht->inconsistent = 0;
 #endif
-	ht->persistent = 0;
-	ht->pListHead = NULL;
-	ht->pListTail = NULL;
-	ht->pInternalPointer = NULL;
+	ht->flags = HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_BIG_DATA;
+	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 	ht->nApplyCount = 0;
-	ht->bApplyProtection = 1;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
-		ht->arBuckets = (Bucket**)&uninitialized_bucket;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
 		return;
 	}
 #endif
 
-	ht->arBuckets = (Bucket **) ecalloc(ht->nTableSize, sizeof(Bucket *));
+	ht->arData = (Bucket *) ecalloc(ht->nTableSize, sizeof(Bucket));
+	if (source->flags & HASH_FLAG_PACKED) {
+		ht->flags |= HASH_FLAG_PACKED;
+		ht->arHash = (HashBucket*)&uninitialized_bucket;
+	} else {
+		ht->arHash = (HashBucket *) ecalloc(ht->nTableSize, sizeof(HashBucket));
+		memset(ht->arHash, INVALID_IDX, sizeof(HashBucket) * ht->nTableSize);
+	}
 
-	prev = &ht->pListHead;
-	p = source->pListHead;
-	while (p) {
+	for (idx = 0; idx < source->nNumUsed; idx++) {		
+		p = source->arData + idx;
+		if (!p->xData) continue;
+
 		nIndex = p->h & ht->nTableMask;
 
-		/* Create bucket and initialize key */
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		if (!p->nKeyLength) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = NULL;
-		} else if (IS_INTERNED(p->arKey)) {
-			q = (Bucket *) emalloc(sizeof(Bucket));
-			q->arKey = p->arKey;
+		/* Insert into hash collision list */
+		if (source->flags & HASH_FLAG_PACKED) {
+			q = ht->arData + p->h;
+			ht->nNumUsed = p->h + 1;
 		} else {
-			q = (Bucket *) emalloc(sizeof(Bucket) + p->nKeyLength);
-			q->arKey = ((char*)q) + sizeof(Bucket);
-			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
+			q = ht->arData + ht->nNumUsed;
+			q->next = ht->arHash[nIndex].idx;
+			ht->arHash[nIndex].idx = ht->nNumUsed++;
 		}
-#else
-		q = (Bucket *) emalloc(sizeof(Bucket) - 1 + p->nKeyLength);
-		if (p->nKeyLength) {
-			memcpy(q->arKey, p->arKey, p->nKeyLength);
-		}
-#endif
+
+		/* Initialize key */
 		q->h = p->h;
 		q->nKeyLength = p->nKeyLength;
-
-		/* Insert into hash collision list */
-		q->pNext = ht->arBuckets[nIndex];
-		q->pLast = NULL;
-		if (q->pNext) {
-			q->pNext->pLast = q;
+		if (!p->nKeyLength) {
+			q->arKey = NULL;
+		} else if (IS_INTERNED(p->arKey)) {
+			q->arKey = p->arKey;
+		} else {
+			q->arKey = (const char *) emalloc(p->nKeyLength);
+			memcpy((char*)q->arKey, p->arKey, p->nKeyLength);
 		}
-		ht->arBuckets[nIndex] = q;
-
-		/* Insert into global list */
-		q->pListLast = ht->pListTail;
-		ht->pListTail = q;
-		q->pListNext = NULL;
-		*prev = q;
-		prev = &q->pListNext;
 
 		/* Copy data */
-		q->pData = (void *) emalloc(sizeof(zend_property_info));
-		prop_info = q->pData;
-		*prop_info = *(zend_property_info*)p->pData;
-		q->pDataPtr = NULL;
+		q->xData = (void *) emalloc(sizeof(zend_property_info));
+		prop_info = q->xData;
+		*prop_info = *(zend_property_info*)p->xData;
 
 		/* Copy constructor */
 		prop_info->name = interned_estrndup(prop_info->name, prop_info->name_length);
@@ -647,10 +627,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		} else {
 			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s", ce->name, prop_info->name);
 		}
-
-		p = p->pListNext;
 	}
-	ht->pInternalPointer = ht->pListHead;
 }
 
 /* protects reference count, creates copy of statics */
@@ -879,13 +856,15 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, uint size, int ignore_dups, void **fail_data, void **conflict_data)
 {
+	uint idx;
 	Bucket *p;
 	void *t;
 
-	p = source->pListHead;
-	while (p) {
+	for (idx = 0; idx < source->nNumUsed; idx++) {		
+		p = source->arData + idx;
+		if (!p->xData) continue;
 		if (p->nKeyLength > 0) {
-			if (zend_hash_quick_add(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+			if (zend_hash_quick_add(target, p->arKey, p->nKeyLength, p->h, HASH_DATA(source, p), size, &t) == SUCCESS) {
 				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
@@ -893,9 +872,9 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
 					/* Mangled key */
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					if (((zend_function*)p->pData)->common.fn_flags & ZEND_ACC_CLOSURE) {
+					if (((zend_function*)p->xData)->common.fn_flags & ZEND_ACC_CLOSURE) {
 						/* update closure */
-						if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+						if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, HASH_DATA(source, p), size, &t) == SUCCESS) {
 							if (pCopyConstructor) {
 								pCopyConstructor(t);
 							}
@@ -905,25 +884,24 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 					} 
 #endif
 				} else if (!ignore_dups && zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS) {
-					*fail_data = p->pData;
+					*fail_data = HASH_DATA(source, p);
 					*conflict_data = t;
 					return FAILURE;
 				}
 			}
 		} else {
-			if (!zend_hash_index_exists(target, p->h) && zend_hash_index_update(target, p->h, p->pData, size, &t) == SUCCESS) {
+			if (!zend_hash_index_exists(target, p->h) && zend_hash_index_update(target, p->h, HASH_DATA(source, p), size, &t) == SUCCESS) {
 				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else if (!ignore_dups && zend_hash_index_find(target,p->h, &t) == SUCCESS) {
-				*fail_data = p->pData;
+				*fail_data = HASH_DATA(source, p);
 				*conflict_data = t;
 				return FAILURE;
 			}
 		}
-		p = p->pListNext;
 	}
-	target->pInternalPointer = target->pListHead;
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 
 	return SUCCESS;
 }

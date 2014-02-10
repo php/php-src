@@ -1401,7 +1401,7 @@ static PHP_MINIT_FUNCTION(apache)
 
 	le_apachereq = zend_register_list_destructors_ex(php_apache_request_free, NULL, "ApacheRequest", module_number);
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "ApacheRequest", php_apache_request_class_functions, NULL, NULL, NULL);
-	apacherequest_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+	apacherequest_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
 
 	REGISTER_LONG_CONSTANT("OK",				OK,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DECLINED",			DECLINED,			CONST_CS | CONST_PERSISTENT);

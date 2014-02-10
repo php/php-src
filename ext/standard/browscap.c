@@ -141,7 +141,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC) /* {{{ */
 {
 	browser_data *bdata = arg;
-	int persistent = bdata->htab->persistent;
+	int persistent = bdata->htab->flags & HASH_FLAG_PERSISTENT;
 	
 	if (!arg1) {
 		return;
@@ -393,6 +393,8 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 		return 0;
 	}
 
+//???
+#if 0
 	re = pcre_get_compiled_regex(Z_STRVAL_PP(browser_regex), &re_extra, &re_options TSRMLS_CC);
 	if (re == NULL) {
 		return 0;
@@ -446,6 +448,7 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 			*found_browser_entry = *browser;
 		}
 	}
+#endif
 
 	return 0;
 }

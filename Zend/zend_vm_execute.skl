@@ -38,7 +38,7 @@ zend_vm_enter:
 
 ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
-	if (EG(exception)) {
+	if (EG(exception) != NULL) {
 		return;
 	} 
 	zend_{%EXECUTOR_NAME%}_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);

@@ -2453,9 +2453,9 @@ PHP_MINIT_FUNCTION(snmp)
 	/* Register SNMPException class */
 	INIT_CLASS_ENTRY(cex, "SNMPException", NULL);
 #ifdef HAVE_SPL
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException, NULL TSRMLS_CC);
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException TSRMLS_CC);
 #else
-	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+	php_snmp_exception_ce = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 #endif
 
 	return SUCCESS;

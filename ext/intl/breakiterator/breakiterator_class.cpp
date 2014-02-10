@@ -386,12 +386,12 @@ U_CFUNC void breakiterator_register_BreakIterator_class(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
 			RuleBasedBreakIterator_class_functions);
 	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr, NULL TSRMLS_CC);
+			BreakIterator_ce_ptr TSRMLS_CC);
 
 	/* Create and register 'CodePointBreakIterator' class. */
 	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator",
 			CodePointBreakIterator_class_functions);
 	CodePointBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-			BreakIterator_ce_ptr, NULL TSRMLS_CC);
+			BreakIterator_ce_ptr TSRMLS_CC);
 }
 /* }}} */

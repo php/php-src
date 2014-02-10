@@ -378,10 +378,10 @@ ZEND_API long zend_atol(const char *str, int str_len);
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 END_EXTERN_C()
 
-#define convert_to_ex_master(ppzv, lower_type, upper_type)	\
-	if (Z_TYPE_PP(ppzv)!=IS_##upper_type) {					\
-		SEPARATE_ZVAL_IF_NOT_REF(ppzv);						\
-		convert_to_##lower_type(*ppzv);						\
+#define convert_to_ex_master(pzv, lower_type, upper_type)	\
+	if (Z_TYPE_P(pzv)!=IS_##upper_type) {					\
+		SEPARATE_ZVAL_IF_NOT_REF(pzv);						\
+		convert_to_##lower_type(pzv);						\
 	}
 
 #define convert_to_explicit_type(pzv, type)		\
@@ -414,80 +414,27 @@ END_EXTERN_C()
 		}										\
 	} while (0);
 
-#define convert_to_explicit_type_ex(ppzv, str_type)	\
-	if (Z_TYPE_PP(ppzv) != str_type) {				\
-		SEPARATE_ZVAL_IF_NOT_REF(ppzv);				\
-		convert_to_explicit_type(*ppzv, str_type);	\
+#define convert_to_explicit_type_ex(pzv, str_type)	\
+	if (Z_TYPE_P(pzv) != str_type) {				\
+		SEPARATE_ZVAL_IF_NOT_REF(pzv);				\
+		convert_to_explicit_type(pzv, str_type);	\
 	}
 
-#define convert_to_boolean_ex(ppzv)	convert_to_ex_master(ppzv, boolean, BOOL)
-#define convert_to_long_ex(ppzv)	convert_to_ex_master(ppzv, long, LONG)
-#define convert_to_double_ex(ppzv)	convert_to_ex_master(ppzv, double, DOUBLE)
-#define convert_to_string_ex(ppzv)	convert_to_ex_master(ppzv, string, STRING)
-#define convert_to_array_ex(ppzv)	convert_to_ex_master(ppzv, array, ARRAY)
-#define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
-#define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
+#define convert_to_boolean_ex(pzv)	convert_to_ex_master(pzv, boolean, BOOL)
+#define convert_to_long_ex(pzv)		convert_to_ex_master(pzv, long, LONG)
+#define convert_to_double_ex(pzv)	convert_to_ex_master(pzv, double, DOUBLE)
+#define convert_to_string_ex(pzv)	convert_to_ex_master(pzv, string, STRING)
+#define convert_to_array_ex(pzv)	convert_to_ex_master(pzv, array, ARRAY)
+#define convert_to_object_ex(pzv)	convert_to_ex_master(pzv, object, OBJECT)
+#define convert_to_null_ex(pzv)		convert_to_ex_master(pzv, null, NULL)
 
-#define convert_scalar_to_number_ex(ppzv)							\
-	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {	\
-		if (!Z_ISREF_PP(ppzv)) {									\
-			SEPARATE_ZVAL(ppzv);									\
+#define convert_scalar_to_number_ex(pzv)							\
+	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
+		if (!Z_ISREF_P(pzv)) {										\
+			SEPARATE_ZVAL(pzv);										\
 		}															\
-		convert_scalar_to_number(*ppzv TSRMLS_CC);					\
+		convert_scalar_to_number(ppzv TSRMLS_CC);					\
 	}
-
-
-#define Z_LVAL(zval)			(zval).value.lval
-#define Z_BVAL(zval)			((zend_bool)(zval).value.lval)
-#define Z_DVAL(zval)			(zval).value.dval
-#define Z_STRVAL(zval)			(zval).value.str.val
-#define Z_STRLEN(zval)			(zval).value.str.len
-#define Z_ARRVAL(zval)			(zval).value.ht
-#define Z_AST(zval)			(zval).value.ast
-#define Z_OBJVAL(zval)			(zval).value.obj
-#define Z_OBJ_HANDLE(zval)		Z_OBJVAL(zval).handle
-#define Z_OBJ_HT(zval)			Z_OBJVAL(zval).handlers
-#define Z_OBJCE(zval)			zend_get_class_entry(&(zval) TSRMLS_CC)
-#define Z_OBJPROP(zval)			Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
-#define Z_OBJ_HANDLER(zval, hf) Z_OBJ_HT((zval))->hf
-#define Z_RESVAL(zval)			(zval).value.lval
-#define Z_OBJDEBUG(zval,is_tmp)	(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&is_tmp TSRMLS_CC):(is_tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
-
-#define Z_LVAL_P(zval_p)		Z_LVAL(*zval_p)
-#define Z_BVAL_P(zval_p)		Z_BVAL(*zval_p)
-#define Z_DVAL_P(zval_p)		Z_DVAL(*zval_p)
-#define Z_STRVAL_P(zval_p)		Z_STRVAL(*zval_p)
-#define Z_STRLEN_P(zval_p)		Z_STRLEN(*zval_p)
-#define Z_ARRVAL_P(zval_p)		Z_ARRVAL(*zval_p)
-#define Z_AST_P(zval_p)			Z_AST(*zval_p)
-#define Z_OBJPROP_P(zval_p)		Z_OBJPROP(*zval_p)
-#define Z_OBJCE_P(zval_p)		Z_OBJCE(*zval_p)
-#define Z_RESVAL_P(zval_p)		Z_RESVAL(*zval_p)
-#define Z_OBJVAL_P(zval_p)		Z_OBJVAL(*zval_p)
-#define Z_OBJ_HANDLE_P(zval_p)	Z_OBJ_HANDLE(*zval_p)
-#define Z_OBJ_HT_P(zval_p)		Z_OBJ_HT(*zval_p)
-#define Z_OBJ_HANDLER_P(zval_p, h)	Z_OBJ_HANDLER(*zval_p, h)
-#define Z_OBJDEBUG_P(zval_p,is_tmp)	Z_OBJDEBUG(*zval_p,is_tmp)
-
-#define Z_LVAL_PP(zval_pp)		Z_LVAL(**zval_pp)
-#define Z_BVAL_PP(zval_pp)		Z_BVAL(**zval_pp)
-#define Z_DVAL_PP(zval_pp)		Z_DVAL(**zval_pp)
-#define Z_STRVAL_PP(zval_pp)	Z_STRVAL(**zval_pp)
-#define Z_STRLEN_PP(zval_pp)	Z_STRLEN(**zval_pp)
-#define Z_ARRVAL_PP(zval_pp)	Z_ARRVAL(**zval_pp)
-#define Z_AST_PP(zval_p)		Z_AST(**zval_p)
-#define Z_OBJPROP_PP(zval_pp)	Z_OBJPROP(**zval_pp)
-#define Z_OBJCE_PP(zval_pp)		Z_OBJCE(**zval_pp)
-#define Z_RESVAL_PP(zval_pp)	Z_RESVAL(**zval_pp)
-#define Z_OBJVAL_PP(zval_pp)	Z_OBJVAL(**zval_pp)
-#define Z_OBJ_HANDLE_PP(zval_p)	Z_OBJ_HANDLE(**zval_p)
-#define Z_OBJ_HT_PP(zval_p)		Z_OBJ_HT(**zval_p)
-#define Z_OBJ_HANDLER_PP(zval_p, h)		Z_OBJ_HANDLER(**zval_p, h)
-#define Z_OBJDEBUG_PP(zval_pp,is_tmp)	Z_OBJDEBUG(**zval_pp,is_tmp)
-
-#define Z_TYPE(zval)		(zval).type
-#define Z_TYPE_P(zval_p)	Z_TYPE(*zval_p)
-#define Z_TYPE_PP(zval_pp)	Z_TYPE(**zval_pp)
 
 #if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)
 /* This is performance improvement of tolower() on Windows and VC2005

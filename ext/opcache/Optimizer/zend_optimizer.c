@@ -544,24 +544,29 @@ static void zend_accel_optimize(zend_op_array           *op_array,
 
 int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 {
+	uint idx, j;
 	Bucket *p, *q;
 	HashTable *constants = NULL;
+	zend_class_entry *ce;
+	zend_op_array *op_array;
 
 	zend_accel_optimize(&script->main_op_array, script, &constants TSRMLS_CC);
 
-	p = script->function_table.pListHead;
-	while (p) {
-		zend_op_array *op_array = (zend_op_array*)p->pData;
+	for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
+		p = script->function_table.arData + idx;
+		if (!p->xData) continue;
+		op_array = (zend_op_array*)p->xData;
 		zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
-		p = p->pListNext;
 	}
 
-	p = script->class_table.pListHead;
-	while (p) {
-		zend_class_entry *ce = (zend_class_entry*)p->pDataPtr;
-		q = ce->function_table.pListHead;
-		while (q) {
-			zend_op_array *op_array = (zend_op_array*)q->pData;
+	for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
+		p = script->class_table.arData + idx;
+		if (!p->xData) continue;
+		ce = (zend_class_entry*)p->xData;
+		for (j = 0; j < ce->function_table.nNumUsed; j++) {
+			q = ce->function_table.arData + j;
+			if (!q->xData) continue;
+			op_array = (zend_op_array*)q->xData;
 			if (op_array->scope == ce) {
 				zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
 			} else if (op_array->type == ZEND_USER_FUNCTION) {
@@ -572,9 +577,7 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 					op_array->static_variables = ht;
 				}
 			}
-			q = q->pListNext;
 		}
-		p = p->pListNext;
 	}
 
 	if (constants) {

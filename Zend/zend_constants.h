@@ -33,8 +33,7 @@
 typedef struct _zend_constant {
 	zval value;
 	int flags;
-	char *name;
-	uint name_len;
+	zend_string *name;
 	int module_number;
 } zend_constant;
 
@@ -76,11 +75,10 @@ ZEND_API void zend_register_string_constant(const char *name, uint name_len, cha
 ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC);
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
-void copy_zend_constant(zend_constant *c);
 zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC);
 END_EXTERN_C()
 
-#define ZEND_CONSTANT_DTOR (void (*)(void *)) free_zend_constant
+#define ZEND_CONSTANT_DTOR (void (*)(zval *)) free_zend_constant
 
 #endif
 

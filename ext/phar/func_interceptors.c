@@ -33,8 +33,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
 
@@ -107,8 +107,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
 
@@ -240,8 +240,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
@@ -335,8 +335,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
@@ -901,8 +901,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
@@ -968,8 +968,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_GLOBALS->phar_fname_map.arBuckets && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
-		&& !cached_phars.arBuckets) {
+	if ((PHAR_GLOBALS->phar_fname_map.arHash && !zend_hash_num_elements(&(PHAR_GLOBALS->phar_fname_map)))
+		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {

@@ -35,7 +35,7 @@ typedef struct _zend_lex_state {
 
 	zend_file_handle *in;
 	uint lineno;
-	char *filename;
+	zend_string *filename;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;

@@ -925,7 +925,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 
 PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC) /* {{{ */ {
 	phar_archive_data **fd_ptr;
-	if (PHAR_GLOBALS->phar_alias_map.arBuckets
+	if (PHAR_GLOBALS->phar_alias_map.arHash
 			&& SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
 		*filename = (*fd_ptr)->fname;
 		*filename_len = (*fd_ptr)->fname_len;
@@ -1253,7 +1253,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 
-	if (!phar->manifest.arBuckets) {
+	if (!phar->manifest.arHash) {
 		return NULL;
 	}
 
@@ -1298,7 +1298,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		}
 	}
 
-	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (phar->mounted_dirs.arHash && zend_hash_num_elements(&phar->mounted_dirs)) {
 		char *str_key;
 		ulong unused;
 		uint keylen;

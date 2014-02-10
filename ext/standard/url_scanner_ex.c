@@ -65,6 +65,7 @@ static PHP_INI_MH(OnUpdateTags)
 	}
 
 	zend_hash_init(ctx->tags, 0, NULL, NULL, 1);
+	ctx->tags->flags |= HASH_FLAG_BIG_DATA;
 	
 	for (key = php_strtok_r(tmp, ",", &lasts);
 			key;

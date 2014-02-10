@@ -2176,14 +2176,15 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
 					HashTable *htl = Z_ARRVAL_P(ctor_params);
+					uint idx;
 					Bucket *p;
 
 					fci.param_count = 0;
 					fci.params = safe_emalloc(sizeof(zval*), htl->nNumOfElements, 0);
-					p = htl->pListHead;
-					while (p != NULL) {
-						fci.params[fci.param_count++] = (zval**)p->pData;
-						p = p->pListNext;
+					for (idx = 0; idx < htl->nNumUsed; idx++) {
+						p = htl->arData + idx;
+						if (!p->xData) continue;
+						fci.params[fci.param_count++] = (zval**)&p->xData;
 					}
 				} else {
 					/* Two problems why we throw exceptions here: PHP is typeless

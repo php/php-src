@@ -161,6 +161,27 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 	}
 }
 
+ZEND_API void zend_stack_clean(zend_stack *stack, void (*func)(void *), zend_bool free_elements)
+{
+	int i;
+
+	if (func) {
+		for (i = 0; i < stack->top; i++) {
+			func(stack->elements[i]);
+		}
+	}
+	if (free_elements) {
+		if (stack->elements) {
+			for (i = 0; i < stack->top; i++) {
+				efree(stack->elements[i]);
+			}
+			efree(stack->elements);
+			stack->elements = NULL;
+		}
+		stack->top = stack->max = 0;
+	}
+}
+
 /*
  * Local variables:
  * tab-width: 4

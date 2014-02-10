@@ -119,7 +119,7 @@ struct _php_stream_filter {
 	php_stream_bucket_brigade buffer;
 
 	/* filters are auto_registered when they're applied */
-	int rsrc_id;
+	zend_resource *res;
 };
 
 /* stack filter onto a stream */

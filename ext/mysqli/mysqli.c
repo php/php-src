@@ -634,9 +634,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	INIT_CLASS_ENTRY(cex, "mysqli_sql_exception", mysqli_exception_methods);
 #ifdef HAVE_SPL
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException, NULL TSRMLS_CC);
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, spl_ce_RuntimeException TSRMLS_CC);
 #else
-	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+	mysqli_exception_class_entry = zend_register_internal_class_ex(&cex, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 #endif
 	mysqli_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(mysqli_exception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
@@ -1290,14 +1290,15 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (Z_TYPE_P(ctor_params) == IS_ARRAY) {
 					HashTable *params_ht = Z_ARRVAL_P(ctor_params);
+					uint idx;
 					Bucket *p;
 
 					fci.param_count = 0;
 					fci.params = safe_emalloc(sizeof(zval*), params_ht->nNumOfElements, 0);
-					p = params_ht->pListHead;
-					while (p != NULL) {
-						fci.params[fci.param_count++] = (zval**)p->pData;
-						p = p->pListNext;
+					for (idx = 0; idx < params_ht->nNumUsed; idx++) {
+						p = params_ht->arData + idx;
+						if (!p->xData) continue;
+						fci.params[fci.param_count++] = (zval**)&p->xData;
 					}
 				} else {
 					/* Two problems why we throw exceptions here: PHP is typeless
