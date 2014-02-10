@@ -2284,7 +2284,7 @@ static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC)
 		case TIMELIB_ZONETYPE_ABBR:
 			new_obj->tzi.z.utc_offset = old_obj->tzi.z.utc_offset;
 			new_obj->tzi.z.dst        = old_obj->tzi.z.dst;
-			new_obj->tzi.z.abbr       = old_obj->tzi.z.abbr;
+			new_obj->tzi.z.abbr       = strdup(old_obj->tzi.z.abbr);
 			break;
 	}
 	
@@ -3225,6 +3225,26 @@ PHP_METHOD(DateTimeImmutable, sub)
 }
 /* }}} */
 
+static void set_timezone_from_timelib_time(php_timezone_obj *tzobj, timelib_time *t)
+{
+       tzobj->initialized = 1;
+       tzobj->type = t->zone_type;
+       switch (t->zone_type) {
+               case TIMELIB_ZONETYPE_ID:
+                       tzobj->tzi.tz = t->tz_info;
+                       break;
+               case TIMELIB_ZONETYPE_OFFSET:
+                       tzobj->tzi.utc_offset = t->z;
+                       break;
+               case TIMELIB_ZONETYPE_ABBR:
+                       tzobj->tzi.z.utc_offset = t->z;
+                       tzobj->tzi.z.dst = t->dst;
+                       tzobj->tzi.z.abbr = strdup(t->tz_abbr);
+                       break;
+       }
+}
+
+
 /* {{{ proto DateTimeZone date_timezone_get(DateTimeInterface object)
    Return new DateTimeZone object relative to give DateTime
 */
@@ -3242,21 +3262,7 @@ PHP_FUNCTION(date_timezone_get)
 	if (dateobj->time->is_localtime/* && dateobj->time->tz_info*/) {
 		php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 		tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-		tzobj->initialized = 1;
-		tzobj->type = dateobj->time->zone_type;
-		switch (dateobj->time->zone_type) {
-			case TIMELIB_ZONETYPE_ID:
-				tzobj->tzi.tz = dateobj->time->tz_info;
-				break;
-			case TIMELIB_ZONETYPE_OFFSET:
-				tzobj->tzi.utc_offset = dateobj->time->z;
-				break;
-			case TIMELIB_ZONETYPE_ABBR:
-				tzobj->tzi.z.utc_offset = dateobj->time->z;
-				tzobj->tzi.z.dst = dateobj->time->dst;
-				tzobj->tzi.z.abbr = strdup(dateobj->time->tz_abbr);
-				break;
-		}
+		set_timezone_from_timelib_time(tzobj, dateobj->time);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3607,23 +3613,21 @@ PHP_FUNCTION(date_diff)
 }
 /* }}} */
 
-static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_DC)
+static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz TSRMLS_DC)
 {
-	char *tzid;
-	
-	*tzi = NULL;
-	
-	if ((tzid = timelib_timezone_id_from_abbr(tz, -1, 0))) {
-		*tzi = php_date_parse_tzfile(tzid, DATE_TIMEZONEDB TSRMLS_CC);
-	} else {
-		*tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB TSRMLS_CC);
-	}
-	
-	if (*tzi) {
-		return SUCCESS;
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or bad timezone (%s)", tz);
+	timelib_time *dummy_t = ecalloc(1, sizeof(timelib_time));
+	int           dst, not_found;
+	char         *orig_tz = tz;
+
+	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
+	if (not_found) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
+		efree(dummy_t);
 		return FAILURE;
+	} else {
+		set_timezone_from_timelib_time(tzobj, dummy_t TSRMLS_CC);
+		efree(dummy_t);
+		return SUCCESS;
 	}
 }
 
@@ -3633,20 +3637,16 @@ static int timezone_initialize(timelib_tzinfo **tzi, /*const*/ char *tz TSRMLS_D
 PHP_FUNCTION(timezone_open)
 {
 	char *tz;
-	php_size_t tz_len;
-	timelib_tzinfo *tzi = NULL;
+	php_size_t   tz_len;
 	php_timezone_obj *tzobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &tz, &tz_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (SUCCESS != timezone_initialize(&tzi, tz TSRMLS_CC)) {
+	tzobj = zend_object_store_get_object(php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC);
+	if (SUCCESS != timezone_initialize(tzobj, tz TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	tzobj = zend_object_store_get_object(php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC);
-	tzobj->type = TIMELIB_ZONETYPE_ID;
-	tzobj->tzi.tz = tzi;
-	tzobj->initialized = 1;
 }
 /* }}} */
 
@@ -3657,18 +3657,13 @@ PHP_METHOD(DateTimeZone, __construct)
 {
 	char *tz;
 	php_size_t tz_len;
-	timelib_tzinfo *tzi = NULL;
 	php_timezone_obj *tzobj;
 	zend_error_handling error_handling;
 	
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &tz, &tz_len)) {
-		if (SUCCESS == timezone_initialize(&tzi, tz TSRMLS_CC)) {
-			tzobj = zend_object_store_get_object(getThis() TSRMLS_CC);
-			tzobj->type = TIMELIB_ZONETYPE_ID;
-			tzobj->tzi.tz = tzi;
-			tzobj->initialized = 1;
-		} else {
+		tzobj = zend_object_store_get_object(getThis() TSRMLS_CC);
+		if (FAILURE == timezone_initialize(tzobj, tz TSRMLS_CC)) {
 			ZVAL_NULL(getThis());
 		}
 	}
@@ -3680,39 +3675,12 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 {
 	zval            **z_timezone = NULL;
 	zval            **z_timezone_type = NULL;
-	timelib_tzinfo  *tzi;
 
 	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
 			convert_to_int(*z_timezone_type);
-			switch (Z_IVAL_PP(z_timezone_type)) {
-				case TIMELIB_ZONETYPE_OFFSET: {
-					char *offset, *offset_start;
-
-					offset = emalloc(sizeof(char) * (Z_STRSIZE_PP(z_timezone) + 1));
-					memmove(offset, Z_STRVAL_PP(z_timezone), Z_STRSIZE_PP(z_timezone)+1);
-					offset_start = offset;
-
-					++offset;
-					if(*offset_start == '+'){
-						(*tzobj)->tzi.utc_offset = -1 * timelib_parse_tz_cor(&offset);
-					} else {
-						(*tzobj)->tzi.utc_offset = timelib_parse_tz_cor(&offset);
-					}
-					efree(offset_start);
-					(*tzobj)->type = TIMELIB_ZONETYPE_OFFSET;
-					(*tzobj)->initialized = 1;
-					return SUCCESS;
-					break;
-				}
-				case TIMELIB_ZONETYPE_ABBR:
-				case TIMELIB_ZONETYPE_ID:
-					if (SUCCESS == timezone_initialize(&tzi, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
-						(*tzobj)->type = TIMELIB_ZONETYPE_ID;
-						(*tzobj)->tzi.tz = tzi;
-						(*tzobj)->initialized = 1;
-						return SUCCESS;
-					}
+			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
+				return SUCCESS;
 			}
 		}
 	}
