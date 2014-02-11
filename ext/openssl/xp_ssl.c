@@ -456,6 +456,31 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	return 0;
 }
 
+static zval *php_capture_ssl_session_meta(SSL *ssl_handle)
+{
+	zval *meta_arr;
+	char *proto_str;
+	long proto = SSL_version(ssl_handle);
+	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl_handle);
+
+	switch (proto) {
+		case TLS1_2_VERSION: proto_str = "TLSv1.2"; break;
+		case TLS1_1_VERSION: proto_str = "TLSv1.1"; break;
+		case TLS1_VERSION: proto_str = "TLSv1"; break;
+		case SSL3_VERSION: proto_str = "SSLv3"; break;
+		case SSL2_VERSION: proto_str = "SSLv2"; break;
+		default: proto_str = "UNKNOWN";
+	}
+
+	MAKE_STD_ZVAL(meta_arr);
+	array_init(meta_arr);
+	add_assoc_string(meta_arr, "protocol", proto_str, 1);
+	add_assoc_string(meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher), 1);
+	add_assoc_long(meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+	add_assoc_string(meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher), 1);
+
+	return meta_arr;
+}
 
 static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_netstream_data_t *sslsock, php_stream_xport_crypto_param *cparam TSRMLS_DC)
 {
@@ -580,6 +605,18 @@ static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_nets
 				 * and/or the certificate chain */
 				if (stream->context) {
 					zval **val, *zcert;
+
+					if (SUCCESS == php_stream_context_get_option(
+								stream->context, "ssl",
+								"capture_session_meta", &val) &&
+							zend_is_true(*val)) {
+						zval *meta_arr = php_capture_ssl_session_meta(sslsock->ssl_handle);
+						php_stream_context_set_option(stream->context,
+								"ssl", "session_meta",
+								meta_arr);
+						zval_dtor(meta_arr);
+						efree(meta_arr);
+					}
 
 					if (SUCCESS == php_stream_context_get_option(
 								stream->context, "ssl",
