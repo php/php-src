@@ -433,6 +433,7 @@ Build change: Fix source variable definition for C89 compatibility
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
    <file name="oci8.c" role="src" />
    <file name="oci8_dtrace.d" role="src" />
    <file name="oci8_collection.c" role="src" />
