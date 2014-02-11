@@ -435,6 +435,11 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		return -1;
 	}
 
+#ifdef SSL_MODE_RELEASE_BUFFERS
+	long mode = SSL_get_mode(sslsock->ssl_handle);
+	SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
+#endif
+
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
 		handle_ssl_error(stream, 0, 1 TSRMLS_CC);
 	}
