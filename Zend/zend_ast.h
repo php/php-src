@@ -22,8 +22,6 @@
 #ifndef ZEND_AST_H
 #define ZEND_AST_H
 
-typedef struct _zend_ast zend_ast;
-
 #include "zend.h"
 
 typedef enum _zend_ast_kind {

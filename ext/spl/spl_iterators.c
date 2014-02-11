@@ -473,7 +473,8 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				} else {
 					ZVAL_LONG(caching_it_flags, CIT_CATCH_GET_CHILD);
 				}
-				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, 1, iterator, caching_it_flags TSRMLS_CC);
+				ALLOC_ZVAL(caching_it);
+				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, caching_it, iterator, caching_it_flags TSRMLS_CC);
 				zval_ptr_dtor(&caching_it_flags);
 				if (inc_refcount == 0 && iterator) {
 					zval_ptr_dtor(&iterator);
@@ -1879,7 +1880,7 @@ SPL_METHOD(RecursiveFilterIterator, getChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception) && retval) {
-		spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), &return_value, 0, retval TSRMLS_CC);
+		spl_instantiate_arg_ex1(Z_OBJCE_P(getThis()), return_value, retval TSRMLS_CC);
 	}
 	if (retval) {
 		zval_ptr_dtor(&retval);
@@ -1901,7 +1902,7 @@ SPL_METHOD(RecursiveCallbackFilterIterator, getChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception) && retval) {
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, retval, intern->u.cbfilter->fci.function_name TSRMLS_CC);
+		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, retval, intern->u.cbfilter->fci.function_name TSRMLS_CC);
 	}
 	if (retval) {
 		zval_ptr_dtor(&retval);
@@ -2203,7 +2204,7 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 	if (!EG(exception)) {
 		MAKE_STD_ZVAL(regex);
 		ZVAL_STRING(regex, intern->u.regex.regex, 1);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), &return_value, 0, retval, regex TSRMLS_CC);
+		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, retval, regex TSRMLS_CC);
 		zval_ptr_dtor(&regex);
 	}
 	if (retval) {
@@ -2613,7 +2614,8 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 					} else {
 						INIT_PZVAL(&zflags);
 						ZVAL_LONG(&zflags, intern->u.caching.flags & CIT_PUBLIC);
-						spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &intern->u.caching.zchildren, 1, zchildren, &zflags TSRMLS_CC);
+						ALLOC_ZVAL(intern->u.caching.zchildren);
+						spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, intern->u.caching.zchildren, zchildren, &zflags TSRMLS_CC);
 						zval_ptr_dtor(&zchildren);
 					}
 				}

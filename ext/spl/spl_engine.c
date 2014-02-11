@@ -32,14 +32,11 @@
 #include "spl_array.h"
 
 /* {{{ spl_instantiate */
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC)
+PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
-	if (alloc) {
-		ALLOC_ZVAL(*object);
-	}
-	object_init_ex(*object, pce);
-	Z_SET_REFCOUNT_PP(object, 1);
-	Z_SET_ISREF_PP(object); /* check if this can be hold always */
+	object_init_ex(object, pce);
+	Z_SET_REFCOUNT_P(object, 1);
+	Z_SET_ISREF_P(object); /* check if this can be hold always */
 }
 /* }}} */
 

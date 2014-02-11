@@ -80,13 +80,13 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, int
 void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
 {
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
-		size_t len = pce->name_length;
 		zval *tmp;
 
-		if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
+		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
 			MAKE_STD_ZVAL(tmp);
-			ZVAL_STRINGL(tmp, pce->name, pce->name_length, 1);
-			zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
+			STR_ADDREF(pce->name);
+			ZVAL_STR(tmp, pce->name);
+			zend_hash_add(Z_ARRVAL_P(list), pce->name, tmp);
 		}
 	}
 }
@@ -137,7 +137,7 @@ char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop
 {
 	char *rv;
 
-	zend_mangle_property_name(&rv, name_len, ce->name, ce->name_length, prop_name, prop_len, 0);
+	zend_mangle_property_name(&rv, name_len, ce->name->val, ce->name->len, prop_name, prop_len, 0);
 
 	return rv;
 }

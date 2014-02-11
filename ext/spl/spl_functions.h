@@ -23,7 +23,7 @@
 
 #include "php.h"
 
-typedef zend_object_value (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
+typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type TSRMLS_DC);
 
 #define REGISTER_SPL_STD_CLASS(class_name, obj_ctor) \
 	spl_register_std_class(&spl_ce_ ## class_name, # class_name, obj_ctor, NULL TSRMLS_CC);

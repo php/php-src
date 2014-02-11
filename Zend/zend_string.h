@@ -109,7 +109,7 @@ static zend_always_inline zend_string *zend_str_init(const char *str, int len, i
 {
 	zend_string *ret = STR_ALLOC(len, persistent);
 
-	memcpy(ret, str, len + 1);
+	memcpy(ret->val, str, len + 1);
 	return ret;
 }
 

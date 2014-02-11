@@ -66,7 +66,10 @@ typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
 typedef struct _zend_str_offset zend_str_offset;
 
-typedef void (*dtor_func_t)(zval *zv);
+typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
+typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t TSRMLS_DC);
+typedef void (*dtor_func_t)(zval *pDest);
+typedef void (*copy_ctor_func_t)(zval *pElement);
 
 typedef union _zend_value {
 	long              lval;				/* long value */
@@ -262,14 +265,14 @@ struct _zend_ast_ref {
 #define Z_OBJ(zval)					(zval).value.obj
 #define Z_OBJ_P(zval_p)				Z_OBJ(*(zval_p))
 
-#define Z_OBJ(zval)					(zval).value.obj
-#define Z_OBJ_P(zval_p)				Z_OBJ(*(zval_p))
-
 #define Z_OBJ_HT(zval)				Z_OBJ(zval)->handlers
 #define Z_OBJ_HT_P(zval_p)			Z_OBJ_HT(*(zval_p))
 
 #define Z_OBJ_HANDLER(zval, hf)		Z_OBJ_HT((zval))->hf
 #define Z_OBJ_HANDLER_P(zv_p, hf)	Z_OBJ_HANDLER(*(zv_p), hf)
+
+#define Z_OBJ_HANDLE(zval)          (Z_OBJ((zval)))->handle
+#define Z_OBJ_HANDLE_P(zval_p)      Z_OBJ_HANDLE(*(zval_p))
 
 #define Z_OBJCE(zval)				zend_get_class_entry(&(zval) TSRMLS_CC)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))

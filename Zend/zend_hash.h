@@ -47,11 +47,6 @@
 
 #define HASH_MASK_CONSISTENCY      0x60
 
-typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
-typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t TSRMLS_DC);
-typedef void (*dtor_func_t)(zval *pDest);
-typedef void (*copy_ctor_func_t)(zval *pElement);
-
 typedef struct _zend_hash_key {
 	ulong        h;
 	zend_string *key;
@@ -446,7 +441,7 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 {
 	zval *zv;
 
-	zv = zend_hash_get_current_data_ptr_ex(ht, pos);
+	zv = zend_hash_get_current_data_ex(ht, pos);
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
