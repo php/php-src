@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed Request #66574i (Allow multiple paths in php_ini_scanned_path). (Remi)
 
+- Date:
+  . Fixed bug #45528 (Allow the DateTimeZone constructor to accept timezones
+    per offset too). (Derick)
+
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
