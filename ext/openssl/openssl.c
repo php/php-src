@@ -433,11 +433,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
     ZEND_ARG_INFO(0, spki)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_get_cert_locations, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+
 /* spki functions */
 	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
 	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
@@ -1279,6 +1284,26 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 /* }}} */
 
 /* {{{ x509 cert functions */
+
+/* {{{ proto array openssl_get_cert_locations(void)
+   Retrieve an array mapping available certificate locations */
+PHP_FUNCTION(openssl_get_cert_locations)
+{
+	array_init(return_value);
+
+	add_assoc_string(return_value, "default_cert_file", (char *) X509_get_default_cert_file(), 1);
+	add_assoc_string(return_value, "default_cert_file_env", (char *) X509_get_default_cert_file_env(), 1);
+	add_assoc_string(return_value, "default_cert_dir", (char *) X509_get_default_cert_dir(), 1);
+	add_assoc_string(return_value, "default_cert_dir_env", (char *) X509_get_default_cert_dir_env(), 1);
+	add_assoc_string(return_value, "default_private_dir", (char *) X509_get_default_private_dir(), 1);
+	add_assoc_string(return_value, "default_default_cert_area", (char *) X509_get_default_cert_area(), 1);
+	add_assoc_string(return_value, "ini_cafile",
+		zend_ini_string("openssl.cafile", sizeof("openssl.cafile"), 0), 1);
+	add_assoc_string(return_value, "ini_capath",
+		zend_ini_string("openssl.capath", sizeof("openssl.capath"), 0), 1);
+}
+/* }}} */
+
 
 /* {{{ php_openssl_x509_from_zval
 	Given a zval, coerce it into an X509 object.
