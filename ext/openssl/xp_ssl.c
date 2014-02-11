@@ -37,6 +37,10 @@
 #include <sys/select.h>
 #endif
 
+#if !defined(OPENSSL_NO_ECDH) && OPENSSL_VERSION_NUMBER >= 0x0090800fL
+#define HAVE_ECDH
+#endif
+
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
 int php_openssl_get_x509_list_id(void);
@@ -427,6 +431,27 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 #endif
 
+	if (!sslsock->is_client && stream->context && SUCCESS == php_stream_context_get_option(
+				stream->context, "ssl", "honor_cipher_order", &val) &&
+			zend_is_true(*val)
+	) {
+		SSL_CTX_set_options(sslsock->ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+	}
+
+	if (!sslsock->is_client && stream->context && SUCCESS == php_stream_context_get_option(
+				stream->context, "ssl", "single_dh_use", &val) &&
+			zend_is_true(*val)
+	) {
+		SSL_CTX_set_options(sslsock->ctx, SSL_OP_SINGLE_DH_USE);
+	}
+
+	if (!sslsock->is_client && stream->context && SUCCESS == php_stream_context_get_option(
+				stream->context, "ssl", "single_ecdh_use", &val) &&
+			zend_is_true(*val)
+	) {
+		SSL_CTX_set_options(sslsock->ctx, SSL_OP_SINGLE_ECDH_USE);
+	}
+
 	sslsock->ssl_handle = php_SSL_new_from_context(sslsock->ctx, stream TSRMLS_CC);
 	if (sslsock->ssl_handle == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create an SSL handle");
@@ -489,7 +514,167 @@ static zval *php_capture_ssl_session_meta(SSL *ssl_handle)
 	return meta_arr;
 }
 
-static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_netstream_data_t *sslsock, php_stream_xport_crypto_param *cparam TSRMLS_DC)
+static int php_set_server_rsa_key(php_stream *stream,
+	php_openssl_netstream_data_t *sslsock
+	TSRMLS_DC)
+{
+	zval ** val;
+	int rsa_key_size;
+	RSA* rsa;
+	int retval = 1;
+
+	if (php_stream_context_get_option(stream->context, "ssl", "rsa_key_size", &val) == SUCCESS) {
+		rsa_key_size = (int) Z_LVAL_PP(val);
+		if ((rsa_key_size != 1) && (rsa_key_size & (rsa_key_size - 1))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"RSA key size requires a power of 2: %d",
+				rsa_key_size);
+
+			rsa_key_size = 2048;
+		}
+	} else {
+		rsa_key_size = 2048;
+	}
+
+	rsa = RSA_generate_key(rsa_key_size, RSA_F4, NULL, NULL);
+
+	if (!SSL_set_tmp_rsa(sslsock->ssl_handle, rsa)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Failed setting RSA key");
+		retval = 0;
+	}
+
+	RSA_free(rsa);
+
+	return retval;
+}
+
+
+static int php_set_server_dh_param(php_openssl_netstream_data_t *sslsock,
+	char *dh_path
+	TSRMLS_DC)
+{
+	DH *dh;
+	BIO* bio;
+
+	bio = BIO_new_file(dh_path, "r");
+
+	if (bio == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Invalid dh_param file: %s",
+			dh_path);
+
+		return 0;
+	}
+
+	dh = PEM_read_bio_DHparams(bio, NULL, NULL, NULL);
+	BIO_free(bio);
+
+	if (dh == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Failed reading DH params from file: %s",
+			dh_path);
+
+		return 0;
+	}
+
+	if (SSL_set_tmp_dh(sslsock->ssl_handle, dh) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"DH param assignment failed");
+		DH_free(dh);
+		return 0;
+	}
+
+	DH_free(dh);
+
+	return 1;
+}
+
+static int php_enable_server_crypto_opts(php_stream *stream,
+	php_openssl_netstream_data_t *sslsock
+	TSRMLS_DC)
+{
+	zval **val;
+
+	if (php_stream_context_get_option(stream->context, "ssl", "dh_param", &val) == SUCCESS) {
+		convert_to_string_ex(val);
+		if (!php_set_server_dh_param(sslsock,  Z_STRVAL_PP(val) TSRMLS_CC)) {
+			return 0;
+		}
+	}
+
+#ifdef HAVE_ECDH
+
+	int curve_nid;
+	EC_KEY *ecdh;
+
+	if (php_stream_context_get_option(stream->context, "ssl", "ecdh_curve", &val) == SUCCESS) {
+		char *curve_str;
+		convert_to_string_ex(val);
+		curve_str = Z_STRVAL_PP(val);
+		curve_nid = OBJ_sn2nid(curve_str);
+		if (curve_nid == NID_undef) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Invalid ECDH curve: %s",
+				curve_str);
+
+			return 0;
+		}
+	} else {
+		curve_nid = NID_X9_62_prime256v1;
+	}
+
+	ecdh = EC_KEY_new_by_curve_name(curve_nid);
+	if (ecdh == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Failed generating ECDH curve");
+
+		return 0;
+	}
+
+	SSL_set_tmp_ecdh(sslsock->ssl_handle, ecdh);
+	EC_KEY_free(ecdh);
+
+#else
+
+	if (php_stream_context_get_option(stream->context, "ssl", "ecdh_curve", &val) == SUCCESS) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"ECDH curve support not compiled into the OpenSSL lib against which PHP is linked");
+	}
+
+#endif
+
+	if (!php_set_server_rsa_key(stream, sslsock TSRMLS_CC)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+static inline void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
+{
+	zval **val;
+
+	if (stream->context &&
+            (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
+                || zend_is_true(*val))
+	) {
+		if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
+			convert_to_string_ex(val);
+			SSL_set_tlsext_host_name(sslsock->ssl_handle, Z_STRVAL_PP(val));
+		} else if (sslsock->url_name) {
+			SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
+		}
+	} else if (!stream->context && sslsock->url_name) {
+		SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
+	}
+}
+/* }}} */
+
+static inline int php_openssl_enable_crypto(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock,
+		php_stream_xport_crypto_param *cparam
+		TSRMLS_DC)
 {
 	int n, retry = 1;
 
@@ -501,26 +686,16 @@ static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_nets
 
 #if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
 {
-		zval **val;
-
-		if (sslsock->is_client &&
-			stream->context &&
-			(php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
-				|| zend_is_true(*val))
-		) {
-			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
-				convert_to_string_ex(val);
-				SSL_set_tlsext_host_name(sslsock->ssl_handle, Z_STRVAL_PP(val));
-			} else if (sslsock->url_name) {
-				SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
-			}
-
-		} else if (sslsock->is_client && !stream->context && sslsock->url_name) {
-			SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
+		if (sslsock->is_client) {
+			enable_client_sni(stream, sslsock);
 		}
-
 }
 #endif
+
+		if (!sslsock->is_client && !php_enable_server_crypto_opts(stream, sslsock TSRMLS_CC)) {
+			return -1;
+		}
+
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
 				SSL_set_connect_state(sslsock->ssl_handle);
