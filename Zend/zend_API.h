@@ -673,30 +673,30 @@ END_EXTERN_C()
 	{																				\
 		char *_name = (name);														\
 																					\
-		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 1, 0);	\
+		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name), var, 1, 0);		\
 	}
 
 #define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount, _is_ref)				\
 	{																									\
-		zval **orig_var;																				\
+		zval *orig_var;																					\
 																										\
-		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
-			&& Z_ISREF_PP(orig_var)) {																\
-			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_PP(orig_var));												\
-			Z_SET_ISREF_P(var);																			\
+		if ((orig_var = zend_hash_str_find(symtable, (name), (name_length))) != NULL					\
+			&& Z_ISREF_P(orig_var)) {																	\
+			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(orig_var));												\
+			/*???Z_SET_ISREF_P(var);*/																	\
 																										\
 			if (_refcount) {																			\
 				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);								\
 			}																							\
-			zval_dtor(*orig_var);																		\
-			**orig_var = *(var);																		\
-			FREE_ZVAL(var);																				\
+			zval_dtor(orig_var);																		\
+			ZVAL_COPY_VALUE(orig_var, var);																\
+			/*???FREE_ZVAL(var);*/																		\
 		} else {																						\
-			Z_SET_ISREF_TO_P(var, _is_ref);																\
+			/*???Z_SET_ISREF_TO_P(var, _is_ref);*/														\
 			if (_refcount) {																			\
 				Z_SET_REFCOUNT_P(var, _refcount);														\
 			}																							\
-			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
+			zend_hash_str_update(symtable, (name), (name_length), var);									\
 		}																								\
 	}
 

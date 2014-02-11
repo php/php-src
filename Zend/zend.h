@@ -685,6 +685,11 @@ END_EXTERN_C()
 		SEPARATE_ZVAL(zv);						\
 	}
 
+#define SEPARATE_ZVAL_IF_REF(zv)				\
+	if (Z_ISREF_P(zv)) {						\
+		SEPARATE_ZVAL(zv);						\
+	}
+
 #define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv)		\
 	if (!Z_ISREF_P(zv)) {						\
 		zval ref;								\
