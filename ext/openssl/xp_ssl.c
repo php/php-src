@@ -418,9 +418,9 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	{
 		zval **val;
 
-		if (stream->context && SUCCESS == php_stream_context_get_option(
-					stream->context, "ssl", "disable_compression", &val) &&
-				zend_is_true(*val)
+		if (stream->context && (FAILURE == php_stream_context_get_option(
+					stream->context, "ssl", "disable_compression", &val) ||
+				zend_is_true(*val))
 		) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
 		}
