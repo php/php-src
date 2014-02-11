@@ -5226,7 +5226,11 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		cipherlist = "DEFAULT";
 	}
 	if (SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set cipher list `%s'", cipherlist);
 		return NULL;
+	}
+	if (GET_VER_OPT("honor_cipher_order")) {
+		SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 	}
 
 	GET_VER_OPT_STRING("local_cert", certfile);
