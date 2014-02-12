@@ -148,12 +148,12 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	while (object->level > 0) {
 		sub_iter = object->iterators[object->level].iterator;
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
-		zval_clear(&object->iterators[object->level--].zobject);
+		zval_ptr_dtor(&object->iterators[object->level--].zobject);
 	}
 	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
 
-	zval_clear(&iter->zobject);
+	zval_ptr_dtor(&iter->zobject);
 	efree(iter);
 }
 
@@ -250,7 +250,7 @@ next_step:
 				}
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					has_children = zend_is_true(&retval TSRMLS_CC);
-					zval_release(&retval);
+					zval_ptr_dtor(&retval);
 					if (has_children) {
 						if (object->max_depth == -1 || object->max_depth > object->level) {
 							switch (object->mode) {
@@ -308,7 +308,7 @@ next_step:
 						return;
 					} else {
 						zend_clear_exception(TSRMLS_C);
-						zval_release(&child);
+						zval_ptr_dtor(&child);
 						object->iterators[object->level].state = RS_NEXT;
 						goto next_step;
 					}
@@ -316,7 +316,7 @@ next_step:
 
 				if (Z_TYPE(child) == IS_UNDEF || Z_TYPE(child) != IS_OBJECT || 
 						!((ce = Z_OBJCE(child)) && instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC))) {
-					zval_release(&child);
+					zval_ptr_dtor(&child);
 					zend_throw_exception(spl_ce_UnexpectedValueException, "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
 					return;
 				} 
@@ -361,7 +361,7 @@ next_step:
 				}
 			}
 			iterator->funcs->dtor(iterator TSRMLS_CC);
-			zval_clear(&object->iterators[object->level].zobject);
+			zval_ptr_dtor(&object->iterators[object->level].zobject);
 			object->level--;
 		} else {
 			return; /* done completeley */
@@ -380,7 +380,7 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 	while (object->level) {
 		sub_iter = object->iterators[object->level].iterator;
 		sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
-		zval_clear(&object->iterators[object->level--].zobject);
+		zval_ptr_dtor(&object->iterators[object->level--].zobject);
 		if (!EG(exception) && (!object->endChildren || object->endChildren->common.scope != spl_ce_RecursiveIteratorIterator)) {
 			zend_call_method_with_0_params(zthis, object->ce, &object->endChildren, "endchildren", NULL);
 		}
@@ -471,7 +471,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 					ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
 				}
 				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags TSRMLS_CC);
-				zval_release(&caching_it_flags);
+				zval_ptr_dtor(&caching_it_flags);
 				if (inc_refcount == 0 && iterator) {
 					zval_ptr_dtor(iterator);
 				}
@@ -562,7 +562,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 		while (intern->level >= 0) {
 			sub_iter = intern->iterators[intern->level].iterator;
 			sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
-			zval_clear(&intern->iterators[intern->level--].zobject);
+			zval_ptr_dtor(&intern->iterators[intern->level--].zobject);
 		}
 		efree(intern->iterators);
 		intern->iterators = NULL;
@@ -861,7 +861,7 @@ static void spl_RecursiveIteratorIterator_dtor(zend_object *_object TSRMLS_DC)
 		while (object->level >= 0) {
 			sub_iter = object->iterators[object->level].iterator;
 			sub_iter->funcs->dtor(sub_iter TSRMLS_CC);
-			zval_clear(&object->iterators[object->level--].zobject);
+			zval_ptr_dtor(&object->iterators[object->level--].zobject);
 		}
 		efree(object->iterators);
 		object->iterators = NULL;
@@ -982,7 +982,7 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 			} else {
 				smart_str_appendl(&str, object->prefix[2].c, object->prefix[2].len);
 			}
-			zval_release(&has_next);
+			zval_ptr_dtor(&has_next);
 		}
 	}
 	zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
@@ -992,7 +992,7 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 		} else {
 			smart_str_appendl(&str, object->prefix[4].c, object->prefix[4].len);
 		}
-		zval_release(&has_next);
+		zval_ptr_dtor(&has_next);
 	}
 
 	smart_str_appendl(&str, object->prefix[5].c, object->prefix[5].len);
@@ -2588,7 +2588,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			zval retval, *zchildren, zflags;
 			zend_call_method_with_0_params(intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
 			if (EG(exception)) {
-				zval_release(&retval);
+				zval_ptr_dtor(&retval);
 				if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
 					zend_clear_exception(TSRMLS_C);
 				} else {
@@ -2598,11 +2598,11 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 				if (zend_is_true(&retval TSRMLS_CC)) {
 					zend_call_method_with_0_params(intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
 					if (EG(exception)) {
-						zval_release(&zchildren);
+						zval_ptr_dtor(&zchildren);
 						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
 							zend_clear_exception(TSRMLS_C);
 						} else {
-							zval_release(&retval);
+							zval_ptr_dtor(&retval);
 							return;
 						}
 					} else {
@@ -3570,7 +3570,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser TSRML
 	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL TSRMLS_CC);
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		result = zend_is_true(retval TSRMLS_CC) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
-		zval_release(&retval);
+		zval_ptr_dtor(&retval);
 	} else {
 		result = ZEND_HASH_APPLY_STOP;
 	}
