@@ -227,9 +227,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	return hash;
 }
 
-//???#define str_estrndup(str, len) (IS_INTERNED(str) ? (str) : estrndup((str), (len)))
-//???#define str_strndup(str, len)	(IS_INTERNED(str) ? (str) : zend_strndup((str), (len)));
-
 #endif /* ZEND_STRING_H */
 
 /*

@@ -698,8 +698,6 @@ int zend_get_class_fetch_type(const char *class_name, uint class_name_len);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name TSRMLS_DC);
 typedef struct _zend_auto_global {
-//???	const char *name;
-//???	uint name_len;
 	zend_string *name;
 	zend_auto_global_callback auto_global_callback;
 	zend_bool jit;

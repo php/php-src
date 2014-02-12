@@ -246,9 +246,8 @@ static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 
 static zend_always_inline zval* zend_vm_stack_frame_base(zend_execute_data *ex)
 {
-//???	return (void**)((char*)ex->call_slots +
-//???		ZEND_MM_ALIGNED_SIZE(sizeof(call_slot)) * ex->op_array->nested_calls);
-	return NULL;
+	return (zval*)((char*)ex->call_slots +
+		ZEND_MM_ALIGNED_SIZE(sizeof(call_slot)) * ex->op_array->nested_calls);
 }
 
 static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)

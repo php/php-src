@@ -148,7 +148,7 @@ struct _zend_array {
 
 struct _zend_object {
 	zend_refcounted   gc;
-	zend_uint         handle;
+	zend_uint         handle; //??? may be removed?
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -158,7 +158,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	long              handle; //???
+	long              handle; //??? may be removed?
 	int               type;
 	void             *ptr;
 };

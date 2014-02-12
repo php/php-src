@@ -30,12 +30,6 @@ BEGIN_EXTERN_C()
 #define ZEND_RESOURCE_LIST_TYPE_STD	1
 #define ZEND_RESOURCE_LIST_TYPE_EX	2
 
-//???typedef struct _zend_rsrc_list_entry {
-//???	void *ptr;
-//???	int type;
-//???	int refcount;
-//???} zend_rsrc_list_entry;
-
 typedef void (*rsrc_dtor_func_t)(zend_resource *res TSRMLS_DC);
 #define ZEND_RSRC_DTOR_FUNC(name) void name(zend_resource *res TSRMLS_DC)
 

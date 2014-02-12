@@ -161,12 +161,6 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 
 END_EXTERN_C()
 
-/* fast cache for zval's */
-//???#define ALLOC_ZVAL(z)		(z) = (zval *) emalloc(sizeof(zval))
-//???#define FREE_ZVAL(z)		efree_rel(z)
-//???#define ALLOC_ZVAL_REL(z)	(z) = (zval *) emalloc_rel(sizeof(zval))
-//???#define FREE_ZVAL_REL(z)	efree_rel(z)
-
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
 	(ht) = (HashTable *) emalloc(sizeof(HashTable))

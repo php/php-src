@@ -705,8 +705,6 @@ END_EXTERN_C()
 		Z_DELREF_P((pzv));					\
 	}										\
 
-//???	INIT_PZVAL(&(zv));
-	
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
 	int is_ref, refcount;						\
 												\
