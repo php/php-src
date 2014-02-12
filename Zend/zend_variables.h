@@ -35,6 +35,20 @@ static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 	_zval_dtor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 }
 
+static zend_always_inline void _zval_clear(zval *zval_ptr, zend_bool reset ZEND_FILE_LINE_DC)
+{
+	if (!Z_REFCOUNTED_P(zval_ptr)) {
+		return;
+	}
+	Z_DELREF_P(zval_ptr);
+	if (Z_REFCOUNT_P(zval_ptr) == 0) {
+		_zval_dtor_func(zval_ptr ZEND_FILE_LINE_RELAY_CC);
+		if (reset) {
+			ZVAL_UNDEF(zval_ptr);
+		}
+	} 
+}
+
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
@@ -55,6 +69,9 @@ ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
+#define zval_clear_ex(zval_ptr, reset) _zval_clear((zval_ptr), (reset) ZEND_FILE_LINE_CC)
+#define zval_release(zval_ptr) zval_clear_ex((zval_ptr), 0 ZEND_FILE_LINE_CC)
+#define zval_clear(zval_ptr) zval_clear_ex((zval_ptr), 1 ZEND_FILE_LINE_CC)
 #define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_internal_ptr_dtor(zvalue) _zval_internal_ptr_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor_wrapper _zval_dtor_wrapper
