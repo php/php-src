@@ -65,18 +65,18 @@ header_remove("X-Foo");
 <?php ?>
 ----------
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php header_remove(); ?>
 ----------
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php header_remove("X-Foo"); ?>
 ----------
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php
@@ -85,7 +85,7 @@ header("X-Foo: Bar");
 ----------
 X-Powered-By: PHP/%s
 X-Foo: Bar
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php
@@ -96,7 +96,7 @@ header_remove("X-Foo");
 ----------
 X-Powered-By: PHP/%s
 X-Bar: Baz
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php
@@ -106,7 +106,7 @@ header_remove("X-Foo: Bar");
 ----------
 X-Powered-By: PHP/%s
 X-Foo: Bar
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 
 Warning: Header to delete may not contain colon. in %s on line 3
@@ -118,7 +118,7 @@ header_remove("X-Foo:");
 ----------
 X-Powered-By: PHP/%s
 X-Foo: Bar
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 
 Warning: Header to delete may not contain colon. in %s on line 3
@@ -128,7 +128,7 @@ header("X-Foo: Bar");
 header_remove();
 ?>
 ----------
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php
@@ -136,7 +136,7 @@ header_remove("");
 ?>
 ----------
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 ----------
 <?php
@@ -144,7 +144,7 @@ header_remove(":");
 ?>
 ----------
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 
 Warning: Header to delete may not contain colon. in %s on line 2
@@ -158,7 +158,7 @@ header_remove("X-Foo");
 ----------
 X-Powered-By: PHP/%s
 X-Foo: Bar
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 flush
 
