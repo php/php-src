@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Alpha 3
 
-06 Feb 2014, PHP 5.6.0 Alpha 2
+13 Feb 2014, PHP 5.6.0 Alpha 2
 - Core:
   . Added T_POW (**) operator
     (RFC: https://wiki.php.net/rfc/pow-operator). (Tjerk Meesters)
