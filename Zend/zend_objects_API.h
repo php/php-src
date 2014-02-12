@@ -51,6 +51,18 @@
 //???	} bucket;
 //???} zend_object_store_bucket;
 
+#define FREE_BUCKET				1
+
+#define IS_VALID(o)				(!(((zend_uintptr_t)(o)) & FREE_BUCKET))
+
+#define SET_INVALID(o)			((zend_object*)((((zend_uintptr_t)(o)) | FREE_BUCKET)))
+
+#define GET_BUCKET_NUMBER(o)	(((zend_uintptr_t)(o)) >> 1)
+
+#define SET_BUCKET_NUMBER(o, n)	do { \
+		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | FREE_BUCKET); \
+	} while (0)
+
 typedef struct _zend_objects_store {
 	zend_object **object_buckets;
 	zend_uint top;
@@ -67,20 +79,10 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects);
 
 /* Store API functions */
 ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC);
+ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC);
 
-//???ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC);
-//???ZEND_API void zend_objects_store_del_ref(zval *object TSRMLS_DC);
-//???ZEND_API void zend_objects_store_add_ref_by_handle(zend_object_handle handle TSRMLS_DC);
-//???ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle, const zend_object_handlers *handlers TSRMLS_DC);
-//???static zend_always_inline void zend_objects_store_del_ref_by_handle(zend_object_handle handle TSRMLS_DC) {
-//???	zend_objects_store_del_ref_by_handle_ex(handle, NULL TSRMLS_CC);
-//???}
-//???ZEND_API zend_uint zend_objects_store_get_refcount(zval *object TSRMLS_DC);
-//???ZEND_API zend_object *zend_objects_store_clone_obj(zval *object TSRMLS_DC);
-//???ZEND_API void *zend_object_store_get_object(const zval *object TSRMLS_DC);
-//???ZEND_API void *zend_object_store_get_object_by_handle(zend_object_handle handle TSRMLS_DC);
 /* See comment in zend_objects_API.c before you use this */
-//???ZEND_API void zend_object_store_set_object(zval *zobject, void *object TSRMLS_DC);
+ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TSRMLS_DC);
 ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC);
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects TSRMLS_DC);

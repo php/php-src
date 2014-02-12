@@ -55,6 +55,7 @@ typedef struct _zend_object_iterator_funcs {
 } zend_object_iterator_funcs;
 
 struct _zend_object_iterator {
+	zend_object std;
 	void *data;
 	zend_object_iterator_funcs *funcs;
 	ulong index; /* private to fe_reset/fe_fetch opcodes */
@@ -82,7 +83,7 @@ BEGIN_EXTERN_C()
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, zend_object_iterator **iter TSRMLS_DC);
 
 /* given an iterator, wrap it up as a zval for use by the engine opcodes */
-ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC);
+ZEND_API void zend_iterator_wrap(zend_object_iterator *iter, zval *zv TSRMLS_DC);
 
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D);
 END_EXTERN_C()

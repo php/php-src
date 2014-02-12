@@ -23,19 +23,7 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 #include "zend_API.h"
-#include "zend_objects_API.h"
-
-#define FREE_BUCKET				1
-
-#define IS_VALID(o)				(!(((zend_uintptr_t)(o)) & FREE_BUCKET))
-
-#define GET_BUCKET_NUMBER(o)	(((zend_uintptr_t)(o)) >> 1)
-
-#define SET_BUCKET_NUMBER(o, n)	do { \
-		(o) = (((zend_uintptr_t)(n)) << 1) | FREE_BUCKET); \
-	} while (0)
-
-	
+#include "zend_objects_API.h"	
 
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size)
 {
@@ -99,7 +87,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 		if (IS_VALID(obj)) {
 			gc_remove_zval_from_buffer((zend_refcounted*)obj TSRMLS_CC);
-//???			objects->object_buckets[i].valid = 0;
+			objects->object_buckets[i] = SET_INVALID(obj);
 			if (obj->handlers->free_obj) {
 				obj->handlers->free_obj(obj TSRMLS_CC);
 			}
@@ -129,72 +117,55 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
 	EG(objects_store).object_buckets[handle] = object;
 }
 
-#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST()																	\
-			EG(objects_store).object_buckets[handle].bucket.free_list.next = EG(objects_store).free_list_head;	\
-			EG(objects_store).free_list_head = handle;															\
-			EG(objects_store).object_buckets[handle].valid = 0;
+#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle)															\
+            SET_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
+			EG(objects_store).free_list_head = handle;
 
-/*
- * Delete a reference to an objects store entry given the object handle.
- */
-//???
-#if 0
-ZEND_API void zend_objects_store_del_ref_by_handle_ex(zend_object_handle handle, const zend_object_handlers *handlers TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	struct _store_object *obj;
-	int failure = 0;
-
-	if (!EG(objects_store).object_buckets) {
-		return;
-	}
-
-	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
 	 */
-	if (EG(objects_store).object_buckets[handle].valid) {
-		if (obj->refcount == 1) {
-			if (!EG(objects_store).object_buckets[handle].destructor_called) {
-				EG(objects_store).object_buckets[handle].destructor_called = 1;
+	if (EG(objects_store).object_buckets &&
+	    IS_VALID(EG(objects_store).object_buckets[object->handle])) {
+		if (object->gc.refcount == 0) {
+			int failure = 0;
 
-				if (obj->dtor) {
-					if (handlers && !obj->handlers) {
-						obj->handlers = handlers;
-					}
+			if (!(object->gc.u.v.flags & IS_OBJ_DESTRUCTOR_CALLED)) {
+				object->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
+
+				if (object->handlers->dtor_obj) {
+					object->gc.refcount++;
 					zend_try {
-						obj->dtor(obj->object, handle TSRMLS_CC);
+						object->handlers->dtor_obj(object TSRMLS_CC);
 					} zend_catch {
 						failure = 1;
 					} zend_end_try();
+					object->gc.refcount--;
 				}
 			}
 			
-			/* re-read the object from the object store as the store might have been reallocated in the dtor */
-			obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
-			if (obj->refcount == 1) {
+			if (object->gc.refcount == 0) {
 //???				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
-				if (obj->free_storage) {
+				if (object->handlers->free_obj) {
 					zend_try {
-						obj->free_storage(obj->object TSRMLS_CC);
+						object->handlers->free_obj(object TSRMLS_CC);
 					} zend_catch {
 						failure = 1;
 					} zend_end_try();
 				}
-				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
+				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(object->handle);
 			}
+			
+			if (failure) {
+				zend_bailout();
+			}
+		} else {
+			object->gc.refcount--;
 		}
 	}
-
-	obj->refcount--;
-
-	if (failure) {
-		zend_bailout();
-	}
 }
-#endif
 /* }}} */
 
 //???
@@ -230,28 +201,18 @@ ZEND_API zend_object *zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
  * from the constructor function.  You MUST NOT use this function for any other
  * weird games, or call it at any other time after the object is constructed.
  * */
-//???
-#if 0
-ZEND_API void zend_object_store_set_object(zval *zobject, void *object TSRMLS_DC)
+ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TSRMLS_DC)
 {
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-
-	EG(objects_store).object_buckets[handle].bucket.obj.object = object;
+	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zobject)] = object;
 }
-#endif
 
 /* Called when the ctor was terminated by an exception */
-//???
-#if 0
 ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC)
 {
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-	zend_object_store_bucket *obj_bucket = &EG(objects_store).object_buckets[handle];
-	
-	obj_bucket->bucket.obj.handlers = Z_OBJ_HT_P(zobject);;
-	obj_bucket->destructor_called = 1;
+	zend_object *obj = Z_OBJ_P(zobject);
+
+	obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
 }
-#endif
 
 /* Proxy objects workings */
 typedef struct _zend_proxy_object {

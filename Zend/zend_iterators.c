@@ -24,8 +24,12 @@
 
 static zend_class_entry zend_iterator_class_entry;
 
+static void iter_wrapper_dtor(zend_object *object TSRMLS_DC);
+
 static zend_object_handlers iterator_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
+	iter_wrapper_dtor,
+	NULL,
+	NULL,
 	NULL, /* prop read */
 	NULL, /* prop write */
 	NULL, /* read dim */
@@ -61,20 +65,9 @@ static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
 	iter->funcs->dtor(iter TSRMLS_CC);
 }
 
-ZEND_API zval *zend_iterator_wrap(zend_object_iterator *iter TSRMLS_DC)
+ZEND_API void zend_iterator_wrap(zend_object_iterator *iter, zval *wrapped TSRMLS_DC)
 {
-//???
-	return NULL;
-#if 0
-	zval *wrapped;
-
-	MAKE_STD_ZVAL(wrapped);
-	Z_TYPE_P(wrapped) = IS_OBJECT;
-	Z_OBJ_HANDLE_P(wrapped) = zend_objects_store_put(iter, iter_wrapper_dtor, NULL, NULL TSRMLS_CC);
-	Z_OBJ_HT_P(wrapped) = &iterator_object_handlers;
-
-	return wrapped;
-#endif
+	ZVAL_OBJ(wrapped, &iter->std); 
 }
 
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(

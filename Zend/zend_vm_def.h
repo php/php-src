@@ -4158,7 +4158,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			FREE_OP1_IF_VAR();
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
 		} else {
 			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();

@@ -217,8 +217,28 @@ struct _zend_ast_ref {
 #define IS_STR_INTERNED				(1<<1) /* interned string          */
 #define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
 
-/* string flags (zval.value->gc.u.vflags) */
-#define IS_OBJ_DESTRUCTOR_CALLED	(1<<0)
+/* object flags (zval.value->gc.u.vflags) */
+#define IS_OBJ_APPLY_COUNT			0x07
+#define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
+
+#define Z_OBJ_APPLY_COUNT(zval) \
+	(Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT)
+
+#define Z_OBJ_INC_APPLY_COUNT(zval) do { \
+		Z_OBJ(zval)->gc.u.v.flags = \
+			(Z_OBJ(zval)->gc.u.v.flags & ~IS_OBJ_APPLY_COUNT) | \
+			((Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT) + 1); \
+	} while (0)
+	
+#define Z_OBJ_DEC_APPLY_COUNT(zval) do { \
+		Z_OBJ(zval)->gc.u.v.flags = \
+			(Z_OBJ(zval)->gc.u.v.flags & ~IS_OBJ_APPLY_COUNT) | \
+			((Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT) - 1); \
+	} while (0)
+
+#define Z_OBJ_APPLY_COUNT_P(zv)     Z_OBJ_APPLY_COUNT(*(zv))
+#define Z_OBJ_INC_APPLY_COUNT_P(zv) Z_OBJ_INC_APPLY_COUNT(*(zv))
+#define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
 
 #define Z_REFCOUNTED(zval)			IS_REFCOUNTED(Z_TYPE(zval))
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))

@@ -1484,7 +1484,6 @@ static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
 	if (Z_REFCOUNT_P(op) == 0) {
 		GC_REMOVE_ZVAL_FROM_BUFFER(op);
 		zval_dtor(op);
-//???		FREE_ZVAL(op);
 	} else {
 		zval_ptr_dtor(op);
 	}

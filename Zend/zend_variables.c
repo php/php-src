@@ -39,23 +39,24 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_ARRAY: {
 				TSRMLS_FETCH();
 
-//???				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
+				if (Z_ARRVAL_P(zvalue) != &EG(symbol_table).ht) {
 					/* break possible cycles */
 					Z_TYPE_P(zvalue) = IS_NULL;
 					zend_hash_destroy(Z_ARRVAL_P(zvalue));
-					FREE_HASHTABLE(Z_ARR_P(zvalue));
-//???				}
+					efree(Z_ARR_P(zvalue));
+				}
 			}
 			break;
 		case IS_CONSTANT_AST:
 			zend_ast_destroy(Z_AST_P(zvalue)->ast);
+			efree(Z_AST_P(zvalue));
 			break;
 		case IS_OBJECT:
 			{
 				TSRMLS_FETCH();
 
 				if (Z_DELREF_P(zvalue) == 0) {
-					// TODO: release object???					
+					zend_objects_store_del(Z_OBJ_P(zvalue) TSRMLS_CC);
 				}
 			}
 			break;
@@ -216,7 +217,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 			}
 		} else {
 			if (is_ref) {
-//???				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
 				if (!Z_ISREF_P(p)) {
 					if (IS_REFCOUNTED(Z_TYPE_P(p)) && Z_REFCOUNT_P(p) > 1) {
 						Z_DELREF_P(p);
@@ -228,8 +229,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 					}
 				}
 			} else if (Z_ISREF_P(p)) {
-//???
-				tmp = *Z_REFVAL_P(p);
+				ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(p));
 				if (Z_REFCOUNTED(tmp) && Z_REFCOUNT(tmp) > 1) {
 					zval_copy_ctor(&tmp);
 					Z_SET_REFCOUNT(tmp, 0);

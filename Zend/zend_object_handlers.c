@@ -41,14 +41,15 @@
 
 #define Z_OBJ_PROTECT_RECURSION(zval_p) \
 	do { \
-		if (EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count++ >= 3) { \
+		if (Z_OBJ_APPLY_COUNT_P(zval_p) >= 3) { \
 			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
 		} \
+		Z_OBJ_INC_APPLY_COUNT_P(zval_p); \
 	} while (0)
 
 
 #define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
-	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count--
+	Z_OBJ_DEC_APPLY_COUNT_P(zval_p)
 
 /*
   __X accessors explanation:
@@ -1010,8 +1011,6 @@ static union _zend_function *zend_std_get_method(zval *object, zend_string *meth
 	if (EXPECTED(key != NULL)) {
 		lc_method_name = Z_STR(key->constant);
 	} else {
-		/* Create a zend_copy_str_tolower(dest, src, src_length); */
-//???		lc_method_name = do_alloca(method_len+1, use_heap);
 		lc_method_name = STR_ALLOC(method_name->len, 0);
 		zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
 	}
@@ -1146,8 +1145,6 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR(key->constant);
 	} else {
-		//???lc_function_name = do_alloca(function_name_strlen+1, use_heap);
-		/* Create a zend_copy_str_tolower(dest, src, src_length); */
 		lc_function_name = STR_ALLOC(function_name->len, 0);
 		zend_str_tolower_copy(lc_function_name->val, function_name->val, function_name->len);
 	}
@@ -1334,38 +1331,38 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	if (!zobj1->properties && !zobj2->properties) {
 		int i;
 
-//???		Z_OBJ_PROTECT_RECURSION(o1);
-//???		Z_OBJ_PROTECT_RECURSION(o2);
+		Z_OBJ_PROTECT_RECURSION(o1);
+		Z_OBJ_PROTECT_RECURSION(o2);
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			if (Z_TYPE(zobj1->properties_table[i]) != IS_UNDEF) {
 				if (Z_TYPE(zobj2->properties_table[i]) != IS_UNDEF) {
 					zval result;
 
 					if (compare_function(&result, &zobj1->properties_table[i], &zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
-//???						Z_OBJ_UNPROTECT_RECURSION(o1);
-//???						Z_OBJ_UNPROTECT_RECURSION(o2);
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
-//???						Z_OBJ_UNPROTECT_RECURSION(o1);
-//???						Z_OBJ_UNPROTECT_RECURSION(o2);
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return Z_LVAL(result);
 					}
 				} else {
-//???					Z_OBJ_UNPROTECT_RECURSION(o1);
-//???					Z_OBJ_UNPROTECT_RECURSION(o2);
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			} else {
 				if (Z_TYPE(zobj2->properties_table[i]) != IS_UNDEF) {
-//???					Z_OBJ_UNPROTECT_RECURSION(o1);
-//???					Z_OBJ_UNPROTECT_RECURSION(o2);
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			}
 		}
-//???		Z_OBJ_UNPROTECT_RECURSION(o1);
-//???		Z_OBJ_UNPROTECT_RECURSION(o2);
+		Z_OBJ_UNPROTECT_RECURSION(o1);
+		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {

@@ -1887,7 +1887,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TS
 {
 	int name_len;
 	zend_string *lcname;
-//???	zend_module_entry *module_ptr;
+	zend_module_entry *module_ptr;
 
 	if (!module) {
 		return NULL;
@@ -1923,13 +1923,13 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TS
 	lcname = STR_ALLOC(name_len, 1);
 	zend_str_tolower_copy(lcname->val, module->name, name_len);
 
-	if (zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry)) == NULL) {
+	if ((module_ptr = zend_hash_add_mem(&module_registry, lcname, module, sizeof(zend_module_entry))) == NULL) {
 		zend_error(E_CORE_WARNING, "Module '%s' already loaded", module->name);
 		STR_RELEASE(lcname);
 		return NULL;
 	}
 	STR_RELEASE(lcname);
-//???	module = module_ptr;
+	module = module_ptr;
 	EG(current_module) = module;
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
@@ -2798,7 +2798,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			EG(scope) = ce_org;
 		}
 
-//???		if (!zend_is_callable_check_class(Z_STRVAL_P(callable), clen, fcc, &strict_class, error TSRMLS_CC)) {
 		if (!zend_is_callable_check_class(Z_STR_P(callable), fcc, &strict_class, error TSRMLS_CC)) {
 			EG(scope) = last_scope;
 			return 0;
@@ -3035,11 +3034,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 	if (object_ptr && Z_TYPE_P(object_ptr) != IS_OBJECT) {
 		object_ptr = NULL;
 	}
-//???	if (object_ptr &&
-//???	    (!EG(objects_store).object_buckets || 
-//???	     !EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(object_ptr)].valid)) {
-//???		return 0;
-//???	}
+
+	if (object_ptr &&
+	    (!EG(objects_store).object_buckets ||
+	     !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(object_ptr)]))) {
+		return 0;
+	}
 
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
@@ -3117,10 +3117,10 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						}
 
 					} else {
-//???						if (!EG(objects_store).object_buckets || 
-//???						    !EG(objects_store).object_buckets[Z_OBJ_HANDLE_PP(obj)].valid) {
-//???							return 0;
-//???						}
+						if (!!EG(objects_store).object_buckets ||
+						    !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
+							return 0;
+						}
 
 						fcc->calling_scope = Z_OBJCE_P(obj); /* TBFixed: what if it's overloaded? */
 
@@ -3711,7 +3711,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				ZVAL_COPY_VALUE(property, value);
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(property);
-				} else {
+//???				} else {
 //???					efree(value);
 				}
 			} else {
@@ -3849,12 +3849,12 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved TSRMLS_DC) 
 {
 	EG(error_handling) = saved->handling;
 	EG(exception_class) = saved->handling == EH_THROW ? saved->exception : NULL;
-	if (Z_TYPE(saved->user_handler) != IS_UNDEF) {
-//???		&& saved->user_handler != EG(user_error_handler)) {
+	if (Z_TYPE(saved->user_handler) != IS_UNDEF
+		&& memcmp(&saved->user_handler, &EG(user_error_handler), sizeof(zval)) != 0) {
 		zval_ptr_dtor(&EG(user_error_handler));
 		ZVAL_COPY_VALUE(&EG(user_error_handler), &saved->user_handler);
-//???	} else if (saved->user_handler) {
-//???		zval_ptr_dtor(&saved->user_handler);
+	} else if (Z_TYPE(saved->user_handler)) {
+		zval_ptr_dtor(&saved->user_handler);
 	}
 	ZVAL_UNDEF(&saved->user_handler);
 }

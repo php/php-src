@@ -3021,7 +3021,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
 		} else {
 			if (IS_CONST == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 
@@ -7995,7 +7995,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
 		} else {
 			if (IS_TMP_VAR == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 
@@ -12989,7 +12989,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval_ptr_dtor_nogc(free_op1.var);
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
 		} else {
 			if (IS_VAR == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
@@ -29534,7 +29534,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			array_ptr = zend_iterator_wrap(iter TSRMLS_CC);
+			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
 		} else {
 			if (IS_CV == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 

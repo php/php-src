@@ -510,9 +510,6 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint idx, Buc
 	if (ht->pDestructor) {
 		ht->pDestructor(&p->val);
 	}
-//???	if (ht->flags & HASH_FLAG_BIG_DATA) {
-//???		pefree(p->xData, ht->flags & HASH_FLAG_PERSISTENT);
-//???	}
 	if (p->key) {
 		STR_RELEASE(p->key);
 	}
@@ -665,9 +662,6 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(&p->val);
 		}
-//???		if (ht->flags & HASH_FLAG_BIG_DATA) {
-//???			pefree(p->xData, ht->flags & HASH_FLAG_PERSISTENT);
-//???		}
 		if (p->key) {
 			STR_RELEASE(p->key);
 		}
@@ -696,9 +690,6 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 		if (ht->pDestructor) {
 			ht->pDestructor(&p->val);
 		}
-//???		if (ht->flags & HASH_FLAG_BIG_DATA) {
-//???			pefree(p->xData, ht->flags & HASH_FLAG_PERSISTENT);
-//???		}
 		if (p->key) {
 			STR_RELEASE(p->key);
 		}
