@@ -383,7 +383,7 @@ struct _zend_execute_data {
 	struct _zend_execute_data *prev_execute_data;
 	zval old_error_reporting;
 	zend_bool nested;
-//???	zval **original_return_value;
+	zval *return_value;
 //???	zend_class_entry *current_scope;
 //???	zend_class_entry *current_called_scope;
 //???	zval *current_this;

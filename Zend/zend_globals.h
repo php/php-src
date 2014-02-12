@@ -158,8 +158,6 @@ struct _zend_compiler_globals {
 
 
 struct _zend_executor_globals {
-//???	zval **return_value_ptr_ptr;
-
 	zval uninitialized_zval;
 	zval error_zval;
 

@@ -282,7 +282,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	opline_ptr = EG(opline_ptr);
 	current_symbol_table = EG(active_symbol_table);
 	EG(active_symbol_table) = NULL;
-	execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+	execute_data = zend_create_execute_data_from_op_array(op_array, return_value, 0 TSRMLS_CC);
 	EG(active_symbol_table) = current_symbol_table;
 	EG(current_execute_data) = current_execute_data;
 	EG(opline_ptr) = opline_ptr;
@@ -331,7 +331,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 
 	{
 		/* Backup executor globals */
-//???		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_op **original_opline_ptr = EG(opline_ptr);
 		zend_op_array *original_active_op_array = EG(active_op_array);
@@ -342,10 +341,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_vm_stack original_stack = EG(argument_stack);
 
 		ZVAL_COPY_VALUE(&original_This, &EG(This));
-
-		/* We (mis)use the return_value_ptr_ptr to provide the generator object
-		 * to the executor, so YIELD will be able to set the yielded value */
-//???		EG(return_value_ptr_ptr) = (zval **) generator;
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
@@ -371,7 +366,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		/* Restore executor globals */
-//???		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
 		EG(current_execute_data) = original_execute_data;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;

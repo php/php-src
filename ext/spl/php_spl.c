@@ -252,7 +252,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	zval dummy;
 	zend_file_handle file_handle;
 	zend_op_array *new_op_array;
-	zval *result = NULL;
+	zval result;
 	int ret;
 
 	class_file_len = spprintf(&class_file, 0, "%s%.*s", lc_name->val, ext_len, ext);
@@ -286,21 +286,18 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 		}
 		STR_FREE(opened_path);
 		if (new_op_array) {
-//!!!			EG(return_value_ptr_ptr) = &result;
 			EG(active_op_array) = new_op_array;
 			if (!EG(active_symbol_table)) {
 				zend_rebuild_symbol_table(TSRMLS_C);
 			}
 
-			zend_execute(new_op_array TSRMLS_CC);
+			ZVAL_UNDEF(&result);
+			zend_execute(new_op_array, &result TSRMLS_CC);
 	
 			destroy_op_array(new_op_array TSRMLS_CC);
 			efree(new_op_array);
 			if (!EG(exception)) {
-/*!!!			if (EG(return_value_ptr_ptr)) {
-					zval_ptr_dtor(EG(return_value_ptr_ptr));
-				}
-*/
+				zval_ptr_dtor(&result);
 			}
 
 			efree(class_file);
@@ -318,7 +315,6 @@ PHP_FUNCTION(spl_autoload)
 	int found = 0, pos_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
-//!!! zval **original_return_value = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	
@@ -337,7 +333,6 @@ PHP_FUNCTION(spl_autoload)
 	lc_name = STR_ALLOC(class_name->len, 0);
 	zend_str_tolower_copy(lc_name->val, class_name->val, class_name->len);
 	while (pos && *pos && !EG(exception)) {
-	//!!!	EG(return_value_ptr_ptr) = original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
 		pos1 = strchr(pos, ',');
@@ -353,7 +348,6 @@ PHP_FUNCTION(spl_autoload)
 	}
 	STR_FREE(lc_name);
 
-//!!!	EG(return_value_ptr_ptr) = original_return_value;
 	EG(opline_ptr) = original_opline_ptr;
 	EG(active_op_array) = original_active_op_array;
 
@@ -365,7 +359,7 @@ PHP_FUNCTION(spl_autoload)
 		if (active_opline->opcode != ZEND_FETCH_CLASS) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name->val);
 		}
 	}
 } /* }}} */
@@ -743,18 +737,17 @@ PHP_FUNCTION(spl_autoload_functions)
 				Z_ADDREF_P(alfi->closure);
 				add_next_index_zval(return_value, alfi->closure);
 			} else if (alfi->func_ptr->common.scope) {
-				zval *tmp;
-				MAKE_STD_ZVAL(tmp);
-				array_init(tmp);
+				zval tmp;
 
+				array_init(&tmp);
 				if (alfi->obj) {
 					Z_ADDREF_P(alfi->obj);
-					add_next_index_zval(tmp, alfi->obj);
+					add_next_index_zval(&tmp, alfi->obj);
 				} else {
-					add_next_index_str(tmp, alfi->ce->name);
+					add_next_index_str(&tmp, alfi->ce->name);
 				}
-				add_next_index_str(tmp, alfi->func_ptr->common.function_name);
-				add_next_index_zval(return_value, tmp);
+				add_next_index_str(&tmp, alfi->func_ptr->common.function_name);
+				add_next_index_zval(return_value, &tmp);
 			} else {
 				if (strncmp(alfi->func_ptr->common.function_name->val, "__lambda_func", sizeof("__lambda_func") - 1)) {
 					add_next_index_str(return_value, alfi->func_ptr->common.function_name);
@@ -817,11 +810,11 @@ PHPAPI void php_spl_object_hash(zval *obj, char *result TSRMLS_DC) /* {{{*/
 }
 /* }}} */
 
-int spl_build_class_list_string(zval **entry, char **list TSRMLS_DC) /* {{{ */
+int spl_build_class_list_string(zval *entry, char **list TSRMLS_DC) /* {{{ */
 {
 	char *res;
 	
-	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_PP(entry));
+	spprintf(&res, 0, "%s, %s", *list, Z_STRVAL_P(entry));
 	efree(*list);
 	*list = res;
 	return ZEND_HASH_APPLY_KEEP;
@@ -837,7 +830,6 @@ PHP_MINFO_FUNCTION(spl)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "SPL support",        "enabled");
 
-	INIT_PZVAL(&list);
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, 1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");
@@ -846,7 +838,6 @@ PHP_MINFO_FUNCTION(spl)
 	php_info_print_table_row(2, "Interfaces", strg + 2);
 	efree(strg);
 
-	INIT_PZVAL(&list);
 	array_init(&list);
 	SPL_LIST_CLASSES(&list, 0, -1, ZEND_ACC_INTERFACE)
 	strg = estrdup("");

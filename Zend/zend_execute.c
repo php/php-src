@@ -1379,7 +1379,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  */
 
-static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data;
 
@@ -1462,6 +1462,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
 	EX(delayed_exception) = NULL;
+	EX(return_value) = return_value;
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
@@ -1489,9 +1490,9 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
 {
-	return i_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
+	return i_create_execute_data_from_op_array(op_array, return_value, nested TSRMLS_CC);
 }
 /* }}} */
 
