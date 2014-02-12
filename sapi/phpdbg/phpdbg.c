@@ -831,7 +831,13 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool remote = 0;
 	int run = 0;
 	int step = 0;
-	char *bp_tmp_file;
+
+#ifdef _WIN32
+	char *bp_tmp_file = NULL;
+#else
+	char bp_tmp_file[] = "/tmp/phpdbg.XXXXXX";
+#endif
+
 #ifndef _WIN32
 	char *address;
 	int listen[2];
@@ -871,10 +877,26 @@ int main(int argc, char **argv) /* {{{ */
 
 phpdbg_main:
 	if (!cleaning) {
+	
+#ifdef _WIN32
 		bp_tmp_file = malloc(L_tmpnam);
-		tmpnam(bp_tmp_file);
-		if (bp_tmp_file == NULL) {
-			phpdbg_error("Unable to create temporary file");
+
+		if (bp_tmp_file) {
+			if (!tmpnam(bp_tmp_file)) {
+				free(bp_tmp_file);
+				bp_tmp_file = NULL;
+			}
+		}
+#else
+		if (!mkstemp(bp_tmp_file)) {
+			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
+		}
+#endif
+
+		if (!bp_tmp_file) {
+			phpdbg_error(
+				"Unable to create temporary file");
+			return 1;
 		}
 	}
 	ini_entries = NULL;
@@ -1117,8 +1139,7 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
-		
-		zend_activate(TSRMLS_C);
+		php_request_startup(TSRMLS_C);
 		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1186,19 +1207,10 @@ phpdbg_main:
 		/* set default prompt */
 		phpdbg_set_prompt(PROMPT TSRMLS_CC);
 
-		zend_try {
-			zend_activate_modules(TSRMLS_C);
-		} zend_end_try();
-
 		if (show_banner) {
 			/* print blurb */
 			phpdbg_welcome((cleaning > 0) TSRMLS_CC);
 		}
-
-		zend_try {
-			/* activate globals, they can be overwritten */
-			zend_activate_auto_globals(TSRMLS_C);
-		} zend_end_try();
 
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
@@ -1269,12 +1281,6 @@ phpdbg_interact:
 			} zend_end_try();
 		} while(!cleaning && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 		
-		/* this must be forced */
-		CG(unclean_shutdown) = 0;
-		
-		/* this is just helpful */
-		PG(report_memleaks) = 0;
-		
 phpdbg_out:
 #ifndef _WIN32
 		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
@@ -1297,24 +1303,14 @@ phpdbg_out:
 		if (ini_override) {
 			free(ini_override);
 		}
+		
+		/* this must be forced */
+		CG(unclean_shutdown) = 0;
+		
+		/* this is just helpful */
+		PG(report_memleaks) = 0;
 
-		if (PG(modules_activated)) {
-			zend_try {
-				zend_deactivate_modules(TSRMLS_C);
-			} zend_end_try();
-		}
-
-		zend_deactivate(TSRMLS_C);
-
-		zend_try {
-			zend_post_deactivate_modules(TSRMLS_C);
-		} zend_end_try();
-
-#ifdef ZEND_SIGNALS
-		zend_try {
-			zend_signal_deactivate(TSRMLS_C);
-		} zend_end_try();
-#endif
+		php_request_shutdown((void*)0);
 
 		zend_try {
 			php_module_shutdown(TSRMLS_C);
@@ -1342,7 +1338,11 @@ phpdbg_out:
 		free(sapi_name);
 	}
 	
+#ifdef _WIN32
 	free(bp_tmp_file);
+#else
+	unlink(bp_tmp_file);
+#endif
 
 	return 0;
 } /* }}} */

@@ -28,11 +28,22 @@ PHP X.Y UPGRADE NOTES
   containing non-lowercase values inside JSON arrays or objects has never been
   accepted.
 
+- openssl:
+  To prevent Man-in-the-Middle attacks against encrypted transfers client
+  streams now verify peer certificates by default. Previous versions
+  required users to manually enable peer verification. As a result of this
+  change, existing code using ssl:// or tls:// stream wrappers (e.g.
+  file_get_contents(), fsockopen(), stream_socket_client()) may no longer
+  connect successfully without manually disabling peer verification via the
+  stream context's "verify_peer" setting. Encrypted transfers delegate to
+  operating system certificate stores by default, so many/most users *should*
+  be unaffected by this transparent security enhancement.
+
 ========================================
 2. New Features
 ========================================
 
-- Added constant scalar expressions syntax
+- Added constant scalar expressions syntax.
   (https://wiki.php.net/rfc/const_scalar_exprs)
 
 - Added dedicated syntax for variadic functions.
@@ -40,6 +51,9 @@ PHP X.Y UPGRADE NOTES
 
 - Added support for argument unpacking to complement the variadic syntax.
   (https://wiki.php.net/rfc/argument_unpacking)
+
+- Added T_POW (**) operator.
+  (https://wiki.php.net/rfc/pow-operator)
 
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
@@ -50,6 +64,8 @@ PHP X.Y UPGRADE NOTES
   option).
 
 - Added openssl crypto method stream context option.
+
+- Added openssl peer verification support for SAN x509 extension
 
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
@@ -94,6 +110,10 @@ PHP X.Y UPGRADE NOTES
 
 - Openssl:
   Added string openssl_x509_fingerprint($x509, $type, $binary).
+  Added string openssl_spki_new($private_key, $challenge, $algorithm)
+  Added bool openssl_spki_verify($spkac)
+  Added string openssl_spki_export($spkac)
+  Added string openssl_spki_export_challenge($spkac)
 
 - LDAP:
   Added ldap_escape($value, $ignore = "", $flags = 0).

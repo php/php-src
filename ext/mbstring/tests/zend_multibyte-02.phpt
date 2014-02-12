@@ -1,6 +1,5 @@
 --TEST--
 zend multibyte (2)
---SKIPIF--
 --XFAIL--
 https://bugs.php.net/bug.php?id=66582
 --INI--
@@ -11,5 +10,5 @@ mbstring.internal_encoding=CP932
 <?php
 var_dump(bin2hex("テスト"));
 ?>
---EXPECT--
-string(12) "836583588367"
+--EXPECTF--
+php: Zend/zend_language_scanner.l:%d: encoding_filter_script_to_internal: Assertion `internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding)' failed.
