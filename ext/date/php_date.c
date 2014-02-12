@@ -3625,7 +3625,7 @@ static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz TSRML
 		efree(dummy_t);
 		return FAILURE;
 	} else {
-		set_timezone_from_timelib_time(tzobj, dummy_t TSRMLS_CC);
+		set_timezone_from_timelib_time(tzobj, dummy_t);
 		efree(dummy_t);
 		return SUCCESS;
 	}
