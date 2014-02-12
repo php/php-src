@@ -991,7 +991,9 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("crc32",			&php_hash_crc32_ops);
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);
 	php_hash_register_algo("fnv132",		&php_hash_fnv132_ops);
+	php_hash_register_algo("fnv1a32",		&php_hash_fnv1a32_ops);
 	php_hash_register_algo("fnv164",		&php_hash_fnv164_ops);
+	php_hash_register_algo("fnv1a64",		&php_hash_fnv1a64_ops);
 	php_hash_register_algo("joaat",			&php_hash_joaat_ops);
 
 	PHP_HASH_HAVAL_REGISTER(3,128);
