@@ -1207,6 +1207,23 @@ PHP_FUNCTION(mysqli_release_savepoint)
 /* }}} */
 
 
+/* {{{ proto bool mysqli_get_links_stats()
+   Returns information about open and cached links */
+PHP_FUNCTION(mysqli_get_links_stats)
+{
+	if (ZEND_NUM_ARGS()) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no parameters expected");
+		return;	
+	}
+	array_init(return_value);
+	add_assoc_long_ex(return_value, "total", sizeof("total"), MyG(num_links));
+	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks"), MyG(num_active_persistent));
+	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks"), MyG(num_inactive_persistent));
+}
+/* }}} */
+
+
+
 /*
  * Local variables:
  * tab-width: 4

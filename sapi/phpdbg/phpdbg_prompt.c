@@ -552,6 +552,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_op_array *orig_op_array = EG(active_op_array);
 		zval **orig_retval_ptr = EG(return_value_ptr_ptr);
 		zend_bool restore = 1;
+		zend_execute_data *ex = EG(current_execute_data);
 		
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
@@ -564,6 +565,11 @@ PHPDBG_COMMAND(run) /* {{{ */
 		EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+
+		/* clean up from last execution */
+		if (ex && ex->symbol_table) {
+			zend_hash_clean(ex->symbol_table);
 		}
 
 		/* clean seek state */

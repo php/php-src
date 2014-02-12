@@ -50,4 +50,14 @@ ZEND_END_MODULE_GLOBALS(ldap)
 
 #define phpext_ldap_ptr ldap_module_ptr
 
+/* Constants for ldap_modify_batch */
+#define LDAP_MODIFY_BATCH_ADD        0x01
+#define LDAP_MODIFY_BATCH_REMOVE     0x02
+#define LDAP_MODIFY_BATCH_REMOVE_ALL 0x12
+#define LDAP_MODIFY_BATCH_REPLACE    0x03
+
+#define LDAP_MODIFY_BATCH_ATTRIB     "attrib"
+#define LDAP_MODIFY_BATCH_MODTYPE    "modtype"
+#define LDAP_MODIFY_BATCH_VALUES     "values"
+
 #endif /* PHP_LDAP_H */

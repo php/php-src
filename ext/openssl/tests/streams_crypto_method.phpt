@@ -10,6 +10,7 @@ if (!extension_loaded('pcntl')) die('skip, pcntl required');
 function client($port, $method) {
 	$ctx = stream_context_create();
 	stream_context_set_option($ctx, 'ssl', 'crypto_method', $method);
+	stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
 
 	$fp = @fopen('https://127.0.0.1:' . $port . '/', 'r', false, $ctx);
 	if ($fp) {

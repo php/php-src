@@ -137,14 +137,9 @@ struct _php_timezone_obj {
 	int             initialized;
 	int             type;
 	union {
-		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
-		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
-		struct                      /* TIMELIB_ZONETYPE_ABBR */
-		{
-			timelib_sll  utc_offset;
-			char        *abbr;
-			int          dst;
-		} z;
+		timelib_tzinfo   *tz;         /* TIMELIB_ZONETYPE_ID */
+		timelib_sll       utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
+		timelib_abbr_info z;          /* TIMELIB_ZONETYPE_ABBR */
 	} tzi;
 	HashTable *props;
 };

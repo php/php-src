@@ -149,7 +149,7 @@ int(0)
 int(0)
 
 -- Iteration 19 --
-float(0)
+int(0)
 
 -- Iteration 20 --
 int(0)
