@@ -63,7 +63,6 @@ static PHP_INI_MH(OnUpdateTags)
 	}
 
 	zend_hash_init(ctx->tags, 0, NULL, NULL, 1);
-	ctx->tags->flags |= ZEND_FLAG_BIG_DATA;
 	
 	for (key = php_strtok_r(tmp, ",", &lasts);
 			key;
@@ -81,7 +80,7 @@ static PHP_INI_MH(OnUpdateTags)
 			keylen = q - key;
 			/* key is stored withOUT NUL
 			   val is stored WITH    NUL */
-			zend_hash_add(ctx->tags, key, keylen, val, strlen(val)+1, NULL);
+			zend_hash_str_add_mem(ctx->tags, key, keylen, val, strlen(val)+1);
 		}
 	}
 
@@ -256,7 +255,7 @@ static inline void handle_tag(STD_PARA)
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
 	for (i = 0; i < ctx->tag.len; i++)
 		ctx->tag.c[i] = tolower((int)(unsigned char)ctx->tag.c[i]);
-	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, (void **) &ctx->lookup_data) == SUCCESS)
+	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ctx->tag.c, ctx->tag.len)) != NULL)
 		ok = 1;
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }

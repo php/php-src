@@ -73,7 +73,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
-		ZVAL_STRING(zerrstr, "", 1);
+		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
 	stream = php_stream_xport_create(hostname, hostname_len, REPORT_ERRORS,
@@ -98,7 +98,8 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrstr, errstr, 0);
+//???			ZVAL_STRING(zerrstr, errstr, 0);
+			ZVAL_STRING(zerrstr, errstr);
 		}
 		else if (!zerrstr && errstr) {
 			efree(errstr);

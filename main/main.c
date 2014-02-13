@@ -699,6 +699,7 @@ PHPAPI int php_printf(const char *format, ...)
  */
 PHPAPI void php_verror(const char *docref, const char *params, int type, const char *format, va_list args TSRMLS_DC)
 {
+	zend_string *replace_buffer = NULL, *replace_origin = NULL;
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
@@ -715,11 +716,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	buffer_len = vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
-		size_t len;
-		char *replace = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		replace_buffer = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(buffer);
-		buffer = replace;
-		buffer_len = len;
+		buffer = replace_buffer->val;
+		buffer_len = replace_buffer->len;
 	}
 
 	/* which function caused the problem if any at all */
@@ -773,10 +773,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	if (PG(html_errors)) {
-		size_t len;
-		char *replace = php_escape_html_entities(origin, origin_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+		replace_origin = php_escape_html_entities(origin, origin_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(origin);
-		origin = replace;
+		origin = replace_origin->val;
 	}
 
 	/* origin and buffer available, so lets come up with the error message */
@@ -847,7 +846,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	} else {
 		spprintf(&message, 0, "%s: %s", origin, buffer);
 	}
-	efree(origin);
+	if (replace_origin) {
+		STR_FREE(replace_origin);
+	} else {
+		efree(origin);
+	}
 	if (docref_buf) {
 		efree(docref_buf);
 	}
@@ -863,7 +866,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			zend_hash_str_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
 		}
 	}
-	efree(buffer);
+	if (replace_buffer) {
+		STR_FREE(replace_buffer);
+	} else {
+		efree(buffer);
+	}
 
 	php_error(type, "%s", message);
 	efree(message);
@@ -1082,10 +1089,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						size_t len;
-						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
+						zend_string *buf = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
-						efree(buf);
+						STR_FREE(buf);
 					} else {
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 					}

@@ -193,12 +193,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
 			} else {
-				STR_FREE(ret->scheme);
+				if (ret->scheme) efree(ret->scheme);
 				efree(ret);
 				return NULL;
 			}
 		} else if (p == pp && *pp == '\0') {
-			STR_FREE(ret->scheme);
+			if (ret->scheme) efree(ret->scheme);
 			efree(ret);
 			return NULL;
 		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
@@ -274,9 +274,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		if (!ret->port) {
 			p++;
 			if (e-p > 5) { /* port cannot be longer then 5 characters */
-				STR_FREE(ret->scheme);
-				STR_FREE(ret->user);
-				STR_FREE(ret->pass);
+				if (ret->scheme) efree(ret->scheme);
+				if (ret->user) efree(ret->user);
+				if (ret->pass) efree(ret->pass);
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
@@ -287,9 +287,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {
-					STR_FREE(ret->scheme);
-					STR_FREE(ret->user);
-					STR_FREE(ret->pass);
+					if (ret->scheme) efree(ret->scheme);
+					if (ret->user) efree(ret->user);
+					if (ret->pass) efree(ret->pass);
 					efree(ret);
 					return NULL;
 				}
@@ -302,9 +302,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 	
 	/* check if we have a valid host, if we don't reject the string as url */
 	if ((p-s) < 1) {
-		STR_FREE(ret->scheme);
-		STR_FREE(ret->user);
-		STR_FREE(ret->pass);
+		if (ret->scheme) efree(ret->scheme);
+		if (ret->user) efree(ret->user);
+		if (ret->pass) efree(ret->pass);
 		efree(ret);
 		return NULL;
 	}
@@ -392,28 +392,28 @@ PHP_FUNCTION(parse_url)
 	if (key > -1) {
 		switch (key) {
 			case PHP_URL_SCHEME:
-				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme, 1);
+				if (resource->scheme != NULL) RETVAL_STRING(resource->scheme);
 				break;
 			case PHP_URL_HOST:
-				if (resource->host != NULL) RETVAL_STRING(resource->host, 1);
+				if (resource->host != NULL) RETVAL_STRING(resource->host);
 				break;
 			case PHP_URL_PORT:
 				if (resource->port != 0) RETVAL_LONG(resource->port);
 				break;
 			case PHP_URL_USER:
-				if (resource->user != NULL) RETVAL_STRING(resource->user, 1);
+				if (resource->user != NULL) RETVAL_STRING(resource->user);
 				break;
 			case PHP_URL_PASS:
-				if (resource->pass != NULL) RETVAL_STRING(resource->pass, 1);
+				if (resource->pass != NULL) RETVAL_STRING(resource->pass);
 				break;
 			case PHP_URL_PATH:
-				if (resource->path != NULL) RETVAL_STRING(resource->path, 1);
+				if (resource->path != NULL) RETVAL_STRING(resource->path);
 				break;
 			case PHP_URL_QUERY:
-				if (resource->query != NULL) RETVAL_STRING(resource->query, 1);
+				if (resource->query != NULL) RETVAL_STRING(resource->query);
 				break;
 			case PHP_URL_FRAGMENT:
-				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
+				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment);
 				break;
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
@@ -542,7 +542,8 @@ PHP_FUNCTION(urlencode)
 	}
 
 	out_str = php_url_encode(in_str, in_str_len, &out_str_len);
-	RETURN_STRINGL(out_str, out_str_len, 0);
+//???	RETURN_STRINGL(out_str, out_str_len, 0);
+	RETURN_STRINGL(out_str, out_str_len);
 }
 /* }}} */
 
@@ -561,7 +562,8 @@ PHP_FUNCTION(urldecode)
 	out_str = estrndup(in_str, in_str_len);
 	out_str_len = php_url_decode(out_str, in_str_len);
 
-    RETURN_STRINGL(out_str, out_str_len, 0);
+//???    RETURN_STRINGL(out_str, out_str_len, 0);
+    RETURN_STRINGL(out_str, out_str_len);
 }
 /* }}} */
 
@@ -643,7 +645,8 @@ PHP_FUNCTION(rawurlencode)
 	}
 
 	out_str = php_raw_url_encode(in_str, in_str_len, &out_str_len);
-	RETURN_STRINGL(out_str, out_str_len, 0);
+//???	RETURN_STRINGL(out_str, out_str_len, 0);
+	RETURN_STRINGL(out_str, out_str_len);
 }
 /* }}} */
 
@@ -662,7 +665,8 @@ PHP_FUNCTION(rawurldecode)
 	out_str = estrndup(in_str, in_str_len);
 	out_str_len = php_raw_url_decode(out_str, in_str_len);
 
-    RETURN_STRINGL(out_str, out_str_len, 0);
+//???    RETURN_STRINGL(out_str, out_str_len, 0);
+    RETURN_STRINGL(out_str, out_str_len);
 }
 /* }}} */
 
@@ -702,7 +706,7 @@ PHP_FUNCTION(get_headers)
 	int url_len;
 	php_stream_context *context;
 	php_stream *stream;
-	zval **prev_val, **hdr = NULL, **h;
+	zval *prev_val, *hdr = NULL, *h;
 	HashPosition pos;
 	HashTable *hashT;
 	long format = 0;
@@ -716,7 +720,7 @@ PHP_FUNCTION(get_headers)
 		RETURN_FALSE;
 	}
 
-	if (!stream->wrapperdata || Z_TYPE_P(stream->wrapperdata) != IS_ARRAY) {
+	if (Z_TYPE(stream->wrapperdata) != IS_ARRAY) {
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
@@ -724,31 +728,31 @@ PHP_FUNCTION(get_headers)
 	array_init(return_value);
 
 	/* check for curl-wrappers that provide headers via a special "headers" element */
-	if (zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h) != FAILURE && Z_TYPE_PP(h) == IS_ARRAY) {
+	if ((h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1)) != NULL && Z_TYPE_P(h) == IS_ARRAY) {
 		/* curl-wrappers don't load data until the 1st read */ 
-		if (!Z_ARRVAL_PP(h)->nNumOfElements) {
+		if (!Z_ARRVAL_P(h)->nNumOfElements) {
 			php_stream_getc(stream);
 		}
-		zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h);
-		hashT = Z_ARRVAL_PP(h);	
+		h = zend_hash_str_find(HASH_OF(&stream->wrapperdata), "headers", sizeof("headers")-1);
+		hashT = Z_ARRVAL_P(h);	
 	} else {
-		hashT = HASH_OF(stream->wrapperdata);
+		hashT = HASH_OF(&stream->wrapperdata);
 	}
 
 	zend_hash_internal_pointer_reset_ex(hashT, &pos);
-	while (zend_hash_get_current_data_ex(hashT, (void**)&hdr, &pos) != FAILURE) {
-		if (!hdr || Z_TYPE_PP(hdr) != IS_STRING) {
+	while ((hdr = zend_hash_get_current_data_ex(hashT, &pos)) != NULL) {
+		if (!hdr || Z_TYPE_P(hdr) != IS_STRING) {
 			zend_hash_move_forward_ex(hashT, &pos);
 			continue;
 		}
 		if (!format) {
 no_name_header:
-			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+			add_next_index_str(return_value, STR_COPY(Z_STR_P(hdr)));
 		} else {
 			char c;
 			char *s, *p;
 
-			if ((p = strchr(Z_STRVAL_PP(hdr), ':'))) {
+			if ((p = strchr(Z_STRVAL_P(hdr), ':'))) {
 				c = *p;
 				*p = '\0';
 				s = p + 1;
@@ -756,11 +760,11 @@ no_name_header:
 					s++;
 				}
 
-				if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))), 1);
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
-					convert_to_array(*prev_val);
-					add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+					convert_to_array(prev_val);
+					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))), 1);
 				}
 
 				*p = c;

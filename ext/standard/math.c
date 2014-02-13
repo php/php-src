@@ -276,20 +276,20 @@ static double php_expm1(double x)
    Return the absolute value of the number */
 PHP_FUNCTION(abs) 
 {
-	zval **value;
+	zval *value;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 	convert_scalar_to_number_ex(value);
 	
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(fabs(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
-		if (Z_LVAL_PP(value) == LONG_MIN) {
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
+		if (Z_LVAL_P(value) == LONG_MIN) {
 			RETURN_DOUBLE(-(double)LONG_MIN);
 		} else {
-			RETURN_LONG(Z_LVAL_PP(value) < 0 ? -Z_LVAL_PP(value) : Z_LVAL_PP(value));
+			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
 	}
 	RETURN_FALSE;
@@ -300,18 +300,18 @@ PHP_FUNCTION(abs)
    Returns the next highest integer value of the number */
 PHP_FUNCTION(ceil) 
 {
-	zval **value;
+	zval *value;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 	convert_scalar_to_number_ex(value);
 
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(ceil(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(ceil(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
 		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_PP(value));
+		RETURN_DOUBLE(Z_DVAL_P(value));
 	}
 	RETURN_FALSE;
 }
@@ -321,18 +321,18 @@ PHP_FUNCTION(ceil)
    Returns the next lowest integer value from the number */
 PHP_FUNCTION(floor)
 {
-	zval **value;
+	zval *value;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 	convert_scalar_to_number_ex(value);
 
-	if (Z_TYPE_PP(value) == IS_DOUBLE) {
-		RETURN_DOUBLE(floor(Z_DVAL_PP(value)));
-	} else if (Z_TYPE_PP(value) == IS_LONG) {
+	if (Z_TYPE_P(value) == IS_DOUBLE) {
+		RETURN_DOUBLE(floor(Z_DVAL_P(value)));
+	} else if (Z_TYPE_P(value) == IS_LONG) {
 		convert_to_double_ex(value);
-		RETURN_DOUBLE(Z_DVAL_PP(value));
+		RETURN_DOUBLE(Z_DVAL_P(value));
 	}
 	RETURN_FALSE;
 }
@@ -342,13 +342,13 @@ PHP_FUNCTION(floor)
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
-	zval **value;
+	zval *value;
 	int places = 0;
 	long precision = 0;
 	long mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ll", &value, &precision, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &value, &precision, &mode) == FAILURE) {
 		return;
 	}
 
@@ -357,16 +357,16 @@ PHP_FUNCTION(round)
 	}
 	convert_scalar_to_number_ex(value);
 
-	switch (Z_TYPE_PP(value)) {
+	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
 			/* Simple case - long that doesn't need to be rounded. */
 			if (places >= 0) {
-				RETURN_DOUBLE((double) Z_LVAL_PP(value));
+				RETURN_DOUBLE((double) Z_LVAL_P(value));
 			}
 			/* break omitted intentionally */
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_PP(value) == IS_LONG) ? (double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
+			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
 			return_val = _php_math_round(return_val, places, mode);
 			RETURN_DOUBLE(return_val);
 			break;
@@ -900,7 +900,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI char * _php_math_longtobase(zval *arg, int base)
+PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char buf[(sizeof(unsigned long) << 3) + 1];
@@ -921,7 +921,7 @@ PHPAPI char * _php_math_longtobase(zval *arg, int base)
 		value /= base;
 	} while (ptr > buf && value);
 
-	return estrndup(ptr, end - ptr);
+	return STR_INIT(ptr, end - ptr, 0);
 }
 /* }}} */
 
@@ -930,7 +930,7 @@ PHPAPI char * _php_math_longtobase(zval *arg, int base)
  * Convert a zval to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
+PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -957,7 +957,7 @@ PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 			fvalue /= base;
 		} while (ptr > buf && fabs(fvalue) >= 1);
 
-		return estrndup(ptr, end - ptr);
+		return STR_INIT(ptr, end - ptr, 0);
 	}
 	
 	return _php_math_longtobase(arg, base);
@@ -968,13 +968,13 @@ PHPAPI char * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
    Returns the decimal equivalent of the binary number */
 PHP_FUNCTION(bindec)
 {
-	zval **arg;
+	zval *arg;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 2, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 2, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -984,13 +984,13 @@ PHP_FUNCTION(bindec)
    Returns the decimal equivalent of the hexadecimal number */
 PHP_FUNCTION(hexdec)
 {
-	zval **arg;
+	zval *arg;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 16, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 16, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -1000,13 +1000,13 @@ PHP_FUNCTION(hexdec)
    Returns the decimal equivalent of an octal string */
 PHP_FUNCTION(octdec)
 {
-	zval **arg;
+	zval *arg;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(arg);
-	if (_php_math_basetozval(*arg, 8, return_value) == FAILURE) {
+	if (_php_math_basetozval(arg, 8, return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -1016,15 +1016,15 @@ PHP_FUNCTION(octdec)
    Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 2);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 2);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1032,15 +1032,15 @@ PHP_FUNCTION(decbin)
    Returns a string containing an octal representation of the given number */
 PHP_FUNCTION(decoct)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 8);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 8);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1048,15 +1048,15 @@ PHP_FUNCTION(decoct)
    Returns a string containing a hexadecimal representation of the given number */
 PHP_FUNCTION(dechex)
 {
-	zval **arg;
-	char *result;
+	zval *arg;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(*arg, 16);
-	RETURN_STRING(result, 0);
+	result = _php_math_longtobase(arg, 16);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1064,11 +1064,11 @@ PHP_FUNCTION(dechex)
    Converts a number in a string from any base <= 36 to any base <= 36 */
 PHP_FUNCTION(base_convert)
 {
-	zval **number, temp;
+	zval *number, temp;
 	long frombase, tobase;
-	char *result;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zll", &number, &frombase, &tobase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zll", &number, &frombase, &tobase) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(number);
@@ -1082,26 +1082,26 @@ PHP_FUNCTION(base_convert)
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(*number, frombase, &temp) == FAILURE) {
+	if(_php_math_basetozval(number, frombase, &temp) == FAILURE) {
 		RETURN_FALSE;
 	}
 	result = _php_math_zvaltobase(&temp, tobase TSRMLS_CC);
-	RETVAL_STRING(result, 0);
+	RETVAL_STR(result);
 } 
 /* }}} */
 
 /* {{{ _php_math_number_format 
 */
-PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
+PHPAPI zend_string *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len,
-		int *result_len)
+PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_point,
+		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
 {
-	char *tmpbuf = NULL, *resbuf;
+	zend_string *res;
+	char *tmpbuf = NULL;
 	char *s, *t;  /* source, target */
 	char *dp;
 	int integral;
@@ -1120,11 +1120,8 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
 
 	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
-		if (result_len) {
-			*result_len = tmplen;
-		}
-
-		return tmpbuf;
+//???		return tmpbuf;
+		return STR_INIT(tmpbuf, tmplen, 0);
 	}
 
 	/* find decimal point, if expected */
@@ -1161,10 +1158,10 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	if (is_negative) {
 		reslen++;
 	}
-	resbuf = (char *) emalloc(reslen+1); /* +1 for NUL terminator */
+	res = STR_ALLOC(reslen, 0);
 
 	s = tmpbuf+tmplen-1;
-	t = resbuf+reslen;
+	t = res->val+reslen;
 	*t-- = '\0';
 
 	/* copy the decimal places.
@@ -1211,20 +1208,9 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 
 	efree(tmpbuf);
 	
-	if (result_len) {
-		*result_len = reslen;
-	}
-
-	return resbuf;
+	res->len = reslen;
+	return res;
 }
-
-PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
-{
-	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
-			thousand_sep, thousand_sep_len, NULL);
-}
-/* }}} */
 
 /* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_separator, string thousands_separator]])
    Formats a number with grouped thousands */
@@ -1242,10 +1228,10 @@ PHP_FUNCTION(number_format)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
-		RETURN_STRING(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr), 0);
+		RETURN_STR(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr));
 		break;
 	case 2:
-		RETURN_STRING(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr), 0);
+		RETURN_STR(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr));
 		break;
 	case 4:
 		if (dec_point == NULL) {
@@ -1258,10 +1244,8 @@ PHP_FUNCTION(number_format)
 			thousand_sep_len = 1;
 		}
 
-		Z_TYPE_P(return_value) = IS_STRING;
-		Z_STRVAL_P(return_value) = _php_math_number_format_ex_len(num, dec,
-				dec_point, dec_point_len, thousand_sep, thousand_sep_len,
-				&Z_STRLEN_P(return_value));
+		RETVAL_STR(_php_math_number_format_ex(num, dec,
+				dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 		break;
 	default:
 		WRONG_PARAM_COUNT;

@@ -249,10 +249,10 @@ END_EXTERN_C()
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->res); (stream)->__exposed++; }
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
 #else
 # define php_stream_auto_cleanup(stream)	/* nothing */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->res); }
+# define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); }
 #endif
 
 #define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())

@@ -148,10 +148,10 @@ PHPAPI int php_le_stream_context(TSRMLS_D)
 */
 static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 {
-	php_stream_context *context = (php_stream_context*)rsrc->ptr;
-	if (context->options) {
+	php_stream_context *context = (php_stream_context*)res->ptr;
+	if (Z_TYPE(context->options) != IS_UNDEF) {
 		zval_ptr_dtor(&context->options);
-		context->options = NULL;
+		ZVAL_UNDEF(&context->options);
 	}
 	php_stream_context_free(context);
 }
@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
@@ -352,16 +352,16 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 
-	if (arg3 && PZVAL_IS_REF(arg3)) {
-		convert_to_long_ex(&arg3);
-		Z_LVAL_P(arg3) = 0;
+	if (arg3 && Z_ISREF_P(arg3)) {
+		convert_to_long_ex(Z_REFVAL_P(arg3));
+		Z_LVAL_P(Z_REFVAL_P(arg3)) = 0;
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-		if (operation && errno == EWOULDBLOCK && arg3 && PZVAL_IS_REF(arg3)) {
-			Z_LVAL_P(arg3) = 1;
+		if (operation && errno == EWOULDBLOCK && arg3 && Z_ISREF_P(arg3)) {
+			Z_LVAL_P(Z_REFVAL_P(arg3)) = 1;
 		}
 		RETURN_FALSE;
 	}
@@ -415,7 +415,7 @@ PHP_FUNCTION(get_meta_tags)
 				}
 			} else if (tok_last == TOK_EQUAL && looking_for_val) {
 				if (saw_name) {
-					STR_FREE(name);
+					if (name) efree(name);
 					/* Get the NAME attr (Single word attr, non-quoted) */
 					temp = name = estrndup(md.token_data, md.token_len);
 
@@ -428,7 +428,7 @@ PHP_FUNCTION(get_meta_tags)
 
 					have_name = 1;
 				} else if (saw_content) {
-					STR_FREE(value);
+					if (value) efree(value);
 					value = estrndup(md.token_data, md.token_len);
 					have_content = 1;
 				}
@@ -449,7 +449,7 @@ PHP_FUNCTION(get_meta_tags)
 			}
 		} else if (tok == TOK_STRING && tok_last == TOK_EQUAL && looking_for_val) {
 			if (saw_name) {
-				STR_FREE(name);
+				if (name) efree(name);
 				/* Get the NAME attr (Quoted single/double) */
 				temp = name = estrndup(md.token_data, md.token_len);
 
@@ -462,7 +462,7 @@ PHP_FUNCTION(get_meta_tags)
 
 				have_name = 1;
 			} else if (saw_content) {
-				STR_FREE(value);
+				if (value) efree(value);
 				value = estrndup(md.token_data, md.token_len);
 				have_content = 1;
 			}
@@ -486,7 +486,7 @@ PHP_FUNCTION(get_meta_tags)
 				}
 
 				efree(name);
-				STR_FREE(value);
+				if (value) efree(value);
 			} else if (have_content) {
 				efree(value);
 			}
@@ -508,8 +508,8 @@ PHP_FUNCTION(get_meta_tags)
 		md.token_data = NULL;
 	}
 
-	STR_FREE(value);
-	STR_FREE(name);
+	if (value) efree(value);
+	if (name) efree(name);
 	php_stream_close(md.stream);
 }
 /* }}} */
@@ -555,7 +555,8 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-		RETVAL_STRINGL(contents, len, 0);
+//???		RETVAL_STRINGL(contents, len, 0);
+		RETVAL_STRINGL(contents, len);
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
@@ -586,7 +587,7 @@ PHP_FUNCTION(file_put_contents)
 	}
 
 	if (Z_TYPE_P(data) == IS_RESOURCE) {
-		php_stream_from_zval(srcstream, &data);
+		php_stream_from_zval(srcstream, data);
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -635,7 +636,7 @@ PHP_FUNCTION(file_put_contents)
 		case IS_DOUBLE:
 		case IS_BOOL:
 		case IS_CONSTANT:
-			convert_to_string_ex(&data);
+			convert_to_string_ex(data);
 
 		case IS_STRING:
 			if (Z_STRLEN_P(data)) {
@@ -650,23 +651,23 @@ PHP_FUNCTION(file_put_contents)
 		case IS_ARRAY:
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
 				int bytes_written;
-				zval **tmp;
+				zval *tmp;
 				HashPosition pos;
 
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
-				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **) &tmp, &pos) == SUCCESS) {
-					if (Z_TYPE_PP(tmp) != IS_STRING) {
+				while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(data), &pos)) != NULL) {
+					if (Z_TYPE_P(tmp) != IS_STRING) {
 						SEPARATE_ZVAL(tmp);
-						convert_to_string(*tmp);
+						convert_to_string(tmp);
 					}
-					if (Z_STRLEN_PP(tmp)) {
-						numbytes += Z_STRLEN_PP(tmp);
-						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
-						if (bytes_written < 0 || bytes_written != Z_STRLEN_PP(tmp)) {
+					if (Z_STRLEN_P(tmp)) {
+						numbytes += Z_STRLEN_P(tmp);
+						bytes_written = php_stream_write(stream, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+						if (bytes_written < 0 || bytes_written != Z_STRLEN_P(tmp)) {
 							if (bytes_written < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRLEN_PP(tmp), filename);
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s", Z_STRLEN_P(tmp), filename);
 							} else {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, Z_STRLEN_PP(tmp));
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", bytes_written, Z_STRLEN_P(tmp));
 							}
 							numbytes = -1;
 							break;
@@ -752,7 +753,7 @@ PHP_FUNCTION(file)
 		s = target_buf;
 		e = target_buf + target_len;
 
-		if (!(p = php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
+		if (!(p = (char*)php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
 			p = e;
 			goto parse_eol;
 		}
@@ -827,7 +828,8 @@ PHP_FUNCTION(tempnam)
 
 	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
 		close(fd);
-		RETVAL_STRING(opened_path, 0);
+//???		RETVAL_STRING(opened_path, 0);
+		RETVAL_STRING(opened_path);
 	}
 	efree(p);
 }
@@ -891,10 +893,10 @@ PHPAPI PHP_FUNCTION(fclose)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid stream resource", stream->rsrc_id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -963,10 +965,10 @@ PHP_FUNCTION(pclose)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	FG(pclose_wait) = 1;
-	zend_list_delete(stream->rsrc_id);
+	zend_list_delete(stream->res);
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
@@ -983,7 +985,7 @@ PHPAPI PHP_FUNCTION(feof)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (php_stream_eof(stream)) {
 		RETURN_TRUE;
@@ -1008,7 +1010,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
@@ -1028,11 +1030,17 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 	}
 
-	ZVAL_STRINGL(return_value, buf, line_len, 0);
 	/* resize buffer if it's much larger than the result.
 	 * Only needed if the user requested a buffer size. */
 	if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
-		Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
+//???		
+		ZVAL_STRINGL(return_value, buf, line_len + 1);
+		Z_STRLEN_P(return_value)--;
+		efree(buf);
+	} else {
+//???
+		ZVAL_STRINGL(return_value, buf, line_len);
+		efree(buf);
 	}
 	return;
 
@@ -1057,7 +1065,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	result = php_stream_getc(stream);
 
@@ -1067,7 +1075,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 		buf[0] = result;
 		buf[1] = '\0';
 
-		RETURN_STRINGL(buf, 1, 1);
+		RETURN_STRINGL(buf, 1);
 	}
 }
 /* }}} */
@@ -1089,7 +1097,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &fd);
+	PHP_STREAM_TO_ZVAL(stream, fd);
 
 	if (ZEND_NUM_ARGS() >= 2) {
 		if (bytes <= 0) {
@@ -1112,7 +1120,8 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
-	RETURN_STRINGL(retval, retval_len, 0);
+//???	RETURN_STRINGL(retval, retval_len, 0);
+	RETURN_STRINGL(retval, retval_len);
 }
 /* }}} */
 
@@ -1121,7 +1130,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 PHP_FUNCTION(fscanf)
 {
 	int result, format_len, type, argc = 0;
-	zval ***args = NULL;
+	zval *args = NULL;
 	zval *file_handle;
 	char *buf, *format;
 	size_t len;
@@ -1131,7 +1140,7 @@ PHP_FUNCTION(fscanf)
 		return;
 	}
 
-	what = zend_fetch_resource(&file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
 
 	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing
@@ -1151,7 +1160,7 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	result = php_sscanf_internal(buf, format, argc, args, 0, &return_value TSRMLS_CC);
+	result = php_sscanf_internal(buf, format, argc, args, 0, return_value TSRMLS_CC);
 
 	if (args) {
 		efree(args);
@@ -1191,7 +1200,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		RETURN_LONG(0);
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	ret = php_stream_write(stream, buffer ? buffer : arg2, num_bytes);
 	if (buffer) {
@@ -1214,7 +1223,7 @@ PHPAPI PHP_FUNCTION(fflush)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	ret = php_stream_flush(stream);
 	if (ret) {
@@ -1235,7 +1244,7 @@ PHPAPI PHP_FUNCTION(rewind)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
@@ -1256,7 +1265,7 @@ PHPAPI PHP_FUNCTION(ftell)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	ret = php_stream_tell(stream);
 	if (ret == -1)	{
@@ -1278,7 +1287,7 @@ PHPAPI PHP_FUNCTION(fseek)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	RETURN_LONG(php_stream_seek(stream, arg2, whence));
 }
@@ -1417,7 +1426,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
@@ -1504,7 +1513,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &fp);
+	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (!php_stream_truncate_supported(stream)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream!");
@@ -1520,8 +1529,8 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 PHP_NAMED_FUNCTION(php_if_fstat)
 {
 	zval *fp;
-	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
-		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
+	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
+		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
 	php_stream *stream;
 	php_stream_statbuf stat_ssb;
 	char *stat_sb_names[13] = {
@@ -1533,7 +1542,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &fp);
+	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (php_stream_stat(stream, &stat_ssb)) {
 		RETURN_FALSE;
@@ -1541,60 +1550,60 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 
 	array_init(return_value);
 
-	MAKE_LONG_ZVAL_INCREF(stat_dev, stat_ssb.sb.st_dev);
-	MAKE_LONG_ZVAL_INCREF(stat_ino, stat_ssb.sb.st_ino);
-	MAKE_LONG_ZVAL_INCREF(stat_mode, stat_ssb.sb.st_mode);
-	MAKE_LONG_ZVAL_INCREF(stat_nlink, stat_ssb.sb.st_nlink);
-	MAKE_LONG_ZVAL_INCREF(stat_uid, stat_ssb.sb.st_uid);
-	MAKE_LONG_ZVAL_INCREF(stat_gid, stat_ssb.sb.st_gid);
+	ZVAL_LONG(&stat_dev, stat_ssb.sb.st_dev);
+	ZVAL_LONG(&stat_ino, stat_ssb.sb.st_ino);
+	ZVAL_LONG(&stat_mode, stat_ssb.sb.st_mode);
+	ZVAL_LONG(&stat_nlink, stat_ssb.sb.st_nlink);
+	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
+	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_ssb.sb.st_rdev);
+	ZVAL_LONG(&stat_rdev, stat_ssb.sb.st_rdev);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+	ZVAL_LONG(&stat_rdev, -1);
 #endif
-	MAKE_LONG_ZVAL_INCREF(stat_size, stat_ssb.sb.st_size);
-	MAKE_LONG_ZVAL_INCREF(stat_atime, stat_ssb.sb.st_atime);
-	MAKE_LONG_ZVAL_INCREF(stat_mtime, stat_ssb.sb.st_mtime);
-	MAKE_LONG_ZVAL_INCREF(stat_ctime, stat_ssb.sb.st_ctime);
+	ZVAL_LONG(&stat_size, stat_ssb.sb.st_size);
+	ZVAL_LONG(&stat_atime, stat_ssb.sb.st_atime);
+	ZVAL_LONG(&stat_mtime, stat_ssb.sb.st_mtime);
+	ZVAL_LONG(&stat_ctime, stat_ssb.sb.st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-	MAKE_LONG_ZVAL_INCREF(stat_blksize, stat_ssb.sb.st_blksize);
+	ZVAL_LONG(&stat_blksize, stat_ssb.sb.st_blksize);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_blksize,-1);
+	ZVAL_LONG(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-	MAKE_LONG_ZVAL_INCREF(stat_blocks, stat_ssb.sb.st_blocks);
+	ZVAL_LONG(&stat_blocks, stat_ssb.sb.st_blocks);
 #else
-	MAKE_LONG_ZVAL_INCREF(stat_blocks,-1);
+	ZVAL_LONG(&stat_blocks,-1);
 #endif
 	/* Store numeric indexes in propper order */
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_dev, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ino, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mode, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_nlink, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_uid, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_gid, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_rdev, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_size, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_atime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_mtime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_ctime, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blksize, sizeof(zval *), NULL);
-	zend_hash_next_index_insert(HASH_OF(return_value), (void *)&stat_blocks, sizeof(zval *), NULL);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_nlink);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_uid);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_gid);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_rdev);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_size);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_atime);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_mtime);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_ctime);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_blksize);
+	zend_hash_next_index_insert(HASH_OF(return_value), &stat_blocks);
 
 	/* Store string indexes referencing the same zval*/
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0])+1, (void *)&stat_dev, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1])+1, (void *)&stat_ino, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2])+1, (void *)&stat_mode, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3])+1, (void *)&stat_nlink, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4])+1, (void *)&stat_uid, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5])+1, (void *)&stat_gid, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6])+1, (void *)&stat_rdev, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7])+1, (void *)&stat_size, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8])+1, (void *)&stat_atime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9])+1, (void *)&stat_mtime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10])+1, (void *)&stat_ctime, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11])+1, (void *)&stat_blksize, sizeof(zval *), NULL);
-	zend_hash_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12])+1, (void *)&stat_blocks, sizeof(zval *), NULL);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+	zend_hash_str_update(HASH_OF(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 }
 /* }}} */
 
@@ -1747,19 +1756,18 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
-	Z_STRVAL_P(return_value) = emalloc(len + 1);
+	ZVAL_STR(return_value, STR_ALLOC(len, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
 
@@ -1858,7 +1866,7 @@ PHP_FUNCTION(fputcsv)
 		escape_char = *escape_str;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &fp);
+	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char TSRMLS_CC);
 	RETURN_LONG(ret);
@@ -1869,16 +1877,16 @@ PHP_FUNCTION(fputcsv)
 PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
 	int count, i = 0, ret;
-	zval **field_tmp = NULL, field;
+	zval *field_tmp = NULL, field;
 	smart_str csvline = {0};
 	HashPosition pos;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), (void **) &field_tmp, &pos) == SUCCESS) {
-		field = **field_tmp;
+	while ((field_tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), &pos)) != NULL) {
+		ZVAL_COPY_VALUE(&field, field_tmp);
 
-		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
+		if (Z_TYPE(field) != IS_STRING) {
 			zval_copy_ctor(&field);
 			convert_to_string(&field);
 		}
@@ -1918,7 +1926,7 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
 
-		if (Z_TYPE_PP(field_tmp) != IS_STRING) {
+		if (Z_TYPE_P(field_tmp) != IS_STRING) {
 			zval_dtor(&field);
 		}
 	}
@@ -1950,7 +1958,7 @@ PHP_FUNCTION(fgetcsv)
 	php_stream *stream;
 
 	{
-		zval *fd, **len_zv = NULL;
+		zval *fd, *len_zv = NULL;
 		char *delimiter_str = NULL;
 		int delimiter_str_len = 0;
 		char *enclosure_str = NULL;
@@ -1958,7 +1966,7 @@ PHP_FUNCTION(fgetcsv)
 		char *escape_str = NULL;
 		int escape_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|Zsss",
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zsss",
 			&fd, &len_zv, &delimiter_str, &delimiter_str_len,
 			&enclosure_str, &enclosure_str_len,
 			&escape_str, &escape_str_len) == FAILURE
@@ -2002,9 +2010,9 @@ PHP_FUNCTION(fgetcsv)
 			escape = escape_str[0];
 		}
 
-		if (len_zv != NULL && Z_TYPE_PP(len_zv) != IS_NULL) {
+		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
 			convert_to_long_ex(len_zv);
-			len = Z_LVAL_PP(len_zv);
+			len = Z_LVAL_P(len_zv);
 			if (len < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 				RETURN_FALSE;
@@ -2015,7 +2023,7 @@ PHP_FUNCTION(fgetcsv)
 			len = -1;
 		}
 
-		PHP_STREAM_TO_ZVAL(stream, &fd);
+		PHP_STREAM_TO_ZVAL(stream, fd);
 	}
 
 	if (len < 0) {
@@ -2315,7 +2323,7 @@ PHP_FUNCTION(realpath)
 			RETURN_FALSE;
 		}
 #endif
-		RETURN_STRING(resolved_path_buff, 1);
+		RETURN_STRING(resolved_path_buff);
 	} else {
 		RETURN_FALSE;
 	}
@@ -2464,7 +2472,7 @@ PHP_FUNCTION(sys_get_temp_dir)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_STRING((char *)php_get_temporary_directory(TSRMLS_C), 1);
+	RETURN_STRING((char *)php_get_temporary_directory(TSRMLS_C));
 }
 /* }}} */
 

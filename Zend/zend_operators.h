@@ -433,7 +433,7 @@ END_EXTERN_C()
 		if (!Z_ISREF_P(pzv)) {										\
 			SEPARATE_ZVAL(pzv);										\
 		}															\
-		convert_scalar_to_number(ppzv TSRMLS_CC);					\
+		convert_scalar_to_number(pzv TSRMLS_CC);					\
 	}
 
 #if HAVE_SETLOCALE && defined(ZEND_WIN32) && !defined(ZTS) && defined(_MSC_VER) && (_MSC_VER >= 1400)

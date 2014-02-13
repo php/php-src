@@ -139,7 +139,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			/* Return last line from the shell command */
-			RETVAL_STRINGL(buf, bufl, 1);
+			RETVAL_STRINGL(buf, bufl);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}
@@ -405,7 +405,8 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		cmd = php_escape_shell_cmd(command);
-		RETVAL_STRING(cmd, 0);
+//???		RETVAL_STRING(cmd, 0);
+		RETVAL_STRING(cmd);
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -426,7 +427,8 @@ PHP_FUNCTION(escapeshellarg)
 
 	if (argument) {
 		cmd = php_escape_shell_arg(argument);
-		RETVAL_STRING(cmd, 0);
+//???		RETVAL_STRING(cmd, 0);
+		RETVAL_STRING(cmd);
 	}
 }
 /* }}} */
@@ -460,7 +462,8 @@ PHP_FUNCTION(shell_exec)
 	php_stream_close(stream);
 
 	if (total_readbytes > 0) {
-		RETVAL_STRINGL(ret, total_readbytes, 0);
+//???		RETVAL_STRINGL(ret, total_readbytes, 0);
+		RETVAL_STRINGL(ret, total_readbytes);
 	}
 }
 /* }}} */

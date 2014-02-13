@@ -25,39 +25,39 @@
    Returns the type of the variable */
 PHP_FUNCTION(gettype)
 {
-	zval **arg;
+	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
-			RETVAL_STRING("NULL", 1);
+			RETVAL_STRING("NULL");
 			break;
 
 		case IS_BOOL:
-			RETVAL_STRING("boolean", 1);
+			RETVAL_STRING("boolean");
 			break;
 
 		case IS_LONG:
-			RETVAL_STRING("integer", 1);
+			RETVAL_STRING("integer");
 			break;
 
 		case IS_DOUBLE:
-			RETVAL_STRING("double", 1);
+			RETVAL_STRING("double");
 			break;
 	
 		case IS_STRING:
-			RETVAL_STRING("string", 1);
+			RETVAL_STRING("string");
 			break;
 	
 		case IS_ARRAY:
-			RETVAL_STRING("array", 1);
+			RETVAL_STRING("array");
 			break;
 
 		case IS_OBJECT:
-			RETVAL_STRING("object", 1);
+			RETVAL_STRING("object");
 		/*
 		   {
 		   char *result;
@@ -72,16 +72,16 @@ PHP_FUNCTION(gettype)
 
 		case IS_RESOURCE:
 			{
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
 
 				if (type_name) {
-					RETVAL_STRING("resource", 1);
+					RETVAL_STRING("resource");
 					break;
 				}
 			}
 
 		default:
-			RETVAL_STRING("unknown type", 1);
+			RETVAL_STRING("unknown type");
 	}
 }
 /* }}} */
@@ -214,26 +214,26 @@ PHP_FUNCTION(strval)
 
 static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	zval **arg;
+	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (Z_TYPE_PP(arg) == type) {
+	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
-			if(Z_OBJ_HT_PP(arg)->get_class_entry == NULL) {
+			if(Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
 			/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
 				RETURN_TRUE;
 			}
-			ce = Z_OBJCE_PP(arg);
-			if (!strcmp(ce->name, INCOMPLETE_CLASS)) {
+			ce = Z_OBJCE_P(arg);
+			if (!strcmp(ce->name->val, INCOMPLETE_CLASS)) {
 				RETURN_FALSE;
 			}
 		}
 		if (type == IS_RESOURCE) {
-			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}
@@ -313,20 +313,20 @@ PHP_FUNCTION(is_object)
    Returns true if value is a number or a numeric string */
 PHP_FUNCTION(is_numeric)
 {
-	zval **arg;
+	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -344,13 +344,13 @@ PHP_FUNCTION(is_numeric)
    Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)
 {
-	zval **arg;
+	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 		return;
 	}
 
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_BOOL:
 		case IS_DOUBLE:
 		case IS_LONG:
@@ -369,14 +369,14 @@ PHP_FUNCTION(is_scalar)
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
-	zval *var, **callable_name = NULL;
+	zval *var, *callable_name = NULL;
 	char *name;
 	char *error;
 	zend_bool retval;
 	zend_bool syntax_only = 0;
 	int check_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bZ", &var,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
@@ -386,8 +386,9 @@ PHP_FUNCTION(is_callable)
 	}
 	if (ZEND_NUM_ARGS() > 2) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL, &error TSRMLS_CC);
-		zval_dtor(*callable_name);
-		ZVAL_STRING(*callable_name, name, 0);
+		zval_dtor(callable_name);
+//???		ZVAL_STRING(callable_name, name, 0);
+		ZVAL_STRING(callable_name, name);
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, NULL, &error TSRMLS_CC);
 	}

@@ -295,12 +295,13 @@ PHP_FUNCTION(crypt)
 
 	if (php_crypt(str, str_len, salt, salt_in_len, &result) == FAILURE) {
 		if (salt[0] == '*' && salt[1] == '0') {
-			RETURN_STRING("*1", 1);
+			RETURN_STRING("*1");
 		} else {
-			RETURN_STRING("*0", 1);
+			RETURN_STRING("*0");
 		}
 	}
-	RETURN_STRING(result, 0);
+//???	RETURN_STRING(result, 0);
+	RETURN_STRING(result);
 }
 /* }}} */
 #endif

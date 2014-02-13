@@ -5283,7 +5283,7 @@ PHP_FUNCTION(str_pad)
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
-	zval ***args = NULL;
+	zval *args = NULL;
 	char *str, *format;
 	int str_len, format_len, result, num_args = 0;
 
@@ -5292,7 +5292,7 @@ PHP_FUNCTION(sscanf)
 		return;
 	}
 
-	result = php_sscanf_internal(str, format, num_args, args, 0, &return_value TSRMLS_CC);
+	result = php_sscanf_internal(str, format, num_args, args, 0, return_value TSRMLS_CC);
 
 	if (args) {
 		efree(args);

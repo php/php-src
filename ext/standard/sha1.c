@@ -50,10 +50,10 @@ PHP_FUNCTION(sha1)
 	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL(digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 
 }
@@ -99,10 +99,10 @@ PHP_FUNCTION(sha1_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL(digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 }
 /* }}} */

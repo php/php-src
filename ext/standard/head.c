@@ -243,9 +243,9 @@ PHP_FUNCTION(headers_sent)
 	case 1:
 		zval_dtor(arg1);
 		if (file) {
-			ZVAL_STRING(arg1, file, 1);
+			ZVAL_STRING(arg1, file);
 		} else {
-			ZVAL_STRING(arg1, "", 1);
+			ZVAL_EMPTY_STRING(arg1);
 		}
 		break;
 	}
