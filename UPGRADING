@@ -117,6 +117,7 @@ PHP X.Y UPGRADE NOTES
 
 - LDAP:
   Added ldap_escape($value, $ignore = "", $flags = 0).
+  Added ldap_modify_batch($link_identifier, $dn, $modifications) described in https://wiki.php.net/rfc/ldap_modify_batch.
 
 - Zip:
   Added ZipArchive::setPassword($password)
