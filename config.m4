@@ -6,7 +6,7 @@ PHP_ARG_ENABLE(phpdbg, for phpdbg support,
 [  --enable-phpdbg         Build phpdbg], yes, yes)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug         Build phpdbg in debug mode], no, no)
+[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
 
 if test "$PHP_PHPDBG" != "no"; then
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
