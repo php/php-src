@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Core:
   . Added T_POW (**) operator
     (RFC: https://wiki.php.net/rfc/pow-operator). (Tjerk Meesters)
+  . Implemented unified default encoding
+    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
 
 - mysqli
   . Added new function mysqli_get_links_stats() as well as new INI variable

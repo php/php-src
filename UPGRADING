@@ -55,6 +55,10 @@ PHP X.Y UPGRADE NOTES
 - Added T_POW (**) operator.
   (https://wiki.php.net/rfc/pow-operator)
 
+- Added unified default encoding. default_charset=UTF-8 and functions/extensions
+  use encoding settings honor default_charset.
+  (https://wiki.php.net/rfc/default_encoding)
+
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
 
