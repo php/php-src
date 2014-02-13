@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - ldap
   . Added new function ldap_modify_batch(). (Ondrej Hosek)
 
+- Openssl
+  . Peer certificates now verified by default in client socket operations
+    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+
 23 Jan 2014, PHP 5.6.0 Alpha 1
 - CLI server:
   . Added some MIME types to the CLI web server. (Chris Jones)
@@ -84,8 +88,6 @@ PHP                                                                        NEWS
   . Peer name verification matches SAN DNS names for certs using
     the Subject Alternative Name x509 extension. (Daniel Lowrey)
   . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
-  . Peer certificates now verified by default in client socket operations
-    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
   . Added SPKAC support. (Jason Gerfen)
 
 - PDO_pgsql:
