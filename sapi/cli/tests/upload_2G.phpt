@@ -61,7 +61,7 @@ if (!$fp) {
 }
 
 $prev = "----123
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Content-Disposition: form-data; name=\"file1\"; filename=\"file1.txt\"\n\n";
 $post = "\n----123--\n";
 $total = $length + strlen($prev) + strlen($post);
@@ -97,7 +97,7 @@ HTTP/1.1 200 OK
 Host: %s
 Connection: close
 X-Powered-By: PHP/%s
-Content-type: text/html
+Content-type: text/html; charset=UTF-8
 
 array(1) {
   ["file1"]=>
