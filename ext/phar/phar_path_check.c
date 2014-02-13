@@ -85,7 +85,7 @@ loop:
 	if (yych <= '.') goto yy29;
 	if (yych <= '/') goto yy30;
 yy3:
-#line 117 "ext/phar/phar_path_check.re"
+#line 105 "ext/phar/phar_path_check.re"
 	{
 			goto loop;
 		}
@@ -123,7 +123,7 @@ yy10:
 	if ((yych = *YYCURSOR) <= 0x7F) goto yy11;
 	if (yych <= 0xBF) goto yy27;
 yy11:
-#line 100 "ext/phar/phar_path_check.re"
+#line 88 "ext/phar/phar_path_check.re"
 	{
 			*error ="illegal character";
 			return pcr_err_illegal_char;
@@ -149,7 +149,7 @@ yy15:
 	goto yy11;
 yy16:
 	++YYCURSOR;
-#line 104 "ext/phar/phar_path_check.re"
+#line 92 "ext/phar/phar_path_check.re"
 	{
 			if (**s == '/') {
 				(*s)++;
@@ -183,40 +183,28 @@ yy21:
 	if (yych <= 0x7F) goto yy20;
 	if (yych >= 0xC0) goto yy20;
 	++YYCURSOR;
-#line 91 "ext/phar/phar_path_check.re"
+#line 85 "ext/phar/phar_path_check.re"
 	{
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
-#line 197 "ext/phar/phar_path_check.c"
+#line 191 "ext/phar/phar_path_check.c"
 yy24:
 	yych = *++YYCURSOR;
 	if (yych <= 0x7F) goto yy20;
 	if (yych >= 0xC0) goto yy20;
 	++YYCURSOR;
-#line 84 "ext/phar/phar_path_check.re"
+#line 82 "ext/phar/phar_path_check.re"
 	{
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
-#line 211 "ext/phar/phar_path_check.c"
+#line 201 "ext/phar/phar_path_check.c"
 yy27:
 	++YYCURSOR;
 #line 79 "ext/phar/phar_path_check.re"
 	{
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
-#line 220 "ext/phar/phar_path_check.c"
+#line 208 "ext/phar/phar_path_check.c"
 yy29:
 	yych = *++YYCURSOR;
 	if (yych <= 0x00) goto yy33;
@@ -231,7 +219,7 @@ yy30:
 			*error = "double slash";
 			return pcr_err_double_slash;
 		}
-#line 235 "ext/phar/phar_path_check.c"
+#line 223 "ext/phar/phar_path_check.c"
 yy32:
 	yych = *++YYCURSOR;
 	if (yych <= 0x00) goto yy35;
@@ -244,7 +232,7 @@ yy33:
 			*error = "current directory reference";
 			return pcr_err_curr_dir;
 		}
-#line 248 "ext/phar/phar_path_check.c"
+#line 236 "ext/phar/phar_path_check.c"
 yy35:
 	++YYCURSOR;
 #line 55 "ext/phar/phar_path_check.re"
@@ -252,8 +240,8 @@ yy35:
 			*error = "upper directory reference";
 			return pcr_err_up_dir;
 		}
-#line 256 "ext/phar/phar_path_check.c"
+#line 244 "ext/phar/phar_path_check.c"
 }
-#line 120 "ext/phar/phar_path_check.re"
+#line 108 "ext/phar/phar_path_check.re"
 
 }

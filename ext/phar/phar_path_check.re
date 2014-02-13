@@ -77,24 +77,12 @@ ANY = .;
 			return pcr_use_query;
 		}
 MB2 {
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
 MB3 {
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
 MB4 {
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
-			(*s)++;
-			(*len)--;
 			goto loop;
 	}
 ILL {
