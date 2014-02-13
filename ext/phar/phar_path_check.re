@@ -42,6 +42,9 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 loop:
 /*!re2c
 END = "\x00";
+MB2 = ([\xC0-\xDF][\x80-\xBF]);
+MB3 = ([\xE0-\xEF][\x80-\xBF]{2});
+MB4 = ([\xF0-\xF7][\x80-\xBF]{3});
 ILL = [\x01-\x19\x80-\xFF];
 EOS = "/" | END;
 ANY = .;
@@ -73,6 +76,27 @@ ANY = .;
 			*error = NULL;
 			return pcr_use_query;
 		}
+MB2 {
+			(*s)++;
+			(*len)--;
+			goto loop;
+	}
+MB3 {
+			(*s)++;
+			(*len)--;
+			(*s)++;
+			(*len)--;
+			goto loop;
+	}
+MB4 {
+			(*s)++;
+			(*len)--;
+			(*s)++;
+			(*len)--;
+			(*s)++;
+			(*len)--;
+			goto loop;
+	}
 ILL {
 			*error ="illegal character";
 			return pcr_err_illegal_char;
