@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2013 The PHP Group                                |
+  | Copyright (c) 2007-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -42,6 +42,9 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 loop:
 /*!re2c
 END = "\x00";
+MB2 = ([\xC0-\xDF][\x80-\xBF]);
+MB3 = ([\xE0-\xEF][\x80-\xBF]{2});
+MB4 = ([\xF0-\xF7][\x80-\xBF]{3});
 ILL = [\x01-\x19\x80-\xFF];
 EOS = "/" | END;
 ANY = .;
@@ -73,6 +76,15 @@ ANY = .;
 			*error = NULL;
 			return pcr_use_query;
 		}
+MB2 {
+			goto loop;
+	}
+MB3 {
+			goto loop;
+	}
+MB4 {
+			goto loop;
+	}
 ILL {
 			*error ="illegal character";
 			return pcr_err_illegal_char;
