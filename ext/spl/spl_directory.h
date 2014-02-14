@@ -87,10 +87,10 @@ struct _spl_filesystem_object {
 		struct {
 			php_stream         *stream;
 			php_stream_context *context;
-			zval               *zcontext;
+			zval               zcontext;
 			char               *open_mode;
 			int                open_mode_len;
-			zval               *current_zval;
+			zval               current_zval;
 			char               *current_line;
 			size_t             current_line_len;
 			size_t             max_line_len;

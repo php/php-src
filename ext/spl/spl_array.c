@@ -1774,6 +1774,7 @@ SPL_METHOD(Array, unserialize)
 		rebuild_object_properties(&intern->std);
 	}
 	zend_hash_copy(intern->std.properties, Z_ARRVAL(members), (copy_ctor_func_t) zval_add_ref);
+	zval_ptr_dtor(&members);
 
 	/* done reading $serialized */
 
