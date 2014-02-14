@@ -963,6 +963,89 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
+ZEND_API int pow_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	zval op1_copy, op2_copy;
+	int converted = 0;
+
+	while (1) {
+		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
+			case TYPE_PAIR(IS_LONG, IS_LONG):
+				if (Z_LVAL_P(op2) >= 0) {
+					long l1 = 1, l2 = Z_LVAL_P(op1), i = Z_LVAL_P(op2);
+
+					if (i == 0) {
+						ZVAL_LONG(result, 1L);
+						return SUCCESS;
+					} else if (l2 == 0) {
+						ZVAL_LONG(result, 0);
+						return SUCCESS;
+					}
+
+					while (i >= 1) {
+						long overflow;
+						double dval = 0.0;
+
+						if (i % 2) {
+							--i;
+							ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
+							if (overflow) {
+								ZVAL_DOUBLE(result, dval * pow(l2, i));
+								return SUCCESS;
+							}
+						} else {
+							i /= 2;
+							ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
+							if (overflow) {
+								ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
+								return SUCCESS;
+							}
+						}
+					}
+					/* i == 0 */
+					ZVAL_LONG(result, l1);
+				} else {
+					ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+				}
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
+				ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
+				ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+				return SUCCESS;
+
+			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
+				ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
+				return SUCCESS;
+
+			default:
+				if (!converted) {
+					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
+
+					if (Z_TYPE_P(op1) == IS_ARRAY) {
+						ZVAL_LONG(result, 0);
+						return SUCCESS;
+					} else {
+						zendi_convert_scalar_to_number(op1, op1_copy, result);
+					}
+					if (Z_TYPE_P(op2) == IS_ARRAY) {
+						ZVAL_LONG(result, 1L);
+						return SUCCESS;
+					} else {
+						zendi_convert_scalar_to_number(op2, op2_copy, result);
+					}
+					converted = 1;
+				} else {
+					zend_error(E_ERROR, "Unsupported operand types");
+					return FAILURE;
+				}
+		}
+	}
+}
+
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;

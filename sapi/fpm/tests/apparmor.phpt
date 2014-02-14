@@ -3,7 +3,7 @@ FPM: Apparmor Test
 --DESCRIPTION--
 This test tries to launches a pool which tries to change to non existing
 apparmor hat a. Test succeeds if apparmor is not running or hat is non
-existant.
+existent.
 --SKIPIF--
 <?php
 include "skipif.inc";
@@ -39,7 +39,7 @@ EOT;
    - failed to change to new confinement
      something in apparmor went wrong
    - exited with code 70
-     Change to successful; Hat not existant (Process gets killed by apparmor)
+     Change to successful; Hat not existent (Process gets killed by apparmor)
  */
 var_dump(run_fpm_till('/(SIGSEGV|failed to query apparmor confinement|failed to change to new confinement|exited with code 70)/', $cfg));
 

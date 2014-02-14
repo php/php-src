@@ -96,6 +96,10 @@ struct _php_core_globals {
 	char *auto_prepend_file;
 	char *auto_append_file;
 
+	char *input_encoding;
+	char *internal_encoding;
+	char *output_encoding;
+
 	arg_separators arg_separator;
 
 	char *variables_order;
