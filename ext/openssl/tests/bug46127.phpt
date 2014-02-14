@@ -13,6 +13,7 @@ function ssl_server($port) {
 	$pem = dirname(__FILE__) . '/bug46127.pem';
 	$ssl = array(
 			'verify_peer' => false,
+			'verify_host' => false,
 			'allow_self_signed' => true,
 			'local_cert' => $pem,
 			//		'passphrase' => '',
@@ -46,7 +47,8 @@ if ($pid == 0) { // child
 // client or failed
 sleep(1);
 $ctx = stream_context_create(['ssl' => [
-    'verify_peer' => false
+	'verify_peer' => false,
+	'verify_host' => false
 ]]);
 $sock = stream_socket_client("ssl://127.0.0.1:{$port}", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
 if (!$sock) exit;

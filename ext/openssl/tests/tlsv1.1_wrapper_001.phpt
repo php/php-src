@@ -21,7 +21,8 @@ if ($pid == -1) {
 } elseif ($pid) {
 	$flags = STREAM_CLIENT_CONNECT;
 	$ctx = stream_context_create(array('ssl' => array(
-		'verify_peer' => false
+		'verify_peer' => false,
+		'verify_host' => false
 	)));
 	
 	$client = stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
