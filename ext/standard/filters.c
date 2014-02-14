@@ -259,20 +259,20 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 	if (filterparams != NULL) {
 		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
 			HashPosition pos;
-			zval **tmp;
+			zval *tmp;
 
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(filterparams), &pos);
-			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(filterparams), (void **) &tmp, &pos) == SUCCESS) {
+			while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(filterparams), &pos)) != NULL) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
 				zend_hash_move_forward_ex(Z_ARRVAL_P(filterparams), &pos);
 			}
 			smart_str_0(&tags_ss);
 		} else {
 			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
-			convert_to_string_ex(&filterparams);
+			convert_to_string_ex(filterparams);
 
 			tags_ss.c = Z_STRVAL_P(filterparams);
 			tags_ss.len = Z_STRLEN_P(filterparams);
@@ -282,14 +282,14 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 
 	if (php_strip_tags_filter_ctor(inst, tags_ss.c, tags_ss.len, persistent) != SUCCESS) {
 		if (tags_ss.a != 0) {
-			STR_FREE(tags_ss.c);
+//???			STR_FREE(tags_ss.c);
 		}
 		pefree(inst, persistent);
 		return NULL;
 	}
 
 	if (tags_ss.a != 0) {
-		STR_FREE(tags_ss.c);
+//???		STR_FREE(tags_ss.c);
 	}
 
 	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
@@ -1220,15 +1220,16 @@ typedef struct _php_convert_filter {
 
 static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, int persistent)
 {
-	zval **tmpval;
+	zval *tmpval;
 
 	*pretval = NULL;
 	*pretval_len = 0;
  
-	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
-		if (Z_TYPE_PP(tmpval) != IS_STRING) {
-			zval zt = **tmpval;
-
+	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
+		if (Z_TYPE_P(tmpval) != IS_STRING) {
+			zval zt;
+			
+			ZVAL_COPY_VALUE(&zt, tmpval);
 			convert_to_string(&zt);
 
 			if (NULL == (*pretval = pemalloc(Z_STRLEN(zt) + 1, persistent))) {
@@ -1239,11 +1240,11 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 			memcpy(*pretval, Z_STRVAL(zt), Z_STRLEN(zt) + 1);
 			zval_dtor(&zt);
 		} else {
-			if (NULL == (*pretval = pemalloc(Z_STRLEN_PP(tmpval) + 1, persistent))) {
+			if (NULL == (*pretval = pemalloc(Z_STRLEN_P(tmpval) + 1, persistent))) {
 				return PHP_CONV_ERR_ALLOC;
 			}
-			*pretval_len = Z_STRLEN_PP(tmpval);
-			memcpy(*pretval, Z_STRVAL_PP(tmpval), Z_STRLEN_PP(tmpval) + 1);
+			*pretval_len = Z_STRLEN_P(tmpval);
+			memcpy(*pretval, Z_STRVAL_P(tmpval), Z_STRLEN_P(tmpval) + 1);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
@@ -1277,23 +1278,22 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, long *pretv
 
 static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned long *pretval, char *field_name, size_t field_name_len)
 {
-	zval **tmpval;
+	zval *tmpval;
 
 	*pretval = 0;
 
-	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
-		zval tmp, *ztval = *tmpval;
+	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
+		zval tmp;
 
-		if (Z_TYPE_PP(tmpval) != IS_LONG) {
-			tmp = *ztval;
-			zval_copy_ctor(&tmp);
+		if (Z_TYPE_P(tmpval) != IS_LONG) {
+			ZVAL_DUP(&tmp, tmpval);;
 			convert_to_long(&tmp);
-			ztval = &tmp;
+			tmpval = &tmp;
 		}
-		if (Z_LVAL_P(ztval) < 0) {
+		if (Z_LVAL_P(tmpval) < 0) {
 			*pretval = 0;
 		} else {
-			*pretval = Z_LVAL_P(ztval);
+			*pretval = Z_LVAL_P(tmpval);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
@@ -1303,20 +1303,20 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, unsigned l
 
 static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	zval **tmpval;
+	zval *tmpval;
 
 	*pretval = 0;
 
-	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
-		zval tmp, *ztval = *tmpval;
+	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
+		zval tmp;
 
-		if (Z_TYPE_PP(tmpval) != IS_BOOL) {
-			tmp = *ztval;
+		if (Z_TYPE_P(tmpval) != IS_BOOL) {
+			ZVAL_DUP(&tmp, tmpval);
 			zval_copy_ctor(&tmp);
 			convert_to_boolean(&tmp);
-			ztval = &tmp;
+			tmpval = &tmp;
 		}
-		*pretval = Z_BVAL_P(ztval);
+		*pretval = Z_BVAL_P(tmpval);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	} 

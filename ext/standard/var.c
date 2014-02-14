@@ -896,9 +896,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 }
 /* }}} */
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC) /* {{{ */
+PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *var_hash TSRMLS_DC) /* {{{ */
 {
-	php_var_serialize_intern(buf, *struc, *var_hash TSRMLS_CC);
+	php_var_serialize_intern(buf, struc, *var_hash TSRMLS_CC);
 	smart_str_0(buf);
 }
 /* }}} */
@@ -907,11 +907,11 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
-	zval **struc;
+	zval *struc;
 	php_serialize_data_t var_hash;
 	smart_str buf = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &struc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &struc) == FAILURE) {
 		return;
 	}
 
@@ -953,7 +953,7 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
+	if (!php_var_unserialize(return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
 		if (!EG(exception)) {

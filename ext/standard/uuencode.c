@@ -198,7 +198,8 @@ PHP_FUNCTION(convert_uuencode)
 
 	dst_len = php_uuencode(src, src_len, &dst);
 
-	RETURN_STRINGL(dst, dst_len, 0);
+//???	RETURN_STRINGL(dst, dst_len, 0);
+	RETURN_STRINGL(dst, dst_len);
 }
 /* }}} */
 
@@ -219,7 +220,8 @@ PHP_FUNCTION(convert_uudecode)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRINGL(dst, dst_len, 0);
+//???	RETURN_STRINGL(dst, dst_len, 0);
+	RETURN_STRINGL(dst, dst_len);
 }
 /* }}} */
 
