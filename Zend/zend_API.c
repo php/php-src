@@ -1373,6 +1373,15 @@ ZEND_API int add_index_double(zval *arg, ulong index, double d) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int add_index_str(zval *arg, ulong index, zend_string *str) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, str);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp) ? SUCCESS : FAILURE;
+}
+/* }}} */
+
 ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int duplicate) /* {{{ */
 {
 	zval tmp;
