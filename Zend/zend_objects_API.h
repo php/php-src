@@ -63,6 +63,14 @@
 		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | FREE_BUCKET); \
 	} while (0)
 
+
+#define OBJ_RELEASE(obj) do { \
+		zend_object *_obj = (obj); \
+		if (--_obj->gc.refcount == 0) { \
+				zend_objects_store_del(_obj TSRMLS_CC); \
+		} \
+	} while (0)
+
 typedef struct _zend_objects_store {
 	zend_object **object_buckets;
 	zend_uint top;

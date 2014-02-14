@@ -978,9 +978,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
  	if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
-		ZVAL_DUP(&tmp_varname, varname);
-//???		Z_SET_REFCOUNT(tmp_varname, 1);
-//???		Z_UNSET_ISREF(tmp_varname);
+		ZVAL_DUP_DEREF(&tmp_varname, varname);
 		convert_to_string(&tmp_varname);
 		varname = &tmp_varname;
 	}

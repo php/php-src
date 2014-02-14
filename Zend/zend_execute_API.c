@@ -429,11 +429,13 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 	Z_DELREF_P(zval_ptr);
 	if (Z_REFCOUNT_P(zval_ptr) == 0) {
 		zval_internal_dtor(zval_ptr);
-	} else if (Z_REFCOUNT_P(zval_ptr) == 1) {
+	} else if (Z_REFCOUNT_P(zval_ptr) == 1) {		
 //???		Z_UNSET_ISREF_P(zval_ptr);
-		zend_reference *ref = Z_REF_P(zval_ptr);
-		ZVAL_COPY_VALUE(zval_ptr, Z_REFVAL_P(zval_ptr));
-		efree(ref);
+		if (Z_ISREF_P(zval_ptr)) {
+			zend_reference *ref = Z_REF_P(zval_ptr);
+			ZVAL_COPY_VALUE(zval_ptr, Z_REFVAL_P(zval_ptr));
+			efree(ref);
+		}
 	}
 }
 /* }}} */
@@ -472,7 +474,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 	} else if ((Z_TYPE_P(p) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		int refcount;
-//???		zend_uchar is_ref;
+		zend_uchar is_ref;
 
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 
@@ -485,17 +487,21 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+				int len;
+
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
-//???				if (inline_change) {
-					zend_string *tmp = STR_INIT(colon, Z_STRLEN_P(p), 0);
+				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
+				if (inline_change) {
+					zend_string *tmp = STR_INIT(colon + 1, len, 0);
 					STR_RELEASE(Z_STR_P(p));
 					Z_STR_P(p) = tmp;
-//???				} else {
+				} else {
 //???					Z_STRVAL_P(p) = colon + 1;
-//???				}
+					Z_STR_P(p) = STR_INIT(colon + 1, len, 0);
+				}
 			} else {
-				char *save = actual, *slash;
+				zend_string *save = Z_STR_P(p);
+				char *slash;
 				int actual_len = Z_STRLEN_P(p);
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
@@ -516,23 +522,19 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					--actual_len;
 				}
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
-					int fix_save = 0;
-					if (save[0] == '\\') {
-						save++;
-						fix_save = 1;
+					if (save->val[0] == '\\') {
+						zend_error(E_ERROR, "Undefined constant '%s'", save->val + 1);
+					} else {
+						zend_error(E_ERROR, "Undefined constant '%s'", save->val);
 					}
-					zend_error(E_ERROR, "Undefined constant '%s'", save);
-					if (fix_save) {
-						save--;
+					if (inline_change) {
+						STR_RELEASE(save);
 					}
-//???					if (inline_change) {
-//???						str_efree(save);
-//???					}
 					save = NULL;
 				}
-//???				if (inline_change && save && save != actual) {
-//???					str_efree(save);
-//???				}
+				if (inline_change && save && save->val != actual) {
+					STR_RELEASE(save);
+				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 				p->type = IS_STRING;
 				if (!inline_change) {
@@ -540,9 +542,9 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				}
 			}
 		} else {
-//???			if (inline_change) {
-//???				str_efree(Z_STRVAL_P(p));
-//???			}
+			if (inline_change) {
+				STR_RELEASE(Z_STR_P(p));
+			}
 			*p = const_value;
 		}
 
@@ -608,7 +610,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					}
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
 				}
-				ZVAL_STRINGL(&const_value, str_index, str_index_len-3, 1);
+				ZVAL_STRINGL(&const_value, str_index, str_index_len-3);
 			}
 #endif
 
@@ -881,19 +883,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
 			ZVAL_UNDEF(&EG(This));
 		} else {
-			ZVAL_COPY_VALUE(&EG(This), fci->object_ptr);
-
-			if (!Z_ISREF(EG(This))) {
-				Z_ADDREF(EG(This)); /* For $this pointer */
-			} else {
-//???				zval *this_ptr;
-//???
-//???				ALLOC_ZVAL(this_ptr);
-//???				*this_ptr = *EG(This);
-//???				INIT_PZVAL(this_ptr);
-//???				zval_copy_ctor(this_ptr);
-//???				EG(This) = this_ptr;
-			}
+			ZVAL_COPY(&EG(This), fci->object_ptr);
 		}
 	} else {
 		ZVAL_UNDEF(&EG(This));

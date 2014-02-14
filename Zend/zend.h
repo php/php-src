@@ -662,6 +662,16 @@ END_EXTERN_C()
 		zval_copy_ctor(z);						\
 	} while (0)
 
+#define ZVAL_DUP_DEREF(z, v)					\
+	do {										\
+		if (Z_ISREF_P(v)) {						\
+			ZVAL_COPY_VALUE(z, Z_REFVAL_P(v));	\
+		} else {								\
+			ZVAL_COPY_VALUE(z, v);				\
+		}										\
+		zval_copy_ctor(z);						\
+	} while (0)
+
 #define INIT_PZVAL_COPY(z, v)					\
 	do {										\
 		ZVAL_COPY_VALUE(z, v);					\

@@ -55,9 +55,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			{
 				TSRMLS_FETCH();
 
-				if (Z_DELREF_P(zvalue) == 0) {
-					zend_objects_store_del(Z_OBJ_P(zvalue) TSRMLS_CC);
-				}
+				OBJ_RELEASE(Z_OBJ_P(zvalue));
 			}
 			break;
 		case IS_RESOURCE:

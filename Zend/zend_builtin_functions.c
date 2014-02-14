@@ -923,8 +923,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		/* copy: enforce read only access */
-		ZVAL_DUP(&prop_copy, prop);
-//???		INIT_PZVAL(prop_copy);
+		ZVAL_DUP_DEREF(&prop_copy, prop);
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
@@ -1938,8 +1937,7 @@ ZEND_FUNCTION(get_defined_constants)
 				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			ZVAL_DUP(&const_val, &val->value);
-//???			INIT_PZVAL(const_val);
+			ZVAL_DUP_DEREF(&const_val, &val->value);
 
 			add_assoc_zval_ex(&modules[module_number], val->name->val, val->name->len, &const_val);
 next_constant:
@@ -2019,8 +2017,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 	ptr = ptr->prev_execute_data;
 
 	while (ptr && (limit == 0 || frameno < limit)) {
-//???		const char *free_class_name = NULL;
-
 		frameno++;
 		class_name = NULL;
 		call_type = NULL;   
@@ -2149,9 +2145,6 @@ ZEND_FUNCTION(debug_print_backtrace)
 		include_filename = filename;
 		ptr = skip->prev_execute_data;
 		++indent;
-//???		if (free_class_name) {
-//???			efree((char*)free_class_name);
-//???		}
 	}
 }
 

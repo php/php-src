@@ -260,15 +260,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					zval val;
 
-//???					ALLOC_ZVAL(val);
-//???					INIT_PZVAL_COPY(val, expr);
-//???					zval_copy_ctor(val);
-					if (Z_ISREF_P(expr)) {
-						ZVAL_COPY_VALUE(&val, Z_REFVAL_P(expr));
-					} else {
-						ZVAL_COPY_VALUE(&val, expr);
-					}
-					zval_copy_ctor(&val);
+					ZVAL_DUP_DEREF(&val, expr);
 					if (Z_OBJ_HANDLER_P(expr, cast_object)(&val, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
 						zval_ptr_dtor(&val);
 						break;
@@ -624,9 +616,6 @@ static zend_bool php_auto_globals_create_globals(zend_string *name TSRMLS_DC) /*
 {
 	zval globals;
 
-//???	ALLOC_ZVAL(globals);
-//???	Z_SET_REFCOUNT_P(globals, 1);
-//???	Z_SET_ISREF_P(globals);
 	ZVAL_ARR(&globals, &EG(symbol_table));
 	ZVAL_NEW_REF(&globals, &globals);
 	zend_hash_update(&EG(symbol_table).ht, name, &globals);
@@ -1315,10 +1304,10 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_cou
 					if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL TSRMLS_CC) == SUCCESS) {
 						zval_ptr_dtor(&retval2);
 						if (EG(exception)) {
-//???							zval_ptr_dtor(&EG(exception));
+							OBJ_RELEASE(EG(exception));
 							EG(exception) = NULL;
 						}
-//???						zval_ptr_dtor(&old_exception);
+						OBJ_RELEASE(old_exception);
 					} else {
 						EG(exception) = old_exception;
 						zend_exception_error(EG(exception), E_ERROR TSRMLS_CC);
