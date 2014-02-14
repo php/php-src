@@ -257,7 +257,7 @@ typedef enum _php_pgsql_data_type {
 	PG_PATH,
 	PG_POLYGON,
 	PG_CIRCLE,
-	/* unkown and system */
+	/* unknown and system */
 	PG_UNKNOWN
 } php_pgsql_data_type;
 
