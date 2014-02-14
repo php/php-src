@@ -257,7 +257,7 @@ static inline int zend_symtable_del(HashTable *ht, zend_string *key)
 }
 
 
-static inline zval *zend_symtable_find(HashTable *ht, zend_string *key)
+static inline zval *zend_symtable_find(const HashTable *ht, zend_string *key)
 {
 	ZEND_HANDLE_NUMERIC(key->val, key->len+1, zend_hash_index_find(ht, idx));
 	return zend_hash_find(ht, key);
@@ -413,7 +413,7 @@ static inline void *zend_hash_next_index_insert_mem(HashTable *ht, void *pData, 
 	return zend_hash_next_index_insert_ptr(ht, p);
 }
 
-static inline void *zend_hash_find_ptr(HashTable *ht, zend_string *key)
+static inline void *zend_hash_find_ptr(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
@@ -421,7 +421,7 @@ static inline void *zend_hash_find_ptr(HashTable *ht, zend_string *key)
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_hash_str_find_ptr(HashTable *ht, const char *str, int len)
+static inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, int len)
 {
 	zval *zv;
 
@@ -429,7 +429,7 @@ static inline void *zend_hash_str_find_ptr(HashTable *ht, const char *str, int l
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_hash_index_find_ptr(HashTable *ht, ulong h)
+static inline void *zend_hash_index_find_ptr(const HashTable *ht, ulong h)
 {
 	zval *zv;
 
