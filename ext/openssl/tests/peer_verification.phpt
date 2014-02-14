@@ -25,7 +25,10 @@ if ($pid == -1) {
 	var_dump(@stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
 	
 	// Should succeed with peer verification disabled in context
-	$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
+	$ctx = stream_context_create(['ssl' => [
+		'verify_peer' => false,
+		'verify_host' => false
+	]]);
 	var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
 
 	// Should succeed with CA file specified in context
