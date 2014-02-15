@@ -1044,26 +1044,6 @@ static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t le
 }
 
 
-/* {{{ _php_pgsql_strndup, no strndup should be used */
-static char *_php_pgsql_strndup(const char *s, size_t len)
-{
-	char *new;
-
-	if (NULL == s) {
-		return (char *)NULL;
-	}
-
-	new = (char *) malloc(len + 1);
-
-	if (NULL == new) {
-		return (char *)NULL;
-	}
-
-	new[len] = '\0';
-
-	return memmove(new, s, len);
-}
-/* }}} */
 
 /* {{{ PHP_INI
  */
@@ -6129,23 +6109,24 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 	token = php_strtok_r(table_copy, ".", &tmp);
 	len = strlen(token);
 	if (_php_pgsql_detect_identifier_escape(token, len) == SUCCESS) {
-		escaped = _php_pgsql_strndup(token, len);
+		smart_str_appendl(querystr, token, len);
 	} else {
 		escaped = PGSQLescapeIdentifier(pg_link, token, len);
+		smart_str_appends(querystr, escaped);
+		PGSQLfree(escaped);
 	}
-	smart_str_appends(querystr, escaped);
-	PGSQLfree(escaped);
 	if (tmp && *tmp) {
 		len = strlen(tmp);
 		/* "schema"."table" format */
 		if (_php_pgsql_detect_identifier_escape(tmp, len) == SUCCESS) {
-			escaped = _php_pgsql_strndup(tmp, len);
+			smart_str_appendc(querystr, '.');
+			smart_str_appendl(querystr, tmp, len);
 		} else {
 			escaped = PGSQLescapeIdentifier(pg_link, tmp, len);
+			smart_str_appendc(querystr, '.');
+			smart_str_appends(querystr, escaped);
+			PGSQLfree(escaped);
 		}
-		smart_str_appendc(querystr, '.');
-		smart_str_appends(querystr, escaped);
-		PGSQLfree(escaped);
 	}
 	efree(table_copy);
 }
