@@ -139,7 +139,7 @@ Rolling a stable release
 1. Checkout your release branch, you should have created when releasing previous RC
 and bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 
-2. If a CVE commit needs to be merged to the release, then have it commited to
+2. If a CVE commit needs to be merged to the release, then have it committed to
 the base branches and merged upwards as usual (f.e commit the CVE fix to 5.3,
 merge to 5.4, 5.5 etc...). Then you can cherry-pick it in your release branch.
 Don't forget to update NEWS manually in an extra commit then.

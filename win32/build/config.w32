@@ -449,4 +449,3 @@ if (PHP_STATIC_ANALYZE == "yes") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
 }
-
