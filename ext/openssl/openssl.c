@@ -5083,14 +5083,14 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	must_verify_peer = GET_VER_OPT("verify_peer")
-		? zend_is_true(*val)
+		? zend_is_true(*val TSRMLS_CC)
 		: sslsock->is_client;
 
 	must_verify_host = GET_VER_OPT("verify_host")
-		? zend_is_true(*val)
+		? zend_is_true(*val TSRMLS_CC)
 		: sslsock->is_client;
 
-	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(*val));
+	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(*val TSRMLS_CC));
 
 	if ((must_verify_peer || must_verify_host || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
