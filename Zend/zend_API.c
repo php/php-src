@@ -701,9 +701,6 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, const char **spe
 			const char *space;
 			const char *class_name = get_active_class_name(&space TSRMLS_CC);
 
-			if (0 == strcmp(expected_type, "unknown")) {
-				severity = E_ERROR;
-			}
 			if (error) {
 				zend_error(severity, "%s%s%s() expects parameter %d %s",
 						class_name, space, get_active_function_name(TSRMLS_C), arg_num, error);
@@ -2323,8 +2320,10 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 }
 /* }}} */
 
-ZEND_API int zend_startup_module(zend_module_entry *module TSRMLS_DC) /* {{{ */
+ZEND_API int zend_startup_module(zend_module_entry *module) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	if ((module = zend_register_internal_module(module TSRMLS_CC)) != NULL && zend_startup_module_ex(module TSRMLS_CC) == SUCCESS) {
 		return SUCCESS;
 	}

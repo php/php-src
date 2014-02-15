@@ -24,7 +24,7 @@
 ZEND_API zend_llist zend_extensions;
 static int last_resource_number;
 
-int zend_load_extension(const char *path TSRMLS_DC)
+int zend_load_extension(const char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
@@ -107,7 +107,7 @@ int zend_load_extension(const char *path TSRMLS_DC)
 		return FAILURE;
 	}
 
-	return zend_register_extension(new_extension, handle TSRMLS_CC);
+	return zend_register_extension(new_extension, handle);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
 /* See http://support.microsoft.com/kb/190351 */
@@ -119,7 +119,7 @@ int zend_load_extension(const char *path TSRMLS_DC)
 }
 
 
-int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle TSRMLS_DC)
+int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
@@ -127,7 +127,7 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle TSRM
 	extension = *new_extension;
 	extension.handle = handle;
 
-	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension TSRMLS_CC);
+	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension);
 
 	zend_llist_add_element(&zend_extensions, &extension);
 
@@ -208,8 +208,10 @@ static void zend_extension_message_dispatcher(const zend_extension *extension, i
 }
 
 
-ZEND_API void zend_extension_dispatch_message(int message, void *arg TSRMLS_DC)
+ZEND_API void zend_extension_dispatch_message(int message, void *arg)
 {
+	TSRMLS_FETCH();
+
 	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher TSRMLS_CC, 2, message, arg);
 }
 

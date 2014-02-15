@@ -443,9 +443,9 @@ ZEND_API void _zval_internal_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ 
 }
 /* }}} */
 
-ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
+ZEND_API int zend_is_true(zval *op) /* {{{ */
 {
-	return i_zend_is_true(op TSRMLS_CC);
+	return i_zend_is_true(op);
 }
 /* }}} */
 

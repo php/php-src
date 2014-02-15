@@ -447,7 +447,6 @@ END_EXTERN_C()
 #define Z_BVAL(zval)			((zend_bool)(zval).value.lval)
 #define Z_DVAL(zval)			(zval).value.dval
 #define Z_STRVAL(zval)			(zval).value.str.val
-
 #define Z_STRSIZE(zval)			(zval).value.str.len
 #define Z_ARRVAL(zval)			(zval).value.ht
 #define Z_AST(zval)			(zval).value.ast

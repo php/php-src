@@ -2376,4 +2376,3 @@ nowdoc_scan_done:
 
 */
 }
-

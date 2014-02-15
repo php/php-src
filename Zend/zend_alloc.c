@@ -2682,8 +2682,10 @@ ZEND_API char *zend_strndup(const char *s, zend_size_t length)
 }
 
 
-ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC)
+ZEND_API int zend_set_memory_limit(size_t memory_limit)
 {
+	TSRMLS_FETCH();
+
 	AG(mm_heap)->limit = (memory_limit >= AG(mm_heap)->block_size) ? memory_limit : AG(mm_heap)->block_size;
 
 	return SUCCESS;
