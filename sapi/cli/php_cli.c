@@ -320,7 +320,7 @@ static php_size_t sapi_cli_ub_write(const char *str, php_size_t str_length TSRML
 }
 /* }}} */
 
-static void sapi_cli_flush(void *server_context TSRMLS_DC) /* {{{ */
+static void sapi_cli_flush(void *server_context) /* {{{ */
 {
 	/* Ignore EBADF here, it's caused by the fact that STDIN/STDOUT/STDERR streams
 	 * are/could be closed before fflush() is called.
@@ -870,7 +870,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(php_optarg TSRMLS_CC);
+				zend_load_extension(php_optarg);
 				break;
 			case 'H':
 				hide_argv = 1;
@@ -1024,7 +1024,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 			/* Zeev might want to do something with this one day */
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
-			zend_indent(TSRMLS_C);
+			zend_indent();
 			zend_file_handle_dtor(file_handle.handle TSRMLS_CC);
 			goto out;
 			break;

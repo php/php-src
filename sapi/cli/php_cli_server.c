@@ -614,9 +614,10 @@ static php_size_t sapi_cli_server_ub_write(const char *str, php_size_t str_lengt
 	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
-static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
+static void sapi_cli_server_flush(void *server_context) /* {{{ */
 {
 	php_cli_server_client *client = server_context;
+	TSRMLS_FETCH();
 
 	if (!client) {
 		return;
@@ -1143,7 +1144,7 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	return 0;
 } /* }}} */
 
-static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read TSRMLS_DC) /* {{{ */
+static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read) /* {{{ */
 {
 	ssize_t _nbytes_read;
 	php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(131072);
@@ -1151,6 +1152,7 @@ static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sen
 	_nbytes_read = read(fd, chunk->data.heap.p, chunk->data.heap.len);
 	if (_nbytes_read < 0) {
 		char *errstr = get_last_error();
+		TSRMLS_FETCH();
 		php_cli_server_logf("%s" TSRMLS_CC, errstr);
 		pefree(errstr, 1);
 		php_cli_server_chunk_dtor(chunk);
@@ -2366,7 +2368,7 @@ static int php_cli_server_send_event(php_cli_server *server, php_cli_server_clie
 	if (client->content_sender_initialized) {
 		if (client->file_fd >= 0 && !client->content_sender.buffer.first) {
 			size_t nbytes_read;
-			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read TSRMLS_CC)) {
+			if (php_cli_server_content_sender_pull(&client->content_sender, client->file_fd, &nbytes_read)) {
 				php_cli_server_close_connection(server, client TSRMLS_CC);
 				return FAILURE;
 			}
