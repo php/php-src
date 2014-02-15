@@ -1396,7 +1396,7 @@ PHP_FUNCTION(umask)
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}

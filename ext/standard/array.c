@@ -4005,7 +4005,6 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
-/* XXX not finished yet, continue after php_rand is worky on 64 bit */
 /* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
@@ -4279,7 +4278,7 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-				int retval_true = zend_is_true(retval TSRMLS_CC);
+				int retval_true = zend_is_true(retval);
 
 				zval_ptr_dtor(&retval);
 				if (use_type) {
@@ -4292,7 +4291,7 @@ PHP_FUNCTION(array_filter)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
-		} else if (!zend_is_true(*operand TSRMLS_CC)) {
+		} else if (!zend_is_true(*operand)) {
 			continue;
 		}
 

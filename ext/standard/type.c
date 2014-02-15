@@ -186,7 +186,7 @@ PHP_FUNCTION(boolval)
 		return;
 	}
 
-	RETURN_BOOL(zend_is_true(*val TSRMLS_CC));
+	RETURN_BOOL(zend_is_true(*val));
 }
 /* }}} */
 
