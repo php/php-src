@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
 
+- Openssl:
+  . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
+  (Mark Zedwood)
+
 - PCRE:
   . Upgraded to PCRE 8.34. (Anatol)
 
