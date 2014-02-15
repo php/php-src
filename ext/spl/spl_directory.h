@@ -55,7 +55,7 @@ typedef struct _spl_other_handler {
 /* define an overloaded iterator structure */
 typedef struct {
 	zend_object_iterator  intern;
-	zval                  *current;
+	zval                  current;
 	spl_filesystem_object *object;
 } spl_filesystem_iterator;
 
