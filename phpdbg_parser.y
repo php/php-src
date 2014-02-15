@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 typedef void* yyscan_t;
 #endif
 }
- 
+%expect 1 
 %output  "phpdbg_parser.c"
 %defines "phpdbg_parser.h"
  
@@ -91,11 +91,11 @@ typedef void* yyscan_t;
 %parse-param { phpdbg_param_t **expression }
 %parse-param { yyscan_t scanner }
 
-%token C_CMD		"command (possibly automatically detected)"
-
 %token C_TRUTHY		"truthy (true, on, yes or enabled)"
 %token C_FALSY		"falsy (false, off, no or disabled)"
 %token C_STRING		"string (some input, perhaps)"
+%token C_EVAL	 	"eval"
+%token C_SHELL		"shell"
 
 %token T_DIGITS	 "digits (numbers)"
 %token T_LITERAL "literal (T_LITERAL)"
@@ -103,7 +103,7 @@ typedef void* yyscan_t;
 %token T_OPLINE	 "opline (T_OPLINE)"
 %token T_FILE	 "file (T_FILE)"
 %token T_ID		 "identifier (T_ID)"
-
+%token T_INPUT	 "input (input string or data)"
 %%
 
 input
@@ -121,8 +121,11 @@ params
 	;
 
 command
-	: C_CMD 								{ fprintf(stderr, "got cmd: %s\n", $1.str);    }
-	| C_CMD	C_CMD							{ fprintf(stderr, "got sub: %s -> %s\n", $1.str, $2.str); }
+	: T_ID 									{ fprintf(stderr, "got cmd: %s\n", $1.str);    				}
+	| T_ID T_ID								{ fprintf(stderr, "got sub: %s -> %s\n", $1.str, $2.str); 	}
+	/* exceptional cases below */
+	| C_EVAL T_INPUT                        { fprintf(stderr, "got eval: %s\n", $2.str); 	            }
+	| C_SHELL T_INPUT						{ fprintf(stderr, "got shell: %s\n", $2.str); 	            }
 	;
 	
 parameter
@@ -132,6 +135,8 @@ parameter
 	| T_OPLINE								{ $$ = $1; }
 	| T_ID									{ $$ = $1; } 
 	| T_LITERAL								{ $$ = $1; }
+	| C_TRUTHY								{ $$ = $1; }
+	| C_FALSY								{ $$ = $1; }
 	;
 
 handler
