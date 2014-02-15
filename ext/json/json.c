@@ -190,10 +190,10 @@ static int json_determine_array_type(zval **val TSRMLS_DC) /* {{{ */
 			}
 
 			if (i == HASH_KEY_IS_STRING) {
-				return PHP_JSON_OUTPUT_OBJECT;
+				return 1;
 			} else {
 				if (index != idx) {
-					return PHP_JSON_OUTPUT_OBJECT;
+					return 1;
 				}
 			}
 			idx++;
