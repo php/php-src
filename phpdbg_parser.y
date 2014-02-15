@@ -104,6 +104,7 @@ typedef void* yyscan_t;
 %token T_FILE	 "file (T_FILE)"
 %token T_ID		 "identifier (T_ID)"
 %token T_INPUT	 "input (input string or data)"
+%token T_UNEXPECTED "unexpected input (input string or data)"
 %%
 
 input

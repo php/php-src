@@ -41,7 +41,6 @@ LITERAL		\"(\\.|[^\\"])*\"
 WS          [ \r\n\t]+
 INPUT		[^\n]+
 %%
-{WS}            							{ }
 <INITIAL>
 {
 	{C_YES}|{C_ON}|{C_ENABLED}|{C_TRUE} 	{
@@ -104,7 +103,6 @@ INPUT		[^\n]+
 	BEGIN(INITIAL);
 	return T_INPUT;
 }
-.			{
-	/** command detection here **/
-}
+{WS}        { /* ignore whitespace */ }
+.			{ return T_UNEXPECTED; }
 %%
