@@ -98,7 +98,7 @@ typedef void* yyscan_t;
 %token C_SHELL		"shell"
 
 %token T_DIGITS	 "digits (numbers)"
-%token T_STRING  "literal (T_LITERAL)"
+%token T_LITERAL "literal (T_LITERAL)"
 %token T_METHOD	 "method (T_METHOD)"
 %token T_OPLINE	 "opline (T_OPLINE)"
 %token T_FILE	 "file (T_FILE)"
@@ -135,7 +135,7 @@ parameter
 	| T_METHOD								{ $$ = $1; }
 	| T_OPLINE								{ $$ = $1; }
 	| T_ID									{ $$ = $1; } 
-	| T_STRING								{ $$ = $1; }
+	| T_LITERAL								{ $$ = $1; }
 	| C_TRUTHY								{ $$ = $1; }
 	| C_FALSY								{ $$ = $1; }
 	;
