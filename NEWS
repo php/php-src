@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
   (Mark Zedwood)
 
+- Pgsql:
+  . Added warning for dangerous client encoding with pg_insert()/pg_update()
+    pg_delete()/pg_select(). (Yasuo)
+
 ?? ??? 2014, PHP 5.4.25
 
 - Core:
