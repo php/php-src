@@ -452,10 +452,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 }
 
 
-static inline int php_openssl_enable_crypto(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock,
-		php_stream_xport_crypto_param *cparam
-		TSRMLS_DC)
+static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_netstream_data_t *sslsock, php_stream_xport_crypto_param *cparam TSRMLS_DC)
 {
 	int n, retry = 1;
 
@@ -466,11 +463,12 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 						has_timeout = 0;
 
 #if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
-
+{
 		zval **val;
 
-		if (sslsock->is_client
-			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
+		if (sslsock->is_client &&
+			stream->context &&
+			(php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
 				|| zend_is_true(*val TSRMLS_CC))
 		) {
 			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
@@ -479,10 +477,13 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			} else if (sslsock->url_name) {
 				SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
 			}
+
+		} else if (sslsock->is_client && !stream->context && sslsock->url_name) {
+			SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
 		}
 
+}
 #endif
-
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
 				SSL_set_connect_state(sslsock->ssl_handle);

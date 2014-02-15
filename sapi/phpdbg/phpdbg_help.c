@@ -268,7 +268,7 @@ PHPDBG_HELP(break) /* {{{ */
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak op ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb O ZEND_ADD", phpdbg_get_prompt(TSRMLS_C));
-	phpdbg_writeln("\tWill break on every occurence of the opcode provided");
+	phpdbg_writeln("\tWill break on every occurrence of the opcode provided");
 	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%sbreak del 1", phpdbg_get_prompt(TSRMLS_C));
 	phpdbg_writeln("\t%sb d 1", phpdbg_get_prompt(TSRMLS_C));
@@ -574,7 +574,7 @@ PHPDBG_HELP(options) /* {{{ */
 	phpdbg_writeln(" -c\t-c/my/php.ini\t\tSet php.ini file to load");
 	phpdbg_writeln(" -d\t-dmemory_limit=4G\tSet a php.ini directive");
 	phpdbg_writeln(" -n\tN/A\t\t\tDisable default php.ini");
-	phpdbg_writeln(" -q\tN/A\t\t\tSupress welcome banner");
+	phpdbg_writeln(" -q\tN/A\t\t\tSuppress welcome banner");
 	phpdbg_writeln(" -e\t-emytest.php\t\tSet execution context");
 	phpdbg_writeln(" -v\tN/A\t\t\tEnable oplog output");
 	phpdbg_writeln(" -s\tN/A\t\t\tEnable stepping");

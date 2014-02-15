@@ -1292,7 +1292,7 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 	const mbfl_encoding *encoding;
 
 	if (!new_value || new_value_length == 0 || !(encoding = mbfl_name2encoding(new_value))) {
-		/* falls back to UTF-8 if an unkown encoding name is given */
+		/* falls back to UTF-8 if an unknown encoding name is given */
 		encoding = mbfl_no2encoding(mbfl_no_encoding_utf8);
 	}
 	MBSTRG(internal_encoding) = encoding;

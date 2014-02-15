@@ -5208,62 +5208,82 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	zval **val = NULL;
 	char *cnmatch = NULL;
 	int err;
-	php_openssl_netstream_data_t *sslsock;
-	
-	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+	zend_bool must_verify_peer;
+	zend_bool must_verify_host;
+	zend_bool must_verify_fingerprint;
+	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
-	if (!(GET_VER_OPT("verify_peer") || sslsock->is_client)
-		|| (GET_VER_OPT("verify_peer") && !zval_is_true(*val))
-	) {
-		return SUCCESS;
-	}
+	must_verify_peer = GET_VER_OPT("verify_peer")
+		? zend_is_true(*val TSRMLS_CC)
+		: sslsock->is_client;
 
-	if (peer == NULL) {
+	must_verify_host = GET_VER_OPT("verify_host")
+		? zend_is_true(*val TSRMLS_CC)
+		: sslsock->is_client;
+
+	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(*val TSRMLS_CC));
+
+	if ((must_verify_peer || must_verify_host || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
 		return FAILURE;
 	}
 
-	err = SSL_get_verify_result(ssl);
-	switch (err) {
-		case X509_V_OK:
-			/* fine */
-			break;
-		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
-			if (GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
-				/* allowed */
+	/* Verify the peer against using CA file/path settings */
+	if (must_verify_peer) {
+		err = SSL_get_verify_result(ssl);
+		switch (err) {
+			case X509_V_OK:
+				/* fine */
 				break;
-			}
-			/* not allowed, so fall through */
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not verify peer: code:%d %s", err, X509_verify_cert_error_string(err));
-			return FAILURE;
-	}
-
-	/* if the cert passed the usual checks, apply our own local policies now */
-
-	if (GET_VER_OPT("peer_fingerprint")) {
-		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
-			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer fingerprint doesn't match");
+			case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+				if (GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
+					/* allowed */
+					break;
+				}
+				/* not allowed, so fall through */
+			default:
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,
+						"Could not verify peer: code:%d %s",
+						err,
+						X509_verify_cert_error_string(err)
+				);
 				return FAILURE;
-			}
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected peer fingerprint must be a string or an array");
 		}
 	}
 
-	GET_VER_OPT_STRING("CN_match", cnmatch);
-
-	/* If no CN_match was specified assign the autodetected name when connecting as a client */
-	if (cnmatch == NULL && sslsock->is_client) {
-		cnmatch = sslsock->url_name;
+	/* If a peer_fingerprint match is required this trumps host verification */
+	if (must_verify_fingerprint) {
+		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
+			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"Peer fingerprint doesn't match"
+				);
+				return FAILURE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Expected peer fingerprint must be a string or an array"
+			);
+		}
 	}
 
-	if (cnmatch) {
-		if (matches_san_list(peer, cnmatch TSRMLS_CC)) {
-			return SUCCESS;
-		} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
-			return SUCCESS;
+	/* verify the host name presented in the peer certificate */
+
+	if (must_verify_host) {
+		GET_VER_OPT_STRING("CN_match", cnmatch);
+		/* If no CN_match was specified assign the autodetected url name in client environments */
+		if (cnmatch == NULL && sslsock->is_client) {
+			cnmatch = sslsock->url_name;
+		}
+
+		if (cnmatch) {
+			if (matches_san_list(peer, cnmatch TSRMLS_CC)) {
+				return SUCCESS;
+			} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
+				return SUCCESS;
+			} else {
+				return FAILURE;
+			}
 		} else {
 			return FAILURE;
 		}

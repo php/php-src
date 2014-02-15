@@ -334,7 +334,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 #endif
 
 		default:
-			/* unkown type */
+			/* unknown type */
 			zval_ptr_dtor(subarray);
 			*subarray = NULL;
 			return;
