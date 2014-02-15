@@ -794,18 +794,17 @@ static char* php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 			char *encoding;
 			/* This is compatible with PQescapeLiteral, but it cannot handle multbyte chars
 			   such as SJIS, BIG5. Raise warning and return NULL by checking
-			   client_encoding. XXX: Black list could be wrong. False positive. */
+			   client_encoding. */
 			encoding = (char *) pg_encoding_to_char(PQclientEncoding(conn));
 			if (!strncmp(encoding, "SJIS", sizeof("SJIS")-1) ||
 				!strncmp(encoding, "SHIFT_JIS_2004", sizeof("SHIFT_JIS_2004")-1) ||
-				!strncmp(encoding, "WIN874", sizeof("WIN874")-1) ||
-				!strncmp(encoding, "WIN1258", sizeof("WIN1258")-1) ||
 				!strncmp(encoding, "BIG5", sizeof("BIG5")-1) ||
+				!strncmp(encoding, "GB18030", sizeof("GB18030")-1) ||
 				!strncmp(encoding, "GBK", sizeof("GBK")-1) ||
 				!strncmp(encoding, "JOHAB", sizeof("JOHAB")-1) ||
 				!strncmp(encoding, "UHC", sizeof("UHC")-1) ) {
 				TSRMLS_FETCH();
-				
+
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsafe encoding is used. Do not use '%s' encoding or use PostgreSQL 9.0 or later libpq.", encoding);
 			}
 			/* check backslashes */
