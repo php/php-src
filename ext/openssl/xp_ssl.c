@@ -407,7 +407,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "no_ticket", &val) && 
-				zend_is_true(*val TSRMLS_CC)
+				zend_is_true(*val)
 		) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
 		}
@@ -420,7 +420,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "disable_compression", &val) &&
-				zend_is_true(*val TSRMLS_CC)
+				zend_is_true(*val)
 		) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
 		}
@@ -452,10 +452,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 }
 
 
-static inline int php_openssl_enable_crypto(php_stream *stream,
-		php_openssl_netstream_data_t *sslsock,
-		php_stream_xport_crypto_param *cparam
-		TSRMLS_DC)
+static inline int php_openssl_enable_crypto(php_stream *stream, php_openssl_netstream_data_t *sslsock, php_stream_xport_crypto_param *cparam TSRMLS_DC)
 {
 	int n, retry = 1;
 
@@ -466,12 +463,13 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 						has_timeout = 0;
 
 #if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
-
+{
 		zval **val;
 
-		if (sslsock->is_client
-			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
-				|| zend_is_true(*val TSRMLS_CC))
+		if (sslsock->is_client &&
+			stream->context &&
+			(php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
+				|| zend_is_true(*val))
 		) {
 			if (php_stream_context_get_option(stream->context, "ssl", "SNI_server_name", &val) == SUCCESS) {
 				convert_to_string_ex(val);
@@ -479,10 +477,13 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			} else if (sslsock->url_name) {
 				SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
 			}
+
+		} else if (sslsock->is_client && !stream->context && sslsock->url_name) {
+			SSL_set_tlsext_host_name(sslsock->ssl_handle, sslsock->url_name);
 		}
 
+}
 #endif
-
 		if (!sslsock->state_set) {
 			if (sslsock->is_client) {
 				SSL_set_connect_state(sslsock->ssl_handle);
@@ -578,7 +579,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					if (SUCCESS == php_stream_context_get_option(
 								stream->context, "ssl",
 								"capture_peer_cert", &val) &&
-							zend_is_true(*val TSRMLS_CC)) {
+							zend_is_true(*val)) {
 						MAKE_STD_ZVAL(zcert);
 						ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, 
 									php_openssl_get_x509_list_id() TSRMLS_CC));
@@ -592,7 +593,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					if (SUCCESS == php_stream_context_get_option(
 								stream->context, "ssl",
 								"capture_peer_cert_chain", &val) &&
-							zend_is_true(*val TSRMLS_CC)) {
+							zend_is_true(*val)) {
 						zval *arr;
 						STACK_OF(X509) *chain;
 
