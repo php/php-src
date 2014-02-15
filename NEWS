@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
 
+- Openssl:
+  . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
+  (Mark Zedwood)
+
 ?? ??? 2014, PHP 5.4.25
 
 - Core:
