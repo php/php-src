@@ -4005,7 +4005,6 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
-/* XXX not finished yet, continue after php_rand is worky on 64 bit */
 /* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
