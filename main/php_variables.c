@@ -731,7 +731,6 @@ static zend_bool php_auto_globals_create_post(const char *name, php_size_t name_
 
 	if (PG(variables_order) &&
 			(strchr(PG(variables_order),'P') || strchr(PG(variables_order),'p')) &&
-		!SG(headers_sent) &&
 		SG(request_info).request_method &&
 		!strcasecmp(SG(request_info).request_method, "POST")) {
 		sapi_module.treat_data(PARSE_POST, NULL, NULL TSRMLS_CC);

@@ -362,7 +362,7 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 	php_size_t length = strlen(filename);
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
-		zend_load_extension(filename TSRMLS_CC);
+		zend_load_extension(filename);
 	} else {
 	    char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
@@ -373,7 +373,7 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 		} else {
 			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
 		}
-		zend_load_extension(libpath TSRMLS_CC);
+		zend_load_extension(libpath);
 		efree(libpath);
 	}
 }
