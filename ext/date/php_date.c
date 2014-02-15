@@ -2404,7 +2404,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 	PHP_DATE_INTERVAL_ADD_PROPERTY("d", d);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("S", s);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
@@ -3995,7 +3995,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 		GET_VALUE_FROM_STRUCT(d, "d");
 		GET_VALUE_FROM_STRUCT(h, "h");
 		GET_VALUE_FROM_STRUCT(i, "i");
-		GET_VALUE_FROM_STRUCT(s, "S");
+		GET_VALUE_FROM_STRUCT(s, "s");
 		GET_VALUE_FROM_STRUCT(invert, "invert");
 		GET_VALUE_FROM_STRUCT(days, "days");
 		/* didn't find any */
@@ -4070,7 +4070,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, const
 		SET_VALUE_FROM_STRUCT(d, "d");
 		SET_VALUE_FROM_STRUCT(h, "h");
 		SET_VALUE_FROM_STRUCT(i, "i");
-		SET_VALUE_FROM_STRUCT(s, "S");
+		SET_VALUE_FROM_STRUCT(s, "s");
 		SET_VALUE_FROM_STRUCT(invert, "invert");
 		/* didn't find any */
 		(zend_get_std_object_handlers())->write_property(object, member, value, key TSRMLS_CC);
