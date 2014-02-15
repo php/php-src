@@ -60,7 +60,7 @@ AH_BOTTOM([
 #endif
 
 #if ZEND_BROKEN_SPRINTF
-zend_str_size_int zend_sprintf(char *buffer, const char *format, ...);
+zend_size_t zend_sprintf(char *buffer, const char *format, ...);
 #else
 # define zend_sprintf sprintf
 #endif
