@@ -25,8 +25,17 @@ echo "Ok\n";
 
 ?>
 --EXPECT--
-array(1) {
+array(2) {
   [0]=>
+  array(3) {
+    ["num"]=>
+    string(4) "1234"
+    ["str"]=>
+    string(3) "AAA"
+    ["bin"]=>
+    string(8) "\x424242"
+  }
+  [1]=>
   array(3) {
     ["num"]=>
     string(4) "1234"

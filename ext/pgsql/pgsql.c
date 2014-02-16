@@ -6382,8 +6382,11 @@ PHP_FUNCTION(pg_insert)
 	zval *pgsql_link, *values;
 	char *table, *sql = NULL;
 	int table_len;
-	ulong option = PGSQL_DML_EXEC;
+	ulong option = PGSQL_DML_EXEC, return_sql;
 	PGconn *pg_link;
+	PGresult *pg_result;
+	ExecStatusType status;
+	pgsql_result_handle *pgsql_handle;
 	int id = -1, argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "rsa|l",
@@ -6400,10 +6403,55 @@ PHP_FUNCTION(pg_insert)
 	if (php_pgsql_flush_query(pg_link TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Detected unhandled result(s) in connection");
 	}
-	if (php_pgsql_insert(pg_link, table, values, option, &sql TSRMLS_CC) == FAILURE) {
+	return_sql = option & PGSQL_DML_STRING;
+	if (option & PGSQL_DML_EXEC) {
+		/* return resource when executed */
+		option = option & ~PGSQL_DML_EXEC;
+		if (php_pgsql_insert(pg_link, table, values, option|PGSQL_DML_STRING, &sql TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
+		pg_result = PQexec(pg_link, sql);
+		if ((PGG(auto_reset_persistent) & 2) && PQstatus(pg_link) != CONNECTION_OK) {
+			PQclear(pg_result);
+			PQreset(pg_link);
+			pg_result = PQexec(pg_link, sql);
+		}
+		efree(sql);
+
+		if (pg_result) {
+			status = PQresultStatus(pg_result);
+		} else {
+			status = (ExecStatusType) PQstatus(pg_link);
+		}
+
+		switch (status) {
+			case PGRES_EMPTY_QUERY:
+			case PGRES_BAD_RESPONSE:
+			case PGRES_NONFATAL_ERROR:
+			case PGRES_FATAL_ERROR:
+				PHP_PQ_ERROR("Query failed: %s", pg_link);
+				PQclear(pg_result);
+				RETURN_FALSE;
+				break;
+			case PGRES_COMMAND_OK: /* successful command that did not return rows */
+			default:
+				if (pg_result) {
+					pgsql_handle = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+					pgsql_handle->conn = pg_link;
+					pgsql_handle->result = pg_result;
+					pgsql_handle->row = 0;
+					ZEND_REGISTER_RESOURCE(return_value, pgsql_handle, le_result);
+					return;
+				} else {
+					PQclear(pg_result);
+					RETURN_FALSE;
+				}
+			break;
+		}
+	} else if (php_pgsql_insert(pg_link, table, values, option, &sql TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (option & PGSQL_DML_STRING) {
+	if (return_sql) {
 		RETURN_STRING(sql, 0);
 	}
 	RETURN_TRUE;
