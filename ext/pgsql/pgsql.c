@@ -5172,7 +5172,7 @@ PHP_FUNCTION(pg_get_pid)
 /* {{{ php_pgsql_meta_data
  * TODO: Add meta_data cache for better performance
  */
-PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC) 
+PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended TSRMLS_DC)
 {
 	PGresult *pg_result;
 	char *src, *tmp_name, *tmp_name2 = NULL;
@@ -5196,10 +5196,25 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		tmp_name = "public";
 	}
 
-	smart_str_appends(&querystr, 
-			"SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotnull, a.atthasdef, a.attndims, t.typtype = 'e' "
-			"FROM pg_class as c, pg_attribute a, pg_type t, pg_namespace n "
-			"WHERE a.attnum > 0 AND a.attrelid = c.oid AND c.relname = '");
+	if (extended) {
+		smart_str_appends(&querystr,
+						  "SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotNULL, a.atthasdef, a.attndims, t.typtype, "
+						  "d.description "
+						  "FROM pg_class as c "
+						  " JOIN pg_attribute a ON (a.attrelid = c.oid) "
+						  " JOIN pg_type t ON (a.atttypid = t.oid) "
+						  " JOIN pg_namespace n ON (c.relnamespace = n.oid) "
+						  " LEFT JOIN pg_description d ON (d.objoid=a.attrelid AND d.objsubid=a.attnum AND c.oid=d.objoid) "
+						  "WHERE a.attnum > 0  AND c.relname = '");
+	} else {
+		smart_str_appends(&querystr,
+						  "SELECT a.attname, a.attnum, t.typname, a.attlen, a.attnotnull, a.atthasdef, a.attndims, t.typtype "
+						  "FROM pg_class as c "
+						  " JOIN pg_attribute a ON (a.attrelid = c.oid) "
+						  " JOIN pg_type t ON (a.atttypid = t.oid) "
+						  " JOIN pg_namespace n ON (c.relnamespace = n.oid) "
+						  "WHERE a.attnum > 0 AND c.relname = '");
+	}
 	escaped = (char *)safe_emalloc(strlen(tmp_name2), 2, 1);
 	new_len = PQescapeStringConn(pg_link, escaped, tmp_name2, strlen(tmp_name2), NULL);
 	if (new_len) {
@@ -5207,7 +5222,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 	}
 	efree(escaped);
 
-	smart_str_appends(&querystr, "' AND c.relnamespace = n.oid AND n.nspname = '");
+	smart_str_appends(&querystr, "' AND n.nspname = '");
 	escaped = (char *)safe_emalloc(strlen(tmp_name), 2, 1);
 	new_len = PQescapeStringConn(pg_link, escaped, tmp_name, strlen(tmp_name), NULL);
 	if (new_len) {
@@ -5215,7 +5230,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 	}
 	efree(escaped);
 
-	smart_str_appends(&querystr, "' AND a.atttypid = t.oid ORDER BY a.attnum;");
+	smart_str_appends(&querystr, "' ORDER BY a.attnum;");
 	smart_str_0(&querystr);
 	efree(src);
 
@@ -5232,28 +5247,41 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		char *name;
 		MAKE_STD_ZVAL(elem);
 		array_init(elem);
+		/* pg_attribute.attnum */
 		add_assoc_long(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
+		/* pg_type.typname */
 		add_assoc_string(elem, "type", PQgetvalue(pg_result,i,2), 1);
+		/* pg_attribute.attlen */
 		add_assoc_long(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
-		if (!strcmp(PQgetvalue(pg_result,i,4), "t")) {
-			add_assoc_bool(elem, "not null", 1);
-		}
-		else {
+		/* pg_attribute.attnonull */
+		!strcmp(PQgetvalue(pg_result,i,4), "t") ?
+			add_assoc_bool(elem, "not null", 1) :
 			add_assoc_bool(elem, "not null", 0);
-		}
-		if (!strcmp(PQgetvalue(pg_result,i,5), "t")) {
-			add_assoc_bool(elem, "has default", 1);
-		}
-		else {
+		/* pg_attribute.atthasdef */
+		!strcmp(PQgetvalue(pg_result,i,5), "t") ?
+			add_assoc_bool(elem, "has default", 1) :
 			add_assoc_bool(elem, "has default", 0);
-		}
+		/* pg_attribute.attndims */
 		add_assoc_long(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
-		if (!strcmp(PQgetvalue(pg_result,i,7), "t")) {
-			add_assoc_bool(elem, "is enum", 1);
-		}
-		else {
+		/* pg_type.typtype */
+		!strcmp(PQgetvalue(pg_result,i,7), "e") ?
+			add_assoc_bool(elem, "is enum", 1) :
 			add_assoc_bool(elem, "is enum", 0);
+		if (extended) {
+			/* pg_type.typtype */
+			!strcmp(PQgetvalue(pg_result,i,7), "b") ?
+				add_assoc_bool(elem, "is base", 1) :
+				add_assoc_bool(elem, "is base", 0);
+			!strcmp(PQgetvalue(pg_result,i,7), "c") ?
+				add_assoc_bool(elem, "is composite", 1) :
+				add_assoc_bool(elem, "is composite", 0);
+			!strcmp(PQgetvalue(pg_result,i,7), "p") ?
+				add_assoc_bool(elem, "is pesudo", 1) :
+				add_assoc_bool(elem, "is pesudo", 0);
+			/* pg_description.description */
+			add_assoc_string(elem, "description", PQgetvalue(pg_result,i,8), 1);
 		}
+		/* pg_attribute.attname */
 		name = PQgetvalue(pg_result,i,0);
 		add_assoc_zval(meta, name, elem);
 	}
@@ -5265,38 +5293,28 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 /* }}} */
 
 
-/* {{{ proto array pg_meta_data(resource db, string table)
+/* {{{ proto array pg_meta_data(resource db, string table [, bool extended])
    Get meta_data */
 PHP_FUNCTION(pg_meta_data)
 {
 	zval *pgsql_link;
 	char *table_name;
 	uint table_name_len;
+	zend_bool extended=0;
 	PGconn *pgsql;
 	int id = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs",
-							  &pgsql_link, &table_name, &table_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|b",
+							  &pgsql_link, &table_name, &table_name_len, &extended) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-	
+
 	array_init(return_value);
-	if (php_pgsql_meta_data(pgsql, table_name, return_value TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_meta_data(pgsql, table_name, return_value, extended TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value); /* destroy array */
 		RETURN_FALSE;
-	}
-	else {
-		HashPosition pos;
-		zval **val;
-
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(return_value), &pos);
-			zend_hash_get_current_data_ex(Z_ARRVAL_P(return_value), (void **)&val, &pos) == SUCCESS;
-			zend_hash_move_forward_ex(Z_ARRVAL_P(return_value), &pos)) {
-			/* delete newly added entry, in order to keep BC */
-			zend_hash_del_key_or_index(Z_ARRVAL_PP(val), "is enum", sizeof("is enum"), 0, HASH_DEL_KEY);
-		}
 	}
 }
 /* }}} */
@@ -5508,7 +5526,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 	array_init(meta);
 
 /* table_name is escaped by php_pgsql_meta_data */
-	if (php_pgsql_meta_data(pg_link, table_name, meta TSRMLS_CC) == FAILURE) {
+	if (php_pgsql_meta_data(pg_link, table_name, meta, 0 TSRMLS_CC) == FAILURE) {
 		zval_dtor(meta);
 		FREE_ZVAL(meta);
 		return FAILURE;
