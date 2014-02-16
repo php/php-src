@@ -15,7 +15,7 @@
 
 %s RAW
 
-%option outfile="phpdbg_lexer.c" header-file="phpdbg_lexer.h"
+%option outfile="sapi/phpdbg/phpdbg_lexer.c" header-file="sapi/phpdbg/phpdbg_lexer.h"
 %option warn nodefault
  
 %option reentrant noyywrap never-interactive nounistd
@@ -66,9 +66,9 @@ INPUT		[^\n]+
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;
-		return C_SHELL; 
+		return C_SHELL;
 	}
-	{DIGITS}         { 
+	{DIGITS}         {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
 		return T_DIGITS;

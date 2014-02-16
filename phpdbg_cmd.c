@@ -22,12 +22,20 @@
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
+#include "phpdbg_parser.h"
+#include "phpdbg_lexer.h"
+
+int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
+void phpdbg_stack_free(phpdbg_param_t *stack);
+int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	switch (param->type) {
+		case STACK_PARAM:
+			return "stack";
 		case EMPTY_PARAM:
 			return "empty";
 		case ADDR_PARAM:
@@ -208,6 +216,10 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest TSRMLS_DC) /* {{{ */
 {
 	switch ((dest->type = src->type)) {
+		case STACK_PARAM:
+			/* nope */
+		break;
+		
 		case STR_PARAM:
 			dest->str = estrndup(src->str, src->len);
 			dest->len = src->len;
@@ -254,6 +266,10 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 	zend_ulong hash = param->type;
 
 	switch (param->type) {
+		case STACK_PARAM:
+			/* nope */
+		break;
+		
 		case STR_PARAM:
 			hash += zend_inline_hash_func(param->str, param->len);
 		break;
@@ -301,7 +317,11 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 	if (l && r) {
 		if (l->type == r->type) {
 			switch (l->type) {
-
+				case STACK_PARAM:
+					/* nope, or yep */
+					return 1;
+				break;
+				
 				case NUMERIC_FUNCTION_PARAM:
 					if (l->num != r->num) {
 						break;
@@ -528,6 +548,39 @@ readline:
 		buffer->argv = phpdbg_read_argv(
 			buffer->string, &buffer->argc TSRMLS_CC);
 
+		{
+			yyscan_t scanner;
+			YY_BUFFER_STATE state;
+			phpdbg_param_t stack;
+		
+			phpdbg_init_param(&stack, STACK_PARAM);
+		
+			if (yylex_init(&scanner)) {
+				fprintf(stderr, "could not initialize scanner\n");
+				return buffer;
+			}
+
+			state = yy_scan_string(buffer->string, scanner);
+	 		
+			if (yyparse(&stack, scanner) <= 0) {
+				char *why = NULL;
+			
+				if (phpdbg_stack_execute(&stack, &why) != SUCCESS) {
+					fprintf(stderr, 
+						"Execution Error: %s\n", 
+						why ? why : "for no particular reason");
+				}
+			
+				if (why) {
+					free(why);
+				}
+			}
+			yy_delete_buffer(state, scanner);
+			yylex_destroy(scanner);
+		
+			phpdbg_stack_free(&stack);
+		}
+		
 #ifdef PHPDBG_DEBUG
 		if (buffer->argc) {
 			int arg = 0;

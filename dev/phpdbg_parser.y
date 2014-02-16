@@ -47,7 +47,7 @@ void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 	}
 }
 
-static void phpdbg_stack_free(phpdbg_param_t *stack) {
+void phpdbg_stack_free(phpdbg_param_t *stack) {
 	if (stack && stack->next) {
 		phpdbg_param_t *remove = stack->next;
 		
@@ -100,7 +100,7 @@ static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	stack->len++;
 }
 
-static int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
+int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	phpdbg_param_t *command = NULL,
 				   *params = NULL;
 	
@@ -135,46 +135,6 @@ static int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	return SUCCESS;
 }
 
-int main(int argc, char **argv) {
- 	do {
-		yyscan_t scanner;
-		YY_BUFFER_STATE state;
-		char buffer[8096];
-		size_t buflen = 0L;
-		phpdbg_param_t stack;
-		
-		phpdbg_init_param(&stack, STACK_PARAM);
-		
-		if (fgets(&buffer[0], 8096, stdin) != NULL) {
-			if (yylex_init(&scanner)) {
-				fprintf(stderr, "could not initialize scanner\n");
-				return 1;
-			}
-
-			state = yy_scan_string(buffer, scanner);
-	 		
-			if (yyparse(&stack, scanner) <= 0) {
-				char *why = NULL;
-				
-				if (phpdbg_stack_execute(&stack, &why) != SUCCESS) {
-					fprintf(stderr, 
-						"Execution Error: %s\n", 
-						why ? why : "for no particular reason");
-				}
-				
-				if (why) {
-					free(why);
-				}
-			}
-			yy_delete_buffer(state, scanner);
-			yylex_destroy(scanner);
-		} else fprintf(stderr, "could not get input !!\n");
-		
-		phpdbg_stack_free(&stack);
- 	} while (1);
- 	
-	return 0;
-}
 
 %}
  
@@ -185,8 +145,8 @@ typedef void* yyscan_t;
 #endif
 }
 %expect 1 
-%output  "phpdbg_parser.c"
-%defines "phpdbg_parser.h"
+%output  "sapi/phpdbg/phpdbg_parser.c"
+%defines "sapi/phpdbg/phpdbg_parser.h"
  
 %define api.pure
 %lex-param   { yyscan_t scanner }
