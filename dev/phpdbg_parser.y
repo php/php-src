@@ -11,14 +11,17 @@
  
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
+#include "phpdbg_utils.h"
 
 #define YYSTYPE phpdbg_param_t
 
 #include "phpdbg_parser.h"
 #include "phpdbg_lexer.h"
 
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
 int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
-    fprintf(stderr, "Parse Error: %s\n", msg);
+    phpdbg_error("Parse Error: %s", msg);
 }
 
 void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
@@ -139,6 +142,7 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 %}
  
 %code requires {
+#include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void* yyscan_t;

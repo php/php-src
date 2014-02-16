@@ -556,7 +556,7 @@ readline:
 			phpdbg_init_param(&stack, STACK_PARAM);
 		
 			if (yylex_init(&scanner)) {
-				fprintf(stderr, "could not initialize scanner\n");
+				phpdbg_error("could not initialize scanner");
 				return buffer;
 			}
 
@@ -566,11 +566,11 @@ readline:
 				char *why = NULL;
 			
 				if (phpdbg_stack_execute(&stack, &why) != SUCCESS) {
-					fprintf(stderr, 
-						"Execution Error: %s\n", 
+					phpdbg_error( 
+						"Execution Error: %s", 
 						why ? why : "for no particular reason");
 				}
-			
+
 				if (why) {
 					free(why);
 				}

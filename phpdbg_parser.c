@@ -79,14 +79,17 @@
  
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
+#include "phpdbg_utils.h"
 
 #define YYSTYPE phpdbg_param_t
 
 #include "phpdbg_parser.h"
 #include "phpdbg_lexer.h"
 
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
 int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
-    fprintf(stderr, "Parse Error: %s\n", msg);
+    phpdbg_error("Parse Error: %s", msg);
 }
 
 void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
@@ -207,7 +210,7 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 
 
 /* Line 268 of yacc.c  */
-#line 211 "sapi/phpdbg/phpdbg_parser.c"
+#line 214 "sapi/phpdbg/phpdbg_parser.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -230,8 +233,9 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 /* "%code requires" blocks.  */
 
 /* Line 288 of yacc.c  */
-#line 141 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 144 "sapi/phpdbg/dev/phpdbg_parser.y"
 
+#include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void* yyscan_t;
@@ -240,7 +244,7 @@ typedef void* yyscan_t;
 
 
 /* Line 288 of yacc.c  */
-#line 244 "sapi/phpdbg/phpdbg_parser.c"
+#line 248 "sapi/phpdbg/phpdbg_parser.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -278,7 +282,7 @@ typedef int YYSTYPE;
 
 
 /* Line 343 of yacc.c  */
-#line 282 "sapi/phpdbg/phpdbg_parser.c"
+#line 286 "sapi/phpdbg/phpdbg_parser.c"
 
 #ifdef short
 # undef short
@@ -571,9 +575,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   173,   173,   177,   178,   181,   183,   187,   188,   192,
-     193,   197,   198,   202,   203,   204,   205,   206,   207,   208,
-     209,   213
+       0,   177,   177,   181,   182,   185,   187,   191,   192,   196,
+     197,   201,   202,   206,   207,   208,   209,   210,   211,   212,
+     213,   217
 };
 #endif
 
@@ -1529,105 +1533,105 @@ yyreduce:
         case 3:
 
 /* Line 1806 of yacc.c  */
-#line 177 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 181 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(1) - (1)])); }
     break;
 
   case 4:
 
 /* Line 1806 of yacc.c  */
-#line 178 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 182 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(2) - (2)])); }
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 187 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 191 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(1) - (1)])); }
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 188 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 192 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(2) - (2)])); }
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 192 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 196 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(1) - (2)])); phpdbg_stack_push(stack, &(yyvsp[(2) - (2)])); }
     break;
 
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 193 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 197 "sapi/phpdbg/dev/phpdbg_parser.y"
     { phpdbg_stack_push(stack, &(yyvsp[(1) - (2)])); phpdbg_stack_push(stack, &(yyvsp[(2) - (2)])); }
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 202 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 206 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 203 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 207 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 204 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 208 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 205 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 209 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 206 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 210 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 207 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 211 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 208 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 212 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 209 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 213 "sapi/phpdbg/dev/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1631 "sapi/phpdbg/phpdbg_parser.c"
+#line 1635 "sapi/phpdbg/phpdbg_parser.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1858,6 +1862,6 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 215 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 219 "sapi/phpdbg/dev/phpdbg_parser.y"
 
 

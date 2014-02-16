@@ -33,8 +33,9 @@
 /* "%code requires" blocks.  */
 
 /* Line 2068 of yacc.c  */
-#line 141 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 144 "sapi/phpdbg/dev/phpdbg_parser.y"
 
+#include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
 #define YY_TYPEDEF_YY_SCANNER_T
 typedef void* yyscan_t;
@@ -43,7 +44,7 @@ typedef void* yyscan_t;
 
 
 /* Line 2068 of yacc.c  */
-#line 47 "sapi/phpdbg/phpdbg_parser.h"
+#line 48 "sapi/phpdbg/phpdbg_parser.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
