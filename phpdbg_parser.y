@@ -4,7 +4,7 @@
 /*
  * phpdbg_parser.y
  *
- * flex phpdb_lexer.l
+ * flex phpdbg_lexer.l
  * bison phpdbg_parser.y
  * gcc -g -o parser phpdbg_lexer.c phpdbg_parser.c -I/usr/src/php-src/main -I/usr/src/php-src/Zend -I/usr/src/php-src/TSRM -I/usr/src/php-src
  */
@@ -43,37 +43,64 @@ void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 #include "phpdbg_parser.h"
 #include "phpdbg_lexer.h"
 
+static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
+	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
+	
+	if (!next)
+		return;
+	
+	*(next) = *(param);
+
+	if (stack->addr) {
+		next->next = 
+			stack->next;
+	} else {
+		stack->addr = (ulong) next;
+	}
+	
+	stack->next = next;
+	stack->len++;
+}
+
 int yyerror(phpdbg_param_t **param, yyscan_t scanner, const char *msg) {
     fprintf(stderr, "Parse Error: %s\n", msg);
 }
 
 int main(int argc, char **argv) {
  	do {
- 		phpdbg_param_t *expression;
 		yyscan_t scanner;
 		YY_BUFFER_STATE state;
 		char buffer[8096];
 		size_t buflen = 0L;
+		phpdbg_param_t *stack = malloc(sizeof(phpdbg_param_t));
+		
+		phpdbg_init_param(stack, EMPTY_PARAM);
 		
 		if (fgets(&buffer[0], 8096, stdin) != NULL) {
 			if (yylex_init(&scanner)) {
-				// couldn't initialize
 				fprintf(stderr, "could not initialize scanner\n");
 				return 1;
 			}
 
 			state = yy_scan_string(buffer, scanner);
 	 		
-			if (yyparse(&expression, scanner) <= 0) {
-				// error parsing
+			if (yyparse(&stack, scanner) <= 0) {
+				fprintf(stderr, "got stack %p\n", stack);
+				while (stack) {
+					phpdbg_debug_param(stack, "\t -> ");
+					stack = stack->next;
+				}
 				yy_delete_buffer(state, scanner);
 				yylex_destroy(scanner);
-			} else fprintf(stderr, "could not parse input (%s) !!\n", buffer);
+			}
 		} else fprintf(stderr, "could not get input !!\n");
+		
+		free(stack);
  	} while (1);
  	
 	return 0;
 }
+
 %}
  
 %code requires {
@@ -88,7 +115,7 @@ typedef void* yyscan_t;
  
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { phpdbg_param_t **expression }
+%parse-param { phpdbg_param_t **stack }
 %parse-param { yyscan_t scanner }
 
 %token C_TRUTHY		"truthy (true, on, yes or enabled)"
@@ -108,25 +135,32 @@ typedef void* yyscan_t;
 %%
 
 input
-    : handler								{} 
+    : handler
     ;
 
 parameters
-	: parameters parameter					{ phpdbg_debug_param(&$2, "got another parameter"); }
-	| parameter								{ phpdbg_debug_param(&$1, "got first parameter");   }
+	: parameter								{ phpdbg_stack_push(*stack, &$1); }
+	| parameters parameter					{ phpdbg_stack_push(*stack, &$2); }
 	;
 
 params
-	: /* empty */							{ /* do nothing */ }
-	| parameters							{ $$ = $1; }
+	: /* empty */
+	| parameters
+	;
+
+normal
+	:	T_ID								{ phpdbg_stack_push(*stack, &$1); }
+	|	normal T_ID							{ phpdbg_stack_push(*stack, &$2); }
+	;
+	
+special
+	: C_EVAL T_INPUT                        { phpdbg_stack_push(*stack, &$1); phpdbg_stack_push(*stack, &$2); }
+	| C_SHELL T_INPUT						{ phpdbg_stack_push(*stack, &$1); phpdbg_stack_push(*stack, &$2); }
 	;
 
 command
-	: T_ID 									{ fprintf(stderr, "got cmd: %s\n", $1.str);    				}
-	| T_ID T_ID								{ fprintf(stderr, "got sub: %s -> %s\n", $1.str, $2.str); 	}
-	/* exceptional cases below */
-	| C_EVAL T_INPUT                        { fprintf(stderr, "got eval: %s\n", $2.str); 	            }
-	| C_SHELL T_INPUT						{ fprintf(stderr, "got shell: %s\n", $2.str); 	            }
+	: normal								
+	| special								
 	;
 	
 parameter
@@ -141,6 +175,6 @@ parameter
 	;
 
 handler
-	: command params 						{}
+	: command params
 	;
 %%

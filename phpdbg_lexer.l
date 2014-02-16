@@ -44,65 +44,74 @@ INPUT		[^\n]+
 <INITIAL>
 {
 	{C_YES}|{C_ON}|{C_ENABLED}|{C_TRUE} 	{
-		yylval->type = NUMERIC_PARAM;
+		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 1;		
 		return C_TRUTHY;
 	}
 	{C_NO}|{C_OFF}|{C_DISABLED}|{C_FALSE} {
-		yylval->type = NUMERIC_PARAM;
+		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 0;
 		return C_FALSY;
 	}
-	{C_EVAL}		{ 
+	{C_EVAL}		{
 		BEGIN(RAW);
-		return C_EVAL; 
+		phpdbg_init_param(yylval, STR_PARAM);
+		yylval->str = strndup(yytext, yyleng);
+		yylval->len = yyleng;
+		return C_EVAL;
 	}
 	{C_SHELL}		{ 
 		BEGIN(RAW);
+		phpdbg_init_param(yylval, STR_PARAM);
+		yylval->str = strndup(yytext, yyleng);
+		yylval->len = yyleng;
 		return C_SHELL; 
 	}
 	{DIGITS}         { 
-		yylval->type = NUMERIC_PARAM;
+		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
 		return T_DIGITS;
 	}
 	{METHOD}		{
-		yylval->type = METHOD_PARAM;
+		phpdbg_init_param(yylval, METHOD_PARAM);
 		yylval->method.class = "class";
 		yylval->method.name = "func";
 		return T_METHOD; 
 	}
 	{FILE}			{
-		yylval->type = FILE_PARAM;
+		phpdbg_init_param(yylval, FILE_PARAM);
 		yylval->file.name = strndup(yytext, yyleng);
 		yylval->file.line = 0;
 		return T_FILE;
 	}
 	{OPLINE}		{
-		yylval->type = ADDR_PARAM;
+		phpdbg_init_param(yylval, ADDR_PARAM);
 		yylval->addr = strtoul(yytext, NULL, 10);
 		return T_OPLINE; 
 	}
-	{LITERAL}		{ 
-		yylval->type = STR_PARAM;
+	{LITERAL}		{
+		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_LITERAL; 
 	}
-	{ID}		{
-		yylval->type = STR_PARAM;
+	{ID}			{
+		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_ID; 
 	}
 }
 <RAW>{INPUT}		{
-	yylval->type = STR_PARAM;
+	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = strndup(yytext, yyleng);
 	yylval->len = yyleng;
 	BEGIN(INITIAL);
 	return T_INPUT;
 }
-{WS}        { /* ignore whitespace */ }
-.			{ return T_UNEXPECTED; }
+{WS}        		{ /* ignore whitespace */ }
+.			{
+	phpdbg_init_param(yylval, EMPTY_PARAM);
+	return T_UNEXPECTED; 
+}
 %%

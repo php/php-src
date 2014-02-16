@@ -53,7 +53,8 @@ struct _phpdbg_input_t {
 	int argc;
 };
 
-typedef struct _phpdbg_param {
+typedef struct _phpdbg_param phpdbg_param_t;
+struct _phpdbg_param {
 	phpdbg_param_type type;
 	long num;
 	zend_ulong addr;
@@ -67,7 +68,21 @@ typedef struct _phpdbg_param {
 	} method;
 	char *str;
 	size_t len;
-} phpdbg_param_t;
+	phpdbg_param_t *next;
+};
+
+#define phpdbg_init_param(v, t) do{ \
+	v->type = t; \
+	v->addr = 0; \
+	v->num = 0; \
+	v->file.name = NULL; \
+	v->file.line = 0; \
+	v->method.class = NULL; \
+	v->method.name = NULL; \
+	v->str = NULL; \
+	v->len = 0; \
+	v->next = NULL; \
+} while(0)
 
 typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*, const phpdbg_input_t* TSRMLS_DC);
 
