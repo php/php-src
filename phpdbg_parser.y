@@ -14,6 +14,13 @@
 
 #define YYSTYPE phpdbg_param_t
 
+#include "phpdbg_parser.h"
+#include "phpdbg_lexer.h"
+
+int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
+    fprintf(stderr, "Parse Error: %s\n", msg);
+}
+
 void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 	if (param && param->type) {
 		switch (param->type) {
@@ -40,8 +47,38 @@ void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 	}
 }
 
-#include "phpdbg_parser.h"
-#include "phpdbg_lexer.h"
+static void phpdbg_stack_free(phpdbg_param_t *stack) {
+	if (stack && stack->next) {
+		phpdbg_param_t *remove = stack->next;
+		
+		while (remove) {
+			phpdbg_param_t *next = NULL;
+			
+			if (remove->next)
+				next = remove->next;
+			
+			switch (remove->type) {
+				case STR_PARAM: 
+					if (remove->str) {
+						free(remove->str);	
+					}
+				break;
+				
+				case FILE_PARAM:
+					if (remove->file.name) {
+						free(remove->file.name);
+					}
+				break;
+			}
+			
+			free(remove);
+			
+			if (next) 
+				remove = next; 
+			else break;
+		}
+	}
+}
 
 static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
@@ -51,19 +88,51 @@ static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	
 	*(next) = *(param);
 
-	if (stack->addr) {
-		next->next = 
-			stack->next;
+	if (stack->top == NULL) {
+		stack->top = next;
+		stack->next = next;
 	} else {
-		stack->addr = (ulong) next;
+		stack->top->next = next;
+		next->top = stack->top;
+		stack->top = next;
 	}
 	
-	stack->next = next;
 	stack->len++;
 }
 
-int yyerror(phpdbg_param_t **param, yyscan_t scanner, const char *msg) {
-    fprintf(stderr, "Parse Error: %s\n", msg);
+static int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
+	phpdbg_param_t *command = NULL,
+				   *params = NULL;
+	
+	if (stack->type != STACK_PARAM) {
+		asprintf(
+			why, "the passed argument was not a stack !!");
+		return FAILURE;
+	}
+	
+	if (!stack->len) {
+		asprintf(
+			why, "the stack contains nothing !!");
+		return FAILURE;
+	}
+	
+	command = params = (phpdbg_param_t*) stack->next;
+
+	if (command->type != STR_PARAM) {
+		asprintf(
+			why, "the first parameter is expected to be a string !!");
+		return FAILURE;
+	}
+	
+	/* do resolve command(s) */
+	
+	/* do prepare params for function */
+	while (params) {
+		phpdbg_debug_param(params, "-> ...");
+		params = params->next;
+	}
+	
+	return SUCCESS;
 }
 
 int main(int argc, char **argv) {
@@ -72,9 +141,9 @@ int main(int argc, char **argv) {
 		YY_BUFFER_STATE state;
 		char buffer[8096];
 		size_t buflen = 0L;
-		phpdbg_param_t *stack = malloc(sizeof(phpdbg_param_t));
+		phpdbg_param_t stack;
 		
-		phpdbg_init_param(stack, EMPTY_PARAM);
+		phpdbg_init_param(&stack, STACK_PARAM);
 		
 		if (fgets(&buffer[0], 8096, stdin) != NULL) {
 			if (yylex_init(&scanner)) {
@@ -85,17 +154,23 @@ int main(int argc, char **argv) {
 			state = yy_scan_string(buffer, scanner);
 	 		
 			if (yyparse(&stack, scanner) <= 0) {
-				fprintf(stderr, "got stack %p\n", stack);
-				while (stack) {
-					phpdbg_debug_param(stack, "\t -> ");
-					stack = stack->next;
+				char *why = NULL;
+				
+				if (phpdbg_stack_execute(&stack, &why) != SUCCESS) {
+					fprintf(stderr, 
+						"Execution Error: %s\n", 
+						why ? why : "for no particular reason");
 				}
-				yy_delete_buffer(state, scanner);
-				yylex_destroy(scanner);
+				
+				if (why) {
+					free(why);
+				}
 			}
+			yy_delete_buffer(state, scanner);
+			yylex_destroy(scanner);
 		} else fprintf(stderr, "could not get input !!\n");
 		
-		free(stack);
+		phpdbg_stack_free(&stack);
  	} while (1);
  	
 	return 0;
@@ -115,7 +190,7 @@ typedef void* yyscan_t;
  
 %define api.pure
 %lex-param   { yyscan_t scanner }
-%parse-param { phpdbg_param_t **stack }
+%parse-param { phpdbg_param_t *stack }
 %parse-param { yyscan_t scanner }
 
 %token C_TRUTHY		"truthy (true, on, yes or enabled)"
@@ -139,8 +214,8 @@ input
     ;
 
 parameters
-	: parameter								{ phpdbg_stack_push(*stack, &$1); }
-	| parameters parameter					{ phpdbg_stack_push(*stack, &$2); }
+	: parameter								{ phpdbg_stack_push(stack, &$1); }
+	| parameters parameter					{ phpdbg_stack_push(stack, &$2); }
 	;
 
 params
@@ -149,13 +224,13 @@ params
 	;
 
 normal
-	:	T_ID								{ phpdbg_stack_push(*stack, &$1); }
-	|	normal T_ID							{ phpdbg_stack_push(*stack, &$2); }
+	:	T_ID								{ phpdbg_stack_push(stack, &$1); }
+	|	normal T_ID							{ phpdbg_stack_push(stack, &$2); }
 	;
 	
 special
-	: C_EVAL T_INPUT                        { phpdbg_stack_push(*stack, &$1); phpdbg_stack_push(*stack, &$2); }
-	| C_SHELL T_INPUT						{ phpdbg_stack_push(*stack, &$1); phpdbg_stack_push(*stack, &$2); }
+	: C_EVAL T_INPUT                        { phpdbg_stack_push(stack, &$1); phpdbg_stack_push(stack, &$2); }
+	| C_SHELL T_INPUT						{ phpdbg_stack_push(stack, &$1); phpdbg_stack_push(stack, &$2); }
 	;
 
 command

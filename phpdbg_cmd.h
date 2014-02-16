@@ -40,7 +40,8 @@ typedef enum {
 	STR_PARAM,
 	NUMERIC_PARAM,
 	NUMERIC_FUNCTION_PARAM,
-	NUMERIC_METHOD_PARAM
+	NUMERIC_METHOD_PARAM,
+	STACK_PARAM
 } phpdbg_param_type;
 
 typedef struct _phpdbg_input_t phpdbg_input_t;
@@ -69,19 +70,21 @@ struct _phpdbg_param {
 	char *str;
 	size_t len;
 	phpdbg_param_t *next;
+	phpdbg_param_t *top;
 };
 
 #define phpdbg_init_param(v, t) do{ \
-	v->type = t; \
-	v->addr = 0; \
-	v->num = 0; \
-	v->file.name = NULL; \
-	v->file.line = 0; \
-	v->method.class = NULL; \
-	v->method.name = NULL; \
-	v->str = NULL; \
-	v->len = 0; \
-	v->next = NULL; \
+	(v)->type = (t); \
+	(v)->addr = 0; \
+	(v)->num = 0; \
+	(v)->file.name = NULL; \
+	(v)->file.line = 0; \
+	(v)->method.class = NULL; \
+	(v)->method.name = NULL; \
+	(v)->str = NULL; \
+	(v)->len = 0; \
+	(v)->next = NULL; \
+	(v)->top = NULL; \
 } while(0)
 
 typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*, const phpdbg_input_t* TSRMLS_DC);

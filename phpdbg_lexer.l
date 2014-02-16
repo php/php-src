@@ -33,9 +33,9 @@ C_EVAL		"eval"
 C_SHELL		"shell"
 
 DIGITS		[0-9]+
-ID			[a-zA-Z][a-zA-Z0-9_]+
+ID			[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
 METHOD		{ID}::{ID}
-FILE		[^ :0-9]{1,}:[0-9]+
+FILE		[^ :]+:[0-9]+
 OPLINE		0x[a-fA-F0-9]+
 LITERAL		\"(\\.|[^\\"])*\"
 WS          [ \r\n\t]+
