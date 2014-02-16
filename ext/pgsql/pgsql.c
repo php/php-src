@@ -5110,7 +5110,7 @@ PHP_FUNCTION(pg_result_status)
 	pgsql_result = pg_result->result;
 	if (result_type == PGSQL_STATUS_LONG) {
 		status = PQresultStatus(pgsql_result);
-		RETURN_INT((int)status);
+		RETURN_INT(status);
 	}
 	else if (result_type == PGSQL_STATUS_STRING) {
 		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
@@ -5772,7 +5772,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							Z_TYPE_P(new_val) = IS_STRING;
 							tmp = (char *)safe_emalloc(Z_STRSIZE_PP(val), 2, 1);
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
-							Z_STRSIZE_P(new_val) = (int)PQescapeStringConn(pg_link, tmp, Z_STRVAL_PP(val), Z_STRSIZE_PP(val), NULL);
+							Z_STRSIZE_P(new_val) = PQescapeStringConn(pg_link, tmp, Z_STRVAL_PP(val), Z_STRSIZE_PP(val), NULL);
 							Z_STRVAL_P(new_val) = tmp;
 							php_pgsql_add_quotes(new_val, 1 TSRMLS_CC);
 						}
