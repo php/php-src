@@ -531,7 +531,7 @@ static PHP_INI_MH(OnChangeAlwaysPopulateRawPostData)
 		*p = (signed char) -1;
 	}
 	else {
-		ZEND_ATOI(new_value, *p);
+		ZEND_ATOI(*p, new_value);
 	}
 	return SUCCESS;
 }
