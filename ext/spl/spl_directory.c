@@ -294,7 +294,8 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	}
 
 	if (!ZVAL_IS_UNDEF(&intern->u.file.zcontext)) {
-		zend_list_addref(Z_RESVAL_P(intern->u.file.zcontext));
+		//zend_list_addref(Z_RES_VAL(intern->u.file.zcontext));
+		Z_ADDREF_P(&intern->u.file.zcontext);
 	}
 
 	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
@@ -307,8 +308,10 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	intern->u.file.open_mode = estrndup(intern->u.file.open_mode, intern->u.file.open_mode_len);
 
 	/* avoid reference counting in debug mode, thus do it manually */
-	ZVAL_RESOURCE(&intern->u.file.zresource, php_stream_get_resource_id(intern->u.file.stream));
+	ZVAL_RES(&intern->u.file.zresource, intern->u.file.stream->res);
+	/*!!! TODO: maybe bug? 
 	Z_SET_REFCOUNT(intern->u.file.zresource, 1);
+	*/
 	
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';

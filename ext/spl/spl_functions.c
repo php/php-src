@@ -77,16 +77,16 @@ void spl_register_property( zend_class_entry * class_entry, char *prop_name, int
 /* }}} */
 
 /* {{{ spl_add_class_name */
-void spl_add_class_name(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
+void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_flags TSRMLS_DC)
 {
 	if (!allow || (allow > 0 && pce->ce_flags & ce_flags) || (allow < 0 && !(pce->ce_flags & ce_flags))) {
 		zval *tmp;
 
 		if ((tmp = zend_hash_find(Z_ARRVAL_P(list), pce->name)) == NULL) {
-			MAKE_STD_ZVAL(tmp);
+			zval t;
 			STR_ADDREF(pce->name);
-			ZVAL_STR(tmp, pce->name);
-			zend_hash_add(Z_ARRVAL_P(list), pce->name, tmp);
+			ZVAL_STR(&t, pce->name);
+			zend_hash_add(Z_ARRVAL_P(list), pce->name, &t);
 		}
 	}
 }

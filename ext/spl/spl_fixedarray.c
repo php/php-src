@@ -601,7 +601,7 @@ SPL_METHOD(SplFixedArray, __wakeup)
 		spl_fixedarray_init(intern->array, size TSRMLS_CC);
 
 		for (zend_hash_internal_pointer_reset_ex(intern_ht, &ptr); (data = zend_hash_get_current_data_ex(intern_ht, &ptr)) != NULL; zend_hash_move_forward_ex(intern_ht, &ptr)) {
-			Z_ADDREF_PP(data);
+			Z_ADDREF_P(data);
 			ZVAL_COPY_VALUE(&intern->array->elements[index++], data);
 		}
 

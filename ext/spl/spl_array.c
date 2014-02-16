@@ -149,7 +149,7 @@ SPL_API int spl_hash_verify_pos(spl_array_object * intern TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* {{{ spl_array_object_free_storage */
-static void spl_array_object_free_storage(void *object TSRMLS_DC)
+static void spl_array_object_free_storage(zend_object *object TSRMLS_DC)
 {
 	spl_array_object *intern = (spl_array_object *)object;
 
@@ -1297,7 +1297,7 @@ SPL_METHOD(Array, getIterator)
 
 	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, object, 0 TSRMLS_CC));
 	Z_SET_REFCOUNT_P(return_value, 1);
-	Z_SET_ISREF_P(return_value);
+	//!!!PZ_SET_ISREF_P(return_value);
 }
 /* }}} */
 

@@ -36,7 +36,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 {
 	object_init_ex(object, pce);
 	Z_SET_REFCOUNT_P(object, 1);
-	Z_SET_ISREF_P(object); /* check if this can be hold always */
+	// !!!PZ_SET_ISREF_P(object); /* check if this can be hold always */
 }
 /* }}} */
 
