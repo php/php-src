@@ -159,7 +159,7 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 #define zend_hash_move_backwards(ht) \
 	zend_hash_move_backwards_ex(ht, NULL)
 #define zend_hash_get_current_key(ht, str_index, num_index, duplicate) \
-	zend_hash_get_current_key_ex(ht, str_index, NULL, num_index, duplicate, NULL)
+	zend_hash_get_current_key_ex(ht, str_index, num_index, duplicate, NULL)
 #define zend_hash_get_current_key_zval(ht, key) \
 	zend_hash_get_current_key_zval_ex(ht, key, NULL)
 #define zend_hash_get_current_key_type(ht) \
