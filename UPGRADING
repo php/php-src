@@ -167,6 +167,9 @@ PHP X.Y UPGRADE NOTES
   LDAP_ESCAPE_FILTER int(1)
   LDAP_ESCAPE_DN     int(2)
 
+- Pgsql:
+  PGSQL_DML_ESCAPE   int(4096)
+
 ========================================
 10. Changes to INI File Handling
 ========================================
