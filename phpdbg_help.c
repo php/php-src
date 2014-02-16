@@ -63,13 +63,13 @@ void pretty_print(char *text TSRMLS_DC)
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
-		if ( UNEXPECTED(p[0] == '*') && p[1] == '*' ) {
+		if (UNEXPECTED(p[0] == '*') && p[1] == '*') {
 			size += bold_escape_len - 2;
 			p++;
-		} else if ( UNEXPECTED(p[0] == '$') && p[1] == 'P' ) {
+		} else if (UNEXPECTED(p[0] == '$') && p[1] == 'P') {
 			size += prompt_escape_len - 2;
 			p++;
-		} else if ( UNEXPECTED(p[0] == '\\') ) {
+		} else if (UNEXPECTED(p[0] == '\\')) {
 			p++;
 		}
 	}
@@ -87,16 +87,16 @@ void pretty_print(char *text TSRMLS_DC)
 	 * first blank.
 	 */
 	for (p = text, q = new; *p; p++) {
-		if ( UNEXPECTED(*p == ' ') ) {
+		if (UNEXPECTED(*p == ' ')) {
 			last_new_blank = q;
 			last_blank_count = line_count++;
 			*q++ = ' ';
-		} else if ( UNEXPECTED(*p == '\n') ) {
+		} else if (UNEXPECTED(*p == '\n')) {
 			last_new_blank = NULL;
 			*q++ = *p;
 			last_blank_count = 0;
 			line_count = 0;
-		} else if ( UNEXPECTED(p[0] == '*') && p[1] == '*' ) {
+		} else if (UNEXPECTED(p[0] == '*') && p[1] == '*') {
 			if (bold_escape_len) {
 				in_bold = !in_bold;
 				memcpy (q, in_bold ? bold_on_escape : bold_off_escape, bold_escape_len);
@@ -104,12 +104,12 @@ void pretty_print(char *text TSRMLS_DC)
 				/* bold on/off has zero print width so line count is unchanged */
 			}
 			p++;
-		} else if ( UNEXPECTED(p[0] == '$') && p[1] == 'P' ) {
+		} else if (UNEXPECTED(p[0] == '$') && p[1] == 'P') {
 			memcpy (q, prompt_escape, prompt_escape_len);
 			q += prompt_escape_len;
 			line_count += prompt_len;
 			p++;
-		} else if ( UNEXPECTED(p[0] == '\\') ) {
+		} else if (UNEXPECTED(p[0] == '\\')) {
 			p++;
 			*q++ = *p;
 			line_count++;
@@ -131,7 +131,7 @@ void pretty_print(char *text TSRMLS_DC)
 		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
 	}
 
-	(void) phpdbg_write("%s\n", new);
+	phpdbg_write("%s\n", new);
 	efree(new);
 }  /* }}} */
 
@@ -139,8 +139,7 @@ void pretty_print(char *text TSRMLS_DC)
 void summary_print(phpdbg_command_t const * const cmd TSRMLS_DC)
 {
 	char *summary;
-	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n",
-	         cmd->name, cmd->alias, cmd->tip);
+	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n", cmd->name, cmd->alias, cmd->tip);
 	pretty_print(summary TSRMLS_CC);
 	efree(summary);
 }
@@ -172,10 +171,10 @@ static char *get_help(const char * const key TSRMLS_DC)
  * will be used to generate a help message but non-unique one will be used to list alternatives.
  */
 static int get_command(
-			const char *key, size_t len,            /* pointer and length of key */
-			phpdbg_command_t const **command,       /* address of first matching command  */
-		    phpdbg_command_t const * const commands /* command table to be scanned */
-			TSRMLS_DC)
+	const char *key, size_t len,      /* pointer and length of key */
+	phpdbg_command_t const **command, /* address of first matching command  */
+	phpdbg_command_t const * commands /* command table to be scanned */
+	TSRMLS_DC)
 {
 	const phpdbg_command_t *c;
 	unsigned int num_matches = 0;
@@ -270,7 +269,7 @@ PHPDBG_HELP(aliases) /* {{{ */
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
 						phpdbg_writeln(" %c %c   %s %-*s  %s",
-							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
+							c->alias, c_sub->alias, (char *)c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
 			}
@@ -278,10 +277,7 @@ PHPDBG_HELP(aliases) /* {{{ */
 	}
 
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
-	(void) get_command( "h", 1, &	c, phpdbg_prompt_commands TSRMLS_CC);
-/* In function ‘phpdbg_do_help_aliases’:
-274:2: warning: passing argument 3 of ‘get_command’ from incompatible pointer type [enabled by default]
-180:12: note: expected ‘struct phpdbg_command_t **’ but argument is of type ‘const struct phpdbg_command_t **’ */
+	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
 	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
 
 	len = 20 - 1 - c->name_len;

@@ -31,7 +31,7 @@
 #ifdef _WIN32
 #	include "win32/time.h"
 #elif defined(HAVE_SYS_IOCTL_H) 
-#   include "sys/ioctl.h"
+#	include "sys/ioctl.h"
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -391,7 +391,7 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 {
 	int columns;	
-#ifdef _win32
+#ifdef _WIN32
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
