@@ -33,7 +33,7 @@ C_EVAL		"eval"
 C_SHELL		"shell"
 
 DIGITS		[0-9]+
-ID			[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
+ID			[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-]*
 NSID		[\\\\]?{ID}
 METHOD		{NSID}+::{ID}
 FILE		[^ :]+:[0-9]+
