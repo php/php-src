@@ -3,10 +3,9 @@
  
 /*
  * phpdbg_parser.y
- *
- * flex phpdbg_lexer.l
- * bison phpdbg_parser.y
- * gcc -g -o parser phpdbg_lexer.c phpdbg_parser.c -I/usr/src/php-src/main -I/usr/src/php-src/Zend -I/usr/src/php-src/TSRM -I/usr/src/php-src
+ * (from php-src root)
+ * flex sapi/phpdbg/dev/phpdbg_lexer.l
+ * bison sapi/phpdbg/dev/phpdbg_parser.y
  */
  
 #include "phpdbg.h"
@@ -164,13 +163,13 @@ typedef void* yyscan_t;
 %token C_SHELL		"shell"
 
 %token T_DIGITS	 "digits (numbers)"
-%token T_LITERAL "literal (T_LITERAL)"
-%token T_METHOD	 "method (T_METHOD)"
-%token T_OPLINE	 "opline (T_OPLINE)"
-%token T_FILE	 "file (T_FILE)"
-%token T_ID		 "identifier (T_ID)"
+%token T_LITERAL "literal (string)"
+%token T_METHOD	 "method"
+%token T_OPLINE	 "opline"
+%token T_FILE	 "file"
+%token T_ID		 "identifier (command or function name)"
 %token T_INPUT	 "input (input string or data)"
-%token T_UNEXPECTED "unexpected input (input string or data)"
+%token T_UNEXPECTED "input"
 %%
 
 input
