@@ -34,7 +34,8 @@ C_SHELL		"shell"
 
 DIGITS		[0-9]+
 ID			[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*
-METHOD		{ID}::{ID}
+NSID		[\\\\]?{ID}
+METHOD		{NSID}+::{ID}
 FILE		[^ :]+:[0-9]+
 OPLINE		0x[a-fA-F0-9]+
 LITERAL		\"(\\.|[^\\"])*\"
