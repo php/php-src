@@ -20,6 +20,7 @@ $ids = array('num'=>'1234');
 $res = pg_select($db, $table_name, $ids) or print "Error\n";
 var_dump($res);
 echo pg_select($db, $table_name, $ids, PGSQL_DML_STRING)."\n";
+echo pg_select($db, $table_name, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAPE)."\n";
 echo "Ok\n";
 
 ?>
@@ -36,4 +37,5 @@ array(1) {
   }
 }
 SELECT * FROM "php_pgsql_test" WHERE "num"=1234;
+SELECT * FROM "php_pgsql_test" WHERE "num"='1234';
 Ok
