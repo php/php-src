@@ -199,6 +199,7 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_EXEC              (1<<9)     /* Execute query */
 #define PGSQL_DML_ASYNC             (1<<10)    /* Do async query */
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
+#define PGSQL_DML_ESCAPE            (1<<12)    /* No convert, but escape only */
 
 /* exported functions */
 PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
