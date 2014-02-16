@@ -20,7 +20,8 @@ else {
 	echo pg_last_error()."\n";
 }
 
-if (!@pg_num_rows(@pg_query($db, "SELECT * FROM ".$table_name_92)))
+$v = pg_version();
+if (version_compare($v['server'], '9.2', '>=') && !@pg_num_rows(@pg_query($db, "SELECT * FROM ".$table_name_92)))
 {
 	pg_query($db,$table_def_92); // Create table here
 }
