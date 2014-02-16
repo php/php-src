@@ -5110,7 +5110,7 @@ PHP_FUNCTION(pg_result_status)
 	pgsql_result = pg_result->result;
 	if (result_type == PGSQL_STATUS_LONG) {
 		status = PQresultStatus(pgsql_result);
-		RETURN_INT((int)status);
+		RETURN_INT(status);
 	}
 	else if (result_type == PGSQL_STATUS_STRING) {
 		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
