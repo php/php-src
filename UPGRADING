@@ -105,6 +105,9 @@ PHP X.Y UPGRADE NOTES
   XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
   the attribute could not be found, just like XMLReader::getAttribute.
 
+- Pgsql:
+  pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
+
 ========================================
 5. New Functions
 ========================================
