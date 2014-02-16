@@ -324,9 +324,9 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char 
 		PHPDBG_BREAK_MAPPING(new_break.id, class_table);
 	} else {
 		phpdbg_notice("Breakpoint exists at %s::%s", class_name, func_name);
-    }
+	}
 
-    efree(lcname);
+	efree(lcname);
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
@@ -992,7 +992,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 
 	for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position);
 	     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void*)&bp, &position) == SUCCESS;
-             zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
+		zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
 		zval *retval = NULL;
 		int orig_interactive = CG(interactive);
 		zval **orig_retval = EG(return_value_ptr_ptr);

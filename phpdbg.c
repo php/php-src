@@ -614,10 +614,10 @@ const char phpdbg_ini_hardcoded[] =
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
-        Z_SET_REFCOUNT(tmp, 0); \
-        Z_UNSET_ISREF(tmp); \
-        ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0); \
-        zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);
+	Z_SET_REFCOUNT(tmp, 0); \
+	Z_UNSET_ISREF(tmp); \
+	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0); \
+	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);
 
 void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 {
