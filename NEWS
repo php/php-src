@@ -11,8 +11,8 @@ PHP                                                                        NEWS
   (Mark Zedwood)
 
 - Pgsql:
-  . Added warning for dangerous client encoding with pg_insert()/pg_update()
-    pg_delete()/pg_select(). (Yasuo)
+  . Added warning for dangerous client encoding and remove possible injections
+    for pg_insert()/pg_update()/pg_delete()/pg_select(). (Yasuo)
 
 ?? ??? 2014, PHP 5.4.25
 
