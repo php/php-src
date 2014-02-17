@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Alpha 3
 
+- gd:
+  . Fixed imagettftext to load the correct character map rather than the last one.
+    (Scott)
+
 - Openssl
   . Fixed segfault when accessing non-existent context for client SNI use
     (Daniel Lowrey)
