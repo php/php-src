@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
 
+- JSON:
+  . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
+  (chobieeee@php.net)
+
 - Openssl
   . Fixed segfault when accessing non-existent context for client SNI use
     (Daniel Lowrey)
