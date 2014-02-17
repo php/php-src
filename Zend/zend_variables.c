@@ -33,7 +33,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			STR_FREE(Z_STR_P(zvalue));
+			STR_RELEASE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -78,8 +78,80 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	}
 }
 
+ZEND_API void _zval_dtor_func_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
+{
+	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+		case IS_STRING:
+		case IS_CONSTANT:
+			CHECK_ZVAL_STRING_REL(zvalue);
+			STR_FREE(Z_STR_P(zvalue));
+			break;
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY: {
+				TSRMLS_FETCH();
+
+				if (Z_ARRVAL_P(zvalue) != &EG(symbol_table).ht) {
+					/* break possible cycles */
+					Z_TYPE_P(zvalue) = IS_NULL;
+					zend_hash_destroy(Z_ARRVAL_P(zvalue));
+					efree(Z_ARR_P(zvalue));
+				}
+			}
+			break;
+		case IS_CONSTANT_AST:
+			zend_ast_destroy(Z_AST_P(zvalue)->ast);
+			efree(Z_AST_P(zvalue));
+			break;
+		case IS_OBJECT:
+			{
+				TSRMLS_FETCH();
+
+				zend_objects_store_del(Z_OBJ_P(zvalue) TSRMLS_CC);
+			}
+			break;
+		case IS_RESOURCE:
+			{
+				TSRMLS_FETCH();
+
+				/* destroy resource */
+				zend_list_delete(Z_RES_P(zvalue));
+			}
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_NULL:
+		default:
+			return;
+			break;
+	}
+}
 
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+		case IS_STRING:
+		case IS_CONSTANT:
+			CHECK_ZVAL_STRING_REL(zvalue);
+			STR_RELEASE(Z_STR_P(zvalue));
+			break;
+		case IS_ARRAY:
+		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
+		case IS_OBJECT:
+		case IS_RESOURCE:
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			break;
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_BOOL:
+		case IS_NULL:
+		default:
+			break;
+	}
+}
+
+ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 		case IS_STRING:
@@ -102,7 +174,6 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 	}
 }
-
 
 ZEND_API void zval_add_ref(zval *p)
 {
@@ -130,7 +201,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				}
 				ZVAL_NEW_ARR(zvalue);
 				zend_hash_init(Z_ARRVAL_P(zvalue), zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(Z_ARRVAL_P(zvalue), ht, (copy_ctor_func_t) zval_add_ref);
+				zend_hash_copy(Z_ARRVAL_P(zvalue), ht, zval_add_ref);
 			}
 			break;
 		case IS_CONSTANT_AST: {

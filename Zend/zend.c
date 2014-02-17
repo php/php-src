@@ -505,7 +505,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry *));
+	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref);
 
 	zend_set_default_compile_time_values(TSRMLS_C);
 
@@ -612,6 +612,21 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 
 void zend_init_opcodes_handlers(void);
 
+static void module_destructor_zval(zval *zv) /* {{{ */
+{
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
+
+	module_destructor(module);
+	free(module);
+}
+/* }}} */
+
+static void auto_global_dtor(zval *zv) /* {{{ */
+{
+	free(Z_PTR_P(zv));
+}
+/* }}} */
+
 static zend_bool php_auto_globals_create_globals(zend_string *name TSRMLS_DC) /* {{{ */
 {
 	zval globals;
@@ -694,10 +709,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
-	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, NULL, 1, 0);
+	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, auto_global_dtor, 1, 0);
 	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
 
-	zend_hash_init_ex(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1, 0);
+	zend_hash_init_ex(&module_registry, 50, NULL, module_destructor_zval, 1, 0);
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS
@@ -730,7 +745,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	zend_interned_strings_init(TSRMLS_C);
 	zend_startup_builtin_functions(TSRMLS_C);
 	zend_register_standard_constants(TSRMLS_C);
-	zend_register_auto_global(STR_INIT("GLOBALS", sizeof("GLOBALS") - 1, 0), 1, php_auto_globals_create_globals TSRMLS_CC);
+	zend_register_auto_global(STR_INIT("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals TSRMLS_CC);
 
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
@@ -1360,6 +1375,12 @@ ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC)
 void free_estring(char **str_p) /* {{{ */
 {
 	efree(*str_p);
+}
+
+void free_string_zval(zval *zv) /* {{{ */
+{
+	zend_string *str = Z_PTR_P(zv);
+	STR_RELEASE(str);
 }
 /* }}} */
 

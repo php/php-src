@@ -188,7 +188,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 		}
 	}
 	*d = '\0';
-	ret = STR_EREALLOC(ret, d - (unsigned char*)ret->val);
+	ret = STR_REALLOC(ret, d - (unsigned char*)ret->val, 0);
 	return ret;
 }
 /* }}} */

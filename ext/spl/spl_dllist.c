@@ -500,8 +500,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	spl_dllist_object     *intern  = (spl_dllist_object*)Z_OBJ_P(obj);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval tmp, dllist_array;
-	char *pnstr;
-	int  pnlen;
+	zend_string *pnstr;
 	int  i = 0;
 
 	*is_temp = 0;
@@ -518,10 +517,10 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		}
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1 TSRMLS_CC);
 		ZVAL_LONG(&tmp, intern->flags);
-		zend_hash_str_add(intern->debug_info, pnstr, pnlen, &tmp);
-		efree(pnstr);
+		zend_hash_add(intern->debug_info, pnstr, &tmp);
+		STR_RELEASE(pnstr);
 
 		array_init(&dllist_array);
 
@@ -535,9 +534,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 			current = next;
 		}
 
-		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1, &pnlen TSRMLS_CC);
-		zend_hash_str_add(intern->debug_info, pnstr, pnlen, &dllist_array);
-		efree(pnstr);
+		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1 TSRMLS_CC);
+		zend_hash_add(intern->debug_info, pnstr, &dllist_array);
+		STR_RELEASE(pnstr);
 	}
 
 	return intern->debug_info;

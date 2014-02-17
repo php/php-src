@@ -152,7 +152,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(error_handling) = EH_NORMAL;
 
 	zend_vm_stack_init(TSRMLS_C);
-	zend_vm_stack_push((void *) NULL TSRMLS_CC);
+//???	zend_vm_stack_push((void *) NULL TSRMLS_CC);
 
 	zend_hash_init(&EG(symbol_table).ht, 50, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table).ht;
@@ -426,15 +426,16 @@ ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 
 ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-	Z_DELREF_P(zval_ptr);
-	if (Z_REFCOUNT_P(zval_ptr) == 0) {
-		zval_internal_dtor(zval_ptr);
-	} else if (Z_REFCOUNT_P(zval_ptr) == 1) {		
-//???		Z_UNSET_ISREF_P(zval_ptr);
-		if (Z_ISREF_P(zval_ptr)) {
-			zend_reference *ref = Z_REF_P(zval_ptr);
-			ZVAL_COPY_VALUE(zval_ptr, Z_REFVAL_P(zval_ptr));
-			efree(ref);
+	if (IS_REFCOUNTED(Z_TYPE_P(zval_ptr))) {
+		Z_DELREF_P(zval_ptr);
+		if (Z_REFCOUNT_P(zval_ptr) == 0) {
+			_zval_internal_dtor_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
+		} else if (Z_REFCOUNT_P(zval_ptr) == 1) {		
+			if (Z_ISREF_P(zval_ptr)) {
+				zend_reference *ref = Z_REF_P(zval_ptr);
+				ZVAL_COPY_VALUE(zval_ptr, Z_REFVAL_P(zval_ptr));
+				efree(ref);
+			}
 		}
 	}
 }
@@ -563,7 +564,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			HashTable *ht = Z_ARRVAL_P(p);
 			ZVAL_NEW_ARR(p);
 			zend_hash_init(Z_ARRVAL_P(p), zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(Z_ARRVAL_P(p), ht, (copy_ctor_func_t) zval_deep_copy);
+			zend_hash_copy(Z_ARRVAL_P(p), ht, zval_deep_copy);
 		}
 
 		/* First go over the array and see if there are any constant indices */

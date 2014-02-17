@@ -658,7 +658,7 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 	}
 
 	if (offset >= str->len) {
-		str = STR_EREALLOC(str, offset + 1);
+		str = STR_REALLOC(str, offset + 1, 0);
 		memset(str->val + str->len, ' ', offset - str->len);
 		str->val[offset+1] = 0;
 	} else if (IS_INTERNED(str)) {

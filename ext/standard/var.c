@@ -669,26 +669,26 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				zend_class_entry *ce;
 				ce = zend_get_class_entry(struc TSRMLS_CC);
 				if (ce) {
-					char *prot_name, *priv_name;
+					zend_string *prot_name, *priv_name;
 					int prop_name_length;
 
 					do {
-						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name->val, ce->name->len, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
-						if ((d = zend_hash_str_find(propers, priv_name, prop_name_length)) != NULL) {
-							php_var_serialize_string(buf, priv_name, prop_name_length);
-							pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
+						priv_name = zend_mangle_property_name(ce->name->val, ce->name->len, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
+						if ((d = zend_hash_find(propers, priv_name)) != NULL) {
+							php_var_serialize_string(buf, priv_name->val, priv_name->len);
+							STR_FREE(priv_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
-						pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
-						zend_mangle_property_name(&prot_name, &prop_name_length, "*", 1, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
-						if ((d = zend_hash_str_find(propers, prot_name, prop_name_length)) != NULL) {
-							php_var_serialize_string(buf, prot_name, prop_name_length);
-							pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+						STR_FREE(priv_name);
+						prot_name = zend_mangle_property_name("*", 1, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
+						if ((d = zend_hash_find(propers, prot_name)) != NULL) {
+							php_var_serialize_string(buf, prot_name->val, prot_name->len);
+							STR_FREE(prot_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 							break;
 						}
-						pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
+						STR_FREE(prot_name);
 						php_var_serialize_string(buf, Z_STRVAL_P(name), Z_STRLEN_P(name));
 						php_var_serialize_intern(buf, nvalp, var_hash TSRMLS_CC);
 						php_error_docref(NULL TSRMLS_CC, E_NOTICE, "\"%s\" returned as member variable from __sleep() but does not exist", Z_STRVAL_P(name));

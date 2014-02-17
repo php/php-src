@@ -99,11 +99,11 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+	int op1_len = Z_STRLEN_P(op1);
+	int length = op1_len + Z_STRLEN_P(op2);
 
-	ZVAL_STR(result, STR_ALLOC(length, 1));
-	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-	memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	ZVAL_STR(result, STR_REALLOC(Z_STR_P(op1), length, 1));
+	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 	Z_STRVAL_P(result)[length] = 0;
 }
 /* }}} */
@@ -273,26 +273,26 @@ statement:
 			printf("SECTION: [%s]\n", Z_STRVAL($2));
 #endif
 			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_FREE(Z_STR($2));
+			STR_RELEASE(Z_STR($2));
 		}
 	|	TC_LABEL '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_FREE(Z_STR($1));
-			STR_FREE(Z_STR($3));
+			STR_RELEASE(Z_STR($1));
+			STR_RELEASE(Z_STR($3));
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL($1), Z_STRVAL($2), Z_STRVAL($5));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			STR_FREE(Z_STR($1));
-			STR_FREE(Z_STR($2));
-			STR_FREE(Z_STR($5));
+			STR_RELEASE(Z_STR($1));
+			STR_RELEASE(Z_STR($2));
+			STR_RELEASE(Z_STR($5));
 		}
-	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); STR_FREE(Z_STR($1)); }
+	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); STR_RELEASE(Z_STR($1)); }
 	|	END_OF_LINE
 ;
 

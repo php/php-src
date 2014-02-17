@@ -56,7 +56,7 @@ php_sprintf_appendchar(zend_string **buffer, int *pos, char add TSRMLS_DC)
 {
 	if (!*buffer || (*pos + 1) >= (*buffer)->len) {
 		PRINTF_DEBUG(("%s(): ereallocing buffer to %d bytes\n", get_active_function_name(TSRMLS_C), (*buffer)->len));
-		*buffer = STR_EREALLOC(*buffer, (*buffer)->len << 1);
+		*buffer = STR_REALLOC(*buffer, (*buffer)->len << 1, 0);
 	}
 	PRINTF_DEBUG(("sprintf: appending '%c', pos=\n", add, *pos));
 	(*buffer)->val[(*pos)++] = add;
@@ -100,7 +100,7 @@ php_sprintf_appendstring(zend_string **buffer, int *pos, char *add,
 			size <<= 1;
 		}
 		PRINTF_DEBUG(("sprintf ereallocing buffer to %d bytes\n", size));
-		*buffer = STR_EREALLOC(*buffer, size);
+		*buffer = STR_REALLOC(*buffer, size, 0);
 	}
 	if (alignment == ALIGN_RIGHT) {
 		if ((neg || always_sign) && padding=='0') {

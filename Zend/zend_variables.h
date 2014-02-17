@@ -26,6 +26,7 @@
 BEGIN_EXTERN_C()
 
 ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC);
+ZEND_API void _zval_dtor_func_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 
 static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
@@ -49,6 +50,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 
 ZEND_API int zend_print_variable(zval *var);
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
+ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_dtor_wrapper(zval *zvalue);

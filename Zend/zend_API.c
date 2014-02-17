@@ -2071,7 +2071,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
 		internal_function->handler = ptr->handler;
-		internal_function->function_name = STR_INIT(ptr->fname, fname_len, 1);
+		internal_function->function_name = zend_new_interned_string(STR_INIT(ptr->fname, fname_len, 1));
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		if (ptr->flags) {
@@ -2140,8 +2140,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		lowercase_name = STR_ALLOC(fname_len, 1);
 		zend_str_tolower_copy(lowercase_name->val, ptr->fname, fname_len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
-		if ((reg_function = zend_hash_add_mem(target_function_table, lowercase_name, &function, sizeof(zend_function))) == NULL) {
+		reg_function = malloc(sizeof(zend_internal_function));
+		memcpy(reg_function, &function, sizeof(zend_internal_function));
+		if (zend_hash_add_ptr(target_function_table, lowercase_name, reg_function) == NULL) {
 			unload=1;
+			free(reg_function);
 			STR_RELEASE(lowercase_name);
 			break;
 		}
@@ -2421,8 +2424,10 @@ ZEND_API void zend_activate_modules(TSRMLS_D) /* {{{ */
 /* }}} */
 
 /* call request shutdown for all modules */
-int module_registry_cleanup(zend_module_entry *module TSRMLS_DC) /* {{{ */
+static int module_registry_cleanup(zval *zv TSRMLS_DC) /* {{{ */
 {
+	zend_module_entry *module = Z_PTR_P(zv);
+
 	if (module->request_shutdown_func) {
 #if 0
 		zend_printf("%s: Request shutdown\n", module->name);
@@ -2439,7 +2444,7 @@ ZEND_API void zend_deactivate_modules(TSRMLS_D) /* {{{ */
 
 	zend_try {
 		if (EG(full_tables_cleanup)) {
-			zend_hash_reverse_apply(&module_registry, (apply_func_t) module_registry_cleanup TSRMLS_CC);
+			zend_hash_reverse_apply(&module_registry, module_registry_cleanup TSRMLS_CC);
 		} else {
 			zend_module_entry **p = module_request_shutdown_handlers;
 
@@ -3480,19 +3485,11 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 	}
 	switch (access_type & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PRIVATE: {
-				char *priv_name;
-				int priv_name_length;
-
-				zend_mangle_property_name(&priv_name, &priv_name_length, ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
-				property_info.name = STR_INIT(priv_name, priv_name_length, ce->type & ZEND_INTERNAL_CLASS);
+				property_info.name = zend_mangle_property_name(ce->name->val, ce->name->len, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 			}
 			break;
 		case ZEND_ACC_PROTECTED: {
-				char *prot_name;
-				int prot_name_length;
-
-				zend_mangle_property_name(&prot_name, &prot_name_length, "*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
-				property_info.name = STR_INIT(prot_name, prot_name_length, ce->type & ZEND_INTERNAL_CLASS);
+				property_info.name = zend_mangle_property_name("*", 1, name->val, name->len, ce->type & ZEND_INTERNAL_CLASS);
 			}
 			break;
 		case ZEND_ACC_PUBLIC:

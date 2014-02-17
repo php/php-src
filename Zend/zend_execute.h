@@ -76,7 +76,7 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
-			zval_dtor(zval_ptr);
+			_zval_dtor_func_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
 		} else {
 			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_TYPE_P(zval_ptr) == IS_REFERENCE) {
 				/* convert reference to regular value */
@@ -95,7 +95,7 @@ static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LIN
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
-			zval_dtor(zval_ptr);
+			_zval_dtor_func_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
 		} else {
 			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_TYPE_P(zval_ptr) == IS_REFERENCE) {
 				/* convert reference to regular value */

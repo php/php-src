@@ -575,6 +575,7 @@ END_EXTERN_C()
 
 BEGIN_EXTERN_C()
 ZEND_API void free_estring(char **str_p);
+ZEND_API void free_string_zval(zval *zv);
 END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */

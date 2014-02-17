@@ -145,6 +145,7 @@ void list_entry_destructor(zval *zv)
 	} else {
 		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", res->type);
 	}
+	efree(res);
 }
 
 void plist_entry_destructor(zval *zv)
@@ -171,6 +172,7 @@ void plist_entry_destructor(zval *zv)
 	} else {
 		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)", res->type);
 	}
+	free(res);
 }
 
 int zend_init_rsrc_list(TSRMLS_D)
@@ -228,7 +230,7 @@ ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
 	
-	lde = emalloc(sizeof(zend_rsrc_list_dtors_entry));
+	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));
 	lde->list_dtor=(void (*)(void *)) ld;
 	lde->plist_dtor=(void (*)(void *)) pld;
 	lde->list_dtor_ex = lde->plist_dtor_ex = NULL;
@@ -250,7 +252,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
 	
-	lde = emalloc(sizeof(zend_rsrc_list_dtors_entry));	
+	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));	
 	lde->list_dtor = NULL;
 	lde->plist_dtor = NULL;
 	lde->list_dtor_ex = ld;
@@ -283,11 +285,16 @@ ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 	return 0;
 }
 
+static void list_destructors_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
+
 int zend_init_rsrc_list_dtors(void)
 {
 	int retval;
 
-	retval = zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+	retval = zend_hash_init(&list_destructors, 50, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
 
 	return retval;

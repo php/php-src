@@ -758,7 +758,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
 	ALLOC_HASHTABLE(uploaded_files);
-	zend_hash_init(uploaded_files, 5, NULL, (dtor_func_t) free_estring, 0);
+	zend_hash_init(uploaded_files, 5, NULL, free_string_zval, 0);
 	SG(rfc1867_uploaded_files) = uploaded_files;
 
 	array_init(&PG(http_globals)[TRACK_VARS_FILES]);

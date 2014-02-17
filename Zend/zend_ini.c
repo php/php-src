@@ -83,6 +83,12 @@ static int zend_restore_ini_entry_wrapper(zend_ini_entry **ini_entry TSRMLS_DC) 
 }
 /* }}} */
 
+static void _free_ptr(zval *zv) /* {{{ */
+{
+	free(Z_PTR_P(zv));
+}
+/* }}} */
+
 /*
  * Startup / shutdown
  */
@@ -93,7 +99,7 @@ ZEND_API int zend_ini_startup(TSRMLS_D) /* {{{ */
 	EG(ini_directives) = registered_zend_ini_directives;
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
-	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, NULL, 1, 0) == FAILURE) {
+	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, _free_ptr, 1, 0) == FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;

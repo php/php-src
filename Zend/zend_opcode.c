@@ -120,11 +120,13 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 	}
 }
 
-ZEND_API void zend_function_dtor(zend_function *function)
+ZEND_API void zend_function_dtor(zval *zv)
 {
+	zend_function *function = Z_PTR_P(zv);
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
+	pefree(function, function->type == ZEND_INTERNAL_FUNCTION);
 }
 
 static void zend_cleanup_op_array_data(zend_op_array *op_array)
@@ -267,9 +269,9 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
-ZEND_API void destroy_zend_class(zend_class_entry **pce)
+ZEND_API void destroy_zend_class(zval *zv)
 {
-	zend_class_entry *ce = *pce;
+	zend_class_entry *ce = Z_PTR_P(zv);
 	
 	if (--ce->refcount > 0) {
 		return;
@@ -342,9 +344,11 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 	}
 }
 
-void zend_class_add_ref(zend_class_entry **ce)
+void zend_class_add_ref(zval *zv)
 {
-	(*ce)->refcount++;
+	zend_class_entry *ce = Z_PTR_P(zv);
+
+	ce->refcount++;
 }
 
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)

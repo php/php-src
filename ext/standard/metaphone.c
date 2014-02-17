@@ -144,7 +144,7 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = STR_EREALLOC(*phoned_word, 1 + max_buffer_len); \
+							*phoned_word = STR_REALLOC(*phoned_word, 1 + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
 						(*phoned_word)->val[p_idx++] = c; \
@@ -153,7 +153,7 @@ static char Lookahead(char *word, int how_far)
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = STR_EREALLOC(*phoned_word, max_buffer_len); \
+								*phoned_word = STR_REALLOC(*phoned_word, max_buffer_len, 0); \
 							} \
 							(*phoned_word)->val[p_idx] = '\0'; \
 							(*phoned_word)->len = p_idx; \

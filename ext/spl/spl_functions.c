@@ -133,13 +133,9 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 }
 /* }}} */
 
-char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC) /* {{{ */
+zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len TSRMLS_DC) /* {{{ */
 {
-	char *rv;
-
-	zend_mangle_property_name(&rv, name_len, ce->name->val, ce->name->len, prop_name, prop_len, 0);
-
-	return rv;
+	return zend_mangle_property_name(ce->name->val, ce->name->len, prop_name, prop_len, 0);
 }
 /* }}} */
 

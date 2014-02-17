@@ -653,7 +653,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	if (Z_REFCOUNT_P(str) == 1) {
-		Z_STR_P(str) = STR_EREALLOC(Z_STR_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD);
+		Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD, 0);
 	} else {
 		zend_string *tmp;
 
@@ -4184,7 +4184,7 @@ yy318:
 	zend_dirname(dirname->val, dirname->len);
 
 	if (strcmp(dirname->val, ".") == 0) {
-		dirname = STR_EREALLOC(dirname, MAXPATHLEN);
+		dirname = STR_REALLOC(dirname, MAXPATHLEN, 0);
 #if HAVE_GETCWD
 		VCWD_GETCWD(dirname->val, MAXPATHLEN);
 #elif HAVE_GETWD

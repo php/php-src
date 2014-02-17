@@ -784,8 +784,7 @@ static HashTable *spl_array_get_properties(zval *object TSRMLS_DC) /* {{{ */
 static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
 {
 	zval *storage;
-	int name_len;
-	char *zname;
+	zend_string *zname;
 	zend_class_entry *base;
 	spl_array_object *intern = (spl_array_object*)Z_OBJ_P(obj);
 
@@ -811,9 +810,9 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 			zval_add_ref(storage);
 
 			base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-			zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
-			zend_symtable_str_update(intern->debug_info, zname, name_len, storage);
-			efree(zname);
+			zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1 TSRMLS_CC);
+			zend_symtable_update(intern->debug_info, zname, storage);
+			STR_RELEASE(zname);
 		}
 
 		return intern->debug_info;

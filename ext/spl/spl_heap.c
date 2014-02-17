@@ -508,8 +508,7 @@ static int spl_heap_object_count_elements(zval *object, long *count TSRMLS_DC) /
 static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp TSRMLS_DC) { /* {{{ */
 	spl_heap_object *intern  = (spl_heap_object*)Z_OBJ_P(obj);
 	zval tmp, heap_array;
-	char *pnstr;
-	int  pnlen;
+	zend_string *pnstr;
 	int  i;
 
 	*is_temp = 0;
@@ -527,15 +526,15 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1, &pnlen TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1 TSRMLS_CC);
 		ZVAL_LONG(&tmp, intern->flags);
-		zend_hash_str_update(intern->debug_info, pnstr, pnlen, &tmp);
-		efree(pnstr);
+		zend_hash_update(intern->debug_info, pnstr, &tmp);
+		STR_RELEASE(pnstr);
 
-		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1, &pnlen TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1 TSRMLS_CC);
 		ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
-		zend_hash_str_update(intern->debug_info, pnstr, pnlen, &tmp);
-		efree(pnstr);
+		zend_hash_update(intern->debug_info, pnstr, &tmp);
+		STR_RELEASE(pnstr);
 
 		array_init(&heap_array);
 
@@ -544,9 +543,9 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 			Z_ADDREF_P(&intern->heap->elements[i]);
 		}
 
-		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1, &pnlen TSRMLS_CC);
-		zend_hash_str_update(intern->debug_info, pnstr, pnlen, &heap_array);
-		efree(pnstr);
+		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1 TSRMLS_CC);
+		zend_hash_update(intern->debug_info, pnstr, &heap_array);
+		STR_RELEASE(pnstr);
 	}
 
 	return intern->debug_info;

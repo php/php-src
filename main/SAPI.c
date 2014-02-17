@@ -57,10 +57,15 @@ SAPI_API int sapi_globals_id;
 sapi_globals_struct sapi_globals;
 #endif
 
+static void _type_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
+
 static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 {
 	memset(sapi_globals, 0, sizeof(*sapi_globals));
-	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5, NULL, NULL, 1, 0);
+	zend_hash_init_ex(&sapi_globals->known_post_content_types, 5, NULL, _type_dtor, 1, 0);
 	php_setup_sapi_content_types(TSRMLS_C);
 }
 

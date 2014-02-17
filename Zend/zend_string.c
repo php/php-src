@@ -34,12 +34,19 @@ ZEND_API zend_ulong zend_hash_func(const char *str, uint len)
 	return zend_inline_hash_func(str, len);
 }
 
+static void _str_dtor(zval *zv)
+{
+	zend_string *str = Z_STR_P(zv);
+	str->gc.u.v.flags &= ~IS_STR_INTERNED;
+	str->gc.refcount = 1;
+}
+
 void zend_interned_strings_init(TSRMLS_D)
 {
 #ifndef ZTS
 	zend_string *str;
 
-	zend_hash_init(&CG(interned_strings), 0, NULL, NULL, 1);
+	zend_hash_init(&CG(interned_strings), 0, NULL, _str_dtor, 1);
 	
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 	CG(interned_strings).arData = (Bucket*) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket), CG(interned_strings).flags & HASH_FLAG_PERSISTENT);
@@ -65,8 +72,9 @@ void zend_interned_strings_init(TSRMLS_D)
 void zend_interned_strings_dtor(TSRMLS_D)
 {
 #ifndef ZTS
-	free(CG(interned_strings).arData);
-	free(CG(interned_strings).arHash);
+	zend_hash_destroy(&CG(interned_strings));
+//???	free(CG(interned_strings).arData);
+//???	free(CG(interned_strings).arHash);
 #endif
 }
 
@@ -89,9 +97,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 		p = CG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-//???				if (free_src) {
-//???					efree((void *)arKey);
-//???				}
+				STR_RELEASE(str);
 				return p->key;
 			}
 		}
@@ -166,6 +172,7 @@ static void zend_interned_strings_snapshot_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
+		ZEND_ASSERT(p->key->gc.u.v.flags & IS_STR_PERSISTENT);
 		p->key->gc.u.v.flags |= IS_STR_PERMANENT;
 	}
 #endif

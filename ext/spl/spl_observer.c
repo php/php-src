@@ -303,8 +303,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	HashPosition pos;
 	zval tmp, storage;
 	char md5str[33];
-	int name_len;
-	char *zname;
+	zend_string *zname;
 
 	*is_temp = 0;
 
@@ -334,9 +333,9 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 				zend_hash_move_forward_ex(&intern->storage, &pos);
 		}
 
-		zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1, &name_len TSRMLS_CC);
-		zend_symtable_str_update(intern->debug_info, zname, name_len, &storage);
-		efree(zname);
+		zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1 TSRMLS_CC);
+		zend_symtable_update(intern->debug_info, zname, &storage);
+		STR_RELEASE(zname);
 	}
 
 	return intern->debug_info;

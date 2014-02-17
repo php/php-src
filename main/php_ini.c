@@ -193,9 +193,9 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		free(Z_ARRVAL_P(zvalue));
+		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		free(Z_STRVAL_P(zvalue));
+		STR_RELEASE(Z_STR_P(zvalue));
 	}
 }
 /* Reset / free active_ini_sectin global */
@@ -591,8 +591,6 @@ int php_init_config(TSRMLS_D)
 			zval tmp;
 
 			ZVAL_STR(&tmp, STR_INIT(fh.filename, strlen(fh.filename), 1));
-			Z_SET_REFCOUNT(tmp, 0);
-
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (php_ini_opened_path) {
 				efree(php_ini_opened_path);

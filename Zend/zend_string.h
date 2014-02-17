@@ -51,7 +51,7 @@ END_EXTERN_C()
 #define STR_INIT(str, len, persistent)	zend_str_init(str, len, persistent)
 #define STR_COPY(s)						zend_str_copy(s)
 #define STR_DUP(s, persistent)			zend_str_dup(s, persistent)
-#define STR_EREALLOC(s, len)			zend_str_erealloc(s, len)
+#define STR_REALLOC(s, len, persistent)	zend_str_realloc(s, len, persistent)
 #define STR_FREE(s)						zend_str_free(s)
 #define STR_RELEASE(s)					zend_str_release(s)
 #define STR_EMPTY_ALLOC()				CG(empty_string)
@@ -100,6 +100,7 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 	ret->gc.refcount = 1;
 	ret->gc.u.v.type = IS_STRING;
 	ret->gc.u.v.flags = (persistent ? IS_STR_PERSISTENT : 0);
+	ret->gc.u.v.buffer = 0;
 	ret->h = 0;
 	ret->len = len;
 	return ret;
@@ -130,19 +131,19 @@ static zend_always_inline zend_string *zend_str_dup(zend_string *s, int persiste
 	}
 }
 
-static zend_always_inline zend_string *zend_str_erealloc(zend_string *s, int len)
+static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len, int persistent)
 {
 	zend_string *ret;
 
 	if (IS_INTERNED(s)) {
-		ret = STR_ALLOC(len, 0);
+		ret = STR_ALLOC(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
 	} else if (STR_REFCOUNT(s) == 1) {
-		ret = erealloc(s, sizeof(zend_string) + len);
+		ret = perealloc(s, sizeof(zend_string) + len, persistent);
 		ret->len = len;
 		STR_FORGET_HASH_VAL(ret);
 	} else {
-		ret = STR_ALLOC(len, 0);
+		ret = STR_ALLOC(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
 		STR_DELREF(s);
 	}
@@ -152,6 +153,7 @@ static zend_always_inline zend_string *zend_str_erealloc(zend_string *s, int len
 static zend_always_inline void zend_str_free(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
+		ZEND_ASSERT(STR_REFCOUNT(s) <= 1);
 		pefree(s, s->gc.u.v.flags & IS_STR_PERSISTENT);
 	}
 }
@@ -160,7 +162,7 @@ static zend_always_inline void zend_str_release(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		if (STR_DELREF(s) == 0) {
-			STR_FREE(s);
+			pefree(s, s->gc.u.v.flags & IS_STR_PERSISTENT);
 		}
 	}
 }

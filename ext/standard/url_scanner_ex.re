@@ -42,6 +42,11 @@
 
 #include "php_smart_str.h"
 
+static void tag_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
+
 static PHP_INI_MH(OnUpdateTags)
 {
 	url_adapt_state_ex_t *ctx;
@@ -62,7 +67,7 @@ static PHP_INI_MH(OnUpdateTags)
 		}
 	}
 
-	zend_hash_init(ctx->tags, 0, NULL, NULL, 1);
+	zend_hash_init(ctx->tags, 0, NULL, tag_dtor, 1);
 	
 	for (key = php_strtok_r(tmp, ",", &lasts);
 			key;

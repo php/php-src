@@ -27,12 +27,17 @@
 #include "zend_globals.h"
 #include "zend_API.h"
 
-void free_zend_constant(zend_constant *c)
+void free_zend_constant(zval *zv)
 {
+	zend_constant *c = Z_PTR_P(zv);
+
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_dtor(&c->value);
+	} else {
+		zval_internal_dtor(&c->value);
 	}
 	STR_RELEASE(c->name);
+	free(c);
 }
 
 
@@ -40,12 +45,12 @@ static void copy_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
+	Z_PTR_P(zv) = malloc(sizeof(zend_constant)/*, c->flags & CONST_PERSISTENT*/);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 	c->name = STR_DUP(c->name, c->flags & CONST_PERSISTENT);
-	if (!(c->flags & CONST_PERSISTENT)) {
+//???	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
-	}
+//???	}
 }
 
 
@@ -55,14 +60,16 @@ void zend_copy_constants(HashTable *target, HashTable *source)
 }
 
 
-static int clean_non_persistent_constant(const zend_constant *c TSRMLS_DC)
+static int clean_non_persistent_constant(zval *zv TSRMLS_DC)
 {
+	zend_constant *c = Z_PTR_P(zv);
 	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
 
 
-static int clean_non_persistent_constant_full(const zend_constant *c TSRMLS_DC)
+static int clean_non_persistent_constant_full(zval *zv TSRMLS_DC)
 {
+	zend_constant *c = Z_PTR_P(zv);
 	return (c->flags & CONST_PERSISTENT) ? 0 : 1;
 }
 
@@ -139,9 +146,9 @@ int zend_shutdown_constants(TSRMLS_D)
 void clean_non_persistent_constants(TSRMLS_D)
 {
 	if (EG(full_tables_cleanup)) {
-		zend_hash_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
+		zend_hash_apply(EG(zend_constants), clean_non_persistent_constant_full TSRMLS_CC);
 	} else {
-		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
+		zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant TSRMLS_CC);
 	}
 }
 
@@ -151,8 +158,7 @@ ZEND_API void zend_register_null_constant(const char *name, uint name_len, int f
 	
 	ZVAL_NULL(&c.value);
 	c.flags = flags;
-	// TODO: remove -1 ???
-	c.name = STR_INIT(name, name_len-1, flags & CONST_PERSISTENT);
+	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
 }
@@ -163,8 +169,7 @@ ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_
 	
 	ZVAL_BOOL(&c.value, bval);
 	c.flags = flags;
-	// TODO: remove -1 ???
-	c.name = STR_INIT(name, name_len-1, flags & CONST_PERSISTENT);
+	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
 }
@@ -175,8 +180,7 @@ ZEND_API void zend_register_long_constant(const char *name, uint name_len, long 
 	
 	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
-	// TODO: remove -1 ???
-	c.name = STR_INIT(name, name_len-1, flags & CONST_PERSISTENT);
+	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
 }
@@ -188,8 +192,7 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 	
 	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
-	// TODO: remove -1 ???
-	c.name = STR_INIT(name, name_len-1, flags & CONST_PERSISTENT);
+	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
 }
@@ -200,10 +203,9 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 	zend_constant c;
 	
 //???	ZVAL_STRINGL(&c.value, strval, strlen, 0);
-	ZVAL_STRINGL(&c.value, strval, strlen);
+	ZVAL_STR(&c.value, STR_INIT(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
-	// TODO: remove -1 ???
-	c.name = STR_INIT(name, name_len-1, flags & CONST_PERSISTENT);
+	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c TSRMLS_CC);
 }
@@ -254,16 +256,16 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
 		const char *cfilename;
-		char *haltname;
-		int len, clen;
+		zend_string *haltname;
+		int clen;
 
 		cfilename = zend_get_executed_filename(TSRMLS_C);
 		clen = strlen(cfilename);
 		/* check for __COMPILER_HALT_OFFSET__ */
-		zend_mangle_property_name(&haltname, &len, haltoff,
+		haltname = zend_mangle_property_name(haltoff,
 			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
-		c = zend_hash_str_find_ptr(EG(zend_constants), haltname, len);
-		efree(haltname);
+		c = zend_hash_find_ptr(EG(zend_constants), haltname);
+		STR_FREE(haltname);
 		return c;
 	} else {
 		return NULL;
@@ -469,14 +471,14 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 
 	if (!(c->flags & CONST_CS)) {
 //???		/* keep in mind that c->name_len already contains the '\0' */
-		lowercase_name = STR_ALLOC(c->name->len, 0);
+		lowercase_name = STR_ALLOC(c->name->len, c->flags & CONST_PERSISTENT);
 		zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 		name = lowercase_name;
 	} else {
 		char *slash = strrchr(c->name->val, '\\');
 		if (slash) {
-			lowercase_name = STR_ALLOC(c->name->len, 0);
+			lowercase_name = STR_ALLOC(c->name->len, c->flags & CONST_PERSISTENT);
 			zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
 			lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 			name = lowercase_name;
