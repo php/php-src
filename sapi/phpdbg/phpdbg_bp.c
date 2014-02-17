@@ -243,7 +243,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 				new_break.filename = estrndup(path, path_len);
 				new_break.line = line_num;
 
-				zend_hash_str_index_update_mem(broken, line_num, &new_break, sizeof(phpdbg_breakfile_t));
+				zend_hash_index_update_mem(broken, line_num, &new_break, sizeof(phpdbg_breakfile_t));
 
 				phpdbg_notice("Breakpoint #%d added at %s:%ld",
 					new_break.id, new_break.filename, new_break.line);

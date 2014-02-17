@@ -39,11 +39,10 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 
 	EG(opline_ptr) = &PHPDBG_EX(opline);
 	EG(active_op_array) = PHPDBG_EX(op_array);
-	EG(return_value_ptr_ptr) = PHPDBG_EX(original_return_value);
 	EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-	EG(This) = PHPDBG_EX(current_this);
-	EG(scope) = PHPDBG_EX(current_scope);
-	EG(called_scope) = PHPDBG_EX(current_called_scope);
+	//!!!EG(This) = PHPDBG_EX(current_this);
+	//!!!EG(scope) = PHPDBG_EX(current_scope);
+	//!!!EG(called_scope) = PHPDBG_EX(current_called_scope);
 } /* }}} */
 
 void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
@@ -82,12 +81,10 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 
 		EG(opline_ptr) = &PHPDBG_EX(opline);
 		EG(active_op_array) = PHPDBG_EX(op_array);
-		PHPDBG_FRAME(execute_data)->original_return_value = EG(return_value_ptr_ptr);
-		EG(return_value_ptr_ptr) = PHPDBG_EX(original_return_value);
 		EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-		EG(This) = PHPDBG_EX(current_this);
-		EG(scope) = PHPDBG_EX(current_scope);
-		EG(called_scope) = PHPDBG_EX(current_called_scope);
+		//!!!EG(This) = PHPDBG_EX(current_this);
+		//!!!EG(scope) = PHPDBG_EX(current_scope);
+		//!!!EG(called_scope) = PHPDBG_EX(current_called_scope);
 	}
 
 	phpdbg_notice("Switched to frame #%d", frame);
@@ -100,45 +97,38 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	);
 } /* }}} */
 
-static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
+static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
 {
-	zval **funcname, **class, **type, **args, **argstmp;
-	char is_class;
+	zval *funcname, *class, *type, *args, *argstmp;
+	zend_string *class_name;
 
-	zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"),
-		(void **)&funcname);
+	funcname = zend_hash_str_find(Z_ARRVAL_P(tmp), "function", sizeof("function") - 1);
 
-	if ((is_class = zend_hash_find(Z_ARRVAL_PP(tmp),
-		"object", sizeof("object"), (void **)&class)) == FAILURE) {
-		is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "class", sizeof("class"),
-			(void **)&class);
+	if ((class = zend_hash_str_find(Z_ARRVAL_P(tmp), "object", sizeof("object") - 1)) == NULL) {
+		class = zend_hash_str_find(Z_ARRVAL_P(tmp), "class", sizeof("class") - 1);
 	} else {
-		zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class),
-			(zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
+		class_name = zend_get_object_classname(class TSRMLS_CC);
 	}
 
-	if (is_class == SUCCESS) {
-		zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
+	if (class) {
+		type = zend_hash_str_find(Z_ARRVAL_P(tmp), "type", sizeof("type") - 1);
 	}
 
 	phpdbg_write("%s%s%s(",
-		is_class == FAILURE?"":Z_STRVAL_PP(class),
-		is_class == FAILURE?"":Z_STRVAL_PP(type),
-		Z_STRVAL_PP(funcname)
-	);
+		class == NULL?"":Z_STRVAL_P(class),
+		class == NULL?"":Z_STRVAL_P(type),
+		Z_STRVAL_P(funcname));
 
-	if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"),
-		(void **)&args) == SUCCESS) {
+	if ((args = zend_hash_str_find(Z_ARRVAL_P(tmp), "args", sizeof("args") - 1)) != NULL) {
 		HashPosition iterator;
 		const zend_function *func = phpdbg_get_function(
-			Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC);
+			Z_STRVAL_P(funcname), class == NULL ? NULL : Z_STRVAL_P(class) TSRMLS_CC);
 		const zend_arg_info *arginfo = func ? func->common.arg_info : NULL;
 		int j = 0, m = func ? func->common.num_args : 0;
 		zend_bool is_variadic = 0;
 
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
-		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
-			(void **) &argstmp, &iterator) == SUCCESS) {
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &iterator);
+		while ((argstmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(args), &iterator)) != NULL) {
 			if (j) {
 				phpdbg_write(", ");
 			}
@@ -151,8 +141,8 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			}
 			++j;
 
-			zend_print_flat_zval_r(*argstmp TSRMLS_CC);
-			zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
+			zend_print_flat_zval_r(argstmp TSRMLS_CC);
+			zend_hash_move_forward_ex(Z_ARRVAL_P(args), &iterator);
 		}
 		if (is_variadic) {
 			phpdbg_write("]");
@@ -160,15 +150,15 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 	}
 	phpdbg_write(")");
 }
+/* }}} */
 
 void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 {
 	zval zbacktrace;
-	zval **tmp;
-	zval **file, **line;
+	zval *tmp;
+	zval *file, *line;
 	HashPosition position;
 	int i = 1, limit = num;
-	int user_defined;
 
 	if (limit < 0) {
 		phpdbg_error("Invalid backtrace size %d", limit);
@@ -178,22 +168,21 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		&zbacktrace, 0, 0, limit TSRMLS_CC);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-	zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position);
+	tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position);
 	while (1) {
-		user_defined = zend_hash_find(Z_ARRVAL_PP(tmp), "file", sizeof("file"), (void **)&file);
-		zend_hash_find(Z_ARRVAL_PP(tmp), "line", sizeof("line"), (void **)&line);
+		file = zend_hash_str_find(Z_ARRVAL_P(tmp), "file", sizeof("file") - 1);
+		line = zend_hash_str_find(Z_ARRVAL_P(tmp), "line", sizeof("line") - 1);
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 
-		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
-			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("frame #0: {main} at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+		if ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position)) == NULL) {
+			phpdbg_write("frame #0: {main} at %s:%ld", Z_STRVAL_P(file), Z_LVAL_P(line));
 			break;
 		}
 
-		if (user_defined == SUCCESS) {
+		if (file) {
 			phpdbg_write("frame #%d: ", i++);
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
-			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_writeln(" at %s:%ld", Z_STRVAL_P(file), Z_LVAL_P(line));
 		} else {
 			phpdbg_write(" => ");
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
@@ -202,5 +191,5 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	}
 
 	phpdbg_writeln(EMPTY);
-	zval_dtor(&zbacktrace);
+	zval_ptr_dtor(&zbacktrace);
 } /* }}} */
