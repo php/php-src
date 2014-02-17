@@ -189,9 +189,13 @@ static void zend_interned_strings_restore_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		if (!(p->key->gc.u.v.flags & IS_STR_PERMANENT)) break;
+		if (p->key->gc.u.v.flags & IS_STR_PERMANENT) break;
 		CG(interned_strings).nNumUsed--;
 		CG(interned_strings).nNumOfElements--;
+
+		p->key->gc.u.v.flags &= ~IS_STR_INTERNED;
+		p->key->gc.refcount = 1;
+		STR_FREE(p->key);
 
 		nIndex = p->h & CG(interned_strings).nTableMask;
 		if (CG(interned_strings).arHash[nIndex] == idx) {
