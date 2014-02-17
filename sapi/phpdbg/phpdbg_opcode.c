@@ -46,20 +46,19 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 
 	switch (type &~ EXT_TYPE_UNUSED) {
 		case IS_CV:
-			asprintf(&decode, "$%s", ops->vars[op->var].name);
+			asprintf(&decode, "$%s", ops->vars[op->var]->val);
 		break;
 
 		case IS_VAR:
 		case IS_TMP_VAR: {
 			zend_ulong id = 0, *pid = NULL;
 			if (vars != NULL) {
-				if (zend_hash_index_find(vars, (zend_ulong) ops->vars - op->var, (void**) &pid) != SUCCESS) {
+				if ((pid = zend_hash_index_find_ptr(vars, (zend_ulong) ops->vars - op->var)) == NULL) {
 					id = zend_hash_num_elements(vars);
-					zend_hash_index_update(
-						vars, (zend_ulong) ops->vars - op->var,
-						(void**) &id,
-						sizeof(zend_ulong), NULL);
-				} else id = *pid;
+					zend_hash_index_update_mem(vars, (zend_ulong)ops->vars - op->var, &id, sizeof(zend_ulong));
+				} else {
+				   	id = *pid;
+				}
 			}
 			asprintf(&decode, "@%lu", id);
 		} break;
@@ -158,7 +157,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
 			   decode,
-			   execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+			   execute_data->op_array->filename ? execute_data->op_array->filename->val : "unknown");
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
@@ -167,7 +166,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
 				decode,
-				execute_data->op_array->filename ? execute_data->op_array->filename : "unknown");
+				execute_data->op_array->filename ? execute_data->op_array->filename->val : "unknown");
 		}
 
 		if (decode) {

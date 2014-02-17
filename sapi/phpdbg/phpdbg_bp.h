@@ -138,7 +138,7 @@ PHPDBG_API void phpdbg_disable_breakpoints(TSRMLS_D); /* }}} */
 
 /* {{{ Breakbase API */
 PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC);
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable **table, HashPosition *position TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Exportation API */
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC); /* }}} */
