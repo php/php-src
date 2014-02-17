@@ -478,6 +478,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	const char *file_path = NULL;
 	char *buf;
 	size_t size, offset = 0;
+	zend_string *compiled_filename;
 
 	/* The shebang line was read, get the current position to obtain the buffer start */
 	if (CG(start_lineno) == 2 && file_handle->type == ZEND_HANDLE_FP && file_handle->handle.fp) {
@@ -533,7 +534,9 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		file_path = file_handle->filename;
 	}
 
-	zend_set_compiled_filename(STR_INIT(file_path, strlen(file_path), 0) TSRMLS_CC);
+	compiled_filename = STR_INIT(file_path, strlen(file_path), 0);
+	zend_set_compiled_filename(compiled_filename TSRMLS_CC);
+	STR_RELEASE(compiled_filename);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -1177,7 +1180,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1690,7 +1693,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
@@ -1698,7 +1701,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%=" {
 	if (CG(asp_tags)) {
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -1708,7 +1711,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?=" {
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
 }
@@ -1716,7 +1719,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1726,7 +1729,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way, no copying intentional */
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
