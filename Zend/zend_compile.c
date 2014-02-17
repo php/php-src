@@ -106,14 +106,28 @@ static void zend_duplicate_property_info(zend_property_info *property_info) /* {
 }
 /* }}} */
 
+static void zend_duplicate_property_info_zval(zval *zv) /* {{{ */
+{
+	zend_duplicate_property_info((zend_property_info*)Z_PTR_P(zv));
+}
+/* }}} */
+
 static void zend_duplicate_property_info_internal(zend_property_info *property_info) /* {{{ */
 {
 	STR_ADDREF(property_info->name);
 }
 /* }}} */
 
-static void zend_destroy_property_info(zend_property_info *property_info) /* {{{ */
+static void zend_duplicate_property_info_internal_zval(zval *zv) /* {{{ */
 {
+	zend_duplicate_property_info_internal((zend_property_info*)Z_PTR_P(zv));
+}
+/* }}} */
+
+static void zend_destroy_property_info(zval *zv) /* {{{ */
+{
+	zend_property_info *property_info = Z_PTR_P(zv);
+
 	STR_RELEASE(property_info->name);
 	if (property_info->doc_comment) {
 		STR_RELEASE(property_info->doc_comment);
@@ -121,8 +135,10 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 }
 /* }}} */
 
-static void zend_destroy_property_info_internal(zend_property_info *property_info) /* {{{ */
+static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 {
+	zend_property_info *property_info = Z_PTR_P(zv);
+
 	STR_RELEASE(property_info->name);
 }
 /* }}} */
@@ -3540,8 +3556,9 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 }
 /* }}} */
 
-static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
+static zend_bool do_inherit_method_check(HashTable *child_function_table, zval *zv, const zend_hash_key *hash_key, zend_class_entry *child_ce) /* {{{ */
 {
+	zend_function *parent = Z_PTR_P(zv);
 	zend_uint parent_flags = parent->common.fn_flags;
 	zend_function *child;
 	TSRMLS_FETCH();
@@ -3559,8 +3576,9 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, const zend_hash_key *hash_key, zend_class_entry *ce) /* {{{ */
+static zend_bool do_inherit_property_access_check(HashTable *target_ht, zval *zv, const zend_hash_key *hash_key, zend_class_entry *ce) /* {{{ */
 {
+    zend_property_info *parent_info = Z_PTR_P(zv);
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
 
@@ -3700,15 +3718,15 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	if (parent_ce->default_properties_count) {
 		int i = ce->default_properties_count + parent_ce->default_properties_count;
 
-		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(void*) * i, ce->type == ZEND_INTERNAL_CLASS);
+		ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * i, ce->type == ZEND_INTERNAL_CLASS);
 		if (ce->default_properties_count) {
 			while (i-- > parent_ce->default_properties_count) {
 				ce->default_properties_table[i] = ce->default_properties_table[i - parent_ce->default_properties_count];
 			}
 		}
 		for (i = 0; i < parent_ce->default_properties_count; i++) {
-			ce->default_properties_table[i] = parent_ce->default_properties_table[i];
-			if (Z_TYPE(ce->default_properties_table[i]) != IS_UNDEF) {
+			ZVAL_COPY_VALUE(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
+			if (IS_REFCOUNTED(Z_TYPE(ce->default_properties_table[i]))) {
 #ifdef ZTS
 				if (parent_ce->type != ce->type) {
 					zval *p;
@@ -3781,7 +3799,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
-	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (copy_ctor_func_t) (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal : zend_duplicate_property_info), (merge_checker_func_t) do_inherit_property_access_check, ce);
+	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal_zval : zend_duplicate_property_info_zval), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, zval_property_ctor(parent_ce, ce), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
@@ -6837,7 +6855,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	zend_hash_init_ex(&ce->properties_info, 0, NULL, (dtor_func_t) (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 0, NULL, (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
 	zend_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 

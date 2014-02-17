@@ -274,13 +274,12 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSRMLS_DC)
 {
 	zend_constant *c;
-	int retval = 1;
 
 	if ((c = zend_hash_str_find_ptr(EG(zend_constants), name, name_len)) == NULL) {
 		char *lcname = zend_str_tolower_dup(name, name_len);
 		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, name_len)) != NULL) {
 			if (c->flags & CONST_CS) {
-				retval=0;
+				c = NULL;
 			}
 		} else {
 			c = zend_get_special_constant(name, name_len TSRMLS_CC);
@@ -288,11 +287,12 @@ ZEND_API int zend_get_constant(const char *name, uint name_len, zval *result TSR
 		efree(lcname);
 	}
 
-	if (retval) {
+	if (c) {
 		ZVAL_DUP(result, &c->value);
+		return 1;
 	}
 
-	return retval;
+	return 0;
 }
 
 ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result, zend_class_entry *scope, ulong flags TSRMLS_DC)

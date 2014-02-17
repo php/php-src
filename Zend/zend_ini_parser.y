@@ -53,10 +53,10 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 	char str_result[MAX_LENGTH_OF_LONG];
 
 	i_op1 = atoi(Z_STRVAL_P(op1));
-	free(Z_STRVAL_P(op1));
+	STR_FREE(Z_STR_P(op1));
 	if (op2) {
 		i_op2 = atoi(Z_STRVAL_P(op2));
-		free(Z_STRVAL_P(op2));
+		STR_FREE(Z_STR_P(op2));
 	} else {
 		i_op2 = 0;
 	}
@@ -121,7 +121,7 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 		convert_to_string(&z_constant);
 		ZVAL_PSTRINGL(result, Z_STRVAL(z_constant), Z_STRLEN(z_constant));
 		zval_dtor(&z_constant);
-		free(Z_STRVAL_P(name));
+		STR_FREE(Z_STR_P(name));
 	} else {
 		*result = *name;
 	}
@@ -273,26 +273,26 @@ statement:
 			printf("SECTION: [%s]\n", Z_STRVAL($2));
 #endif
 			ZEND_INI_PARSER_CB(&$2, NULL, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($2));
+			STR_FREE(Z_STR($2));
 		}
 	|	TC_LABEL '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("NORMAL: '%s' = '%s'\n", Z_STRVAL($1), Z_STRVAL($3));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($1));
-			free(Z_STRVAL($3));
+			STR_FREE(Z_STR($1));
+			STR_FREE(Z_STR($3));
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
 			printf("OFFSET: '%s'[%s] = '%s'\n", Z_STRVAL($1), Z_STRVAL($2), Z_STRVAL($5));
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC);
-			free(Z_STRVAL($1));
-			free(Z_STRVAL($2));
-			free(Z_STRVAL($5));
+			STR_FREE(Z_STR($1));
+			STR_FREE(Z_STR($2));
+			STR_FREE(Z_STR($5));
 		}
-	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); free(Z_STRVAL($1)); }
+	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG TSRMLS_CC); STR_FREE(Z_STR($1)); }
 	|	END_OF_LINE
 ;
 
@@ -314,8 +314,8 @@ option_offset:
 ;
 
 encapsed_list:
-		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
+		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
 	|	/* empty */						{ zend_ini_init_string(&$$); }
 ;
 
@@ -323,18 +323,18 @@ var_string_list_section:
 		cfg_var_ref						{ $$ = $1; }
 	|	constant_literal				{ $$ = $1; }
 	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
+	|	var_string_list_section cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+	|	var_string_list_section constant_literal	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+	|	var_string_list_section '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); STR_FREE(Z_STR($3)); }
 ;
 
 var_string_list:
 		cfg_var_ref						{ $$ = $1; }
 	|	constant_string					{ $$ = $1; }
 	|	'"' encapsed_list '"'			{ $$ = $2; }
-	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); free(Z_STRVAL($2)); }
-	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); free(Z_STRVAL($3)); }
+	|	var_string_list cfg_var_ref 	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+	|	var_string_list constant_string	{ zend_ini_add_string(&$$, &$1, &$2); STR_FREE(Z_STR($2)); }
+	|	var_string_list '"' encapsed_list '"'  { zend_ini_add_string(&$$, &$1, &$3); STR_FREE(Z_STR($3)); }
 ;
 
 expr:
@@ -348,7 +348,7 @@ expr:
 ;
 
 cfg_var_ref:
-		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); free(Z_STRVAL($2)); }
+		TC_DOLLAR_CURLY TC_VARNAME '}'	{ zend_ini_get_var(&$$, &$2 TSRMLS_CC); STR_FREE(Z_STR($2)); }
 ;
 
 constant_literal:

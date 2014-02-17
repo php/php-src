@@ -1763,6 +1763,15 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
+static int zend_startup_module_zval(zval *zv TSRMLS_DC) /* {{{ */
+{
+	zend_module_entry *module = Z_PTR_P(zv);
+
+	return zend_startup_module_ex(module TSRMLS_CC);
+}
+/* }}} */
+
+
 static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare TSRMLS_DC) /* {{{ */
 {
 	Bucket *b1 = base;
@@ -1805,7 +1814,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 	int startup_count = 0;
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
-	zend_class_entry **pce;
+	zend_class_entry *ce;
 	int class_count = 0;
 
 	/* Collect extensions with request startup/shutdown handlers */
@@ -1850,10 +1859,10 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 
 	/* Collect internal classes with static members */
 	for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
-	     (pce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
+	     (ce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
 	     zend_hash_move_forward_ex(CG(class_table), &pos)) {
-		if ((*pce)->type == ZEND_INTERNAL_CLASS &&
-		    (*pce)->default_static_members_count > 0) {
+		if (ce->type == ZEND_INTERNAL_CLASS &&
+		    ce->default_static_members_count > 0) {
 		    class_count++;
 		}
 	}
@@ -1865,11 +1874,11 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 
 	if (class_count) {
 		for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
-		     (pce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
+		     (ce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
 	    	 zend_hash_move_forward_ex(CG(class_table), &pos)) {
-			if ((*pce)->type == ZEND_INTERNAL_CLASS &&
-			    (*pce)->default_static_members_count > 0) {
-			    class_cleanup_handlers[--class_count] = *pce;
+			if (ce->type == ZEND_INTERNAL_CLASS &&
+			    ce->default_static_members_count > 0) {
+			    class_cleanup_handlers[--class_count] = ce;
 			}
 		}
 	}
@@ -1879,7 +1888,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 ZEND_API int zend_startup_modules(TSRMLS_D) /* {{{ */
 {
 	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0 TSRMLS_CC);
-	zend_hash_apply(&module_registry, (apply_func_t)zend_startup_module_ex TSRMLS_CC);
+	zend_hash_apply(&module_registry, zend_startup_module_zval TSRMLS_CC);
 	return SUCCESS;
 }
 /* }}} */
@@ -2050,7 +2059,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 	if (scope) {
 		class_name_len = scope->name->len;
-		if ((lc_class_name = zend_memrchr(scope->name, '\\', class_name_len))) {
+		if ((lc_class_name = zend_memrchr(scope->name->val, '\\', class_name_len))) {
 			++lc_class_name;
 			class_name_len -= (lc_class_name - scope->name->val);
 			lc_class_name = zend_str_tolower_dup(lc_class_name, class_name_len);
