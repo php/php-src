@@ -10,7 +10,13 @@ PHP                                                                        NEWS
 
 - Pgsql:
   . pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
-
+    (Yasuo)
+  . Impremented FR #25854 Return value for pg_insert should be resource instead of bool.
+    (Yasuo)
+  . Implemented FR #41146 - Add "description" with exteneded flag pg_meta_data().
+    pg_meta_data(resource $conn, string $table [, bool extended])
+    It also made pg_meta_data() return "is enum" always.
+    (Yasuo)
 
 13 Feb 2014, PHP 5.6.0 Alpha 2
 - Core:
