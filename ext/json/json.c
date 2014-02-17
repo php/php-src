@@ -39,7 +39,7 @@ static PHP_FUNCTION(json_last_error_msg);
 
 static const char digits[] = "0123456789abcdef";
 
-zend_class_entry *php_json_serializable_ce;
+PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(json)
 
