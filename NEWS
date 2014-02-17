@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #45528 (Allow the DateTimeZone constructor to accept timezones
     per offset too). (Derick)
 
+- JSON:
+  . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
+  (chobieeee@php.net)
+
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
