@@ -5286,30 +5286,18 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		/* pg_attribute.attlen */
 		add_assoc_int(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
-		!strcmp(PQgetvalue(pg_result,i,4), "t") ?
-			add_assoc_bool(elem, "not null", 1) :
-			add_assoc_bool(elem, "not null", 0);
+		add_assoc_bool(elem, "not null", !strcmp(PQgetvalue(pg_result,i,4), "t"));
 		/* pg_attribute.atthasdef */
-		!strcmp(PQgetvalue(pg_result,i,5), "t") ?
-			add_assoc_bool(elem, "has default", 1) :
-			add_assoc_bool(elem, "has default", 0);
+		add_assoc_bool(elem, "has default", !strcmp(PQgetvalue(pg_result,i,5), "t"));
 		/* pg_attribute.attndims */
 		add_assoc_int(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
 		/* pg_type.typtype */
-		!strcmp(PQgetvalue(pg_result,i,7), "e") ?
-			add_assoc_bool(elem, "is enum", 1) :
-			add_assoc_bool(elem, "is enum", 0);
+		add_assoc_bool(elem, "is enum", !strcmp(PQgetvalue(pg_result,i,7), "e"));
 		if (extended) {
 			/* pg_type.typtype */
-			!strcmp(PQgetvalue(pg_result,i,7), "b") ?
-				add_assoc_bool(elem, "is base", 1) :
-				add_assoc_bool(elem, "is base", 0);
-			!strcmp(PQgetvalue(pg_result,i,7), "c") ?
-				add_assoc_bool(elem, "is composite", 1) :
-				add_assoc_bool(elem, "is composite", 0);
-			!strcmp(PQgetvalue(pg_result,i,7), "p") ?
-				add_assoc_bool(elem, "is pesudo", 1) :
-				add_assoc_bool(elem, "is pesudo", 0);
+			add_assoc_bool(elem, "is base", !strcmp(PQgetvalue(pg_result,i,7), "b"));
+			add_assoc_bool(elem, "is composite", !strcmp(PQgetvalue(pg_result,i,7), "c"));
+			add_assoc_bool(elem, "is pesudo", !strcmp(PQgetvalue(pg_result,i,7), "p"));
 			/* pg_description.description */
 			add_assoc_string(elem, "description", PQgetvalue(pg_result,i,8), 1);
 		}
