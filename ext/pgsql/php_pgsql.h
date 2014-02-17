@@ -24,6 +24,8 @@
 
 #if HAVE_PGSQL
 
+#define PHP_PGSQL_API_VERSION 20140217
+
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
@@ -201,8 +203,9 @@ PHP_FUNCTION(pg_select);
 #define PGSQL_DML_STRING            (1<<11)    /* Return query string */
 #define PGSQL_DML_ESCAPE            (1<<12)    /* No convert, but escape only */
 
+
 /* exported functions */
-PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta TSRMLS_DC);
+PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, zval *meta, zend_bool extended TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, php_uint_t opt TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *values, php_uint_t opt, char **sql TSRMLS_DC);
 PHP_PGSQL_API int php_pgsql_update(PGconn *pg_link, const char *table, zval *values, zval *ids, php_uint_t opt , char **sql TSRMLS_DC);

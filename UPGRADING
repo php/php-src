@@ -159,6 +159,13 @@ PHP X.Y UPGRADE NOTES
   - The oci_internal_debug() function is now a no-op.
   - The phpinfo() output format for OCI8 has changed.
 
+- Pgsql:
+  - pg_insert()/pg_select()/pg_update()/pg_delete()/pg_meta_data()/pg_convert()
+    are no longer EXPERIMENTAL
+  - pg_select() return PostgreSQL query resources when query is executed.
+  - Added extended flag parameter for pg_meta_data(). pg_meta_data() always
+    returns "is enum" attribute.
+
 ========================================
 9. New Global Constants
 ========================================
