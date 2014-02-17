@@ -5280,11 +5280,11 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		MAKE_STD_ZVAL(elem);
 		array_init(elem);
 		/* pg_attribute.attnum */
-		add_assoc_long(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
+		add_assoc_int(elem, "num", atoi(PQgetvalue(pg_result,i,1)));
 		/* pg_type.typname */
 		add_assoc_string(elem, "type", PQgetvalue(pg_result,i,2), 1);
 		/* pg_attribute.attlen */
-		add_assoc_long(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
+		add_assoc_int(elem, "len", atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
 		!strcmp(PQgetvalue(pg_result,i,4), "t") ?
 			add_assoc_bool(elem, "not null", 1) :
@@ -5294,7 +5294,7 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 			add_assoc_bool(elem, "has default", 1) :
 			add_assoc_bool(elem, "has default", 0);
 		/* pg_attribute.attndims */
-		add_assoc_long(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
+		add_assoc_int(elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
 		/* pg_type.typtype */
 		!strcmp(PQgetvalue(pg_result,i,7), "e") ?
 			add_assoc_bool(elem, "is enum", 1) :
