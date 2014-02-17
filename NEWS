@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #67024 (getimagesize should recognize BMP files with negative 
     height). (Gabor Buella)
 
+- Date:
+  . Fixed bug #66721 (__wakeup of DateTime segfaults when invalid object data is
+    supplied). (Boro Sitnikovski)
+
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol)
 
