@@ -30,6 +30,8 @@
 
 #ifdef _WIN32
 #	include "win32/time.h"
+#elif defined(HAVE_SYS_IOCTL_H) 
+#	include "sys/ioctl.h"
 #endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -385,3 +387,22 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D) /* {{{ */
 
 	return PHPDBG_G(prompt)[1];
 } /* }}} */
+
+PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
+{
+	int columns;	
+#ifdef _WIN32
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+#elif defined(HAVE_SYS_IOCTL_H) 
+	struct winsize w;
+
+	columns = ioctl(fileno(stdout), TIOCGWINSZ, &w) == 0 ? w.ws_col : 100;
+#else
+	columns = 100;
+#endif
+	return columns;
+} /* }}} */
+

@@ -107,4 +107,7 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D); /* }}} */
 PHPDBG_API void phpdbg_set_prompt(const char* TSRMLS_DC);
 PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D); /* }}} */
 
+/* {{{ Console Width */
+PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
+
 #endif /* PHPDBG_UTILS_H */
