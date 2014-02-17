@@ -21,16 +21,17 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
-C_TRUE		"true"
-C_YES		"yes"
-C_ON		"on"
-C_ENABLED	"enabled"
-C_FALSE		"false"
-C_NO		"no"
-C_OFF		"off"
-C_DISABLED	"disabled"
-C_EVAL		"eval"
-C_SHELL		"shell"
+C_TRUE		?i:"true"
+C_YES		?i:"yes"
+C_ON		?i:"on"
+C_ENABLED	?i:"enabled"
+C_FALSE		?i:"false"
+C_NO		?i:"no"
+C_OFF		?i:"off"
+C_DISABLED	?i:"disabled"
+C_EVAL		?i:"eval"
+C_SHELL		?i:"shell"
+C_IF		?i:"if"
 
 DIGITS		[0-9]+
 ID			[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-]*
@@ -44,6 +45,21 @@ INPUT		[^\n]+
 %%
 <INITIAL>
 {
+	{C_EVAL}		{
+		BEGIN(RAW);
+		phpdbg_init_param(yylval, EMPTY_PARAM);
+		return C_EVAL;
+	}
+	{C_SHELL}		{ 
+		BEGIN(RAW);
+		phpdbg_init_param(yylval, EMPTY_PARAM);
+		return C_SHELL;
+	}
+	{C_IF}			{
+		BEGIN(RAW);
+		phpdbg_init_param(yylval, EMPTY_PARAM);
+		return C_IF;
+	}
 	{C_YES}|{C_ON}|{C_ENABLED}|{C_TRUE} 	{
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 1;		
@@ -53,20 +69,6 @@ INPUT		[^\n]+
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 0;
 		return C_FALSY;
-	}
-	{C_EVAL}		{
-		BEGIN(RAW);
-		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
-		yylval->len = yyleng;
-		return C_EVAL;
-	}
-	{C_SHELL}		{ 
-		BEGIN(RAW);
-		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
-		yylval->len = yyleng;
-		return C_SHELL;
 	}
 	{DIGITS}         {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
@@ -96,7 +98,7 @@ INPUT		[^\n]+
 		yylval->len = yyleng;
 		return T_LITERAL; 
 	}
-	{ID}			{
+	{NSID}			{
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;

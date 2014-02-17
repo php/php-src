@@ -45,6 +45,10 @@ void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 			case NUMERIC_PARAM:
 				fprintf(stderr, "%s NUMERIC_PARAM(%ld)\n", msg, param->num);
 			break;
+			
+			case COND_PARAM:
+				fprintf(stderr, "%s COND_PARAM(%s=%d)\n", msg, param->str, param->len);
+			break;
 		}
 	}
 }
@@ -119,16 +123,28 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	}
 	
 	command = params = (phpdbg_param_t*) stack->next;
-
-	if (command->type != STR_PARAM) {
-		asprintf(
-			why, "the first parameter is expected to be a string !!");
-		return FAILURE;
+	
+	switch (command->type) {
+		case EVAL_PARAM:
+			phpdbg_notice("eval (%s)", command->str);
+		break;
+		
+		case SHELL_PARAM:
+			phpdbg_notice("shell (%s)", command->str);
+		break;
+		
+		case STR_PARAM: {
+			/* do resolve command(s) */
+		} break;
+		
+		default:
+			asprintf(
+				why, "the first parameter makes no sense !!");
+			return FAILURE;
 	}
 	
-	/* do resolve command(s) */
-	
 	/* do prepare params for function */
+	
 	while (params) {
 		phpdbg_debug_param(params, "-> ...");
 		params = params->next;
@@ -161,6 +177,7 @@ typedef void* yyscan_t;
 %token C_STRING		"string (some input, perhaps)"
 %token C_EVAL	 	"eval"
 %token C_SHELL		"shell"
+%token C_IF			"if (condition)"
 
 %token T_DIGITS	 "digits (numbers)"
 %token T_LITERAL "literal (string)"
@@ -187,18 +204,18 @@ params
 	;
 
 normal
-	:	T_ID								{ phpdbg_stack_push(stack, &$1); }
-	|	normal T_ID							{ phpdbg_stack_push(stack, &$2); }
+	:	T_ID								{ $$ = $1; }
+	|	normal T_ID							{ $$ = $2; }
 	;
 	
 special
-	: C_EVAL T_INPUT                        { phpdbg_stack_push(stack, &$1); phpdbg_stack_push(stack, &$2); }
-	| C_SHELL T_INPUT						{ phpdbg_stack_push(stack, &$1); phpdbg_stack_push(stack, &$2); }
+	: C_EVAL T_INPUT                        { $$ = $2; $$.type = EVAL_PARAM; }
+	| C_SHELL T_INPUT						{ $$ = $2; $$.type = SHELL_PARAM;; }
 	;
 
 command
-	: normal								
-	| special								
+	: normal								{ phpdbg_stack_push(stack, &$1); }
+	| special								{ phpdbg_stack_push(stack, &$1); }
 	;
 	
 parameter
@@ -210,6 +227,7 @@ parameter
 	| T_LITERAL								{ $$ = $1; }
 	| C_TRUTHY								{ $$ = $1; }
 	| C_FALSY								{ $$ = $1; }
+	| C_IF T_INPUT							{ $$ = $2; $$.type = COND_PARAM; }
 	;
 
 handler

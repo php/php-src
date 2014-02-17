@@ -41,7 +41,11 @@ typedef enum {
 	NUMERIC_PARAM,
 	NUMERIC_FUNCTION_PARAM,
 	NUMERIC_METHOD_PARAM,
-	STACK_PARAM
+	STACK_PARAM,
+	EVAL_PARAM,
+	SHELL_PARAM,
+	COND_PARAM,
+	ORIG_PARAM
 } phpdbg_param_type;
 
 typedef struct _phpdbg_input_t phpdbg_input_t;
