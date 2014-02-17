@@ -545,16 +545,12 @@ END_EXTERN_C()
 #define CHECK_NULL_PATH(p, l) (strlen(p) != l)
 
 #define ZVAL_STRINGL(z, s, l) do {				\
-		zval *_z = (z);							\
-		int __l = l;							\
-		ZVAL_STR(_z, STR_ALLOC(__l, 0));		\
-		memcpy(Z_STRVAL_P(_z), (s), __l + 1);	\
+		ZVAL_STR(z, STR_INIT(s, l, 0));			\
 	} while (0)
 
 #define ZVAL_STRING(z, s) do {					\
 		const char *_s = (s);					\
-		int _l = strlen(_s);					\
-		ZVAL_STRINGL(z, _s, _l);				\
+		ZVAL_STRINGL(z, _s, strlen(_s));		\
 	} while (0)
 
 #define ZVAL_EMPTY_STRING(z) do {				\
@@ -562,16 +558,12 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\
-		zval *_z = (z);							\
-		int __l = l;							\
-		ZVAL_STR(_z, STR_ALLOC(__l, 1));		\
-		memcpy(Z_STRVAL_P(_z), (s), __l + 1);	\
+		ZVAL_STR(z, STR_INIT(s, l, 1));			\
 	} while (0)
 
 #define ZVAL_PSTRING(z, s) do {					\
 		const char *_s = (s);					\
-		int _l = strlen(_s);					\
-		ZVAL_PSTRINGL(z, _s, _l);				\
+		ZVAL_PSTRINGL(z, _s, strlen(_s));		\
 	} while (0)
 
 #define ZVAL_EMPTY_PSTRING(z) do {				\

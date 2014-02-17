@@ -1027,7 +1027,6 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_W:
-					Z_ADDREF_P(&EG(uninitialized_zval));
 					retval = zend_hash_update(target_symbol_table, Z_STR_P(varname), &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
@@ -1602,7 +1601,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
 			if (zend_assign_to_string_offset(EX_VAR((opline+1)->op2.var), value, (opline+1)->op1_type TSRMLS_CC)) {
 				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
+					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str->val + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
 				}
 			} else if (RETURN_VALUE_USED(opline)) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1650,7 +1649,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
 		if (zend_assign_to_string_offset(EX_VAR(opline->op1.var), value, OP2_TYPE TSRMLS_CC)) {
 			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
+				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str->val + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
 			}
 		} else if (RETURN_VALUE_USED(opline)) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
@@ -1748,7 +1747,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		i_free_compiled_variables(execute_data TSRMLS_CC);
 	}
 
-	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(zval)) * op_array->T) TSRMLS_CC);
+	zend_vm_stack_free((char*)execute_data TSRMLS_CC);
 
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
 		zval_ptr_dtor((zval*)op_array->prototype);
@@ -1877,8 +1876,11 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	if (EX(call)->num_additional_args) {
 		EX(function_state).arguments = zend_vm_stack_push_args(num_args TSRMLS_CC);
 	} else {
+		zval tmp;
+
+		ZVAL_LONG(&tmp, num_args);
 		EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-		zend_vm_stack_push((void*)(zend_uintptr_t) num_args TSRMLS_CC);
+		zend_vm_stack_push(&tmp TSRMLS_CC);
 	}
 	LOAD_OPLINE();
 
@@ -2955,7 +2957,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 			varptr = Z_REFVAL_P(varptr);
 		}
 	} else if (OP1_TYPE == IS_CV) {
-		Z_ADDREF_P(varptr);
+		if (IS_REFCOUNTED(Z_TYPE_P(varptr))) Z_ADDREF_P(varptr);
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -3240,7 +3242,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
 		var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-		Z_DELREF_P(var_ptr);
+		if (IS_REFCOUNTED(Z_TYPE_P(var_ptr))) Z_DELREF_P(var_ptr);
 		ZVAL_COPY(var_ptr, param);
 	}
 

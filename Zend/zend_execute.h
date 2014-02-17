@@ -226,7 +226,8 @@ static zend_always_inline zval *zend_vm_stack_top(TSRMLS_D)
 
 static zend_always_inline void zend_vm_stack_push(zval *ptr TSRMLS_DC)
 {
-	*(EG(argument_stack)->top++) = *ptr;
+	ZVAL_COPY_VALUE(EG(argument_stack)->top, ptr);
+	EG(argument_stack)->top++;
 }
 
 static zend_always_inline zval *zend_vm_stack_pop(TSRMLS_D)

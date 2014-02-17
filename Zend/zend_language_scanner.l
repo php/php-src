@@ -1193,7 +1193,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state(TSRMLS_C);
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
 	return T_STRING;
 }
 
@@ -1480,7 +1479,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
 	yyless(yyleng - 1);
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
 	yy_pop_state(TSRMLS_C);
 	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return T_STRING_VARNAME;
@@ -1819,7 +1817,6 @@ inline_html:
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -1829,13 +1826,11 @@ inline_html:
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET TSRMLS_CC);
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	zendlval->type = IS_STRING;
 	return T_VARIABLE;
 }
 
@@ -1858,7 +1853,6 @@ inline_html:
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
 	zend_copy_value(zendlval, yytext, yyleng);
-	zendlval->type = IS_STRING;
 	return T_STRING;
 }
 
@@ -2363,7 +2357,6 @@ nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	zend_copy_value(zendlval, yytext, yyleng - newline);
-	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	return T_ENCAPSED_AND_WHITESPACE;
 }

@@ -168,6 +168,7 @@ static void build_runtime_defined_function_key(zval *result, const char *name, i
 	ZVAL_STR(result, STR_ALLOC(1+name_length+strlen(filename)+char_pos_len, 0));
 
  	/* must be binary safe */
+ 	Z_STRVAL_P(result)[0] = '\0';
  	sprintf(Z_STRVAL_P(result)+1, "%s%s%s", name, filename, char_pos_buf);
 }
 /* }}} */
@@ -298,7 +299,8 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (zend_uint)(zend_uintptr_t)EX_VAR_NUM_2(0, (op_array->T)++);
+//???	return (zend_uint)(zend_uintptr_t)EX_VAR_NUM_2(0, (op_array->T)++);
+	return (zend_uint)op_array->T++;
 }
 /* }}} */
 
@@ -340,11 +342,11 @@ void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
 /* }}} */
 
 /* Common part of zend_add_literal and zend_append_individual_literal */
-static inline void zend_insert_literal(zend_op_array *op_array, const zval *zv, int literal_position TSRMLS_DC) /* {{{ */
+static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int literal_position TSRMLS_DC) /* {{{ */
 {
 	if (Z_TYPE_P(zv) == IS_STRING || Z_TYPE_P(zv) == IS_CONSTANT) {
 		STR_HASH_VAL(Z_STR_P(zv));
-		zend_new_interned_string(Z_STR_P(zv) TSRMLS_CC);
+		Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv) TSRMLS_CC);
 	}
 	ZVAL_COPY_VALUE(&CONSTANT_EX(op_array, literal_position), zv);
 //???	Z_SET_REFCOUNT(CONSTANT_EX(op_array, literal_position), 2);
@@ -1715,7 +1717,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			char *tmp = zend_str_tolower_dup(Z_STRVAL_P(ns_name), Z_STRLEN_P(ns_name));
 
 			if (Z_STRLEN_P(ns_name) != Z_STRLEN(function_name->u.constant) ||
-				memcmp(tmp, lcname, Z_STRLEN(function_name->u.constant))) {
+				memcmp(tmp, lcname->val, Z_STRLEN(function_name->u.constant))) {
 				zend_error(E_COMPILE_ERROR, "Cannot declare function %s because the name is already in use", Z_STRVAL(function_name->u.constant));
 			}
 			efree(tmp);

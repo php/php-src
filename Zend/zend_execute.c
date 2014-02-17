@@ -212,7 +212,7 @@ static zend_never_inline zval *_get_zval_cv_lookup(zend_uint var, int type TSRML
 				zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
 				/* break missing intentionally */
 			case BP_VAR_W:
-				ret = EX_VAR_2(EG(current_execute_data), var);
+				ret = EX_VAR_NUM_2(EG(current_execute_data), var);
 				ZVAL_NULL(ret);
 				if (EG(active_symbol_table)) {
 					ret = zend_hash_update(EG(active_symbol_table), cv, ret);
@@ -267,7 +267,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zend_uint var TSRML
 	zval *ret;
 
 	if (!EG(active_symbol_table)) {
-		ret = EX_VAR_2(EG(current_execute_data), var);
+		ret = EX_VAR_NUM_2(EG(current_execute_data), var);
 		ZVAL_NULL(ret);
 		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
 	} else if ((ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
@@ -283,7 +283,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zend_uint var TSRMLS
 	zval *ret;
 
 	if (!EG(active_symbol_table)) {
-		ret = EX_VAR_2(EG(current_execute_data), var);
+		ret = EX_VAR_NUM_2(EG(current_execute_data), var);
 		ZVAL_NULL(ret);
 	} else if ((ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
 		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
@@ -1365,7 +1365,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             | VAR[op_array->last_var-1]              |
  *                             | VAR[op_array->last_var]                |
  *                             | ...                                    |
- *                             | VAR[op_array->T-1]                     |
+ *                             | VAR[op_array->last_var+op_array->T-1]  |
  *                             +----------------------------------------+
  *           EX(call_slots) -> | CALL_SLOT[0]                           |
  *                             | ...                                    |

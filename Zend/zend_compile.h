@@ -396,7 +396,7 @@ struct _zend_execute_data {
 #define EX(element) execute_data.element
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)		(EX_VAR_2(ex, 0) - (1 + (n)))
+#define EX_VAR_NUM_2(ex, n)     (((zval*)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
 
 #define EX_VAR(n)				EX_VAR_2(execute_data, n)
 #define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)

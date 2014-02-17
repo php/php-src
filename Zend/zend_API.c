@@ -763,7 +763,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	int arg_count;
 	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
 	zend_bool have_varargs = 0;
-	zval ***varargs = NULL;
+	zval **varargs = NULL;
 	int *n_varargs = NULL;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
@@ -869,7 +869,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			int num_varargs = num_args + 1 - post_varargs;
 
 			/* eat up the passed in storage even if it won't be filled in with varargs */
-			varargs = va_arg(*va, zval ***);
+			varargs = va_arg(*va, zval **);
 			n_varargs = va_arg(*va, int *);
 			type_spec++;
 
@@ -880,9 +880,11 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				*n_varargs = num_varargs;
 
 				/* allocate space for array and store args */
-				*varargs = safe_emalloc(num_varargs, sizeof(zval *), 0);
+				*varargs = (zval*)safe_emalloc(num_varargs, sizeof(zval), 0);
 				while (num_varargs-- > 0) {
-					(*varargs)[iv++] = p++;
+					ZVAL_COPY_VALUE(&(*varargs)[iv], p);
+					iv++;
+					p++;
 				}
 
 				/* adjust how many args we have left and restart loop */

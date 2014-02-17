@@ -129,6 +129,7 @@ static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {
 
 void init_executor(TSRMLS_D) /* {{{ */
 {
+	zval tmp;
 	zend_init_fpu(TSRMLS_C);
 
 	ZVAL_NULL(&EG(uninitialized_zval));
@@ -152,7 +153,8 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(error_handling) = EH_NORMAL;
 
 	zend_vm_stack_init(TSRMLS_C);
-//???	zend_vm_stack_push((void *) NULL TSRMLS_CC);
+	ZVAL_LONG(&tmp, 0);
+	zend_vm_stack_push(&tmp TSRMLS_CC);
 
 	zend_hash_init(&EG(symbol_table).ht, 50, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table).ht;
@@ -734,6 +736,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zval current_this;
 	zend_execute_data execute_data;
 	zend_fcall_info_cache fci_cache_local;
+	zval tmp;
 
 	fci->retval = NULL;
 
@@ -821,7 +824,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	ZEND_VM_STACK_GROW_IF_NEEDED(fci->param_count + 1);
 
 	for (i=0; i<fci->param_count; i++) {
-		zval *param, tmp;
+		zval *param;
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
 			if (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1) {
@@ -831,7 +834,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				    !ARG_MAY_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
 					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
 						/* hack to clean up the stack */
-						zend_vm_stack_push((void *) (zend_uintptr_t)i TSRMLS_CC);
+						ZVAL_LONG(&tmp, i);
+						zend_vm_stack_push(&tmp TSRMLS_CC);
 						zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 					}
 
@@ -866,7 +870,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-	zend_vm_stack_push((void*)(zend_uintptr_t)fci->param_count TSRMLS_CC);
+	ZVAL_LONG(&tmp, fci->param_count);
+	zend_vm_stack_push(&tmp TSRMLS_CC);
 
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
