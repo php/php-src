@@ -518,15 +518,14 @@ PHPDBG_HELP(register) /* {{{ */
 	phpdbg_writeln("Note: arguments passed as strings, return (if present) print_r'd on console");
 	if (zend_hash_num_elements(&PHPDBG_G(registered))) {
    		HashPosition position;
-   		char *name = NULL;
-   		zend_uint name_len = 0;
+		zend_string *name;
 
    		phpdbg_notice("Registered Functions (%d)", zend_hash_num_elements(&PHPDBG_G(registered)));
    		for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(registered), &position);
-   			zend_hash_get_current_key_ex(&PHPDBG_G(registered), &name, &name_len, NULL, 1, &position) == HASH_KEY_IS_STRING;
+   			zend_hash_get_current_key_ex(&PHPDBG_G(registered), &name, NULL, 1, &position) == HASH_KEY_IS_STRING;
    			zend_hash_move_forward_ex(&PHPDBG_G(registered), &position)) {
-   			phpdbg_writeln("|-------> %s", name);
-   			efree(name);
+   			phpdbg_writeln("|-------> %s", name->val);
+			STR_RELEASE(name);
    		}
 	}
 

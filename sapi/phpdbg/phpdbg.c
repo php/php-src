@@ -98,30 +98,29 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
-	zend_hash_destroy((HashTable*)brake);
+	zend_hash_destroy((HashTable*)Z_PTR_P(brake));
 } /* }}} */
 
-static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_symbol(zval *brake) /* {{{ */
 {
-	efree((char*)((phpdbg_breaksymbol_t*)brake)->symbol);
+	efree((char*)((phpdbg_breaksymbol_t*)Z_PTR_P(brake))->symbol);
 } /* }}} */
 
-static void php_phpdbg_destroy_bp_opcode(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_opcode(zval *brake) /* {{{ */
 {
-	efree((char*)((phpdbg_breakop_t*)brake)->name);
+	efree((char*)((phpdbg_breakop_t*)Z_PTR_P(brake))->name);
 } /* }}} */
 
-
-static void php_phpdbg_destroy_bp_methods(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_methods(zval *brake) /* {{{ */
 {
-	zend_hash_destroy((HashTable*)brake);
+	zend_hash_destroy((HashTable*)Z_PTR_P(brake));
 } /* }}} */
 
-static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
+static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 {
-	phpdbg_breakcond_t *brake = (phpdbg_breakcond_t*) data;
+	phpdbg_breakcond_t *brake = (phpdbg_breakcond_t*)Z_PTR_P(data);
 
 	if (brake) {
 		if (brake->ops) {
@@ -135,9 +134,9 @@ static void php_phpdbg_destroy_bp_condition(void *data) /* {{{ */
 	}
 } /* }}} */
 
-static void php_phpdbg_destroy_registered(void *data) /* {{{ */
+static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
 {
-	zend_function *function = (zend_function*) data;
+	zend_function *function = (zend_function*)Z_PTR_P(data);
 	TSRMLS_FETCH();
 
 	destroy_zend_function(
@@ -146,7 +145,7 @@ static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
@@ -229,7 +228,7 @@ static PHP_FUNCTION(phpdbg_exec)
 		if (VCWD_STAT(exec, &sb) != FAILURE) {
 			if (sb.st_mode & (S_IFREG|S_IFLNK)) {
 				if (PHPDBG_G(exec)) {
-					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len), 1);
+					ZVAL_STRINGL(return_value, PHPDBG_G(exec), PHPDBG_G(exec_len));
 					efree(PHPDBG_G(exec));
 					result = 0;
 				}
@@ -615,9 +614,8 @@ const char phpdbg_ini_hardcoded[] =
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
         Z_SET_REFCOUNT(tmp, 0); \
-        Z_UNSET_ISREF(tmp); \
-        ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0); \
-        zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);
+        ZVAL_STRINGL(&tmp, value, sizeof(value) - 1); \
+        zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
 
 void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 {

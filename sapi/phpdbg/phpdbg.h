@@ -169,7 +169,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */
 	zend_op_array *ops;                 	     /* op_array */
-	zval *retval;                                /* return value */
+	zval retval;                                 /* return value */
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
 

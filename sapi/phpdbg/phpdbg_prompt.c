@@ -72,22 +72,20 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 {
 	phpdbg_input_t *function = input->argv[0];
 
-	if (zend_hash_exists(
-		&PHPDBG_G(registered), function->string, function->length+1)) {
+	if (zend_hash_str_exists(
+		&PHPDBG_G(registered), function->string, function->length)) {
 
-		zval fname, *fretval;
+		zval fretval;
 		zend_fcall_info fci;
-
-		ZVAL_STRINGL(&fname, function->string, function->length, 1);
 
 		memset(&fci, 0, sizeof(zend_fcall_info));
 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &PHPDBG_G(registered);
-		fci.function_name = &fname;
+		ZVAL_STRINGL(&fci.function_name, function->string, function->length);
 		fci.symbol_table = EG(active_symbol_table);
 		fci.object_ptr = NULL;
-		fci.retval_ptr_ptr = &fretval;
+		fci.retval = &fretval;
 		fci.no_separation = 1;
 
 		if (input->argc > 1) {
@@ -119,13 +117,13 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 
 		zend_call_function(&fci, NULL TSRMLS_CC);
 
-		if (fretval) {
+		if (!ZVAL_IS_UNDEF(&fretval)) {
 			zend_print_zval_r(
-				fretval, 0 TSRMLS_CC);
+				&fretval, 0 TSRMLS_CC);
 			phpdbg_writeln(EMPTY);
 		}
 
-		zval_dtor(&fname);
+		zval_ptr_dtor(&fci.function_name);
 
 		return SUCCESS;
 	}
@@ -394,11 +392,11 @@ PHPDBG_COMMAND(until) /* {{{ */
 
 		for (next = self; next < EG(active_op_array)->last; next++) {
 			if (EG(active_op_array)->opcodes[next].lineno != opline->lineno) {
-				zend_hash_index_update(
+				zend_hash_index_update_mem(
 					&PHPDBG_G(seek),
 					(zend_ulong) &EG(active_op_array)->opcodes[next],
-					&EG(active_op_array)->opcodes[next],
-					sizeof(zend_op), NULL);
+					(void *)&EG(active_op_array)->opcodes[next],
+					sizeof(zend_op));
 				break;
 			}
 		}
@@ -427,11 +425,11 @@ PHPDBG_COMMAND(finish) /* {{{ */
 #ifdef ZEND_YIELD
 				case ZEND_YIELD:
 #endif
-					zend_hash_index_update(
+					zend_hash_index_update_mem(
 						&PHPDBG_G(seek),
 						(zend_ulong) &EG(active_op_array)->opcodes[next],
-						&EG(active_op_array)->opcodes[next],
-						sizeof(zend_op), NULL);
+						(void *)&EG(active_op_array)->opcodes[next],
+						sizeof(zend_op));
 				break;
 			}
 		}
@@ -460,11 +458,11 @@ PHPDBG_COMMAND(leave) /* {{{ */
 #ifdef ZEND_YIELD
 				case ZEND_YIELD:
 #endif
-					zend_hash_index_update(
+					zend_hash_index_update_mem(
 						&PHPDBG_G(seek),
 						(zend_ulong) &EG(active_op_array)->opcodes[next],
-						&EG(active_op_array)->opcodes[next],
-						sizeof(zend_op), NULL);
+						(void *)&EG(active_op_array)->opcodes[next],
+						sizeof(zend_op));
 				break;
 			}
 		}
@@ -494,8 +492,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 {
 	zend_fcall_info fci;
 
-	zval fname,
-		 *trace,
+	zval trace,
 		 exception;
 
 	/* get filename and linenumber before unsetting exception */
@@ -503,40 +500,38 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	zend_uint lineno = zend_get_executed_lineno(TSRMLS_C);
 
 	/* copy exception */
-	exception = *EG(exception);
-	zval_copy_ctor(&exception);
+	ZVAL_OBJ(&exception, EG(exception));
 	EG(exception) = NULL;
 
 	phpdbg_error(
 		"Uncaught %s!",
-		Z_OBJCE(exception)->name);
+		Z_OBJCE(exception)->name->val);
 
 	/* call __toString */
-	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 1);
 	fci.size = sizeof(fci);
 	fci.function_table = &Z_OBJCE(exception)->function_table;
-	fci.function_name = &fname;
+	ZVAL_STRINGL(&fci.function_name, "__tostring", sizeof("__tostring") - 1);
 	fci.symbol_table = NULL;
 	fci.object_ptr = &exception;
-	fci.retval_ptr_ptr = &trace;
+	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
 	fci.no_separation = 1;
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
-	if (trace) {
+	if (!ZVAL_IS_UNDEF(&trace) && Z_TYPE(trace) == IS_STRING) {
 		phpdbg_writeln(
-			"Uncaught %s", Z_STRVAL_P(trace));
+			"Uncaught %s", Z_STRVAL(trace));
 		/* remember to dtor trace */
 		zval_ptr_dtor(&trace);
 	}
+	zval_ptr_dtor(&trace);
 
 	/* output useful information about address */
 	phpdbg_writeln(
 		"Stacked entered at %p in %s on line %u",
 		EG(active_op_array)->opcodes, filename, lineno);
 
-	zval_dtor(&fname);
 	zval_dtor(&exception);
 } /* }}} */
 
@@ -550,7 +545,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		zend_op **orig_opline = EG(opline_ptr);
 		zend_op_array *orig_op_array = EG(active_op_array);
-		zval **orig_retval_ptr = EG(return_value_ptr_ptr);
 		zend_bool restore = 1;
 		
 		if (!PHPDBG_G(ops)) {
@@ -561,7 +555,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		EG(active_op_array) = PHPDBG_G(ops);
-		EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
@@ -577,13 +570,12 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_try {
 			php_output_activate(TSRMLS_C);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
-			zend_execute(EG(active_op_array) TSRMLS_CC);
+			zend_execute(EG(active_op_array), &PHPDBG_G(retval) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			php_output_deactivate(TSRMLS_C);
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
-			EG(return_value_ptr_ptr) = orig_retval_ptr;
 
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 				phpdbg_error("Caught exit/error from VM");
@@ -598,7 +590,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
-			EG(return_value_ptr_ptr) = orig_retval_ptr;
 		}
 	} else {
 		phpdbg_error("Nothing to execute!");
@@ -827,10 +818,10 @@ PHPDBG_COMMAND(register) /* {{{ */
 			char *lcname = zend_str_tolower_dup(param->str, param->len);
 			size_t lcname_len = strlen(lcname);
 
-			if (!zend_hash_exists(&PHPDBG_G(registered), lcname, lcname_len+1)) {
-				if (zend_hash_find(EG(function_table), lcname, lcname_len+1, (void**) &function) == SUCCESS) {
-					zend_hash_update(
-						&PHPDBG_G(registered), lcname, lcname_len+1, (void*)&function, sizeof(zend_function), NULL);
+			if (!zend_hash_str_exists(&PHPDBG_G(registered), lcname, lcname_len)) {
+				if ((function = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len)) != NULL) {
+					zend_hash_str_update_mem(
+						&PHPDBG_G(registered), lcname, lcname_len, function, sizeof(zend_function));
 					function_add_ref(function);
 
 					phpdbg_notice(
@@ -1088,10 +1079,10 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
 {
 #if PHP_VERSION_ID >= 50500
-	return zend_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
+	return zend_create_execute_data_from_op_array(op_array, return_value, nested TSRMLS_CC);
 #else
 
 #undef EX
@@ -1150,7 +1141,7 @@ static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_ar
 } /* }}} */
 
 #if PHP_VERSION_ID >= 50500
-void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+void phpdbg_execute_ex(zend_execute_data *execute_data, zval *return_value TSRMLS_DC) /* {{{ */
 {
 #else
 void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
@@ -1174,7 +1165,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 #if PHP_VERSION_ID >= 50500
 	if (0) {
 zend_vm_enter:
-		execute_data = phpdbg_create_execute_data(EG(active_op_array), 1 TSRMLS_CC);
+		execute_data = phpdbg_create_execute_data(EG(active_op_array), return_value, 1 TSRMLS_CC);
 	}
 	zend_hash_init(&vars, EG(active_op_array)->last, NULL, NULL, 0);
 #else
