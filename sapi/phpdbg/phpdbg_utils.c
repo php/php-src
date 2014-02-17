@@ -161,20 +161,22 @@ PHPDBG_API const zend_function *phpdbg_get_function(const char *fname, const cha
 	char *lcname = zend_str_tolower_dup(fname, fname_len);
 
 	if (cname) {
-		zend_class_entry **ce;
+		zval name;
+		zend_class_entry *ce;
 		size_t cname_len = strlen(cname);
 		char *lc_cname = zend_str_tolower_dup(cname, cname_len);
-		int ret = zend_lookup_class(lc_cname, cname_len, &ce TSRMLS_CC);
+
+		ZVAL_STRINGL(&name, lc_cname, cname_len);
+		ce = zend_lookup_class(Z_STR(name) TSRMLS_CC);
 
 		efree(lc_cname);
+		zval_ptr_dtor(&name);
 
-		if (ret == SUCCESS) {
-			zend_hash_find(&(*ce)->function_table, lcname, fname_len+1,
-				(void**)&func);
+		if (ce != NULL) {
+			func = zend_hash_str_find_ptr(&ce->function_table, lcname, fname_len);
 		}
 	} else {
-		zend_hash_find(EG(function_table), lcname, fname_len+1,
-			(void**)&func);
+		func = zend_hash_str_find_ptr(EG(function_table), lcname, fname_len);
 	}
 
 	efree(lcname);
