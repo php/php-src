@@ -2156,6 +2156,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	if (out == NULL) {
 		RETURN_FALSE;
 	}
+
 	
 	php_stream_printf(out TSRMLS_CC, "SQL: [%d] %.*s\n",
 		stmt->query_stringlen,
@@ -2180,10 +2181,42 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out TSRMLS_CC, "Key: Name: [%d] %.*s\n", len, len, str);
 			}
 
-			php_stream_printf(out TSRMLS_CC, "paramno=%ld\nname=[%d] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
+			/*
+			 * Here's where we set up the char array for the enum type
+			 */
+			const char *types[] = {"PDO::PARAM_NULL","PDO::PARAM_INT","PDO::PARAM_STR","PDO::PARAM_LOB","PDO::PARAM_STMT","PDO::PARAM_BOOL"}; 
+
+			php_stream_printf(out TSRMLS_CC, "Number=%ld\nName=[%d] \"%.*s\"\nIs Param=%d\nType=%s\n",
 				param->paramno, param->namelen, param->namelen, param->name ? param->name : "",
 				param->is_param,
-				param->param_type);
+				types[param->param_type]);
+
+			/*
+			 * Check the type of the parameter and print out the value.
+			 *
+			 * Most are self explanatory with the following exceptions:
+			 * PDO::PARAM_INT evaluates to a long
+			 * PDO::PARAM_LOB evaluates to a string
+			 */
+			switch(param->parameter->type){
+				case IS_BOOL:
+					php_stream_printf(out TSRMLS_CC, "Value=%s\n",(int)param->parameter->value.lval ? "true" : "false");
+					break;
+				case IS_NULL:
+					php_stream_printf(out TSRMLS_CC, "Value=null\n");
+					break;
+				case IS_LONG:
+					php_stream_printf(out TSRMLS_CC, "Value=%ld\n",param->parameter->value.lval);
+					break;
+				case IS_STRING:
+					php_stream_printf(out TSRMLS_CC, "Value=%s\n",param->parameter->value.str.val);
+					break;
+				default:
+					php_stream_printf(out TSRMLS_CC, "Value=unknown\n");
+					break;
+			}
+
+			php_stream_printf(out TSRMLS_CC, "\n");
 			
 			zend_hash_move_forward_ex(stmt->bound_params, &pos);
 		}
