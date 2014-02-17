@@ -21,27 +21,29 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
-C_TRUE		?i:"true"
-C_YES		?i:"yes"
-C_ON		?i:"on"
-C_ENABLED	?i:"enabled"
-C_FALSE		?i:"false"
-C_NO		?i:"no"
-C_OFF		?i:"off"
-C_DISABLED	?i:"disabled"
-C_EVAL		?i:"eval"
-C_SHELL		?i:"shell"
-C_IF		?i:"if"
+C_TRUE				?i:"true"
+C_YES				?i:"yes"
+C_ON				?i:"on"
+C_ENABLED			?i:"enabled"
+C_FALSE				?i:"false"
+C_NO				?i:"no"
+C_OFF				?i:"off"
+C_DISABLED			?i:"disabled"
+C_EVAL				?i:"eval"
+C_SHELL				?i:"shell"
+C_IF				?i:"if"
 
-DIGITS		[0-9]+
-ID			[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-]*
-NSID		[\\\\]?{ID}
-METHOD		{NSID}+::{ID}
-FILE		[^ :]+:[0-9]+
-OPLINE		0x[a-fA-F0-9]+
-LITERAL		\"(\\.|[^\\"])*\"
-WS          [ \r\n\t]+
-INPUT		[^\n]+
+DIGITS				[0-9]+
+ID					[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-]*
+NSID				[\\\\]?{ID}
+METHOD				{NSID}+::{ID}
+NUMERIC_METHOD		{METHOD}[#]{DIGITS}
+NUMERIC_FUNCTION	{NSID}[#]{DIGITS}
+FILE				[^ :]+:[0-9]+
+OPLINE				0x[a-fA-F0-9]+
+LITERAL				\"(\\.|[^\\"])*\"
+WS          		[ \r\n\t]+
+INPUT				[^\n]+
 %%
 <INITIAL>
 {
@@ -74,6 +76,20 @@ INPUT		[^\n]+
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
 		return T_DIGITS;
+	}
+	{NUMERIC_METHOD}	{
+		phpdbg_init_param(yylval, NUMERIC_METHOD_PARAM);
+		yylval->method.class = "class";
+		yylval->method.name = "func";
+		yylval->num = 0;
+		return T_METHOD; 
+	}
+	{NUMERIC_FUNCTION}	{
+		phpdbg_init_param(yylval, NUMERIC_FUNCTION_PARAM);
+		yylval->str = strndup(yytext, yyleng);
+		yylval->len = yyleng;
+		yylval->num = 0;
+		return T_ID; 
 	}
 	{METHOD}		{
 		phpdbg_init_param(yylval, METHOD_PARAM);

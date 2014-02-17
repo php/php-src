@@ -33,7 +33,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 2068 of yacc.c  */
-#line 159 "sapi/phpdbg/dev/phpdbg_parser.y"
+#line 234 "sapi/phpdbg/dev/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -61,11 +61,13 @@ typedef void* yyscan_t;
      T_DIGITS = 264,
      T_LITERAL = 265,
      T_METHOD = 266,
-     T_OPLINE = 267,
-     T_FILE = 268,
-     T_ID = 269,
-     T_INPUT = 270,
-     T_UNEXPECTED = 271
+     T_NUMERIC_METHOD = 267,
+     T_NUMERIC_FUNCTION = 268,
+     T_OPLINE = 269,
+     T_FILE = 270,
+     T_ID = 271,
+     T_INPUT = 272,
+     T_UNEXPECTED = 273
    };
 #endif
 

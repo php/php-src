@@ -11,6 +11,7 @@
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_prompt.h"
 
 #define YYSTYPE phpdbg_param_t
 
@@ -40,6 +41,14 @@ void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
 			
 			case METHOD_PARAM:
 				fprintf(stderr, "%s METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
+			break;
+			
+			case NUMERIC_METHOD_PARAM:
+				fprintf(stderr, "%s NUMERIC_METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
+			break;
+			
+			case NUMERIC_FUNCTION_PARAM:
+				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%s)\n", msg, param->str, param->num);
 			break;
 			
 			case NUMERIC_PARAM:
@@ -102,13 +111,69 @@ static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 		next->top = stack->top;
 		stack->top = next;
 	}
-	
+	phpdbg_debug_param(next, "push ->");
 	stack->len++;
+}
+
+phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, phpdbg_param_t **top, char **why) {
+	const phpdbg_command_t *command = commands;
+	phpdbg_param_t *name = *top;
+	phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
+	ulong matches = 0L;
+	
+	while (command && command->name && command->handler) {
+		if (command->name_len >= name->len) {
+			if (memcmp(command->name, name->str, name->len) == SUCCESS) {
+				if (matches < 3) {
+					matched[matches] = command;
+					matches++;
+				} else break;
+			}
+		}
+		command++;
+	}
+	
+	switch (matches) {
+		case 0: { 
+			asprintf(
+				why,
+				"The command %s could not be found", 
+				name->str);
+		} break;
+		
+		case 1: {
+			(*top) = (*top)->next;
+			if (matched[0]->subs && (*top) && ((*top)->type == STR_PARAM)) {
+				command = phpdbg_stack_resolve(matched[0]->subs, top, why);
+				if (command) {
+					phpdbg_notice(
+						"Command matching with sub command %s %s", 
+						matched[0]->name, command->name);
+					return command;
+				}
+			}
+			
+			phpdbg_notice(
+				"Command matching with %s", 
+				matched[0]->name);
+			return matched[0];
+		} break;
+		
+		default: {
+			asprintf(
+				why,
+				"The command %s is ambigious, matching %d commands", 
+				name->str, matches);
+		}
+	}
+	
+	return NULL;
 }
 
 int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	phpdbg_param_t *command = NULL,
 				   *params = NULL;
+	phpdbg_command_t *handler = NULL;
 	
 	if (stack->type != STACK_PARAM) {
 		asprintf(
@@ -122,7 +187,7 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 		return FAILURE;
 	}
 	
-	command = params = (phpdbg_param_t*) stack->next;
+	command = (phpdbg_param_t*) stack->next;
 	
 	switch (command->type) {
 		case EVAL_PARAM:
@@ -135,19 +200,29 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 		
 		case STR_PARAM: {
 			/* do resolve command(s) */
+			handler = phpdbg_stack_resolve(
+				phpdbg_prompt_commands, &command, why);
+			
+			if (handler) {
+				/* get top of stack */
+				params = command;
+				
+				/* prepare params */
+				while (params) {
+					phpdbg_debug_param(params, "-> ...");
+					params = params->next;
+				}
+				
+				return SUCCESS;
+			} else {
+				return FAILURE;
+			}
 		} break;
 		
 		default:
 			asprintf(
 				why, "the first parameter makes no sense !!");
 			return FAILURE;
-	}
-	
-	/* do prepare params for function */
-	
-	while (params) {
-		phpdbg_debug_param(params, "-> ...");
-		params = params->next;
 	}
 	
 	return SUCCESS;
@@ -163,7 +238,7 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 typedef void* yyscan_t;
 #endif
 }
-%expect 1 
+%expect 1
 %output  "sapi/phpdbg/phpdbg_parser.c"
 %defines "sapi/phpdbg/phpdbg_parser.h"
  
@@ -179,14 +254,16 @@ typedef void* yyscan_t;
 %token C_SHELL		"shell"
 %token C_IF			"if (condition)"
 
-%token T_DIGITS	 "digits (numbers)"
-%token T_LITERAL "literal (string)"
-%token T_METHOD	 "method"
-%token T_OPLINE	 "opline"
-%token T_FILE	 "file"
-%token T_ID		 "identifier (command or function name)"
-%token T_INPUT	 "input (input string or data)"
-%token T_UNEXPECTED "input"
+%token T_DIGITS	 			"digits (numbers)"
+%token T_LITERAL 			"literal (string)"
+%token T_METHOD	 			"method"
+%token T_NUMERIC_METHOD		"method opline address"
+%token T_NUMERIC_FUNCTION	"function opline address"
+%token T_OPLINE	 			"opline"
+%token T_FILE	 			"file"
+%token T_ID		 			"identifier (command or function name)"
+%token T_INPUT	 			"input (input string or data)"
+%token T_UNEXPECTED 		"input"
 %%
 
 input
@@ -199,22 +276,22 @@ parameters
 	;
 
 params
-	: /* empty */
-	| parameters
+	: parameters
+	| /* empty */
 	;
 
 normal
-	:	T_ID								{ $$ = $1; }
-	|	normal T_ID							{ $$ = $2; }
+	:	T_ID								{ phpdbg_stack_push(stack, &$1); }
+	|	normal T_ID							{ phpdbg_stack_push(stack, &$2); }
 	;
 	
 special
-	: C_EVAL T_INPUT                        { $$ = $2; $$.type = EVAL_PARAM; }
-	| C_SHELL T_INPUT						{ $$ = $2; $$.type = SHELL_PARAM;; }
+	: C_EVAL T_INPUT                        { $$ = $2; $$.type = EVAL_PARAM;  }
+	| C_SHELL T_INPUT						{ $$ = $2; $$.type = SHELL_PARAM; }
 	;
 
 command
-	: normal								{ phpdbg_stack_push(stack, &$1); }
+	: normal
 	| special								{ phpdbg_stack_push(stack, &$1); }
 	;
 	
@@ -222,6 +299,8 @@ parameter
 	: T_DIGITS								{ $$ = $1; }
 	| T_FILE								{ $$ = $1; }
 	| T_METHOD								{ $$ = $1; }
+	| T_NUMERIC_METHOD						{ $$ = $1; }
+	| T_NUMERIC_FUNCTION					{ $$ = $1; }
 	| T_OPLINE								{ $$ = $1; }
 	| T_ID									{ $$ = $1; } 
 	| T_LITERAL								{ $$ = $1; }
