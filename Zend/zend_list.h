@@ -35,8 +35,8 @@ typedef void (*rsrc_dtor_func_t)(zend_resource *res TSRMLS_DC);
 
 typedef struct _zend_rsrc_list_dtors_entry {
 	/* old style destructors */
-	void (*list_dtor)(void *);
-	void (*plist_dtor)(void *);
+	void (*list_dtor)(zend_resource *);
+	void (*plist_dtor)(zend_resource *);
 
 	/* new style destructors */
 	rsrc_dtor_func_t list_dtor_ex;
@@ -50,8 +50,8 @@ typedef struct _zend_rsrc_list_dtors_entry {
 } zend_rsrc_list_dtors_entry;
 
 
-#define register_list_destructors(ld, pld) zend_register_list_destructors((void (*)(void *))ld, (void (*)(void *))pld, module_number);
-ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number);
+#define register_list_destructors(ld, pld) zend_register_list_destructors(ld, pld, module_number);
+ZEND_API int zend_register_list_destructors(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number);
 ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, const char *type_name, int module_number);
 
 void list_entry_destructor(zval *ptr);

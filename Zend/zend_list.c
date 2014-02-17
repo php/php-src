@@ -137,7 +137,7 @@ void list_entry_destructor(zval *zv)
 				break;
 			case ZEND_RESOURCE_LIST_TYPE_EX:
 				if (ld->list_dtor_ex) {
-					ld->list_dtor_ex(res->ptr TSRMLS_CC);
+					ld->list_dtor_ex(res TSRMLS_CC);
 				}
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
@@ -225,14 +225,14 @@ void zend_clean_module_rsrc_dtors(int module_number TSRMLS_DC)
 }
 
 
-ZEND_API int zend_register_list_destructors(void (*ld)(void *), void (*pld)(void *), int module_number)
+ZEND_API int zend_register_list_destructors(rsrc_dtor_func_t ld, rsrc_dtor_func_t pld, int module_number)
 {
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
 	
 	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));
-	lde->list_dtor=(void (*)(void *)) ld;
-	lde->plist_dtor=(void (*)(void *)) pld;
+	lde->list_dtor = ld;
+	lde->plist_dtor = pld;
 	lde->list_dtor_ex = lde->plist_dtor_ex = NULL;
 	lde->module_number = module_number;
 	lde->resource_id = list_destructors.nNextFreeElement;
