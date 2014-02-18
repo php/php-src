@@ -212,103 +212,132 @@ static zend_always_inline zval *_get_zval_ptr_var_deref(zend_uint var, const zen
 	return ret;
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup(zend_uint var, int type TSRMLS_DC)
+static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int type TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
-	zval *ret;
+	zval *ret = NULL;
 
-	// TODO: IS_INDIRECT handling ???
-	if (!EG(active_symbol_table) ||
-	    (ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
-		switch (type) {
-			case BP_VAR_R:
-			case BP_VAR_UNSET:
-				zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-				/* break missing intentionally */
-			case BP_VAR_IS:
-				return &EG(uninitialized_zval);
-				break;
-			case BP_VAR_RW:
-				zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-				/* break missing intentionally */
-			case BP_VAR_W:
-				ret = EX_VAR_NUM_2(EG(current_execute_data), var);
-				ZVAL_NULL(ret);
-				if (EG(active_symbol_table)) {
-					ret = zend_hash_update(EG(active_symbol_table), cv, ret);
-				}
-				break;
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
 		}
 	}
-	return ret;
-}
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zend_uint var TSRMLS_DC)
-{
-	zend_string *cv = CV_DEF_OF(var);
-	zval *ret;
-
-	if (!EG(active_symbol_table) ||
-	    (ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
-		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-		return &EG(uninitialized_zval);
+	switch (type) {
+		case BP_VAR_R:
+		case BP_VAR_UNSET:
+			zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+			/* break missing intentionally */
+		case BP_VAR_IS:
+			return &EG(uninitialized_zval);
+		case BP_VAR_RW:
+			zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+			/* break missing intentionally */
+		case BP_VAR_W:
+			if (EG(active_symbol_table)) {
+				ret = zend_hash_update(EG(active_symbol_table), cv, ret);
+				ZVAL_INDIRECT(ptr, ret);
+			} else {
+				ZVAL_NULL(ptr);
+				ret = ptr;
+			}
+			break;
 	}
 	return ret;
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zend_uint var TSRMLS_DC)
+static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
-	zval *ret;
+	zval *ret = NULL;
 
-	if (!EG(active_symbol_table) ||
-	    (ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
-		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-		return &EG(uninitialized_zval);
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
+		}
 	}
-	return ret;
+
+	zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+	return &EG(uninitialized_zval);
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zend_uint var TSRMLS_DC)
+static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 	zval *ret;
 
-	if (!EG(active_symbol_table) ||
-	    (ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
-		return &EG(uninitialized_zval);
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
+		}
 	}
-	return ret;
+
+	zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+	return &EG(uninitialized_zval);
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zend_uint var TSRMLS_DC)
+static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 	zval *ret;
 
-	if (!EG(active_symbol_table)) {
-		ret = EX_VAR_NUM_2(EG(current_execute_data), var);
-		ZVAL_NULL(ret);
-		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-	} else if ((ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
+		}
+	}
+
+	return &EG(uninitialized_zval);
+}
+
+static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uint var TSRMLS_DC)
+{
+	zend_string *cv = CV_DEF_OF(var);
+	zval *ret;
+
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
+		}
 		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
+		ZVAL_INDIRECT(ptr, ret);
 		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+		return ret;
+	} else {
+		ZVAL_NULL(ptr);
+		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+		return ptr;
 	}
-	return ret;
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zend_uint var TSRMLS_DC)
+static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 	zval *ret;
 
-	if (!EG(active_symbol_table)) {
-		ret = EX_VAR_NUM_2(EG(current_execute_data), var);
-		ZVAL_NULL(ret);
-	} else if ((ret = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+	if (EG(active_symbol_table)) {
+		ret = zend_hash_find(EG(active_symbol_table), cv);
+		if (ret) {
+			ZVAL_INDIRECT(ptr, ret);
+			return ret;
+		}
 		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
+		ZVAL_INDIRECT(ptr, ret);
+		return ret;
+	} else {
+		ZVAL_NULL(ptr);
+		return ptr;
 	}
-	return ret;
 }
 
 static zend_always_inline zval *_get_zval_ptr_cv(zend_uint var, int type TSRMLS_DC)
@@ -316,7 +345,9 @@ static zend_always_inline zval *_get_zval_ptr_cv(zend_uint var, int type TSRMLS_
 	zval *ret = EX_VAR_NUM_2(EG(current_execute_data), var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup(var, type TSRMLS_CC);
+		return _get_zval_cv_lookup(ret, var, type TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -326,8 +357,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref(zend_uint var, int type T
 	zval *ret = EX_VAR_NUM_2(EG(current_execute_data), var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup(var, type TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup(ret, var, type TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
@@ -338,7 +372,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_R(const zend_execute_dat
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_R(var TSRMLS_CC);
+		return _get_zval_cv_lookup_BP_VAR_R(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -348,8 +384,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_R(const zend_execu
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_R(var TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup_BP_VAR_R(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
@@ -360,7 +399,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_UNSET(const zend_execute
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_UNSET(var TSRMLS_CC);
+		return _get_zval_cv_lookup_BP_VAR_UNSET(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -370,8 +411,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_UNSET(const zend_e
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_UNSET(var TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup_BP_VAR_UNSET(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
@@ -382,7 +426,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_IS(const zend_execute_da
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_IS(var TSRMLS_CC);
+		return _get_zval_cv_lookup_BP_VAR_IS(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -392,8 +438,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_IS(const zend_exec
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_IS(var TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup_BP_VAR_IS(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
@@ -404,7 +453,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_RW(const zend_execute_da
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_RW(var TSRMLS_CC);
+		return _get_zval_cv_lookup_BP_VAR_RW(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -414,8 +465,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_RW(const zend_exec
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_RW(var TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup_BP_VAR_RW(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
@@ -426,7 +480,9 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_dat
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_W(var TSRMLS_CC);
+		return _get_zval_cv_lookup_BP_VAR_W(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
 	}
 	return ret;
 }
@@ -436,8 +492,11 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execu
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_W(var TSRMLS_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		return _get_zval_cv_lookup_BP_VAR_W(ret, var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
 		ret = Z_REFVAL_P(ret);
 	}
 	return ret;

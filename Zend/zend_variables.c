@@ -199,7 +199,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT:
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			Z_STR_P(zvalue) = STR_DUP(Z_STR_P(zvalue), 0);
+			if (!IS_INTERNED(Z_STR_P(zvalue))) {
+				Z_STR_P(zvalue) = STR_DUP(Z_STR_P(zvalue), 0);
+			}
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {

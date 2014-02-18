@@ -459,7 +459,9 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 		 * the resource list, otherwise the resource will point to invalid memory.
 		 * In any case, let's always completely delete it from the resource list,
 		 * not only when PHP_STREAM_FREE_RELEASE_STREAM is set */
-		while (zend_list_delete(stream->res) == SUCCESS) {}
+//???		while (zend_list_delete(stream->res) == SUCCESS) {}
+		stream->res->gc.refcount = 0;
+		zend_list_delete(stream->res);
 	}
 
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {

@@ -855,7 +855,11 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (!converted) {
+				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
 
 					zendi_convert_scalar_to_number(op1, op1_copy, result);
@@ -904,7 +908,11 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (!converted) {
+				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
 
 					zendi_convert_scalar_to_number(op1, op1_copy, result);
@@ -947,7 +955,11 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (!converted) {
+				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
 
 					zendi_convert_scalar_to_number(op1, op1_copy, result);
@@ -1014,7 +1026,11 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (!converted) {
+				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
 
 					zendi_convert_scalar_to_number(op1, op1_copy, result);

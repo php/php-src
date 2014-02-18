@@ -1159,6 +1159,9 @@ ZEND_FUNCTION(property_exists)
 
 	if (Z_TYPE_P(object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(object) TSRMLS_CC);
+		if (!ce) {
+			RETURN_FALSE;
+		}			
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {

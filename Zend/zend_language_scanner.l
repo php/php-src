@@ -650,26 +650,18 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
 	char *buf;
-	size_t size;
+	size_t size, old_len;
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
-	if (Z_REFCOUNT_P(str) == 1) {
-		Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD, 0);
-	} else {
-		zend_string *tmp;
-
-		tmp = STR_ALLOC(Z_STRLEN_P(str) + ZEND_MMAP_AHEAD, 0);
-		memcpy(tmp->val, Z_STRVAL_P(str), Z_STRLEN_P(str) + 1);
-		Z_DELREF_P(str);
-		Z_STR_P(str) = tmp;
-	}
-	memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), 0, ZEND_MMAP_AHEAD);
+	old_len = Z_STRLEN_P(str);
+	Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
+	memset(Z_STRVAL_P(str) + old_len, 0, ZEND_MMAP_AHEAD + 1);
 
 	SCNG(yy_in) = NULL;
 	SCNG(yy_start) = NULL;
 
 	buf = Z_STRVAL_P(str);
-	size = Z_STRLEN_P(str);
+	size = old_len;
 
 	if (CG(multibyte)) {
 		SCNG(script_org) = (unsigned char*)buf;
@@ -737,8 +729,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 
 	CG(in_compilation) = 1;
 
-	tmp = *source_string;
-	zval_copy_ctor(&tmp);
+	ZVAL_DUP(&tmp, source_string);
 	convert_to_string(&tmp);
 	source_string = &tmp;
 

@@ -2338,13 +2338,19 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static void label_dtor(zval *zv) /* {{{ */
+{
+	efree(Z_PTR_P(zv));
+}
+/* }}} */
+
 void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
 {
 	zend_label dest;
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 4, NULL, NULL, 0);
+		zend_hash_init(CG(context).labels, 4, NULL, label_dtor, 0);
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
@@ -4067,8 +4073,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 }
 /* }}} */
 
-static int zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static int zend_fixup_trait_method(zval *zv, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
+	zend_function *fn = Z_PTR_P(zv);
+		
 	if ((fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 
 		fn->common.scope = ce;
@@ -4084,8 +4092,9 @@ static int zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce TSRML
 }
 /* }}} */
 
-static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int zend_traits_copy_functions(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
+	zend_function     *fn = Z_PTR_P(zv);
 	zend_class_entry  *ce;
 	HashTable         **overriden;
 	zend_trait_alias  *alias, **alias_ptr;
@@ -4120,7 +4129,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				lcname = STR_ALLOC(alias->alias->len, 0);
 				zend_str_tolower_copy(lcname->val, alias->alias->val, alias->alias->len);
 				zend_add_trait_method(ce, alias->alias->val, lcname, &fn_copy, overriden TSRMLS_CC);
-				STR_FREE(lcname);
+				STR_RELEASE(lcname);
 
 				/* Record the trait from which this alias was resolved. */
 				if (!alias->trait_method->ce) {

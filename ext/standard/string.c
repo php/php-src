@@ -127,23 +127,21 @@ static MUTEX_T locale_mutex = NULL;
 
 /* {{{ php_bin2hex
  */
-static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *newlen)
+static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 {
-	register unsigned char *result = NULL;
+	zend_string *result;
 	size_t i, j;
 
-	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
+//???	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
+	result = STR_ALLOC(oldlen * 2 * sizeof(char), 0);
 
 	for (i = j = 0; i < oldlen; i++) {
-		result[j++] = hexconvtab[old[i] >> 4];
-		result[j++] = hexconvtab[old[i] & 15];
+		result->val[j++] = hexconvtab[old[i] >> 4];
+		result->val[j++] = hexconvtab[old[i] & 15];
 	}
-	result[j] = '\0';
+	result->val[j] = '\0';
 
-	if (newlen)
-		*newlen = oldlen * 2 * sizeof(char);
-
-	return (char *)result;
+	return result;
 }
 /* }}} */
 
@@ -237,22 +235,21 @@ PHP_MSHUTDOWN_FUNCTION(localeconv)
    Converts the binary representation of data to hex */
 PHP_FUNCTION(bin2hex)
 {
-	char *result, *data;
-	size_t newlen;
+	zend_string *result;
+	char *data;
 	int datalen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &datalen) == FAILURE) {
 		return;
 	}
 
-	result = php_bin2hex((unsigned char *)data, datalen, &newlen);
+	result = php_bin2hex((unsigned char *)data, datalen);
 
 	if (!result) {
 		RETURN_FALSE;
 	}
 
-//???	RETURN_STRINGL(result, newlen, 0);
-	RETURN_STRINGL(result, newlen);
+	RETURN_STR(result);
 }
 /* }}} */
 

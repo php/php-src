@@ -1403,7 +1403,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			value = &zobj->properties_table[property_info->offset];
 			goto found;
 		}
-		if (UNEXPECTED(!zobj->properties)) {
+		if (UNEXPECTED(zobj->properties != NULL)) {
 			value = zend_hash_find(zobj->properties, property_info->name);
 found:
 			switch (has_set_exists) {

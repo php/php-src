@@ -50,9 +50,6 @@ ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 	if (object->properties) {
 		zend_hash_destroy(object->properties);
 		FREE_HASHTABLE(object->properties);
-		if (object->properties_table) {
-			efree(object->properties_table);
-		}
 	}
 	for (i = 0; i < object->ce->default_properties_count; i++) {
 		zval_ptr_dtor(&object->properties_table[i]);

@@ -1081,6 +1081,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_li
 	EG(autoload_func) = fcall_cache.function_handler;
 
 	zval_ptr_dtor(&args[0]);
+	zval_dtor(&fcall_info.function_name);
 
 	zend_hash_del(EG(in_autoload), lc_name);
 
@@ -1111,7 +1112,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 	int retval;
 
 	if (retval_ptr) {
-		ZVAL_STR(&pv, STR_ALLOC(str_len + sizeof("return ;"), 1));
+		ZVAL_STR(&pv, STR_ALLOC(str_len + sizeof("return ;")-1, 1));
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';

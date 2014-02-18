@@ -707,6 +707,10 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			opline->result.var = (zend_uint)EX_VAR_NUM_2(NULL, op_array->last_var + opline->result.var);
 		}
 		switch (opline->opcode) {
+			case ZEND_DECLARE_INHERITED_CLASS:
+			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
+				opline->extended_value = (zend_uint)EX_VAR_NUM_2(NULL, op_array->last_var + opline->extended_value);
+				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
