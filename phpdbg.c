@@ -216,7 +216,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 static PHP_FUNCTION(phpdbg_exec) 
 {
 	char *exec = NULL;
-	zend_ulong exec_len = 0L;
+	int exec_len = 0;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &exec, &exec_len) == FAILURE) {
 		return;
@@ -258,9 +258,9 @@ static PHP_FUNCTION(phpdbg_exec)
 static PHP_FUNCTION(phpdbg_break)
 {
 	if (ZEND_NUM_ARGS() > 0) {
-		long type;
+		long type = 0;
 		char *expr = NULL;
-		zend_uint expr_len = 0;
+		int expr_len = 0;
 		phpdbg_param_t param;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
@@ -318,9 +318,9 @@ static PHP_FUNCTION(phpdbg_clear)
 /* {{{ proto void phpdbg_color(integer element, string color) */
 static PHP_FUNCTION(phpdbg_color)
 {
-	long element;
-	char *color;
-	zend_uint color_len;
+	long element = 0L;
+	char *color = NULL;
+	int color_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -340,8 +340,8 @@ static PHP_FUNCTION(phpdbg_color)
 /* {{{ proto void phpdbg_prompt(string prompt) */
 static PHP_FUNCTION(phpdbg_prompt)
 {
-	char *prompt;
-	zend_uint prompt_len;
+	char *prompt = NULL;
+	int prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
