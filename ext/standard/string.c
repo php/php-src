@@ -1516,19 +1516,17 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 PHP_FUNCTION(dirname)
 {
 	char *str;
-	char *ret;
+	zend_string *ret;
 	int str_len;
-	size_t ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	ret = estrndup(str, str_len);
-	ret_len = php_dirname(ret, str_len);
+	ret = STR_INIT(str, str_len, 0);
+	ret->len = zend_dirname(ret->val, str_len);
 
-//???	RETURN_STRINGL(ret, ret_len, 0);
-	RETURN_STRINGL(ret, ret_len);
+	RETURN_STR(ret);
 }
 /* }}} */
 
