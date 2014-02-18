@@ -717,7 +717,7 @@ void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{
 	}
 
 	if (Z_TYPE(intern->array) == IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name);
+		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Cannot append properties to objects, use %s::offsetSet() instead", Z_OBJCE_P(object)->name->val);
 		return;
 	}
 
@@ -759,11 +759,11 @@ SPL_METHOD(Array, offsetUnset)
    Return a copy of the contained array */
 SPL_METHOD(Array, getArrayCopy)
 {
-	zval *object = getThis(), *tmp;
+	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)Z_OBJ_P(object);
 
     array_init(return_value);
-	zend_hash_copy(HASH_OF(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC), (copy_ctor_func_t) zval_add_ref);
+	zend_hash_copy(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0 TSRMLS_CC), (copy_ctor_func_t) zval_add_ref);
 } /* }}} */
 
 static HashTable *spl_array_get_properties(zval *object TSRMLS_DC) /* {{{ */
@@ -1683,10 +1683,8 @@ SPL_METHOD(Array, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	if (buf.c) {
-		RETVAL_STRINGL(buf.c, buf.len);
-		smart_str_free(&buf);
-		return;
+	if (buf.s) {
+		RETVAL_STR(buf.s);
 	}
 
 	zval_ptr_dtor(&members);

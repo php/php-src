@@ -294,7 +294,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 finish:
 		smart_str_appendl(&header, "\r\n", sizeof("\r\n")-1);
 
-		if (php_stream_write(stream, header.c, header.len) != header.len) {
+		if (php_stream_write(stream, header.s->val, header.s->len) != header.s->len) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Cannot connect to HTTPS server through proxy");
 			php_stream_close(stream);
 			stream = NULL;
@@ -438,8 +438,8 @@ finish:
 			}
 			smart_str_0(&tmpstr);
 			/* Remove newlines and spaces from start and end. there's at least one extra \r\n at the end that needs to go. */
-			if (tmpstr.c) {
-				tmp = php_trim(tmpstr.c, strlen(tmpstr.c), NULL, 0, NULL, 3 TSRMLS_CC);
+			if (tmpstr.s) {
+				tmp = php_trim(tmpstr.s->val, tmpstr.s->len, NULL, 0, NULL, 3 TSRMLS_CC);
 				smart_str_free(&tmpstr);
 			}
 		}

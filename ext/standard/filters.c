@@ -247,7 +247,7 @@ static php_stream_filter_ops strfilter_strip_tags_ops = {
 static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
 {
 	php_strip_tags_filter *inst;
-	smart_str tags_ss = { 0, 0, 0 };
+	smart_str tags_ss = {0};
 	
 	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
 
@@ -273,24 +273,17 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 		} else {
 			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
 			convert_to_string_ex(filterparams);
-
-			tags_ss.c = Z_STRVAL_P(filterparams);
-			tags_ss.len = Z_STRLEN_P(filterparams);
-			tags_ss.a = 0;
+			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRLEN_P(filterparams));
 		}
 	}
 
-	if (php_strip_tags_filter_ctor(inst, tags_ss.c, tags_ss.len, persistent) != SUCCESS) {
-		if (tags_ss.a != 0) {
-//???			STR_FREE(tags_ss.c);
-		}
+	if (php_strip_tags_filter_ctor(inst, tags_ss.s->val, tags_ss.s->len, persistent) != SUCCESS) {
+		smart_str_free(&tags_ss);
 		pefree(inst, persistent);
 		return NULL;
 	}
 
-	if (tags_ss.a != 0) {
-//???		STR_FREE(tags_ss.c);
-	}
+	smart_str_free(&tags_ss);
 
 	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
 }

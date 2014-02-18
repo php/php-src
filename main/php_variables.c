@@ -283,8 +283,8 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof 
 {
 	uint64_t max_vars = PG(max_input_vars);
 
-	vars->ptr = vars->str.c;
-	vars->end = vars->str.c + vars->str.len;
+	vars->ptr = vars->str.s->val;
+	vars->end = vars->str.s->val + vars->str.s->len;
 	while (add_post_var(arr, vars, eof TSRMLS_CC)) {
 		if (++vars->cnt > max_vars) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
@@ -296,7 +296,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof 
 	}
 
 	if (!eof) {
-		memmove(vars->str.c, vars->ptr, vars->str.len = vars->end - vars->ptr);
+		memmove(vars->str.s->val, vars->ptr, vars->str.s->len = vars->end - vars->ptr);
 	}
 	return SUCCESS;
 }
@@ -318,8 +318,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 				smart_str_appendl(&post_data.str, buf, len);
 
 				if (SUCCESS != add_post_vars(arr, &post_data, 0 TSRMLS_CC)) {
-					if (post_data.str.c) {
-						efree(post_data.str.c);
+					if (post_data.str.s) {
+						smart_str_free(&post_data.str);
 					}
 					return;
 				}
@@ -331,8 +331,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 		}
 
 		add_post_vars(arr, &post_data, 1 TSRMLS_CC);
-		if (post_data.str.c) {
-			efree(post_data.str.c);
+		if (post_data.str.s) {
+			smart_str_free(&post_data.str);
 		}
 	}
 }

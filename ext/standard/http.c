@@ -141,7 +141,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			/* Skip these types */
 			continue;
 		} else {
-			if (formstr->len) {
+			if (formstr->s->len) {
 				smart_str_appendl(formstr, arg_sep, arg_sep_len);
 			}
 			/* Simple key=value */
@@ -220,20 +220,19 @@ PHP_FUNCTION(http_build_query)
 	}
 
 	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, enc_type TSRMLS_CC) == FAILURE) {
-		if (formstr.c) {
-			efree(formstr.c);
+		if (formstr.s) {
+			smart_str_free(&formstr);
 		}
 		RETURN_FALSE;
 	}
 
-	if (!formstr.c) {
+	if (!formstr.s) {
 		RETURN_EMPTY_STRING();
 	}
 
 	smart_str_0(&formstr);
 	
-//???	RETURN_STRINGL(formstr.c, formstr.len, 0);
-	RETURN_STRINGL(formstr.c, formstr.len);
+	RETURN_STR(formstr.s);
 }
 /* }}} */
 

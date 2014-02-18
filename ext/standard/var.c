@@ -507,8 +507,8 @@ PHPAPI void php_var_export(zval *struc, int level TSRMLS_DC) /* {{{ */
 {
 	smart_str buf = {0};
 	php_var_export_ex(struc, level, &buf TSRMLS_CC);
-	smart_str_0 (&buf);
-	PHPWRITE(buf.c, buf.len);
+	smart_str_0(&buf);
+	PHPWRITE(buf.s->val, buf.s->len);
 	smart_str_free(&buf);
 }
 /* }}} */
@@ -530,11 +530,11 @@ PHP_FUNCTION(var_export)
 	smart_str_0 (&buf);
 
 	if (return_output) {
-		RETVAL_STRINGL(buf.c, buf.len);
+		RETURN_STR(buf.s);
 	} else {
-		PHPWRITE(buf.c, buf.len);
+		PHPWRITE(buf.s->val, buf.s->len);
+		smart_str_free(&buf);
 	}
-	smart_str_free(&buf);
 }
 /* }}} */
 
@@ -924,9 +924,8 @@ PHP_FUNCTION(serialize)
 		RETURN_FALSE;
 	}
 
-	if (buf.c) {
-//???		RETURN_STRINGL(buf.c, buf.len, 0);
-		RETURN_STRINGL(buf.c, buf.len);
+	if (buf.s) {
+		RETURN_STR(buf.s);
 	} else {
 		RETURN_NULL();
 	}
