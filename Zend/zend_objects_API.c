@@ -147,6 +147,8 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 			}
 			
 			if (object->gc.refcount == 0) {
+				zend_uint handle = object->handle;
+
 //???				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
 				if (object->handlers->free_obj) {
 					zend_try {
@@ -155,7 +157,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 						failure = 1;
 					} zend_end_try();
 				}
-				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(object->handle);
+				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 			}
 			
 			if (failure) {
