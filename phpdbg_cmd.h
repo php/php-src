@@ -140,16 +140,8 @@ typedef struct {
 /*
 * Input Management
 */
-PHPDBG_API phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
-PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
-
-/*
-* Argument Management
-*/
-PHPDBG_API phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
-PHPDBG_API void phpdbg_destroy_argv(phpdbg_input_t **argv, int argc TSRMLS_DC);
-#define phpdbg_argv_is(n, s) \
-	(memcmp(input->argv[n]->string, s, input->argv[n]->length) == SUCCESS)
+PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC);
+PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
 
 /*
 * Parameter Management
@@ -161,11 +153,6 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_par
 PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
 PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC);
-
-/*
-* Command Executor
-*/
-PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC);
 
 /**
  * Command Declarators

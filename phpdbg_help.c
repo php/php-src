@@ -208,13 +208,13 @@ PHPDBG_COMMAND(help) /* {{{ */
 	phpdbg_command_t const *cmd;
 	int n;
 
-	if (param->type == EMPTY_PARAM) {
+	if (!param || param->type == EMPTY_PARAM) {
 		pretty_print(get_help("overview!" TSRMLS_CC) TSRMLS_CC);
 		return SUCCESS;
 	}
 
-	if (param->type == STR_PARAM) {
-	    n = get_command( param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
+	if (param && param->type == STR_PARAM) {
+	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
 
 		if (n==1) {
 			summary_print(cmd TSRMLS_CC);

@@ -35,6 +35,12 @@
 #include "phpdbg_cmd.h"
 #include "phpdbg_set.h"
 #include "phpdbg_frame.h"
+#include "phpdbg_lexer.h"
+#include "phpdbg_parser.h"
+
+int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
+void phpdbg_stack_free(phpdbg_param_t *stack);
+int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -188,8 +194,8 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						goto next_line;
 					}
 
-					{
-						phpdbg_input_t *input = phpdbg_read_input(cmd TSRMLS_CC);
+					/*{
+						phpdbg_param_t *input = phpdbg_read_input(cmd TSRMLS_CC);
 						switch (phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
 							case FAILURE:
 								if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -200,7 +206,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 							break;
 						}
 						phpdbg_destroy_input(&input TSRMLS_CC);
-					}
+					}*/
 
 				}
 next_line:
@@ -798,6 +804,7 @@ PHPDBG_COMMAND(shell) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
+	/*
 	switch (param->type) {
 		case STR_PARAM: {
 			if (input->argc > 2) {
@@ -820,7 +827,7 @@ PHPDBG_COMMAND(source) /* {{{ */
 		} break;
 
 		phpdbg_default_switch_case();
-	}
+	}*/
 	return SUCCESS;
 } /* }}} */
 
@@ -860,9 +867,6 @@ PHPDBG_COMMAND(quit) /* {{{ */
 {
 	/* don't allow this to loop, ever ... */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-
-		phpdbg_destroy_input((phpdbg_input_t**)&input TSRMLS_CC);
-
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 		zend_bailout();
 	}
@@ -928,9 +932,10 @@ PHPDBG_COMMAND(quiet) /* {{{ */
 
 PHPDBG_COMMAND(list) /* {{{ */
 {
-	switch (param->type) {
+	if (!param || param->type == EMPTY_PARAM) {
+		return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
+	} else switch (param->type) {
 		case NUMERIC_PARAM:
-		case EMPTY_PARAM:
 			return PHPDBG_LIST_HANDLER(lines)(PHPDBG_COMMAND_ARGS);
 
 		case FILE_PARAM:
@@ -952,38 +957,65 @@ PHPDBG_COMMAND(list) /* {{{ */
 int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	int ret = SUCCESS;
-	phpdbg_input_t *input;
-
+	char *why = NULL;
+	char *input = NULL;
+	phpdbg_param_t stack;
+	
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
 	input = phpdbg_read_input(NULL TSRMLS_CC);
-
-	if (input && input->length > 0L) {
+	
+	printf("got input %s\n", input);
+	
+	if (input) {
 		do {
-			switch (ret = phpdbg_do_cmd(phpdbg_prompt_commands, input TSRMLS_CC)) {
-				case FAILURE:
-					if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-						if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
-							phpdbg_error("Failed to execute %s!", input->string);
-						}
-					}
-				break;
+			yyscan_t scanner;
+			YY_BUFFER_STATE state;
 
-				case PHPDBG_LEAVE:
-				case PHPDBG_FINISH:
-				case PHPDBG_UNTIL:
-				case PHPDBG_NEXT: {
-					if (!EG(in_execution)) {
-						phpdbg_error("Not running");
-					}
-					goto out;
-				}
+			phpdbg_init_param(&stack, STACK_PARAM);
+	
+			if (yylex_init(&scanner)) {
+				phpdbg_error(
+					"could not initialize scanner");
+				return FAILURE;
 			}
 
-			phpdbg_destroy_input(&input TSRMLS_CC);
-		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)) && (input->length > 0L));
+			state = yy_scan_string(input, scanner);
+	 		
+			if (yyparse(&stack, scanner) <= 0) {
+				switch (ret = phpdbg_stack_execute(&stack, &why)) {
+					case FAILURE:
+						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+							/*if (phpdbg_call_register(input TSRMLS_CC) == FAILURE) {
+								
+							}*/
+							phpdbg_error("%s", why);
+						}
+						if (why)
+							free(why);
+					break;
 
-		if (input && !input->length)
+					case PHPDBG_LEAVE:
+					case PHPDBG_FINISH:
+					case PHPDBG_UNTIL:
+					case PHPDBG_NEXT: {
+						if (!EG(in_execution)) {
+							phpdbg_error("Not running");
+						}
+						goto out;
+					}
+				}
+			}
+			
+			yy_delete_buffer(state, scanner);
+			yylex_destroy(scanner);
+	
+			phpdbg_stack_free(&stack);
+			phpdbg_destroy_input(&input TSRMLS_CC);
+			
+		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
+
+		if (!input)
 			goto last;
 
 	} else {
@@ -996,7 +1028,11 @@ last:
 	}
 
 out:
-	phpdbg_destroy_input(&input TSRMLS_CC);
+	if (input) {
+		phpdbg_destroy_input(&input TSRMLS_CC);
+	}
+	
+	phpdbg_stack_free(&stack);
 
 	if (EG(in_execution)) {
 		phpdbg_restore_frame(TSRMLS_C);

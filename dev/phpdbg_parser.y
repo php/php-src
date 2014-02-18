@@ -111,7 +111,7 @@ static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 		next->top = stack->top;
 		stack->top = next;
 	}
-	phpdbg_debug_param(next, "push ->");
+	
 	stack->len++;
 }
 
@@ -146,16 +146,10 @@ phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, phpdbg_
 			if (matched[0]->subs && (*top) && ((*top)->type == STR_PARAM)) {
 				command = phpdbg_stack_resolve(matched[0]->subs, top, why);
 				if (command) {
-					phpdbg_notice(
-						"Command matching with sub command %s %s", 
-						matched[0]->name, command->name);
 					return command;
 				}
 			}
 			
-			phpdbg_notice(
-				"Command matching with %s", 
-				matched[0]->name);
 			return matched[0];
 		} break;
 		
@@ -191,29 +185,17 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	
 	switch (command->type) {
 		case EVAL_PARAM:
-			PHPDBG_COMMAND_HANDLER(eval)(command, NULL TSRMLS_CC);
-		break;
+			return PHPDBG_COMMAND_HANDLER(eval)(command, NULL TSRMLS_CC);
 		
 		case SHELL_PARAM:
-			PHPDBG_COMMAND_HANDLER(shell)(command, NULL TSRMLS_CC);
-		break;
+			return PHPDBG_COMMAND_HANDLER(shell)(command, NULL TSRMLS_CC);
 		
 		case STR_PARAM: {
-			/* do resolve command(s) */
 			handler = phpdbg_stack_resolve(
 				phpdbg_prompt_commands, &command, why);
 			
 			if (handler) {
-				/* get top of stack */
-				params = command;
-				
-				/* prepare params */
-				while (params) {
-					phpdbg_debug_param(params, "-> ...");
-					params = params->next;
-				}
-				
-				return SUCCESS;
+				return handler->handler(command, NULL TSRMLS_CC);
 			} else {
 				return FAILURE;
 			}

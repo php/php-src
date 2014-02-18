@@ -56,12 +56,10 @@ PHPDBG_SET(prompt) /* {{{ */
 
 PHPDBG_SET(break) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_writeln("%s",
-				PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED ? "on" : "off");
-			break;
-
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("%s",
+			PHPDBG_G(flags) & PHPDBG_IS_BP_ENABLED ? "on" : "off");
+	} else switch (param->type) {
 		case STR_PARAM:
 			if (strncasecmp(param->str, PHPDBG_STRL("on")) == 0) {
 				phpdbg_enable_breakpoints(TSRMLS_C);
@@ -71,12 +69,14 @@ PHPDBG_SET(break) /* {{{ */
 			break;
 			
 		case NUMERIC_PARAM: {
-			if (input->argc > 2) {
+			if (input && input->argc > 2) {
+					/*
 					if (phpdbg_argv_is(2, "on")) {
 						phpdbg_enable_breakpoint(param->num TSRMLS_CC);
 					} else if (phpdbg_argv_is(2, "off")) {
 						phpdbg_disable_breakpoint(param->num TSRMLS_CC);
 					}
+					*/
 			} else {
 				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
 				if (brake) {
@@ -106,7 +106,7 @@ PHPDBG_SET(color) /* {{{ */
 
 		/* @TODO(anyone) make this consistent with other set commands */
 		if (color) {
-			if (phpdbg_argv_is(1, "prompt")) {
+			/*if (phpdbg_argv_is(1, "prompt")) {
 				phpdbg_notice(
 					"setting prompt color to %s (%s)", color->name, color->code);
 				element = PHPDBG_COLOR_PROMPT;
@@ -125,9 +125,9 @@ PHPDBG_SET(color) /* {{{ */
 				element = PHPDBG_COLOR_NOTICE;
 
 			} else goto usage;
-
+*/
 			/* set color for element */
-			phpdbg_set_color(element, color TSRMLS_CC);
+			/* phpdbg_set_color(element, color TSRMLS_CC); */
 		} else {
 			phpdbg_error(
 				"Failed to find the requested color (%s)", input->argv[2]->string);

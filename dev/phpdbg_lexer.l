@@ -34,7 +34,7 @@ C_SHELL				?i:"shell"
 C_IF				?i:"if"
 
 DIGITS				[0-9]+
-ID					[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-]*
+ID					[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-\./]*
 NSID				[\\\\]?{ID}
 METHOD				{NSID}+::{ID}
 NUMERIC_METHOD		{METHOD}[#]{DIGITS}

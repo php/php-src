@@ -762,6 +762,7 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 
 PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC) /* {{{ */
 {
+	/*
 	if (input->argc > 3 && phpdbg_argv_is(2, "if")) {
 		phpdbg_breakcond_t new_break;
 		phpdbg_param_t new_param;
@@ -776,7 +777,6 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpd
 		expr_hash = zend_inline_hash_func(expr, expr_len);
 
 		{
-			/* get a clean parameter from input string */
 			size_t sparam_len = 0L;
 			char *sparam = input->string;
 
@@ -791,7 +791,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpd
 						&new_param TSRMLS_CC);
 					goto usage;
 
-				default: { /* do nothing */ } break;
+				default: {  } break;
 			}
 
 			expr_hash += phpdbg_hash_param(&new_param TSRMLS_CC);
@@ -810,6 +810,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpd
 usage:
 		phpdbg_error("usage: break at <func|method|file:line|address> if <expression>");
 	}
+	*/
 } /* }}} */
 
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */

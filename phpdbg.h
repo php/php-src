@@ -159,6 +159,7 @@
 #define PHPDBG_STDERR			2
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
