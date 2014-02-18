@@ -267,7 +267,7 @@ ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *p
 		if (ht->pDestructor) {
 			ht->pDestructor(&p->val);
 		}
-		p->val = *pData;
+		ZVAL_COPY_VALUE(&p->val, pData);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return &p->val;
 	}
@@ -284,7 +284,7 @@ ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *p
 	p->h = h;
 	p->key = key;
 	STR_ADDREF(key);
-	p->val = *pData;
+	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h & ht->nTableMask;
 	p->val.u.next = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
@@ -342,7 +342,7 @@ ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zv
 				if (ht->pDestructor) {
 					ht->pDestructor(&p->val);
 				}
-				p->val = *pData;
+				ZVAL_COPY_VALUE(&p->val, pData);
 				HANDLE_UNBLOCK_INTERRUPTIONS();
 				if ((long)h >= (long)ht->nNextFreeElement) {
 					ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
@@ -373,7 +373,7 @@ new_packed:
 			p = ht->arData + h;
 			p->h = h;
 			p->key = NULL;
-			p->val = *pData;
+			ZVAL_COPY_VALUE(&p->val, pData);
 			p->val.u.next = INVALID_IDX;
 
 			HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -395,7 +395,7 @@ convert_to_hash:
 		if (ht->pDestructor) {
 			ht->pDestructor(&p->val);
 		}
-		p->val = *pData;
+		ZVAL_COPY_VALUE(&p->val, pData);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		if ((long)h >= (long)ht->nNextFreeElement) {
 			ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
@@ -418,7 +418,7 @@ convert_to_hash:
 	p->h = h;
 	p->key = NULL;
 	nIndex = h & ht->nTableMask;
-	p->val = *pData;
+	ZVAL_COPY_VALUE(&p->val, pData);
 	p->val.u.next = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
 	HANDLE_UNBLOCK_INTERRUPTIONS();

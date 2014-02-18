@@ -837,8 +837,7 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSR
 
 	if (has_per_host_config && host && host_len) {
 		/* Search for source array matching the host from configuration_hash */
-//??? remove -1
-		if ((tmp = zend_hash_str_find(&configuration_hash, host, host_len-1)) != NULL) {
+		if ((tmp = zend_hash_str_find(&configuration_hash, host, host_len)) != NULL) {
 			php_ini_activate_config(Z_ARRVAL_P(tmp), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE TSRMLS_CC);
 		}
 	}
@@ -849,8 +848,7 @@ PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSR
  */
 PHPAPI zval *cfg_get_entry(const char *name, uint name_length)
 {
-//??? remove -1
-	return zend_hash_str_find(&configuration_hash, name, name_length-1);
+	return zend_hash_str_find(&configuration_hash, name, name_length);
 }
 /* }}} */
 

@@ -4858,7 +4858,7 @@ PHP_FUNCTION(str_repeat)
 	char		*input_str;		/* Input string */
 	int 		input_len;
 	long 		mult;			/* Multiplier */
-	char		*result;		/* Resulting string */
+	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &input_str, &input_len, &mult) == FAILURE) {
@@ -4877,18 +4877,19 @@ PHP_FUNCTION(str_repeat)
 
 	/* Initialize the result string */
 	result_len = input_len * mult;
-	result = (char *)safe_emalloc(input_len, mult, 1);
+//???	result = (char *)safe_emalloc(input_len, mult, 1);
+	result = STR_ALLOC(result_len, 0);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (input_len == 1) {
-		memset(result, *(input_str), mult);
+		memset(result->val, *(input_str), mult);
 	} else {
 		char *s, *e, *ee;
 		int l=0;
-		memcpy(result, input_str, input_len);
-		s = result;
-		e = result + input_len;
-		ee = result + result_len;
+		memcpy(result->val, input_str, input_len);
+		s = result->val;
+		e = result->val + input_len;
+		ee = result->val + result_len;
 
 		while (e<ee) {
 			l = (e-s) < (ee-e) ? (e-s) : (ee-e);
@@ -4897,10 +4898,9 @@ PHP_FUNCTION(str_repeat)
 		}
 	}
 
-	result[result_len] = '\0';
+	result->val[result_len] = '\0';
 
-//???	RETURN_STRINGL(result, result_len, 0);
-	RETURN_STRINGL(result, result_len);
+	RETURN_STR(result);
 }
 /* }}} */
 

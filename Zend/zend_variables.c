@@ -68,6 +68,12 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				}
 			}
 			break;
+		case IS_REFERENCE:
+			if (Z_DELREF_P(zvalue) == 0) {
+				zval_dtor(Z_REFVAL_P(zvalue));
+				efree(Z_REF_P(zvalue));
+			}
+			break;
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_BOOL:
@@ -116,6 +122,10 @@ ZEND_API void _zval_dtor_func_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 				/* destroy resource */
 				zend_list_delete(Z_RES_P(zvalue));
 			}
+			break;
+		case IS_REFERENCE:
+			zval_dtor(Z_REFVAL_P(zvalue));
+			efree(Z_REF_P(zvalue));
 			break;
 		case IS_LONG:
 		case IS_DOUBLE:

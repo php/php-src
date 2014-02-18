@@ -72,9 +72,9 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 			Z_SET_REFCOUNT_P(z, 1);
 //???			Z_UNSET_ISREF_P(z);
 			if (Z_ISREF_P(z)) {
-				zend_reference *ref = Z_REF_P(z);
-				ZVAL_COPY_VALUE(z, &ref->val);
-				efree(ref);
+//???				zend_reference *ref = Z_REF_P(z);
+//???				ZVAL_COPY_VALUE(z, &ref->val);
+//???				efree(ref);
 			}
 			should_free->var = z;
 /*		should_free->is_var = 1; */
@@ -82,9 +82,9 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 			if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
 //???			Z_UNSET_ISREF_P(z);
 				if (Z_ISREF_P(z)) {
-					zend_reference *ref = Z_REF_P(z);
-					ZVAL_COPY_VALUE(z, &ref->val);
-					efree(ref);
+//???					zend_reference *ref = Z_REF_P(z);
+//???					ZVAL_COPY_VALUE(z, &ref->val);
+//???					efree(ref);
 				}
 			}
 		}
@@ -189,7 +189,27 @@ static zend_always_inline zval *_get_zval_ptr_tmp(zend_uint var, const zend_exec
 
 static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
 {
-	return should_free->var = EX_VAR(var);
+	zval *ret = EX_VAR(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	should_free->var = ret;
+	return ret;
+}
+
+static zend_always_inline zval *_get_zval_ptr_var_deref(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+{
+	zval *ret = EX_VAR(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	}
+	should_free->var = ret;
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
+	}
+	return ret;
 }
 
 static zend_never_inline zval *_get_zval_cv_lookup(zend_uint var, int type TSRMLS_DC)
@@ -301,12 +321,36 @@ static zend_always_inline zval *_get_zval_ptr_cv(zend_uint var, int type TSRMLS_
 	return ret;
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_deref(zend_uint var, int type TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM_2(EG(current_execute_data), var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup(var, type TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
+	}
+	return ret;
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_R(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
 {
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_R(var TSRMLS_CC);
+	}
+	return ret;
+}
+
+static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_R(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup_BP_VAR_R(var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
 }
@@ -321,12 +365,36 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_UNSET(const zend_execute
 	return ret;
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_UNSET(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup_BP_VAR_UNSET(var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
+	}
+	return ret;
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_IS(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
 {
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_IS(var TSRMLS_CC);
+	}
+	return ret;
+}
+
+static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_IS(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup_BP_VAR_IS(var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
 }
@@ -341,12 +409,36 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_RW(const zend_execute_da
 	return ret;
 }
 
+static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_RW(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup_BP_VAR_RW(var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
+	}
+	return ret;
+}
+
 static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
 {
 	zval *ret = EX_VAR_NUM(var);
 
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_W(var TSRMLS_CC);
+	}
+	return ret;
+}
+
+static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execute_data *execute_data, zend_uint var TSRMLS_DC)
+{
+	zval *ret = EX_VAR_NUM(var);
+
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+		return _get_zval_cv_lookup_BP_VAR_W(var TSRMLS_CC);
+	} else if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
+		ret = Z_REFVAL_P(ret);
 	}
 	return ret;
 }
@@ -373,6 +465,34 @@ static inline zval *_get_zval_ptr(int op_type, const znode_op *node, const zend_
 		case IS_CV:
 			should_free->var = 0;
 			return _get_zval_ptr_cv(node->var, type TSRMLS_CC);
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+	return NULL;
+}
+
+static inline zval *_get_zval_ptr_deref(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+{
+/*	should_free->is_var = 0; */
+	switch (op_type) {
+		case IS_CONST:
+			should_free->var = 0;
+			return node->zv;
+			break;
+		case IS_TMP_VAR:
+			should_free->var = TMP_FREE(EX_VAR(node->var));
+			return EX_VAR(node->var);
+			break;
+		case IS_VAR:
+			return _get_zval_ptr_var_deref(node->var, execute_data, should_free TSRMLS_CC);
+			break;
+		case IS_UNUSED:
+			should_free->var = 0;
+			return NULL;
+			break;
+		case IS_CV:
+			should_free->var = 0;
+			return _get_zval_ptr_cv_deref(node->var, type TSRMLS_CC);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}

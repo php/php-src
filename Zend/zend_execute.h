@@ -80,9 +80,9 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 		} else {
 			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_TYPE_P(zval_ptr) == IS_REFERENCE) {
 				/* convert reference to regular value */
-				zend_reference *ref = Z_REF_P(zval_ptr);
-				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
-				efree_rel(ref);
+//???				zend_reference *ref = Z_REF_P(zval_ptr);
+//???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
+//???				efree_rel(ref);
 			}
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
 		}
@@ -99,9 +99,9 @@ static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LIN
 		} else {
 			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_TYPE_P(zval_ptr) == IS_REFERENCE) {
 				/* convert reference to regular value */
-				zend_reference *ref = Z_REF_P(zval_ptr);
-				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
-				efree_rel(ref);
+//???				zend_reference *ref = Z_REF_P(zval_ptr);
+//???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
+//???				efree_rel(ref);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ struct _zend_vm_stack {
 	} while (0)
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(int count) {
-	zend_vm_stack page = (zend_vm_stack)emalloc(ZEND_MM_ALIGNED_SIZE(sizeof(*page)) + sizeof(void*) * count);
+	zend_vm_stack page = (zend_vm_stack)emalloc(ZEND_MM_ALIGNED_SIZE(sizeof(*page)) + sizeof(zval) * count);
 
 	page->top = ZEND_VM_STACK_ELEMETS(page);
 	page->end = page->top + count;

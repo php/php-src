@@ -1925,7 +1925,8 @@ inline_html:
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }

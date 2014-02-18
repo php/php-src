@@ -1302,7 +1302,7 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + 1;
-	zend_string *buf = STR_REALLOC(Z_STR_P(op1), length + 1, 0);
+	zend_string *buf = STR_REALLOC(Z_STR_P(op1), length, 0);
 
 	buf->val[length - 1] = (char) Z_LVAL_P(op2);
 	buf->val[length] = 0;
@@ -1314,10 +1314,11 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 /* must support result==op1 */
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
-	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-	zend_string *buf = STR_REALLOC(Z_STR_P(op1), length + 1, 0);
+	int op1_len = Z_STRLEN_P(op1);
+	int length = op1_len + Z_STRLEN_P(op2);
+	zend_string *buf = STR_REALLOC(Z_STR_P(op1), length, 0);
 
-	memcpy(buf->val + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	memcpy(buf->val + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 	buf->val[length] = 0;
 	ZVAL_STR(result, buf);
 	return SUCCESS;
@@ -1353,16 +1354,17 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		op2 = &op2_copy;
 	}
 	if (result==op1 && !IS_INTERNED(Z_STR_P(op1))) {	/* special case, perform operations on result */
-		uint res_len = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+		uint op1_len = Z_STRLEN_P(op1);
+		uint res_len = op1_len + Z_STRLEN_P(op2);
 
 		if (Z_STRLEN_P(result) < 0 || (int) (Z_STRLEN_P(op1) + Z_STRLEN_P(op2)) < 0) {
 			ZVAL_EMPTY_STRING(result);
 			zend_error(E_ERROR, "String size overflow");
 		}
 
-		Z_STR_P(result) = STR_REALLOC(Z_STR_P(result), res_len+1, 0 );
+		Z_STR_P(result) = STR_REALLOC(Z_STR_P(result), res_len, 0 );
 
-		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(result), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		memcpy(Z_STRVAL_P(result) + op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		Z_STRVAL_P(result)[res_len]=0;
 	} else {
 		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);

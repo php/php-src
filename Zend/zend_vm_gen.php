@@ -135,6 +135,24 @@ $op2_get_zval_ptr = array(
 	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var TSRMLS_CC)",
 );
 
+$op1_get_zval_ptr_deref = array(
+	"ANY"    => "get_zval_ptr_deref(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
+	"VAR"    => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
+	"CONST"  => "opline->op1.zv",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op1.var TSRMLS_CC)",
+);
+
+$op2_get_zval_ptr_deref = array(
+	"ANY"    => "get_zval_ptr_deref(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC)",
+	"VAR"    => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC)",
+	"CONST"  => "opline->op2.zv",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var TSRMLS_CC)",
+);
+
 $op1_get_obj_zval_ptr = array(
 	"ANY"    => "get_obj_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
@@ -274,6 +292,7 @@ function helper_name($name, $spec, $op1, $op2) {
 // Generates code for opcode handler or helper
 function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 	global $op1_type, $op2_type, $op1_get_zval_ptr, $op2_get_zval_ptr,
+		$op1_get_zval_ptr_deref, $op2_get_zval_ptr_deref,
 		$op1_get_obj_zval_ptr, $op2_get_obj_zval_ptr,
 		$op1_is_tmp_free, $op2_is_tmp_free, $op1_free, $op2_free,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
@@ -289,6 +308,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/OP2_FREE/",
 			"/GET_OP1_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP2_ZVAL_PTR\(([^)]*)\)/",
+			"/GET_OP1_ZVAL_PTR_DEREF\(([^)]*)\)/",
+			"/GET_OP2_ZVAL_PTR_DEREF\(([^)]*)\)/",
 			"/GET_OP1_OBJ_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP2_OBJ_ZVAL_PTR\(([^)]*)\)/",
 			"/IS_OP1_TMP_FREE\(\)/",
@@ -319,6 +340,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_free[$op2],
 			$op1_get_zval_ptr[$op1],
 			$op2_get_zval_ptr[$op2],
+			$op1_get_zval_ptr_deref[$op1],
+			$op2_get_zval_ptr_deref[$op2],
 			$op1_get_obj_zval_ptr[$op1],
 			$op2_get_obj_zval_ptr[$op2],
 			$op1_is_tmp_free[$op1],
