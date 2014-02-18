@@ -197,6 +197,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__set = handle_propset;					\
 		class_container.__unset = handle_propunset;				\
 		class_container.__isset = handle_propisset;				\
+		class_container.__debugInfo = NULL;					\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
 		class_container.serialize = NULL;						\
