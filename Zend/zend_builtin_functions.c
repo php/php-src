@@ -468,7 +468,7 @@ ZEND_FUNCTION(func_get_args)
 		arg = p-(arg_count-i);
 		if (!Z_ISREF_P(arg)) {
 			element = arg;
-			Z_ADDREF_P(element);
+			if (IS_REFCOUNTED(Z_TYPE_P(element))) Z_ADDREF_P(element);
 		} else {
 			ZVAL_DUP(&tmp, Z_REFVAL_P(arg));
 			element = &tmp;

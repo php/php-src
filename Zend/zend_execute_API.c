@@ -738,7 +738,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_fcall_info_cache fci_cache_local;
 	zval tmp;
 
-	fci->retval = NULL;
+	ZVAL_UNDEF(fci->retval);
 
 	if (!EG(active)) {
 		return FAILURE; /* executor is already inactive */
@@ -802,7 +802,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
 	fci->object_ptr = fci_cache->object_ptr;
-	ZVAL_COPY_VALUE(&EX(object), fci->object_ptr);
+	if (fci->object_ptr) {
+		ZVAL_COPY_VALUE(&EX(object), fci->object_ptr);
+	} else {
+		ZVAL_UNDEF(&EX(object));
+	}
 	if (fci->object_ptr && Z_TYPE_P(fci->object_ptr) == IS_OBJECT &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(fci->object_ptr)]))) {
@@ -859,12 +863,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		           (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
 			param = &tmp;
 			ZVAL_DUP(param, &fci->params[i]);
-//???		} else if (*fci->params[i] != &EG(uninitialized_zval)) {
-			Z_ADDREF(fci->params[i]);
-			param = &fci->params[i];
-//???		} else {
-//???			param = &tmp;
-//???			ZVAL_COPY_VALUE(param, &fci->params[i]);
+		} else {
+			param = &tmp;
+			ZVAL_COPY(param, &fci->params[i]);
 		}
 		zend_vm_stack_push(param TSRMLS_CC);
 	}

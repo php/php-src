@@ -711,9 +711,11 @@ END_EXTERN_C()
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	ZVAL_COPY_VALUE(&(zv), (pzv));			\
-	if (Z_REFCOUNT_P(pzv)>1) {				\
-		zval_copy_ctor(&(zv));				\
-		Z_DELREF_P((pzv));					\
+	if (IS_REFCOUNTED(Z_TYPE_P(pzv))) {		\
+		if (Z_REFCOUNT_P(pzv)>1) {			\
+			zval_copy_ctor(&(zv));			\
+			Z_DELREF_P((pzv));				\
+		}									\
 	}										\
 
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
