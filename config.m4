@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], yes, yes)
+[  --enable-phpdbg         Build phpdbg], no, no)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
 [  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
