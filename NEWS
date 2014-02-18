@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #45528 (Allow the DateTimeZone constructor to accept timezones
     per offset too). (Derick)
 
+- Fileinfo:
+  . Bug #66731 (file: infinite recursion). (Remi)
+
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
