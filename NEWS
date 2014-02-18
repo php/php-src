@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
 
+- Fileinfo:
+  . Bug #66731 (file: infinite recursion). (Remi)
+
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
