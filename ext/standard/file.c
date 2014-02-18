@@ -1934,7 +1934,7 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);
 
-	ret = php_stream_write(stream, csvline.c, csvline.len);
+	ret = php_stream_write(stream, csvline.s->val, csvline.s->len);
 
 	smart_str_free(&csvline);
 

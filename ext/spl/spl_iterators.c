@@ -972,15 +972,15 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	zval       has_next;
 	int        level;
 
-	smart_str_appendl(&str, object->prefix[0].c, object->prefix[0].len);
+	smart_str_appendl(&str, object->prefix[0].s->val, object->prefix[0].s->len);
 	
 	for (level = 0; level < object->level; ++level) {
 		zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 		if (Z_TYPE(has_next) != IS_UNDEF) {
 			if (Z_LVAL(has_next)) {
-				smart_str_appendl(&str, object->prefix[1].c, object->prefix[1].len);
+				smart_str_appendl(&str, object->prefix[1].s->val, object->prefix[1].s->len);
 			} else {
-				smart_str_appendl(&str, object->prefix[2].c, object->prefix[2].len);
+				smart_str_appendl(&str, object->prefix[2].s->val, object->prefix[2].s->len);
 			}
 			zval_ptr_dtor(&has_next);
 		}
@@ -988,21 +988,20 @@ static void spl_recursive_tree_iterator_get_prefix(spl_recursive_it_object *obje
 	zend_call_method_with_0_params(&object->iterators[level].zobject, object->iterators[level].ce, NULL, "hasnext", &has_next);
 	if (Z_TYPE(has_next) != IS_UNDEF) {
 		if (Z_LVAL(has_next)) {
-			smart_str_appendl(&str, object->prefix[3].c, object->prefix[3].len);
+			smart_str_appendl(&str, object->prefix[3].s->val, object->prefix[3].s->len);
 		} else {
-			smart_str_appendl(&str, object->prefix[4].c, object->prefix[4].len);
+			smart_str_appendl(&str, object->prefix[4].s->val, object->prefix[4].s->len);
 		}
 		zval_ptr_dtor(&has_next);
 	}
 
-	smart_str_appendl(&str, object->prefix[5].c, object->prefix[5].len);
+	smart_str_appendl(&str, object->prefix[5].s->val, object->prefix[5].s->len);
 	smart_str_0(&str);
 
-	RETVAL_STRINGL(str.c, str.len);
-	smart_str_free(&str);
+	RETURN_STR(str.s);
 }
 
-static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * object, zval * return_value TSRMLS_DC)
+static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object *object, zval *return_value TSRMLS_DC)
 {
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 	zval                      *data;
@@ -1023,9 +1022,10 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
 }
 
-static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object * object, zval * return_value TSRMLS_DC)
+static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object *object, zval *return_value TSRMLS_DC)
 {
-	RETVAL_STRINGL(object->postfix[0].c, object->postfix[0].len);
+	RETVAL_STR(object->postfix[0].s);
+	Z_ADDREF_P(return_value);
 }
 
 /* {{{ proto void RecursiveTreeIterator::__construct(RecursiveIterator|IteratorAggregate it [, int flags = RTIT_BYPASS_KEY [, int cit_flags = CIT_CATCH_GET_CHILD [, mode = RIT_SELF_FIRST ]]]) throws InvalidArgumentException

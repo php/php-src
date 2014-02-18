@@ -118,7 +118,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	const char *bash = NULL;
 	const char *sep = "?";
 	
-	q = (p = url->c) + url->len;
+	q = (p = url->s->val) + url->s->len;
 
 scan:
 /*!re2c
@@ -130,13 +130,13 @@ scan:
 done:
 	
 	/* Don't modify URLs of the format "#mark" */
-	if (bash && bash - url->c == 0) {
+	if (bash && bash - url->s->val == 0) {
 		smart_str_append(dest, url);
 		return;
 	}
 
 	if (bash)
-		smart_str_appendl(dest, url->c, bash - url->c);
+		smart_str_appendl(dest, url->s->val, bash - url->s->val);
 	else
 		smart_str_append(dest, url);
 
@@ -158,7 +158,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSR
 {
 	char f = 0;
 
-	if (strncasecmp(ctx->arg.c, ctx->lookup_data, ctx->arg.len) == 0)
+	if (strncasecmp(ctx->arg.s->val, ctx->lookup_data, ctx->arg.s->len) == 0)
 		f = 1;
 
 	if (quotes)
@@ -212,18 +212,18 @@ static void handle_form(STD_PARA)
 {
 	int doit = 0;
 
-	if (ctx->form_app.len > 0) {
-		switch (ctx->tag.len) {
+	if (ctx->form_app.s->len > 0) {
+		switch (ctx->tag.s->len) {
 			case sizeof("form") - 1:
-				if (!strncasecmp(ctx->tag.c, "form", sizeof("form") - 1)) {
+				if (!strncasecmp(ctx->tag.s->val, "form", sizeof("form") - 1)) {
 					doit = 1;		
 				}
-				if (doit && ctx->val.c && ctx->lookup_data && *ctx->lookup_data) {
-					char *e, *p = zend_memnstr(ctx->val.c, "://", sizeof("://") - 1, ctx->val.c + ctx->val.len);
+				if (doit && ctx->val.s->val && ctx->lookup_data && *ctx->lookup_data) {
+					char *e, *p = (char *)zend_memnstr(ctx->val.s->val, "://", sizeof("://") - 1, ctx->val.s->val + ctx->val.s->len);
 					if (p) {
-						e = memchr(p, '/', (ctx->val.c + ctx->val.len) - p);
+						e = memchr(p, '/', (ctx->val.s->val + ctx->val.s->len) - p);
 						if (!e) {
-							e = ctx->val.c + ctx->val.len;
+							e = ctx->val.s->val + ctx->val.s->len;
 						}
 						if ((e - p) && strncasecmp(p, ctx->lookup_data, (e - p))) {
 							doit = 0;
@@ -233,7 +233,7 @@ static void handle_form(STD_PARA)
 				break;
 
 			case sizeof("fieldset") - 1:
-				if (!strncasecmp(ctx->tag.c, "fieldset", sizeof("fieldset") - 1)) {
+				if (!strncasecmp(ctx->tag.s->val, "fieldset", sizeof("fieldset") - 1)) {
 					doit = 1;		
 				}
 				break;
@@ -256,18 +256,19 @@ static inline void handle_tag(STD_PARA)
 	int ok = 0;
 	unsigned int i;
 
-	ctx->tag.len = 0;
+	ctx->tag.s->len = 0;
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
-	for (i = 0; i < ctx->tag.len; i++)
-		ctx->tag.c[i] = tolower((int)(unsigned char)ctx->tag.c[i]);
-	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ctx->tag.c, ctx->tag.len)) != NULL)
+	for (i = 0; i < ctx->tag.s->len; i++)
+		ctx->tag.s->val[i] = tolower((int)(unsigned char)ctx->tag.s->val[i]);
+    /* intentionally using str_find here, in case the hash value is set, but the string val is changed later */
+	if ((ctx->lookup_data = zend_hash_str_find_ptr(ctx->tags, ctx->tag.s->val, ctx->tag.s->len)) != NULL)
 		ok = 1;
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }
 
 static inline void handle_arg(STD_PARA) 
 {
-	ctx->arg.len = 0;
+	ctx->arg.s->len = 0;
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
 }
 
@@ -286,8 +287,8 @@ static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, s
 
 	smart_str_appendl(&ctx->buf, newdata, newlen);
 	
-	YYCURSOR = ctx->buf.c;
-	YYLIMIT = ctx->buf.c + ctx->buf.len;
+	YYCURSOR = ctx->buf.s->val;
+	YYLIMIT = ctx->buf.s->val + ctx->buf.s->len;
 
 	switch (STATE) {
 		case STATE_PLAIN: goto state_plain;
@@ -358,12 +359,13 @@ stop:
 	/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */	
 	if (rest < 0) rest = 0;
 	
-	if (rest) memmove(ctx->buf.c, start, rest);
-	ctx->buf.len = rest;
+	if (rest) memmove(ctx->buf.s->val, start, rest);
+	ctx->buf.s->len = rest;
 }
 
 char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
 {
+	char *result;
 	smart_str surl = {0};
 	smart_str buf = {0};
 	smart_str url_app = {0};
@@ -377,11 +379,13 @@ char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const cha
 	append_modified_url(&surl, &buf, &url_app, PG(arg_separator).output);
 
 	smart_str_0(&buf);
-	if (newlen) *newlen = buf.len;
+	if (newlen) *newlen = buf.s->len;
+	result = estrndup(buf.s->val, buf.s->len);
 
 	smart_str_free(&url_app);
+	smart_str_free(&buf);
 
-	return buf.c;
+	return result;
 }
 
 
@@ -394,19 +398,18 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 
 	xx_mainloop(ctx, src, srclen TSRMLS_CC);
 
-	*newlen = ctx->result.len;
-	if (!ctx->result.c) {
+	*newlen = ctx->result.s->len;
+	if (!ctx->result.s) {
 		smart_str_appendl(&ctx->result, "", 0);
 	}
 	smart_str_0(&ctx->result);
 	if (do_flush) {
-		smart_str_appendl(&ctx->result, ctx->buf.c, ctx->buf.len);
-		*newlen += ctx->buf.len;
+		smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
+		*newlen += ctx->buf.s->len;
 		smart_str_free(&ctx->buf);
 	}
-	retval = ctx->result.c;
-	ctx->result.c = NULL;
-	ctx->result.len = 0;
+	retval = estrndup(ctx->result.s->val, ctx->result.s->len);
+	smart_str_free(&ctx->result);
 	return retval;
 }
 
@@ -439,25 +442,24 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 {
 	size_t len;
 
-	if (BG(url_adapt_state_ex).url_app.len != 0) {
+	if (BG(url_adapt_state_ex).url_app.s->len != 0) {
 		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0) TSRMLS_CC);
 		if (sizeof(uint) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
 		}
 		*handled_output_len = len;
-	} else if (BG(url_adapt_state_ex).url_app.len == 0) {
+	} else if (BG(url_adapt_state_ex).url_app.s->len == 0) {
 		url_adapt_state_ex_t *ctx = &BG(url_adapt_state_ex);
-		if (ctx->buf.len) {
-			smart_str_appendl(&ctx->result, ctx->buf.c, ctx->buf.len);
+		if (ctx->buf.s) {
+			smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
 			smart_str_appendl(&ctx->result, output, output_len);
 
-			*handled_output = ctx->result.c;
-			*handled_output_len = ctx->buf.len + output_len;
+			*handled_output = estrndup(ctx->result.s->val, ctx->result.s->len);
+			*handled_output_len = ctx->buf.s->len + output_len;
 
-			ctx->result.c = NULL;
-			ctx->result.len = 0;
 			smart_str_free(&ctx->buf);
+			smart_str_free(&ctx->result);
 		} else {
 			*handled_output = estrndup(output, *handled_output_len = output_len);
 		}
@@ -479,7 +481,7 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	}
 
 
-	if (BG(url_adapt_state_ex).url_app.len != 0) {
+	if (BG(url_adapt_state_ex).url_app.s->len != 0) {
 		smart_str_appends(&BG(url_adapt_state_ex).url_app, PG(arg_separator).output);
 	}
 
@@ -508,8 +510,8 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 
 PHPAPI int php_url_scanner_reset_vars(TSRMLS_D)
 {
-	BG(url_adapt_state_ex).form_app.len = 0;
-	BG(url_adapt_state_ex).url_app.len = 0;
+	BG(url_adapt_state_ex).form_app.s->len = 0;
+	BG(url_adapt_state_ex).url_app.s->len = 0;
 
 	return SUCCESS;
 }
@@ -518,8 +520,7 @@ PHP_MINIT_FUNCTION(url_scanner)
 {
 	BG(url_adapt_state_ex).tags = NULL;
 
-	BG(url_adapt_state_ex).form_app.c = BG(url_adapt_state_ex).url_app.c = 0;
-	BG(url_adapt_state_ex).form_app.len = BG(url_adapt_state_ex).url_app.len = 0;
+	BG(url_adapt_state_ex).form_app.s = BG(url_adapt_state_ex).url_app.s = NULL;
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

@@ -669,7 +669,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 	}
 	smart_str_appendl(&buffer, "\r\n", 2);
 
-	php_cli_server_client_send_through(client, buffer.c, buffer.len);
+	php_cli_server_client_send_through(client, buffer.s->val, buffer.s->len);
 
 	smart_str_free(&buffer);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
@@ -1961,7 +1961,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
 		append_http_status_line(&buffer, client->request.protocol_version, status, 1);
-		if (!buffer.c) {
+		if (!buffer.s) {
 			/* out of memory */
 			goto fail;
 		}
@@ -1972,7 +1972,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
-		chunk = php_cli_server_chunk_heap_new(buffer.c, buffer.c, buffer.len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s->val, buffer.s->val, buffer.s->len);
 		if (!chunk) {
 			smart_str_free_ex(&buffer, 1);
 			goto fail;
@@ -2046,7 +2046,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		}
 
 		append_http_status_line(&buffer, client->request.protocol_version, status, 1);
-		if (!buffer.c) {
+		if (!buffer.s) {
 			/* out of memory */
 			php_cli_server_log_response(client, 500, NULL TSRMLS_CC);
 			return FAILURE;
@@ -2062,7 +2062,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		smart_str_append_generic_ex(&buffer, client->request.sb.st_size, 1, size_t, _unsigned);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
-		chunk = php_cli_server_chunk_heap_new(buffer.c, buffer.c, buffer.len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s->val, buffer.s->val, buffer.s->len);
 		if (!chunk) {
 			smart_str_free_ex(&buffer, 1);
 			php_cli_server_log_response(client, 500, NULL TSRMLS_CC);

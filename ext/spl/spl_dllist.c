@@ -317,7 +317,7 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret TSRMLS_DC) /* {{
 
 static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to TSRMLS_DC) /* {{{ */
 {
-	spl_ptr_llist_element   *current = from->head, *next;
+	spl_ptr_llist_element *current = from->head, *next;
 	spl_ptr_llist_ctor_func  ctor    = from->ctor;
 
 	while (current) {
@@ -1145,10 +1145,8 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	if (buf.c) {
-		RETVAL_STRINGL(buf.c, buf.len);
-		smart_str_free(&buf);
-		return;
+	if (buf.s) {
+		RETURN_STR(buf.s);
 	} else {
 		RETURN_NULL();
 	}

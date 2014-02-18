@@ -554,7 +554,7 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_EMPTY_STRING(z) do {				\
-		ZVAL_STRINGL(z, "", 0);					\
+		ZVAL_STR(z, STR_EMPTY_ALLOC());			\
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\

@@ -284,7 +284,6 @@ static zend_object *spl_object_storage_clone(zval *zobject TSRMLS_DC)
 {
 	zend_object *old_object;
 	zend_object *new_object;
-	spl_SplObjectStorage *intern;
 
 	old_object = Z_OBJ_P(zobject);
 	new_object = spl_object_storage_new_ex(old_object->ce, zobject TSRMLS_CC);
@@ -763,10 +762,8 @@ SPL_METHOD(SplObjectStorage, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	if (buf.c) {
-		RETVAL_STRINGL(buf.c, buf.len);
-		smart_str_free(&buf);
-		return;
+	if (buf.s) {
+		RETURN_STR(buf.s);
 	} else {
 		RETURN_NULL();
 	}

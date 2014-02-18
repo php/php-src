@@ -1201,9 +1201,8 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 	}
 	smart_str_0(&implstr);
 
-	if (implstr.len) {
-//???		RETURN_STRINGL(implstr.c, implstr.len, 0);
-		RETURN_STRINGL(implstr.c, implstr.len);
+	if (implstr.s) {
+		RETURN_STR(implstr.s);
 	} else {
 		smart_str_free(&implstr);
 		RETURN_EMPTY_STRING();
@@ -3069,10 +3068,9 @@ end_outer_loop: ;
 
 	smart_str_appendl(&result, &S(text)[nextwpos], L(text) - nextwpos);
 
-	if (result.c != NULL) {
+	if (result.s) {
 		smart_str_0(&result);
-//???		RETVAL_STRINGL(result.c, result.len, 0);
-		RETVAL_STRINGL(result.c, result.len);
+		RETURN_STR(result.s);
 	} else {
 		RETURN_EMPTY_STRING();
 	}

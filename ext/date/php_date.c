@@ -1046,7 +1046,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
+static zend_string *date_format(char *format, int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
 	int                  i, length = 0;
@@ -1057,7 +1057,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	int                  weekYearSet = 0;
 
 	if (!format_len) {
-		return estrdup("");
+		return STR_EMPTY_ALLOC();
 	}
 
 	if (localtime) {
@@ -1201,7 +1201,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 		timelib_time_offset_dtor(offset);
 	}
 
-	return string.c;
+	return string.s;
 }
 
 static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
@@ -1209,7 +1209,6 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	char   *format;
 	int     format_len;
 	long    ts;
-	char   *string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
@@ -1218,18 +1217,15 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 		ts = time(NULL);
 	}
 
-	string = php_format_date(format, format_len, ts, localtime TSRMLS_CC);
-	
-//???	RETVAL_STRING(string, 0);
-	RETVAL_STRING(string);
+	RETURN_STR(php_format_date(format, format_len, ts, localtime TSRMLS_CC));
 }
 /* }}} */
 
-PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
+PHPAPI zend_string *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
-	char *string;
+	zend_string *string;
 
 	t = timelib_time_ctor();
 
@@ -2204,8 +2200,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	}
 
 	/* first we add the date and time in ISO format */
-//???	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
-	ZVAL_STRING(&zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
@@ -2989,8 +2984,7 @@ PHP_FUNCTION(date_format)
 	}
 	dateobj = (php_date_obj *) Z_OBJ_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-//???	RETURN_STRING(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime), 0);
-	RETURN_STRING(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime));
+	RETURN_STR(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime));
 }
 /* }}} */
 
@@ -3846,7 +3840,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add_nominal() \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     timestamp_begin); \
-		add_assoc_string(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC), 0); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx], 1); \
@@ -3855,7 +3849,7 @@ PHP_FUNCTION(timezone_transitions_get)
 #define add(i,ts) \
 		array_init(&element); \
 		add_assoc_long(&element, "ts",     ts); \
-		add_assoc_string(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC), 0); \
+		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
 		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1); \
@@ -4278,7 +4272,7 @@ static char *date_interval_format(char *format, int format_len, timelib_rel_time
 
 	smart_str_0(&string);
 
-	return string.c;
+	return string.s;
 }
 /* }}} */
 
