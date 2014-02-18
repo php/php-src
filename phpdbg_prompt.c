@@ -617,7 +617,7 @@ out:
 PHPDBG_COMMAND(eval) /* {{{ */
 {
 	switch (param->type) {
-		case STR_PARAM: {
+		case EVAL_PARAM: {
 			zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
 			zval retval;
 
@@ -780,7 +780,7 @@ PHPDBG_COMMAND(shell) /* {{{ */
 {
 	/* don't allow this to loop, ever ... */
 	switch (param->type) {
-		case STR_PARAM: {
+		case SHELL_PARAM: {
 			FILE *fd = NULL;
 			if ((fd=VCWD_POPEN((char*)param->str, "w"))) {
 				/* do something perhaps ?? do we want input ?? */

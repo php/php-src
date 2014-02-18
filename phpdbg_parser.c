@@ -259,11 +259,11 @@ int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	
 	switch (command->type) {
 		case EVAL_PARAM:
-			phpdbg_notice("eval (%s)", command->str);
+			PHPDBG_COMMAND_HANDLER(eval)(command, NULL TSRMLS_CC);
 		break;
 		
 		case SHELL_PARAM:
-			phpdbg_notice("shell (%s)", command->str);
+			PHPDBG_COMMAND_HANDLER(shell)(command, NULL TSRMLS_CC);
 		break;
 		
 		case STR_PARAM: {
