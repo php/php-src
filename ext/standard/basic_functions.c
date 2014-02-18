@@ -5334,7 +5334,7 @@ PHP_FUNCTION(ini_get)
 		return;
 	}
 
-	str = zend_ini_string(varname, varname_len + 1, 0);
+	str = zend_ini_string(varname, varname_len, 0);
 
 	if (!str) {
 		RETURN_FALSE;
@@ -5510,11 +5510,11 @@ PHP_FUNCTION(set_include_path)
 
 	key = STR_INIT("include_path", sizeof("include_path")-1, 0);
 	if (zend_alter_ini_entry_ex(key, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
-		STR_FREE(key);
+		STR_RELEASE(key);
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	STR_FREE(key);
+	STR_RELEASE(key);
 }
 /* }}} */
 
@@ -5612,7 +5612,7 @@ PHP_FUNCTION(ignore_user_abort)
 	if (arg) {
 		zend_string *key = STR_INIT("ignore_user_abort", sizeof("ignore_user_abort"), 0);
 		zend_alter_ini_entry_ex(key, arg, arg_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
-		STR_FREE(key);
+		STR_RELEASE(key);
 	}
 
 	RETURN_LONG(old_setting);

@@ -376,7 +376,7 @@ ZEND_FUNCTION(gc_enable)
 {
 	zend_string *key = STR_INIT("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
 	zend_alter_ini_entry(key, "1", sizeof("1")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	STR_FREE(key);
+	STR_RELEASE(key);
 }
 /* }}} */
 
@@ -386,7 +386,7 @@ ZEND_FUNCTION(gc_disable)
 {
 	zend_string *key = STR_INIT("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
 	zend_alter_ini_entry(key, "0", sizeof("0")-1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-	STR_FREE(key);
+	STR_RELEASE(key);
 }
 /* }}} */
 
@@ -639,7 +639,7 @@ ZEND_FUNCTION(error_reporting)
 	if(ZEND_NUM_ARGS() != 0) {
 		zend_string *key = STR_INIT("error_reporting", sizeof("error_reporting")-1, 0);
 		zend_alter_ini_entry(key, err, err_len, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-		STR_FREE(key);
+		STR_RELEASE(key);
 	}
 
 	RETVAL_LONG(old_error_reporting);

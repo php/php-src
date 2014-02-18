@@ -798,7 +798,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
 					zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
 					zend_alter_ini_entry(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-					STR_FREE(key);
+					STR_RELEASE(key);
 				}
 
 				mimetype = estrdup(ptr);
@@ -827,7 +827,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
 				zend_alter_ini_entry(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-				STR_FREE(key);
+				STR_RELEASE(key);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 307) &&

@@ -1287,7 +1287,7 @@ PHP_FUNCTION(set_time_limit)
 	} else {
 		RETVAL_FALSE;
 	}
-	STR_FREE(key);
+	STR_RELEASE(key);
 	efree(new_timeout_str);
 }
 /* }}} */
