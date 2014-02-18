@@ -11,6 +11,7 @@
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_cmd.h"
 #include "phpdbg_prompt.h"
 
 #define YYSTYPE phpdbg_param_t
@@ -22,194 +23,17 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
     phpdbg_error("Parse Error: %s", msg);
+    {
+    	const phpdbg_param_t *top = stack;
+    	zend_ulong position  = 0L;
+    	
+    	while (top) {
+    		phpdbg_param_debug(
+    			top, "--> ");
+    		top = top->next;
+    	}
+    }
 }
-
-void phpdbg_debug_param(const phpdbg_param_t *param, const char *msg) {
-	if (param && param->type) {
-		switch (param->type) {
-			case STR_PARAM:
-				fprintf(stderr, "%s STR_PARAM(%s=%d)\n", msg, param->str, param->len);
-			break;
-			
-			case ADDR_PARAM:
-				fprintf(stderr, "%s ADDR_PARAM(%lu)\n", msg, param->addr);
-			break;
-			
-			case FILE_PARAM:
-				fprintf(stderr, "%s FILE_PARAM(%s:%d)\n", msg, param->file.name, param->file.line);
-			break;
-			
-			case METHOD_PARAM:
-				fprintf(stderr, "%s METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
-			break;
-			
-			case NUMERIC_METHOD_PARAM:
-				fprintf(stderr, "%s NUMERIC_METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
-			break;
-			
-			case NUMERIC_FUNCTION_PARAM:
-				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%s)\n", msg, param->str, param->num);
-			break;
-			
-			case NUMERIC_PARAM:
-				fprintf(stderr, "%s NUMERIC_PARAM(%ld)\n", msg, param->num);
-			break;
-			
-			case COND_PARAM:
-				fprintf(stderr, "%s COND_PARAM(%s=%d)\n", msg, param->str, param->len);
-			break;
-		}
-	}
-}
-
-void phpdbg_stack_free(phpdbg_param_t *stack) {
-	if (stack && stack->next) {
-		phpdbg_param_t *remove = stack->next;
-		
-		while (remove) {
-			phpdbg_param_t *next = NULL;
-			
-			if (remove->next)
-				next = remove->next;
-			
-			switch (remove->type) {
-				case STR_PARAM: 
-					if (remove->str) {
-						free(remove->str);	
-					}
-				break;
-				
-				case FILE_PARAM:
-					if (remove->file.name) {
-						free(remove->file.name);
-					}
-				break;
-			}
-			
-			free(remove);
-			
-			if (next) 
-				remove = next; 
-			else break;
-		}
-	}
-}
-
-static void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
-	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
-	
-	if (!next)
-		return;
-	
-	*(next) = *(param);
-
-	if (stack->top == NULL) {
-		stack->top = next;
-		stack->next = next;
-	} else {
-		stack->top->next = next;
-		next->top = stack->top;
-		stack->top = next;
-	}
-	
-	stack->len++;
-}
-
-phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, phpdbg_param_t **top, char **why) {
-	const phpdbg_command_t *command = commands;
-	phpdbg_param_t *name = *top;
-	phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
-	ulong matches = 0L;
-	
-	while (command && command->name && command->handler) {
-		if (command->name_len >= name->len) {
-			if (memcmp(command->name, name->str, name->len) == SUCCESS) {
-				if (matches < 3) {
-					matched[matches] = command;
-					matches++;
-				} else break;
-			}
-		}
-		command++;
-	}
-	
-	switch (matches) {
-		case 0: { 
-			asprintf(
-				why,
-				"The command %s could not be found", 
-				name->str);
-		} break;
-		
-		case 1: {
-			(*top) = (*top)->next;
-			if (matched[0]->subs && (*top) && ((*top)->type == STR_PARAM)) {
-				command = phpdbg_stack_resolve(matched[0]->subs, top, why);
-				if (command) {
-					return command;
-				}
-			}
-			
-			return matched[0];
-		} break;
-		
-		default: {
-			asprintf(
-				why,
-				"The command %s is ambigious, matching %d commands", 
-				name->str, matches);
-		}
-	}
-	
-	return NULL;
-}
-
-int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
-	phpdbg_param_t *command = NULL,
-				   *params = NULL;
-	phpdbg_command_t *handler = NULL;
-	
-	if (stack->type != STACK_PARAM) {
-		asprintf(
-			why, "the passed argument was not a stack !!");
-		return FAILURE;
-	}
-	
-	if (!stack->len) {
-		asprintf(
-			why, "the stack contains nothing !!");
-		return FAILURE;
-	}
-	
-	command = (phpdbg_param_t*) stack->next;
-	
-	switch (command->type) {
-		case EVAL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(eval)(command, NULL TSRMLS_CC);
-		
-		case SHELL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(shell)(command, NULL TSRMLS_CC);
-		
-		case STR_PARAM: {
-			handler = phpdbg_stack_resolve(
-				phpdbg_prompt_commands, &command, why);
-			
-			if (handler) {
-				return handler->handler(command, NULL TSRMLS_CC);
-			} else {
-				return FAILURE;
-			}
-		} break;
-		
-		default:
-			asprintf(
-				why, "the first parameter makes no sense !!");
-			return FAILURE;
-	}
-	
-	return SUCCESS;
-}
-
 %}
  
 %code requires {

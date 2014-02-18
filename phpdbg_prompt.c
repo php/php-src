@@ -965,8 +965,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 	input = phpdbg_read_input(NULL TSRMLS_CC);
 	
-	printf("got input %s\n", input);
-	
 	if (input) {
 		do {
 			yyscan_t scanner;

@@ -143,6 +143,14 @@ typedef struct {
 PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC);
 PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
 
+/**
+ * Stack Management
+ */
+PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
+PHPDBG_API phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, phpdbg_param_t **top, char **why);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
+PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
+
 /*
 * Parameter Management
 */
@@ -153,6 +161,7 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_par
 PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
 PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC);
+PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg);
 
 /**
  * Command Declarators
