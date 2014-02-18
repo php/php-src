@@ -87,7 +87,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 						phpdbg_error("\tFailed to decode opline %16p", opline);
 					}
 					opline++;
-				} while (++opcode < end);
+				} while (opcode++ < end);
 				zend_hash_destroy(&vars);
 			}
 		} break;
