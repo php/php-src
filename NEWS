@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.5.11
+
 ?? ??? 2014, PHP 5.5.10
 
 - Core:
@@ -10,7 +12,7 @@ PHP                                                                        NEWS
     per offset too). (Derick)
 
 - Fileinfo:
-  . Bug #66731 (file: infinite recursion). (Remi)
+  . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
