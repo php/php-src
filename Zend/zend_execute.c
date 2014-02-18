@@ -1572,7 +1572,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	EG(argument_stack)->top = (zval*)zend_vm_stack_frame_base(execute_data);
 
 	ZVAL_UNDEF(&EX(object));
-//???	EX(current_this) = NULL;
+	ZVAL_UNDEF(&EX(current_this));
 	ZVAL_UNDEF(&EX(old_error_reporting));
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(call) = NULL;

@@ -384,9 +384,10 @@ struct _zend_execute_data {
 	zval old_error_reporting;
 	zend_bool nested;
 	zval *return_value;
-//???	zend_class_entry *current_scope;
-//???	zend_class_entry *current_called_scope;
-//???	zval *current_this;
+//???
+	zend_class_entry *current_scope;
+	zend_class_entry *current_called_scope;
+	zval current_this;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object *delayed_exception;
 	call_slot *call_slots;

@@ -1804,9 +1804,9 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 				}
 				zval_ptr_dtor(&EG(This));
 			}
-//???			EG(This) = EX(current_this);
-//???			EG(scope) = EX(current_scope);
-//???			EG(called_scope) = EX(current_called_scope);
+			ZVAL_COPY_VALUE(&EG(This), &EX(current_this));
+			EG(scope) = EX(current_scope);
+			EG(called_scope) = EX(current_called_scope);
 
 			EX(call)--;
 
@@ -1869,9 +1869,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 	if (fbc->type == ZEND_USER_FUNCTION || fbc->common.scope) {
 		should_change_scope = 1;
-//???		EX(current_this) = EG(This);
-//???		EX(current_scope) = EG(scope);
-//???		EX(current_called_scope) = EG(called_scope);
+		ZVAL_COPY_VALUE(&EX(current_this), &EG(This));
+		EX(current_scope) = EG(scope);
+		EX(current_called_scope) = EG(called_scope);
 		EG(This) = EX(object);
 		EG(scope) = (fbc->type == ZEND_USER_FUNCTION || Z_TYPE(EX(object)) == IS_UNDEF) ? fbc->common.scope : NULL;
 		EG(called_scope) = EX(call)->called_scope;
@@ -1991,9 +1991,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			}
 			zval_ptr_dtor(&EG(This));
 		}
-//???		EG(This) = EX(current_this);
-//???		EG(scope) = EX(current_scope);
-//???		EG(called_scope) = EX(current_called_scope);
+		ZVAL_COPY_VALUE(&EG(This), &EX(current_this));
+		EG(scope) = EX(current_scope);
+		EG(called_scope) = EX(current_called_scope);
 	}
 
 	EX(call)--;
@@ -2752,7 +2752,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (OP1_TYPE == IS_CV) {
-				Z_ADDREF_P(retval_ptr);
+				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}

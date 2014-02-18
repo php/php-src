@@ -116,9 +116,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
 
-//???		if (execute_data->current_this) {
-//???			zval_ptr_dtor(&execute_data->current_this);
-//???		}
+		zval_ptr_dtor(&execute_data->current_this);
 
 		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
@@ -294,10 +292,10 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	}
 
 	/* Back up executor globals. */
-//???	execute_data->current_scope = EG(scope);
-//???	execute_data->current_called_scope = EG(called_scope);
+	execute_data->current_scope = EG(scope);
+	execute_data->current_called_scope = EG(called_scope);
 	execute_data->symbol_table = EG(active_symbol_table);
-//???	execute_data->current_this = EG(This);
+	ZVAL_COPY_VALUE(&execute_data->current_this, &EG(This));
 
 	/* Save execution context in generator object. */
 	generator = (zend_generator *) Z_OBJ_P(return_value);
@@ -347,9 +345,9 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		EG(opline_ptr) = &generator->execute_data->opline;
 		EG(active_op_array) = generator->execute_data->op_array;
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
-//???		EG(This) = generator->execute_data->current_this;
-//???		EG(scope) = generator->execute_data->current_scope;
-//???		EG(called_scope) = generator->execute_data->current_called_scope;
+		ZVAL_COPY_VALUE(&EG(This), &generator->execute_data->current_this);
+		EG(scope) = generator->execute_data->current_scope;
+		EG(called_scope) = generator->execute_data->current_called_scope;
 		EG(argument_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
