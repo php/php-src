@@ -26,6 +26,9 @@ PHP                                                                        NEWS
     It also made pg_meta_data() return "is enum" always.
     (Yasuo)
 
+- Core
+  . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
+
 13 Feb 2014, PHP 5.6.0 Alpha 2
 - Core:
   . Added T_POW (**) operator
