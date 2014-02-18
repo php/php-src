@@ -147,7 +147,7 @@ file_ascmagic_with_encoding(struct magic_set *ms, const unsigned char *buf,
 		    == NULL)
 			goto done;
 		if ((rv = file_softmagic(ms, utf8_buf,
-		    (size_t)(utf8_end - utf8_buf), TEXTTEST, text)) == 0)
+		    (size_t)(utf8_end - utf8_buf), 0, TEXTTEST, text)) == 0)
 			rv = -1;
 	}
 
