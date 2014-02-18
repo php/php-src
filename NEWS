@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.10
+20 Fev 2014, PHP 5.5.10RC1
 
 - Core:
   . Fixed Request #66574i (Allow multiple paths in php_ini_scanned_path). (Remi)
@@ -10,7 +10,7 @@ PHP                                                                        NEWS
     per offset too). (Derick)
 
 - Fileinfo:
-  . Bug #66731 (file: infinite recursion). (Remi)
+  . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
