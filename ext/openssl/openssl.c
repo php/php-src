@@ -3026,7 +3026,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			}
 			break;
 #endif
-#ifdef EVP_PKEY_EC
+#if OPENSSL_VERSION_NUMBER >= 0x0090800fL && !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
 		case EVP_PKEY_EC:
 			assert(pkey->pkey.ec != NULL);
 
