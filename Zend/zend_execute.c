@@ -760,63 +760,60 @@ static inline zval* zend_assign_const_to_variable(zval *variable_ptr, zval *valu
 
 static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRMLS_DC)
 {
-	if (Z_ISREF_P(variable_ptr)) {
+	zval garbage;
+
+	if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(variable_ptr)))) {
+		ZVAL_COPY(variable_ptr, value);
+		return variable_ptr;
+	} else if (Z_ISREF_P(variable_ptr)) {
 		variable_ptr = Z_REFVAL_P(variable_ptr);
 	}
 
-	if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
+	if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(variable_ptr)))) {
+		ZVAL_COPY(variable_ptr, value);
+	} else if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
-		return variable_ptr;
-	}
-
-//???
-#if 0
- 	if (EXPECTED(!PZVAL_IS_REF(variable_ptr))) {
+	} else if (EXPECTED(variable_ptr != value)) {
 		if (Z_REFCOUNT_P(variable_ptr)==1) {
-			if (UNEXPECTED(variable_ptr == value)) {
-				return variable_ptr;
-			} else if (EXPECTED(!PZVAL_IS_REF(value))) {
-				Z_ADDREF_P(value);
-				*variable_ptr_ptr = value;
-				ZEND_ASSERT(variable_ptr != &EG(uninitialized_zval));
-				GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
-				zval_dtor(variable_ptr);
-				efree(variable_ptr);
-				return value;
-			} else {
-				goto copy_value;
-			}
-		} else { /* we need to split */
-			Z_DELREF_P(variable_ptr);
-			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
-			if (PZVAL_IS_REF(value)) {
-				ALLOC_ZVAL(variable_ptr);
-				*variable_ptr_ptr = variable_ptr;
-				INIT_PZVAL_COPY(variable_ptr, value);
-				zval_copy_ctor(variable_ptr);
-				return variable_ptr;
-			} else {
-				*variable_ptr_ptr = value;
-				Z_ADDREF_P(value);
-				return value;
-			}
-		}
- 	} else {
-		if (EXPECTED(variable_ptr != value)) {
-copy_value:
-			if (EXPECTED(Z_TYPE_P(variable_ptr) <= IS_BOOL)) {
-				/* nothing to destroy */
-				ZVAL_DUP(variable_ptr, value);
-			} else {
+//???			if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(value)))) {
+//???				_zval_dtor_func(variable_ptr ZEND_FILE_LINE_CC);
+//???				ZVAL_COPY(variable_ptr, value);
+//???			} else if (EXPECTED(!Z_ISREF_P(value))) {
+//???				Z_ADDREF_P(value);
+//???				*variable_ptr_ptr = value;
+//???				ZEND_ASSERT(variable_ptr != &EG(uninitialized_zval));
+//???				GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
+//???				zval_dtor(variable_ptr);
+//???				ZVAL_COPY(variable_ptr, value);
+//???			} else {
 				ZVAL_COPY_VALUE(&garbage, variable_ptr);
 				ZVAL_DUP(variable_ptr, value);
 				_zval_dtor_func(&garbage ZEND_FILE_LINE_CC);
+//???			}
+		} else { /* we need to split */
+			Z_DELREF_P(variable_ptr);
+			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
+			if (Z_ISREF_P(value)) {
+				ZVAL_DUP(variable_ptr, Z_REFVAL_P(value));
+			} else {
+				ZVAL_COPY(variable_ptr, value);
 			}
 		}
+//??? 	} else {
+//???		if (EXPECTED(variable_ptr != value)) {
+//???copy_value:
+//???			if (EXPECTED(Z_TYPE_P(variable_ptr) <= IS_BOOL)) {
+//???				/* nothing to destroy */
+//???				ZVAL_DUP(variable_ptr, value);
+//???			} else {
+//???				ZVAL_COPY_VALUE(&garbage, variable_ptr);
+//???				ZVAL_DUP(variable_ptr, value);
+//???				_zval_dtor_func(&garbage ZEND_FILE_LINE_CC);
+//???			}
+//???		}
 		return variable_ptr;
 	}
-#endif
 	return variable_ptr;
 }
 

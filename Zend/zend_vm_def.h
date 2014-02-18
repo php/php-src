@@ -495,6 +495,9 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
+		if (Z_ISREF_P(var_ptr)) {
+			var_ptr = Z_REFVAL_P(var_ptr);
+		}
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -1729,8 +1732,8 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
 	}
 
-	FREE_OP1_VAR_PTR();
-	FREE_OP2_VAR_PTR();
+//???	FREE_OP1_VAR_PTR();
+//???	FREE_OP2_VAR_PTR();
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
