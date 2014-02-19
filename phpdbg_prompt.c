@@ -55,14 +55,13 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, "s"),
 	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 0),
-	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
-	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "n"),
+	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, "|n"),
+	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "|n"),
 	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, "*"),
 	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, "s"),
 	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
 	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
 	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s"),
-	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, "b"),
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
 	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, "s"),
@@ -376,9 +375,8 @@ PHPDBG_COMMAND(compile) /* {{{ */
 PHPDBG_COMMAND(step) /* {{{ */
 {
 	switch (param->type) {
-		case EMPTY_PARAM:
 		case NUMERIC_PARAM: {
-			if (param->type == NUMERIC_PARAM && param->num) {
+			if (param->num) {
 				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 			} else {
 				PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
@@ -495,13 +493,11 @@ PHPDBG_COMMAND(leave) /* {{{ */
 
 PHPDBG_COMMAND(frame) /* {{{ */
 {
-	switch (param->type) {
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_notice("Currently in frame #%d", PHPDBG_G(frame).num);
+	} else switch (param->type) {
 		case NUMERIC_PARAM:
 			phpdbg_switch_frame(param->num TSRMLS_CC);
-			break;
-
-		case EMPTY_PARAM:
-			phpdbg_notice("Currently in frame #%d", PHPDBG_G(frame).num);
 			break;
 
 		phpdbg_default_switch_case();
@@ -681,11 +677,11 @@ PHPDBG_COMMAND(back) /* {{{ */
 		return SUCCESS;
 	}
 
-	switch (param->type) {
-		case EMPTY_PARAM:
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_dump_backtrace(0 TSRMLS_CC);
+	} else switch (param->type) {
 		case NUMERIC_PARAM:
-			phpdbg_dump_backtrace(
-				(param->type == NUMERIC_PARAM) ? param->num : 0 TSRMLS_CC);
+			phpdbg_dump_backtrace(param->num TSRMLS_CC);
 		break;
 
 		phpdbg_default_switch_case();
@@ -696,46 +692,42 @@ PHPDBG_COMMAND(back) /* {{{ */
 
 PHPDBG_COMMAND(print) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM: {
-			phpdbg_writeln(SEPARATE);
-			phpdbg_notice("Execution Context Information");
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln(SEPARATE);
+		phpdbg_notice("Execution Context Information");
 #ifdef HAVE_LIBREADLINE
-			phpdbg_writeln("Readline\tyes");
+		phpdbg_writeln("Readline\tyes");
 #else
-			phpdbg_writeln("Readline\tno");
+		phpdbg_writeln("Readline\tno");
 #endif
 
-			phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-			phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
-			phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-			phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
-			phpdbg_writeln("Oplog\t\t%s", PHPDBG_G(oplog) ? "on" : "off");
+		phpdbg_writeln("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+		phpdbg_writeln("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
+		phpdbg_writeln("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+		phpdbg_writeln("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+		phpdbg_writeln("Oplog\t\t%s", PHPDBG_G(oplog) ? "on" : "off");
 
-			if (PHPDBG_G(ops)) {
-				phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
+		if (PHPDBG_G(ops)) {
+			phpdbg_writeln("Opcodes\t\t%d", PHPDBG_G(ops)->last);
 
-				if (PHPDBG_G(ops)->last_var) {
-					phpdbg_writeln("Variables\t%d", PHPDBG_G(ops)->last_var-1);
-				} else {
-					phpdbg_writeln("Variables\tNone");
-				}
+			if (PHPDBG_G(ops)->last_var) {
+				phpdbg_writeln("Variables\t%d", PHPDBG_G(ops)->last_var-1);
+			} else {
+				phpdbg_writeln("Variables\tNone");
 			}
+		}
 
-			phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
-			if (EG(in_execution)) {
-				phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
-			}
+		phpdbg_writeln("Executing\t%s", EG(in_execution) ? "yes" : "no");
+		if (EG(in_execution)) {
+			phpdbg_writeln("VM Return\t%d", PHPDBG_G(vmret));
+		}
 
-			phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
-			phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
-			phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
-			phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
+		phpdbg_writeln("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
+		phpdbg_writeln("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+		phpdbg_writeln("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+		phpdbg_writeln("Included\t%d", zend_hash_num_elements(&EG(included_files)));
 
-			phpdbg_writeln(SEPARATE);
-		} break;
-
-		phpdbg_default_switch_case();
+		phpdbg_writeln(SEPARATE);
 	}
 
 	return SUCCESS;
@@ -759,12 +751,11 @@ PHPDBG_COMMAND(set) /* {{{ */
 
 PHPDBG_COMMAND(break) /* {{{ */
 {
-	switch (param->type) {
-		case EMPTY_PARAM:
-			phpdbg_set_breakpoint_file(
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_set_breakpoint_file(
 				zend_get_executed_filename(TSRMLS_C),
 				zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
-			break;
+	} else switch (param->type) {
 		case ADDR_PARAM:
 			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
 			break;
@@ -922,25 +913,6 @@ PHPDBG_COMMAND(clear) /* {{{ */
 	phpdbg_writeln("Conditionals\t\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]));
 
 	phpdbg_clear_breakpoints(TSRMLS_C);
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_COMMAND(quiet) /* {{{ */
-{
-	switch (param->type) {
-		case NUMERIC_PARAM: {
-			if (param->num) {
-				PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
-			} else {
-				PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
-			}
-			phpdbg_notice("Quietness %s",
-				(PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
-		} break;
-
-		phpdbg_default_switch_case();
-	}
 
 	return SUCCESS;
 } /* }}} */

@@ -32,6 +32,8 @@ PHPDBG_SET(colors);
 #endif
 PHPDBG_SET(oplog);
 PHPDBG_SET(break);
+PHPDBG_SET(breaks);
+PHPDBG_SET(quiet);
 
 extern const phpdbg_command_t phpdbg_set_commands[];
 

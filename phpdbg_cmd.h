@@ -94,7 +94,8 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char *args;							/* Argument Spec */							
+	char *args;							/* Argument Spec */
+	const phpdbg_command_t *parent;		/* Parent Command */							
 };
 /* }}} */
 
@@ -158,17 +159,20 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
  */
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
+#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent}
+
 #define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL}
 
 #define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL}
 
 #define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param TSRMLS_DC)
 
 #define PHPDBG_COMMAND_ARGS param TSRMLS_CC
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', NULL}
 
 /*
 * Default Switch Case

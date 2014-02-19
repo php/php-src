@@ -809,21 +809,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Print the instructions for the current stack"
 },
 
-{"quiet",
-"Setting quietness on will stop the OPLINE output during execution" CR CR
-
-"**Examples**" CR CR
-"    $P quiet 1" CR
-"    $P Q 1" CR
-"    Will silence OPLINE output, while" CR CR
-
-"    $P quiet 0" CR
-"    $P Q 0" CR
-"    Will enable OPLINE output again" CR CR
-
-"Note: Quietness is disabled automatically while stepping"
-},
-
 {"register",
 //******* Needs a general explanation of the how registered functions work
 "Register any global function for use as a command in phpdbg console" CR CR
@@ -856,11 +841,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "are as follows:" CR CR
 
 "   **Type**  **Alias**    **Purpose**" CR
-"   **prompt**   **p**     set the prompt  " CR
+"   **prompt**   **p**     set the prompt" CR
 "   **color**    **c**     set color  <element> <color>" CR
-"   **colors**   **C**     set colors on or off" CR
+"   **colors**   **C**     set colors <on|off>" CR
 "   **oplog**    **O**     set oplog output" CR
-"   **break**    **b**     set break **id** <on|off>" CR CR
+"   **break**    **b**     set break **id** <on|off>" CR
+"   **breaks**   **B**     set breaks <on|off>" CR
+"   **quiet**    **q**     set quiet <on|off>" CR CR
 
 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "
 "**cyan** and **black**.  All colours except **none** can be followed by an optional "

@@ -33,16 +33,16 @@ C_EVAL				?i:"eval"
 C_SHELL				?i:"shell"
 C_IF				?i:"if"
 
-DIGITS				[0-9]+
-ID					[a-zA-Z_\x7f-\xff\-][a-zA-Z0-9_\x7f-\xff\-\./]*
+WS          		[ \r\n\t]+
+DIGITS				[0-9\.]+
+ID					[^ \r\n\t]+
 NSID				[\\\\]?{ID}
 METHOD				{NSID}+::{ID}
 NUMERIC_METHOD		{METHOD}[#]{DIGITS}
 NUMERIC_FUNCTION	{NSID}[#]{DIGITS}
-FILE				[^ :]+:[0-9]+
+FILE				[^ :\r\n\t]+:[0-9]+
 OPLINE				0x[a-fA-F0-9]+
 LITERAL				\"(\\.|[^\\"])*\"
-WS          		[ \r\n\t]+
 INPUT				[^\n]+
 %%
 <INITIAL>
@@ -129,8 +129,4 @@ INPUT				[^\n]+
 	return T_INPUT;
 }
 {WS}        		{ /* ignore whitespace */ }
-.			{
-	phpdbg_init_param(yylval, EMPTY_PARAM);
-	return T_UNEXPECTED; 
-}
 %%

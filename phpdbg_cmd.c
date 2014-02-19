@@ -26,6 +26,23 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+static inline const char *phpdbg_command_name(const phpdbg_command_t *command, char *buffer) {
+	size_t pos = 0;
+
+	if (command->parent) {
+		memcpy(&buffer[pos], command->parent->name, command->parent->name_len);
+		pos += command->parent->name_len;
+		memcpy(&buffer[pos], " ", sizeof(" ")-1);
+		pos += (sizeof(" ")-1);
+	}
+
+	memcpy(&buffer[pos], command->name, command->name_len);
+	pos += command->name_len;
+	buffer[pos] = 0;
+	
+	return buffer;
+}
+
 PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	switch (param->type) {
@@ -493,115 +510,87 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC) {
 	if (command && command->args) {
+		char buffer[128] = {0,};
 		const phpdbg_param_t *top = (stack != NULL) ? *stack : NULL;
 		const char *arg = command->args;
-		size_t expected = strlen(command->args),
-			   received = 0L;
+		size_t least = 0L,
+			   received = 0L,
+			   current = 0L;
 		zend_bool optional = 0;
 		
-		if (*arg == '|') {
-			expected--;
-			optional = 1;
+		/* check for arg spec */
+		if (!(arg) || !(*arg))
+			return SUCCESS;
+		
+		least = 0L;
+		
+		/* count least amount of arguments */
+		while (arg && *arg) {
+			if (arg[0] == '|') {
+				break;
+			}
+			least++;
 			arg++;
 		}
 		
-		if (arg && !top && !optional) {
-			asprintf(why,
-				"%s expected arguments and received none", command->name);
-			return FAILURE;
-		}
+		arg = command->args;
 
-		while (top && arg) {
+#define verify_arg(e, a, t) if (!(a)) { \
+	if (!optional) { \
+		asprintf(why, \
+			"%s expected %s and got nothing at parameter %lu", \
+			phpdbg_command_name(command, buffer), \
+			(e), \
+			current); \
+		return FAILURE;\
+	} \
+} else if ((a)->type != (t)) { \
+	asprintf(why, \
+		"%s expected %s and got %s at parameter %lu", \
+		phpdbg_command_name(command, buffer), \
+		(e),\
+		phpdbg_get_param_type((a) TSRMLS_CC), \
+		current); \
+	return FAILURE; \
+}
 
+		while (arg) {
+			current++;
+			
 			switch (*arg) {
-				case '|': { 
-					expected--;
+				case '|': {
+					current--;
 					optional = 1;
 					arg++;
 				} continue;
 				
-				case 'i': if (top->type != STR_PARAM) {
-					asprintf(why, 
-						"%s expected raw input and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 's': if (top->type != STR_PARAM) {
-					asprintf(why, 
-						"%s expected string and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-
-				case 'n': if (top->type != NUMERIC_PARAM) {
-					asprintf(why, 
-						"%s expected number and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 'm': if (top->type != METHOD_PARAM) {
-					asprintf(why, 
-						"%s expected method and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 'a': if (top->type != ADDR_PARAM) {
-					asprintf(why, 
-						"%s expected address and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 'f': if (top->type != FILE_PARAM) {
-					asprintf(why, 
-						"%s expected file:line and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 'c': if (top->type != COND_PARAM) {
-					asprintf(why, 
-						"%s expected condition and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
-				
-				case 'b': if (top->type != NUMERIC_PARAM) {
-					asprintf(why, 
-						"%s expected boolean and got %s at parameter %lu", 
-						command->name, phpdbg_get_param_type(top TSRMLS_CC),
-						(command->args - arg) + 1);
-					return FAILURE;
-				} else if (top->num > 1 || top->num < 0) {
-					asprintf(why, 
-						"%s expected boolean and got number at parameter %lu",
-						command->name,
-						(command->args - arg) + 1);
-					return FAILURE;
-				} break;
+				case 'i': verify_arg("raw input", top, STR_PARAM); break;
+				case 's': verify_arg("string", top, STR_PARAM); break;
+				case 'n': verify_arg("number", top, NUMERIC_PARAM); break;
+				case 'm': verify_arg("method", top, METHOD_PARAM); break;
+				case 'a': verify_arg("address", top, ADDR_PARAM); break;
+				case 'f': verify_arg("file:line", top, FILE_PARAM); break;
+				case 'c': verify_arg("condition", top, COND_PARAM); break;
+				case 'b': verify_arg("boolean", top, NUMERIC_PARAM); break;
 				
 				case '*': { /* do nothing */ } break;
 			}
-			top = top->next;
+			
+			if (top ) {
+				top = top->next;
+			} else break;
+			
 			received++;
 			arg++;
 		}
 
-		if ((received < expected) && (arg && *arg) && !optional) {
+#undef verify_arg
+
+		if ((received < least)) {
 			asprintf(why,
-				"%s expected %lu arguments (%s) and received %lu",
-				command->name,
-				expected,
+				"%s expected at least %lu arguments (%s) and received %lu",
+				phpdbg_command_name(command, buffer),
+				least,
 				command->args, 
 				received);
 			return FAILURE;
@@ -627,15 +616,21 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 					matches++;
 				}
 			} else {
+			
 				/* match full command name */
 				if (memcmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
 						matched[matches] = command;
 						matches++;
+						
+						/* exact match */
+						if (name->len == command->name_len)
+							break;
 					} else break;
 				}
 			}
 		}
+		
 		command++;
 	}
 	
@@ -655,10 +650,36 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 		} break;
 		
 		default: {
+			char *list = NULL;
+			zend_uint it = 0;
+			size_t pos = 0;
+			
+			while (it < matches) {
+				if (!list) {
+					list = malloc(
+						matched[it]->name_len + 1 + 
+						((it+1) < matches ? sizeof(", ")-1 : 0));
+				} else {
+					list = realloc(list, 
+						(pos + matched[it]->name_len) + 1  + 
+						((it+1) < matches ? sizeof(", ")-1 : 0));
+				}
+				memcpy(&list[pos], matched[it]->name, matched[it]->name_len);
+				pos += matched[it]->name_len;
+				if ((it+1) < matches) {
+					memcpy(&list[pos], ", ", sizeof(", ")-1);
+					pos += (sizeof(", ") - 1);
+				}
+				
+				list[pos] = 0;
+				it++;
+			}
+			
 			asprintf(
 				why,
-				"The command %s is ambigious, matching %lu commands", 
-				name->str, matches);
+				"The command %s is ambigious, matching %lu commands (%s)", 
+				name->str, matches, list);
+			free(list);
 		} return NULL;
 	}
 

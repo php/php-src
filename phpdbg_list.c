@@ -29,14 +29,18 @@
 #include "phpdbg.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_prompt.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+#define PHPDBG_LIST_COMMAND_D(f, h, a, m, l, s) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[13])
+
 const phpdbg_command_t phpdbg_list_commands[] = {
-	PHPDBG_COMMAND_D_EX(lines,     "lists the specified lines",    'l', list_lines,  NULL, "l"),
-	PHPDBG_COMMAND_D_EX(class,     "lists the specified class",    'c', list_class,  NULL, "s"),
-	PHPDBG_COMMAND_D_EX(method,    "lists the specified method",   'm', list_method, NULL, "m"),
-	PHPDBG_COMMAND_D_EX(func,      "lists the specified function", 'f', list_func,   NULL, "s"),
+	PHPDBG_LIST_COMMAND_D(lines,     "lists the specified lines",    'l', list_lines,  NULL, "l"),
+	PHPDBG_LIST_COMMAND_D(class,     "lists the specified class",    'c', list_class,  NULL, "s"),
+	PHPDBG_LIST_COMMAND_D(method,    "lists the specified method",   'm', list_method, NULL, "m"),
+	PHPDBG_LIST_COMMAND_D(func,      "lists the specified function", 'f', list_func,   NULL, "s"),
 	PHPDBG_END_COMMAND
 };
 
@@ -49,12 +53,12 @@ PHPDBG_LIST(lines) /* {{{ */
 
 	switch (param->type) {
 		case NUMERIC_PARAM:
-		case EMPTY_PARAM:
 			phpdbg_list_file(phpdbg_current_file(TSRMLS_C),
-				param->type == EMPTY_PARAM ? 0 : (param->num < 0 ? 1 - param->num : param->num),
-				(param->type != EMPTY_PARAM && param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C),
+				(param->num < 0 ? 1 - param->num : param->num),
+				(param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C),
 				0 TSRMLS_CC);
 			break;
+			
 		case FILE_PARAM:
 			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
