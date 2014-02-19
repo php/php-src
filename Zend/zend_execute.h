@@ -72,7 +72,8 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 
 static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
 {
-	if (IS_REFCOUNTED(Z_TYPE_P(zval_ptr))) {
+//??? IS_CONSTANT_TYPE_MASK used only for some rare cases
+	if (IS_REFCOUNTED(Z_TYPE_P(zval_ptr) & IS_CONSTANT_TYPE_MASK)) {
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);

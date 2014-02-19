@@ -299,6 +299,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 		} else {
 			if (is_ref) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
+/*
 				if (!Z_ISREF_P(p)) {
 					if (IS_REFCOUNTED(Z_TYPE_P(p)) && Z_REFCOUNT_P(p) > 1) {
 						Z_DELREF_P(p);
@@ -309,6 +310,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 						ZVAL_NEW_REF(p, p);
 					}
 				}
+*/
 			} else if (Z_ISREF_P(p)) {
 				ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(p));
 				if (Z_REFCOUNTED(tmp) && Z_REFCOUNT(tmp) > 1) {

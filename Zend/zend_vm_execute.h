@@ -9519,10 +9519,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
@@ -10319,10 +10324,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
@@ -11664,10 +11674,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
@@ -25226,10 +25241,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDL
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
@@ -26474,10 +26494,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDL
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
@@ -28121,10 +28146,15 @@ static int ZEND_FASTCALL  ZEND_ADD_VAR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLE
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);

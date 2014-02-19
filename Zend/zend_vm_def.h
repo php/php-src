@@ -2258,10 +2258,15 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		zend_make_printable_zval(var, &var_copy, &use_copy);
+		if (Z_TYPE_P(var) == IS_REFERENCE) {
+			var = Z_REFVAL_P(var);
+		}
+		if (Z_TYPE_P(var) != IS_STRING) {
+			zend_make_printable_zval(var, &var_copy, &use_copy);
 
-		if (use_copy) {
-			var = &var_copy;
+			if (use_copy) {
+				var = &var_copy;
+			}
 		}
 	}
 	add_string_to_string(str, str, var);
