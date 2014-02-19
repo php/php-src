@@ -315,11 +315,7 @@ PHP_FUNCTION(finfo_open)
 		file = NULL;
 	} else if (file && *file) { /* user specified file, perform open_basedir checks */
 
-#if PHP_API_VERSION < 20100412
-		if ((PG(safe_mode) && (!php_checkuid(file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(file TSRMLS_CC)) {
-#else
 		if (php_check_open_basedir(file TSRMLS_CC)) {
-#endif
 			FILEINFO_DESTROY_OBJECT(object);
 			RETURN_FALSE;
 		}
