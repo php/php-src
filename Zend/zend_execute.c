@@ -1143,7 +1143,8 @@ fetch_from_array:
 			} else {
 				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
 			}
-			ZVAL_COPY(result, retval);
+//???			ZVAL_COPY(result, retval);
+			ZVAL_INDIRECT(result, retval);
 			return;
 			break;
 
@@ -1240,7 +1241,8 @@ convert_to_array:
 //???					}
 //???					AI_SET_PTR(result, overloaded_result);
 //???					PZVAL_LOCK(overloaded_result);
-					ZVAL_COPY(result, overloaded_result);
+//???					ZVAL_COPY(result, overloaded_result);
+					ZVAL_INDIRECT(result, overloaded_result);
 				} else {
 					result = &EG(error_zval);
 				}

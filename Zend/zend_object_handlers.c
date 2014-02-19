@@ -566,12 +566,14 @@ found:
 				} else {
 					zval garbage;
 
-					ZVAL_COPY_VALUE(&garbage, Z_REFVAL_P(variable_ptr));
+					ZVAL_COPY_VALUE(&garbage, variable_ptr);
 
 					/* if we assign referenced variable, we should separate it */
-					Z_ADDREF_P(value);
-					if (Z_ISREF_P(value)) {
-						SEPARATE_ZVAL(value);
+					if (IS_REFCOUNTED(Z_TYPE_P(value))) {
+						Z_ADDREF_P(value);
+						if (Z_ISREF_P(value)) {
+							SEPARATE_ZVAL(value);
+						}
 					}
 					ZVAL_COPY_VALUE(variable_ptr, value);
 					zval_ptr_dtor(&garbage);
@@ -605,9 +607,11 @@ found:
 		}
 	} else if (EXPECTED(property_info != NULL)) {
 		/* if we assign referenced variable, we should separate it */
-		Z_ADDREF_P(value);
-		if (Z_ISREF_P(value)) {
-			SEPARATE_ZVAL(value);
+		if (IS_REFCOUNTED(Z_TYPE_P(value))) {
+			Z_ADDREF_P(value);
+			if (Z_ISREF_P(value)) {
+				SEPARATE_ZVAL(value);
+			}
 		}
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {

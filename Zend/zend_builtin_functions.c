@@ -1968,10 +1968,10 @@ static void debug_backtrace_get_args(zval *curpos, zval *arg_array TSRMLS_DC)
 	while (--arg_count >= 0) {
 		arg = p++;
 		if (arg) {
-			if (Z_TYPE_P(arg) != IS_OBJECT) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
-			}
-			Z_ADDREF_P(arg);
+//???			if (Z_TYPE_P(arg) != IS_OBJECT) {
+//???				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+//???			}
+			if (IS_REFCOUNTED(Z_TYPE_P(arg))) Z_ADDREF_P(arg);
 			add_next_index_zval(arg_array, arg);
 		} else {
 			add_next_index_null(arg_array);

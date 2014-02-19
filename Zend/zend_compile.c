@@ -889,7 +889,7 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 
 	if (Z_LVAL(modifiers->u.constant) & ZEND_ACC_ABSTRACT) {
 		if(Z_LVAL(modifiers->u.constant) & ZEND_ACC_PRIVATE) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private", method_type, CG(active_class_entry)->name->val, Z_STRVAL(function_name->u.constant));
 		}
 		if (Z_LVAL(body->u.constant) == ZEND_ACC_ABSTRACT) {
 			zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -899,11 +899,11 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 			SET_UNUSED(opline->op2);
 		} else {
 			/* we had code in the function body */
-			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body", method_type, CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot contain body", method_type, CG(active_class_entry)->name->val, Z_STRVAL(function_name->u.constant));
 		}
 	} else {
 		if (Z_LVAL(body->u.constant) == ZEND_ACC_ABSTRACT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body", CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+			zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract method %s::%s() must contain body", CG(active_class_entry)->name->val, Z_STRVAL(function_name->u.constant));
 		}
 	}
 }
@@ -1540,7 +1540,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	if (is_method) {
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 			if ((Z_LVAL(fn_flags_znode->u.constant) & ~(ZEND_ACC_STATIC|ZEND_ACC_PUBLIC))) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted", CG(active_class_entry)->name, Z_STRVAL(function_name->u.constant));
+				zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method %s::%s() must be omitted", CG(active_class_entry)->name->val, Z_STRVAL(function_name->u.constant));
 			}
 			Z_LVAL(fn_flags_znode->u.constant) |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
 		}
@@ -5118,7 +5118,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
 		*class_name = tmp;
 		STR_FREE(lcname);
-		STR_ALLOC(Z_STRLEN(class_name->u.constant), 0);
+		lcname = STR_ALLOC(Z_STRLEN(class_name->u.constant), 0);
 		zend_str_tolower_copy(lcname->val, Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 	}
 
@@ -5407,7 +5407,7 @@ void zend_do_declare_property(znode *var_name, const znode *value, zend_uint acc
 
 	if (access_type & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods and classes",
-				   CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
+				   CG(active_class_entry)->name->val, Z_STRVAL(var_name->u.constant));
 	}
 
 	if ((existing_property_info = zend_hash_find_ptr(&CG(active_class_entry)->properties_info, Z_STR(var_name->u.constant))) != NULL) {

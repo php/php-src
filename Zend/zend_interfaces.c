@@ -40,8 +40,12 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 
 	zval params[2];
 
-	ZVAL_COPY_VALUE(&params[0], arg1);
-	ZVAL_COPY_VALUE(&params[1], arg2);
+	if (param_count > 0) {
+		ZVAL_COPY_VALUE(&params[0], arg1);
+	}
+	if (param_count > 1) {
+		ZVAL_COPY_VALUE(&params[1], arg2);
+	}
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */

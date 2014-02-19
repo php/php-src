@@ -363,9 +363,10 @@ ZEND_METHOD(error_exception, getSeverity)
 
 static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
-	zend_string *str;
+	zend_string *str, **str_ptr;
 
-	str = va_arg(args, zend_string*);
+	str_ptr = va_arg(args, zend_string**);
+	str = *str_ptr;
 
 	/* the trivial way would be to do:
 	 * conver_to_string_ex(arg);
@@ -373,6 +374,9 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
 
+	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+		arg = Z_REFVAL_P(arg);
+	}
 	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
 			TRACE_APPEND_STR("NULL, ");
@@ -449,6 +453,7 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 		default:
 			break;
 	}
+	*str_ptr = str;
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -460,14 +465,15 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 	long line;
 	HashTable *ht = Z_ARRVAL_P(frame);
 	zval *file, *tmp;
-	zend_string *str;
+	zend_string *str, **str_ptr;
 
 	if (Z_TYPE_P(frame) != IS_ARRAY) {
 		zend_error(E_WARNING, "Expected array for frame %lu", hash_key->h);
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	str = va_arg(args, zend_string*);
+	str_ptr = va_arg(args, zend_string**);
+	str = *str_ptr;
 	num = va_arg(args, int*);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
@@ -507,7 +513,7 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			int last_len = str->len;
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 1, str);
+			zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 1, &str);
 			if (last_len != str->len) {
 				str->len -= 2; /* remove last ', ' */
 			}
@@ -516,6 +522,7 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 		}
 	}
 	TRACE_APPEND_STR(")\n");
+	*str_ptr = str;
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -534,7 +541,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	str = STR_ALLOC(0, 0);
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 2, str, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 2, &str, &num);
 
 	len = sprintf(s_tmp, "#%d {main}", num);
 	TRACE_APPEND_STRL(s_tmp, len);
@@ -615,12 +622,12 @@ ZEND_METHOD(exception, __toString)
 
 		if (Z_STRLEN(message) > 0) {
 			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
+								Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
 								(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		} else {
 			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
+								Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_LVAL(line),
 								(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		}

@@ -4727,7 +4727,6 @@ ZEND_VM_HANDLER(158, ZEND_JMP_SET_VAR, CONST|TMP|VAR|CV, ANY)
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_ADDREF_P(value);
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!IS_OP1_TMP_FREE()) {

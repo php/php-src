@@ -511,7 +511,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						zend_string *s = STR_INIT(actual, actual_len, 0);
-						STR_RELEASE(Z_STR_P(p));
+//???						STR_RELEASE(Z_STR_P(p));
 						Z_STR_P(p) = s;
 					}
 				}
@@ -531,12 +531,12 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 						zend_error(E_ERROR, "Undefined constant '%s'", save->val);
 					}
 					if (inline_change) {
-						STR_RELEASE(save);
+//???						STR_RELEASE(save);
 					}
 					save = NULL;
 				}
 				if (inline_change && save && save->val != actual) {
-					STR_RELEASE(save);
+//???					STR_RELEASE(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 				p->type = IS_STRING;
@@ -546,12 +546,12 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			}
 		} else {
 			if (inline_change) {
-				STR_RELEASE(Z_STR_P(p));
+//???				STR_RELEASE(Z_STR_P(p));
 			}
 			*p = const_value;
 		}
 
-		Z_SET_REFCOUNT_P(p, refcount);
+		if (IS_REFCOUNTED(Z_TYPE_P(p))) Z_SET_REFCOUNT_P(p, refcount);
 //???		Z_SET_ISREF_TO_P(p, is_ref);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval *element, new_val;

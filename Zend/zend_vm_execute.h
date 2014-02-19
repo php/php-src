@@ -3155,7 +3155,6 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_ADDREF_P(value);
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
@@ -8152,7 +8151,6 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_ADDREF_P(value);
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!1) {
@@ -13240,7 +13238,6 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_ADDREF_P(value);
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
@@ -29691,7 +29688,6 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_ADDREF_P(value);
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
