@@ -142,6 +142,14 @@
 ; Default Value: none
 ;prefix = /path/to/pools/$pool
 
+; Preserve environment
+; By default, environment variables are not passed to workers.
+; This option prevents environment from being cleared when FPM workers spawn,
+; making environment variables available to PHP code running in the workers
+; via getenv(), $_ENV and $_SERVER.
+; Default Value: no
+;preserve_environment = yes
+
 ; Unix user/group of processes
 ; Note: The user is mandatory. If the group is not set, the default user's group
 ;       will be used.

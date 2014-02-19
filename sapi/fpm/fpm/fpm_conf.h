@@ -62,6 +62,7 @@ struct fpm_worker_pool_config_s {
 	char *listen_group;
 	char *listen_mode;
 	char *listen_allowed_clients;
+	int preserve_environment;
 	int process_priority;
 	int pm;
 	int pm_max_children;
