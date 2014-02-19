@@ -550,6 +550,10 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 
 	IS_CONSISTENT(ht);
 
+	if (ht->flags & HASH_FLAG_PACKED) {
+		return FAILURE;
+	}
+
 	h = STR_HASH_VAL(key);
 	nIndex = h & ht->nTableMask;
 
