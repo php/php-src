@@ -1408,21 +1408,22 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			goto found;
 		}
 		if (UNEXPECTED(zobj->properties != NULL)) {
-			value = zend_hash_find(zobj->properties, property_info->name);
+			if ((value = zend_hash_find(zobj->properties, property_info->name)) != NULL) {
 found:
-			switch (has_set_exists) {
-				case 0:
-					result = (Z_TYPE_P(value) != IS_NULL);
-					break;
-				default:
-					result = zend_is_true(value TSRMLS_CC);
-					break;
-				case 2:
-					result = 1;
-					break;
+				switch (has_set_exists) {
+					case 0:
+						result = (Z_TYPE_P(value) != IS_NULL);
+						break;
+					default:
+						result = zend_is_true(value TSRMLS_CC);
+						break;
+					case 2:
+						result = 1;
+						break;
+				}
 			}
+			goto exit;
 		}
-		goto exit;
 	}
 
 	result = 0;
