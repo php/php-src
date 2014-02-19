@@ -475,6 +475,15 @@ pm.max_spare_servers = 3
 ; Default Value: no
 ;catch_workers_output = yes
 
+; Clear environment in FPM workers
+; Prevents arbitrary environment variables from reaching FPM worker processes
+; by clearing the environment in workers before env vars specified in this
+; pool configuration are added.
+; Setting to "no" will make all environment variables available to PHP code
+; via getenv(), $_ENV and $_SERVER.
+; Default Value: yes
+;clear_env = no
+
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit
 ; FPM to .php extensions to prevent malicious users to use other extensions to
