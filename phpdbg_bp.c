@@ -355,7 +355,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	phpdbg_breakline_t opline_break;
-	if (op_array->last < brake->opline_num) {
+	if (op_array->last <= brake->opline_num) {
 		if (brake->class_name == NULL) {
 			phpdbg_error("There are only %d oplines in function %s (breaking at opline %ld impossible)", op_array->last, brake->func_name, brake->opline_num);
 		} else if (brake->func_name == NULL) {
