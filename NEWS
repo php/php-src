@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
 
+- Fileinfo
+  . Upgraded to libmagic-5.17 (Anatol)
+
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
