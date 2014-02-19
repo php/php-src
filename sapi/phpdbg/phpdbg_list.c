@@ -238,7 +238,7 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	const zend_op_array *ops;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
-		phpdbg_error("The function requested (%s) is not user defined", fbc->common.function_name);
+		phpdbg_error("The function requested (%s) is not user defined", fbc->common.function_name->val);
 		return;
 	}
 

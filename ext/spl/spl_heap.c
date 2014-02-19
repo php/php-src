@@ -896,7 +896,7 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) 
 
 	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
-		return;
+		return NULL;
 	}
 
 	if (iterator->object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
@@ -914,7 +914,7 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC
 
 	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
-		return;
+		return NULL;
 	}
 
 	if (iterator->object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {

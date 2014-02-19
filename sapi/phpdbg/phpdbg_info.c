@@ -196,15 +196,15 @@ PHPDBG_INFO(literal) /* {{{ */
 		if (ops->function_name) {
 			if (ops->scope) {
 				phpdbg_notice(
-				"Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name, count);
+				"Literal Constants in %s::%s() (%d)", ops->scope->name, ops->function_name->val, count);
 			} else {
 				phpdbg_notice(
-					"Literal Constants in %s() (%d)", ops->function_name, count);
+					"Literal Constants in %s() (%d)", ops->function_name->val, count);
 			}
 		} else {
 			if (ops->filename) {
 				phpdbg_notice(
-				"Literal Constants in %s (%d)", ops->filename, count);
+				"Literal Constants in %s (%d)", ops->filename->val, count);
 			} else {
 				phpdbg_notice(
 					"Literal Constants @ %p (%d)", ops, count);

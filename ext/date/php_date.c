@@ -4215,14 +4215,14 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 /* }}} */
 
 /* {{{ date_interval_format -  */
-static char *date_interval_format(char *format, int format_len, timelib_rel_time *t)
+static zend_string *date_interval_format(char *format, int format_len, timelib_rel_time *t)
 {
 	smart_str            string = {0};
 	int                  i, length, have_format_spec = 0;
 	char                 buffer[33];
 
 	if (!format_len) {
-		return estrdup("");
+		return STR_EMPTY_ALLOC();
 	}
 
 	for (i = 0; i < format_len; i++) {
@@ -4292,8 +4292,7 @@ PHP_FUNCTION(date_interval_format)
 	diobj = (php_interval_obj *) Z_OBJ_P(object);
 	DATE_CHECK_INITIALIZED(diobj->initialized, DateInterval);
 
-//???	RETURN_STRING(date_interval_format(format, format_len, diobj->diff), 0);
-	RETURN_STRING(date_interval_format(format, format_len, diobj->diff));
+	RETURN_STR(date_interval_format(format, format_len, diobj->diff));
 }
 /* }}} */
 
