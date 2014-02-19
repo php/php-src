@@ -1063,14 +1063,14 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
-//	ZVAL_COPY(EX_VAR(opline->result.var), retval);
-	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+
 	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-//???	switch (type) {
-//???		case BP_VAR_R:
-//???		case BP_VAR_IS:
-//???			break;
-//???		case BP_VAR_UNSET: {
+	switch (type) {
+		case BP_VAR_R:
+		case BP_VAR_IS:
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+			break;
+		case BP_VAR_UNSET: {
 //???			zend_free_op free_res;
 //???
 //???			PZVAL_UNLOCK(*retval, &free_res);
@@ -1079,12 +1079,12 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 //???			}
 //???			PZVAL_LOCK(*retval);
 //???			FREE_OP_VAR_PTR(free_res);
-//???		}
-//???		/* break missing intentionally */
-//???		default:
-//???			EX_T(opline->result.var).var.ptr_ptr = retval;
-//???			break;
-//???	}
+		}
+		/* break missing intentionally */
+		default:
+			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+			break;
+	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1864,7 +1864,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		} else {
 			/* FIXME: output identifiers properly */
 			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name, fbc->common.function_name);
+			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name->val, fbc->common.function_name->val);
 		}
 	}
 
@@ -2954,14 +2954,14 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if (Z_ISREF_P(varptr)) {
-		if (OP1_TYPE == IS_CV ||
-		    (OP1_TYPE == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
+//???		if (OP1_TYPE == IS_CV ||
+//???		    (OP1_TYPE == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
 			ZVAL_DUP(&var, Z_REFVAL_P(varptr));
 			varptr = &var;
 			FREE_OP1();
-		} else {
-			varptr = Z_REFVAL_P(varptr);
-		}
+//???		} else {
+//???			varptr = Z_REFVAL_P(varptr);
+//???		}
 	} else if (OP1_TYPE == IS_CV) {
 		if (IS_REFCOUNTED(Z_TYPE_P(varptr))) Z_ADDREF_P(varptr);
 	}
