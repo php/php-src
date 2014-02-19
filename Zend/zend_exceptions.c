@@ -334,29 +334,27 @@ ZEND_METHOD(error_exception, getSeverity)
 /* }}} */
 
 /* {{{ gettraceasstring() macros */
-#define TRACE_APPEND_CHR(chr)                                            \
-	*str = (char*)erealloc(*str, *len + 1 + 1);                          \
-	(*str)[(*len)++] = chr
+#define TRACE_APPEND_CHR(chr)                                        \
+	str = STR_REALLOC(str, str->len + 1, 0);                         \
+    str->val[str->len - 1] = chr
 
-#define TRACE_APPEND_STRL(val, vallen)                                   \
-	{                                                                    \
-		int l = vallen;                                                  \
-		*str = (char*)erealloc(*str, *len + l + 1);                      \
-		memcpy((*str) + *len, val, l);                                   \
-		*len += l;                                                       \
+#define TRACE_APPEND_STRL(v, l)                                      \
+	{                                                                \
+		str = STR_REALLOC(str, str->len + (l), 0);                   \
+		memcpy(str->val + str->len - (l), (v), (l));                 \
 	}
 
-#define TRACE_APPEND_STR(val)                                            \
-	TRACE_APPEND_STRL(val, sizeof(val)-1)
+#define TRACE_APPEND_STR(v)                                          \
+	TRACE_APPEND_STRL((v), sizeof((v))-1)
 
 #define TRACE_APPEND_KEY(key) do {                                          \
-		tmp = zend_hash_str_find(ht, key, sizeof(key)-1); \
-		if (tmp) { \
-			if (Z_TYPE_P(tmp) != IS_STRING) {                              \
-				zend_error(E_WARNING, "Value for %s is no string", key); \
-				TRACE_APPEND_STR("[unknown]");                          \
+		tmp = zend_hash_str_find(ht, key, sizeof(key)-1);                   \
+		if (tmp) {                                                          \
+			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
+				zend_error(E_WARNING, "Value for %s is no string", key);    \
+				TRACE_APPEND_STR("[unknown]");                              \
 			} else {                                                        \
-				TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));  \
+				TRACE_APPEND_STRL(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));        \
 			}                                                               \
 		} \
 	} while (0)
@@ -365,11 +363,9 @@ ZEND_METHOD(error_exception, getSeverity)
 
 static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
-	char **str;
-	int *len;
+	zend_string *str;
 
-	str = va_arg(args, char**);
-	len = va_arg(args, int*);
+	str = va_arg(args, zend_string*);
 
 	/* the trivial way would be to do:
 	 * conver_to_string_ex(arg);
@@ -395,8 +391,8 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 				l_added += 3 + 1;
 			}
 			while (--l_added) {
-				if ((*str)[*len - l_added] < 32) {
-					(*str)[*len - l_added] = '?';
+				if (str->val[str->len - l_added] < 32) {
+					str->val[str->len - l_added] = '?';
 				}
 			}
 			break;
@@ -459,24 +455,24 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 
 static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
-	char *s_tmp, **str;
-	int *len, *num;
+	char *s_tmp;
+	int len, *num;
 	long line;
 	HashTable *ht = Z_ARRVAL_P(frame);
 	zval *file, *tmp;
+	zend_string *str;
 
 	if (Z_TYPE_P(frame) != IS_ARRAY) {
 		zend_error(E_WARNING, "Expected array for frame %lu", hash_key->h);
 		return ZEND_HASH_APPLY_KEEP;
 	}
 
-	str = va_arg(args, char**);
-	len = va_arg(args, int*);
+	str = va_arg(args, zend_string*);
 	num = va_arg(args, int*);
 
 	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 1 + 1);
-	sprintf(s_tmp, "#%d ", (*num)++);
-	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+	len = sprintf(s_tmp, "#%d ", (*num)++);
+	TRACE_APPEND_STRL(s_tmp, len);
 	efree(s_tmp);
 	file = zend_hash_str_find(ht, "file", sizeof("file")-1);
 	if (file) {
@@ -496,8 +492,8 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 				line = 0;
 			}
 			s_tmp = emalloc(Z_STRLEN_P(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-			sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
-			TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+			len = sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_P(file), line);
+			TRACE_APPEND_STRL(s_tmp, len);
 			efree(s_tmp);
 		}
 	} else {
@@ -510,10 +506,10 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 	tmp = zend_hash_str_find(ht, "args", sizeof("args")-1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			int last_len = *len;
-			zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 2, str, len);
-			if (last_len != *len) {
-				*len -= 2; /* remove last ', ' */
+			int last_len = str->len;
+			zend_hash_apply_with_arguments(Z_ARRVAL_P(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 1, str);
+			if (last_len != str->len) {
+				str->len -= 2; /* remove last ', ' */
 			}
 		} else {
 			zend_error(E_WARNING, "args element is no array");
@@ -529,25 +525,23 @@ static int _build_trace_string(zval *frame TSRMLS_DC, int num_args, va_list args
 ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace;
-	char *res, **str, *s_tmp;
-	int res_len = 0, *len = &res_len, num = 0;
+	zend_string *str;
+	int num = 0, len;
+	char s_tmp[MAX_LENGTH_OF_LONG + 7 + 1 + 1];
 
 	DEFAULT_0_PARAMS;
 	
-	res = estrdup("");
-	str = &res;
+	str = STR_ALLOC(0, 0);
 
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 3, str, len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace) TSRMLS_CC, (apply_func_args_t)_build_trace_string, 2, str, &num);
 
-	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
-	sprintf(s_tmp, "#%d {main}", num);
-	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
-	efree(s_tmp);
+	len = sprintf(s_tmp, "#%d {main}", num);
+	TRACE_APPEND_STRL(s_tmp, len);
 
-	res[res_len] = '\0';	
-//???	RETURN_STRINGL(res, res_len, 0); 
-	RETURN_STRINGL(res, res_len); 
+	str->val[str->len] = '\0';	
+
+	RETURN_STR(str); 
 }
 /* }}} */
 
