@@ -455,12 +455,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 	 * as hash keys especually for this table.
 	 * See bug #63180 
 	 */
-	STR_ADDREF(regex);
-
-	pce = zend_hash_update_mem(&PCRE_G(pcre_cache), regex, (void *)&new_entry,
-						sizeof(pcre_cache_entry));
-
-	STR_RELEASE(regex);
+	pce = zend_hash_str_update_mem(&PCRE_G(pcre_cache), regex->val, regex->len, &new_entry, sizeof(pcre_cache_entry));
 
 	return pce;
 }

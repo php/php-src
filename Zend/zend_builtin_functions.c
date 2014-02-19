@@ -1837,23 +1837,26 @@ ZEND_FUNCTION(get_resource_type)
 /* }}} */
 
 
-static int add_extension_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int add_extension_info(zval *item, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(item);
 	add_next_index_string(name_array, module->name, 1);
 	return 0;
 }
 
-static int add_zendext_info(zend_extension *ext, void *arg TSRMLS_DC)
+static int add_zendext_info(zval *item, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
+	zend_extension *ext = (zend_extension*)Z_PTR_P(item);
 	add_next_index_string(name_array, ext->name, 1);
 	return 0;
 }
 
-static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
+static int add_constant_info(zval *item, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
+	zend_constant *constant = (zend_constant*)Z_PTR_P(item);
 	zval const_val;
 
 	if (!constant->name) {
@@ -1880,9 +1883,9 @@ ZEND_FUNCTION(get_loaded_extensions)
 	array_init(return_value);
 
 	if (zendext) {
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, return_value TSRMLS_CC);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t)add_zendext_info, return_value TSRMLS_CC);
 	} else {
-		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t) add_extension_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(&module_registry, (apply_func_arg_t)add_extension_info, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1953,7 +1956,7 @@ next_constant:
 		efree(module_names);
 		efree(modules);
 	} else {
-		zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
+		zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t)add_constant_info, return_value TSRMLS_CC);
 	}
 }
 /* }}} */
