@@ -2115,7 +2115,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace
 	}
 
 	if (current_import_sub) {
-		len = Z_STRLEN(element_name->u.constant)+1;
+		len = Z_STRLEN(element_name->u.constant);
 		if (case_sensitive) {
 			lookup_name = STR_INIT(Z_STRVAL(element_name->u.constant), len, 0);
 		} else {
@@ -2125,7 +2125,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace
 		/* Check if function/const matches imported name */
 		if ((ns = zend_hash_find(current_import_sub, lookup_name)) != NULL) {
 			zval_dtor(&element_name->u.constant);
-			zval_copy_ctor(&element_name->u.constant);
+			ZVAL_DUP(&element_name->u.constant, ns);
 			STR_FREE(lookup_name);
 			*check_namespace = 0;
 			return;
@@ -2338,7 +2338,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void label_dtor(zval *zv) /* {{{ */
+static void ptr_dtor(zval *zv) /* {{{ */
 {
 	efree(Z_PTR_P(zv));
 }
@@ -2350,7 +2350,7 @@ void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 4, NULL, label_dtor, 0);
+		zend_hash_init(CG(context).labels, 4, NULL, ptr_dtor, 0);
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
@@ -4030,7 +4030,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				}
 			} else {
 				ALLOC_HASHTABLE(*overriden);
-				zend_hash_init_ex(*overriden, 2, NULL, NULL, 0, 0);
+				zend_hash_init_ex(*overriden, 2, NULL, ptr_dtor, 0, 0);
 			}
 			fn = zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
 			return;
@@ -5168,7 +5168,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	if (doing_inheritance) {
 		/* Make sure a trait does not try to extend a class */
 		if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name->val);
 		}
 
 		opline->extended_value = parent_class_name->u.op.var;

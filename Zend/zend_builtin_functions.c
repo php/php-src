@@ -585,6 +585,9 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
+	if (Z_TYPE_P(array) == IS_REFERENCE) {
+		array = Z_REFVAL_P(array);
+	}
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
@@ -603,9 +606,9 @@ ZEND_FUNCTION(each)
 		entry = &tmp;
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
-	Z_ADDREF_P(entry);
+	if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
-	Z_ADDREF_P(entry);
+	if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
 
 	/* add the key elements */
 	switch (zend_hash_get_current_key_ex(target_hash, &key, &num_key, 0, NULL)) {
@@ -617,7 +620,7 @@ ZEND_FUNCTION(each)
 			break;
 	}
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
-	Z_ADDREF_P(inserted_pointer);
+	if (IS_REFCOUNTED(Z_TYPE_P(inserted_pointer))) Z_ADDREF_P(inserted_pointer);
 	zend_hash_move_forward(target_hash);
 }
 /* }}} */
