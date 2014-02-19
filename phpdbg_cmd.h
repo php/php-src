@@ -23,8 +23,6 @@
 
 #include "TSRM.h"
 
-typedef struct _phpdbg_command_t phpdbg_command_t;
-
 /* {{{ Command and Parameter */
 enum {
 	NO_ARG = 0,
@@ -47,16 +45,6 @@ typedef enum {
 	COND_PARAM,
 	ORIG_PARAM
 } phpdbg_param_type;
-
-typedef struct _phpdbg_input_t phpdbg_input_t;
-
-struct _phpdbg_input_t {
-	char * const *start;
-	char *string;
-	size_t length;
-	phpdbg_input_t **argv;
-	int argc;
-};
 
 typedef struct _phpdbg_param phpdbg_param_t;
 struct _phpdbg_param {
@@ -95,8 +83,9 @@ struct _phpdbg_param {
 #define YYSTYPE phpdbg_param_t
 #endif
 
-typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*, const phpdbg_input_t* TSRMLS_DC);
+typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t* TSRMLS_DC);
 
+typedef struct _phpdbg_command_t phpdbg_command_t;
 struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
 	size_t name_len;                    /* Command name length */
@@ -147,7 +136,8 @@ PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
  * Stack Management
  */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
-PHPDBG_API phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
+PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
 PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
@@ -174,11 +164,11 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 #define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
 	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args}
 
-#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC)
+#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param TSRMLS_DC)
 
-#define PHPDBG_COMMAND_ARGS param, input TSRMLS_CC
+#define PHPDBG_COMMAND_ARGS param TSRMLS_CC
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', '\0'}
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
 
 /*
 * Default Switch Case

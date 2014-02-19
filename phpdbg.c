@@ -271,19 +271,19 @@ static PHP_FUNCTION(phpdbg_break)
 
 		switch (type) {
 			case METHOD_PARAM:
-				phpdbg_do_break_method(&param, NULL TSRMLS_CC);
+				phpdbg_do_break_method(&param TSRMLS_CC);
 				break;
 
 			case FILE_PARAM:
-				phpdbg_do_break_file(&param, NULL TSRMLS_CC);
+				phpdbg_do_break_file(&param TSRMLS_CC);
 				break;
 
 			case NUMERIC_PARAM:
-				phpdbg_do_break_lineno(&param, NULL TSRMLS_CC);
+				phpdbg_do_break_lineno(&param TSRMLS_CC);
 				break;
 
 			case STR_PARAM:
-				phpdbg_do_break_func(&param, NULL TSRMLS_CC);
+				phpdbg_do_break_func(&param TSRMLS_CC);
 				break;
 
 			default: zend_error(
@@ -1232,7 +1232,7 @@ phpdbg_main:
 
 		if (run) {
 			/* no need to try{}, run does it ... */
-			PHPDBG_COMMAND_HANDLER(run)(NULL, NULL TSRMLS_CC);
+			PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
 			if (run > 1) {
 				/* if -r is on the command line more than once just quit */
 				goto phpdbg_out;

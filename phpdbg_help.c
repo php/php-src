@@ -240,7 +240,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 
 			if (n>0) {
 				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
-					return cmd->handler(param, NULL TSRMLS_CC);
+					return cmd->handler(param TSRMLS_CC);
 				} else {
 					pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
 					return SUCCESS;

@@ -73,66 +73,81 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ */
 {
-	phpdbg_input_t *function = input->argv[0];
+	phpdbg_param_t *name = stack;
 
-	if (zend_hash_exists(
-		&PHPDBG_G(registered), function->string, function->length+1)) {
+	if (name->type == STR_PARAM) {
+		if (zend_hash_exists(
+			&PHPDBG_G(registered), name->str, name->len+1)) {
 
-		zval fname, *fretval;
-		zend_fcall_info fci;
+			zval fname, *fretval;
+			zend_fcall_info fci;
 
-		ZVAL_STRINGL(&fname, function->string, function->length, 1);
+			ZVAL_STRINGL(&fname, name->str, name->len, 1);
 
-		memset(&fci, 0, sizeof(zend_fcall_info));
+			memset(&fci, 0, sizeof(zend_fcall_info));
 
-		fci.size = sizeof(zend_fcall_info);
-		fci.function_table = &PHPDBG_G(registered);
-		fci.function_name = &fname;
-		fci.symbol_table = EG(active_symbol_table);
-		fci.object_ptr = NULL;
-		fci.retval_ptr_ptr = &fretval;
-		fci.no_separation = 1;
+			fci.size = sizeof(zend_fcall_info);
+			fci.function_table = &PHPDBG_G(registered);
+			fci.function_name = &fname;
+			fci.symbol_table = EG(active_symbol_table);
+			fci.object_ptr = NULL;
+			fci.retval_ptr_ptr = &fretval;
+			fci.no_separation = 1;
 
-		if (input->argc > 1) {
-			int param;
-			zval params;
+			if (stack->next) {
+				zval params;
+				phpdbg_param_t *next = stack->next;
+				
+				array_init(&params);
 
-			array_init(&params);
+				while (next) {	
+					switch (next->type) {
+						case STR_PARAM:
+							add_next_index_stringl(
+								&params,
+								next->str,
+								next->len, 1);
+						break;
+						
+						case NUMERIC_PARAM:
+							add_next_index_long(&params, next->num);
+						break;
+						
+						default: {
+							/* not yet */
+						}
+					}
+					
+					phpdbg_debug(
+						"created param[%d] from argv[%d]: %s",
+						param, param+1, next->str);
+					next = next->next;	
+				}
 
-			for (param = 0; param < (input->argc-1); param++) {
-				add_next_index_stringl(
-					&params,
-					input->argv[param+1]->string,
-					input->argv[param+1]->length, 1);
-
-				phpdbg_debug(
-					"created param[%d] from argv[%d]: %s",
-					param, param+1, input->argv[param+1]->string);
+				zend_fcall_info_args(&fci, &params TSRMLS_CC);
+			} else {
+				fci.params = NULL;
+				fci.param_count = 0;
 			}
 
-			zend_fcall_info_args(&fci, &params TSRMLS_CC);
-		} else {
-			fci.params = NULL;
-			fci.param_count = 0;
-		}
+			phpdbg_debug(
+				"created %d params from arguments",
+				fci.param_count);
 
-		phpdbg_debug(
-			"created %d params from %d arguments",
-			fci.param_count, input->argc);
+			zend_call_function(&fci, NULL TSRMLS_CC);
 
-		zend_call_function(&fci, NULL TSRMLS_CC);
+			if (fretval) {
+				zend_print_zval_r(
+					fretval, 0 TSRMLS_CC);
+				phpdbg_writeln(EMPTY);
+			}
 
-		if (fretval) {
-			zend_print_zval_r(
-				fretval, 0 TSRMLS_CC);
-			phpdbg_writeln(EMPTY);
-		}
+			zval_dtor(&fname);
 
-		zval_dtor(&fname);
-
-		return SUCCESS;
+			return SUCCESS;
+		}	
 	}
 
 	return FAILURE;
@@ -1027,7 +1042,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 last:
 		if (PHPDBG_G(lcmd)) {
 			ret = PHPDBG_G(lcmd)->handler(
-					&PHPDBG_G(lparam), input TSRMLS_CC);
+					&PHPDBG_G(lparam) TSRMLS_CC);
 			goto out;
 		}
 	}

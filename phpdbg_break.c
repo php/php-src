@@ -38,8 +38,8 @@ const phpdbg_command_t phpdbg_break_commands[] = {
 	PHPDBG_COMMAND_D_EX(op,          "specify breakpoint by opcode",                           'O', break_op,      NULL, "s"),
 	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by condition",                        'o', break_on,      NULL, "c"),
 	PHPDBG_COMMAND_D_EX(at,          "specify breakpoint by location and condition",           'A', break_at,      NULL, "*c"),
-	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, "l"),
-	PHPDBG_COMMAND_D_EX(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, "l"),
+	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, "n"),
+	PHPDBG_COMMAND_D_EX(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, "n"),
 	PHPDBG_END_COMMAND
 };
 
@@ -109,7 +109,7 @@ PHPDBG_BREAK(on) /* {{{ */
 
 PHPDBG_BREAK(at) /* {{{ */
 {
-	phpdbg_set_breakpoint_at(param, input TSRMLS_CC);
+	phpdbg_set_breakpoint_at(param TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
