@@ -463,12 +463,9 @@ if (empty($multicp_rows))
     goto skip_multicp;
 
 ksort($multicp_rows);
-$output = array();
-foreach ($multicp_rows as $k => $v) {
-    ksort($v);
-    $output[$k] = $v;
-}
-$multicp_rows = $output;
+foreach ($multicp_rows as &$v) { ksort($v); }
+unset($v);
+
 
 echo
 "/* {{{ Start of double code point tables for $name */", "\n\n";
