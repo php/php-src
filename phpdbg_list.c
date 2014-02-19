@@ -33,10 +33,10 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 const phpdbg_command_t phpdbg_list_commands[] = {
-	PHPDBG_COMMAND_D_EX(lines,     "lists the specified lines",    'l', list_lines,  NULL, 1),
-	PHPDBG_COMMAND_D_EX(class,     "lists the specified class",    'c', list_class,  NULL, 1),
-	PHPDBG_COMMAND_D_EX(method,    "lists the specified method",   'm', list_method, NULL, 1),
-	PHPDBG_COMMAND_D_EX(func,      "lists the specified function", 'f', list_func,   NULL, 1),
+	PHPDBG_COMMAND_D_EX(lines,     "lists the specified lines",    'l', list_lines,  NULL, "l"),
+	PHPDBG_COMMAND_D_EX(class,     "lists the specified class",    'c', list_class,  NULL, "s"),
+	PHPDBG_COMMAND_D_EX(method,    "lists the specified method",   'm', list_method, NULL, "m"),
+	PHPDBG_COMMAND_D_EX(func,      "lists the specified function", 'f', list_func,   NULL, "s"),
 	PHPDBG_END_COMMAND
 };
 

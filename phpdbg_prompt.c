@@ -44,29 +44,29 @@ int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, 1),
+	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
 	PHPDBG_COMMAND_D(compile, "attempt compilation",                      'c', NULL, 0),
-	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 1),
+	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
-	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, 1),
+	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, "i"),
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
-	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, 2),
-	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 1),
+	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, "s"),
+	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 0),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, 0),
-	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, 1),
-	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, 2),
-	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, 1),
+	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "n"),
+	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, "*"),
+	PHPDBG_COMMAND_D(info,    "displays some informations",               'i', phpdbg_info_commands, "s"),
 	PHPDBG_COMMAND_D(clean,   "clean the execution environment",          'X', NULL, 0),
 	PHPDBG_COMMAND_D(clear,   "clear breakpoints",                        'C', NULL, 0),
-	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, 2),
-	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, 1),
-	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   1),
-	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, 1),
-	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, 1),
-	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 1),
+	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s"),
+	PHPDBG_COMMAND_D(quiet,   "silence some output",                      'Q', NULL, "b"),
+	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
+	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
+	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, "s"),
+	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 0),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
@@ -989,8 +989,10 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 							}*/
 							phpdbg_error("%s", why);
 						}
-						if (why)
+						if (why) {
 							free(why);
+							why = NULL;
+						}
 					break;
 
 					case PHPDBG_LEAVE:
@@ -1003,6 +1005,11 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 						goto out;
 					}
 				}
+			}
+			
+			if (why) {
+				free(why);
+				why = NULL;
 			}
 			
 			yy_delete_buffer(state, scanner);

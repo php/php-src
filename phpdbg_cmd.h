@@ -105,7 +105,7 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char arg_type;                      /* Accept args? */
+	char *args;							/* Argument Spec */							
 };
 /* }}} */
 
@@ -147,7 +147,7 @@ PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
  * Stack Management
  */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
-PHPDBG_API phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, phpdbg_param_t **top, char **why);
+PHPDBG_API phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
 PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
@@ -168,17 +168,17 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
  */
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
-#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, has_args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, has_args}
+#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args}
 
-#define PHPDBG_COMMAND_D(name, tip, alias, children, has_args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, has_args}
+#define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args}
 
 #define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC)
 
 #define PHPDBG_COMMAND_ARGS param, input TSRMLS_CC
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', '\0'}
 
 /*
 * Default Switch Case

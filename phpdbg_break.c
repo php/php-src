@@ -31,15 +31,15 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
  * Commands
  */
 const phpdbg_command_t phpdbg_break_commands[] = {
-	PHPDBG_COMMAND_D_EX(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, 1),
-	PHPDBG_COMMAND_D_EX(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, 1),
-	PHPDBG_COMMAND_D_EX(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, 1),
-	PHPDBG_COMMAND_D_EX(address,     "specify breakpoint by address",                          'a', break_address, NULL, 1),
-	PHPDBG_COMMAND_D_EX(op,          "specify breakpoint by opcode",                           'O', break_op,      NULL, 1),
-	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by condition",                        'o', break_on,      NULL, 1),
-	PHPDBG_COMMAND_D_EX(at,          "specify breakpoint by location and condition",           'A', break_at,      NULL, 1),
-	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, 1),
-	PHPDBG_COMMAND_D_EX(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, 1),
+	PHPDBG_COMMAND_D_EX(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, "f"),
+	PHPDBG_COMMAND_D_EX(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, "s"),
+	PHPDBG_COMMAND_D_EX(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, "m"),
+	PHPDBG_COMMAND_D_EX(address,     "specify breakpoint by address",                          'a', break_address, NULL, "a"),
+	PHPDBG_COMMAND_D_EX(op,          "specify breakpoint by opcode",                           'O', break_op,      NULL, "s"),
+	PHPDBG_COMMAND_D_EX(on,          "specify breakpoint by condition",                        'o', break_on,      NULL, "c"),
+	PHPDBG_COMMAND_D_EX(at,          "specify breakpoint by location and condition",           'A', break_at,      NULL, "*c"),
+	PHPDBG_COMMAND_D_EX(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, "l"),
+	PHPDBG_COMMAND_D_EX(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, "l"),
 	PHPDBG_END_COMMAND
 };
 

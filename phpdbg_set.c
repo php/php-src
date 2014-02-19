@@ -27,13 +27,13 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 const phpdbg_command_t phpdbg_set_commands[] = {
-	PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",          'p', set_prompt,       NULL, 0),
+	PHPDBG_COMMAND_D_EX(prompt,       "usage: set prompt <string>",          'p', set_prompt,       NULL, "s"),
 #ifndef _WIN32
-	PHPDBG_COMMAND_D_EX(color,        "usage: set color  <element> <color>", 'c', set_color,        NULL, 1),
-	PHPDBG_COMMAND_D_EX(colors,       "usage: set colors <on|off>",			 'C', set_colors,       NULL, 1),
+	PHPDBG_COMMAND_D_EX(color,        "usage: set color  <element> <color>", 'c', set_color,        NULL, "ss"),
+	PHPDBG_COMMAND_D_EX(colors,       "usage: set colors <on|off>",			 'C', set_colors,       NULL, "b"),
 #endif
-	PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          'O', set_oplog,        NULL, 0),
-	PHPDBG_COMMAND_D_EX(break,        "usage: set break [id] <on|off>",      'b', set_break,        NULL, 0),
+	PHPDBG_COMMAND_D_EX(oplog,        "usage: set oplog  <output>",          'O', set_oplog,        NULL, "s"),
+	PHPDBG_COMMAND_D_EX(break,        "usage: set break [id] <on|off>",      'b', set_break,        NULL, "lb"),
 	PHPDBG_END_COMMAND
 };
 
