@@ -961,11 +961,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 	TSRMLS_FETCH();
 
 	ms->file = fn;
-#if PHP_API_VERSION < 20100412
-	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
 	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
-#endif
 
 	if (stream == NULL) {
 		if (errno != ENOENT)
@@ -2770,12 +2766,8 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 	if (dbname == NULL) 
 		goto out;
 
-/* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
-#if PHP_API_VERSION < 20100412
-	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
+	/* wb+ == O_WRONLY|O_CREAT|O_TRUNC|O_BINARY */
 	stream = php_stream_open_wrapper((char *)fn, "wb+", REPORT_ERRORS, NULL);
-#endif
 
 	if (!stream) {
 		file_error(ms, errno, "cannot open `%s'", dbname);
