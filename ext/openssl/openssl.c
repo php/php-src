@@ -79,6 +79,10 @@
 #endif
 #define DEBUG_SMIME	0
 
+#if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#define HAVE_EVP_PKEY_EC 1
+#endif
+
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
  * against php constants. Also sorry to break the
@@ -89,7 +93,7 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
 #endif
 };
@@ -1169,7 +1173,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	REGISTER_LONG_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -3468,7 +3472,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			}
 			break;
 #endif
-#if OPENSSL_VERSION_NUMBER >= 0x0090800fL && !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			assert(pkey->pkey.ec != NULL);
 
@@ -3877,7 +3881,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			}
 
 			break;
-#ifdef EVP_PKEY_EC 
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			ktype = OPENSSL_KEYTYPE_EC;
 			break;
