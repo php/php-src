@@ -1065,6 +1065,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -1161,9 +1162,9 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -3963,6 +3964,10 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);

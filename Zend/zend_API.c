@@ -300,6 +300,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
 	int check_null = 0;
+	zval *real_arg = arg;
 
 	/* scan through modifiers */
 	while (1) {
@@ -311,6 +312,10 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			break;
 		}
 		spec_walk++;
+	}
+
+	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+		arg = Z_REFVAL_P(arg);
 	}
 
 	switch (c) {
@@ -691,7 +696,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 					*p = NULL;
 				} else {
-					*p = arg;
+					*p = real_arg;
 				}
 			}
 			break;

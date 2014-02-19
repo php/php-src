@@ -3584,6 +3584,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -5331,6 +5332,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -6011,6 +6013,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -8602,6 +8605,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -10225,6 +10229,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -10908,6 +10913,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -14130,6 +14136,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -14225,9 +14232,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -15197,6 +15204,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	offset = opline->op2.zv;
 
 	if (IS_VAR != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -16439,9 +16450,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -17246,6 +17257,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -18460,6 +18475,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -18555,9 +18571,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -19491,6 +19507,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -20320,6 +20340,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -20398,9 +20419,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -21804,9 +21825,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -22661,6 +22682,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 	if (IS_VAR != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -24080,6 +24105,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 	offset = opline->op2.zv;
 
 	if (IS_UNUSED != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -25324,6 +25353,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -26568,6 +26601,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -28209,6 +28246,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 	if (IS_UNUSED != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -30577,6 +30618,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -30671,9 +30713,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -31432,6 +31474,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	offset = opline->op2.zv;
 
 	if (IS_CV != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -32666,9 +32712,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -33355,6 +33401,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -34562,6 +34612,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -34656,9 +34707,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -35474,6 +35525,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
@@ -36296,6 +36351,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 	}
 //	ZVAL_COPY(EX_VAR(opline->result.var), retval);
 	ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 //???	switch (type) {
 //???		case BP_VAR_R:
 //???		case BP_VAR_IS:
@@ -36373,9 +36429,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -37647,9 +37703,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		Z_DELREF_P(retval_ptr);
+//???		Z_DELREF_P(retval_ptr);
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-		Z_ADDREF_P(retval_ptr);
+//???		Z_ADDREF_P(retval_ptr);
 	}
 
 	CHECK_EXCEPTION();
@@ -38386,6 +38442,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 	if (IS_CV != IS_VAR || container) {
+//???deref
+		if (Z_TYPE_P(container) == IS_REFERENCE) {
+			container = Z_REFVAL_P(container);
+		}
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);

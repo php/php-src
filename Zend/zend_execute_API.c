@@ -1649,7 +1649,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, zend_st
 					if (ex->op_array->vars[i]->h == name->h &&
 						ex->op_array->vars[i]->len == name->len &&
 						!memcmp(ex->op_array->vars[i]->val, name->val, name->len)) {
-						ZVAL_NULL(EX_VAR_NUM_2(ex, i));
+						ZVAL_UNDEF(EX_VAR_NUM_2(ex, i));
 						break;
 					}
 				}
