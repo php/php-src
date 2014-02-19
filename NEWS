@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
 
+- Fileinfo
+  . Upgraded to libmagic-5.17 (Anatol)
+
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
@@ -25,6 +28,9 @@ PHP                                                                        NEWS
     pg_meta_data(resource $conn, string $table [, bool extended])
     It also made pg_meta_data() return "is enum" always.
     (Yasuo)
+
+- Core
+  . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
 
 13 Feb 2014, PHP 5.6.0 Alpha 2
 - Core:

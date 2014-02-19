@@ -79,6 +79,10 @@
 #endif
 #define DEBUG_SMIME	0
 
+#if !defined(OPENSSL_NO_EC) && defined(EVP_PKEY_EC)
+#define HAVE_EVP_PKEY_EC 1
+#endif
+
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
  * against php constants. Also sorry to break the
@@ -89,7 +93,7 @@ enum php_openssl_key_type {
 	OPENSSL_KEYTYPE_DSA,
 	OPENSSL_KEYTYPE_DH,
 	OPENSSL_KEYTYPE_DEFAULT = OPENSSL_KEYTYPE_RSA,
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	OPENSSL_KEYTYPE_EC = OPENSSL_KEYTYPE_DH +1
 #endif
 };
@@ -697,7 +701,7 @@ static time_t asn1_time_to_time_t(ASN1_UTCTIME * timestr TSRMLS_DC) /* {{{ */
 		return (time_t)-1;
 	}
 
-	if (ASN1_STRING_length(timestr) != strlen(ASN1_STRING_data(timestr))) {
+	if (ASN1_STRING_length(timestr) != strlen((const char*)ASN1_STRING_data(timestr))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal length in timestamp");
 		return (time_t)-1;
 	}
@@ -1171,7 +1175,7 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_DSA", OPENSSL_KEYTYPE_DSA, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_DH", OPENSSL_KEYTYPE_DH, CONST_CS|CONST_PERSISTENT);
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 	REGISTER_INT_CONSTANT("OPENSSL_KEYTYPE_EC", OPENSSL_KEYTYPE_EC, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -3501,7 +3505,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			}
 			break;
 #endif
-#ifdef EVP_PKEY_EC
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			assert(pkey->pkey.ec != NULL);
 
@@ -3925,7 +3929,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			}
 
 			break;
-#ifdef EVP_PKEY_EC 
+#ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			ktype = OPENSSL_KEYTYPE_EC;
 			break;
@@ -5173,10 +5177,10 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC
 		ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
 
 		/* prevent null byte poisoning */
-		if (san_name_len != strlen(cert_name)) {
+		if (san_name_len != strlen((const char*)cert_name)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer SAN entry is malformed");
 		} else {
-			is_match = strcasecmp(subject_name, cert_name) == 0;
+			is_match = strcasecmp(subject_name, (const char*)cert_name) == 0;
 		}
 
 		OPENSSL_free(cert_name);
@@ -5321,6 +5325,110 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 }
 /* }}} */
 
+static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS_DC) /* {{{ */
+{
+	php_stream *stream;
+	X509 *cert;
+	BIO *buffer;
+	int buffer_active;
+	char *line;
+	size_t line_len;
+	long certs_added = 0;
+	const char *begin_line = "-----BEGIN CERTIFICATE-----\n";
+	const char *end_line = "-----END CERTIFICATE-----\n";
+
+	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
+
+	if (stream == NULL) {
+		php_error(E_WARNING, "failed loading cafile stream: `%s'", cafile);
+		return 0;
+	} else if (stream->wrapper->is_url) {
+		php_stream_close(stream);
+		php_error(E_WARNING, "remote cafile streams are disabled for security purposes");
+		return 0;
+	}
+
+	cert_start: {
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (strcmp(line, begin_line)) {
+			efree(line);
+			goto cert_start;
+		} else {
+			buffer = BIO_new(BIO_s_mem());
+			buffer_active = 1;
+		}
+	}
+
+	cert_line: {
+		BIO_puts(buffer, line);
+		efree(line);
+		line = php_stream_get_line(stream, NULL, 0, &line_len);
+		if (line == NULL) {
+			goto stream_complete;
+		} else if (strcmp(line, end_line)) {
+			goto cert_line;
+		} else {
+			goto add_cert;
+		}
+	}
+
+	add_cert: {
+		BIO_puts(buffer, line);
+		efree(line);
+		cert = PEM_read_bio_X509(buffer, NULL, 0, NULL);
+		BIO_free(buffer);
+		buffer_active = 0;
+		if (cert && X509_STORE_add_cert(cert_store, cert)) {
+			++certs_added;
+		}
+		goto cert_start;
+	}
+
+	stream_complete: {
+		php_stream_close(stream);
+		if (buffer_active) {
+			BIO_free(buffer);
+		}
+	}
+	
+	return certs_added;
+}
+/* }}} */
+
+static int load_verify_locations(SSL_CTX *ctx, php_stream *stream, char *cafile, char *capath TSRMLS_DC) /* {{{ */
+{
+	if (!cafile) {
+		cafile = zend_ini_string("openssl.cafile", sizeof("openssl.cafile"), 0);
+		cafile = strlen(cafile) ? cafile : NULL;
+	}
+
+	if (!capath) {
+		capath = zend_ini_string("openssl.capath", sizeof("openssl.capath"), 0);
+		capath = strlen(capath) ? capath : NULL;
+	}
+
+	if (cafile || capath) {
+		if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
+			if (cafile && !load_stream_cafile(SSL_CTX_get_cert_store(ctx), cafile TSRMLS_CC)) {
+				return 0;
+			}
+		}
+	} else {
+		php_openssl_netstream_data_t *sslsock;
+		sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Unable to set default verify locations and no CA settings specified");
+			return 0;
+		}
+	}
+
+	return 1;
+}
+/* }}} */
+
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
@@ -5344,29 +5452,8 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		GET_VER_OPT_STRING("cafile", cafile);
 		GET_VER_OPT_STRING("capath", capath);
 
-		if (!cafile) {
-			zend_bool exists = 1;
-			cafile = zend_ini_string_ex("openssl.cafile", sizeof("openssl.cafile"), 0, &exists);
-		}
-
-		if (!capath) {
-			zend_bool exists = 1;
-			capath = zend_ini_string_ex("openssl.capath", sizeof("openssl.capath"), 0, &exists);
-		}
-
-		if (cafile || capath) {
-			if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set verify locations `%s' `%s'", cafile, capath);
-				return NULL;
-			}
-		} else {
-			php_openssl_netstream_data_t *sslsock;
-			sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-			if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-					"Unable to set default verify locations and no CA settings specified");
-				return NULL;
-			}
+		if (!load_verify_locations(ctx, stream, cafile, capath TSRMLS_CC)) {
+			return NULL;
 		}
 
 		if (GET_VER_OPT("verify_depth")) {
