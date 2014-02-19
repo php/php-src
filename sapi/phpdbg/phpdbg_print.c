@@ -155,7 +155,7 @@ PHPDBG_PRINT(class) /* {{{ */
 						(ce->ce_flags & ZEND_ACC_ABSTRACT) ?
 							"Abstract Class" :
 							"Class",
-					*ce->name->val);
+					ce->name->val);
 
 				phpdbg_writeln("Methods (%d):", zend_hash_num_elements(&ce->function_table));
 				if (zend_hash_num_elements(&ce->function_table)) {
@@ -197,7 +197,7 @@ PHPDBG_PRINT(method) /* {{{ */
 				if ((fbc = zend_hash_str_find_ptr(&ce->function_table, lcname, strlen(lcname))) != NULL) {
 					phpdbg_notice("%s Method %s",
 						(fbc->type == ZEND_USER_FUNCTION) ? "User" : "Internal",
-						fbc->common.function_name);
+						fbc->common.function_name->val);
 
 					phpdbg_print_function_helper(fbc TSRMLS_CC);
 				} else {
