@@ -8100,7 +8100,7 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			    EG(error_reporting_ini_entry)->value != EG(error_reporting_ini_entry)->orig_value)) {
 				efree(EG(error_reporting_ini_entry)->value);
 			}
-			EG(error_reporting_ini_entry)->value = Z_STRVAL(restored_error_reporting);
+			EG(error_reporting_ini_entry)->value = estrndup(Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting));
 			EG(error_reporting_ini_entry)->value_length = Z_STRLEN(restored_error_reporting);
 		} else {
 			zval_dtor(&restored_error_reporting);
