@@ -1155,23 +1155,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		*/
 	}
 	/* Overflow ? */
-	if (set->row_count) {
-		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
-		if (set->row_count * meta->field_count * sizeof(zval *) > SIZE_MAX) {
-			SET_OOM_ERROR(*conn->error_info);
-			ret = FAIL;
-			goto end;
-		}
-		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-		set->data = mnd_emalloc((size_t)(set->row_count * meta->field_count * sizeof(zval *)));
-		if (!set->data) {
-			SET_OOM_ERROR(*conn->error_info);
-			ret = FAIL;
-			goto end;
-		}
-		memset(set->data, 0, (size_t)(set->row_count * meta->field_count * sizeof(zval *)));
-	}
-
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats,
 									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
 														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
@@ -1203,9 +1186,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(set->error_info, row_packet->error_info);
 	} else {
-		/* Position at the first row */
-		set->data_cursor = set->data;
-
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status->affected_rows = set->row_count;
 	}
@@ -1255,7 +1235,27 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 			SET_OOM_ERROR(*conn->error_info);
 		}
 		DBG_RETURN(NULL);
+	} else {
+	/* Overflow ? */
+		MYSQLND_RES_BUFFERED * set = result->stored_data;
+		if (set->row_count) {
+			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+			if (set->row_count * result->meta->field_count * sizeof(zval *) > SIZE_MAX) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+			set->data = mnd_emalloc((size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+			if (!set->data) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			memset(set->data, 0, (size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+		}
+		/* Position at the first row */
+		set->data_cursor = set->data;
 	}
+
 	/* libmysql's documentation says it should be so for SELECT statements */
 	conn->upsert_status->affected_rows = result->stored_data->row_count;
 
