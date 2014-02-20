@@ -4895,7 +4895,7 @@ PHP_FUNCTION(imageconvolution)
 				if (zend_hash_index_find(Z_ARRVAL_PP(var), (j), (void **) &var2) == SUCCESS) {
 					if (Z_TYPE_PP(var2) != IS_DOUBLE) {
 						zval dval;
-						dval = **var;
+						dval = **var2;
 						zval_copy_ctor(&dval);
 						convert_to_double(&dval);
 						matrix[i][j] = (float)Z_DVAL(dval);
