@@ -435,6 +435,13 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		return -1;
 	}
 
+	if (!sslsock->is_client && stream->context && SUCCESS == php_stream_context_get_option(
+				stream->context, "ssl", "honor_cipher_order", &val) &&
+			zend_is_true(*val)
+	) {
+		SSL_CTX_set_options(sslsock->ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+	}
+
 #ifdef SSL_MODE_RELEASE_BUFFERS
 	long mode = SSL_get_mode(sslsock->ssl_handle);
 	SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
