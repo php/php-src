@@ -754,19 +754,23 @@ static inline void zend_assign_to_object(zval *retval, zval *object, zval *prope
 		if (Z_TYPE_P(object) == IS_NULL ||
 		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
-			SEPARATE_ZVAL_IF_NOT_REF(object);
-			Z_ADDREF_P(object);
-			zend_error(E_WARNING, "Creating default object from empty value");
-			if (Z_REFCOUNTED_P(object) && Z_REFCOUNT_P(object) == 1) {
-				/* object was removed by error handler, nothing to assign to */
-				zval_ptr_dtor(object);
-				if (retval) {
-					ZVAL_NULL(retval);
+			if (Z_REFCOUNTED_P(object)) {
+				SEPARATE_ZVAL_IF_NOT_REF(object);
+				Z_ADDREF_P(object);
+				zend_error(E_WARNING, "Creating default object from empty value");
+				if (Z_REFCOUNT_P(object) == 1) {
+					/* object was removed by error handler, nothing to assign to */
+					zval_ptr_dtor(object);
+					if (retval) {
+						ZVAL_NULL(retval);
+					}
+					FREE_OP(free_value);
+					return;
 				}
-				FREE_OP(free_value);
-				return;
+				Z_DELREF_P(object);
+			} else {
+				zend_error(E_WARNING, "Creating default object from empty value");
 			}
-			Z_DELREF_P(object);
 			zval_dtor(object);
 			object_init(object);
 		} else {

@@ -129,7 +129,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 	 */
 	if (EG(objects_store).object_buckets &&
 	    IS_VALID(EG(objects_store).object_buckets[object->handle])) {
-		if (object->gc.refcount == 0) {
+		if (object->gc.refcount == 1) {
 			int failure = 0;
 
 			if (!(object->gc.u.v.flags & IS_OBJ_DESTRUCTOR_CALLED)) {
@@ -146,7 +146,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 				}
 			}
 			
-			if (object->gc.refcount == 0) {
+			if (object->gc.refcount == 1) {
 				zend_uint handle = object->handle;
 
 //???				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
