@@ -1701,6 +1701,8 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			return -1;
 			if (file_printf(ms, "%s", rbuf) == -1)
 				return -1;
+		}
+		if (rbuf) {
 			efree(rbuf);
 		}
 		return rv;
