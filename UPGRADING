@@ -162,7 +162,11 @@ PHP X.Y UPGRADE NOTES
 - Pgsql:
   - pg_insert()/pg_select()/pg_update()/pg_delete()/pg_meta_data()/pg_convert()
     are no longer EXPERIMENTAL
-  - pg_select() return PostgreSQL query resources when query is executed.
+  - Added PGSQL_DML_ESCAPE option for pg_insert()/pg_select()/pg_update()/pg_delete()
+    that simply escapes all supplied parameters. These functions can be as fast as
+    native query. Unvalidated data(Unknown data types) is passed as string.
+    JSON/Array/etc are supported both PGSQL_DML_ESCAPE and pg_convert() as string.
+  - pg_select() returns PostgreSQL query resource when query is executed.
   - Added extended flag parameter for pg_meta_data(). pg_meta_data() always
     returns "is enum" attribute.
 
