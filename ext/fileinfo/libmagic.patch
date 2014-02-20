@@ -3000,7 +3000,7 @@ diff -u libmagic.orig/readelf.h libmagic/readelf.h
  typedef uint8_t		Elf64_Char;
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	Thu Mar 21 18:45:14 2013
-+++ libmagic/softmagic.c	Tue Feb 18 18:44:17 2014
++++ libmagic/softmagic.c	Thu Feb 20 18:57:46 2014
 @@ -41,6 +41,11 @@
  #include <stdlib.h>
  #include <time.h>
@@ -3178,7 +3178,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		if (nbytes < offset)
  			return 0;
  		sbuf = ms->o.buf;
-@@ -1710,19 +1689,19 @@
+@@ -1710,19 +1689,21 @@
  		ms->o.buf = NULL;
  		ms->offset = 0;
  		rv = file_softmagic(ms, s + offset, nbytes - offset,
@@ -3198,11 +3198,13 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			if (file_printf(ms, "%s", rbuf) == -1)
  				return -1;
 -			free(rbuf);
++		}
++		if (rbuf) {
 +			efree(rbuf);
  		}
  		return rv;
  
-@@ -1837,6 +1816,42 @@
+@@ -1837,6 +1818,42 @@
  	return file_strncmp(a, b, len, flags);
  }
  
@@ -3245,7 +3247,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int
  magiccheck(struct magic_set *ms, struct magic *m)
  {
-@@ -1996,69 +2011,157 @@
+@@ -1996,69 +2013,157 @@
  		break;
  	}
  	case FILE_REGEX: {
