@@ -3133,6 +3133,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (!ce->destructor) {
 		ce->destructor   = ce->parent->destructor;
 	}
+	if (!ce->__debugInfo) {
+		ce->__debugInfo = ce->parent->__debugInfo;
+	}
 	if (ce->constructor) {
 		if (ce->parent->constructor && ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL) {
 			zend_error(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
@@ -6958,6 +6961,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->unserialize = NULL;
 		ce->serialize_func = NULL;
 		ce->unserialize_func = NULL;
+		ce->__debugInfo = NULL;
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ce->info.internal.module = NULL;
 			ce->info.internal.builtin_functions = NULL;
