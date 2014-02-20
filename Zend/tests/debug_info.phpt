@@ -13,14 +13,27 @@ class Foo {
   }
 }
 
+class Bar {
+  public $val = 123;
+
+  public function __debugInfo() {
+    return null;
+  }
+}
+
 $f = new Foo;
 var_dump($f);
---EXPECT--
-object(Foo)#1 (3) {
+
+$b = new Bar;
+var_dump($b);
+--EXPECTF--
+object(Foo)#%d (3) {
   ["a"]=>
   int(1)
   ["b":protected]=>
   int(2)
   ["c":"Foo":private]=>
   int(3)
+}
+object(Bar)#%d (0) {
 }
