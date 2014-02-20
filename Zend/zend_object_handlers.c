@@ -165,6 +165,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 		zval ret;
 		array_init(&ret);
 		*is_temp = 1;
+		zval_ptr_dtor(&retval);
 		return Z_ARRVAL(ret);
 	}
 
