@@ -55,7 +55,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 				obj->gc.refcount--;
 
 				if (obj->gc.refcount == 0) {
-					gc_remove_zval_from_buffer((zend_refcounted*)obj TSRMLS_CC);
+					GC_REMOVE_ZOBJ_FROM_BUFFER(obj TSRMLS_CC);
 				}
 			}
 		}
@@ -86,7 +86,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 		zend_object *obj = objects->object_buckets[i];
 
 		if (IS_VALID(obj)) {
-			gc_remove_zval_from_buffer((zend_refcounted*)obj TSRMLS_CC);
+			GC_REMOVE_ZOBJ_FROM_BUFFER(obj TSRMLS_CC);
 			objects->object_buckets[i] = SET_INVALID(obj);
 			if (obj->handlers->free_obj) {
 				obj->handlers->free_obj(obj TSRMLS_CC);

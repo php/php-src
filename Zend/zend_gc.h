@@ -140,6 +140,12 @@ END_EXTERN_C()
 		} \
 	} while (0)
 
+#define GC_REMOVE_ZOBJ_FROM_BUFFER(z) do { \
+		if (GC_ADDRESS((z)->gc.u.v.buffer)) { \
+			gc_remove_zval_from_buffer(&(z)->gc TSRMLS_CC); \
+		} \
+	} while (0)
+
 static zend_always_inline void gc_zval_check_possible_root(zval *z TSRMLS_DC)
 {
 	if (Z_TYPE_P(z) == IS_ARRAY || Z_TYPE_P(z) == IS_OBJECT) {
