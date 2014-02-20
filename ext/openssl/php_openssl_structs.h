@@ -22,6 +22,14 @@
 #include "php_network.h"
 #include <openssl/ssl.h>
 
+typedef struct _php_openssl_handshake_bucket_t {
+	long prev_handshake;
+	long limit;
+	long window;
+	float tokens;
+	unsigned should_close;
+} php_openssl_handshake_bucket_t;
+
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
  * Don't try this technique in other extensions!
@@ -36,6 +44,7 @@ typedef struct _php_openssl_netstream_data_t {
 	int is_client;
 	int ssl_active;
 	php_stream_xport_crypt_method_t method;
+	php_openssl_handshake_bucket_t *reneg;
 	char *url_name;
 	unsigned state_set:1;
 	unsigned _spare:31;
