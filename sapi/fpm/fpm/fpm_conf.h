@@ -62,7 +62,6 @@ struct fpm_worker_pool_config_s {
 	char *listen_group;
 	char *listen_mode;
 	char *listen_allowed_clients;
-	int preserve_environment;
 	int process_priority;
 	int pm;
 	int pm_max_children;
@@ -84,6 +83,7 @@ struct fpm_worker_pool_config_s {
 	char *chroot;
 	char *chdir;
 	int catch_workers_output;
+	int clear_env;
 	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;

@@ -143,7 +143,7 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_env_setproctitle(title);
 	efree(title);
 
-	if (!wp->config->preserve_environment) {
+	if (wp->config->clear_env) {
 		clearenv();
 	}
 

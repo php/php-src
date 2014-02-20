@@ -142,14 +142,6 @@
 ; Default Value: none
 ;prefix = /path/to/pools/$pool
 
-; Preserve environment
-; By default, environment variables are not passed to workers.
-; This option prevents environment from being cleared when FPM workers spawn,
-; making environment variables available to PHP code running in the workers
-; via getenv(), $_ENV and $_SERVER.
-; Default Value: no
-;preserve_environment = yes
-
 ; Unix user/group of processes
 ; Note: The user is mandatory. If the group is not set, the default user's group
 ;       will be used.
@@ -482,6 +474,15 @@ pm.max_spare_servers = 3
 ; process time (several ms).
 ; Default Value: no
 ;catch_workers_output = yes
+
+; Clear environment in FPM workers
+; Prevents arbitrary environment variables from reaching FPM worker processes
+; by clearing the environment in workers before env vars specified in this
+; pool configuration are added.
+; Setting to "no" will make all environment variables available to PHP code
+; via getenv(), $_ENV and $_SERVER.
+; Default Value: yes
+;clear_env = no
 
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit
