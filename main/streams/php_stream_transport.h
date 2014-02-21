@@ -163,22 +163,29 @@ typedef struct _php_stream_xport_param {
 	} outputs;
 } php_stream_xport_param;
 
+/* Because both client and server streams use the same mechanisms
+   for encryption we use the LSB to denote clients.
+*/
+typedef enum {
+	STREAM_CRYPTO_METHOD_SSLv2_CLIENT = (1 << 1 | 1),
+	STREAM_CRYPTO_METHOD_SSLv3_CLIENT = (1 << 2 | 1),
+	STREAM_CRYPTO_METHOD_SSLv23_CLIENT = ((1 << 1) | (1 << 2) | 1),
+	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT = (1 << 3 | 1),
+	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT = (1 << 4 | 1),
+	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT = (1 << 5 | 1),
+	STREAM_CRYPTO_METHOD_TLS_CLIENT = ((1 << 3) | (1 << 4) | (1 << 5) | 1),
+	STREAM_CRYPTO_METHOD_ANY_CLIENT = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5) | 1),
+	STREAM_CRYPTO_METHOD_SSLv2_SERVER = (1 << 1),
+	STREAM_CRYPTO_METHOD_SSLv3_SERVER = (1 << 2),
+	STREAM_CRYPTO_METHOD_SSLv23_SERVER = ((1 << 1) | (1 << 2)),
+	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER = (1 << 3),
+	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER = (1 << 4),
+	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER = (1 << 5),
+	STREAM_CRYPTO_METHOD_TLS_SERVER = ((1 << 3) | (1 << 4) | (1 << 5)),
+	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5))
+} php_stream_xport_crypt_method_t;
 
 /* These functions provide crypto support on the underlying transport */
-typedef enum {
-	STREAM_CRYPTO_METHOD_SSLv2_CLIENT,
-	STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
-	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,
-	STREAM_CRYPTO_METHOD_TLS_CLIENT,
-	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,
-	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
-	STREAM_CRYPTO_METHOD_SSLv2_SERVER,
-	STREAM_CRYPTO_METHOD_SSLv3_SERVER,
-	STREAM_CRYPTO_METHOD_SSLv23_SERVER,
-	STREAM_CRYPTO_METHOD_TLS_SERVER,
-	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,
-	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER
-} php_stream_xport_crypt_method_t;
 
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream TSRMLS_DC);
