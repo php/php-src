@@ -1614,13 +1614,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"__METHOD__" {
 	const char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name->val : NULL;
 	const char *func_name = CG(active_op_array)? CG(active_op_array)->function_name->val : NULL;
+//???
+// Z_STRLEN_P(zendlval) = zend_spprintf((char**)&Z_STRVAL_P(zendlval), 0, "%s%s%s",
+//		class_name ? class_name : "",
+//		class_name && func_name ? "::" : "",
+//		func_name ? func_name : ""
+//		);
+// zendlval->type = IS_STRING;
+	char *method_name;
+	int method_len;
 
-	Z_STRLEN_P(zendlval) = zend_spprintf((char**)&Z_STRVAL_P(zendlval), 0, "%s%s%s",
-		class_name ? class_name : "",
-		class_name && func_name ? "::" : "",
-		func_name ? func_name : ""
-		);
-	zendlval->type = IS_STRING;
+	method_len = zend_spprintf(&method_name, 0, "%s%s%s",
+        class_name ? class_name : "",
+        class_name && func_name ? "::" : "",
+        func_name ? func_name : ""
+	);
+	ZVAL_STRINGL(zendlval, method_name, method_len);
+	efree(method_name);
 	return T_METHOD_C;
 }
 
