@@ -3318,8 +3318,8 @@ PHP_FUNCTION(addcslashes)
    Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	char *str;
-	int  str_len;
+	char *str, *new_str;
+	int  str_len, new_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -3333,10 +3333,9 @@ PHP_FUNCTION(addslashes)
 //???	                             str_len,
 //???	                             &Z_STRLEN_P(return_value), 0
 //???	                             TSRMLS_CC), 0);
-	RETURN_STRING(php_addslashes(str,
-	                             str_len,
-	                             &Z_STRLEN_P(return_value), 0
-	                             TSRMLS_CC));
+	new_str = php_addslashes(str, str_len, &new_len, 0 TSRMLS_CC);
+	RETVAL_STRINGL(new_str, new_len);
+	efree(new_str);
 }
 /* }}} */
 
