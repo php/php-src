@@ -376,6 +376,9 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	long ssl_ctx_options;
 	long method_flags;
 	zval **val;
+#ifdef SSL_MODE_RELEASE_BUFFERS
+	long mode;
+#endif
 
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -476,7 +479,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 #ifdef SSL_MODE_RELEASE_BUFFERS
-	long mode = SSL_get_mode(sslsock->ssl_handle);
+	mode = SSL_get_mode(sslsock->ssl_handle);
 	SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
 #endif
 
@@ -603,6 +606,10 @@ static int php_enable_server_crypto_opts(php_stream *stream,
 	TSRMLS_DC)
 {
 	zval **val;
+#ifdef HAVE_ECDH
+	int curve_nid;
+	EC_KEY *ecdh;
+#endif
 
 	if (php_stream_context_get_option(stream->context, "ssl", "dh_param", &val) == SUCCESS) {
 		convert_to_string_ex(val);
@@ -612,9 +619,6 @@ static int php_enable_server_crypto_opts(php_stream *stream,
 	}
 
 #ifdef HAVE_ECDH
-
-	int curve_nid;
-	EC_KEY *ecdh;
 
 	if (php_stream_context_get_option(stream->context, "ssl", "ecdh_curve", &val) == SUCCESS) {
 		char *curve_str;
