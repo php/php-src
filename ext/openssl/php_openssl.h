@@ -29,6 +29,10 @@ extern zend_module_entry openssl_module_entry;
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
 
+/* Used for client-initiated handshake renegotiation DoS protection*/
+#define DEFAULT_RENEG_LIMIT 2
+#define DEFAULT_RENEG_WINDOW 300
+
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 PHP_MINIT_FUNCTION(openssl);
