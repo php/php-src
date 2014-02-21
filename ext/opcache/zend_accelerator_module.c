@@ -57,9 +57,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
 	ZEND_ARG_INFO(0, force)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_is_script_cached, 0, 0, 1)
+	ZEND_ARG_INFO(0, script)
+ZEND_END_ARG_INFO()
+
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
 static ZEND_FUNCTION(opcache_invalidate);
+static ZEND_FUNCTION(opcache_is_script_cached);
 
 /* Private functions */
 static ZEND_FUNCTION(opcache_get_status);
@@ -71,6 +76,7 @@ static zend_function_entry accel_functions[] = {
 	ZEND_FE(opcache_reset,					arginfo_opcache_none)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
+	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
@@ -758,4 +764,26 @@ static ZEND_FUNCTION(opcache_compile_file)
 		RETVAL_FALSE;
 	}
 	zend_destroy_file_handle(&handle TSRMLS_CC);
+}
+
+/* {{{ proto bool opcache_is_script_cached(string $script)
+   Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
+static ZEND_FUNCTION(opcache_is_script_cached)
+{
+	char *script_name;
+	int script_name_len;
+
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(filename_is_in_cache(script_name, script_name_len TSRMLS_CC));
 }

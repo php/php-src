@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
 
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+
 - Openssl:
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
   (Mark Zedwood)
