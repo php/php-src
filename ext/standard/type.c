@@ -90,34 +90,34 @@ PHP_FUNCTION(gettype)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
-	zval **var;
+	zval *var;
 	char *type;
 	int type_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs", &var, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &var, &type, &type_len) == FAILURE) {
 		return;
 	}
 
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(*var);
+		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(*var);
+		convert_to_long(var);
 	} else if (!strcasecmp(type, "float")) {
-		convert_to_double(*var);
+		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
-		convert_to_double(*var);
+		convert_to_double(var);
 	} else if (!strcasecmp(type, "string")) {
-		convert_to_string(*var);
+		convert_to_string(var);
 	} else if (!strcasecmp(type, "array")) {
-		convert_to_array(*var);
+		convert_to_array(var);
 	} else if (!strcasecmp(type, "object")) {
-		convert_to_object(*var);
+		convert_to_object(var);
 	} else if (!strcasecmp(type, "bool")) {
-		convert_to_boolean(*var);
+		convert_to_boolean(var);
 	} else if (!strcasecmp(type, "boolean")) {
-		convert_to_boolean(*var);
+		convert_to_boolean(var);
 	} else if (!strcasecmp(type, "null")) {
-		convert_to_null(*var);
+		convert_to_null(var);
 	} else if (!strcasecmp(type, "resource")) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;

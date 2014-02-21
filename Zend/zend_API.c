@@ -225,6 +225,9 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
+	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+		arg = Z_REFVAL_P(arg);
+	}
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 /* }}} */
@@ -703,8 +706,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
-//???
+//??? 'Z' iz not supported anymore and should be replaced with 'z'
 		case 'Z':
+			ZEND_ASSERT(c != 'Z');
 		default:
 			return "unknown";
 	}
@@ -2600,7 +2604,7 @@ ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_c
 		lcname = STR_ALLOC(name_len, 1);
 		zend_str_tolower_copy(lcname->val, name, name_len);
 	}
-	ce = zend_hash_add_ptr(CG(class_table), lcname, &ce);
+	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);
 	STR_RELEASE(lcname);
 	if (ce) {
 		ce->refcount++;

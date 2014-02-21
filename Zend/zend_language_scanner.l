@@ -1603,8 +1603,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"__FUNCTION__" {
 	zend_op_array *op_array = CG(active_op_array);
 	if (op_array && op_array->function_name) {
-		ZVAL_STR(zendlval, op_array->function_name);
-		Z_ADDREF_P(zendlval);
+		ZVAL_STR(zendlval, STR_COPY(op_array->function_name));
 	} else {
 		ZVAL_EMPTY_STRING(zendlval);
 	}
@@ -1612,25 +1611,33 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__METHOD__" {
-	const char *class_name = CG(active_class_entry) ? CG(active_class_entry)->name->val : NULL;
-	const char *func_name = CG(active_op_array)? CG(active_op_array)->function_name->val : NULL;
-//???
-// Z_STRLEN_P(zendlval) = zend_spprintf((char**)&Z_STRVAL_P(zendlval), 0, "%s%s%s",
-//		class_name ? class_name : "",
-//		class_name && func_name ? "::" : "",
-//		func_name ? func_name : ""
-//		);
-// zendlval->type = IS_STRING;
-	char *method_name;
-	int method_len;
+	if (CG(active_class_entry)) {
+		int len = 2;
 
-	method_len = zend_spprintf(&method_name, 0, "%s%s%s",
-        class_name ? class_name : "",
-        class_name && func_name ? "::" : "",
-        func_name ? func_name : ""
-	);
-	ZVAL_STRINGL(zendlval, method_name, method_len);
-	efree(method_name);
+		if (CG(active_class_entry)->name) {
+			len += CG(active_class_entry)->name->len;
+		}
+		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			len += CG(active_op_array)->function_name->len;
+		}
+		ZVAL_STR(zendlval, STR_ALLOC(len, 0));
+		len = 0;
+		if (CG(active_class_entry)->name) {
+			memcpy(Z_STRVAL_P(zendlval), CG(active_class_entry)->name->val, CG(active_class_entry)->name->len);
+			len += CG(active_class_entry)->name->len;
+		}
+		memcpy(Z_STRVAL_P(zendlval) + len, "::", sizeof("::")-1);
+		len += sizeof("::")-1;
+		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			memcpy(Z_STRVAL_P(zendlval) + len, CG(active_op_array)->function_name->val, CG(active_op_array)->function_name->len);
+			len += CG(active_op_array)->function_name->len;
+		}
+		Z_STRVAL_P(zendlval)[len] = 0;
+	} else if (CG(active_op_array) && CG(active_op_array)->function_name) {
+		ZVAL_STR(zendlval, STR_COPY(CG(active_op_array)->function_name));
+	} else {
+		ZVAL_EMPTY_STRING(zendlval);
+	}
 	return T_METHOD_C;
 }
 
