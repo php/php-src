@@ -610,7 +610,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			}
 			break;
 		case IS_RESOURCE: {
-			long tmp = Z_LVAL_P(op);
+			long tmp = Z_RES_HANDLE_P(op);
 			char *str;
 			int len;
 			TSRMLS_FETCH();
@@ -747,7 +747,14 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 	switch (Z_TYPE_P(op)) {
 		case IS_ARRAY:
 			{
-				object_and_properties_init(op, zend_standard_class_def, Z_ARRVAL_P(op));
+				HashTable *properties = emalloc(sizeof(HashTable));
+				zend_array *arr = Z_ARR_P(op);
+
+				memcpy(properties, Z_ARRVAL_P(op), sizeof(HashTable));
+				object_and_properties_init(op, zend_standard_class_def, properties);
+				if (--arr->gc.refcount == 0) {
+					efree(arr);
+				}
 				break;
 			}
 		case IS_OBJECT:

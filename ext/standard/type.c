@@ -98,6 +98,10 @@ PHP_FUNCTION(settype)
 		return;
 	}
 
+	if (Z_TYPE_P(var)) {
+		var = Z_REFVAL_P(var);
+	}
+
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {

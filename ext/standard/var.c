@@ -32,7 +32,7 @@
 #include "basic_functions.h"
 #include "php_incomplete_class.h"
 
-#define COMMON (Z_ISREF_P(struc) ? "&" : "")
+#define COMMON (is_ref ? "&" : "")
 /* }}} */
 
 static int php_array_element_dump(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
@@ -90,11 +90,17 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	zend_string *class_name;
 	int (*php_element_dump_func)(zval* TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp;
+	int is_ref = 0;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
 	}
 
+	if (Z_TYPE_P(struc) == IS_REFERENCE) {
+		is_ref = 1;
+		struc = Z_REFVAL_P(struc);
+	}
+	
 	switch (Z_TYPE_P(struc)) {
 	case IS_BOOL:
 		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc) ? "true" : "false");
@@ -244,9 +250,15 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	zend_string *class_name;
 	int (*zval_element_dump_func)(zval* TSRMLS_DC, int, va_list, zend_hash_key*);
 	int is_temp = 0;
+	int is_ref = 0;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
+	}
+
+	if (Z_TYPE_P(struc) == IS_REFERENCE) {
+		is_ref = 1;
+		struc = Z_REFVAL_P(struc);
 	}
 
 	switch (Z_TYPE_P(struc)) {

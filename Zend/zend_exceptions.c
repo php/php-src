@@ -409,9 +409,15 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 				TRACE_APPEND_STR("false, ");
 			}
 			break;
-		case IS_RESOURCE:
+		case IS_RESOURCE: {
+			long lval = Z_RES_HANDLE_P(arg);
+			char s_tmp[MAX_LENGTH_OF_LONG + 1];
+			int l_tmp = zend_sprintf(s_tmp, "%ld", lval);  /* SAFE */
 			TRACE_APPEND_STR("Resource id #");
-			/* break; */
+			TRACE_APPEND_STRL(s_tmp, l_tmp);
+			TRACE_APPEND_STR(", ");
+			break;
+		}
 		case IS_LONG: {
 			long lval = Z_LVAL_P(arg);
 			char s_tmp[MAX_LENGTH_OF_LONG + 1];

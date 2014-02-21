@@ -57,7 +57,7 @@
 
 #define SET_INVALID(o)			((zend_object*)((((zend_uintptr_t)(o)) | FREE_BUCKET)))
 
-#define GET_BUCKET_NUMBER(o)	(((zend_uintptr_t)(o)) >> 1)
+#define GET_BUCKET_NUMBER(o)	(((zend_intptr_t)(o)) >> 1)
 
 #define SET_BUCKET_NUMBER(o, n)	do { \
 		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | FREE_BUCKET); \
