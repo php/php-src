@@ -762,55 +762,24 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 
 PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
-	/*
-	if (input->argc > 3 && phpdbg_argv_is(2, "if")) {
-		phpdbg_breakcond_t new_break;
-		phpdbg_param_t new_param;
-
-		zend_ulong expr_hash = 0L;
-		size_t expr_len;
-		const char *join = strstr(input->string, "if");
-		const char *expr = (join) + sizeof("if");
-
-		expr_len = strlen(expr);
-		expr = phpdbg_trim(expr, expr_len, &expr_len);
-		expr_hash = zend_inline_hash_func(expr, expr_len);
-
-		{
-			size_t sparam_len = 0L;
-			char *sparam = input->string;
-
-			sparam[
-				strstr(input->string, " ") - input->string] = 0;
-			sparam_len = strlen(sparam);
-
-			switch (phpdbg_parse_param(sparam, sparam_len, &new_param TSRMLS_CC)) {
-				case EMPTY_PARAM:
-				case NUMERIC_PARAM:
-					phpdbg_clear_param(
-						&new_param TSRMLS_CC);
-					goto usage;
-
-				default: {  } break;
-			}
-
-			expr_hash += phpdbg_hash_param(&new_param TSRMLS_CC);
-		}
-
-		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], expr_hash)) {
+	phpdbg_breakcond_t new_break;
+	phpdbg_param_t *condition;
+	zend_ulong hash = 0L;
+	
+	if (param->next) {
+		condition = param->next;
+		hash = zend_inline_hash_func(condition->str, condition->len);
+		
+		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
 			phpdbg_create_conditional_break(
-				&new_break, &new_param, expr, expr_len, expr_hash TSRMLS_CC);
+				&new_break, param, 
+					condition->str, condition->len, hash TSRMLS_CC);
 		} else {
 			phpdbg_notice(
-				"Conditional break %s exists at the specified location", expr);
-		}
-
-		phpdbg_clear_param(&new_param TSRMLS_CC);
-	} else {
-usage:
-		phpdbg_error("usage: break at <func|method|file:line|address> if <expression>");
+				"Conditional break %s exists at the specified location", condition->str);
+		}	
 	}
-	*/
+	
 } /* }}} */
 
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
