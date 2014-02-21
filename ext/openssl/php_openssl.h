@@ -85,6 +85,8 @@ PHP_FUNCTION(openssl_spki_new);
 PHP_FUNCTION(openssl_spki_verify);
 PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
+
+PHP_FUNCTION(openssl_get_cert_locations);
 #else
 
 #define phpext_openssl_ptr NULL
