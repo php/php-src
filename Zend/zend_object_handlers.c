@@ -180,7 +180,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	SEPARATE_ARG_IF_REF(member);
-	Z_ADDREF_P(value);
+	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 
 	/* __set handler is called with two arguments:
 	     property name
@@ -664,7 +664,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /*
 		}
 
 		/* Undo PZVAL_LOCK() */
-		Z_DELREF(retval);
+		if (Z_REFCOUNTED(retval)) Z_DELREF(retval);
 
 		// TODO: FIXME???
 		//???return &retval;

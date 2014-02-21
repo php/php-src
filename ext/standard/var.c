@@ -251,21 +251,21 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 
 	switch (Z_TYPE_P(struc)) {
 	case IS_BOOL:
-		php_printf("%sbool(%s) refcount(%u)\n", COMMON, Z_LVAL_P(struc)?"true":"false", Z_REFCOUNT_P(struc));
+		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc)?"true":"false");
 		break;
 	case IS_NULL:
-		php_printf("%sNULL refcount(%u)\n", COMMON, Z_REFCOUNT_P(struc));
+		php_printf("%sNULL\n", COMMON);
 		break;
 	case IS_LONG:
-		php_printf("%slong(%ld) refcount(%u)\n", COMMON, Z_LVAL_P(struc), Z_REFCOUNT_P(struc));
+		php_printf("%slong(%ld)\n", COMMON, Z_LVAL_P(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%sdouble(%.*G) refcount(%u)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc), Z_REFCOUNT_P(struc));
+		php_printf("%sdouble(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
 		PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
-		php_printf("\" refcount(%u)\n", Z_REFCOUNT_P(struc));
+		php_printf("\" refcount(%u)\n", IS_INTERNED(Z_STR_P(struc)) ? 1 : Z_REFCOUNT_P(struc));
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);

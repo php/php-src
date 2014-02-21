@@ -133,20 +133,20 @@ PHP_FUNCTION(settype)
    Get the integer value of a variable using the optional base for the conversion */
 PHP_FUNCTION(intval)
 {
-	zval **num;
+	zval *num;
 	long arg_base;
 	int base;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
 				return;
 			}
 			base = 10;
 			break;
 
 		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &num, &arg_base) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &num, &arg_base) == FAILURE) {
 				return;
 			}
 			base = arg_base;
@@ -156,7 +156,7 @@ PHP_FUNCTION(intval)
 			WRONG_PARAM_COUNT;
 	}
 
-	RETVAL_ZVAL(*num, 1, 0);
+	RETVAL_ZVAL(num, 1, 0);
 	convert_to_long_base(return_value, base);
 }
 /* }}} */
@@ -165,13 +165,13 @@ PHP_FUNCTION(intval)
    Get the float value of a variable */
 PHP_FUNCTION(floatval)
 {
-	zval **num;
+	zval *num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
 		return;
 	}
 
-	RETVAL_ZVAL(*num, 1, 0);
+	RETVAL_ZVAL(num, 1, 0);
 	convert_to_double(return_value);
 }
 /* }}} */
@@ -180,13 +180,13 @@ PHP_FUNCTION(floatval)
    Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
 {
-	zval **val;
+	zval *val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &val) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(zend_is_true(*val TSRMLS_CC));
+	RETURN_BOOL(zend_is_true(val TSRMLS_CC));
 }
 /* }}} */
 
@@ -194,20 +194,20 @@ PHP_FUNCTION(boolval)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
-	zval **num, *tmp;
+	zval *num, *tmp;
 	zval expr_copy;
 	int use_copy;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
 		return;
 	}
 
-	zend_make_printable_zval(*num, &expr_copy, &use_copy);
+	zend_make_printable_zval(num, &expr_copy, &use_copy);
 	if (use_copy) {
 		tmp = &expr_copy;
 		RETVAL_ZVAL(tmp, 0, 0);
 	} else {
-		RETVAL_ZVAL(*num, 1, 0);
+		RETVAL_ZVAL(num, 1, 0);
 	}
 }
 /* }}} */

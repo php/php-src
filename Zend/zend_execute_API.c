@@ -1582,8 +1582,10 @@ typedef struct _zend_abstract_info {
 	int ctor;
 } zend_abstract_info;
 
-static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
+static int zend_verify_abstract_class_function(zval *zv, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
 {
+	zend_function *fn = Z_PTR_P(zv);
+
 	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
 			ai->afn[ai->cnt] = fn;
