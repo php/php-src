@@ -585,7 +585,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 	return FAILURE; \
 }
 
-		while (arg) {
+		while (arg && *arg) {
 			current++;
 			
 			switch (*arg) {
