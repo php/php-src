@@ -35,7 +35,6 @@ PHPDBG_BREAK(method);
 PHPDBG_BREAK(address);
 PHPDBG_BREAK(at);
 PHPDBG_BREAK(op);
-PHPDBG_BREAK(on);
 PHPDBG_BREAK(lineno);
 PHPDBG_BREAK(del);
 

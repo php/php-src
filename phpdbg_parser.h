@@ -52,22 +52,21 @@ typedef void* yyscan_t;
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     C_TRUTHY = 258,
-     C_FALSY = 259,
-     C_STRING = 260,
-     C_EVAL = 261,
-     C_SHELL = 262,
-     C_IF = 263,
-     T_DIGITS = 264,
-     T_LITERAL = 265,
-     T_METHOD = 266,
-     T_NUMERIC_METHOD = 267,
-     T_NUMERIC_FUNCTION = 268,
+     T_EVAL = 258,
+     T_SHELL = 259,
+     T_IF = 260,
+     T_TRUTHY = 261,
+     T_FALSY = 262,
+     T_STRING = 263,
+     T_COLON = 264,
+     T_DCOLON = 265,
+     T_POUND = 266,
+     T_DIGITS = 267,
+     T_LITERAL = 268,
      T_OPLINE = 269,
-     T_FILE = 270,
-     T_ID = 271,
-     T_INPUT = 272,
-     T_UNEXPECTED = 273
+     T_ID = 270,
+     T_INPUT = 271,
+     T_UNEXPECTED = 272
    };
 #endif
 

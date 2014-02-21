@@ -507,14 +507,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **method**   **m**     specify breakpoint by class::method" CR
 "  **address**  **a**     specify breakpoint by address" CR
 "  **op**       **O**     specify breakpoint by opcode" CR
-"  **on**       **o**     specify breakpoint by condition" CR
 "  **at**       **A**     specify breakpoint by location and condition" CR
 "  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
 
 "The syntax of the target argument is dependent on the target type and in the case of address, "
 "file, func, line and method targets the target keyword or alias is optional and can be omitted." CR CR
-
-"**Break on** takes a string argument which must be a valid PHP expression." CR CR
 
 "**Break at** takes two arguments. The first is any valid target as per the file, lineno, func "
 "and address types.  The second is a valid PHP expression which will trigger the break in "
@@ -562,8 +559,8 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P b a test.php#3" CR
 "    Break at the opline #3 of test.php" CR CR
 
-"    $P break on $cnt > 10" CR
-"    $P b o $cnt > 10" CR
+"    $P break if $cnt > 10" CR
+"    $P b if $cnt > 10" CR
 "    Break when the condition ($cnt > 10) evaluates to true" CR CR
 
 "    $P break at phpdbg::isGreat if $opt == 'S'" CR
@@ -573,7 +570,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Break at every opcode on line 20 of test.php when the condition evaluates to true" CR CR
 
 "    $P break op ZEND_ADD" CR
-"    $P b O ZEND_ADD" CR
+"    $P b o ZEND_ADD" CR
 "    Break on any occurence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR

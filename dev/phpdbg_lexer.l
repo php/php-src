@@ -21,87 +21,60 @@
 %option reentrant noyywrap never-interactive nounistd
 %option bison-bridge
 
-C_TRUE				?i:"true"
-C_YES				?i:"yes"
-C_ON				?i:"on"
-C_ENABLED			?i:"enabled"
-C_FALSE				?i:"false"
-C_NO				?i:"no"
-C_OFF				?i:"off"
-C_DISABLED			?i:"disabled"
-C_EVAL				?i:"eval"
-C_SHELL				?i:"shell"
-C_IF				?i:"if"
+T_TRUE				?i:"true"
+T_YES				?i:"yes"
+T_ON				?i:"on"
+T_ENABLED			?i:"enabled"
+T_FALSE				?i:"false"
+T_NO				?i:"no"
+T_OFF				?i:"off"
+T_DISABLED			?i:"disabled"
+T_EVAL				?i:"eval"
+T_SHELL				?i:"shell"
+T_IF				?i:"if"
 
 WS          		[ \r\n\t]+
 DIGITS				[0-9\.]+
-ID					[^ \r\n\t]+
-NSID				[\\\\]?{ID}
-METHOD				{NSID}+::{ID}
-NUMERIC_METHOD		{METHOD}[#]{DIGITS}
-NUMERIC_FUNCTION	{NSID}[#]{DIGITS}
-FILE				[^ :\r\n\t]+:[0-9]+
+ID					[^ \r\n\t:#]+
 OPLINE				0x[a-fA-F0-9]+
 LITERAL				\"(\\.|[^\\"])*\"
 INPUT				[^\n]+
 %%
 <INITIAL>
 {
-	{C_EVAL}		{
+	[#]{1}		{ return T_POUND;  }
+	[:]{2}		{ return T_DCOLON; }
+	[:]{1}		{ return T_COLON;  }
+	
+	{T_EVAL}		{
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
-		return C_EVAL;
+		return T_EVAL;
 	}
-	{C_SHELL}		{ 
+	{T_SHELL}		{
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
-		return C_SHELL;
+		return T_SHELL;
 	}
-	{C_IF}			{
+	{T_IF}			{
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
-		return C_IF;
+		return T_IF;
 	}
-	{C_YES}|{C_ON}|{C_ENABLED}|{C_TRUE} 	{
+	{T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE} 	{
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 1;		
-		return C_TRUTHY;
+		return T_TRUTHY;
 	}
-	{C_NO}|{C_OFF}|{C_DISABLED}|{C_FALSE} {
+	{T_NO}|{T_OFF}|{T_DISABLED}|{T_FALSE} {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 0;
-		return C_FALSY;
+		return T_FALSY;
 	}
 	{DIGITS}         {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
 		return T_DIGITS;
-	}
-	{NUMERIC_METHOD}	{
-		phpdbg_init_param(yylval, NUMERIC_METHOD_PARAM);
-		yylval->method.class = "class";
-		yylval->method.name = "func";
-		yylval->num = 0;
-		return T_METHOD; 
-	}
-	{NUMERIC_FUNCTION}	{
-		phpdbg_init_param(yylval, NUMERIC_FUNCTION_PARAM);
-		yylval->str = strndup(yytext, yyleng);
-		yylval->len = yyleng;
-		yylval->num = 0;
-		return T_ID; 
-	}
-	{METHOD}		{
-		phpdbg_init_param(yylval, METHOD_PARAM);
-		yylval->method.class = "class";
-		yylval->method.name = "func";
-		return T_METHOD; 
-	}
-	{FILE}			{
-		phpdbg_init_param(yylval, FILE_PARAM);
-		yylval->file.name = strndup(yytext, yyleng);
-		yylval->file.line = 0;
-		return T_FILE;
 	}
 	{OPLINE}		{
 		phpdbg_init_param(yylval, ADDR_PARAM);
@@ -114,7 +87,7 @@ INPUT				[^\n]+
 		yylval->len = yyleng;
 		return T_LITERAL; 
 	}
-	{NSID}			{
+	{ID}			{
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;
