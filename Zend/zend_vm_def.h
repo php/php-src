@@ -1844,7 +1844,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	ZVAL_COPY_VALUE(&EX(object), &EX(call)->object);
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
@@ -3485,7 +3485,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -4188,7 +4188,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				FREE_OP1_VAR_PTR();
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
@@ -4676,7 +4676,7 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 ZEND_VM_HANDLER(142, ZEND_RAISE_ABSTRACT_ERROR, ANY, ANY)
 {
 	SAVE_OPLINE();
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name, EX(op_array)->function_name);
+	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name->val, EX(op_array)->function_name->val);
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
@@ -4944,7 +4944,7 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 	}
 
 	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name->val, iface->name->val);
 	}
 	zend_do_implement_interface(ce, iface TSRMLS_CC);
 
@@ -4970,7 +4970,7 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
 			ZEND_VM_NEXT_OPCODE();
 		}
 		if (!((trait->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)) {
-			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name, trait->name);
+			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name->val, trait->name->val);
 		}
 		CACHE_PTR(opline->op2.literal->cache_slot, trait);
 	}

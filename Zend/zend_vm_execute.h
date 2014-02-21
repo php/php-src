@@ -478,7 +478,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	ZVAL_COPY_VALUE(&EX(object), &EX(call)->object);
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
@@ -1003,7 +1003,7 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 static int ZEND_FASTCALL  ZEND_RAISE_ABSTRACT_ERROR_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	SAVE_OPLINE();
-	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name, EX(op_array)->function_name);
+	zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EG(scope)->name->val, EX(op_array)->function_name->val);
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
@@ -1125,7 +1125,7 @@ static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZEND_VM_NEXT_OPCODE();
 		}
 		if (!((trait->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)) {
-			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name, trait->name);
+			zend_error_noreturn(E_ERROR, "%s cannot use %s - it is not a trait", ce->name->val, trait->name->val);
 		}
 		CACHE_PTR(opline->op2.literal->cache_slot, trait);
 	}
@@ -1684,7 +1684,7 @@ static int ZEND_FASTCALL  ZEND_ADD_INTERFACE_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	}
 
 	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
-		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name, iface->name);
+		zend_error_noreturn(E_ERROR, "%s cannot implement %s - it is not an interface", ce->name->val, iface->name->val);
 	}
 	zend_do_implement_interface(ce, iface TSRMLS_CC);
 
@@ -2724,7 +2724,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -3032,7 +3032,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
@@ -7721,7 +7721,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -8029,7 +8029,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
@@ -12752,7 +12752,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -13060,7 +13060,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
@@ -23207,7 +23207,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -29408,7 +29408,7 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
 	if (UNEXPECTED(clone_call == NULL)) {
 		if (ce) {
-			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name->val);
 		} else {
 			zend_error_noreturn(E_ERROR, "Trying to clone an uncloneable object");
 		}
@@ -29716,7 +29716,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 			}
 			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
