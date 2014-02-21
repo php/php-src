@@ -176,7 +176,9 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 
 	while (param_count-->0) {
 		zval *param = p-(arg_count--);
-		Z_ADDREF_P(param);
+		if (Z_REFCOUNTED_P(param)) {
+			Z_ADDREF_P(param);
+		}
 		add_next_index_zval(argument_array, param);
 	}
 
