@@ -135,27 +135,27 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
 							fprintf(handle,
-								"break file %s:%lu\n",
+								"break %s:%lu\n",
 								((phpdbg_breakfile_t*)brake)->filename,
 								((phpdbg_breakfile_t*)brake)->line);
 						} break;
 
 						case PHPDBG_BREAK_SYM: {
 							fprintf(handle,
-								"break func %s\n",
+								"break %s\n",
 								((phpdbg_breaksymbol_t*)brake)->symbol);
 						} break;
 
 						case PHPDBG_BREAK_METHOD: {
 							fprintf(handle,
-								"break method %s::%s\n",
+								"break %s::%s\n",
 								((phpdbg_breakmethod_t*)brake)->class_name,
 								((phpdbg_breakmethod_t*)brake)->func_name);
 						} break;
 
 						case PHPDBG_BREAK_METHOD_OPLINE: {
 							fprintf(handle,
-								"break address %s::%s#%ld\n",
+								"break %s::%s#%ld\n",
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
@@ -163,21 +163,21 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 
 						case PHPDBG_BREAK_FUNCTION_OPLINE: {
 							fprintf(handle,
-								"break address %s#%ld\n",
+								"break %s#%ld\n",
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
 							fprintf(handle,
-								"break address %s:%ld\n",
+								"break %s:#%ld\n",
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_OPCODE: {
 							fprintf(handle,
-								"break op %s\n",
+								"break %s\n",
 								((phpdbg_breakop_t*)brake)->name);
 						} break;
 
@@ -209,7 +209,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 								}
 							} else {
 								fprintf(
-									handle, "break on %s\n", conditional->code);
+									handle, "break if %s\n", conditional->code);
 							}
 						} break;
 					}
