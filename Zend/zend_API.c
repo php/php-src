@@ -2602,7 +2602,7 @@ ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_c
 		lcname = STR_ALLOC(name_len, 1);
 		zend_str_tolower_copy(lcname->val, name, name_len);
 	}
-	ce = zend_hash_add_ptr(CG(class_table), lcname, &ce);
+	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);
 	STR_RELEASE(lcname);
 	if (ce) {
 		ce->refcount++;
