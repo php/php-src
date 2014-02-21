@@ -394,8 +394,8 @@ static inline void init_handshake_limiting(php_stream *stream, php_openssl_netst
 		SUCCESS == php_stream_context_get_option(stream->context,
 				"ssl", "reneg_limit", &val)
 	) {
-		convert_to_long(*val);
-		limit = Z_LVAL_PP(val);
+		convert_to_int(*val);
+		limit = Z_IVAL_PP(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -407,8 +407,8 @@ static inline void init_handshake_limiting(php_stream *stream, php_openssl_netst
 		SUCCESS == php_stream_context_get_option(stream->context,
 				"ssl", "reneg_window", &val)
 	) {
-		convert_to_long(*val);
-		window = Z_LVAL_PP(val);
+		convert_to_int(*val);
+		window = Z_IVAL_PP(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
