@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 
 - OPCache
   . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
 - Openssl:
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).

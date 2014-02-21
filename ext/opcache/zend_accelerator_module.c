@@ -444,6 +444,14 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Free memory", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
+				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+				php_info_print_table_row(2, "Interned Strings Used memory", buf);
+				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+				php_info_print_table_row(2, "Interned Strings Free memory", buf);
+			}
+#endif
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
@@ -573,6 +581,20 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
 	add_assoc_zval(return_value, "memory_usage", memory_usage);
 
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
+		zval *interned_strings_usage;
+
+		MAKE_STD_ZVAL(interned_strings_usage);
+		array_init(interned_strings_usage);
+		add_assoc_long(interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
+		add_assoc_long(interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+		add_assoc_long(interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+		add_assoc_long(interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
+		add_assoc_zval(return_value, "interned_strings_usage", interned_strings_usage);
+	}
+#endif
+	
 	/* Accelerator statistics */
 	MAKE_STD_ZVAL(statistics);
 	array_init(statistics);
