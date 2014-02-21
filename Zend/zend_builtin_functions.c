@@ -1003,7 +1003,7 @@ ZEND_FUNCTION(get_object_vars)
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
 				zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
 				/* Not separating references */
-				Z_ADDREF_P(value);
+				if (IS_REFCOUNTED(Z_TYPE_P(value))) Z_ADDREF_P(value);
 				add_assoc_zval_ex(return_value, prop_name, prop_len, value);
 			}
 		}
