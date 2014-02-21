@@ -27,7 +27,8 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define ACCELERATOR_VERSION "7.0.3"
+#define PHP_ZENDOPCACHE_VERSION "7.0.4-dev"
+#define ACCELERATOR_VERSION PHP_ZENDOPCACHE_VERSION
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
