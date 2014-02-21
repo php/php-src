@@ -398,7 +398,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		} else {
 			/* try lowercase */
 			zend_str_tolower(lcname->val + prefix_len + 1, const_name_len);
-			lcname->h = 0; // reuse ???
+			STR_FORGET_HASH_VAL(lcname);
 			if ((c = zend_hash_find_ptr(EG(zend_constants), lcname)) != NULL) {
 				if ((c->flags & CONST_CS) == 0) {
 					found_const = 1;
@@ -478,8 +478,8 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	} else {
 		char *slash = strrchr(c->name->val, '\\');
 		if (slash) {
-			lowercase_name = STR_ALLOC(c->name->len, c->flags & CONST_PERSISTENT);
-			zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
+			lowercase_name = STR_INIT(c->name->val, c->name->len, c->flags & CONST_PERSISTENT);
+			zend_str_tolower(lowercase_name->val, slash - c->name->val);
 			lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 			name = lowercase_name;
 		} else {
