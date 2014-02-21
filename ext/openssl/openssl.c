@@ -83,6 +83,15 @@
 #define HAVE_EVP_PKEY_EC 1
 #endif
 
+#define PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH 9
+#define PHP_OPENSSL_DEFAULT_STREAM_CIPHERS "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:" \
+	"ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:" \
+	"DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:" \
+	"ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:" \
+	"ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:" \
+	"DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:" \
+	"AES256-GCM-SHA384:AES128:AES256:HIGH:!SSLv2:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!RC4:!ADH"
+
 /* FIXME: Use the openssl constants instead of
  * enum. It is now impossible to match real values
  * against php constants. Also sorry to break the
@@ -424,11 +433,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
     ZEND_ARG_INFO(0, spki)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_get_cert_locations, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+
 /* spki functions */
 	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
 	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
@@ -1153,6 +1167,10 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_INT_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_INT_CONSTANT("OPENSSL_PKCS1_OAEP_PADDING", RSA_PKCS1_OAEP_PADDING, CONST_CS|CONST_PERSISTENT);
 
+	/* Informational stream wrapper constants */
+	REGISTER_STRING_CONSTANT("OPENSSL_DEFAULT_STREAM_CIPHERS", PHP_OPENSSL_DEFAULT_STREAM_CIPHERS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH", PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH, CONST_CS|CONST_PERSISTENT);
+
 	/* Ciphers */
 #ifndef OPENSSL_NO_RC2
 	REGISTER_INT_CONSTANT("OPENSSL_CIPHER_RC2_40", PHP_OPENSSL_CIPHER_RC2_40, CONST_CS|CONST_PERSISTENT);
@@ -1208,6 +1226,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("tlsv1.0", php_openssl_ssl_socket_factory TSRMLS_CC);
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory TSRMLS_CC);
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory TSRMLS_CC);
@@ -1253,6 +1272,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #endif
 	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
+	php_stream_xport_unregister("tlsv1.0" TSRMLS_CC);
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	php_stream_xport_unregister("tlsv1.1" TSRMLS_CC);
 	php_stream_xport_unregister("tlsv1.2" TSRMLS_CC);
@@ -1268,6 +1288,26 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 /* }}} */
 
 /* {{{ x509 cert functions */
+
+/* {{{ proto array openssl_get_cert_locations(void)
+   Retrieve an array mapping available certificate locations */
+PHP_FUNCTION(openssl_get_cert_locations)
+{
+	array_init(return_value);
+
+	add_assoc_string(return_value, "default_cert_file", (char *) X509_get_default_cert_file(), 1);
+	add_assoc_string(return_value, "default_cert_file_env", (char *) X509_get_default_cert_file_env(), 1);
+	add_assoc_string(return_value, "default_cert_dir", (char *) X509_get_default_cert_dir(), 1);
+	add_assoc_string(return_value, "default_cert_dir_env", (char *) X509_get_default_cert_dir_env(), 1);
+	add_assoc_string(return_value, "default_private_dir", (char *) X509_get_default_private_dir(), 1);
+	add_assoc_string(return_value, "default_default_cert_area", (char *) X509_get_default_cert_area(), 1);
+	add_assoc_string(return_value, "ini_cafile",
+		zend_ini_string("openssl.cafile", sizeof("openssl.cafile"), 0), 1);
+	add_assoc_string(return_value, "ini_capath",
+		zend_ini_string("openssl.capath", sizeof("openssl.capath"), 0), 1);
+}
+/* }}} */
+
 
 /* {{{ php_openssl_x509_from_zval
 	Given a zval, coerce it into an X509 object.
@@ -5459,6 +5499,8 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		if (GET_VER_OPT("verify_depth")) {
 			convert_to_int_ex(val);
 			SSL_CTX_set_verify_depth(ctx, Z_IVAL_PP(val));
+		} else {
+			SSL_CTX_set_verify_depth(ctx, PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH);
 		}
 	}
 
@@ -5470,7 +5512,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
 	if (!cipherlist) {
-		cipherlist = "DEFAULT";
+		cipherlist = PHP_OPENSSL_DEFAULT_STREAM_CIPHERS;
 	}
 	if (SSL_CTX_set_cipher_list(ctx, cipherlist) != 1) {
 		return NULL;
