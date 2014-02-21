@@ -51,7 +51,7 @@
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
-php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
+extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 int php_openssl_get_x509_list_id(void);
 
 php_stream_ops php_openssl_socket_ops;
@@ -536,7 +536,11 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		}
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 	sslsock->ctx = SSL_CTX_new(method);
+#else
+	sslsock->ctx = SSL_CTX_new((SSL_METHOD*)method);
+#endif
 	if (sslsock->ctx == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create an SSL context");
 		return -1;
@@ -638,8 +642,10 @@ static zval *php_capture_ssl_session_meta(SSL *ssl_handle)
 	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl_handle);
 
 	switch (proto) {
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 		case TLS1_2_VERSION: proto_str = "TLSv1.2"; break;
 		case TLS1_1_VERSION: proto_str = "TLSv1.1"; break;
+#endif
 		case TLS1_VERSION: proto_str = "TLSv1"; break;
 		case SSL3_VERSION: proto_str = "SSLv3"; break;
 		case SSL2_VERSION: proto_str = "SSLv2"; break;
