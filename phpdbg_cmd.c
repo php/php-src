@@ -236,6 +236,11 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 			dest->str = estrndup(src->str, src->len);
 			dest->len = src->len;
 		break;
+		
+		case OP_PARAM:
+			dest->str = estrndup(src->str, src->len);
+			dest->len = src->len;
+		break;
 
 		case ADDR_PARAM:
 			dest->addr = src->addr;
@@ -250,6 +255,7 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 			dest->method.name = estrdup(src->method.name);
 		break;
 
+		case NUMERIC_FILE_PARAM:
 		case FILE_PARAM:
 			dest->file.name = estrdup(src->file.name);
 			dest->file.line = src->file.line;
@@ -712,7 +718,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 
 /* {{{ */
 PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
-	phpdbg_param_t *command = NULL;
+	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
 	
 	if (stack->type != STACK_PARAM) {
@@ -727,22 +733,22 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 		return FAILURE;
 	}
 	
-	command = (phpdbg_param_t*) stack->next;
+	top = (phpdbg_param_t*) stack->next;
 	
-	switch (command->type) {
+	switch (top->type) {
 		case EVAL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(eval)(command TSRMLS_CC);
+			return PHPDBG_COMMAND_HANDLER(eval)(top TSRMLS_CC);
 		
 		case SHELL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(shell)(command TSRMLS_CC);
+			return PHPDBG_COMMAND_HANDLER(shell)(top TSRMLS_CC);
 		
 		case STR_PARAM: {
 			handler = phpdbg_stack_resolve(
-				phpdbg_prompt_commands, NULL, &command, why);
+				phpdbg_prompt_commands, NULL, &top, why);
 			
 			if (handler) {
-				if (phpdbg_stack_verify(handler, &command, why) == SUCCESS) {
-					return handler->handler(command TSRMLS_CC);
+				if (phpdbg_stack_verify(handler, &top, why) == SUCCESS) {
+					return handler->handler(top TSRMLS_CC);
 				}
 			}
 		} return FAILURE;

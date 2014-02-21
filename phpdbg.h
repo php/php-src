@@ -181,7 +181,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 
 	phpdbg_command_t *lcmd;                      /* last command */
-	phpdbg_param_t lparam;                       /* last param */
+	phpdbg_param_t    lparam;                    /* last param */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */

@@ -38,8 +38,6 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 
-int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
-void phpdbg_stack_free(phpdbg_param_t *stack);
 int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 
 /* {{{ command declarations */
