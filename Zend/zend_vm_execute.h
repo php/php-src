@@ -3915,7 +3915,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -3931,7 +3931,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -4754,7 +4754,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -4770,7 +4770,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -5558,7 +5558,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -5574,7 +5574,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -6214,7 +6214,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -6230,7 +6230,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -7096,7 +7096,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -7112,7 +7112,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -8866,7 +8866,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -8882,7 +8882,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -9680,7 +9680,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -9696,7 +9696,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -10492,7 +10492,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -10508,7 +10508,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -11037,7 +11037,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -11053,7 +11053,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -11848,7 +11848,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -11864,7 +11864,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -15108,7 +15108,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -15124,7 +15124,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -17238,7 +17238,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -17254,7 +17254,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -19420,7 +19420,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -19436,7 +19436,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -20763,7 +20763,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -20779,7 +20779,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -22679,7 +22679,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -22695,7 +22695,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -31418,7 +31418,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -31434,7 +31434,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -33422,7 +33422,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -33438,7 +33438,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -35478,7 +35478,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -35494,7 +35494,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -36702,7 +36702,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -36718,7 +36718,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -38479,7 +38479,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		if (Z_COUNTED_P(expr_ptr)) {
+		if (Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
@@ -38495,7 +38495,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
+		} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
