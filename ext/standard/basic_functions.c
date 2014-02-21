@@ -4970,6 +4970,7 @@ void user_shutdown_function_dtor(zval *zv) /* {{{ */
 		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
 	}
 	efree(shutdown_function_entry->arguments);
+	efree(shutdown_function_entry);
 }
 /* }}} */
 
@@ -4984,8 +4985,9 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 }
 /* }}} */
 
-static int user_shutdown_function_call(php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC) /* {{{ */
+static int user_shutdown_function_call(zval *zv TSRMLS_DC) /* {{{ */
 {
+    php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
 	char *function_name;
 

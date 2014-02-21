@@ -3791,7 +3791,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		if (parent_ce->default_static_members_count) {
 			int i = ce->default_static_members_count + parent_ce->default_static_members_count;
 
-			ce->default_static_members_table = erealloc(ce->default_static_members_table, sizeof(void*) * i);
+			ce->default_static_members_table = erealloc(ce->default_static_members_table, sizeof(zval) * i);
 			if (ce->default_static_members_count) {
 				while (i-- > parent_ce->default_static_members_count) {
 					ce->default_static_members_table[i] = ce->default_static_members_table[i - parent_ce->default_static_members_count];
@@ -3809,7 +3809,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		if (parent_ce->default_static_members_count) {
 			int i = ce->default_static_members_count + parent_ce->default_static_members_count;
 
-			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(void*) * i, ce->type == ZEND_INTERNAL_CLASS);
+			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * i, ce->type == ZEND_INTERNAL_CLASS);
 			if (ce->default_static_members_count) {
 				while (i-- > parent_ce->default_static_members_count) {
 					ce->default_static_members_table[i] = ce->default_static_members_table[i - parent_ce->default_static_members_count];
@@ -5434,7 +5434,6 @@ void zend_do_declare_property(znode *var_name, const znode *value, zend_uint acc
 void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_DC) /* {{{ */
 {
 	zval property;
-	zend_string *cname = NULL;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
@@ -5447,8 +5446,8 @@ void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_D
 
 	ZVAL_COPY_VALUE(&property, &value->u.constant);
 
-	cname = zend_new_interned_string(Z_STR(var_name->u.constant) TSRMLS_CC);
-	if (zend_hash_add(&CG(active_class_entry)->constants_table, cname, &property) == NULL) {
+	Z_STR(var_name->u.constant) = zend_new_interned_string(Z_STR(var_name->u.constant) TSRMLS_CC);
+	if (zend_hash_add(&CG(active_class_entry)->constants_table, Z_STR(var_name->u.constant), &property) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s", CG(active_class_entry)->name->val, Z_STRVAL(var_name->u.constant));
 	}
 	FREE_PNODE(var_name);

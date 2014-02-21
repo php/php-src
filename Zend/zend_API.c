@@ -2720,13 +2720,13 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope);
-			if (!fcc->object_ptr) {
+			if (!fcc->object_ptr && Z_TYPE(EG(This)) == IS_OBJECT) {
 				fcc->object_ptr = &EG(This);
 			}
 			ret = 1;
 		}
 	} else if (name_len == sizeof("parent") - 1 && 
-		       !memcmp(lcname, "parent", sizeof("parent") - 1)) {
+		       !memcmp(lcname->val, "parent", sizeof("parent") - 1)) {
 		if (!EG(scope)) {
 			if (error) *error = estrdup("cannot access parent:: when no class scope is active");
 		} else if (!EG(scope)->parent) {
@@ -2734,20 +2734,20 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope)->parent;
-			if (!fcc->object_ptr) {
+			if (!fcc->object_ptr && Z_TYPE(EG(This)) == IS_OBJECT) {
 				fcc->object_ptr = &EG(This);
 			}
 			*strict_class = 1;
 			ret = 1;
 		}
 	} else if (name_len == sizeof("static") - 1 &&
-	           !memcmp(lcname, "static", sizeof("static") - 1)) {
+	           !memcmp(lcname->val, "static", sizeof("static") - 1)) {
 		if (!EG(called_scope)) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(called_scope);
-			if (!fcc->object_ptr) {
+			if (!fcc->object_ptr && Z_TYPE(EG(This)) == IS_OBJECT) {
 				fcc->object_ptr = &EG(This);
 			}
 			*strict_class = 1;
@@ -2770,7 +2770,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	} else {
 		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, name->val);
 	}
-	efree(lcname);
+	STR_FREE(lcname);
 	return ret;
 }
 /* }}} */
@@ -2779,7 +2779,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	int retval = 0;
-	zend_string *mname;
+	zend_string *mname, *cname;
 	zend_string *lmname;
 	const char *colon;
 	int clen, mlen;
@@ -2834,10 +2834,13 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			EG(scope) = ce_org;
 		}
 
-		if (!zend_is_callable_check_class(Z_STR_P(callable), fcc, &strict_class, error TSRMLS_CC)) {
+		cname = STR_INIT(Z_STRVAL_P(callable), clen, 0);
+		if (!zend_is_callable_check_class(cname, fcc, &strict_class, error TSRMLS_CC)) {
+			STR_RELEASE(cname);
 			EG(scope) = last_scope;
 			return 0;
 		}
+		STR_RELEASE(cname);
 		EG(scope) = last_scope;
 
 		ftable = &fcc->calling_scope->function_table;
@@ -3024,12 +3027,13 @@ get_function_via_handler:
 		}
 	} else if (error && !(check_flags & IS_CALLABLE_CHECK_SILENT)) {
 		if (fcc->calling_scope) {
-			if (error) zend_spprintf(error, 0, "class '%s' does not have a method '%s'", fcc->calling_scope->name, mname);
+			if (error) zend_spprintf(error, 0, "class '%s' does not have a method '%s'", fcc->calling_scope->name->val, mname->val);
 		} else {
-			if (error) zend_spprintf(error, 0, "function '%s' does not exist", mname);
+			if (error) zend_spprintf(error, 0, "function '%s' does not exist", mname->val);
 		}
 	}
-	efree(lmname);
+	STR_FREE(lmname);
+	STR_RELEASE(mname);
 
 	if (fcc->object_ptr) {
 		fcc->called_scope = Z_OBJCE_P(fcc->object_ptr);
