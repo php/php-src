@@ -3149,7 +3149,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						}
 
 					} else {
-						if (!!EG(objects_store).object_buckets ||
+						if (!EG(objects_store).object_buckets ||
 						    !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
 							return 0;
 						}

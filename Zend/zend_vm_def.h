@@ -1025,7 +1025,9 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -1060,30 +1062,33 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	if (OP1_TYPE != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
-		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
+		} 
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
