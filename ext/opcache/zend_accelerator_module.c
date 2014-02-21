@@ -591,10 +591,10 @@ static ZEND_FUNCTION(opcache_get_status)
 
 		MAKE_STD_ZVAL(interned_strings_usage);
 		array_init(interned_strings_usage);
-		add_assoc_long(interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
-		add_assoc_long(interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
-		add_assoc_long(interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
-		add_assoc_long(interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
+		add_assoc_int(interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
+		add_assoc_int(interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+		add_assoc_int(interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+		add_assoc_int(interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
 		add_assoc_zval(return_value, "interned_strings_usage", interned_strings_usage);
 	}
 #endif
@@ -797,7 +797,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 static ZEND_FUNCTION(opcache_is_script_cached)
 {
 	char *script_name;
-	int script_name_len;
+	zend_size_t script_name_len;
 
 	if (!validate_api_restriction(TSRMLS_C)) {
 		RETURN_FALSE;
@@ -807,7 +807,7 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &script_name, &script_name_len) == FAILURE) {
 		return;
 	}
 
