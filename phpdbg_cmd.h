@@ -43,6 +43,8 @@ typedef enum {
 	EVAL_PARAM,
 	SHELL_PARAM,
 	COND_PARAM,
+	OP_PARAM,
+	OPLINE_PARAM,
 	ORIG_PARAM
 } phpdbg_param_type;
 

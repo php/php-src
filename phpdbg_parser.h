@@ -58,15 +58,17 @@ typedef void* yyscan_t;
      T_TRUTHY = 261,
      T_FALSY = 262,
      T_STRING = 263,
-     T_COLON = 264,
-     T_DCOLON = 265,
-     T_POUND = 266,
-     T_DIGITS = 267,
-     T_LITERAL = 268,
-     T_OPLINE = 269,
-     T_ID = 270,
-     T_INPUT = 271,
-     T_UNEXPECTED = 272
+     T_SQUIGGLE = 264,
+     T_COLON = 265,
+     T_DCOLON = 266,
+     T_POUND = 267,
+     T_DIGITS = 268,
+     T_LITERAL = 269,
+     T_ADDR = 270,
+     T_OPCODE = 271,
+     T_ID = 272,
+     T_INPUT = 273,
+     T_UNEXPECTED = 274
    };
 #endif
 

@@ -57,13 +57,15 @@ typedef void* yyscan_t;
 %token T_TRUTHY		"truthy (true, on, yes or enabled)"
 %token T_FALSY		"falsy (false, off, no or disabled)"
 %token T_STRING		"string (some input, perhaps)"
+%token T_SQUIGGLE	"~ (squiggle)"
 %token T_COLON		": (colon)"
 %token T_DCOLON		":: (double colon)"
 %token T_POUND		"# (pound sign)"
 
 %token T_DIGITS	 			"digits (numbers)"
 %token T_LITERAL 			"literal (string)"
-%token T_OPLINE	 			"opline"
+%token T_ADDR	 			"address"
+%token T_OPCODE				"opcode"
 %token T_ID		 			"identifier (command or function name)"
 %token T_INPUT	 			"input (input string or data)"
 %token T_UNEXPECTED 		"input"
@@ -80,7 +82,11 @@ parameters
 	;
 
 parameter
-	: T_ID T_COLON T_DIGITS					{ 	
+	: T_SQUIGGLE T_DIGITS					{
+		$$.type = OPLINE_PARAM;
+		$$.num = $2.num; 
+	}
+	| T_ID T_COLON T_DIGITS					{ 	
 		$$.type = FILE_PARAM;
 		$$.file.name = $1.str;
 		$$.file.line = $3.num;
@@ -117,7 +123,8 @@ parameter
 		$$.str = $2.str;
 		$$.len = $2.len;
 	}
-	| T_OPLINE								{ $$ = $1; }
+	| T_OPCODE								{ $$ = $1; }
+	| T_ADDR								{ $$ = $1; }
 	| T_LITERAL								{ $$ = $1; }
 	| T_TRUTHY								{ $$ = $1; }
 	| T_FALSY								{ $$ = $1; }

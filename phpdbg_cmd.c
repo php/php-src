@@ -442,6 +442,14 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 				fprintf(stderr, "%s COND_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
 			
+			case OP_PARAM:
+				fprintf(stderr, "%s OP_PARAM(%s=%lu)\n", msg, param->str, param->len);
+			break;
+			
+			case OPLINE_PARAM:
+				fprintf(stderr, "%s OPLINE_PARAM(%ld)\n", msg, param->num);
+			break;
+			
 			default: {
 				/* not yet */
 			}
@@ -571,6 +579,8 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 				case 'a': verify_arg("address", top, ADDR_PARAM); break;
 				case 'f': verify_arg("file:line", top, FILE_PARAM); break;
 				case 'c': verify_arg("condition", top, COND_PARAM); break;
+				case 'o': verify_arg("opcode", top, OP_PARAM); break;
+				case 'O': verify_arg("opline", top, OPLINE_PARAM); break;
 				case 'b': verify_arg("boolean", top, NUMERIC_PARAM); break;
 				
 				case '*': { /* do nothing */ } break;

@@ -268,28 +268,7 @@ static PHP_FUNCTION(phpdbg_break)
 		}
 
 		phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
-
-		switch (type) {
-			case METHOD_PARAM:
-				phpdbg_do_break_method(&param TSRMLS_CC);
-				break;
-
-			case FILE_PARAM:
-				phpdbg_do_break_file(&param TSRMLS_CC);
-				break;
-
-			case NUMERIC_PARAM:
-				phpdbg_do_break_lineno(&param TSRMLS_CC);
-				break;
-
-			case STR_PARAM:
-				phpdbg_do_break_func(&param TSRMLS_CC);
-				break;
-
-			default: zend_error(
-							 E_WARNING, "unrecognized parameter type %ld", type);
-		}
-
+		phpdbg_do_break(&param TSRMLS_CC);
 		phpdbg_clear_param(&param TSRMLS_CC);
 
 	} else if (EG(current_execute_data) && EG(active_op_array)) {

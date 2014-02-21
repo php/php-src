@@ -35,8 +35,9 @@ T_IF				?i:"if"
 
 WS          		[ \r\n\t]+
 DIGITS				[0-9\.]+
-ID					[^ \r\n\t:#]+
-OPLINE				0x[a-fA-F0-9]+
+ID					[^ \r\n\t:#~]+
+ADDR				0x[a-fA-F0-9]+
+OPCODE				ZEND_([A-Z])+
 LITERAL				\"(\\.|[^\\"])*\"
 INPUT				[^\n]+
 %%
@@ -45,7 +46,7 @@ INPUT				[^\n]+
 	[#]{1}		{ return T_POUND;  }
 	[:]{2}		{ return T_DCOLON; }
 	[:]{1}		{ return T_COLON;  }
-	
+	[~]{1}		{ return T_SQUIGGLE; }
 	{T_EVAL}		{
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -76,10 +77,16 @@ INPUT				[^\n]+
 		yylval->num = atoi(yytext);
 		return T_DIGITS;
 	}
-	{OPLINE}		{
+	{ADDR}		{
 		phpdbg_init_param(yylval, ADDR_PARAM);
 		yylval->addr = strtoul(yytext, NULL, 10);
-		return T_OPLINE; 
+		return T_ADDR; 
+	}
+	{OPCODE}	{
+		phpdbg_init_param(yylval, OP_PARAM);
+		yylval->str = strndup(yytext, yyleng);
+		yylval->len = yyleng;
+		return T_OPCODE;
 	}
 	{LITERAL}		{
 		phpdbg_init_param(yylval, STR_PARAM);

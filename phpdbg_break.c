@@ -35,64 +35,15 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
  * Commands
  */
 const phpdbg_command_t phpdbg_break_commands[] = {
-	PHPDBG_BREAK_COMMAND_D(file,        "specify breakpoint by file:line",                        'F', break_file,    NULL, "f"),
-	PHPDBG_BREAK_COMMAND_D(func,        "specify breakpoint by global function name",             'f', break_func,    NULL, "s"),
-	PHPDBG_BREAK_COMMAND_D(method,      "specify breakpoint by class::method",                    'm', break_method,  NULL, "m"),
-	PHPDBG_BREAK_COMMAND_D(address,     "specify breakpoint by address",                          'a', break_address, NULL, "a"),
-	PHPDBG_BREAK_COMMAND_D(op,          "specify breakpoint by opcode",                           'o', break_op,      NULL, "s"),
-	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",            'A', break_at,      NULL, "*c"),
-	PHPDBG_BREAK_COMMAND_D(lineno,      "specify breakpoint by line of currently executing file", 'l', break_lineno,  NULL, "n"),
-	PHPDBG_BREAK_COMMAND_D(del,         "delete breakpoint by identifier number",                 'd', break_del,     NULL, "n"),
+	PHPDBG_BREAK_COMMAND_D(address,    "specify breakpoint by address",                          'a', break_address, NULL, "f"),
+	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",           'A', break_at,      NULL, "*c"),
+	PHPDBG_BREAK_COMMAND_D(del,        "delete breakpoint by identifier number",                 'd', break_del,     NULL, "n"),
 	PHPDBG_END_COMMAND
 };
 
-PHPDBG_BREAK(file) /* {{{ */
-{
-	switch (param->type) {
-		case FILE_PARAM:
-			phpdbg_set_breakpoint_file(param->file.name, param->file.line TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_BREAK(method) /* {{{ */
-{
-	switch (param->type) {
-		case METHOD_PARAM:
-			phpdbg_set_breakpoint_method(param->method.class, param->method.name TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
-	
-	return SUCCESS;
-} /* }}} */
-
 PHPDBG_BREAK(address) /* {{{ */
 {
-	switch (param->type) {
-		case ADDR_PARAM:
-			phpdbg_set_breakpoint_opline(param->addr TSRMLS_CC);
-			break;
-
-		case NUMERIC_METHOD_PARAM:
-			phpdbg_set_breakpoint_method_opline(param->method.class, param->method.name, param->num TSRMLS_CC);
-			break;
-
-		case NUMERIC_FUNCTION_PARAM:
-			phpdbg_set_breakpoint_function_opline(param->str, param->num TSRMLS_CC);
-			break;			
-
-		case FILE_PARAM:
-			phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
+	phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
@@ -104,58 +55,9 @@ PHPDBG_BREAK(at) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_BREAK(lineno) /* {{{ */
-{
-	switch (param->type) {
-		case NUMERIC_PARAM: {
-			if (PHPDBG_G(exec)) {
-				phpdbg_set_breakpoint_file(phpdbg_current_file(TSRMLS_C), param->num TSRMLS_CC);
-			} else {
-				phpdbg_error("Execution context not set!");
-			}
-		} break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_BREAK(func) /* {{{ */
-{
-	switch (param->type) {
-		case STR_PARAM:
-			phpdbg_set_breakpoint_symbol(param->str, param->len TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_BREAK(op) /* {{{ */
-{
-	switch (param->type) {
-		case STR_PARAM:
-			phpdbg_set_breakpoint_opcode(param->str, param->len TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
-
-	return SUCCESS;
-} /* }}} */
-
 PHPDBG_BREAK(del) /* {{{ */
 {
-	switch (param->type) {
-		case NUMERIC_PARAM: {
-			phpdbg_delete_breakpoint(param->num TSRMLS_CC);
-		} break;
-
-		phpdbg_default_switch_case();
-	}
+	phpdbg_delete_breakpoint(param->num TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */

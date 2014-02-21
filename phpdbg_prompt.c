@@ -784,6 +784,9 @@ PHPDBG_COMMAND(break) /* {{{ */
 		case STR_PARAM:
 			phpdbg_set_breakpoint_symbol(param->str, param->len TSRMLS_CC);
 			break;
+		case OP_PARAM:
+			phpdbg_set_breakpoint_opcode(param->str, param->len TSRMLS_CC);
+			break;
 
 		phpdbg_default_switch_case();
 	}
