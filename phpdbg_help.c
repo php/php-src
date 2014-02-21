@@ -328,23 +328,23 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
-"  **clean**    clean the execution environment" CR
 "  **run**      attempt execution" CR
-"  **eval**     evaluate some code" CR
 "  **step**     Enable or disable per opcode stepping mode" CR
 "  **next**     continue execution" CR
 "  **until**    continue execution up to the given location" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
-"  **clear**    clear one or all breakpoints" CR CR
+"  **ev**       evaluate some code" CR
+"  **clear**    clear one or all breakpoints" CR
+"  **clean**    clean the execution environment" CR CR
 
 "**Miscellaneous**" CR
 "  **quiet**    silence some output" CR
 "  **set**      set the phpdbg configuration" CR
 "  **source**   execute a phpdbginit script" CR
 "  **register** register a phpdbginit function as a command alias" CR
-"  **shell**    shell a command" CR
+"  **sh**       shell a command" CR
 "  **quit**     exit phpdbg" CR CR
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
@@ -416,7 +416,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"syntax", CR
-"All **phpdbg** commands are case sensitive.  Commands start with a keyword, and some (**break**, "
+"Commands start with a keyword, and some (**break**, "
 "**info**, **set**, **print** and **list**) may include a subcommand keyword.  All keywords are "
 "lower case but also have a single letter alias that may be used as an alternative to typing in the"
 "keyword in full.  Note some aliases are uppercase, and that keywords cannot be abbreviated other "
@@ -444,27 +444,18 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     $P q" CR
 "     Quit the debugger" CR CR
 
-"     $P eval $total[2]" CR
-"     $P E $total[2]" CR
+"     $P ev $total[2]" CR
 "     Evaluate and print the variable $total[2] in the current stack frame" CR
 "    " CR
-"     $P break lineno 200" CR
+"     $P break 200" CR
 "     $P b my_source.php:200" CR
 "     Break at line 200 in the current source and in file **my_source.php**. " CR CR
 
-"     $P b A ClassX::get_args if $arg[0] == \"fred\"" CR
-"     $P b d 3" CR
+"     $P b @ ClassX::get_args if $arg[0] == \"fred\"" CR
+"     $P b ~ 3" CR
 "     Break at ClassX::get_args() if $arg[0] == \"fred\" and delete breakpoint 3" CR CR
 
 "**Examples of invalid commands**" CR
-"     $P break line 23" CR
-"     The command keyword is **lineno**; **line** is not allowed" CR CR
-
-"     $P NEXT" CR
-"     Commands are case sensitive.  The keyword is **next**" CR CR
-
-"     $P s on" CR
-"     **step** takes an integer argument **0** or **1**; on/off is not allowed." CR CR
 
 "     $P #This is a comment" CR
 "     Comments introduced by the **#** character are only allowed in **phpdbginit** script files."
@@ -549,6 +540,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Break when the condition ($cnt > 10) evaluates to true" CR CR
 
 "    $P break at phpdbg::isGreat if $opt == 'S'" CR
+"    $P break @ phpdbg::isGreat if $opt == 'S'" CR
 "    Break at any opcode in phpdbg::isGreat when the condition ($opt == 'S') is true" CR CR
 
 "    $P break at test.php:20 if !isset($x)" CR
@@ -559,7 +551,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Break on any occurence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
-"    $P b d 2" CR
+"    $P b ~ 2" CR
 "    Remove breakpoint 2" CR CR
 
 "Note: Conditional breaks are costly in terms of runtime overhead. Use them only when required "
@@ -600,25 +592,23 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "to compilation."
 },
 
-{"eval",
-"The **eval** command takes a string expression which it evaluates and then displays. It "
+{"ev",
+"The **ev** command takes a string expression which it evaluates and then displays. It "
 "evaluates in the context of the lowest (that is the executing) frame, unless this has first "
 "been explicitly changed by issuing a **frame** command. " CR CR
 
 "**Examples**" CR CR
-"    $P eval $variable" CR
-"    $P E $variable" CR
+"    $P ev $variable" CR
 "    Will print_r($variable) on the console, if it is defined" CR CR
 
-"    $P eval $variable = \"Hello phpdbg :)\"" CR
-"    $P E $variable = \"Hello phpdbg :)\"" CR
+"    $P ev $variable = \"Hello phpdbg :)\"" CR
 "    Will set $variable in the current scope" CR CR
 
-"Note that **eval** allows any valid PHP expression including assignments, function calls and "
+"Note that **ev** allows any valid PHP expression including assignments, function calls and "
 "other write statements.  This enables you to change the environment during execution, so care "
 "is needed here.  You can even call PHP functions which have breakpoints defined. " CR CR
 
-"Note: **eval** will always show the result, so do not prefix the code with **return**"
+"Note: **ev** will always show the result, so do not prefix the code with **return**"
 },
 
 {"exec",
@@ -853,12 +843,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 //*********** check oplog syntax
 },
 
-{"shell",
+{"sh",
 "Direct access to shell commands saves having to switch windows/consoles" CR CR
 
 "**Examples**" CR CR
-"    $P shell ls /usr/src/php-src" CR
-"    $P - ls /usr/src/php-src" CR
+"    $P sh ls /usr/src/php-src" CR
 "    Will execute ls /usr/src/php-src, displaying the output in the console"
 //*********** what does this mean????Note: read only commands please!
 },

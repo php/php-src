@@ -655,8 +655,14 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 				/* match full, case insensitive, command name */
 				if (strncasecmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
-						matched[matches] = command;
-						matches++;
+						
+						/* only allow abbreviating commands that can be aliased */
+						if (((name->len != command->name_len) && command->alias) ||
+							(name->len == command->name_len)) {
+							matched[matches] = command;
+							matches++;
+						}
+						
 						
 						/* exact match */
 						if (name->len == command->name_len)
@@ -748,10 +754,10 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	
 	switch (top->type) {
 		case EVAL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(eval)(top TSRMLS_CC);
+			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
 		
 		case SHELL_PARAM:
-			return PHPDBG_COMMAND_HANDLER(shell)(top TSRMLS_CC);
+			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
 		
 		case STR_PARAM: {
 			handler = phpdbg_stack_resolve(

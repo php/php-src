@@ -47,7 +47,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
-	PHPDBG_COMMAND_D(eval,    "evaluate some code",                       'E', NULL, "i"),
+	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0, NULL, "i"),
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
@@ -62,8 +62,8 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s"),
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
-	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, "s"),
-	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, "i"),
+	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '-', NULL, "s"),
+	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0, NULL, "i"),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
@@ -77,13 +77,17 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 	if (stack->type == STACK_PARAM) {
 		name = stack->next;
 		
+		if (!name || name->type != STR_PARAM) {
+			return FAILURE;
+		}
+		
 		if (zend_hash_exists(
-			&PHPDBG_G(registered), name->str, name->len+1)) {
+				&PHPDBG_G(registered), name->str, name->len+1)) {
 
 			zval fname, *fretval;
 			zend_fcall_info fci;
 
-			ZVAL_STRINGL(&fname, name->str, name->len, 1);
+			ZVAL_STRINGL(&fname, name->str, name->len+1, 1);
 
 			memset(&fci, 0, sizeof(zend_fcall_info));
 
@@ -640,41 +644,35 @@ out:
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_COMMAND(eval) /* {{{ */
+PHPDBG_COMMAND(ev) /* {{{ */
 {
-	switch (param->type) {
-		case EVAL_PARAM: {
-			zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
-			zval retval;
+	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING)==PHPDBG_IS_STEPPING);
+	zval retval;
 
-			if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
-				PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
-			}
-
-			/* disable stepping while eval() in progress */
-			PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
-			zend_try {
-				if (zend_eval_stringl(param->str, param->len,
-					&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-					zend_print_zval_r(
-						&retval, 0 TSRMLS_CC);
-					phpdbg_writeln(EMPTY);
-					zval_dtor(&retval);
-				}
-			} zend_end_try();
-			PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
-
-			/* switch stepping back on */
-			if (stepping &&
-				!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
-				PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-			}
-
-			CG(unclean_shutdown) = 0;
-		} break;
-
-		phpdbg_default_switch_case();
+	if (!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
+		PHPDBG_G(flags) &= ~ PHPDBG_IS_STEPPING;
 	}
+
+	/* disable stepping while eval() in progress */
+	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
+	zend_try {
+		if (zend_eval_stringl(param->str, param->len,
+			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+			zend_print_zval_r(
+				&retval, 0 TSRMLS_CC);
+			phpdbg_writeln(EMPTY);
+			zval_dtor(&retval);
+		}
+	} zend_end_try();
+	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
+
+	/* switch stepping back on */
+	if (stepping &&
+		!(PHPDBG_G(flags) & PHPDBG_IS_STEPONEVAL)) {
+		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	}
+
+	CG(unclean_shutdown) = 0;
 
 	return SUCCESS;
 } /* }}} */
@@ -800,23 +798,17 @@ PHPDBG_COMMAND(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_COMMAND(shell) /* {{{ */
+PHPDBG_COMMAND(sh) /* {{{ */
 {
-	/* don't allow this to loop, ever ... */
-	switch (param->type) {
-		case SHELL_PARAM: {
-			FILE *fd = NULL;
-			if ((fd=VCWD_POPEN((char*)param->str, "w"))) {
-				/* do something perhaps ?? do we want input ?? */
-				fclose(fd);
-			} else {
-				phpdbg_error(
-					"Failed to execute %s", param->str);
-			}
-		} break;
-
-		phpdbg_default_switch_case();
+	FILE *fd = NULL;
+	if ((fd=VCWD_POPEN((char*)param->str, "w"))) {
+		/* do something perhaps ?? do we want input ?? */
+		fclose(fd);
+	} else {
+		phpdbg_error(
+			"Failed to execute %s", param->str);
 	}
+	
 	return SUCCESS;
 } /* }}} */
 

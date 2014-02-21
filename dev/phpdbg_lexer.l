@@ -29,8 +29,8 @@ T_FALSE				?i:"false"
 T_NO				?i:"no"
 T_OFF				?i:"off"
 T_DISABLED			?i:"disabled"
-T_EVAL				?i:"eval"
-T_SHELL				?i:"shell"
+T_EVAL				?i:"ev"
+T_SHELL				?i:"sh"
 T_IF				?i:"if"
 
 WS          		[ \r\n\t]+
