@@ -579,6 +579,7 @@ found:
 						zval_ptr_dtor(&garbage);
 					}
 				}
+				return;
 			}
 		}
 	}

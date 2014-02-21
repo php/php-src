@@ -160,6 +160,7 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	object_properties_init(object, class_type);
 
 	zend_fetch_debug_backtrace(&trace, skip_top_traces, 0, 0 TSRMLS_CC);
+	Z_SET_REFCOUNT(trace, 0);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
@@ -194,19 +195,19 @@ ZEND_METHOD(exception, __clone)
    Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
-	char  *message = NULL;
+	zend_string *message = NULL;
 	long   code = 0;
 	zval  *object, *previous = NULL;
-	int    argc = ZEND_NUM_ARGS(), message_len;
+	int    argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|slO!", &message, &message_len, &code, &previous, default_exception_ce) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|SlO!", &message, &code, &previous, default_exception_ce) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
 	}
 
 	object = getThis();
 
 	if (message) {
-		zend_update_property_stringl(default_exception_ce, object, "message", sizeof("message")-1, message, message_len TSRMLS_CC);
+		zend_update_property_str(default_exception_ce, object, "message", sizeof("message")-1, message TSRMLS_CC);
 	}
 
 	if (code) {
