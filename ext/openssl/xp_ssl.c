@@ -51,7 +51,7 @@
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
-php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
+extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 int php_openssl_get_x509_list_id(void);
 
 php_stream_ops php_openssl_socket_ops;
