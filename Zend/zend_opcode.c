@@ -306,7 +306,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
-				efree((char*)ce->info.user.doc_comment);
+				STR_RELEASE(ce->info.user.doc_comment);
 			}
 			
 			_destroy_zend_class_traits_info(ce);
@@ -392,10 +392,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	efree(op_array->opcodes);
 
 	if (op_array->function_name) {
-		efree((char*)op_array->function_name);
+		STR_RELEASE(op_array->function_name);
 	}
 	if (op_array->doc_comment) {
-		efree((char*)op_array->doc_comment);
+		STR_RELEASE(op_array->doc_comment);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
