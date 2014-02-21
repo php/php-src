@@ -113,20 +113,13 @@ typedef struct {
 } phpdbg_frame_t;
 /* }}} */
 
-
-
 /*
 * Workflow:
-* 1) read input
-*	input takes the line from console, creates argc/argv
-* 2) parse parameters into suitable types based on arg_type
-*	takes input from 1) and arg_type and creates parameters
-* 3) do command
-*	executes commands
-* 4) destroy parameters
-*	cleans up what was allocated by creation of parameters
-* 5) destroy input
-*	cleans up what was allocated by creation of input
+* 1) the lexer/parser creates a stack of commands and arguments from input
+* 2) the commands at the top of the stack are resolved sensibly using aliases, abbreviations and case insensitive matching
+* 3) the remaining arguments in the stack are verified (optionally) against the handlers declared argument specification
+* 4) the handler is called passing the top of the stack as the only parameter
+* 5) the stack is destroyed upon return from the handler
 */
 
 /*
