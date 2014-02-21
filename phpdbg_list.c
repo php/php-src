@@ -71,41 +71,28 @@ PHPDBG_LIST(lines) /* {{{ */
 
 PHPDBG_LIST(func) /* {{{ */
 {
-	switch (param->type) {
-		case STR_PARAM:
-			phpdbg_list_function_byname(
-				param->str, param->len TSRMLS_CC);
-			break;
-
-		phpdbg_default_switch_case();
-	}
+	phpdbg_list_function_byname(param->str, param->len TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_LIST(method) /* {{{ */
 {
-	switch (param->type) {
-		case METHOD_PARAM: {
-			zend_class_entry **ce;
+	zend_class_entry **ce;
 
-			if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
-				zend_function *function;
-				char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
+	if (zend_lookup_class(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+		zend_function *function;
+		char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
-				if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
-					phpdbg_list_function(function TSRMLS_CC);
-				} else {
-					phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
-				}
+		if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
+			phpdbg_list_function(function TSRMLS_CC);
+		} else {
+			phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
+		}
 
-				efree(lcname);
-			} else {
-				phpdbg_error("Could not find the class %s", param->method.class);
-			}
-		} break;
-
-		phpdbg_default_switch_case();
+		efree(lcname);
+	} else {
+		phpdbg_error("Could not find the class %s", param->method.class);
 	}
 
 	return SUCCESS;
@@ -113,30 +100,24 @@ PHPDBG_LIST(method) /* {{{ */
 
 PHPDBG_LIST(class) /* {{{ */
 {
-	switch (param->type) {
-		case STR_PARAM: {
-			zend_class_entry **ce;
+	zend_class_entry **ce;
 
-			if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
-				if ((*ce)->type == ZEND_USER_CLASS) {
-					if ((*ce)->info.user.filename) {
-						phpdbg_list_file(
-							(*ce)->info.user.filename,
-							(*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
-							(*ce)->info.user.line_start, 0 TSRMLS_CC
-						);
-					} else {
-						phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
-					}
-				} else {
-					phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
-				}
+	if (zend_lookup_class(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+		if ((*ce)->type == ZEND_USER_CLASS) {
+			if ((*ce)->info.user.filename) {
+				phpdbg_list_file(
+					(*ce)->info.user.filename,
+					(*ce)->info.user.line_end - (*ce)->info.user.line_start + 1,
+					(*ce)->info.user.line_start, 0 TSRMLS_CC
+				);
 			} else {
-				phpdbg_error("The requested class (%s) could not be found", param->str);
+				phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
 			}
-		} break;
-
-		phpdbg_default_switch_case();
+		} else {
+			phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
+		}
+	} else {
+		phpdbg_error("The requested class (%s) could not be found", param->str);
 	}
 
 	return SUCCESS;
