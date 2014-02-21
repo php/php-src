@@ -602,7 +602,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		}
 
 		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree((char*)fbc->common.function_name);
+			STR_RELEASE(fbc->common.function_name);
 		}
 		efree(fbc);
 

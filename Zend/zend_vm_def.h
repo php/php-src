@@ -1968,7 +1968,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		}
 
 		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree((char*)fbc->common.function_name);
+			STR_RELEASE(fbc->common.function_name);
 		}
 		efree(fbc);
 

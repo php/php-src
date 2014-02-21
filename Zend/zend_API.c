@@ -2929,7 +2929,7 @@ get_function_via_handler:
 					     !instanceof_function(ce_org, fcc->function_handler->common.scope TSRMLS_CC))) {
 						if ((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
 							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-								efree((char*)fcc->function_handler->common.function_name);
+								STR_RELEASE(fcc->function_handler->common.function_name);
 							}
 							efree(fcc->function_handler);
 						}
@@ -2961,7 +2961,7 @@ get_function_via_handler:
 		if (fcc->calling_scope && !call_via_handler) {
 			if (!fcc->object_ptr && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 				if (error) {
-					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
+					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 					retval = 0;
 				} else {
 					zend_error(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
@@ -3008,7 +3008,7 @@ get_function_via_handler:
 							if (*error) {
 								efree(*error);
 							}
-							zend_spprintf(error, 0, "cannot access private method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
+							zend_spprintf(error, 0, "cannot access private method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 						}
 						retval = 0;
 					}
@@ -3018,7 +3018,7 @@ get_function_via_handler:
 							if (*error) {
 								efree(*error);
 							}
-							zend_spprintf(error, 0, "cannot access protected method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
+							zend_spprintf(error, 0, "cannot access protected method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 						}
 						retval = 0;
 					}
@@ -3114,7 +3114,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
 			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
 				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-					efree((char*)fcc->function_handler->common.function_name);
+					STR_RELEASE(fcc->function_handler->common.function_name);
 				}
 				efree(fcc->function_handler);
 			}
@@ -3192,7 +3192,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
 					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
 						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-							efree((char*)fcc->function_handler->common.function_name);
+							STR_RELEASE(fcc->function_handler->common.function_name);
 						}
 						efree(fcc->function_handler);
 					}
@@ -3270,7 +3270,7 @@ ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRML
 		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
 		     fcc.function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
 			if (fcc.function_handler->type != ZEND_OVERLOADED_FUNCTION) {
-				efree((char*)fcc.function_handler->common.function_name);
+				STR_RELEASE(fcc.function_handler->common.function_name);
 			}
 			efree(fcc.function_handler);
 		}
