@@ -56,4 +56,3 @@ EOS;
 ?>
 --EXPECTF--
 Hello World!
-
