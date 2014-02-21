@@ -7144,7 +7144,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 
 		zend_str_tolower_copy(c_ns_name->val, Z_STRVAL(CG(current_namespace)), Z_STRLEN(CG(current_namespace)));
 		c_ns_name->val[Z_STRLEN(CG(current_namespace))] = '\\';
-		memcpy(c_ns_name->val+Z_STRLEN(CG(current_namespace))+1, lcname, Z_STRLEN_P(name)+1);
+		memcpy(c_ns_name->val+Z_STRLEN(CG(current_namespace))+1, lcname->val, Z_STRLEN_P(name)+1);
 		if (zend_hash_exists(CG(class_table), c_ns_name)) {
 			char *tmp2 = zend_str_tolower_dup(Z_STRVAL(ns), Z_STRLEN(ns));
 
@@ -7176,7 +7176,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		}
 		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
 	}
-	efree(lcname);
+	STR_RELEASE(lcname);
 	zval_dtor(name);
 }
 /* }}} */
