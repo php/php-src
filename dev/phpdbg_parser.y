@@ -57,7 +57,6 @@ typedef void* yyscan_t;
 %token T_TRUTHY		"truthy (true, on, yes or enabled)"
 %token T_FALSY		"falsy (false, off, no or disabled)"
 %token T_STRING		"string (some input, perhaps)"
-%token T_SQUIGGLE	"~ (squiggle)"
 %token T_COLON		": (colon)"
 %token T_DCOLON		":: (double colon)"
 %token T_POUND		"# (pound sign)"
@@ -82,11 +81,7 @@ parameters
 	;
 
 parameter
-	: T_SQUIGGLE T_DIGITS					{
-		$$.type = OPLINE_PARAM;
-		$$.num = $2.num; 
-	}
-	| T_ID T_COLON T_DIGITS					{ 	
+	: T_ID T_COLON T_DIGITS					{ 	
 		$$.type = FILE_PARAM;
 		$$.file.name = $1.str;
 		$$.file.line = $3.num;
