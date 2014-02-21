@@ -325,7 +325,7 @@ static const SSL_METHOD *php_select_crypto_method(long method_value, int is_clie
 		return is_client ? TLSv1_2_client_method() : TLSv1_2_server_method();
 #else
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"TLSv1.1 support is not compiled into the OpenSSL library PHP is linked against");
+				"TLSv1.2 support is not compiled into the OpenSSL library PHP is linked against");
 		return NULL;
 #endif
 	} else {
@@ -344,38 +344,25 @@ static long php_get_crypto_method_ctx_flags(long method_flags TSRMLS_DC)
 		ssl_ctx_options |= SSL_OP_NO_SSLv2;
 	}
 #endif
-
+#ifndef OPENSSL_NO_SSL3
 	if (!(method_flags & STREAM_CRYPTO_METHOD_SSLv3)) {
 		ssl_ctx_options |= SSL_OP_NO_SSLv3;
 	}
-
+#endif
+#ifndef OPENSSL_NO_TLS1
 	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_0)) {
 		ssl_ctx_options |= SSL_OP_NO_TLSv1;
 	}
-
-	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_1)) {
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x10001001L
+	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_1)) {
 		ssl_ctx_options |= SSL_OP_NO_TLSv1_1;
-#endif
-	} else {
-#if OPENSSL_VERSION_NUMBER < 0x10001001L
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"TLSv1.1 support is not compiled into the OpenSSL library PHP is linked against");
-		return -1;
-#endif
 	}
 
 	if (!(method_flags & STREAM_CRYPTO_METHOD_TLSv1_2)) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
 		ssl_ctx_options |= SSL_OP_NO_TLSv1_2;
-#endif
-	} else {
-#if OPENSSL_VERSION_NUMBER < 0x10001001L
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,
-			"TLSv1.2 support is not compiled into the OpenSSL library PHP is linked against");
-	return -1;
-#endif
 	}
+#endif
 
 	return ssl_ctx_options;
 }
@@ -388,6 +375,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	const SSL_METHOD *method;
 	long ssl_ctx_options;
 	long method_flags;
+	zval **val;
 
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -431,8 +419,6 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL
 	{
-		zval **val;
-
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "no_ticket", &val) && 
 				zend_is_true(*val)
@@ -444,8 +430,6 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
 	{
-		zval **val;
-
 		if (stream->context && (FAILURE == php_stream_context_get_option(
 					stream->context, "ssl", "disable_compression", &val) ||
 				zend_is_true(*val))

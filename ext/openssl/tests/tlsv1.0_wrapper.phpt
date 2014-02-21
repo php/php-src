@@ -3,7 +3,6 @@ tlsv1.0 stream wrapper
 --SKIPIF--
 <?php 
 if (!extension_loaded("openssl")) die("skip");
-if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSL 1.0.1 required");
 if (!function_exists('pcntl_fork')) die("skip no fork");
 --FILE--
 <?php
