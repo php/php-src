@@ -621,9 +621,9 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 					matches++;
 				}
 			} else {
-			
-				/* match full command name */
-				if (memcmp(command->name, name->str, name->len) == SUCCESS) {
+
+				/* match full, case insensitive, command name */
+				if (strncasecmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
 						matched[matches] = command;
 						matches++;

@@ -37,8 +37,7 @@ WS          		[ \r\n\t]+
 DIGITS				[0-9\.]+
 ID					[^ \r\n\t:#]+
 ADDR				0x[a-fA-F0-9]+
-OPCODE				ZEND_([A-Z])+
-LITERAL				\"(\\.|[^\\"])*\"
+OPCODE				?i:ZEND_([A-Za-z])+
 INPUT				[^\n]+
 %%
 <INITIAL>
@@ -86,12 +85,6 @@ INPUT				[^\n]+
 		yylval->str = strndup(yytext, yyleng);
 		yylval->len = yyleng;
 		return T_OPCODE;
-	}
-	{LITERAL}		{
-		phpdbg_init_param(yylval, STR_PARAM);
-		yylval->str = strndup(yytext, yyleng);
-		yylval->len = yyleng;
-		return T_LITERAL; 
 	}
 	{ID}			{
 		phpdbg_init_param(yylval, STR_PARAM);
