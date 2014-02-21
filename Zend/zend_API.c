@@ -223,6 +223,9 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
+	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+		arg = Z_REFVAL_P(arg);
+	}
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 /* }}} */
@@ -701,8 +704,9 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
-//???
+//??? 'Z' iz not supported anymore and should be replaced with 'z'
 		case 'Z':
+			ZEND_ASSERT(c != 'Z');
 		default:
 			return "unknown";
 	}
