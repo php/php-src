@@ -1632,6 +1632,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			memcpy(Z_STRVAL_P(zendlval) + len, CG(active_op_array)->function_name->val, CG(active_op_array)->function_name->len);
 			len += CG(active_op_array)->function_name->len;
 		}
+		Z_STRVAL_P(zendlval)[len] = 0;
 	} else if (CG(active_op_array) && CG(active_op_array)->function_name) {
 		ZVAL_STR(zendlval, STR_COPY(CG(active_op_array)->function_name));
 	} else {

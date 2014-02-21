@@ -2239,7 +2239,7 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 		/* This is a compound class name that contains namespace prefix */
 		if (Z_STRVAL(class_name->u.constant)[0] == '\\') {
 			/* The STRING name has "\" prefix */
-			memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+1, Z_STRLEN(class_name->u.constant)-1);
+			memmove(Z_STRVAL(class_name->u.constant), Z_STRVAL(class_name->u.constant)+1, Z_STRLEN(class_name->u.constant));
 			Z_STR(class_name->u.constant) = STR_REALLOC(
 				Z_STR(class_name->u.constant),
 				Z_STRLEN(class_name->u.constant) - 1, 0);
