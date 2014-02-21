@@ -1126,6 +1126,9 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 			H->disable_native_prepares = Z_LVAL_P(val);
 			return 1;
 #endif
+		case PDO_PGSQL_ATTR_DISABLE_RESOLVE_NATIVE_TYPE_ON_META:
+			H->disable_resolve_native_type_on_meta = Z_LVAL_P(val);
+			return 1;
 
 		default:
 			return 0;

@@ -586,28 +586,31 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
-	/* Fetch metadata from Postgres system catalogue */
-	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
-	res = PQexec(S->H->server, q);
-	efree(q);
-	
-	status = PQresultStatus(res);
-	
-	if (status != PGRES_TUPLES_OK) {
-		/* Failed to get system catalogue, but return success
-		 * with the data we have collected so far
-		 */
-		goto done;
-	}
+	if (!S->H->disable_resolve_native_type_on_meta) {
+		/* Fetch metadata from Postgres system catalogue */
+		spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
+		res = PQexec(S->H->server, q);
+		efree(q);
 
-	/* We want exactly one row returned */
-	if (1 != PQntuples(res)) {
-		goto done;
-	}
+		status = PQresultStatus(res);
 
-	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
-done:
-	PQclear(res);		
+		if (status != PGRES_TUPLES_OK) {
+			/* Failed to get system catalogue, but return success
+			 * with the data we have collected so far
+			 */
+			goto done;
+		}
+
+		/* We want exactly one row returned */
+		if (1 != PQntuples(res)) {
+			goto done;
+		}
+
+		add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
+	
+		done:
+			PQclear(res);
+	}	
 	return 1;
 }
 

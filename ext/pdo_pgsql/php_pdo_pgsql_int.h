@@ -51,6 +51,7 @@ typedef struct {
 	int		disable_native_prepares;
 #endif
 	unsigned int stmt_counter;
+	unsigned int disable_resolve_native_type_on_meta;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -95,6 +96,7 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_DISABLE_RESOLVE_NATIVE_TYPE_ON_META,
 };
 
 struct pdo_pgsql_lob_self {
