@@ -2613,7 +2613,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 			zend_error_noreturn(E_COMPILE_ERROR,
 						"Call-time pass-by-reference has been removed; "
 						"If you would like to pass argument by reference, modify the declaration of %s().",
-						function_ptr->common.function_name);
+						function_ptr->common.function_name->val);
 		} else {
 			zend_error_noreturn(E_COMPILE_ERROR, "Call-time pass-by-reference has been removed");
 		}
@@ -3540,7 +3540,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 	}
 
 	if (parent_flags & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name->val);
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -4053,12 +4053,12 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			/* two traits can't define the same non-abstract method */
 #if 1
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
-				name, ce->name);
+				name, ce->name->val);
 #else		/* TODO: better error message */
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
-				fn->common.scope->name, fn->common.function_name,
-				ce->name, name,
-				existing_fn->common.scope->name, existing_fn->common.function_name);
+				fn->common.scope->name->val, fn->common.function_name->val,
+				ce->name->val, name,
+				existing_fn->common.scope->name->val, existing_fn->common.function_name->val);
 #endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
@@ -5210,19 +5210,19 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 	if (ce->constructor) {
 		ce->constructor->common.fn_flags |= ZEND_ACC_CTOR;
 		if (ce->constructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name, ce->constructor->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static", ce->name->val, ce->constructor->common.function_name->val);
 		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name, ce->destructor->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static", ce->name->val, ce->destructor->common.function_name->val);
 		}
 	}
 	if (ce->clone) {
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name, ce->clone->common.function_name);
+			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static", ce->name->val, ce->clone->common.function_name->val);
 		}
 	}
 
@@ -5273,7 +5273,7 @@ void zend_do_implements_interface(znode *interface_name TSRMLS_DC) /* {{{ */
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' since it is a Trait",
 							 Z_STRVAL(interface_name->u.constant),
-							 CG(active_class_entry)->name);
+							 CG(active_class_entry)->name->val);
 	}
 
 	switch (zend_get_class_fetch_type(Z_STRVAL(interface_name->u.constant), Z_STRLEN(interface_name->u.constant))) {
@@ -5304,7 +5304,7 @@ void zend_do_use_trait(znode *trait_name TSRMLS_DC) /* {{{ */
 	if ((CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use traits inside of interfaces. %s is used in %s",
-				Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name);
+				Z_STRVAL(trait_name->u.constant), CG(active_class_entry)->name->val);
 	}
 
 
