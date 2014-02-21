@@ -18,6 +18,45 @@ PHP                                                                        NEWS
     (Daniel Lowrey)
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
     (Mark Zedwood)
+  . Fixed Bug #47030 (add new boolean "verify_host" SSL context option
+    allowing clients to verify names separately from peer certs).
+    (Daniel Lowrey)
+  . Fixed Bug #65538 ("cafile" SSL context option now supports stream
+    wrappers). (Daniel Lowrey)
+  . New openssl_get_cert_locations() function to aid CA file and peer
+    verification debugging. (Daniel Lowrey)
+  . Encrypted stream wrappers now disable TLS compression by default.
+    (Daniel Lowrey)
+  . New "capture_session_meta" SSL context option allows encrypted client and
+    server streams access to negotiated protocol/cipher information.
+    (Daniel Lowrey)
+  . New "honor_cipher_order" SSL context option allows servers to prioritize
+    cipher suites of their choosing when negotiating SSL/TLS handshakes.
+    (Daniel Lowrey)
+  . New "single_ecdh_use" and "single_dh_use" SSL context options allow for
+    improved forward secrecy in encrypted stream servers. (Daniel Lowrey)
+  . New "dh_param" SSL context option allows stream servers control over
+    the parameters when negotiating DHE cipher suites. (Daniel Lowrey)
+  . New "ecdh_curve" SSL context option allowing stream servers to specify
+    the curve to use when negotiating ephemeral ECDHE ciphers (defaults to
+    NIST P-256). (Daniel Lowrey)
+  . New "rsa_key_size" SSL context option gives stream servers control
+    over the key size (in bits) used for RSA key agreements. (Daniel Lowrey)
+  . Crypto methods for encrypted client and server streams now use
+    bitwise flags for fine-grained protocol support. (Daniel Lowrey)
+  . Added new tlsv1.0 stream wrapper to specify TLSv1 client/server method.
+    tls wrapper now negotiates TLSv1, TLSv1.1 or TLSv1.2. (Daniel Lowrey)
+  . Encrypted client streams now enable SNI by default. (Daniel Lowrey)
+  . Encrypted streams now prioritize ephemeral key agreement and high strength
+    ciphers by default. (Daniel Lowrey)
+  . New OPENSSL_DEFAULT_STREAM_CIPHERS constant exposes default cipher
+    list. (Daniel Lowrey)
+  . New STREAM_CRYPTO_METHOD_* constants for enhanced control over the crypto
+    methods negotiated encrypted server/client sessions. (Daniel Lowrey)
+  . Encrypted stream servers now automatically mitigate potential DoS vector
+    arising from client-initiated TLS renegotiation. New "reneg_limit",
+    "reneg_window" and "reneg_limit_callback" SSL context options for custom
+    renegotiation limiting control. (Daniel Lowrey)
 
 - Pgsql:
   . pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
@@ -52,6 +91,7 @@ PHP                                                                        NEWS
 - Openssl
   . Peer certificates now verified by default in client socket operations
     (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+  . New openssl.cafile and openssl.capath ini directives. (Daniel Lowrey)
 
 23 Jan 2014, PHP 5.6.0 Alpha 1
 - CLI server:
