@@ -38,6 +38,7 @@ PHP X.Y UPGRADE NOTES
   stream context's "verify_peer" setting. Encrypted transfers delegate to
   operating system certificate stores by default, so many/most users *should*
   be unaffected by this transparent security enhancement.
+  (https://wiki.php.net/rfc/tls-peer-verification)
 
 ========================================
 2. New Features
@@ -69,7 +70,22 @@ PHP X.Y UPGRADE NOTES
 
 - Added openssl crypto method stream context option.
 
-- Added openssl peer verification support for SAN x509 extension
+- Added support for SAN x509 extension matching in encrypted streams.
+
+- Added a range of new SSL context options for improved encrypted stream
+  security. (https://wiki.php.net/rfc/improved-tls-defaults)
+
+- Added stream wrapper support for cafile paths when verifying SSL/TLS peers.
+
+- Added support for independent peer cert and host name verification when
+  validating encrypted TLS stream peers.
+
+- Added protection against client-initiated renegotiation DoS in encrypted
+  stream servers.
+
+- Added protocol-specific tlsv1.0://, tlsv1.1:// and tlsv1.2:// encryption
+  stream wrappers. tls:// wrapper now supports TLSv1.1 and TLSv1.2 (previously
+  only supported TLSv1 method).
 
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
@@ -121,6 +137,7 @@ PHP X.Y UPGRADE NOTES
   Added bool openssl_spki_verify($spkac)
   Added string openssl_spki_export($spkac)
   Added string openssl_spki_export_challenge($spkac)
+  Added array openssl_get_cert_locations()
 
 - LDAP:
   Added ldap_escape($value, $ignore = "", $flags = 0).
@@ -181,6 +198,17 @@ PHP X.Y UPGRADE NOTES
 - Pgsql:
   PGSQL_DML_ESCAPE   int(4096)
 
+- Openssl:
+  STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT   int(9)
+  STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT   int(17)
+  STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT   int(33)
+  STREAM_CRYPTO_METHOD_ANY_CLIENT       int(63)
+  STREAM_CRYPTO_METHOD_TLSv1_0_SERVER   int(8)
+  STREAM_CRYPTO_METHOD_TLSv1_1_SERVER   int(16)
+  STREAM_CRYPTO_METHOD_TLSv1_2_SERVER   int(32)
+  STREAM_CRYPTO_METHOD_ANY_SERVER       int(62)
+  OPENSSL_DEFAULT_STREAM_CIPHERS        string
+
 ========================================
 10. Changes to INI File Handling
 ========================================
@@ -189,6 +217,10 @@ PHP X.Y UPGRADE NOTES
   Changed always_populate_raw_post_data to throw a deprecation warning when
   enabled and to recognize ohe value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
+
+- Openssl:
+  openssl.cafile and openssl.capath ini directives have been added to allow
+  global CA default specification as necessary.
 
 ========================================
 11. Other Changes
