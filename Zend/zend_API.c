@@ -3694,6 +3694,15 @@ ZEND_API void zend_update_property_double(zend_class_entry *scope, zval *object,
 }
 /* }}} */
 
+ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, const char *name, int name_length, zend_string *value TSRMLS_DC) /* {{{ */
+{
+	zval tmp;
+
+	ZVAL_STR(&tmp, STR_COPY(value));
+	zend_update_property(scope, object, name, name_length, &tmp TSRMLS_CC);
+}
+/* }}} */
+
 ZEND_API void zend_update_property_string(zend_class_entry *scope, zval *object, const char *name, int name_length, const char *value TSRMLS_DC) /* {{{ */
 {
 	zval tmp;

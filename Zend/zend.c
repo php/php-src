@@ -417,7 +417,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				}
 				ZEND_PUTS_EX(" Object\n");
 				if (class_name) {
-					efree((char*)class_name);
+					STR_RELEASE(class_name);
 				}
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
