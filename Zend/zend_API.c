@@ -647,7 +647,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base TSRMLS_CC))) {
 						zend_spprintf(error, 0, "to be a class name derived from %s, '%s' given",
-							ce_base->name, Z_STRVAL_P(arg));
+							ce_base->name->val, Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
@@ -2768,7 +2768,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		*strict_class = 1;
 		ret = 1;
 	} else {
-		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, name);
+		if (error) zend_spprintf(error, 0, "class '%.*s' not found", name_len, name->val);
 	}
 	efree(lcname);
 	return ret;

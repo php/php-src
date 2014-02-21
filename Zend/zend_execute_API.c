@@ -815,7 +815,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 	if (EX(function_state).function->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) {
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name, EX(function_state).function->common.function_name);
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", EX(function_state).function->common.scope->name->val, EX(function_state).function->common.function_name->val);
 		}
 		if (EX(function_state).function->common.fn_flags & ZEND_ACC_DEPRECATED) {
  			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
