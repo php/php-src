@@ -3544,7 +3544,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -3579,30 +3581,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 	if (IS_CONST != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3910,7 +3915,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -3924,7 +3931,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -4747,7 +4754,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -4761,7 +4770,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -5292,7 +5301,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -5327,30 +5338,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 	if (IS_CONST != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -5544,7 +5558,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -5558,7 +5574,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -5973,7 +5989,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -6008,30 +6026,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 	if (IS_CONST != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -6193,7 +6214,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -6207,7 +6230,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -7073,7 +7096,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -7087,7 +7112,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CONST == IS_CV) {
+		} else if (IS_CONST == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -8564,7 +8589,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -8599,30 +8626,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 	if (IS_TMP_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -8836,7 +8866,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -8850,7 +8882,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -9648,7 +9680,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -9662,7 +9696,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -10193,7 +10227,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -10228,30 +10264,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 	if (IS_TMP_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -10453,7 +10492,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -10467,7 +10508,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -10882,7 +10923,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -10917,30 +10960,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 	if (IS_TMP_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -10991,7 +11037,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -11005,7 +11053,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -11800,7 +11848,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -11814,7 +11864,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_TMP_VAR == IS_CV) {
+		} else if (IS_TMP_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -14110,7 +14160,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -14145,30 +14197,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 	if (IS_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -15053,7 +15108,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -15067,7 +15124,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -17181,7 +17238,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -17195,7 +17254,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -18449,7 +18508,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -18484,30 +18545,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 	if (IS_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -19356,7 +19420,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -19370,7 +19436,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -20314,7 +20380,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -20349,30 +20417,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 	if (IS_VAR != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -20692,7 +20763,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -20706,7 +20779,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -22606,7 +22679,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -22620,7 +22695,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			zval_ptr_dtor_nogc(free_op1.var);
-		} else if (IS_VAR == IS_CV) {
+		} else if (IS_VAR == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -30607,7 +30682,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -30642,30 +30719,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 	if (IS_CV != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -31338,7 +31418,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -31352,7 +31434,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV) {
+		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -33340,7 +33422,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -33354,7 +33438,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV) {
+		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -34601,7 +34685,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -34636,30 +34722,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 	if (IS_CV != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -35389,7 +35478,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -35403,7 +35494,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV) {
+		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -36340,7 +36431,9 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
 				case BP_VAR_IS:
-					ZVAL_NULL(retval);
+					//???
+					//ZVAL_NULL(retval);
+					ZVAL_NULL(EX_VAR(opline->result.var));
 					break;
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
@@ -36375,30 +36468,33 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 	if (IS_CV != IS_CONST && varname == &tmp_varname) {
 		zval_dtor(&tmp_varname);
 	}
+
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
-	switch (type) {
-		case BP_VAR_R:
-		case BP_VAR_IS:
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
-			break;
-		case BP_VAR_UNSET: {
-//???			zend_free_op free_res;
-//???
-//???			PZVAL_UNLOCK(*retval, &free_res);
-//???			if (retval != &EG(uninitialized_zval_ptr)) {
-//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-//???			}
-//???			PZVAL_LOCK(*retval);
-//???			FREE_OP_VAR_PTR(free_res);
+	if (EXPECTED(retval)) {
+		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		switch (type) {
+			case BP_VAR_R:
+			case BP_VAR_IS:
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), retval);
+				break;
+			case BP_VAR_UNSET: {
+	//???			zend_free_op free_res;
+	//???
+	//???			PZVAL_UNLOCK(*retval, &free_res);
+	//???			if (retval != &EG(uninitialized_zval_ptr)) {
+	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
+	//???			}
+	//???			PZVAL_LOCK(*retval);
+	//???			FREE_OP_VAR_PTR(free_res);
+			}
+			/* break missing intentionally */
+			default:
+				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
+				break;
 		}
-		/* break missing intentionally */
-		default:
-			ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-			break;
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -36606,7 +36702,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -36620,7 +36718,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV) {
+		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}
@@ -38381,7 +38479,9 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -38395,7 +38495,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 
-		} else if (IS_CV == IS_CV) {
+		} else if (IS_CV == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}

@@ -1527,9 +1527,9 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 //???					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
-						zval_dtor(readobj);
+						zval_ptr_dtor(readobj);
 					}
-					ZVAL_ZVAL(writeobj, &retval, 1, 1);
+					ZVAL_COPY_VALUE(writeobj, &retval);
 					if (Z_TYPE_P(writeobj) != type) {
 						convert_to_explicit_type(writeobj, type);
 					}
@@ -1538,7 +1538,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					zval_ptr_dtor(&retval);
 //???					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
-						zval_dtor(readobj);
+						zval_ptr_dtor(readobj);
 					}
 					ZVAL_EMPTY_STRING(writeobj);
 					zend_error(E_RECOVERABLE_ERROR, "Method %s::__toString() must return a string value", ce->name->val);

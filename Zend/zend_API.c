@@ -176,7 +176,9 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 
 	while (param_count-->0) {
 		zval *param = p-(arg_count--);
-		Z_ADDREF_P(param);
+		if (Z_REFCOUNTED_P(param)) {
+			Z_ADDREF_P(param);
+		}
 		add_next_index_zval(argument_array, param);
 	}
 
@@ -3151,7 +3153,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						}
 
 					} else {
-						if (!!EG(objects_store).object_buckets ||
+						if (!EG(objects_store).object_buckets ||
 						    !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
 							return 0;
 						}

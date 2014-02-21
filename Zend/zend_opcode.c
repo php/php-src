@@ -412,7 +412,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 			efree((char*)op_array->arg_info[i].name);
 			if (op_array->arg_info[i].class_name) {
 //???				str_efree(op_array->arg_info[i].class_name);
-				efree((char*)op_array->arg_info[i].class_name);
+				STR_RELEASE(op_array->arg_info[i].class_name);
 			}
 		}
 		efree(op_array->arg_info);

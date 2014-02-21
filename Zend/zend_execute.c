@@ -642,9 +642,8 @@ static inline void make_real_object(zval *object_ptr TSRMLS_DC)
 
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, char **class_name, zend_class_entry **pce TSRMLS_DC)
 {
-	zend_string *key = STR_INIT(cur_arg_info->class_name, cur_arg_info->class_name_len, 0);
+	zend_string *key = cur_arg_info->class_name;
 	*pce = zend_fetch_class(key, (fetch_type | ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
-	STR_FREE(key);
 	*class_name = (*pce) ? (*pce)->name->val : (char*)cur_arg_info->class_name;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
 		return "implement interface ";

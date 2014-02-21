@@ -733,11 +733,11 @@ END_EXTERN_C()
 	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\
 }
 
-#define SEPARATE_ARG_IF_REF(varptr) \
-	if (Z_ISREF_P(varptr)) { \
-		ZVAL_DUP(varptr, Z_REFVAL_P(varptr)); \
-	} else { \
-		Z_ADDREF_P(varptr); \
+#define SEPARATE_ARG_IF_REF(varptr) 				\
+	if (Z_ISREF_P(varptr)) { 						\
+		ZVAL_DUP(varptr, Z_REFVAL_P(varptr)); 		\
+	} else if (IS_REFCOUNTED(Z_TYPE_P(varptr))) { 	\
+		Z_ADDREF_P(varptr); 						\
 	}
 
 #define READY_TO_DESTROY(zv) \
