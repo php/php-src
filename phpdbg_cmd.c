@@ -418,6 +418,10 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 				fprintf(stderr, "%s ADDR_PARAM(%lu)\n", msg, param->addr);
 			break;
 			
+			case NUMERIC_FILE_PARAM:
+				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#%lu)\n", msg, param->file.name, param->file.line);
+			break;
+			
 			case FILE_PARAM:
 				fprintf(stderr, "%s FILE_PARAM(%s:%lu)\n", msg, param->file.name, param->file.line);
 			break;
@@ -465,16 +469,25 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				next = remove->next;
 			
 			switch (remove->type) {
-				case STR_PARAM: 
-					if (remove->str) {
+				case NUMERIC_METHOD_PARAM:
+				case METHOD_PARAM:
+					if (remove->method.class)
+						free(remove->method.class);
+					if (remove->method.name)
+						free(remove->method.name);
+				break;
+
+				case NUMERIC_FUNCTION_PARAM:
+				case STR_PARAM:
+				case OP_PARAM:
+					if (remove->str)
 						free(remove->str);	
-					}
 				break;
 				
+				case NUMERIC_FILE_PARAM:
 				case FILE_PARAM:
-					if (remove->file.name) {
+					if (remove->file.name)
 						free(remove->file.name);
-					}
 				break;
 				
 				default: {

@@ -540,9 +540,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    $P b \\\\my\\\\class::method#2" CR
 "    Break at the opline #2 of the method \\\\my\\\\class::method" CR CR
 
-"    $P break address test.php:3" CR
-"    $P b a test.php:3" CR
-"    Break at the 3rd opline in test.php" CR CR
+"    $P break test.php:#3" CR
+"    $P b test.php:#3" CR
+"    Break at opline #3 in test.php" CR CR
 
 "    $P break if $cnt > 10" CR
 "    $P b if $cnt > 10" CR

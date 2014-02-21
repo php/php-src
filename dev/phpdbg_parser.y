@@ -86,6 +86,11 @@ parameter
 		$$.file.name = $1.str;
 		$$.file.line = $3.num;
 	}
+	| T_ID T_COLON T_POUND T_DIGITS {
+		$$.type = NUMERIC_FILE_PARAM;
+		$$.file.name = $1.str;
+		$$.file.line = $4.num;
+	}
 	| T_ID T_DCOLON T_ID					{ 
 		$$.type = METHOD_PARAM;
 		$$.method.class = $1.str;

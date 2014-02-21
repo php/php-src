@@ -29,7 +29,6 @@
 /**
  * Printer Forward Declarations
  */
-PHPDBG_BREAK(address);
 PHPDBG_BREAK(at);
 PHPDBG_BREAK(del);
 

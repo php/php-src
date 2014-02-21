@@ -35,18 +35,10 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
  * Commands
  */
 const phpdbg_command_t phpdbg_break_commands[] = {
-	PHPDBG_BREAK_COMMAND_D(address,    "specify breakpoint by address",                          'a', break_address, NULL, "f"),
 	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",           'A', break_at,      NULL, "*c"),
 	PHPDBG_BREAK_COMMAND_D(del,        "delete breakpoint by identifier number",                 'd', break_del,     NULL, "n"),
 	PHPDBG_END_COMMAND
 };
-
-PHPDBG_BREAK(address) /* {{{ */
-{
-	phpdbg_set_breakpoint_file_opline(param->file.name, param->file.line TSRMLS_CC);
-
-	return SUCCESS;
-} /* }}} */
 
 PHPDBG_BREAK(at) /* {{{ */
 {
