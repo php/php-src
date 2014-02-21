@@ -1474,7 +1474,7 @@ yyreduce:
     { 
 		(yyval).type = METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (3)]).str;
-		(yyval).method.name = (yyvsp[(3) - (3)]).str; 
+		(yyval).method.name = (yyvsp[(3) - (3)]).str;
 	}
     break;
 

@@ -502,12 +502,15 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 			}
 			
 			free(remove);
+			remove = NULL;
 			
-			if (next) 
+			if (next)
 				remove = next; 
 			else break;
 		}
 	}
+	
+	stack->next = NULL;
 } /* }}} */
 
 /* {{{ */
