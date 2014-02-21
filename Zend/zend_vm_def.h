@@ -3620,7 +3620,9 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
-		Z_ADDREF_P(expr_ptr);
+		if (Z_COUNTED_P(expr_ptr)) {
+			Z_ADDREF_P(expr_ptr);
+		}
 	} else {
 		expr_ptr=GET_OP1_ZVAL_PTR(BP_VAR_R);
 		if (IS_OP1_TMP_FREE()) { /* temporary variable */
@@ -3634,7 +3636,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
             ZVAL_DUP(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
 			FREE_OP1_IF_VAR();
-		} else if (OP1_TYPE == IS_CV) {
+		} else if (OP1_TYPE == IS_CV && Z_COUNTED_P(expr_ptr)) {
 			Z_ADDREF_P(expr_ptr);
 		}
 	}

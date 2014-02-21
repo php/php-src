@@ -62,6 +62,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		 * needed later inside zend_call_function. */
 		fci.function_table = !object ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
+		zval_ptr_dtor(&fci.function_name);
 	} else {
 		zend_fcall_info_cache fcic;
 
@@ -97,6 +98,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		}
 		fcic.object_ptr = object;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
+		zval_ptr_dtor(&fci.function_name);
 	}
 	if (result == FAILURE) {
 		/* error at c-level */
