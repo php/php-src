@@ -298,7 +298,7 @@ static int php_openssl_sockop_stat(php_stream *stream, php_stream_statbuf *ssb T
 }
 
 
-static const SSL_METHOD *php_select_crypto_method(long method_value, int is_client TSRMLS_DC)
+static const SSL_METHOD *php_select_crypto_method(php_int_t method_value, int is_client TSRMLS_DC)
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
 #ifndef OPENSSL_NO_SSL2
@@ -376,6 +376,9 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	php_int_t ssl_ctx_options;
 	php_int_t method_flags;
 	zval **val;
+#ifdef SSL_MODE_RELEASE_BUFFERS
+	php_int_t mode;
+#endif
 
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -476,7 +479,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 #ifdef SSL_MODE_RELEASE_BUFFERS
-	php_int_t mode = SSL_get_mode(sslsock->ssl_handle);
+	mode = SSL_get_mode(sslsock->ssl_handle);
 	SSL_set_mode(sslsock->ssl_handle, mode | SSL_MODE_RELEASE_BUFFERS);
 #endif
 
@@ -603,6 +606,10 @@ static int php_enable_server_crypto_opts(php_stream *stream,
 	TSRMLS_DC)
 {
 	zval **val;
+#ifdef HAVE_ECDH
+	int curve_nid;
+	EC_KEY *ecdh;
+#endif
 
 	if (php_stream_context_get_option(stream->context, "ssl", "dh_param", &val) == SUCCESS) {
 		convert_to_string_ex(val);
@@ -612,9 +619,6 @@ static int php_enable_server_crypto_opts(php_stream *stream,
 	}
 
 #ifdef HAVE_ECDH
-
-	int curve_nid;
-	EC_KEY *ecdh;
 
 	if (php_stream_context_get_option(stream->context, "ssl", "ecdh_curve", &val) == SUCCESS) {
 		char *curve_str;

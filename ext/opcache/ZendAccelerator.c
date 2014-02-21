@@ -342,6 +342,7 @@ const char *accel_new_interned_string(const char *arKey, zend_size_t nKeyLength,
 	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength) >=
 	    ZCSG(interned_strings_end)) {
 	    /* no memory, return the same non-interned string */
+		zend_accel_error(ACCEL_LOG_WARNING, "Interned string buffer overflow");
 		return arKey;
 	}
 
