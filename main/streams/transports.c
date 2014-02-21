@@ -58,7 +58,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
-	php_stream_transport_factory *factory = NULL;
+	php_stream_transport_factory factory;
 	const char *p, *protocol = NULL;
 	int n = 0, failed = 0;
 	char *error_text = NULL;
@@ -129,7 +129,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		return NULL;
 	}
 
-	stream = (*factory)(protocol, n,
+	stream = (factory)(protocol, n,
 			(char*)name, namelen, persistent_id, options, flags, timeout,
 			context STREAMS_REL_CC TSRMLS_CC);
 
