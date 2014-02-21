@@ -228,10 +228,10 @@ typedef struct _zend_property_info {
 typedef struct _zend_arg_info {
 	const char *name;
 	zend_uint name_len;
-//???	const char *class_name;
-//	zend_uint class_name_len;
-//	zend_string *name;
-	zend_string *class_name;
+	const char *class_name;
+	zend_uint class_name_len;
+//???	zend_string *name;
+//???	zend_string *class_name;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
