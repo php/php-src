@@ -532,7 +532,7 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 } /* }}} */
 
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC) {
-	if (command && command->args) {
+	if (command) {
 		char buffer[128] = {0,};
 		const phpdbg_param_t *top = (stack != NULL) ? *stack : NULL;
 		const char *arg = command->args;
@@ -542,8 +542,16 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 		zend_bool optional = 0;
 		
 		/* check for arg spec */
-		if (!(arg) || !(*arg))
-			return SUCCESS;
+		if (!(arg) || !(*arg)) {
+			if (!top) {
+				return SUCCESS;
+			}
+			
+			asprintf(why,
+				"%s expected no arguments", 
+				phpdbg_command_name(command, buffer));
+			return FAILURE;
+		}
 		
 		least = 0L;
 		

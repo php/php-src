@@ -52,7 +52,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
 	PHPDBG_COMMAND_D(leave,   "continue until the end of the stack",      'L', NULL, 0),
 	PHPDBG_COMMAND_D(print,   "print something",                          'p', phpdbg_print_commands, "s"),
-	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, 0),
+	PHPDBG_COMMAND_D(break,   "set breakpoint",                           'b', phpdbg_break_commands, "*|c"),
 	PHPDBG_COMMAND_D(back,    "show trace",                               't', NULL, "|n"),
 	PHPDBG_COMMAND_D(frame,   "switch to a frame",                        'f', NULL, "|n"),
 	PHPDBG_COMMAND_D(list,    "lists some code",                          'l', phpdbg_list_commands, "*"),
@@ -63,7 +63,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
 	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '.', NULL, "s"),
-	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, 0),
+	PHPDBG_COMMAND_D(shell,   "shell a command",                          '-', NULL, "i"),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
