@@ -651,6 +651,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 {
 	char *buf;
 	size_t size, old_len;
+	zend_string *new_compiled_filename;
 
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
@@ -682,7 +683,9 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 
 	yy_scan_buffer(buf, size TSRMLS_CC);
 
-	zend_set_compiled_filename(STR_INIT(filename, strlen(filename), 0) TSRMLS_CC);
+	new_compiled_filename = STR_INIT(filename, strlen(filename), 0);
+	zend_set_compiled_filename(new_compiled_filename TSRMLS_CC);
+	STR_RELEASE(new_compiled_filename);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
