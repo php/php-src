@@ -3309,8 +3309,7 @@ PHP_FUNCTION(addcslashes)
 		RETURN_STRINGL(str, str_len);
 	}
 
-//???	Z_STRVAL_P(return_value) = php_addcslashes(str, str_len, &Z_STRLEN_P(return_value), 0, what, what_len TSRMLS_CC);
-//???	RETURN_STRINGL(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), 0);
+	RETURN_STR(php_addcslashes(str, str_len, 0, what, what_len TSRMLS_CC));
 }
 /* }}} */
 
@@ -3455,14 +3454,14 @@ PHPAPI void php_stripcslashes(char *str, int *len)
 
 /* {{{ php_addcslashes
  */
-PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int should_free, char *what, int wlength TSRMLS_DC)
+PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free, char *what, int wlength TSRMLS_DC)
 {
 	char flags[256];
-	char *new_str = safe_emalloc(4, (length?length:(length=strlen(str))), 1);
 	char *source, *target;
 	char *end;
 	char c;
 	int  newlen;
+	zend_string *new_str = STR_ALLOC(4 * (length? length : (length = strlen(str))) + 1, 0);
 
 	if (!wlength) {
 		wlength = strlen(what);
@@ -3470,7 +3469,7 @@ PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int s
 
 	php_charmask((unsigned char *)what, wlength, flags TSRMLS_CC);
 
-	for (source = (char*)str, end = source + length, target = new_str; source < end; source++) {
+	for (source = (char*)str, end = source + length, target = new_str->val; source < end; source++) {
 		c = *source;
 		if (flags[(unsigned char)c]) {
 			if ((unsigned char) c < 32 || (unsigned char) c > 126) {
@@ -3492,12 +3491,9 @@ PHPAPI char *php_addcslashes(const char *str, int length, int *new_length, int s
 		*target++ = c;
 	}
 	*target = 0;
-	newlen = target - new_str;
-	if (target - new_str < length * 4) {
-		new_str = erealloc(new_str, newlen + 1);
-	}
-	if (new_length) {
-		*new_length = newlen;
+	newlen = target - new_str->val;
+	if (newlen < length * 4) {
+		new_str = STR_REALLOC(new_str, newlen, 0);
 	}
 	if (should_free) {
 //???		STR_FREE((char*)str);

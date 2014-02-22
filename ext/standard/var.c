@@ -365,10 +365,10 @@ static int php_array_element_export(zval *zv TSRMLS_DC, int num_args, va_list ar
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
-		char *key, *tmp_str;
-		int key_len, tmp_len;
-		key = php_addcslashes(hash_key->key->val, hash_key->key->len, &key_len, 0, "'\\", 2 TSRMLS_CC);
-		tmp_str = php_str_to_str_ex(key, key_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
+		char *tmp_str;
+		int tmp_len;
+		zend_string *key = php_addcslashes(hash_key->key->val, hash_key->key->len, 0, "'\\", 2 TSRMLS_CC);
+		tmp_str = php_str_to_str_ex(key->val, key->len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
 
 		buffer_append_spaces(buf, level + 1);
 
@@ -376,7 +376,7 @@ static int php_array_element_export(zval *zv TSRMLS_DC, int num_args, va_list ar
 		smart_str_appendl(buf, tmp_str, tmp_len);
 		smart_str_appendl(buf, "' => ", 5);
 
-		efree(key);
+		STR_RELEASE(key);
 		efree(tmp_str);
 	}
 	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
@@ -400,18 +400,16 @@ static int php_object_element_export(zval *zv TSRMLS_DC, int num_args, va_list a
 	if (hash_key->key != NULL) {
 		const char *class_name; /* ignored, but must be passed to unmangle */
 		const char *pname;
-		char *pname_esc;
-		int  pname_esc_len;
+		zend_string *pname_esc;
 		
 		zend_unmangle_property_name(hash_key->key->val, hash_key->key->len,
 				&class_name, &pname);
-		pname_esc = php_addcslashes(pname, strlen(pname), &pname_esc_len, 0,
-			"'\\", 2 TSRMLS_CC);
+		pname_esc = php_addcslashes(pname, strlen(pname), 0, "'\\", 2 TSRMLS_CC);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, pname_esc, pname_esc_len);
+		smart_str_appendl(buf, pname_esc->val, pname_esc->len);
 		smart_str_appendc(buf, '\'');
-		efree(pname_esc);
+		STR_RELEASE(pname_esc);
 	} else {
 		smart_str_append_long(buf, (long) hash_key->h);
 	}
@@ -426,9 +424,10 @@ static int php_object_element_export(zval *zv TSRMLS_DC, int num_args, va_list a
 PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) /* {{{ */
 {
 	HashTable *myht;
-	char *tmp_str, *tmp_str2;
-	int tmp_len, tmp_len2;
+	char *tmp_str;
+	int tmp_len;
 	zend_string *class_name;
+	zend_string *ztmp;
 
 	switch (Z_TYPE_P(struc)) {
 	case IS_BOOL:
@@ -450,14 +449,14 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 		efree(tmp_str);
 		break;
 	case IS_STRING:
-		tmp_str = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), &tmp_len, 0, "'\\", 2 TSRMLS_CC);
-		tmp_str2 = php_str_to_str_ex(tmp_str, tmp_len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len2, 0, NULL);
+		ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2 TSRMLS_CC);
+		tmp_str = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, tmp_str2, tmp_len2);
+		smart_str_appendl(buf, tmp_str, tmp_len);
 		smart_str_appendc(buf, '\'');
 
-		efree(tmp_str2);
+		STR_RELEASE(ztmp);
 		efree(tmp_str);
 		break;
 	case IS_ARRAY:
@@ -682,7 +681,6 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				ce = zend_get_class_entry(struc TSRMLS_CC);
 				if (ce) {
 					zend_string *prot_name, *priv_name;
-					int prop_name_length;
 
 					do {
 						priv_name = zend_mangle_property_name(ce->name->val, ce->name->len, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
