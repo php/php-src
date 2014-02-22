@@ -748,8 +748,8 @@ literal:
 						refcount = Z_REFCOUNT_P(current);
 						zval_dtor(current);
 						ZVAL_LONG(current, (long)(string - baseString) );
-						Z_SET_REFCOUNT_P(current, refcount);
-//???						Z_SET_ISREF_P(current);
+//						Z_SET_REFCOUNT_P(current, refcount);
+//???					Z_SET_ISREF_P(current);
 						ZVAL_NEW_REF(current, current);
 					} else {
 						add_index_long(return_value, objIndex++, string - baseString);
