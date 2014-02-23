@@ -4293,7 +4293,8 @@ PHP_FUNCTION(strip_tags)
 	buf = estrndup(str, str_len);
 	retval_len = php_strip_tags_ex(buf, str_len, NULL, allowed_tags, allowed_tags_len, 0);
 //???	RETURN_STRINGL(buf, retval_len, 0);
-	RETURN_STRINGL(buf, retval_len);
+	RETVAL_STRINGL(buf, retval_len);
+	efree(buf);
 }
 /* }}} */
 
