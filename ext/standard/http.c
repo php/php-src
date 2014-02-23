@@ -141,7 +141,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			/* Skip these types */
 			continue;
 		} else {
-			if (formstr->s->len) {
+			if (formstr->s) {
 				smart_str_appendl(formstr, arg_sep, arg_sep_len);
 			}
 			/* Simple key=value */

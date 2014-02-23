@@ -368,6 +368,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
 	ZVAL_STRINGL(&member, prop_name, prop_name_len);
 	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
+	zval_dtor(&member);
 	if (!property_info) {
 		return FAILURE;
 	}
