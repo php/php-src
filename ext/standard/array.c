@@ -2255,20 +2255,26 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 							thash->nApplyCount--;
 						}
 					} else {
-						Z_ADDREF_P(src_entry);
+						if (Z_REFCOUNTED_P(src_entry)) {
+							Z_ADDREF_P(src_entry);
+						}
 						zend_hash_next_index_insert(Z_ARRVAL_P(dest_entry), &src_zval);
 					}
 					if (tmp) {
 						zval_ptr_dtor(tmp);
 					}
 				} else {
-					Z_ADDREF_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
 					zend_hash_update(dest, string_key, src_entry);
 				}
 				break;
 
 			case HASH_KEY_IS_LONG:
-				Z_ADDREF_P(src_entry);
+				if (Z_REFCOUNTED_P(src_entry)) {
+					Z_ADDREF_P(src_entry);
+				}
 				zend_hash_next_index_insert(dest, src_entry);
 				break;
 		}
@@ -4324,11 +4330,11 @@ PHP_FUNCTION(array_map)
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL(arrays[i]), &array_pos[i]);
 	}
 
-	efree(arrays);
 
 	/* Short-circuit: if no callback and only one array, just return it. */
 	if (!ZEND_FCI_INITIALIZED(fci) && n_arrays == 1) {
 		RETVAL_ZVAL(args[0], 1, 0);
+		efree(arrays);
 		efree(array_len);
 		efree(array_pos);
 		efree(args);
@@ -4403,6 +4409,7 @@ PHP_FUNCTION(array_map)
 		}
 	}
 
+	efree(arrays);
 	efree(params);
 	efree(array_len);
 	efree(array_pos);
