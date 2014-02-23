@@ -67,6 +67,14 @@ const static phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_END
 }; /* }}} */
 
+/* {{{ */
+const static phpdbg_element_t elements[] = {
+	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
+	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
+	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),
+	PHPDBG_ELEMENT_END
+}; /* }}} */
+
 PHPDBG_API int phpdbg_is_numeric(const char *str) /* {{{ */
 {
 	if (!str)
@@ -348,6 +356,21 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D) /* {{{ */
 {
 	return colors;
 } /* }}} */
+
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len) {
+	const phpdbg_element_t *element = elements;
+	
+	while (element && element->name) {
+		if (len == element->name_length) {
+			if (strncasecmp(name, element->name, len) == SUCCESS) {
+				return element->id;
+			}
+		}
+		element++;
+	}
+	
+	return PHPDBG_COLOR_INVALID;
+}
 
 PHPDBG_API void phpdbg_set_prompt(const char *prompt TSRMLS_DC) /* {{{ */
 {

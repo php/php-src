@@ -248,8 +248,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 			}
 		}
 	}
- 
-	phpdbg_error("No help can be found for the subject \"%s\"", param->str);
+
 	return FAILURE;
 
 } /* }}} */

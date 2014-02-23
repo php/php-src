@@ -102,43 +102,43 @@ PHPDBG_SET(breaks) /* {{{ */
 #ifndef _WIN32
 PHPDBG_SET(color) /* {{{ */
 {
-	/*if ((param->type == STR_PARAM) && (input->argc == 3)) {
-		const phpdbg_color_t *color = phpdbg_get_color(
-			input->argv[2]->string, input->argv[2]->length TSRMLS_CC);
-		int element = PHPDBG_COLOR_INVALID;
-
-		if (color) {
-			if (phpdbg_argv_is(1, "prompt")) {
-				phpdbg_notice(
-					"setting prompt color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_PROMPT;
-				if (PHPDBG_G(prompt)[1]) {
-					free(PHPDBG_G(prompt)[1]);
-					PHPDBG_G(prompt)[1]=NULL;
-				}
-			} else if (phpdbg_argv_is(1, "error")) {
-				phpdbg_notice(
-					"setting error color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_ERROR;
-
-			} else if (phpdbg_argv_is(1, "notice")) {
-				phpdbg_notice(
-					"setting notice color to %s (%s)", color->name, color->code);
-				element = PHPDBG_COLOR_NOTICE;
-
-			} else goto usage;
-
-			 phpdbg_set_color(element, color TSRMLS_CC);
-		} else {
-			phpdbg_error(
-				"Failed to find the requested color (%s)", input->argv[2]->string);
-		}
-	} else {
-usage:
-		phpdbg_error(
-			"set color used incorrectly: set color <prompt|error|notice> <color>");
-	} */
+	const phpdbg_color_t *color = phpdbg_get_color(
+			param->next->str, param->next->len TSRMLS_CC);
 	
+	if (!color) {
+		phpdbg_error(
+			"Failed to find the requested color (%s)", param->next->str);
+		return SUCCESS;
+	}
+	
+	switch (phpdbg_get_element(param->str, param->len TSRMLS_CC)) {
+		case PHPDBG_COLOR_PROMPT:
+			phpdbg_notice(
+				"setting prompt color to %s (%s)", color->name, color->code);
+			if (PHPDBG_G(prompt)[1]) {
+				free(PHPDBG_G(prompt)[1]);
+				PHPDBG_G(prompt)[1]=NULL;
+			}
+			phpdbg_set_color(PHPDBG_COLOR_PROMPT, color TSRMLS_CC);
+		break;
+		
+		case PHPDBG_COLOR_ERROR:
+			phpdbg_notice(
+				"setting error color to %s (%s)", color->name, color->code);
+			phpdbg_set_color(PHPDBG_COLOR_ERROR, color TSRMLS_CC);
+		break;
+		
+		case PHPDBG_COLOR_NOTICE:
+			phpdbg_notice(
+				"setting notice color to %s (%s)", color->name, color->code);
+			phpdbg_set_color(PHPDBG_COLOR_NOTICE, color TSRMLS_CC);
+		break;
+		
+		default:
+			phpdbg_error(
+				"Failed to find the requested element (%s)", param->str);
+	}
+
 	return SUCCESS;
 } /* }}} */
 

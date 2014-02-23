@@ -745,7 +745,7 @@ PHPDBG_COMMAND(info) /* {{{ */
 PHPDBG_COMMAND(set) /* {{{ */
 {
 	phpdbg_error(
-		"No information command selected!");
+		"No set command selected!");
 
 	return SUCCESS;
 } /* }}} */
@@ -952,7 +952,9 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 							if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
-								phpdbg_error("%s", why);
+								if (why) {
+									phpdbg_error("%s", why);
+								}
 							}
 						}
 						
@@ -973,18 +975,18 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					}
 				}
 			}
-			
+
 			if (why) {
 				free(why);
 				why = NULL;
 			}
-			
+
 			yy_delete_buffer(state, scanner);
 			yylex_destroy(scanner);
-	
+
 			phpdbg_stack_free(&stack);
 			phpdbg_destroy_input(&input TSRMLS_CC);
-			
+
 		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
 
 		if (!input)
@@ -1002,6 +1004,10 @@ last:
 out:
 	if (input) {
 		phpdbg_destroy_input(&input TSRMLS_CC);
+	}
+
+	if (why) {
+		free(why);
 	}
 	
 	phpdbg_stack_free(&stack);

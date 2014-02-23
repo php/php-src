@@ -551,7 +551,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 			}
 			
 			asprintf(why,
-				"%s expected no arguments", 
+				"The command \"%s\" expected no arguments", 
 				phpdbg_command_name(command, buffer));
 			return FAILURE;
 		}
@@ -572,7 +572,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 #define verify_arg(e, a, t) if (!(a)) { \
 	if (!optional) { \
 		asprintf(why, \
-			"%s expected %s and got nothing at parameter %lu", \
+			"The command \"%s\" expected %s and got nothing at parameter %lu", \
 			phpdbg_command_name(command, buffer), \
 			(e), \
 			current); \
@@ -580,7 +580,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 	} \
 } else if ((a)->type != (t)) { \
 	asprintf(why, \
-		"%s expected %s and got %s at parameter %lu", \
+		"The command \"%s\" expected %s and got %s at parameter %lu", \
 		phpdbg_command_name(command, buffer), \
 		(e),\
 		phpdbg_get_param_type((a) TSRMLS_CC), \
@@ -623,7 +623,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 
 		if ((received < least)) {
 			asprintf(why,
-				"%s expected at least %lu arguments (%s) and received %lu",
+				"The command \"%s\" expected at least %lu arguments (%s) and received %lu",
 				phpdbg_command_name(command, buffer),
 				least,
 				command->args, 
@@ -676,13 +676,17 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 	}
 	
 	switch (matches) {
-		case 0: if (!parent) {
-			asprintf(
+		case 0: {
+			if (parent) {
+				asprintf(
 				why,
-				"The command %s could not be found", 
+				"The command \"%s %s\" could not be found", 
+				parent->name, name->str);
+			} else asprintf(
+				why,
+				"The command \"%s\" could not be found", 
 				name->str);
-			 return NULL;
-		} else return parent;
+		} return parent;
 		
 		case 1: {
 			(*top) = (*top)->next;
@@ -718,7 +722,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 			
 			asprintf(
 				why,
-				"The command %s is ambigious, matching %lu commands (%s)", 
+				"The command \"%s\" is ambigious, matching %lu commands (%s)", 
 				name->str, matches, list);
 			free(list);
 		} return NULL;
@@ -740,13 +744,13 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 	
 	if (stack->type != STACK_PARAM) {
 		asprintf(
-			why, "the passed argument was not a stack !!");
+			why, "The passed argument was not a stack !!");
 		return FAILURE;
 	}
 	
 	if (!stack->len) {
 		asprintf(
-			why, "the stack contains nothing !!");
+			why, "The stack contains nothing !!");
 		return FAILURE;
 	}
 	
@@ -772,7 +776,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 		
 		default:
 			asprintf(
-				why, "the first parameter makes no sense !!");
+				why, "The first parameter makes no sense !!");
 			return FAILURE;
 	}
 	
