@@ -21,6 +21,8 @@
 #ifndef PHP_TYPE_H
 #define PHP_TYPE_H
 
+PHPAPI const char* gettype(zval* arg);
+
 PHP_FUNCTION(intval);
 PHP_FUNCTION(floatval);
 PHP_FUNCTION(strval);
