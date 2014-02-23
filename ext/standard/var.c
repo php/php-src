@@ -365,19 +365,18 @@ static int php_array_element_export(zval *zv TSRMLS_DC, int num_args, va_list ar
 		smart_str_appendl(buf, " => ", 4);
 
 	} else { /* string key */
-		char *tmp_str;
-		int tmp_len;
+		zend_string *tmp_str;
 		zend_string *key = php_addcslashes(hash_key->key->val, hash_key->key->len, 0, "'\\", 2 TSRMLS_CC);
-		tmp_str = php_str_to_str_ex(key->val, key->len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
+		tmp_str = php_str_to_str_ex(key->val, key->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
 
 		buffer_append_spaces(buf, level + 1);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, tmp_str, tmp_len);
+		smart_str_appendl(buf, tmp_str->val, tmp_str->len);
 		smart_str_appendl(buf, "' => ", 5);
 
-		STR_RELEASE(key);
-		efree(tmp_str);
+		STR_FREE(key);
+		STR_FREE(tmp_str);
 	}
 	php_var_export_ex(zv, level + 2, buf TSRMLS_CC);
 
@@ -427,7 +426,7 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 	char *tmp_str;
 	int tmp_len;
 	zend_string *class_name;
-	zend_string *ztmp;
+	zend_string *ztmp, *ztmp2;
 
 	switch (Z_TYPE_P(struc)) {
 	case IS_BOOL:
@@ -450,14 +449,14 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 		break;
 	case IS_STRING:
 		ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2 TSRMLS_CC);
-		tmp_str = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, &tmp_len, 0, NULL);
+		ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
 
 		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, tmp_str, tmp_len);
+		smart_str_appendl(buf, ztmp2->val, ztmp2->len);
 		smart_str_appendc(buf, '\'');
 
-		STR_RELEASE(ztmp);
-		efree(tmp_str);
+		STR_FREE(ztmp);
+		STR_FREE(ztmp2);
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);

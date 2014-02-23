@@ -3626,22 +3626,21 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 
 /* {{{ php_str_to_str_ex
  */
-PHPAPI char *php_str_to_str_ex(char *haystack, int length,
-	char *needle, int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count)
+PHPAPI zend_string *php_str_to_str_ex(char *haystack, int length,
+	char *needle, int needle_len, char *str, int str_len, int case_sensitivity, int *replace_count)
 {
-	char *new_str;
+	zend_string *new_str;
 
 	if (needle_len < length) {
 		char *end, *haystack_dup = NULL, *needle_dup = NULL;
 		char *e, *s, *p, *r;
 
 		if (needle_len == str_len) {
-			new_str = estrndup(haystack, length);
-			*_new_length = length;
+			new_str = STR_INIT(haystack, length, 0);
 
 			if (case_sensitivity) {
-				end = new_str + length;
-				for (p = new_str; (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+				end = new_str->val + length;
+				for (p = new_str->val; (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
 					memcpy(r, str, str_len);
 					if (replace_count) {
 						(*replace_count)++;
@@ -3654,7 +3653,7 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 				php_strtolower(needle_dup, needle_len);
 				end = haystack_dup + length;
 				for (p = haystack_dup; (r = (char*)php_memnstr(p, needle_dup, needle_len, end)); p = r + needle_len) {
-					memcpy(new_str + (r - haystack_dup), str, str_len);
+					memcpy(new_str->val + (r - haystack_dup), str, str_len);
 					if (replace_count) {
 						(*replace_count)++;
 					}
@@ -3672,7 +3671,7 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 			}
 
 			if (str_len < needle_len) {
-				new_str = emalloc(length + 1);
+				new_str = STR_ALLOC(length, 0);
 			} else {
 				int count = 0;
 				char *o, *n, *endp;
@@ -3698,17 +3697,14 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					if (needle_dup) {
 						efree(needle_dup);
 					}
-					new_str = estrndup(haystack, length);
-					if (_new_length) {
-						*_new_length = length;
-					}
+					new_str = STR_INIT(haystack, length, 0);
 					return new_str;
 				} else {
-					new_str = safe_emalloc(count, str_len - needle_len, length + 1);
+					new_str = STR_ALLOC(count * (str_len - needle_len) + length, 0);
 				}
 			}
 
-			e = s = new_str;
+			e = s = new_str->val;
 
 			if (case_sensitivity) {
 				end = haystack + length;
@@ -3753,15 +3749,13 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 			}
 
 			*e = '\0';
-			*_new_length = e - s;
 
-			new_str = erealloc(new_str, *_new_length + 1);
+			new_str = STR_REALLOC(new_str, e - s, 0);
 			return new_str;
 		}
 	} else if (needle_len > length) {
 nothing_todo:
-		*_new_length = length;
-		new_str = estrndup(haystack, length);
+		new_str = STR_INIT(haystack, length, 0);
 		return new_str;
 	} else {
 		if (case_sensitivity && memcmp(haystack, needle, length)) {
@@ -3784,8 +3778,7 @@ nothing_todo:
 			efree(l_needle);
 		}
 
-		*_new_length = str_len;
-		new_str = estrndup(str, str_len);
+		new_str = STR_INIT(str, str_len, 0);
 
 		if (replace_count) {
 			(*replace_count)++;
@@ -3798,10 +3791,9 @@ nothing_todo:
 
 /* {{{ php_str_to_str
  */
-PHPAPI char *php_str_to_str(char *haystack, int length,
-	char *needle, int needle_len, char *str, int str_len, int *_new_length)
+PHPAPI zend_string *php_str_to_str(char *haystack, int length, char *needle, int needle_len, char *str, int str_len)
 {
-	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1, NULL);
+	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, 1, NULL);
 }
 /* }}} */
 
@@ -3880,9 +3872,9 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 								case_sensitivity,
 								replace_count);
 			} else if (Z_STRLEN_P(search_entry) > 1) {
-//???				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
-//???														   Z_STRVAL_P(search_entry), Z_STRLEN_P(search_entry),
-//???														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity, replace_count);
+				ZVAL_STR(&temp_result, php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
+							Z_STRVAL_P(search_entry), Z_STRLEN_P(search_entry),
+							replace_value, replace_len, case_sensitivity, replace_count));
 			}
 
 			STR_FREE(Z_STR_P(result));
@@ -3905,9 +3897,9 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 							case_sensitivity,
 							replace_count);
 		} else if (Z_STRLEN_P(search) > 1) {
-//???			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_P(subject), Z_STRLEN_P(subject),
-//???													Z_STRVAL_P(search), Z_STRLEN_P(search),
-//???													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
+			ZVAL_STR(result, php_str_to_str_ex(Z_STRVAL_P(subject), Z_STRLEN_P(subject),
+						Z_STRVAL_P(search), Z_STRLEN_P(search),
+						Z_STRVAL_P(replace), Z_STRLEN_P(replace), case_sensitivity, replace_count));
 		} else {
 			ZVAL_DUP(result, subject);
 		}
