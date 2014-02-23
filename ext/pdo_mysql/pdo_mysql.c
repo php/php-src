@@ -64,7 +64,12 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
 		pdo_dbh_t * dbh = zend_object_store_get_object(zv TSRMLS_CC);
 
-		if (!dbh || dbh->driver != &pdo_mysql_driver) {
+		if (!dbh) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to retrieve handle from object store");
+			return NULL;
+		}
+
+		if (dbh->driver != &pdo_mysql_driver) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
 			return NULL;
 		}
