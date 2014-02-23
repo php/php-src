@@ -2342,6 +2342,11 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (IS_CONST == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
 		Z_SET_REFCOUNT_P(z, 1);
 	}
+
+	if (UNEXPECTED(Z_ISREF_P(z))) {
+		z = Z_REFVAL_P(z);
+	}
+
 	zend_print_variable(z);
 
 	CHECK_EXCEPTION();
@@ -7351,6 +7356,11 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (IS_TMP_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
 		Z_SET_REFCOUNT_P(z, 1);
 	}
+
+	if (UNEXPECTED(Z_ISREF_P(z))) {
+		z = Z_REFVAL_P(z);
+	}
+
 	zend_print_variable(z);
 
 	zval_dtor(free_op1.var);
@@ -12279,6 +12289,11 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (IS_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
 		Z_SET_REFCOUNT_P(z, 1);
 	}
+
+	if (UNEXPECTED(Z_ISREF_P(z))) {
+		z = Z_REFVAL_P(z);
+	}
+
 	zend_print_variable(z);
 
 	zval_ptr_dtor_nogc(free_op1.var);
@@ -28963,6 +28978,11 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (IS_CV == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
 		Z_SET_REFCOUNT_P(z, 1);
 	}
+
+	if (UNEXPECTED(Z_ISREF_P(z))) {
+		z = Z_REFVAL_P(z);
+	}
+
 	zend_print_variable(z);
 
 	CHECK_EXCEPTION();

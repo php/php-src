@@ -954,6 +954,11 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 	if (OP1_TYPE == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
 		Z_SET_REFCOUNT_P(z, 1);
 	}
+
+	if (UNEXPECTED(Z_ISREF_P(z))) {
+		z = Z_REFVAL_P(z);
+	}
+
 	zend_print_variable(z);
 
 	FREE_OP1();

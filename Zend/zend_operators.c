@@ -663,6 +663,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		default:
+			//??? op is set to be IS_STRING below. 
 			zval_dtor(op);
 			ZVAL_BOOL(op, 0);
 			break;
