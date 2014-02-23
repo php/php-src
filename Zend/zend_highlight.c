@@ -57,7 +57,7 @@ ZEND_API void zend_html_putc(char c)
 ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const unsigned char *ptr = (const unsigned char*)s, *end = ptr + len;
-	unsigned char *filtered;
+	unsigned char *filtered = NULL;
 	size_t filtered_len;
 
 	if (LANG_SCNG(output_filter)) {
