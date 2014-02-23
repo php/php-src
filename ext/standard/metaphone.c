@@ -144,7 +144,7 @@ static char Lookahead(char *word, int how_far)
  * could be one though; or more too). */
 #define Phonize(c)	{ \
 						if (p_idx >= max_buffer_len) { \
-							*phoned_word = STR_REALLOC(*phoned_word, 1 + max_buffer_len, 0); \
+							*phoned_word = STR_REALLOC(*phoned_word, 2 * sizeof(char) + max_buffer_len, 0); \
 							max_buffer_len += 2; \
 						} \
 						(*phoned_word)->val[p_idx++] = c; \
@@ -153,7 +153,8 @@ static char Lookahead(char *word, int how_far)
 /* Slap a null character on the end of the phoned word */
 #define End_Phoned_Word	{ \
 							if (p_idx == max_buffer_len) { \
-								*phoned_word = STR_REALLOC(*phoned_word, max_buffer_len, 0); \
+								*phoned_word = STR_REALLOC(*phoned_word, 1 * sizeof(char) + max_buffer_len, 0); \
+								max_buffer_len += 1; \
 							} \
 							(*phoned_word)->val[p_idx] = '\0'; \
 							(*phoned_word)->len = p_idx; \
@@ -188,10 +189,10 @@ static int metaphone(unsigned char *word, int word_len, long max_phonemes, zend_
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
 		max_buffer_len = word_len;
-		*phoned_word = safe_emalloc(sizeof(char), word_len, 1);
+		*phoned_word = STR_ALLOC(sizeof(char) * word_len + 1, 0);
 	} else {
 		max_buffer_len = max_phonemes;
-		*phoned_word = safe_emalloc(sizeof(char), max_phonemes, 1);
+		*phoned_word = STR_ALLOC(sizeof(char) * max_phonemes + 1, 0);
 	}
 
 
