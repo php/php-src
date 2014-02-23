@@ -555,8 +555,9 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-//???		RETVAL_STRINGL(contents, len, 0);
+//???	RETVAL_STRINGL(contents, len, 0);
 		RETVAL_STRINGL(contents, len);
+		efree(contents);
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
