@@ -540,12 +540,13 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 			}
 			PRINTF_DEBUG(("sprintf: format character='%c'\n", format[inpos]));
 			/* now we expect to find a type specifier */
-			if (multiuse) {
+			//???? We don't hold zval** in args anymore
+			//if (multiuse) {
 				ZVAL_DUP(&tmp, &args[argnum]);
-			} else {
-				SEPARATE_ZVAL(&args[argnum]);
-				ZVAL_COPY_VALUE(&tmp, &args[argnum]);
-			}
+			//} else {
+			//	SEPARATE_ZVAL(&args[argnum]);
+			//	ZVAL_COPY_VALUE(&tmp, &args[argnum]);
+			//}
 
 			switch (format[inpos]) {
 				case 's': {
