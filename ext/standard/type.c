@@ -21,68 +21,55 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 
-/* {{{ proto string gettype(mixed var)
-   Returns the type of the variable */
-PHP_FUNCTION(gettype)
+PHPAPI const char* gettype(zval* arg)
 {
-	zval **arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &arg) == FAILURE) {
-		return;
-	}
-
-	switch (Z_TYPE_PP(arg)) {
+	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
-			RETVAL_STRING("NULL", 1);
-			break;
+			return "NULL";
 
 		case IS_BOOL:
-			RETVAL_STRING("boolean", 1);
-			break;
+			return "boolean";
 
 		case IS_LONG:
-			RETVAL_STRING("integer", 1);
-			break;
+			return "integer";
 
 		case IS_DOUBLE:
-			RETVAL_STRING("double", 1);
-			break;
+			return "double";
 	
 		case IS_STRING:
-			RETVAL_STRING("string", 1);
-			break;
+			return "string";
 	
 		case IS_ARRAY:
-			RETVAL_STRING("array", 1);
-			break;
+			return "array";
 
 		case IS_OBJECT:
-			RETVAL_STRING("object", 1);
-		/*
-		   {
-		   char *result;
-		   int res_len;
-
-		   res_len = sizeof("object of type ")-1 + Z_OBJCE_P(arg)->name_length;
-		   spprintf(&result, 0, "object of type %s", Z_OBJCE_P(arg)->name);
-		   RETVAL_STRINGL(result, res_len, 0);
-		   }
-		 */
-			break;
+			return "object";
 
 		case IS_RESOURCE:
 			{
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_P(arg) TSRMLS_CC);
 
 				if (type_name) {
-					RETVAL_STRING("resource", 1);
-					break;
+					return "resource";
 				}
 			}
 
 		default:
-			RETVAL_STRING("unknown type", 1);
+			return "unknown type";
 	}
+}
+
+/* {{{ proto string gettype(mixed var)
+   Returns the type of the variable */
+PHP_FUNCTION(gettype)
+{
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		return;
+	}
+
+	RETVAL_STRING(gettype(arg), 1);
 }
 /* }}} */
 
