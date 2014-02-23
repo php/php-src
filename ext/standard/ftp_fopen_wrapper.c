@@ -611,8 +611,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	php_stream_dirent *ent = (php_stream_dirent *)buf;
 	php_stream *innerstream;
 	size_t tmp_len;
-	char *basename;
-	size_t basename_len;
+	zend_string *basename;
 
 	innerstream =  ((php_ftp_dirstream_data *)stream->abstract)->datastream;
 
@@ -628,20 +627,12 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	php_basename(ent->d_name, tmp_len, NULL, 0, &basename, &basename_len TSRMLS_CC);
-	if (!basename) {
-		return 0;
-	}
+	basename = php_basename(ent->d_name, tmp_len, NULL, 0 TSRMLS_CC);
 
-	if (!basename_len) {
-		efree(basename);
-		return 0;
-	}
-
-	tmp_len = MIN(sizeof(ent->d_name), basename_len - 1);
-	memcpy(ent->d_name, basename, tmp_len);
+	tmp_len = MIN(sizeof(ent->d_name), basename->len - 1);
+	memcpy(ent->d_name, basename->val, tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	efree(basename);
+	STR_RELEASE(basename);
 
 	/* Trim off trailing whitespace characters */
 	tmp_len--;

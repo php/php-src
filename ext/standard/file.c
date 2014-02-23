@@ -806,10 +806,9 @@ PHP_FUNCTION(tempnam)
 {
 	char *dir, *prefix;
 	int dir_len, prefix_len;
-	size_t p_len;
 	char *opened_path;
-	char *p;
 	int fd;
+	zend_string *p;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
 		return;
@@ -819,19 +818,19 @@ PHP_FUNCTION(tempnam)
 		RETURN_FALSE;
 	}
 
-	php_basename(prefix, prefix_len, NULL, 0, &p, &p_len TSRMLS_CC);
-	if (p_len > 64) {
-		p[63] = '\0';
+	p = php_basename(prefix, prefix_len, NULL, 0 TSRMLS_CC);
+	if (p->len > 64) {
+		p->val[63] = '\0';
 	}
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1 TSRMLS_CC)) >= 0) {
 		close(fd);
 //???		RETVAL_STRING(opened_path, 0);
 		RETVAL_STRING(opened_path);
 	}
-	efree(p);
+	STR_RELEASE(p);
 }
 /* }}} */
 

@@ -173,12 +173,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	char *file_dirname_fullpath;
 	char file_dirname[MAXPATHLEN];
 	size_t dir_len;
-	char *file_basename;
-	size_t file_basename_len;
 	int is_dir_only = 0;
 	char *path_cleaned;
 	size_t path_cleaned_len;
 	cwd_state new_state;
+	zend_string *file_basename;
 
 	new_state.cwd = CWD_STATE_ALLOC(1);
 	new_state.cwd[0] = '\0';
@@ -212,11 +211,11 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
 		}
 
-		php_basename(path_cleaned, path_cleaned_len, NULL, 0, &file_basename, (size_t *)&file_basename_len TSRMLS_CC);
+		file_basename =	php_basename(path_cleaned, path_cleaned_len, NULL, 0 TSRMLS_CC);
 
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
-			efree(file_basename);
+			STR_RELEASE(file_basename);
 			CWD_STATE_FREE(new_state.cwd);
 			return 0;
 		}
@@ -240,7 +239,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		if (!ret) {
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
-				efree(file_basename);
+				STR_RELEASE(file_basename);
 				CWD_STATE_FREE(new_state.cwd);
 			}
 			return 0;
@@ -254,16 +253,16 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		return 1;
 	}
 
-	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, file_basename);
+	len = spprintf(&fullpath, 0, "%s/%s", file_dirname_fullpath, file_basename->val);
 	if (!len) {
 		efree(file_dirname_fullpath);
-		efree(file_basename);
+		STR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
-		efree(file_basename);
+		STR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -275,7 +274,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	if (ZIP_OPENBASEDIR_CHECKPATH(fullpath)) {
 		efree(fullpath);
 		efree(file_dirname_fullpath);
-		efree(file_basename);
+		STR_RELEASE(file_basename);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -309,7 +308,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 done:
 	efree(fullpath);
-	efree(file_basename);
+	STR_RELEASE(file_basename);
 	efree(file_dirname_fullpath);
 	CWD_STATE_FREE(new_state.cwd);
 
@@ -1773,13 +1772,14 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 			char *file_stripped, *entry_name;
 			size_t entry_name_len, file_stripped_len;
 			char entry_name_buf[MAXPATHLEN];
-			char *basename = NULL;
+			zend_string *basename = NULL;
 
 			if (zend_hash_index_find(Z_ARRVAL_P(return_value), i, (void **) &zval_file) == SUCCESS) {
 				if (remove_all_path) {
-					php_basename(Z_STRVAL_PP(zval_file), Z_STRLEN_PP(zval_file), NULL, 0,
-									&basename, (size_t *)&file_stripped_len TSRMLS_CC);
-					file_stripped = basename;
+					basename = php_basename(Z_STRVAL_PP(zval_file), Z_STRLEN_PP(zval_file), NULL, 0,
+									&basename TSRMLS_CC);
+					file_stripped = basename->val;
+					file_stripped_len = basename->len;
 				} else if (remove_path && strstr(Z_STRVAL_PP(zval_file), remove_path) != NULL) {
 					file_stripped = Z_STRVAL_PP(zval_file) + remove_path_len + 1;
 					file_stripped_len = Z_STRLEN_PP(zval_file) - remove_path_len - 1;
@@ -1804,7 +1804,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					entry_name_len = Z_STRLEN_PP(zval_file);
 				}
 				if (basename) {
-					efree(basename);
+					STR_RELEASE(basename);
 					basename = NULL;
 				}
 				if (php_zip_add_file(intern, Z_STRVAL_PP(zval_file), Z_STRLEN_PP(zval_file),

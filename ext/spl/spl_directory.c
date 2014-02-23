@@ -923,6 +923,7 @@ SPL_METHOD(SplFileInfo, getExtension)
 	const char *p;
 	size_t flen;
 	int path_len, idx;
+	zend_string *ret;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -938,18 +939,16 @@ SPL_METHOD(SplFileInfo, getExtension)
 		flen = intern->file_name_len;
 	}
 
-	php_basename(fname, flen, NULL, 0, &fname, &flen TSRMLS_CC);
+	ret = php_basename(fname, flen, NULL, 0 TSRMLS_CC);
 
-	p = zend_memrchr(fname, '.', flen);
+	p = zend_memrchr(ret->val, '.', ret->len);
 	if (p) {
 		idx = p - fname;
-		RETVAL_STRINGL(fname + idx + 1, flen - idx - 1);
-		efree(fname);
+		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
+		STR_RELEASE(ret);
 		return;
 	} else {
-		if (fname) {
-			efree(fname);
-		}
+		STR_RELEASE(ret);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -960,27 +959,23 @@ SPL_METHOD(SplFileInfo, getExtension)
 SPL_METHOD(DirectoryIterator, getExtension)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
-	char *fname = NULL;
 	const char *p;
-	size_t flen;
 	int idx;
+	zend_string *fname;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0, &fname, &flen TSRMLS_CC);
+	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), NULL, 0 TSRMLS_CC);
 
-	p = zend_memrchr(fname, '.', flen);
+	p = zend_memrchr(fname->val, '.', fname->len);
 	if (p) {
-		idx = p - fname;
-		RETVAL_STRINGL(fname + idx + 1, flen - idx - 1);
-		efree(fname);
-		return;
+		idx = p - fname->val;
+		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
+		STR_RELEASE(fname);
 	} else {
-		if (fname) {
-			efree(fname);
-		}
+		STR_RELEASE(fname);
 		RETURN_EMPTY_STRING();
 	}
 }
@@ -1009,10 +1004,7 @@ SPL_METHOD(SplFileInfo, getBasename)
 		flen = intern->file_name_len;
 	}
 
-	php_basename(fname, flen, suffix, slen, &fname, &flen TSRMLS_CC);
-
-	RETVAL_STRINGL(fname, flen);
-	efree(fname);
+	RETURN_STR(php_basename(fname, flen, suffix, slen TSRMLS_CC));
 }
 /* }}}*/   
 
@@ -1021,18 +1013,17 @@ SPL_METHOD(SplFileInfo, getBasename)
 SPL_METHOD(DirectoryIterator, getBasename)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
-	char *suffix = 0, *fname;
+	char *suffix = 0;
 	int slen = 0;
-	size_t flen;
+	zend_string *fname;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &suffix, &slen) == FAILURE) {
 		return;
 	}
 
-	php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), suffix, slen, &fname, &flen TSRMLS_CC);
+	fname = php_basename(intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name), suffix, slen TSRMLS_CC);
 
-	RETVAL_STRINGL(fname, flen);
-	efree(fname);
+	RETVAL_STR(fname);
 }
 /* }}} */
 

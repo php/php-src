@@ -1398,11 +1398,12 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI void php_basename(const char *s, size_t len, char *suffix, size_t sufflen, char **p_ret, size_t *p_len TSRMLS_DC)
+PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen TSRMLS_DC)
 {
-	char *ret = NULL, *c, *comp, *cend;
+	char *c, *comp, *cend;
 	size_t inc_len, cnt;
 	int state;
+	zend_string *ret;
 
 	c = comp = cend = (char*)s;
 	cnt = len;
@@ -1470,15 +1471,8 @@ quit_loop:
 
 	len = cend - comp;
 
-	if (p_ret) {
-		ret = emalloc(len + 1);
-		memcpy(ret, comp, len);
-		ret[len] = '\0';
-		*p_ret = ret;
-	}
-	if (p_len) {
-		*p_len = len;
-	}
+	ret = STR_INIT(comp, len, 0);
+	return ret;
 }
 /* }}} */
 
@@ -1486,17 +1480,14 @@ quit_loop:
    Returns the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	char *string, *suffix = NULL, *ret;
+	char *string, *suffix = NULL;
 	int   string_len, suffix_len = 0;
-	size_t ret_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
 		return;
 	}
 
-	php_basename(string, string_len, suffix, suffix_len, &ret, &ret_len TSRMLS_CC);
-//???	RETURN_STRINGL(ret, (int)ret_len, 0);
-	RETURN_STRINGL(ret, (int)ret_len);
+	RETURN_STR(php_basename(string, string_len, suffix, suffix_len TSRMLS_CC));
 }
 /* }}} */
 
@@ -1532,10 +1523,10 @@ PHP_FUNCTION(dirname)
 PHP_FUNCTION(pathinfo)
 {
 	zval tmp;
-	char *path, *ret = NULL;
+	char *path, *dirname;
 	int path_len, have_basename;
-	size_t ret_len;
 	long opt = PHP_PATHINFO_ALL;
+	zend_string *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
 		return;
@@ -1546,18 +1537,17 @@ PHP_FUNCTION(pathinfo)
 	array_init(&tmp);
 
 	if ((opt & PHP_PATHINFO_DIRNAME) == PHP_PATHINFO_DIRNAME) {
-		ret = estrndup(path, path_len);
-		php_dirname(ret, path_len);
-		if (*ret) {
-			add_assoc_string(&tmp, "dirname", ret, 1);
+		dirname = estrndup(path, path_len);
+		php_dirname(dirname, path_len);
+		if (*dirname) {
+			add_assoc_string(&tmp, "dirname", dirname, 1);
 		}
-		efree(ret);
-		ret = NULL;
+		efree(dirname);
 	}
 
 	if (have_basename) {
-		php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
-		add_assoc_stringl(&tmp, "basename", ret, ret_len, 0);
+		ret = php_basename(path, path_len, NULL, 0 TSRMLS_CC);
+		add_assoc_str(&tmp, "basename", ret);
 	}
 
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
@@ -1565,14 +1555,14 @@ PHP_FUNCTION(pathinfo)
 		int idx;
 
 		if (!have_basename) {
-			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
+			ret = php_basename(path, path_len, NULL, 0 TSRMLS_CC);
 		}
 
-		p = zend_memrchr(ret, '.', ret_len);
+		p = zend_memrchr(ret->val, '.', ret->len);
 
 		if (p) {
-			idx = p - ret;
-			add_assoc_stringl(&tmp, "extension", ret + idx + 1, ret_len - idx - 1, 1);
+			idx = p - ret->val;
+			add_assoc_stringl(&tmp, "extension", ret->val + idx + 1, ret->len - idx - 1, 1);
 		}
 	}
 
@@ -1582,17 +1572,17 @@ PHP_FUNCTION(pathinfo)
 
 		/* Have we already looked up the basename? */
 		if (!have_basename && !ret) {
-			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
+			ret = php_basename(path, path_len, NULL, 0 TSRMLS_CC);
 		}
 
-		p = zend_memrchr(ret, '.', ret_len);
+		p = zend_memrchr(ret->val, '.', ret->len);
 
-		idx = p ? (p - ret) : ret_len;
-		add_assoc_stringl(&tmp, "filename", ret, idx, 1);
+		idx = p ? (p - ret->val) : ret->len;
+		add_assoc_stringl(&tmp, "filename", ret->val, idx, 1);
 	}
 
 	if (!have_basename && ret) {
-		efree(ret);
+		STR_RELEASE(ret);
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {

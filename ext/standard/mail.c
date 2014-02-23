@@ -278,17 +278,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 	if (PG(mail_x_header)) {
 		const char *tmp = zend_get_executed_filename(TSRMLS_C);
-		char *f;
-		size_t f_len;
+		zend_string *f;
 
-		php_basename(tmp, strlen(tmp), NULL, 0,&f, &f_len TSRMLS_CC);
+		f = php_basename(tmp, strlen(tmp), NULL, 0 TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f->val, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n", php_getuid(TSRMLS_C), f->val);
 		}
-		efree(f);
+		STR_RELEASE(f);
 	}
 
 	if (!sendmail_path) {
