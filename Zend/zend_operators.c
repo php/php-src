@@ -232,8 +232,12 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 					break;													\
 				}															\
 			case IS_BOOL:													\
-			case IS_RESOURCE:												\
 				ZVAL_LONG(&(holder), Z_LVAL_P(op));							\
+				(op) = &(holder);											\
+				break;														\
+			case IS_RESOURCE:												\
+			    /* ??? delete old resource ??? */							\
+				ZVAL_LONG(&(holder), Z_RES_HANDLE_P(op));					\
 				(op) = &(holder);											\
 				break;														\
 			case IS_NULL:													\
@@ -275,8 +279,11 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				convert_to_long_base(&(holder), 10);				\
 				break;												\
 			case IS_BOOL:											\
-			case IS_RESOURCE:										\
 				Z_LVAL(holder) = Z_LVAL_P(op);						\
+				break;												\
+			case IS_RESOURCE:										\
+			    /* ??? delete old resource ??? */					\
+				ZVAL_LONG(&holder, Z_RES_HANDLE_P(op));				\
 				break;												\
 			default:												\
 				zend_error(E_WARNING, "Cannot convert to ordinal value");	\
@@ -299,6 +306,8 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_LVAL(holder) = 0;									\
 				break;												\
 			case IS_RESOURCE:										\
+				Z_LVAL(holder) = (Z_RES_HANDLE_P(op) ? 1 : 0);		\
+				break;												\
 			case IS_LONG:											\
 				Z_LVAL(holder) = (Z_LVAL_P(op) ? 1 : 0);			\
 				break;												\
@@ -1728,8 +1737,10 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			break;
 		case IS_BOOL:
 		case IS_LONG:
-		case IS_RESOURCE:
 			Z_LVAL_P(result) = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			break;
+		case IS_RESOURCE:
+			Z_LVAL_P(result) = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			Z_LVAL_P(result) = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
