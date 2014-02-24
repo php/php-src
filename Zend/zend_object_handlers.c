@@ -332,7 +332,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		if (UNEXPECTED(denied_access != 0)) {
 			/* Information was available, but we were denied access.  Error out. */
 			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, Z_STRVAL_P(member));
+				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, Z_STRVAL_P(member));
 			}
 			return NULL;
 		} else {
@@ -485,7 +485,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 						Z_SET_REFCOUNT_P(rv, 0);
 					}
 					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
-						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name, Z_STRVAL_P(member));
+						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name->val, Z_STRVAL_P(member));
 					}
 				}
 			} else {
@@ -1202,7 +1202,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	/* right now this function is used for non static method lookup too */
 	/* Is the function static */
 	if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
-		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name);
+		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name->val);
 	}
 #endif
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
@@ -1258,14 +1258,14 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 		if (UNEXPECTED(!zend_verify_property_access(property_info, ce TSRMLS_CC))) {
 			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name, property_name);
+				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, property_name->val);
 			}
 			return NULL;
 		}
 
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
 			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
+				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
 			}
 			return NULL;
 		}
