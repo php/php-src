@@ -1521,7 +1521,7 @@ PHP_FUNCTION(pathinfo)
 	char *path, *dirname;
 	int path_len, have_basename;
 	long opt = PHP_PATHINFO_ALL;
-	zend_string *ret;
+	zend_string *ret = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &path, &path_len, &opt) == FAILURE) {
 		return;
@@ -1576,7 +1576,7 @@ PHP_FUNCTION(pathinfo)
 		add_assoc_stringl(&tmp, "filename", ret->val, idx, 1);
 	}
 
-	if (!have_basename && ret) {
+	if (ret) {
 		STR_RELEASE(ret);
 	}
 
