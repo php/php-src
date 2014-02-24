@@ -61,6 +61,9 @@ PHP                                                                        NEWS
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
     (Matteo)
 
+- PDO-ODBC:
+  . Fixed bug #50444 (PDO-ODBC changes for 64-bit). 
+
 - SQLite:
   . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
 

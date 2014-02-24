@@ -279,7 +279,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
 	SWORD sqltype = 0, ctype = 0, scale = 0, nullable = 0;
-	UDWORD precision = 0;
+	SQLULEN precision = 0;
 	pdo_odbc_param *P;
 	
 	/* we're only interested in parameters for prepared SQL right now */
@@ -551,7 +551,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	struct pdo_column_data *col = &stmt->columns[colno];
 	RETCODE rc;
 	SWORD	colnamelen;
-	SDWORD	colsize;
+	SQLULEN	colsize;
 	SQLLEN displaysize;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
