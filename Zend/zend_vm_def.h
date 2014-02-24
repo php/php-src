@@ -509,7 +509,9 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();

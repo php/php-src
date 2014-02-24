@@ -13954,7 +13954,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -16347,7 +16349,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -18322,7 +18326,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -20408,7 +20414,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -21775,7 +21783,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -23608,7 +23618,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -24949,7 +24961,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -26206,7 +26220,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -27463,7 +27479,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -27862,7 +27880,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -30577,7 +30597,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -32751,7 +32773,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -34600,7 +34624,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -36560,7 +36586,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
@@ -37795,7 +37823,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 
 	if (opline->extended_value == ZEND_ASSIGN_DIM) {
 		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+		if (var_ptr != free_op_data2.var) {
+			FREE_OP_VAR_PTR(free_op_data2);
+		}
 
 		CHECK_EXCEPTION();
 		ZEND_VM_INC_OPCODE();
