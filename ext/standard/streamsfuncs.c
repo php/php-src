@@ -412,8 +412,7 @@ PHP_FUNCTION(stream_get_contents)
 	zval		*zsrc;
 	long		maxlen		= PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
-	int			len;
-	char		*contents	= NULL;
+	zend_string *contents;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &desiredpos) == FAILURE) {
 		RETURN_FALSE;
@@ -441,14 +440,9 @@ PHP_FUNCTION(stream_get_contents)
 		}
 	}
 
-	len = php_stream_copy_to_mem(stream, &contents, maxlen, 0);
+	contents = php_stream_copy_to_mem(stream, maxlen, 0);
 
-	if (contents) {
-//???		RETVAL_STRINGL(contents, len, 0);
-		RETVAL_STRINGL(contents, len);
-	} else {
-		RETVAL_EMPTY_STRING();
-	}
+	RETURN_STR(contents);
 }
 /* }}} */
 

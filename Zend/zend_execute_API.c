@@ -251,14 +251,14 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		 * so that if handler used some class, crash would not happen */
 		if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 			zeh = &EG(user_error_handler);
-			ZVAL_UNDEF(&EG(user_error_handler));
 			zval_ptr_dtor(zeh);
+			ZVAL_UNDEF(&EG(user_error_handler));
 		}
 
 		if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 			zeh = &EG(user_exception_handler);
-			ZVAL_UNDEF(&EG(user_exception_handler));
 			zval_ptr_dtor(zeh);
+			ZVAL_UNDEF(&EG(user_exception_handler));
 		}
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));

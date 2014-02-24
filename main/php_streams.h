@@ -61,7 +61,7 @@ END_EXTERN_C()
  * the ultimate ancestor, which is useful, because there can be several layers of calls */
 #define php_stream_alloc_rel(ops, thisptr, persistent, mode) _php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_REL_CC TSRMLS_CC)
 
-#define php_stream_copy_to_mem_rel(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_copy_to_mem_rel(src, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_rel(filename, mode, opened, options) _php_stream_fopen((filename), (mode), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
@@ -440,9 +440,8 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 /* read all data from stream and put into a buffer. Caller must free buffer
  * when done. */
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
-		int persistent STREAMS_DC TSRMLS_DC);
-#define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC);
+#define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
 
 /* output all data from a stream */
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
@@ -546,7 +545,7 @@ PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_st
 PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options TSRMLS_DC);
-PHPAPI const char *php_stream_locate_eol(php_stream *stream, const char *buf, size_t buf_len TSRMLS_DC);
+PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)

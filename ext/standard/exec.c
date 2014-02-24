@@ -438,10 +438,9 @@ PHP_FUNCTION(escapeshellarg)
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
-	size_t total_readbytes;
 	char *command;
 	int command_len;
-	char *ret;
+	zend_string *ret;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
@@ -458,12 +457,11 @@ PHP_FUNCTION(shell_exec)
 	}
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
-	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
+	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
-	if (total_readbytes > 0) {
-//???		RETVAL_STRINGL(ret, total_readbytes, 0);
-		RETVAL_STRINGL(ret, total_readbytes);
+	if (ret->len > 0) {
+		RETVAL_STR(ret);
 	}
 }
 /* }}} */

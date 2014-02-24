@@ -1344,15 +1344,15 @@ PHP_FUNCTION(strtoupper)
 {
 	char *arg;
 	int arglen;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arglen) == FAILURE) {
 		return;
 	}
 
-	arg = estrndup(arg, arglen);
-	php_strtoupper(arg, arglen);
-//???	RETURN_STRINGL(arg, arglen, 0);
-	RETURN_STRINGL(arg, arglen);
+	result = STR_INIT(arg, arglen, 0);
+	php_strtoupper(result->val, result->len);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1379,15 +1379,15 @@ PHP_FUNCTION(strtolower)
 {
 	char *str;
 	int arglen;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &arglen) == FAILURE) {
 		return;
 	}
 
-	str = estrndup(str, arglen);
-	php_strtolower(str, arglen);
-//???	RETURN_STRINGL(str, arglen, 0);
-	RETURN_STRINGL(str, arglen);
+	result = STR_INIT(str, arglen, 0);
+	php_strtolower(result->val, result->len);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -2105,33 +2105,33 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen)
+static zend_string *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen)
 {
-	char *dest;
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
 	int out_len;
+	zend_string *dest;
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	if(chunks > INT_MAX - 1) {
+	if (chunks > INT_MAX - 1) {
 		return NULL;
 	}
 	out_len = chunks + 1;
-	if(endlen !=0 && out_len > INT_MAX/endlen) {
+	if (endlen !=0 && out_len > INT_MAX/endlen) {
 		return NULL;
 	}
 	out_len *= endlen;
-	if(out_len > INT_MAX - srclen - 1) {
+	if (out_len > INT_MAX - srclen - 1) {
 		return NULL;
 	}
 	out_len += srclen + 1;
 
-	dest = safe_emalloc((int)out_len, sizeof(char), 0);
+	dest = STR_ALLOC(out_len * sizeof(char), 0);
 
-	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
+	for (p = src, q = dest->val; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
 		q += chunklen;
 		memcpy(q, end, endlen);
@@ -2147,11 +2147,9 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 	}
 
 	*q = '\0';
-	if (destlen) {
-		*destlen = q - dest;
-	}
+	dest->len = q - dest->val;
 
-	return(dest);
+	return dest;
 }
 /* }}} */
 
@@ -2160,12 +2158,11 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 PHP_FUNCTION(chunk_split)
 {
 	char *str;
-	char *result;
 	char *end    = "\r\n";
 	int endlen   = 2;
 	long chunklen = 76;
-	int result_len;
 	int str_len;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &chunklen, &end, &endlen) == FAILURE) {
 		return;
@@ -2178,24 +2175,21 @@ PHP_FUNCTION(chunk_split)
 
 	if (chunklen > str_len) {
 		/* to maintain BC, we must return original string + ending */
-		result_len = endlen + str_len;
-		result = emalloc(result_len + 1);
-		memcpy(result, str, str_len);
-		memcpy(result + str_len, end, endlen);
-		result[result_len] = '\0';
-//???		RETURN_STRINGL(result, result_len, 0);
-		RETURN_STRINGL(result, result_len);
+		result = STR_ALLOC(endlen + str_len, 0);
+		memcpy(result->val, str, str_len);
+		memcpy(result->val + str_len, end, endlen);
+		result->val[result->len] = '\0';
+		RETURN_STR(result);
 	}
 
 	if (!str_len) {
 		RETURN_EMPTY_STRING();
 	}
 
-	result = php_chunk_split(str, str_len, end, endlen, chunklen, &result_len);
+	result = php_chunk_split(str, str_len, end, endlen, chunklen);
 
 	if (result) {
-//???		RETURN_STRINGL(result, result_len, 0);
-		RETURN_STRINGL(result, result_len);
+		RETURN_STR(result);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3127,15 +3121,16 @@ PHP_FUNCTION(strtr)
 PHP_FUNCTION(strrev)
 {
 	char *str;
-	char *e, *n, *p;
+	char *e, *p;
 	int  str_len;
+	zend_string *n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	n = emalloc(str_len+1);
-	p = n;
+	n = STR_ALLOC(str_len, 0);
+	p = n->val;
 
 	e = str + str_len;
 
@@ -3145,8 +3140,7 @@ PHP_FUNCTION(strrev)
 
 	*p = '\0';
 
-//???	RETVAL_STRINGL(n, str_len, 0);
-	RETVAL_STRINGL(n, str_len);
+	RETVAL_STR(n);
 }
 /* }}} */
 
@@ -4170,12 +4164,12 @@ PHP_FUNCTION(hebrevc)
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
-	char		*tmp, *str;
-	int		new_length;
-	char		*end, *target;
+	char	*tmp, *str;
+	char	*end, *target;
 	int		repl_cnt = 0;
 	int		str_len;
 	zend_bool	is_xhtml = 1;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &is_xhtml) == FAILURE) {
 		return;
@@ -4209,8 +4203,8 @@ PHP_FUNCTION(nl2br)
 	{
 		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
-		new_length = str_len + repl_cnt * repl_len;
-		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
+		result = STR_ALLOC(repl_cnt * repl_len + str_len, 0);
+		target = result->val;
 	}
 
 	while (str < end) {
@@ -4241,8 +4235,7 @@ PHP_FUNCTION(nl2br)
 
 	*target = '\0';
 
-//???	RETURN_STRINGL(tmp, new_length, 0);
-	RETURN_STRINGL(tmp, new_length);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -5165,13 +5158,12 @@ PHP_FUNCTION(str_pad)
 	long pad_length;			/* Length to pad to */
 
 	/* Helper variables */
-	size_t	   num_pad_chars;		/* Number of padding characters (total - input size) */
-	char  *result = NULL;		/* Resulting string */
-	int	   result_len = 0;		/* Length of the resulting string */
+	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	int    pad_str_len = 1;		/* Length of the padding string */
 	long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	int	   i, left_pad=0, right_pad=0;
+	zend_string *result = NULL;	/* Resulting string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|sl", &input, &input_len, &pad_length,
 																  &pad_str_val, &pad_str_len, &pad_type_val) == FAILURE) {
@@ -5199,7 +5191,9 @@ PHP_FUNCTION(str_pad)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding length is too long");
 		return;
 	}
-	result = (char *)emalloc(input_len + num_pad_chars + 1);
+
+	result = STR_ALLOC(input_len + num_pad_chars, 0);
+	result->len = 0;
 
 	/* We need to figure out the left/right padding lengths. */
 	switch (pad_type_val) {
@@ -5221,20 +5215,19 @@ PHP_FUNCTION(str_pad)
 
 	/* First we pad on the left. */
 	for (i = 0; i < left_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
+		result->val[result->len++] = pad_str_val[i % pad_str_len];
 
 	/* Then we copy the input string. */
-	memcpy(result + result_len, input, input_len);
-	result_len += input_len;
+	memcpy(result->val + result->len, input, input_len);
+	result->len += input_len;
 
 	/* Finally, we pad on the right. */
 	for (i = 0; i < right_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
+		result->val[result->len++] = pad_str_val[i % pad_str_len];
 
-	result[result_len] = '\0';
+	result->val[result->len] = '\0';
 
-//???	RETURN_STRINGL(result, result_len, 0);
-	RETURN_STRINGL(result, result_len);
+	RETURN_STR(result);
 }
 /* }}} */
 
