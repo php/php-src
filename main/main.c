@@ -2584,19 +2584,18 @@ PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC)
 
 	if (auth && auth[0] != '\0' && strncmp(auth, "Basic ", 6) == 0) {
 		char *pass;
-		char *user;
+		zend_string *user;
 
-		user = php_base64_decode(auth + 6, strlen(auth) - 6, NULL);
+		user = php_base64_decode(auth + 6, strlen(auth) - 6);
 		if (user) {
-			pass = strchr(user, ':');
+			pass = strchr(user->val, ':');
 			if (pass) {
 				*pass++ = '\0';
-				SG(request_info).auth_user = user;
+				SG(request_info).auth_user = estrndup(user->val, user->len);
 				SG(request_info).auth_password = estrdup(pass);
 				ret = 0;
-			} else {
-				efree(user);
-			}
+			} 
+			STR_FREE(user);
 		}
 	}
 

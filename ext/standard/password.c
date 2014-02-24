@@ -82,28 +82,27 @@ static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {
 static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
 	size_t pos = 0;
-	size_t ret_len = 0;
-	unsigned char *buffer;
+	zend_string *buffer;
 	if ((int) str_len < 0) {
 		return FAILURE;
 	}
-	buffer = php_base64_encode((unsigned char*) str, (int) str_len, (int*) &ret_len);
-	if (ret_len < out_len) {
+	buffer = php_base64_encode((unsigned char*) str, (int) str_len);
+	if (buffer->len < out_len) {
 		/* Too short of an encoded string generated */
-		efree(buffer);
+		STR_RELEASE(buffer);
 		return FAILURE;
 	}
 	for (pos = 0; pos < out_len; pos++) {
-		if (buffer[pos] == '+') {
+		if (buffer->val[pos] == '+') {
 			ret[pos] = '.';
-		} else if (buffer[pos] == '=') {
-			efree(buffer);
+		} else if (buffer->val[pos] == '=') {
+			STR_FREE(buffer);
 			return FAILURE;
 		} else {
-			ret[pos] = buffer[pos];
+			ret[pos] = buffer->val[pos];
 		}
 	}
-	efree(buffer);
+	STR_FREE(buffer);
 	return SUCCESS;
 }
 /* }}} */
