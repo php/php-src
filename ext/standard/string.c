@@ -4410,11 +4410,7 @@ PHP_FUNCTION(parse_str)
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
 //???		Z_ARRVAL(tmp) = EG(active_symbol_table);
-		array_init(&tmp);
-		zend_hash_copy(Z_ARRVAL(tmp), EG(active_symbol_table), zval_add_ref);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
-		zend_hash_copy(EG(active_symbol_table), Z_ARRVAL(tmp), zval_add_ref);
-		zval_dtor(&tmp);
 	} else 	{
 		zval ret;
 
