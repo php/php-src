@@ -2105,33 +2105,33 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen, int *destlen)
+static zend_string *php_chunk_split(char *src, int srclen, char *end, int endlen, int chunklen)
 {
-	char *dest;
 	char *p, *q;
 	int chunks; /* complete chunks! */
 	int restlen;
 	int out_len;
+	zend_string *dest;
 
 	chunks = srclen / chunklen;
 	restlen = srclen - chunks * chunklen; /* srclen % chunklen */
 
-	if(chunks > INT_MAX - 1) {
+	if (chunks > INT_MAX - 1) {
 		return NULL;
 	}
 	out_len = chunks + 1;
-	if(endlen !=0 && out_len > INT_MAX/endlen) {
+	if (endlen !=0 && out_len > INT_MAX/endlen) {
 		return NULL;
 	}
 	out_len *= endlen;
-	if(out_len > INT_MAX - srclen - 1) {
+	if (out_len > INT_MAX - srclen - 1) {
 		return NULL;
 	}
 	out_len += srclen + 1;
 
-	dest = safe_emalloc((int)out_len, sizeof(char), 0);
+	dest = STR_ALLOC(out_len * sizeof(char), 0);
 
-	for (p = src, q = dest; p < (src + srclen - chunklen + 1); ) {
+	for (p = src, q = dest->val; p < (src + srclen - chunklen + 1); ) {
 		memcpy(q, p, chunklen);
 		q += chunklen;
 		memcpy(q, end, endlen);
@@ -2147,11 +2147,9 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 	}
 
 	*q = '\0';
-	if (destlen) {
-		*destlen = q - dest;
-	}
+	dest->len = q - dest->val;
 
-	return(dest);
+	return dest;
 }
 /* }}} */
 
@@ -2160,12 +2158,11 @@ static char *php_chunk_split(char *src, int srclen, char *end, int endlen, int c
 PHP_FUNCTION(chunk_split)
 {
 	char *str;
-	char *result;
 	char *end    = "\r\n";
 	int endlen   = 2;
 	long chunklen = 76;
-	int result_len;
 	int str_len;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len, &chunklen, &end, &endlen) == FAILURE) {
 		return;
@@ -2178,24 +2175,21 @@ PHP_FUNCTION(chunk_split)
 
 	if (chunklen > str_len) {
 		/* to maintain BC, we must return original string + ending */
-		result_len = endlen + str_len;
-		result = emalloc(result_len + 1);
-		memcpy(result, str, str_len);
-		memcpy(result + str_len, end, endlen);
-		result[result_len] = '\0';
-//???		RETURN_STRINGL(result, result_len, 0);
-		RETURN_STRINGL(result, result_len);
+		result = STR_ALLOC(endlen + str_len, 0);
+		memcpy(result->val, str, str_len);
+		memcpy(result->val + str_len, end, endlen);
+		result->val[result->len] = '\0';
+		RETURN_STR(result);
 	}
 
 	if (!str_len) {
 		RETURN_EMPTY_STRING();
 	}
 
-	result = php_chunk_split(str, str_len, end, endlen, chunklen, &result_len);
+	result = php_chunk_split(str, str_len, end, endlen, chunklen);
 
 	if (result) {
-//???		RETURN_STRINGL(result, result_len, 0);
-		RETURN_STRINGL(result, result_len);
+		RETURN_STR(result);
 	} else {
 		RETURN_FALSE;
 	}
