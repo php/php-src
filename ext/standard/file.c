@@ -520,14 +520,13 @@ PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	int filename_len;
-	char *contents;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
-	int len;
 	long offset = -1;
 	long maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
+	zend_string *contents;
 
 	/* Parse arguments */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
@@ -554,12 +553,8 @@ PHP_FUNCTION(file_get_contents)
 		RETURN_FALSE;
 	}
 
-	if ((len = php_stream_copy_to_mem(stream, &contents, maxlen, 0)) > 0) {
-//???	RETVAL_STRINGL(contents, len, 0);
-		RETVAL_STRINGL(contents, len);
-		efree(contents);
-	} else if (len == 0) {
-		RETVAL_EMPTY_STRING();
+	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
+		RETVAL_STR(contents);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -715,9 +710,8 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *target_buf=NULL, *p, *s, *e;
+	char *p, *s, *e;
 	register int i = 0;
-	int target_len;
 	char eol_marker = '\n';
 	long flags = 0;
 	zend_bool use_include_path;
@@ -726,6 +720,7 @@ PHP_FUNCTION(file)
 	php_stream *stream;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
+	zend_string *target_buf;
 
 	/* Parse arguments */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
@@ -750,11 +745,11 @@ PHP_FUNCTION(file)
 	/* Initialize return array */
 	array_init(return_value);
 
-	if ((target_len = php_stream_copy_to_mem(stream, &target_buf, PHP_STREAM_COPY_ALL, 0))) {
-		s = target_buf;
-		e = target_buf + target_len;
+	if ((target_buf = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
+		s = target_buf->val;
+		e = target_buf->val + target_buf->len;
 
-		if (!(p = (char*)php_stream_locate_eol(stream, target_buf, target_len TSRMLS_CC))) {
+		if (!(p = (char*)php_stream_locate_eol(stream, target_buf TSRMLS_CC))) {
 			p = e;
 			goto parse_eol;
 		}
@@ -775,7 +770,7 @@ parse_eol:
 		} else {
 			do {
 				int windows_eol = 0;
-				if (p != target_buf && eol_marker == '\n' && *(p - 1) == '\r') {
+				if (p != target_buf->val && eol_marker == '\n' && *(p - 1) == '\r') {
 					windows_eol++;
 				}
 				if (skip_blank_lines && !(p-s-windows_eol)) {
@@ -795,7 +790,7 @@ parse_eol:
 	}
 
 	if (target_buf) {
-		efree(target_buf);
+		STR_FREE(target_buf);
 	}
 	php_stream_close(stream);
 }

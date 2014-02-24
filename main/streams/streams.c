@@ -833,7 +833,7 @@ PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	return (stream->ops->stat)(stream, ssb TSRMLS_CC);
 }
 
-PHPAPI const char *php_stream_locate_eol(php_stream *stream, const char *buf, size_t buf_len TSRMLS_DC)
+PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf TSRMLS_DC)
 {
 	size_t avail;
 	const char *cr, *lf, *eol = NULL;
@@ -843,8 +843,8 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, const char *buf, si
 		readptr = (char*)stream->readbuf + stream->readpos;
 		avail = stream->writepos - stream->readpos;
 	} else {
-		readptr = buf;
-		avail = buf_len;
+		readptr = buf->val;
+		avail = buf->len;
 	}
 
 	/* Look for EOL */
@@ -913,7 +913,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 			int done = 0;
 
 			readptr = (char*)stream->readbuf + stream->readpos;
-			eol = php_stream_locate_eol(stream, NULL, 0 TSRMLS_CC);
+			eol = php_stream_locate_eol(stream, NULL TSRMLS_CC);
 
 			if (eol) {
 				cpysz = eol - readptr + 1;
@@ -1411,7 +1411,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 }
 
 
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC)
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC)
 {
 	size_t ret = 0;
 	char *ptr;
@@ -1419,9 +1419,10 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
 	php_stream_statbuf ssbuf;
+	zend_string *result;
 
 	if (maxlen == 0) {
-		return 0;
+		return STR_EMPTY_ALLOC();
 	}
 
 	if (maxlen == PHP_STREAM_COPY_ALL) {
@@ -1429,7 +1430,8 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	}
 
 	if (maxlen > 0) {
-		ptr = *buf = pemalloc_rel_orig(maxlen + 1, persistent);
+		result = STR_ALLOC(maxlen, persistent);
+		ptr = result->val;
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
 			if (!ret) {
@@ -1440,11 +1442,12 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		}
 		if (len) {
 			*ptr = '\0';
+			result->len = len;
 		} else {
-			pefree(*buf, persistent);
-			*buf = NULL;
+			STR_FREE(result);
+			result = NULL;
 		}
-		return len;
+		return result;
 	}
 
 	/* avoid many reallocs by allocating a good sized chunk to begin with, if
@@ -1459,26 +1462,28 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 		max_len = step;
 	}
 
-	ptr = *buf = pemalloc_rel_orig(max_len, persistent);
+	result = STR_ALLOC(max_len, persistent);
+	ptr = result->val;
 
-	while((ret = php_stream_read(src, ptr, max_len - len)))	{
+	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			*buf = perealloc_rel_orig(*buf, max_len + step, persistent);
+			result = STR_REALLOC(result, max_len + step, persistent);
 			max_len += step;
-			ptr = *buf + len;
+			ptr = result->val + len;
 		} else {
 			ptr += ret;
 		}
 	}
 	if (len) {
-		*buf = perealloc_rel_orig(*buf, len + 1, persistent);
-		(*buf)[len] = '\0';
+		result = STR_REALLOC(result, len, persistent);
+		result->val[len] = '\0';
 	} else {
-		pefree(*buf, persistent);
-		*buf = NULL;
+		STR_FREE(result);
+		result = NULL;
 	}
-	return len;
+
+	return result;
 }
 
 /* Returns SUCCESS/FAILURE and sets *len to the number of bytes moved */

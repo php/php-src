@@ -2604,6 +2604,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	}
 
 	if (user_stub) {
+		zend_string *suser_stub;
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval **)user_stub))) {
@@ -2623,7 +2624,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 			user_stub = 0;
 
-			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
+			if (!(suser_stub = php_stream_copy_to_mem(stubfile, len, 0))) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -2634,6 +2635,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				return EOF;
 			}
 			free_user_stub = 1;
+			user_stub = suser_stub->val;
+			len = suser_stub->len;
 		} else {
 			free_user_stub = 0;
 		}
@@ -2648,7 +2651,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				spprintf(error, 0, "illegal stub for phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				efree(user_stub);
+				STR_FREE(suser_stub);
 			}
 			return EOF;
 		}
@@ -2665,13 +2668,13 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
 			if (free_user_stub) {
-				efree(user_stub);
+				STR_FREE(suser_stub);
 			}
 			return EOF;
 		}
 		phar->halt_offset = len + 5;
 		if (free_user_stub) {
-			efree(user_stub);
+			STR_FREE(suser_stub);
 		}
 	} else {
 		size_t written;
