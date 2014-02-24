@@ -248,7 +248,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			// TODO: ??? use interned string
-			Z_STR_P(expr_copy) = STR_INIT("Array", 1, 0);
+			Z_STR_P(expr_copy) = STR_INIT("Array", sizeof("Array") - 1, 0);
 			break;
 		case IS_OBJECT:
 			{
