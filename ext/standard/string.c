@@ -2860,7 +2860,7 @@ static int php_strtr_compare_hash_suffix(const void *a, const void *b TSRMLS_DC,
 /* {{{ php_strtr_free_strp */
 static void php_strtr_free_strp(void *strp)
 {
-//???	STR_FREE(*(char**)strp);
+	STR_RELEASE(*(zend_string **)strp);
 }
 /* }}} */
 /* {{{ php_strtr_array_prepare_repls */
@@ -2874,7 +2874,7 @@ static PATNREPL *php_strtr_array_prepare_repls(int slen, HashTable *pats, zend_l
 
 	patterns = safe_emalloc(num_pats, sizeof(*patterns), 0);
 	*allocs = emalloc(sizeof **allocs);
-	zend_llist_init(*allocs, sizeof(void*), &php_strtr_free_strp, 0);
+	zend_llist_init(*allocs, sizeof(zend_string*), &php_strtr_free_strp, 0);
 
 	for (i = 0, zend_hash_internal_pointer_reset_ex(pats, &hpos);
 			(entry = zend_hash_get_current_data_ex(pats, &hpos)) != NULL;
@@ -2884,11 +2884,13 @@ static PATNREPL *php_strtr_array_prepare_repls(int slen, HashTable *pats, zend_l
 		zval	tzv;
 
 		switch (zend_hash_get_current_key_ex(pats, &string_key, &num_key, 0, &hpos)) {
-		case HASH_KEY_IS_LONG:
-//???			string_key_len = 1 + zend_spprintf(&string_key, 0, "%ld", (long)num_key);
+		case HASH_KEY_IS_LONG: {
+			char buf[MAX_LENGTH_OF_LONG];
+			int len = snprintf(buf, sizeof(buf), "%ld", num_key);
+			string_key = STR_INIT(buf, len, 0);
 			zend_llist_add_element(*allocs, &string_key);
 			/* break missing intentionally */
-
+		   }
 		case HASH_KEY_IS_STRING:
 			if (string_key->len == 0) { /* empty string given as pattern */
 				efree(patterns);
@@ -2905,7 +2907,7 @@ static PATNREPL *php_strtr_array_prepare_repls(int slen, HashTable *pats, zend_l
 				ZVAL_DUP(&tzv, entry);
 				convert_to_string(&tzv);
 				entry = &tzv;
-				zend_llist_add_element(*allocs, &Z_STRVAL_P(entry));
+				zend_llist_add_element(*allocs, &Z_STR_P(entry));
 			}
 
 			S(&patterns[i].pat) = string_key->val;
