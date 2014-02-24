@@ -736,7 +736,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 {
 	zend_object *zobj;
 	zval tmp_member;
-	zval *retval;
+	zval *retval, tmp;
 	zend_property_info *property_info;
 	long *guard;
 
@@ -766,7 +766,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 			}
 			goto exit;
 		}
-		if (UNEXPECTED(!zobj->properties)) {
+		if (UNEXPECTED(zobj->properties != NULL)) {
 			retval = zend_hash_find(zobj->properties, property_info->name);
 			if (retval) goto exit;
 		}
@@ -780,12 +780,10 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
+		ZVAL_NULL(&tmp);
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
 			if (zobj->properties) {				
-				zval tmp;
-
-				ZVAL_NULL(&tmp);
 				retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
 			    ZVAL_INDIRECT(&zobj->properties_table[property_info->offset], retval);
 			} else {
@@ -796,7 +794,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
-			zend_hash_update(zobj->properties, property_info->name, retval);
+			retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
 		}
 	} else {
 		/* we do have getter - fail and let it try again with usual get/set */
