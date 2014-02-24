@@ -106,8 +106,12 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 				
 				array_init(&params);
 
-				while (next) {	
+				while (next) {
+					char *buffered = NULL;
+					
 					switch (next->type) {
+						case OP_PARAM:
+						case COND_PARAM:
 						case STR_PARAM:
 							add_next_index_stringl(
 								&params,
@@ -119,14 +123,41 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 							add_next_index_long(&params, next->num);
 						break;
 						
+						case METHOD_PARAM:
+							spprintf(&buffered, 0, "%s::%s" 
+								TSRMLS_CC, next->method.class, next->method.name);
+							add_next_index_string(&params, buffered, 0);
+						break;
+						
+						case NUMERIC_METHOD_PARAM:
+							spprintf(&buffered, 0, "%s::%s#%ld" 
+								TSRMLS_CC, next->method.class, next->method.name, next->num);
+							add_next_index_string(&params, buffered, 0);
+						break;
+						
+						case NUMERIC_FUNCTION_PARAM:
+							spprintf(&buffered, 0, "%s#%ld" 
+								TSRMLS_CC, next->str, next->num);
+							add_next_index_string(&params, buffered, 0);
+						break;
+							
+						case FILE_PARAM:
+							spprintf(&buffered, 0, "%s:%ld" 
+								TSRMLS_CC, next->file.name, next->file.line);
+							add_next_index_string(&params, buffered, 0);
+						break;
+						
+						case NUMERIC_FILE_PARAM:
+							spprintf(&buffered, 0, "%s:#%ld" 
+								TSRMLS_CC, next->file.name, next->file.line);
+							add_next_index_string(&params, buffered, 0);
+						break;
+						
 						default: {
 							/* not yet */
 						}
 					}
 					
-					phpdbg_debug(
-						"created param[%d] from argv[%d]: %s",
-						param, param+1, next->str);
 					next = next->next;	
 				}
 

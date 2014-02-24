@@ -11,6 +11,10 @@
 #include "phpdbg_parser.h"
 #include <stdio.h>
 #include <string.h>
+
+static inline int phpdbg_needs_params(phpdbg_param_t *param TSRMLS_DC) {
+	return 0;
+}
 %}
 
 %s RAW
@@ -40,6 +44,22 @@ ADDR				0x[a-fA-F0-9]+
 OPCODE				?i:ZEND_([A-Za-z])+
 INPUT				[^\n]+
 %%
+<INITIAL>[a-zA-Z]+	{
+	phpdbg_init_param(yylval, STR_PARAM);
+	yylval->str = strndup(yytext, yyleng);
+	yylval->len = yyleng;
+	if (phpdbg_needs_params(yylval TSRMLS_CC)) {
+		BEGIN(PARAMS);
+	}
+	return T_ID;
+}
+
+<PARAMS>[0-9]+		{
+	phpdbg_init_param(yylval, NUMERIC_PARAM);
+	yylval->num = atoi(yytext);
+	return T_ID;
+}
+
 <INITIAL>
 {
 	[#]{1}		{ return T_POUND;  }
