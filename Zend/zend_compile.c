@@ -5890,6 +5890,9 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 			case IS_CONSTANT:
 //???				/* Ugly hack to denote that this value has a constant index */
 				Z_STR(offset->u.constant)->gc.u.v.flags |= IS_STR_CONSTANT;
+				if (Z_TYPE(offset->u.constant) & IS_CONSTANT_UNQUALIFIED) {
+					Z_STR(offset->u.constant)->gc.u.v.flags |= IS_STR_CONSTANT_UNQUALIFIED;
+				}
 //???				Z_TYPE(element) |= IS_CONSTANT_INDEX;
 //???				Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
 //???				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);

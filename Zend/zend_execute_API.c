@@ -585,7 +585,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				zend_ast_evaluate(&const_value, (zend_ast *)str_index->val, scope TSRMLS_CC);
 				zend_ast_destroy((zend_ast *)str_index->val);
 //???
-			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, 0 /*???str_index[str_index_len - 2]*/ TSRMLS_CC)) {
+			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, str_index->gc.u.v.flags TSRMLS_CC)) {
 				char *actual, *str;
 				const char *save = str_index->val;
 				int len;
@@ -611,10 +611,10 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					if (save[0] == '\\') {
 						++save;
 					}
-					if (str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED) {
+					if (!(str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED)) {
 						zend_error(E_ERROR, "Undefined constant '%s'", save);
 					}
-					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
+					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str, str);
 				}
 				if (str == str_index->val && len == str_index->len) {
 					ZVAL_STR(&const_value, str_index);
