@@ -1033,6 +1033,10 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 		FREE_OP1();
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -1751,6 +1755,11 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	    (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
+//???: instead of FREE_OP2_VAR_PTR
+	if (OP2_TYPE == IS_VAR && free_op2.var) {
+		if (Z_REFCOUNTED_P(free_op2.var)) Z_DELREF_P(free_op2.var);
+		free_op2.var = NULL;
+	}
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
@@ -1762,7 +1771,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	}
 
 //???	FREE_OP1_VAR_PTR();
-	FREE_OP2_VAR_PTR();
+//???	FREE_OP2_VAR_PTR();
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3968,6 +3977,10 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((OP1_TYPE == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -4458,6 +4471,10 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}

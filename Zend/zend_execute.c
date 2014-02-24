@@ -620,9 +620,7 @@ static void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_pt
 		zval_ptr_dtor(variable_ptr);
 		ZVAL_COPY_VALUE(variable_ptr, value_ptr);
 	} else if (!Z_ISREF_P(variable_ptr)) {
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
-		Z_ADDREF_P(value_ptr);
-		ZVAL_COPY_VALUE(variable_ptr, value_ptr);
+		ZVAL_NEW_REF(variable_ptr, variable_ptr);
 	}
 }
 

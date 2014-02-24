@@ -3538,6 +3538,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -4060,6 +4064,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -4128,6 +4136,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -5295,6 +5307,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -5703,6 +5719,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -5771,6 +5791,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -5983,6 +6007,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -6359,6 +6387,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -6427,6 +6459,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -8590,6 +8626,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 		zval_dtor(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -9018,6 +9058,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -9086,6 +9130,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -10228,6 +10276,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 		zval_dtor(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -10644,6 +10696,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -10712,6 +10768,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -10924,6 +10984,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 		zval_dtor(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -11189,6 +11253,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -11257,6 +11325,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -14184,6 +14256,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -15283,6 +15359,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -15489,6 +15569,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -18532,6 +18616,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -19227,6 +19315,11 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	    (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
+//???: instead of FREE_OP2_VAR_PTR
+	if (IS_VAR == IS_VAR && free_op2.var) {
+		if (Z_REFCOUNTED_P(free_op2.var)) Z_DELREF_P(free_op2.var);
+		free_op2.var = NULL;
+	}
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
@@ -19238,7 +19331,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	}
 
 //???	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	if (free_op2.var) {zval_ptr_dtor_nogc(free_op2.var);};
+//???	if (free_op2.var) {zval_ptr_dtor_nogc(free_op2.var);};
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -19595,6 +19688,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -19801,6 +19898,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -20404,6 +20505,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -20938,6 +21043,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -21006,6 +21115,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -22488,6 +22601,11 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	    (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
+//???: instead of FREE_OP2_VAR_PTR
+	if (IS_CV == IS_VAR && free_op2.var) {
+		if (Z_REFCOUNTED_P(free_op2.var)) Z_DELREF_P(free_op2.var);
+		free_op2.var = NULL;
+	}
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
@@ -22499,6 +22617,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	}
 
 //???	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+//???	;
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -30728,6 +30847,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -31615,6 +31738,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -31819,6 +31946,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -34731,6 +34862,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -35419,6 +35554,11 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	    (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
+//???: instead of FREE_OP2_VAR_PTR
+	if (IS_VAR == IS_VAR && free_op2.var) {
+		if (Z_REFCOUNTED_P(free_op2.var)) Z_DELREF_P(free_op2.var);
+		free_op2.var = NULL;
+	}
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
@@ -35430,7 +35570,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	}
 
 //???	;
-	if (free_op2.var) {zval_ptr_dtor_nogc(free_op2.var);};
+//???	if (free_op2.var) {zval_ptr_dtor_nogc(free_op2.var);};
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -35675,6 +35815,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -35879,6 +36023,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -36477,6 +36625,10 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -36899,6 +37051,10 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			varname = Z_INDIRECT_P(varname);
+		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
 	}
 
@@ -36967,6 +37123,10 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+//???: STRING may become INDIRECT
+			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+				varname = Z_INDIRECT_P(varname);
+			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -38422,6 +38582,11 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	    (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
+//???: instead of FREE_OP2_VAR_PTR
+	if (IS_CV == IS_VAR && free_op2.var) {
+		if (Z_REFCOUNTED_P(free_op2.var)) Z_DELREF_P(free_op2.var);
+		free_op2.var = NULL;
+	}
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
@@ -38432,6 +38597,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
 	}
 
+//???	;
 //???	;
 
 	CHECK_EXCEPTION();
