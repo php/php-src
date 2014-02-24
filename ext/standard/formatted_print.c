@@ -395,9 +395,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		zval array;
 
 		z_format = &args[format_offset];
-		ZVAL_COPY_VALUE(&array, &args[1 + format_offset]);
-		
-		SEPARATE_ZVAL(&array);
+		ZVAL_DUP(&array, &args[1 + format_offset]);
 		convert_to_array_ex(&array);
 		
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL(array));
@@ -411,6 +409,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 			i++;
 		}
 		efree(args);
+		zval_dtor(&array);
 		args = newargs;
 		format_offset = 0;
 	}
