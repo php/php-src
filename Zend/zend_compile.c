@@ -5888,26 +5888,27 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 	if (offset) {
 		switch (Z_TYPE(offset->u.constant) & IS_CONSTANT_TYPE_MASK) {
 			case IS_CONSTANT:
-				/* Ugly hack to denote that this value has a constant index */
-				Z_TYPE(element) |= IS_CONSTANT_INDEX;
+//???				/* Ugly hack to denote that this value has a constant index */
+				Z_STR(offset->u.constant)->gc.u.v.flags |= IS_STR_CONSTANT;
+//???				Z_TYPE(element) |= IS_CONSTANT_INDEX;
 //???				Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
 //???				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
 //???				Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+2] = 0;
-//???				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3, &element, sizeof(zval *), NULL);
+				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STR(offset->u.constant), &element);
 				zval_dtor(&offset->u.constant);
 				break;
 			case IS_CONSTANT_AST: {
-				/* Another ugly hack to store the data about the AST in the array */
-//???				char* key;
+//???				/* Another ugly hack to store the data about the AST in the array */
+				zend_string *key;
 //???				int len = sizeof(zend_ast *);
-				Z_TYPE(element) |= IS_CONSTANT_INDEX;
+//???				Z_TYPE(element) |= IS_CONSTANT_INDEX;
+				Z_STR(offset->u.constant)->gc.u.v.flags |= IS_STR_AST;
 
-//???				key = emalloc(len + 2);
-//???				*(zend_ast **)key = Z_AST(offset->u.constant);
+				key = STR_INIT((char*)Z_AST(offset->u.constant), sizeof(zend_ast*), 0);
 //???				key[len] = Z_TYPE(offset->u.constant);
 //???				key[len + 1] = 0;
-//???				zend_symtable_update(Z_ARRVAL(result->u.constant), key, len + 2, &element, sizeof(zval *), NULL);
-//???				efree(key);
+				zend_symtable_update(Z_ARRVAL(result->u.constant), key, &element);
+				STR_RELEASE(key);
 				break;
 			}
 			case IS_STRING:

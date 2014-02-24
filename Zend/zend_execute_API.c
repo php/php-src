@@ -451,7 +451,7 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-#define IS_VISITED_CONSTANT			IS_CONSTANT_INDEX
+#define IS_VISITED_CONSTANT			0x080 //??? IS_CONSTANT_INDEX
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_P(p) |= IS_VISITED_CONSTANT
@@ -460,10 +460,10 @@ static void zval_deep_copy(zval *p)
 {
 	zval value;
 
-	ZVAL_COPY_VALUE(&value, p);
-	Z_TYPE(value) &= ~IS_CONSTANT_INDEX;
-	zval_copy_ctor(&value);
-	Z_TYPE(value) = Z_TYPE_P(p);
+	ZVAL_DUP(&value, p);
+//???	Z_TYPE(value) &= ~IS_CONSTANT_INDEX;
+//???	zval_copy_ctor(&value);
+//???	Z_TYPE(value) = Z_TYPE_P(p);
 	ZVAL_COPY_VALUE(p, &value);
 }
 
@@ -546,9 +546,9 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			}
 		} else {
 			if (inline_change) {
-//???				STR_RELEASE(Z_STR_P(p));
+				STR_RELEASE(Z_STR_P(p));
 			}
-			*p = const_value;
+			ZVAL_COPY_VALUE(p, &const_value);
 		}
 
 		if (IS_REFCOUNTED(Z_TYPE_P(p))) Z_SET_REFCOUNT_P(p, refcount);
@@ -572,56 +572,62 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		/* First go over the array and see if there are any constant indices */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
 		while ((element = zend_hash_get_current_data(Z_ARRVAL_P(p))) != NULL) {
-			if (!(Z_TYPE_P(element) & IS_CONSTANT_INDEX)) {
-				zend_hash_move_forward(Z_ARRVAL_P(p));
-				continue;
-			}
-			Z_TYPE_P(element) &= ~IS_CONSTANT_INDEX;
 			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(p), &str_index, &num_index, 0, NULL) != HASH_KEY_IS_STRING) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
+			if (!(str_index->gc.u.v.flags & (IS_STR_CONSTANT | IS_STR_AST))) {
+				zend_hash_move_forward(Z_ARRVAL_P(p));
+				continue;
+			}
+
+			if (str_index->gc.u.v.flags & IS_STR_AST) {
+				zend_ast_evaluate(&const_value, (zend_ast *)str_index->val, scope TSRMLS_CC);
+				zend_ast_destroy((zend_ast *)str_index->val);
 //???
-#if 0
-			if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
-				zend_ast_evaluate(&const_value, *(zend_ast **)str_index, scope TSRMLS_CC);
-				zend_ast_destroy(*(zend_ast **)str_index);
-			} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
-				char *actual;
-				const char *save = str_index;
-				if ((colon = (char*)zend_memrchr(str_index, ':', str_index_len - 3))) {
-					zend_error(E_ERROR, "Undefined class constant '%s'", str_index);
-					str_index_len -= ((colon - str_index) + 1);
-					str_index = colon;
+			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, 0 /*???str_index[str_index_len - 2]*/ TSRMLS_CC)) {
+				char *actual, *str;
+				const char *save = str_index->val;
+				int len;
+
+				str = str_index->val;
+				len = str_index->len;
+				if ((colon = (char*)zend_memrchr(str, ':', len))) {
+					zend_error(E_ERROR, "Undefined class constant '%s'", str);
+					len -= ((colon - str) + 1);
+					str = colon;
 				} else {
-					if (str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) {
-						if ((actual = (char *)zend_memrchr(str_index, '\\', str_index_len - 3))) {
+					if (str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED) {
+						if ((actual = (char *)zend_memrchr(str, '\\', len))) {
 							actual++;
-							str_index_len -= (actual - str_index);
-							str_index = actual;
+							len -= (actual - str);
+							str = actual;
 						}
 					}
-					if (str_index[0] == '\\') {
-						++str_index;
-						--str_index_len;
+					if (str[0] == '\\') {
+						++str;
+						--len;
 					}
 					if (save[0] == '\\') {
 						++save;
 					}
-					if ((str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
+					if (str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED) {
 						zend_error(E_ERROR, "Undefined constant '%s'", save);
 					}
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
 				}
-				ZVAL_STRINGL(&const_value, str_index, str_index_len-3);
+				if (str == str_index->val && len == str_index->len) {
+					ZVAL_STR(&const_value, str_index);
+				} else {
+					ZVAL_STRINGL(&const_value, str, len);
+				}
 			}
-#endif
 
 			if (Z_REFCOUNT_P(element) > 1) {
 				ZVAL_DUP(&new_val, element);
 
 				/* preserve this bit for inheritance */
-				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
+//???				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
 				zval_ptr_dtor(element);
 				ZVAL_COPY_VALUE(element, &new_val);
 			}

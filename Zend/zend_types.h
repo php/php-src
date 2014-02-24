@@ -198,7 +198,7 @@ struct _zend_ast_ref {
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f
 #define IS_CONSTANT_UNQUALIFIED		0x010
-#define IS_CONSTANT_INDEX			0x080
+//???#define IS_CONSTANT_INDEX			0x080
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100
@@ -212,10 +212,14 @@ struct _zend_ast_ref {
 #define Z_TYPE(zval)				(zval).type
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
 
-/* string flags (zval.value->gc.u.vflags) */
+/* string flags (zval.value->gc.u.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
 #define IS_STR_INTERNED				(1<<1) /* interned string          */
 #define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
+
+#define IS_STR_CONSTANT             (1<<3) /* constant index */
+#define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
+#define IS_STR_AST                  (1<<5) /* constant expression index */
 
 /* object flags (zval.value->gc.u.vflags) */
 #define IS_OBJ_APPLY_COUNT			0x07
