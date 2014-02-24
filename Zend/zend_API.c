@@ -3554,7 +3554,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 
 	property_info.flags = access_type;
 
-	property_info.doc_comment = doc_comment ? STR_COPY(doc_comment) : NULL;
+	property_info.doc_comment = doc_comment;
 
 	property_info.ce = ce;
 

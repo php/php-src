@@ -3971,7 +3971,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname->val, ZEND_CONSTRUCTOR_FUNC_NAME, mname->len)) {
 		if (ce->constructor) {
-			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
 	} else if (!strncmp(mname->val, ZEND_DESTRUCTOR_FUNC_NAME,  mname->len)) {
@@ -3990,13 +3990,13 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__callstatic = fe;
 	} else if (!strncmp(mname->val, ZEND_TOSTRING_FUNC_NAME, mname->len)) {
 		ce->__tostring = fe;
-	} else if (ce->name->len + 1 == mname->len) {
+	} else if (ce->name->len == mname->len) {
 		zend_string *lowercase_name = STR_ALLOC(ce->name->len, 0);
 		zend_str_tolower_copy(lowercase_name->val, ce->name->val, ce->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 		if (!memcmp(mname->val, lowercase_name->val, mname->len)) {
 			if (ce->constructor) {
-				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
+				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 			}
 			ce->constructor = fe;
 			fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -4187,7 +4187,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 	zend_uint i;
 
 	if ((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name);
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name->val);
 	}
 
 	for (i = 0; i < ce->num_traits; i++) {
@@ -4246,7 +4246,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 					zend_string* class_name = cur_precedence->exclude_from_classes[j].class_name;
 
 					if (!(cur_precedence->exclude_from_classes[j].ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name);
+						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name->val);
 					}
 					zend_check_trait_usage(ce, cur_precedence->exclude_from_classes[j].ce TSRMLS_CC);
 
@@ -4261,7 +4261,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 								   cur_precedence->trait_method->ce->name->val);
 					}
 
-					STR_FREE(class_name);
+					STR_RELEASE(class_name);
 					j++;
 				}
 			}
@@ -4290,7 +4290,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				STR_FREE(lcname);
 
 				if (!method_exists) {
-					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name->val, cur_method_ref->method_name);
+					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name->val, cur_method_ref->method_name->val);
 				}
 			}
 			i++;
@@ -4318,7 +4318,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 						precedences[i]->trait_method->method_name->len);
 					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
 						STR_RELEASE(lcname);
-						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name, trait->name);
+						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name->val, trait->name->val);
 					}
 					STR_RELEASE(lcname);
 				}
@@ -4389,6 +4389,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zend_bool not_compatible;
 	zval* prop_value;
 	zend_uint flags;
+	zend_string *doc_comment;
 
 	/* In the following steps the properties are inserted into the property table
 	 * for that, a very strict approach is applied:
@@ -4404,7 +4405,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 			 */
 			flags = property_info->flags;
 			if ((flags & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
-				prop_name = property_info->name;
+				prop_name = STR_COPY(property_info->name);
 			} else {
 				const char *pname;
 				int pname_len;
@@ -4454,6 +4455,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 								property_info->ce->name->val,
 								prop_name->val,
 								ce->name->val);
+						STR_RELEASE(prop_name);
 						continue;
 					}
 				}
@@ -4467,10 +4469,11 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 			}
 			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
-//???			doc_comment = property_info->doc_comment ? STR_DUP(property_info->doc_comment, 0) : NULL;
+			doc_comment = property_info->doc_comment ? STR_COPY(property_info->doc_comment) : NULL;
 			zend_declare_property_ex(ce, prop_name,
 									 prop_value, flags,
-								     property_info->doc_comment TSRMLS_CC);
+								     doc_comment TSRMLS_CC);
+			STR_RELEASE(prop_name);
 		}
 	}
 }
@@ -4492,8 +4495,8 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 					/** Plain old inconsistency/typo/bug */
 					zend_error_noreturn(E_COMPILE_ERROR,
 							   "An alias (%s) was defined for method %s(), but this method does not exist",
-							   cur_alias->alias,
-							   cur_alias->trait_method->method_name);
+							   cur_alias->alias->val,
+							   cur_alias->trait_method->method_name->val);
 				} else {
 					/** Here are two possible cases:
 						1) this is an attempt to modifiy the visibility
