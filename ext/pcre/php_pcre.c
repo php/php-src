@@ -881,14 +881,13 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	zval		 retval;			/* Return value from evaluation */
 	char		*eval_str_end,		/* End of eval string */
 				*match,				/* Current match for a backref */
-				*esc_match,			/* Quote-escaped match */
 				*walk,				/* Used to walk the code string */
 				*segment,			/* Start of segment to append while walking */
 				 walk_last;			/* Last walked character */
 	int			 match_len;			/* Length of the match */
-	int			 esc_match_len;		/* Length of the quote-escaped match */
 	int			 result_len;		/* Length of the result of the evaluation */
 	int			 backref;			/* Current backref */
+	zend_string *esc_match;			/* Quote-escaped match */
 	char        *compiled_string_description;
 	smart_str    code = {0};
 	
@@ -914,22 +913,19 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 					match = subject + offsets[backref<<1];
 					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					if (match_len) {
-						esc_match = php_addslashes(match, match_len, &esc_match_len, 0 TSRMLS_CC);
+						esc_match = php_addslashes(match, match_len, 0 TSRMLS_CC);
 					} else {
-						esc_match = match;
-						esc_match_len = 0;
+						esc_match = STR_INIT(match, match_len, 0);
 					}
 				} else {
-					esc_match = "";
-					esc_match_len = 0;
+					esc_match = STR_EMPTY_ALLOC();
 				}
-				smart_str_appendl(&code, esc_match, esc_match_len);
+				smart_str_appendl(&code, esc_match->val, esc_match->len);
 
 				segment = walk;
 
 				/* Clean up and reassign */
-				if (esc_match_len)
-					efree(esc_match);
+				STR_RELEASE(esc_match);
 				continue;
 			}
 		}

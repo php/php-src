@@ -922,12 +922,12 @@ PHP_FUNCTION(wordwrap)
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
 			chk = (int)(textlen/linelength + 1);
-			newtext = STR_ALLOC(chk * breakcharlen + textlen + 1, 0);
+			newtext = STR_ALLOC(chk * breakcharlen + textlen, 0);
 			alloced = textlen + chk * breakcharlen + 1;
 		} else {
 			chk = textlen;
 			alloced = textlen * (breakcharlen + 1) + 1;
-			newtext = STR_ALLOC(textlen * (breakcharlen + 1) + 1, 0);
+			newtext = STR_ALLOC(textlen * (breakcharlen + 1), 0);
 		}
 
 		/* now keep track of the actual new text length */
@@ -3305,8 +3305,8 @@ PHP_FUNCTION(addcslashes)
    Escapes single quote, double quotes and backslash characters in a string with backslashes */
 PHP_FUNCTION(addslashes)
 {
-	char *str, *new_str;
-	int  str_len, new_len;
+	char *str;
+	int  str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
@@ -3316,13 +3316,7 @@ PHP_FUNCTION(addslashes)
 		RETURN_EMPTY_STRING();
 	}
 
-//???	RETURN_STRING(php_addslashes(str,
-//???	                             str_len,
-//???	                             &Z_STRLEN_P(return_value), 0
-//???	                             TSRMLS_CC), 0);
-	new_str = php_addslashes(str, str_len, &new_len, 0 TSRMLS_CC);
-	RETVAL_STRINGL(new_str, new_len);
-	efree(new_str);
+	RETURN_STR(php_addslashes(str, str_len, 0 TSRMLS_CC));
 }
 /* }}} */
 
@@ -3449,7 +3443,7 @@ PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free
 	char *end;
 	char c;
 	int  newlen;
-	zend_string *new_str = STR_ALLOC(4 * (length? length : (length = strlen(str))) + 1, 0);
+	zend_string *new_str = STR_ALLOC(4 * (length? length : (length = strlen(str))), 0);
 
 	if (!wlength) {
 		wlength = strlen(what);
@@ -3492,25 +3486,21 @@ PHPAPI zend_string *php_addcslashes(const char *str, int length, int should_free
 
 /* {{{ php_addslashes
  */
-PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_free TSRMLS_DC)
+PHPAPI zend_string *php_addslashes(char *str, int length, int should_free TSRMLS_DC)
 {
 	/* maximum string length, worst case situation */
-	char *new_str;
 	char *source, *target;
 	char *end;
-	int local_new_length;
+	zend_string *new_str;
 
-	if (!new_length) {
-		new_length = &local_new_length;
-	}
 	if (!str) {
-		*new_length = 0;
-		return str;
+		return STR_EMPTY_ALLOC();
 	}
-	new_str = (char *) safe_emalloc(2, (length ? length : (length = strlen(str))), 1);
+
+	new_str = STR_ALLOC(2 * (length ? length : (length = strlen(str))), 0);
 	source = str;
 	end = source + length;
-	target = new_str;
+	target = new_str->val;
 
 	while (source < end) {
 		switch (*source) {
@@ -3532,11 +3522,11 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	}
 
 	*target = 0;
-	*new_length = target - new_str;
 	if (should_free) {
 //???		STR_FREE(str);
 	}
-	new_str = (char *) erealloc(new_str, *new_length + 1);
+	new_str = STR_REALLOC(new_str, target - new_str->val, 0);
+
 	return new_str;
 }
 /* }}} */

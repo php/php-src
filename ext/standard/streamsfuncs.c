@@ -136,10 +136,10 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (stream == NULL) {
 		/* host might contain binary characters */
-		char *quoted_host = php_addslashes(host, host_len, NULL, 0 TSRMLS_CC);
+		zend_string *quoted_host = php_addslashes(host, host_len, 0 TSRMLS_CC);
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", quoted_host, errstr == NULL ? "Unknown error" : errstr);
-		efree(quoted_host);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr);
+		STR_RELEASE(quoted_host);
 	}
 
 	if (hashkey) {
