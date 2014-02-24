@@ -1667,7 +1667,11 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return SUCCESS;
 					}
 				}
-				if (!converted) {
+				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+					op1 = Z_REFVAL_P(op1);
+				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+					op2 = Z_REFVAL_P(op2);
+				} else if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL) {
 						zendi_convert_to_boolean(op2, op2_copy, result);
 						ZVAL_LONG(result, Z_LVAL_P(op2) ? -1 : 0);
