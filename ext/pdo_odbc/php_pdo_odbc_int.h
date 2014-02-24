@@ -157,7 +157,7 @@ typedef struct {
 } pdo_odbc_stmt;
 
 typedef struct {
-	SQLINTEGER len;
+	SQLLEN len;
 	SQLSMALLINT paramtype;
 	char *outbuf;
 	unsigned is_unicode:1;
