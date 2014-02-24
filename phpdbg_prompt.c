@@ -87,7 +87,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 			zval fname, *fretval;
 			zend_fcall_info fci;
 
-			ZVAL_STRINGL(&fname, name->str, name->len+1, 1);
+			ZVAL_STRINGL(&fname, name->str, name->len, 1);
 
 			memset(&fci, 0, sizeof(zend_fcall_info));
 

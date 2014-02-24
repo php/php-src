@@ -398,7 +398,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "overridden on the command line using the **-i** switch (see **help options** for a more "
 "details)." CR CR
 
-"Debugger scripts can also be executed using the **script** command." CR CR
+"Debugger scripts can also be executed using the **source** command." CR CR
 
 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
 "code. " CR CR 
@@ -430,7 +430,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     *  **method#op**    a valid **Class::methodName** follow by # and an integer" CR
 "     *  **string**       a general string" CR
 "     *  **function**     a valid **Function name**" CR
-"     *  **File-line**    a valid **filename** follow by : and an integer" CR CR
+"     *  **file:line**    a valid **filename** follow by : and an integer" CR CR
 
 "In some cases the type of the argument enables the second keyword to be omitted." CR CR
 
@@ -491,7 +491,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **address**  **a**     specify breakpoint by address" CR
 "  **at**       **A**     specify breakpoint by location and condition" CR
 "  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
 
