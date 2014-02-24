@@ -2275,11 +2275,10 @@ PHP_FUNCTION(substr_replace)
 	zval *from;
 	zval *len = NULL;
 	zval *repl;
-	char *result;
-	int result_len;
 	int l = 0;
 	int f;
 	int argc = ZEND_NUM_ARGS();
+	zend_string *result;
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
@@ -2374,17 +2373,16 @@ PHP_FUNCTION(substr_replace)
 			} else {
 				repl_len = Z_STRLEN_P(repl);
 			}
-			result_len = Z_STRLEN_P(str) - l + repl_len;
-			result = emalloc(result_len + 1);
 
-			memcpy(result, Z_STRVAL_P(str), f);
+			result = STR_ALLOC(Z_STRLEN_P(str) - l + repl_len, 0);
+
+			memcpy(result->val, Z_STRVAL_P(str), f);
 			if (repl_len) {
-				memcpy((result + f), (Z_TYPE_P(repl) == IS_ARRAY ? Z_STRVAL_P(tmp_repl) : Z_STRVAL_P(repl)), repl_len);
+				memcpy((result->val + f), (Z_TYPE_P(repl) == IS_ARRAY ? Z_STRVAL_P(tmp_repl) : Z_STRVAL_P(repl)), repl_len);
 			}
-			memcpy((result + f + repl_len), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
-			result[result_len] = '\0';
-//???			RETURN_STRINGL(result, result_len, 0);
-			RETURN_STRINGL(result, result_len);
+			memcpy((result->val + f + repl_len), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
+			result->val[result->len] = '\0';
+			RETURN_STR(result);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
 			RETURN_STR(STR_COPY(Z_STR_P(str)));
@@ -2392,6 +2390,7 @@ PHP_FUNCTION(substr_replace)
 	} else { /* str is array of strings */
 		zend_string *str_index = NULL;
 		ulong num_index;
+		int result_len;
 
 		array_init(return_value);
 
@@ -2517,43 +2516,42 @@ PHP_FUNCTION(substr_replace)
 
 					result_len += Z_STRLEN_P(repl_str);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(repl), &pos_repl);
-					result = emalloc(result_len + 1);
+					result = STR_ALLOC(result_len, 0);
 
-					memcpy(result, Z_STRVAL_P(orig_str), f);
-					memcpy((result + f), Z_STRVAL_P(repl_str), Z_STRLEN_P(repl_str));
-					memcpy((result + f + Z_STRLEN_P(repl_str)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
+					memcpy(result->val, Z_STRVAL_P(orig_str), f);
+					memcpy((result->val + f), Z_STRVAL_P(repl_str), Z_STRLEN_P(repl_str));
+					memcpy((result->val + f + Z_STRLEN_P(repl_str)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
 					if(Z_TYPE_P(tmp_repl) != IS_STRING) {
 						zval_dtor(repl_str);
 					}
 				} else {
-					result = emalloc(result_len + 1);
+					result = STR_ALLOC(result_len, 0);
 
-					memcpy(result, Z_STRVAL_P(orig_str), f);
-					memcpy((result + f), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
+					memcpy(result->val, Z_STRVAL_P(orig_str), f);
+					memcpy((result->val + f), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
 				}
 			} else {
 				result_len += Z_STRLEN_P(repl);
 
-				result = emalloc(result_len + 1);
+				result = STR_ALLOC(result_len, 0);
 
-				memcpy(result, Z_STRVAL_P(orig_str), f);
-				memcpy((result + f), Z_STRVAL_P(repl), Z_STRLEN_P(repl));
-				memcpy((result + f + Z_STRLEN_P(repl)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
+				memcpy(result->val, Z_STRVAL_P(orig_str), f);
+				memcpy((result->val + f), Z_STRVAL_P(repl), Z_STRLEN_P(repl));
+				memcpy((result->val + f + Z_STRLEN_P(repl)), Z_STRVAL_P(orig_str) + f + l, Z_STRLEN_P(orig_str) - f - l);
 			}
 
-			result[result_len] = '\0';
+			result->val[result->len] = '\0';
 
 			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(str), &str_index, &num_index, 0, &pos_str) == HASH_KEY_IS_STRING) {
-//???
-				add_assoc_stringl_ex(return_value, str_index->val, str_index->len, result, result_len, 0);
+				add_assoc_str(return_value, str_index->val, result);
 			} else {
-				add_index_stringl(return_value, num_index, result, result_len, 0);
+				add_index_str(return_value, num_index, result);
 			}
 
 			if(Z_TYPE_P(tmp_str) != IS_STRING) {
 				zval_dtor(orig_str);
 			} else {
-//???				Z_SET_ISREF_TO_P(orig_str, was_ref);
+//???			Z_SET_ISREF_TO_P(orig_str, was_ref);
 			}
 			zend_hash_move_forward_ex(Z_ARRVAL_P(str), &pos_str);
 		} /*while*/
