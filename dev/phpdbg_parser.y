@@ -22,6 +22,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
+	TSRMLS_FETCH();
     phpdbg_error("Parse Error: %s", msg);
     {
     	const phpdbg_param_t *top = stack;

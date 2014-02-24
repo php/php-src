@@ -357,7 +357,7 @@ PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D) /* {{{ */
 	return colors;
 } /* }}} */
 
-PHPDBG_API int phpdbg_get_element(const char *name, size_t len) {
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC) {
 	const phpdbg_element_t *element = elements;
 	
 	while (element && element->name) {

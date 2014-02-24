@@ -134,7 +134,7 @@ PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
 PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*

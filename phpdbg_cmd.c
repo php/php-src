@@ -738,7 +738,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC) {
 	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
 	
@@ -768,7 +768,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why) {
 				phpdbg_prompt_commands, NULL, &top, why);
 			
 			if (handler) {
-				if (phpdbg_stack_verify(handler, &top, why) == SUCCESS) {
+				if (phpdbg_stack_verify(handler, &top, why TSRMLS_CC) == SUCCESS) {
 					return handler->handler(top TSRMLS_CC);
 				}
 			}

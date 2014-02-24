@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+/* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,10 +30,18 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
+#ifndef YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+# define YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
 /* "%code requires" blocks.  */
-
-/* Line 2068 of yacc.c  */
-#line 39 "sapi/phpdbg/dev/phpdbg_parser.y"
+/* Line 2058 of yacc.c  */
+#line 40 "sapi/phpdbg/dev/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -42,9 +50,8 @@ typedef void* yyscan_t;
 #endif
 
 
-
-/* Line 2068 of yacc.c  */
-#line 48 "sapi/phpdbg/phpdbg_parser.h"
+/* Line 2058 of yacc.c  */
+#line 55 "sapi/phpdbg/phpdbg_parser.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -72,7 +79,6 @@ typedef void* yyscan_t;
 #endif
 
 
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
@@ -81,5 +87,18 @@ typedef int YYSTYPE;
 #endif
 
 
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int yyparse (void *YYPARSE_PARAM);
+#else
+int yyparse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
+int yyparse (phpdbg_param_t *stack, yyscan_t scanner);
+#else
+int yyparse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
 
-
+#endif /* !YY_YY_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */

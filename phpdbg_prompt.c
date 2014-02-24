@@ -230,7 +230,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						state = yy_scan_string(input, scanner);
 				 		
 						if (yyparse(&stack, scanner) <= 0) {
-							switch (phpdbg_stack_execute(&stack, &why)) {
+							switch (phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 								case FAILURE:
 									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 										if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
@@ -948,7 +948,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			state = yy_scan_string(input, scanner);
 	 		
 			if (yyparse(&stack, scanner) <= 0) {
-				switch (ret = phpdbg_stack_execute(&stack, &why)) {
+				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 							if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
