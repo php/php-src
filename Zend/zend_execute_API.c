@@ -1724,10 +1724,10 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				if (Z_TYPE_P(EX_VAR_NUM_2(ex, i)) != IS_UNDEF) {
-					// TODO: use INDIRECT???
-					zend_hash_update(EG(active_symbol_table),
+					zval *zv = zend_hash_update(EG(active_symbol_table),
 						ex->op_array->vars[i],
 						EX_VAR_NUM_2(ex, i));
+					ZVAL_INDIRECT(EX_VAR_NUM_2(ex, i), zv);
 				}
 			}
 		}
