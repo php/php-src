@@ -1088,8 +1088,9 @@ fetch_string_dim:
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(dim), Z_LVAL_P(dim));
-			/* Fall Through */
+			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			hval = Z_RES_HANDLE_P(dim);
+			goto num_index;
 		case IS_BOOL:
 		case IS_LONG:
 			hval = Z_LVAL_P(dim);

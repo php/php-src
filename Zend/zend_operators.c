@@ -232,8 +232,12 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 					break;													\
 				}															\
 			case IS_BOOL:													\
-			case IS_RESOURCE:												\
 				ZVAL_LONG(&(holder), Z_LVAL_P(op));							\
+				(op) = &(holder);											\
+				break;														\
+			case IS_RESOURCE:												\
+			    /* ??? delete old resource ??? */							\
+				ZVAL_LONG(&(holder), Z_RES_HANDLE_P(op));					\
 				(op) = &(holder);											\
 				break;														\
 			case IS_NULL:													\
@@ -275,8 +279,11 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				convert_to_long_base(&(holder), 10);				\
 				break;												\
 			case IS_BOOL:											\
-			case IS_RESOURCE:										\
 				Z_LVAL(holder) = Z_LVAL_P(op);						\
+				break;												\
+			case IS_RESOURCE:										\
+			    /* ??? delete old resource ??? */					\
+				ZVAL_LONG(&holder, Z_RES_HANDLE_P(op));				\
 				break;												\
 			default:												\
 				zend_error(E_WARNING, "Cannot convert to ordinal value");	\
@@ -299,6 +306,8 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 				Z_LVAL(holder) = 0;									\
 				break;												\
 			case IS_RESOURCE:										\
+				Z_LVAL(holder) = (Z_RES_HANDLE_P(op) ? 1 : 0);		\
+				break;												\
 			case IS_LONG:											\
 				Z_LVAL(holder) = (Z_LVAL_P(op) ? 1 : 0);			\
 				break;												\
@@ -334,6 +343,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 #define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		zval dst;																			\
+		ZVAL_UNDEF(&dst);																	\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
 			zend_error(E_RECOVERABLE_ERROR,													\
 				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
@@ -1625,6 +1635,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
+						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, &tmp_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
 							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
@@ -1642,6 +1653,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
+						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, &tmp_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
 							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
@@ -1728,8 +1740,10 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			break;
 		case IS_BOOL:
 		case IS_LONG:
-		case IS_RESOURCE:
 			Z_LVAL_P(result) = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			break;
+		case IS_RESOURCE:
+			Z_LVAL_P(result) = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			Z_LVAL_P(result) = (Z_DVAL_P(op1) == Z_DVAL_P(op2));

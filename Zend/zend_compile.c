@@ -1936,8 +1936,15 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 					zend_resolve_class_name(class_type TSRMLS_CC);
 				}
 				Z_STR(class_type->u.constant) = zend_new_interned_string(Z_STR(class_type->u.constant) TSRMLS_CC);
+//???: for now we have to copy it :(
+#if 1
+				cur_arg_info->class_name = estrndup(Z_STRVAL(class_type->u.constant), Z_STRLEN(class_type->u.constant));
+				cur_arg_info->class_name_len = Z_STRLEN(class_type->u.constant);
+				STR_RELEASE(Z_STR(class_type->u.constant));
+#else
 				cur_arg_info->class_name = Z_STRVAL(class_type->u.constant);
 				cur_arg_info->class_name_len = Z_STRLEN(class_type->u.constant);
+#endif
 				if (op == ZEND_RECV_INIT) {
 					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
@@ -3284,13 +3291,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			zend_string *fe_class_name, *proto_class_name;
 
 			if (!strcasecmp(fe_arg_info->class_name, "parent") && proto->common.scope) {
-				fe_class_name = STR_INIT(
-					proto->common.scope->name->val,
-					proto->common.scope->name->len, 0);
+				fe_class_name = STR_COPY(proto->common.scope->name);
 			} else if (!strcasecmp(fe_arg_info->class_name, "self") && fe->common.scope) {
-				fe_class_name = STR_INIT(
-					fe->common.scope->name->val,
-					fe->common.scope->name->len, 0);
+				fe_class_name = STR_COPY(fe->common.scope->name);
 			} else {
 				fe_class_name = STR_INIT(
 					fe_arg_info->class_name,
@@ -3298,13 +3301,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			}
 
 			if (!strcasecmp(proto_arg_info->class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
-				proto_class_name = STR_INIT(
-					proto->common.scope->parent->name->val,
-					proto->common.scope->parent->name->len, 0);
+				proto_class_name = STR_COPY(proto->common.scope->parent->name);
 			} else if (!strcasecmp(proto_arg_info->class_name, "self") && proto->common.scope) {
-				proto_class_name = STR_INIT(
-					proto->common.scope->name->val,
-					proto->common.scope->name->len, 0);
+				proto_class_name = STR_COPY(proto->common.scope->name);
 			} else {
 				proto_class_name = STR_INIT(
 					proto_arg_info->class_name,
@@ -3315,6 +3314,8 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 				const char *colon;
 
 				if (fe->common.type != ZEND_USER_FUNCTION) {
+					STR_RELEASE(proto_class_name);
+					STR_RELEASE(fe_class_name);
 					return 0;
 			    } else if (strchr(proto_class_name->val, '\\') != NULL ||
 						(colon = zend_memrchr(fe_class_name->val, '\\', fe_class_name->len)) == NULL ||
@@ -3329,10 +3330,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 							fe_ce->type == ZEND_INTERNAL_CLASS ||
 							proto_ce->type == ZEND_INTERNAL_CLASS ||
 							fe_ce != proto_ce) {
+						STR_RELEASE(proto_class_name);
+						STR_RELEASE(fe_class_name);
 						return 0;
 					}
 				}
 			}
+			STR_RELEASE(proto_class_name);
+			STR_RELEASE(fe_class_name);
 		}
 		if (fe_arg_info->type_hint != proto_arg_info->type_hint) {
 			/* Incompatible type hint */
