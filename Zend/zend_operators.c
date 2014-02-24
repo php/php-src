@@ -343,6 +343,7 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 #define convert_object_to_type(op, ctype, conv_func)										\
 	if (Z_OBJ_HT_P(op)->cast_object) {														\
 		zval dst;																			\
+		ZVAL_UNDEF(&dst);																	\
 		if (Z_OBJ_HT_P(op)->cast_object(op, &dst, ctype TSRMLS_CC) == FAILURE) {			\
 			zend_error(E_RECOVERABLE_ERROR,													\
 				"Object of class %s could not be converted to %s", Z_OBJCE_P(op)->name->val,\
@@ -1634,6 +1635,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
+						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op1)->cast_object(op1, &tmp_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, 1);
 							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
@@ -1651,6 +1653,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
 					} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
+						ZVAL_UNDEF(&tmp_free);
 						if (Z_OBJ_HT_P(op2)->cast_object(op2, &tmp_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
 							ZVAL_LONG(result, -1);
 							zend_free_obj_get_result(&tmp_free TSRMLS_CC);
