@@ -853,17 +853,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 {"source",
 "Sourcing a **phpdbginit** script during your debugging session might save some time." CR CR
 
-"The source command can also be used to export breakpoints to a phpdbginit file." CR CR
-
 "**Examples**" CR CR
 
 "    $P source /my/init" CR
-"    $P . /my/init" CR
+"    $P < /my/init" CR
 "    Will execute the phpdbginit file at /my/init" CR CR
+},
 
-"    $P source export /my/init" CR
-"    $P . export /my/init" CR
-"    Will export breakpoints to /my/init in phpdbginit file format"
+{"export",
+"Exporting breakpoints allows you to share, and or save your current debugging session" CR CR
+
+"**Examples**" CR CR
+
+"    $P export /my/exports" CR
+"    $P > /my/exports" CR
+"    Will export all breakpoints to /my/exports" CR CR
 },
 
 {"step",

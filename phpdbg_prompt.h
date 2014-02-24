@@ -50,6 +50,7 @@ PHPDBG_COMMAND(help);
 PHPDBG_COMMAND(sh);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
+PHPDBG_COMMAND(export);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit); /* }}} */
 

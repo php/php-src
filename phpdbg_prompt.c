@@ -62,7 +62,8 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(help,    "show help menu",                           'h', phpdbg_help_commands, "|s"),
 	PHPDBG_COMMAND_D(set,     "set phpdbg configuration",                 'S', phpdbg_set_commands,   "s"),
 	PHPDBG_COMMAND_D(register,"register a function",                      'R', NULL, "s"),
-	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '-', NULL, "s"),
+	PHPDBG_COMMAND_D(source,  "execute a phpdbginit",                     '<', NULL, "s"),
+	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s"),
 	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0, NULL, "i"),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0),
 	PHPDBG_END_COMMAND
@@ -818,8 +819,26 @@ PHPDBG_COMMAND(source) /* {{{ */
 	
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0 TSRMLS_CC);
-	} else phpdbg_error("Cannot stat %s", param->str);
+	} else {
+		phpdbg_error(
+			"Failed to stat %s, file does not exist", param->str);
+	}
 			
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_COMMAND(export) /* {{{ */
+{
+	FILE *handle = VCWD_FOPEN(param->str, "w+");
+	
+	if (handle) {
+		phpdbg_export_breakpoints(handle TSRMLS_CC);
+		fclose(handle);
+	} else {
+		phpdbg_error(
+			"Failed to open or create %s, check path and permissions", param->str);
+	}
+	
 	return SUCCESS;
 } /* }}} */
 
