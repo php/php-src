@@ -1654,12 +1654,12 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 
 	if (op_array->this_var != -1 && Z_TYPE(EG(This)) != IS_UNDEF) {
 		if (!EG(active_symbol_table)) {
-			ZVAL_COPY(EX_VAR(op_array->this_var), &EG(This));
+			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
 		} else {
-			ZVAL_COPY(EX_VAR(op_array->this_var), &EG(This));
+			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
 			zval *zv = zend_hash_str_add(EG(active_symbol_table), "this", sizeof("this")-1, EX_VAR(op_array->this_var));
 			if (zv) {
-				Z_ADDREF(EG(This));
+				ZVAL_INDIRECT(EX_VAR_NUM(op_array->this_var), zv);
 			}
 		}
 	}
