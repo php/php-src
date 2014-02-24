@@ -1344,15 +1344,15 @@ PHP_FUNCTION(strtoupper)
 {
 	char *arg;
 	int arglen;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arglen) == FAILURE) {
 		return;
 	}
 
-	arg = estrndup(arg, arglen);
-	php_strtoupper(arg, arglen);
-//???	RETURN_STRINGL(arg, arglen, 0);
-	RETURN_STRINGL(arg, arglen);
+	result = STR_INIT(arg, arglen, 0);
+	php_strtoupper(result->val, result->len);
+	RETURN_STR(result);
 }
 /* }}} */
 
@@ -1379,15 +1379,15 @@ PHP_FUNCTION(strtolower)
 {
 	char *str;
 	int arglen;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &arglen) == FAILURE) {
 		return;
 	}
 
-	str = estrndup(str, arglen);
-	php_strtolower(str, arglen);
-//???	RETURN_STRINGL(str, arglen, 0);
-	RETURN_STRINGL(str, arglen);
+	result = STR_INIT(str, arglen, 0);
+	php_strtolower(result->val, result->len);
+	RETURN_STR(result);
 }
 /* }}} */
 
