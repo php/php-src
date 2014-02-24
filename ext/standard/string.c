@@ -4164,12 +4164,12 @@ PHP_FUNCTION(hebrevc)
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
-	char		*tmp, *str;
-	int		new_length;
-	char		*end, *target;
+	char	*tmp, *str;
+	char	*end, *target;
 	int		repl_cnt = 0;
 	int		str_len;
 	zend_bool	is_xhtml = 1;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &is_xhtml) == FAILURE) {
 		return;
@@ -4203,8 +4203,8 @@ PHP_FUNCTION(nl2br)
 	{
 		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
-		new_length = str_len + repl_cnt * repl_len;
-		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
+		result = STR_ALLOC(repl_cnt * repl_len + str_len, 0);
+		target = result->val;
 	}
 
 	while (str < end) {
@@ -4235,8 +4235,7 @@ PHP_FUNCTION(nl2br)
 
 	*target = '\0';
 
-//???	RETURN_STRINGL(tmp, new_length, 0);
-	RETURN_STRINGL(tmp, new_length);
+	RETURN_STR(result);
 }
 /* }}} */
 
