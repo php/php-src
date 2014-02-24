@@ -1179,9 +1179,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 	} else {
 		retval = FAILURE;
 	}
-	if (retval_ptr) {
-		zval_dtor(&pv);
-	}
+	zval_dtor(&pv);
 	return retval;
 }
 /* }}} */
