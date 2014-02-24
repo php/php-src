@@ -5158,13 +5158,12 @@ PHP_FUNCTION(str_pad)
 	long pad_length;			/* Length to pad to */
 
 	/* Helper variables */
-	size_t	   num_pad_chars;		/* Number of padding characters (total - input size) */
-	char  *result = NULL;		/* Resulting string */
-	int	   result_len = 0;		/* Length of the resulting string */
+	size_t num_pad_chars;		/* Number of padding characters (total - input size) */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	int    pad_str_len = 1;		/* Length of the padding string */
 	long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	int	   i, left_pad=0, right_pad=0;
+	zend_string *result = NULL;	/* Resulting string */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|sl", &input, &input_len, &pad_length,
 																  &pad_str_val, &pad_str_len, &pad_type_val) == FAILURE) {
@@ -5192,7 +5191,9 @@ PHP_FUNCTION(str_pad)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Padding length is too long");
 		return;
 	}
-	result = (char *)emalloc(input_len + num_pad_chars + 1);
+
+	result = STR_ALLOC(input_len + num_pad_chars, 0);
+	result->len = 0;
 
 	/* We need to figure out the left/right padding lengths. */
 	switch (pad_type_val) {
@@ -5214,20 +5215,19 @@ PHP_FUNCTION(str_pad)
 
 	/* First we pad on the left. */
 	for (i = 0; i < left_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
+		result->val[result->len++] = pad_str_val[i % pad_str_len];
 
 	/* Then we copy the input string. */
-	memcpy(result + result_len, input, input_len);
-	result_len += input_len;
+	memcpy(result->val + result->len, input, input_len);
+	result->len += input_len;
 
 	/* Finally, we pad on the right. */
 	for (i = 0; i < right_pad; i++)
-		result[result_len++] = pad_str_val[i % pad_str_len];
+		result->val[result->len++] = pad_str_val[i % pad_str_len];
 
-	result[result_len] = '\0';
+	result->val[result->len] = '\0';
 
-//???	RETURN_STRINGL(result, result_len, 0);
-	RETURN_STRINGL(result, result_len);
+	RETURN_STR(result);
 }
 /* }}} */
 
