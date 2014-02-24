@@ -452,7 +452,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 			}
 			goto exit;
 		}
-		if (UNEXPECTED(!zobj->properties)) {
+		if (UNEXPECTED(zobj->properties != NULL)) {
 			retval = zend_hash_find(zobj->properties, property_info->name);
 			if (retval) goto exit;
 		}
