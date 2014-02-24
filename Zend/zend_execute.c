@@ -1278,6 +1278,9 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 {
 	zval *retval;
 
+	if (UNEXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		container = Z_REFVAL_P(container);
+	}
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
