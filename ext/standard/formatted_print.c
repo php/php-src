@@ -422,7 +422,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	currarg = 1;
 
 	while (inpos<Z_STRLEN(args[format_offset])) {
-		int expprec = 0, multiuse = 0;
+		int expprec = 0;
 		zval tmp;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));
@@ -456,7 +456,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 						return NULL;
 					}
 
-					multiuse = 1;
 					inpos++;  /* skip the '$' */
 				} else {
 					argnum = currarg++;
@@ -646,9 +645,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 				default:
 					break;
 			}
-			if (multiuse) {
-				zval_ptr_dtor(&tmp);
-			}
+			zval_ptr_dtor(&tmp);
 			inpos++;
 		}
 	}
