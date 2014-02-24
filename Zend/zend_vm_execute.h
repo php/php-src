@@ -7100,8 +7100,8 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
 	if (EG(active_symbol_table)) {
 		zend_string *cv = CV_DEF_OF(opline->op2.var);
-		// TODO: indirect???
-		zend_hash_update(EG(active_symbol_table), cv, EX_VAR_NUM(opline->op2.var));
+		zval *zv = zend_hash_update(EG(active_symbol_table), cv, EX_VAR_NUM(opline->op2.var));
+		ZVAL_INDIRECT(EX_VAR_NUM(opline->op2.var), zv);
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
 		EG(exception)->gc.refcount++;
