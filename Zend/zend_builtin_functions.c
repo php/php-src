@@ -602,7 +602,7 @@ ZEND_FUNCTION(each)
 	/* add value elements */
 	if (Z_ISREF_P(entry)) {
 		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
-		Z_SET_REFCOUNT(tmp, 0);
+		if (IS_REFCOUNTED(Z_TYPE(tmp))) Z_SET_REFCOUNT(tmp, 0);
 		entry = &tmp;
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);

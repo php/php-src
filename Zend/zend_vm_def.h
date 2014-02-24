@@ -1194,9 +1194,18 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-//???		Z_DELREF_P(retval_ptr);
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-//???		Z_ADDREF_P(retval_ptr);
+		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
+			retval_ptr = Z_INDIRECT_P(retval_ptr);
+		}
+		if (!Z_ISREF_P(retval_ptr)) {
+			if (Z_REFCOUNTED_P(retval_ptr)) {
+				Z_DELREF_P(retval_ptr);
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
+				Z_ADDREF_P(retval_ptr);
+			} else {
+				ZVAL_NEW_REF(retval_ptr, retval_ptr);
+			}
+		}
 	}
 
 	CHECK_EXCEPTION();
@@ -1392,11 +1401,18 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-//???		Z_DELREF_P(retval_ptr);
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-//???		Z_ADDREF_P(retval_ptr);
-//???		EX_T(opline->result.var).var.ptr = *EX_T(opline->result.var).var.ptr_ptr;
-//???		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
+		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
+			retval_ptr = Z_INDIRECT_P(retval_ptr);
+		}
+		if (!Z_ISREF_P(retval_ptr)) {
+			if (Z_REFCOUNTED_P(retval_ptr)) {
+				Z_DELREF_P(retval_ptr);
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
+				Z_ADDREF_P(retval_ptr);
+			} else {
+				ZVAL_NEW_REF(retval_ptr, retval_ptr);
+			}
+		}
 	}
 
 	CHECK_EXCEPTION();
@@ -1667,7 +1683,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
 		}
-		FREE_OP_VAR_PTR(free_op_data2);
+//???		FREE_OP_VAR_PTR(free_op_data2);
 	 	FREE_OP_IF_VAR(free_op_data1);
 	}
  	FREE_OP1_VAR_PTR();
@@ -2843,11 +2859,11 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 //???			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 //???			    EX_T(opline->op1.var).var.fcall_returned_reference) {
 //???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-				zend_error(E_NOTICE, "Only variable references should be returned by reference");
-				if (EX(return_value)) {
-					ZVAL_DUP(EX(return_value), retval_ptr);
-				}
-				break;
+//???				zend_error(E_NOTICE, "Only variable references should be returned by reference");
+//???				if (EX(return_value)) {
+//???					ZVAL_DUP(EX(return_value), retval_ptr);
+//???				}
+//???				break;
 //???			}
 		}
 

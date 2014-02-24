@@ -1123,9 +1123,10 @@ num_index:
 	return retval;
 }
 
-static void zend_fetch_dimension_address(zval *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
+static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type TSRMLS_DC)
 {
     zval *retval;
+    zval *container = container_ptr;
 
 	if (Z_ISREF_P(container)) {
 		container = Z_REFVAL_P(container);
@@ -1156,7 +1157,10 @@ fetch_from_array:
 				result = &EG(error_zval);
 			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
-				SEPARATE_ZVAL_IF_NOT_REF(container);
+				if (Z_TYPE_P(container_ptr) != IS_REFERENCE) {
+					SEPARATE_ZVAL(container);
+				}
+
 				zval_dtor(container);
 				array_init(container);
 				goto fetch_from_array;
@@ -1178,7 +1182,9 @@ convert_to_array:
 				}
 
 				if (type != BP_VAR_UNSET) {
-					SEPARATE_ZVAL_IF_NOT_REF(container);
+					if (Z_TYPE_P(container_ptr) != IS_REFERENCE) {
+						SEPARATE_ZVAL(container);
+					}
 				}
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
@@ -1403,7 +1409,8 @@ static void zend_fetch_property_address(zval *result, zval *container, zval *pro
 				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
 			}
 		} else {
-			ZVAL_COPY(result, ptr);
+//???			ZVAL_COPY(result, ptr);
+			ZVAL_INDIRECT(result, ptr);
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key TSRMLS_CC);
