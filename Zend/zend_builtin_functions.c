@@ -2235,7 +2235,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 						Z_OBJCE(ptr->object) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
-				ptr->function_state.function->common.function_name->val;
+				(ptr->function_state.function->common.function_name ?
+				 ptr->function_state.function->common.function_name->val : 
+				 NULL);
 
 		if (function_name) {
 			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name, 1);
