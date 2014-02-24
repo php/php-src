@@ -3121,15 +3121,16 @@ PHP_FUNCTION(strtr)
 PHP_FUNCTION(strrev)
 {
 	char *str;
-	char *e, *n, *p;
+	char *e, *p;
 	int  str_len;
+	zend_string *n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
-	n = emalloc(str_len+1);
-	p = n;
+	n = STR_ALLOC(str_len, 0);
+	p = n->val;
 
 	e = str + str_len;
 
@@ -3139,8 +3140,7 @@ PHP_FUNCTION(strrev)
 
 	*p = '\0';
 
-//???	RETVAL_STRINGL(n, str_len, 0);
-	RETVAL_STRINGL(n, str_len);
+	RETVAL_STR(n);
 }
 /* }}} */
 
