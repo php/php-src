@@ -300,6 +300,45 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 }
 /* }}} */
 
+static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS_DC) /* {{{ */
+{
+	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
+		zval obj;
+		if (Z_OBJ_HANDLER_P(arg, cast_object)(arg, &obj, type TSRMLS_CC) == SUCCESS) {
+			zval_ptr_dtor(arg);
+			ZVAL_COPY_VALUE(arg, &obj);
+			*str = Z_STR_P(arg);
+			return SUCCESS;
+		}
+	}
+	/* Standard PHP objects */
+	if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (zend_std_cast_object_tostring(arg, arg, type TSRMLS_CC) == SUCCESS) {
+			*str = Z_STR_P(arg);
+			return SUCCESS;
+		}
+	}
+	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
+		int use_copy;
+		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg TSRMLS_CC);
+		Z_ADDREF_P(z);
+		if(Z_TYPE_P(z) != IS_OBJECT) {
+			zval_dtor(arg);
+			Z_TYPE_P(arg) = IS_NULL;
+			zend_make_printable_zval(z, arg, &use_copy);
+			if (!use_copy) {
+				ZVAL_ZVAL(arg, z, 1, 1);
+			}
+			*str = Z_STR_P(arg);
+			return SUCCESS;
+		}
+		zval_ptr_dtor(z);
+	}
+	return FAILURE;
+}
+/* }}} */
+
 static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {
 	const char *spec_walk = *spec;
@@ -498,11 +537,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						break;
 
 					case IS_OBJECT: {
-						char *p;
-						int pl;
-
-						if (parse_arg_object_to_string(arg, &p, &pl, IS_STRING TSRMLS_CC) == SUCCESS) {
-							*str = STR_INIT(p, pl, 0);
+						if (parse_arg_object_to_str(arg, str, IS_STRING TSRMLS_CC) == SUCCESS) {
 							break;
 						}
 					}

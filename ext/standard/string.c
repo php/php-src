@@ -1080,39 +1080,36 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
    Splits a string on string separator and return array of components. If limit is positive only limit number of components is returned. If limit is negative all components except the last abs(limit) are returned. */
 PHP_FUNCTION(explode)
 {
-	char *str, *delim;
-	int str_len = 0, delim_len = 0;
+	zend_string *str, *delim;
 	long limit = LONG_MAX; /* No limit */
 	zval zdelim, zstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &delim, &delim_len, &str, &str_len, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &delim, &str, &limit) == FAILURE) {
 		return;
 	}
 
-	if (delim_len == 0) {
+	if (delim->len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	if (str_len == 0) {
+	if (str->len == 0) {
 	  	if (limit >= 0) {
 			add_next_index_stringl(return_value, "", sizeof("") - 1, 1);
 		}
 		return;
 	}
 
-//???	ZVAL_STRINGL(&zstr, str, str_len, 0);
-//???	ZVAL_STRINGL(&zdelim, delim, delim_len, 0);
-	ZVAL_STRINGL(&zstr, str, str_len);
-	ZVAL_STRINGL(&zdelim, delim, delim_len);
+	ZVAL_STR(&zstr, str);
+	ZVAL_STR(&zdelim, delim);
 	if (limit > 1) {
 		php_explode(&zdelim, &zstr, return_value, limit);
 	} else if (limit < 0) {
 		php_explode_negative_limit(&zdelim, &zstr, return_value, limit);
 	} else {
-		add_index_stringl(return_value, 0, str, str_len, 1);
+		add_index_stringl(return_value, 0, str->val, str->len, 1);
 	}
 }
 /* }}} */
@@ -4363,7 +4360,10 @@ PHP_FUNCTION(setlocale)
 		if (retval) {
 			/* Remember if locale was changed */
 			if (loc) {
-//???				STR_FREE(BG(locale_string));
+//???			STR_FREE(BG(locale_string));
+				if (BG(locale_string)) {
+					efree(BG(locale_string));
+				}
 				BG(locale_string) = estrdup(retval);
 			}
 
