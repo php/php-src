@@ -4331,7 +4331,9 @@ PHP_FUNCTION(setlocale)
 			if (!zend_hash_num_elements(Z_ARRVAL(args[0]))) {
 				break;
 			}
-			plocale = zend_hash_get_current_data(Z_ARRVAL(args[0]));
+			if ((plocale = zend_hash_get_current_data(Z_ARRVAL(args[0]))) == NULL) {
+				break;
+			}
 		} else {
 			plocale = &args[i];
 		}
