@@ -13276,12 +13276,12 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				if (key_type == HASH_KEY_IS_LONG) {
 					ZVAL_LONG(key, int_key);
 				} else {
-//???					const char *class_name, *prop_name;
-//???					int prop_name_len;
-//???					zend_unmangle_property_name_ex(
-//???						str_key, &class_name, &prop_name, &prop_name_len
-//???					);
-//???					ZVAL_STRINGL(key, prop_name, prop_name_len, 1);
+					const char *class_name, *prop_name;
+					int prop_name_len;
+					zend_unmangle_property_name_ex(
+						str_key->val, str_key->len, &class_name, &prop_name, &prop_name_len
+					);
+					ZVAL_STRINGL(key, prop_name, prop_name_len);
 				}
 			}
 
