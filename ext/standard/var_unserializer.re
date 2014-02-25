@@ -413,9 +413,9 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		BG(serialize_lock)++;
 		call_user_function_ex(CG(function_table), rval, &fname, &retval, 0, 0, 1, NULL TSRMLS_CC);
 		BG(serialize_lock)--;
+		zval_dtor(&fname);
+		zval_dtor(&retval);
 	}
-
-	zval_ptr_dtor(&retval);
 
 	if (EG(exception)) {
 		return 0;
@@ -714,12 +714,13 @@ object ":" uiv ":" ["]	{
 		
 		/* Call unserialize callback */
 		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
-		ZVAL_STR(&args[0], class_name);
+		
+		ZVAL_STR(&args[0], STR_COPY(class_name));
 		BG(serialize_lock)++;
 		if (call_user_function_ex(CG(function_table), NULL, &user_func, &retval, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
 			BG(serialize_lock)--;
 			if (EG(exception)) {
-				STR_FREE(class_name);
+				STR_RELEASE(class_name);
 				zval_ptr_dtor(&user_func);
 				zval_ptr_dtor(&args[0]);
 				return 0;
@@ -734,7 +735,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 		zval_ptr_dtor(&retval);
 		if (EG(exception)) {
-			STR_FREE(class_name);
+			STR_RELEASE(class_name);
 			zval_ptr_dtor(&user_func);
 			zval_ptr_dtor(&args[0]);
 			return 0;
@@ -762,7 +763,7 @@ object ":" uiv ":" ["]	{
 		if (ret && incomplete_class) {
 			php_store_class_name(rval, class_name->val, len2);
 		}
-		STR_FREE(class_name);
+		STR_RELEASE(class_name);
 		return ret;
 	}
 	
@@ -771,7 +772,7 @@ object ":" uiv ":" ["]	{
 	if (incomplete_class) {
 		php_store_class_name(rval, class_name->val, len2);
 	}
-	STR_FREE(class_name);
+	STR_RELEASE(class_name);
 
 	return object_common2(UNSERIALIZE_PASSTHRU, elements);
 }
