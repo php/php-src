@@ -5240,17 +5240,16 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 }
 /* }}} */
 
+
 static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 	X509 *cert;
 	BIO *buffer;
-	int buffer_active;
+	int buffer_active = 0;
 	char *line;
 	size_t line_len;
 	long certs_added = 0;
-	const char *begin_line = "-----BEGIN CERTIFICATE-----\n";
-	const char *end_line = "-----END CERTIFICATE-----\n";
 
 	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
 
@@ -5267,12 +5266,15 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 		line = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (line == NULL) {
 			goto stream_complete;
-		} else if (strcmp(line, begin_line)) {
-			efree(line);
-			goto cert_start;
-		} else {
+		} else if (!strcmp(line, "-----BEGIN CERTIFICATE-----\n") ||
+				!strcmp(line, "-----BEGIN CERTIFICATE-----\r\n")
+		) {
 			buffer = BIO_new(BIO_s_mem());
 			buffer_active = 1;
+			goto cert_line;
+		} else {
+			efree(line);
+			goto cert_start;
 		}
 	}
 
@@ -5282,10 +5284,13 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 		line = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (line == NULL) {
 			goto stream_complete;
-		} else if (strcmp(line, end_line)) {
-			goto cert_line;
-		} else {
+		} else if (!strcmp(line, "-----END CERTIFICATE-----") ||
+			!strcmp(line, "-----END CERTIFICATE-----\n") ||
+			!strcmp(line, "-----END CERTIFICATE-----\r\n")
+		) {
 			goto add_cert;
+		} else {
+			goto cert_line;
 		}
 	}
 
@@ -5303,11 +5308,15 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 
 	stream_complete: {
 		php_stream_close(stream);
-		if (buffer_active) {
+		if (buffer_active == 1) {
 			BIO_free(buffer);
 		}
 	}
-	
+
+	if (certs_added == 0) {
+		php_error(E_WARNING, "no valid certs found cafile stream: `%s'", cafile);
+	}
+
 	return certs_added;
 }
 /* }}} */
