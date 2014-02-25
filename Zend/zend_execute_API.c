@@ -371,10 +371,10 @@ ZEND_API const char *get_active_function_name(TSRMLS_D) /* {{{ */
 	}
 	switch (EG(current_execute_data)->function_state.function->type) {
 		case ZEND_USER_FUNCTION: {
-				const char *function_name = ((zend_op_array *) EG(current_execute_data)->function_state.function)->function_name->val;
+				zend_string *function_name = ((zend_op_array *) EG(current_execute_data)->function_state.function)->function_name;
 
 				if (function_name) {
-					return function_name;
+					return function_name->val;
 				} else {
 					return "main";
 				}
