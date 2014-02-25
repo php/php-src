@@ -1214,6 +1214,10 @@ convert_to_array:
 					convert_to_long(&tmp);
 					dim = &tmp;
 				}
+//??? container may became IS_INDIRECT because of symtable initialization in zend_error
+				if (Z_TYPE_P(container) == IS_INDIRECT) {
+					container = Z_INDIRECT_P(container);
+				}
 				ZVAL_STR_OFFSET(result, Z_STR_P(container), Z_LVAL_P(dim));
 				Z_ADDREF_P(container);				
 				return;
