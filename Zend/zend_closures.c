@@ -170,7 +170,7 @@ static zend_function *zend_closure_get_method(zval *object_ptr, zend_string *met
 	lc_name = STR_ALLOC(method->len, 0);
 	zend_str_tolower_copy(lc_name->val, method->val, method->len);
 	if ((method->len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) &&
-		memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
+		memcmp(lc_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 	) {
 		STR_FREE(lc_name);
 		return zend_get_closure_invoke_method(object_ptr TSRMLS_CC);

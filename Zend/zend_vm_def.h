@@ -2601,7 +2601,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		zend_free_op free_op2;
 
 		SAVE_OPLINE();
-		function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		function_name = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 
 		if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 			if (Z_STRVAL_P(function_name)[0] == '\\') {
