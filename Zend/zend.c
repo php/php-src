@@ -225,6 +225,14 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		*use_copy = 0;
 		return;
 	}
+	if (Z_TYPE_P(expr) == IS_REFERENCE) {
+		expr = Z_REFVAL_P(expr);
+		if (Z_TYPE_P(expr) == IS_STRING) {
+			ZVAL_STR(expr_copy, Z_STR_P(expr));
+			*use_copy = 1;
+			return;
+		}
+	}
 	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
 			Z_STR_P(expr_copy) = STR_EMPTY_ALLOC();

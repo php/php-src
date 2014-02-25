@@ -1425,20 +1425,10 @@ ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend
 	int use_copy1 = 0, use_copy2 = 0;
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
-		if (Z_TYPE_P(op1) == IS_REFERENCE) {
-			op1 = Z_REFVAL_P(op1);
-		}
-		if (Z_TYPE_P(op1) != IS_STRING) {
-			zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-		}
+		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
 	}
 	if (Z_TYPE_P(op2) != IS_STRING) {
-		if (Z_TYPE_P(op2) == IS_REFERENCE) {
-			op2 = Z_REFVAL_P(op2);
-		}
-		if (Z_TYPE_P(op2) != IS_STRING) {
-			zend_make_printable_zval(op2, &op2_copy, &use_copy2);
-		}
+		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
 	}
 
 	if (use_copy1) {
