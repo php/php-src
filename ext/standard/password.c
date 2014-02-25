@@ -272,17 +272,18 @@ PHP_FUNCTION(password_verify)
 {
 	int status = 0, i;
 	int password_len, hash_len;
-	char *ret, *password, *hash;
+	char *password, *hash;
+	zend_string *ret;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (php_crypt(password, password_len, hash, hash_len, &ret) == FAILURE) {
+	if ((ret = php_crypt(password, password_len, hash, hash_len)) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (strlen(ret) != hash_len || hash_len < 13) {
-		efree(ret);
+	if (ret->len != hash_len || hash_len < 13) {
+		STR_FREE(ret);
 		RETURN_FALSE;
 	}
 	
@@ -291,10 +292,10 @@ PHP_FUNCTION(password_verify)
 	 * equality check that will always check every byte of both
 	 * values. */
 	for (i = 0; i < hash_len; i++) {
-		status |= (ret[i] ^ hash[i]);
+		status |= (ret->val[i] ^ hash[i]);
 	}
 
-	efree(ret);
+	STR_FREE(ret);
 
 	RETURN_BOOL(status == 0);
 	
@@ -305,12 +306,13 @@ PHP_FUNCTION(password_verify)
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	char *hash_format, *hash, *salt, *password, *result;
+	char *hash_format, *hash, *salt, *password;
 	long algo = 0;
 	int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval *option_buffer;
+	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
@@ -432,20 +434,19 @@ PHP_FUNCTION(password_hash)
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
 	hash_len = (int) (hash_format_len + salt_len);
 
-	if (php_crypt(password, password_len, hash, hash_len, &result) == FAILURE) {
+	if ((result = php_crypt(password, password_len, hash, hash_len)) == NULL) {
 		efree(hash);
 		RETURN_FALSE;
 	}
 
 	efree(hash);
 
-	if (strlen(result) < 13) {
-		efree(result);
+	if (result->len < 13) {
+		STR_FREE(result);
 		RETURN_FALSE;
 	}
 
-//???	RETURN_STRING(result, 0);
-	RETURN_STRING(result);
+	RETURN_STR(result);
 }
 /* }}} */
 
