@@ -2,57 +2,49 @@
 Basic bitwise stream crypto context flag assignment
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
-if (!function_exists('pcntl_fork')) die("skip no fork");
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 --FILE--
 <?php
-$flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-$ctx = stream_context_create(['ssl' => [
-    'local_cert' => __DIR__ . '/bug54992.pem',
-    'allow_self_signed' => true
-]]);
-$server = stream_socket_server('ssl://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-var_dump($server);
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/bug54992.pem'
+    ]]);
 
-$pid = pcntl_fork();
-if ($pid == -1) {
-    die('could not fork');
-} else if ($pid) {
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-    // Base SSL context values
-    $sslCtxVars = array(
-        'verify_peer' => TRUE,
+    @stream_socket_accept($server, 1);
+    @stream_socket_accept($server, 1);
+    @stream_socket_accept($server, 1);
+CODE;
+
+$clientCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $clientFlags = STREAM_CLIENT_CONNECT;
+    $clientCtx = stream_context_create(['ssl' => [
+        'verify_peer' => true,
         'cafile' => __DIR__ . '/bug54992-ca.pem',
-        'CN_match' => 'bug54992.local', // common name from the server's "local_cert" PEM file
-    );
+        'CN_match' => 'bug54992.local',
+    ]]);
 
-    // SSLv3
-    $ctxCopy = $sslCtxVars;
-    $ctxCopy['crypto_method'] = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
-    $ctx = stream_context_create(array('ssl' => $ctxCopy));
-    var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+    phpt_wait();
 
-    // TLSv1
-    $ctxCopy = $sslCtxVars;
-    $ctxCopy['crypto_method'] = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
-    $ctx = stream_context_create(array('ssl' => $ctxCopy));
-    var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_SSLv3_CLIENT);
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
-    // TLS (any)
-    $ctxCopy = $sslCtxVars;
-    $ctxCopy['crypto_method'] = STREAM_CRYPTO_METHOD_TLS_CLIENT;
-    $ctx = stream_context_create(array('ssl' => $ctxCopy));
-    var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT);
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
-} else {
-    @pcntl_wait($status);
-    @stream_socket_accept($server, 1);
-    @stream_socket_accept($server, 1);
-    @stream_socket_accept($server, 1);
-}
+    stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLS_CLIENT);
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+CODE;
+
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-resource(%d) of type (stream)
-
