@@ -12293,11 +12293,12 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 
@@ -12339,11 +12340,12 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 
@@ -29199,11 +29201,12 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 
@@ -29244,11 +29247,12 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 

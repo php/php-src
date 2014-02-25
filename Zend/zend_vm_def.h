@@ -888,11 +888,12 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 
@@ -934,11 +935,12 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	}
 
 	retval = EX_VAR(opline->result.var);
-	ZVAL_DUP(retval, var_ptr);
 
 	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
 		var_ptr = Z_REFVAL_P(var_ptr);
+		ZVAL_DUP(retval, var_ptr);
 	} else {
+		ZVAL_DUP(retval, var_ptr);
 		SEPARATE_ZVAL(var_ptr);
 	}
 
