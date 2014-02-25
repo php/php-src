@@ -460,7 +460,7 @@ PHP_FUNCTION(shell_exec)
 	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
-	if (ret->len > 0) {
+	if (ret && ret->len > 0) {
 		RETVAL_STR(ret);
 	}
 }
