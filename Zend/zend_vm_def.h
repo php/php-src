@@ -4165,12 +4165,17 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
 	zend_bool is_empty = 0;
+	zval *array_ref = NULL;
 
 	SAVE_OPLINE();
 
 	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
 	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
 		array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		if (Z_ISREF_P(array_ptr)) {
+			array_ref = array_ptr;
+			array_ptr = Z_REFVAL_P(array_ptr);
+		}
 		if (Z_TYPE_P(array_ptr) == IS_NULL) {
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
@@ -4180,20 +4185,28 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || ce->get_iterator == NULL) {
-				SEPARATE_ZVAL_IF_NOT_REF(array_ptr);
+				if (!array_ref) {
+					SEPARATE_ZVAL(array_ptr);
+				}
 				Z_ADDREF_P(array_ptr);
 			}
 		} else {
 			if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-				SEPARATE_ZVAL_IF_NOT_REF(array_ptr);
-				if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-					ZVAL_NEW_REF(array_ptr, array_ptr);
+				if (!array_ref) {
+					SEPARATE_ZVAL(array_ptr);
+					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
+						ZVAL_NEW_REF(array_ptr, array_ptr);
+					}
 				}
 			}
 			if (Z_REFCOUNTED_P(array_ptr)) Z_ADDREF_P(array_ptr);
 		}
 	} else {
 		array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		if (Z_ISREF_P(array_ptr)) {
+			array_ref = array_ptr;
+			array_ptr = Z_REFVAL_P(array_ptr);
+		}
 		if (IS_OP1_TMP_FREE()) { /* IS_TMP_VAR */
 			zval tmp;
 
@@ -4215,10 +4228,10 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		} else if (Z_REFCOUNTED_P(array_ptr)) {
 			if (OP1_TYPE == IS_CONST ||
 			           (OP1_TYPE == IS_CV && 
-			            !Z_ISREF_P(array_ptr) &&
+			            (array_ref == NULL) &&
 			            Z_REFCOUNT_P(array_ptr) > 1) ||
 			           (OP1_TYPE == IS_VAR &&
-			            !Z_ISREF_P(array_ptr) &&
+			            (array_ref == NULL) &&
 			            Z_REFCOUNT_P(array_ptr) > 2)) {
 				zval tmp;
 
