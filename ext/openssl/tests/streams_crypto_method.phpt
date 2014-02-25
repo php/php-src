@@ -2,57 +2,51 @@
 Specific crypto method for ssl:// transports.
 --SKIPIF--
 <?php
-if (!extension_loaded('openssl')) die('skip, openssl required');
-if (!extension_loaded('pcntl')) die('skip, pcntl required');
-?>
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 --FILE--
 <?php
-$serverCtx = stream_context_create(['ssl' => [
-	'local_cert' => dirname(__FILE__) . '/streams_crypto_method.pem',
-]]);
-$serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-$server = stream_socket_server('sslv3://127.0.0.1:12345', $errno, $errstr, $serverFlags, $serverCtx);
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+    ]]);
 
-$pid = pcntl_fork();
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-if ($pid == -1) {
-	die('could not fork');
-} else if ($pid) {
-	$clientCtx = stream_context_create(['ssl' => [
-		'crypto_method' => STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
-		'verify_peer' => false,
-		'verify_host' => false
-	]]);
+    $client = @stream_socket_accept($server);
+    if ($client) {
+        $in = '';
+        while (!preg_match('/\r?\n\r?\n/', $in)) {
+            $in .= fread($client, 2048);
+        }
+        $response = "HTTP/1.0 200 OK\r\n"
+                  . "Content-Type: text/plain\r\n"
+                  . "Content-Length: 12\r\n"
+                  . "Connection: close\r\n"
+                  . "\r\n"
+                  . "Hello World!";
+        fwrite($client, $response);
+        fclose($client);
+    }
+CODE;
 
-	$fp = fopen('https://127.0.0.1:12345/', 'r', false, $clientCtx);
+$clientCode = <<<'CODE'
+    $serverUri = "https://127.0.0.1:64321/";
+    $clientFlags = STREAM_CLIENT_CONNECT;
+    $clientCtx = stream_context_create(['ssl' => [
+        'crypto_method' => STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
+        'verify_peer' => false,
+        'verify_host' => false
+    ]]);
 
-	if ($fp) {
-		fpassthru($fp);
-	fclose($fp);
-	}
-} else {
-	@pcntl_wait($status);
-	$client = @stream_socket_accept($server);
-	if ($client) {
-		$in = '';
-		while (!preg_match('/\r?\n\r?\n/', $in)) {
-			$in .= fread($client, 2048);
-		}
-		$response = <<<EOS
-HTTP/1.1 200 OK
-Content-Type: text/plain
-Content-Length: 13
-Connection: close
+    phpt_wait();
+    echo file_get_contents($serverUri, false, $clientCtx);
+CODE;
 
-Hello World!
-
-EOS;
-		fwrite($client, $response);
-		fclose($client);
-
-		exit();
-	}
-}
-?>
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 Hello World!
