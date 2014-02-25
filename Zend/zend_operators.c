@@ -1714,7 +1714,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int hash_zval_identical_function(const zval **z1, const zval **z2) /* {{{ */
+static int hash_zval_identical_function(const zval *z1, const zval *z2) /* {{{ */
 {
 	zval result;
 	TSRMLS_FETCH();
@@ -1724,7 +1724,7 @@ static int hash_zval_identical_function(const zval **z1, const zval **z2) /* {{{
 	 * whereas this comparison function is expected to return 0 on identity,
 	 * and non zero otherwise.
 	 */
-	if (is_identical_function(&result, (zval *) *z1, (zval *) *z2 TSRMLS_CC)==FAILURE) {
+	if (is_identical_function(&result, z1, z2 TSRMLS_CC)==FAILURE) {
 		return 1;
 	}
 	return !Z_LVAL(result);
