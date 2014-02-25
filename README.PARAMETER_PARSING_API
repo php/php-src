@@ -59,7 +59,7 @@ Type specifiers
  h  - array (returned as HashTable*)
  H  - array or HASH_OF(object) (returned as HashTable*)
  i  - php_int_t (zend_int_t), platform dependent
- I  - php_int_t_int_t, limits out-of-range numbers to ZEND_INT_MAX/ZEND_INT_MIN (zend_int_t),
+ I  - php_int_t, limits out-of-range numbers to ZEND_INT_MAX/ZEND_INT_MIN (zend_int_t),
       platform dependent
  o  - object of any type (zval*)
  O  - object of specific type given by class entry (zval*, zend_class_entry)
