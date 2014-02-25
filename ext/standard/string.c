@@ -2557,11 +2557,12 @@ PHP_FUNCTION(substr_replace)
    Quotes meta characters */
 PHP_FUNCTION(quotemeta)
 {
-	char *str, *old;
+	char *old;
 	char *old_end;
 	char *p, *q;
 	char c;
 	int  old_len;
+	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &old, &old_len) == FAILURE) {
 		return;
@@ -2573,9 +2574,9 @@ PHP_FUNCTION(quotemeta)
 		RETURN_FALSE;
 	}
 
-	str = safe_emalloc(2, old_len, 1);
+	str = STR_ALLOC(2 * old_len, 0);
 
-	for (p = old, q = str; p != old_end; p++) {
+	for (p = old, q = str->val; p != old_end; p++) {
 		c = *p;
 		switch (c) {
 			case '.':
@@ -2595,10 +2596,10 @@ PHP_FUNCTION(quotemeta)
 				*q++ = c;
 		}
 	}
-	*q = 0;
 
-//???	RETURN_STRINGL(erealloc(str, q - str + 1), q - str, 0);
-	RETURN_STRINGL(erealloc(str, q - str + 1), q - str);
+	*q = '\0';
+
+	RETURN_STR(STR_REALLOC(str, q - str->val, 0));
 }
 /* }}} */
 
