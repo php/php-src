@@ -1176,8 +1176,13 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			if (!EG(active_symbol_table)) {
 				ZVAL_NULL(&params[4]);
 			} else {
-//???				ZVAL_ARR(&params[4], EG(active_symbol_table));
+//???
+#if 1
+				ZVAL_NULL(&params[4]);
+#else
+				ZVAL_ARR(&params[4], EG(active_symbol_table));
 				zval_copy_ctor(&params[4]);
+#endif
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));
@@ -1229,10 +1234,15 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				CG(in_compilation) = 1;
 			}
 
+			zval_ptr_dtor(&params[4]);
+			zval_ptr_dtor(&params[3]);
+			zval_ptr_dtor(&params[2]);
+			zval_ptr_dtor(&params[1]);
+			zval_ptr_dtor(&params[0]);
+
 			if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
 				ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
-			}
-			else {
+			} else {
 				zval_ptr_dtor(&orig_user_error_handler);
 			}
 			break;
