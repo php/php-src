@@ -86,7 +86,9 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    prop_info->offset >= 0 &&
 				    Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
 					zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-					ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+					if (EXPECTED(zv)) {
+						ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+					}
 				}
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
@@ -100,7 +102,9 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    prop_info->offset >= 0 &&
 						Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
 						zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-						ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+						if (EXPECTED(zv)) {
+							ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+						}
 					}
 				}
 			}
