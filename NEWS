@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   (chobieeee@php.net)
 
 - Openssl
+  . Fallback to Windows CA cert store for peer verification if no openssl.cafile
+    ini directive or "cafile" SSL context option specified in Windows.
+    (Chris Wright)
   . Fixed segfault when accessing non-existent context for client SNI use
     (Daniel Lowrey)
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
