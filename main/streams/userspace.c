@@ -120,7 +120,7 @@ PHP_MINIT_FUNCTION(user_streams)
 
 struct _php_userstream_data {
 	struct php_user_stream_wrapper * wrapper;
-	zval * object;
+	zval object;
 };
 typedef struct _php_userstream_data php_userstream_data_t;
 
@@ -281,7 +281,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 
 	}}} **/
 
-static zval *user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object TSRMLS_DC)
+static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php_stream_context *context, zval *object TSRMLS_DC)
 {
 	/* create an instance of our class */
 	object_init_ex(object, uwrap->ce);
@@ -319,18 +319,15 @@ static zval *user_stream_create_object(struct php_user_stream_wrapper *uwrap, ph
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name->val, uwrap->ce->constructor->common.function_name->val);
 			zval_dtor(object);
 			ZVAL_UNDEF(object);
-			return NULL;
 		} else {
 			zval_ptr_dtor(&retval);
 		}
 	}
-	return object;
 }
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 									   int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	zval object;
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
 	zval zretval, zfuncname;
@@ -360,8 +357,8 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
 
-	us->object = user_stream_create_object(uwrap, context, &object TSRMLS_CC);
-	if(us->object == NULL) {
+	user_stream_create_object(uwrap, context, &us->object TSRMLS_CC);
+	if (Z_TYPE(us->object) == IS_UNDEF) {
 		FG(user_stream_current_filename) = NULL;
 		PG(in_user_include) = old_in_user_include;
 		efree(us);
@@ -377,7 +374,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 	ZVAL_STRING(&zfuncname, USERSTREAM_OPEN);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&zfuncname,
 			&zretval,
 			4, args,
@@ -393,7 +390,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 		}
 
 		/* set wrapper data to be a reference to our object */
-		ZVAL_COPY(&stream->wrapperdata, us->object);
+		ZVAL_COPY(&stream->wrapperdata, &us->object);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "\"%s::" USERSTREAM_OPEN "\" call failed",
 			us->wrapper->classname);
@@ -401,15 +398,15 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 	/* destroy everything else */
 	if (stream == NULL) {
-		zval_ptr_dtor(us->object);
+		zval_ptr_dtor(&us->object);
 		efree(us);
 	}
 	zval_ptr_dtor(&zretval);
 	zval_ptr_dtor(&zfuncname);
-	zval_ptr_dtor(&args[4]);
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
 	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&args[0]);
 
 	FG(user_stream_current_filename) = NULL;
 
@@ -420,7 +417,6 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	zval object;
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
 	zval zretval, zfuncname;
@@ -438,8 +434,8 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	us = emalloc(sizeof(*us));
 	us->wrapper = uwrap;
 
-	us->object = user_stream_create_object(uwrap, context, &object TSRMLS_CC);
-	if(us->object == NULL) {
+	user_stream_create_object(uwrap, context, &us->object TSRMLS_CC);
+	if (Z_TYPE(us->object) == IS_UNDEF) {
 		FG(user_stream_current_filename) = NULL;
 		efree(us);
 		return NULL;
@@ -452,7 +448,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 	ZVAL_STRING(&zfuncname, USERSTREAM_DIR_OPEN);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&zfuncname,
 			&zretval,
 			2, args,
@@ -463,7 +459,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 		stream = php_stream_alloc_rel(&php_stream_userspace_dir_ops, us, 0, mode);
 
 		/* set wrapper data to be a reference to our object */
-		ZVAL_COPY(&stream->wrapperdata, us->object);
+		ZVAL_COPY(&stream->wrapperdata, &us->object);
 	} else {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "\"%s::" USERSTREAM_DIR_OPEN "\" call failed",
 			us->wrapper->classname);
@@ -471,7 +467,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 
 	/* destroy everything else */
 	if (stream == NULL) {
-		zval_ptr_dtor(us->object);
+		zval_ptr_dtor(&us->object);
 		efree(us);
 	}
 	zval_ptr_dtor(&zretval);
@@ -596,18 +592,18 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_WRITE, sizeof(USERSTREAM_WRITE)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_WRITE, sizeof(USERSTREAM_WRITE)-1);
 
 	ZVAL_STRINGL(&args[0], (char*)buf, count);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			1, args,
 			0, NULL TSRMLS_CC);
 	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&func_name);
 
 	didwrite = 0;
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -642,13 +638,12 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_READ, sizeof(USERSTREAM_READ)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_READ, sizeof(USERSTREAM_READ)-1);
 
 	ZVAL_LONG(&args[0], count);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			1, args,
@@ -672,14 +667,14 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 	zval_ptr_dtor(&retval);
 	ZVAL_UNDEF(&retval);
+	zval_ptr_dtor(&func_name);
 
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
@@ -695,6 +690,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 	}
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	return didread;
 }
@@ -707,18 +703,18 @@ static int php_userstreamop_close(php_stream *stream, int close_handle TSRMLS_DC
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_CLOSE, sizeof(USERSTREAM_CLOSE)-1);
 
 	call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
-	zval_ptr_dtor(us->object);
+	zval_ptr_dtor(&us->object);
 
 	efree(us);
 
@@ -734,11 +730,10 @@ static int php_userstreamop_flush(php_stream *stream TSRMLS_DC)
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_FLUSH, sizeof(USERSTREAM_FLUSH)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_FLUSH, sizeof(USERSTREAM_FLUSH)-1);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
@@ -749,6 +744,7 @@ static int php_userstreamop_flush(php_stream *stream TSRMLS_DC)
 		call_result = -1;
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	return call_result;
 }
@@ -763,14 +759,13 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_SEEK, sizeof(USERSTREAM_SEEK)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_SEEK, sizeof(USERSTREAM_SEEK)-1);
 
 	ZVAL_LONG(&args[0], offset);
 	ZVAL_LONG(&args[1], whence);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			2, args,
@@ -778,6 +773,7 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor(&func_name);
 
 	if (call_result == FAILURE) {
 		/* stream_seek is not implemented, so disable seeks for this stream */
@@ -801,11 +797,10 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	}
 
 	/* now determine where we are */
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_TELL, sizeof(USERSTREAM_TELL)-1);
 
 	call_result = call_user_function_ex(NULL,
-		us->object,
+		&us->object,
 		&func_name,
 		&retval,
 		0, NULL, 0, NULL TSRMLS_CC);
@@ -821,6 +816,7 @@ static int php_userstreamop_seek(php_stream *stream, off_t offset, int whence, o
 	}
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 	return ret;
 }
 
@@ -879,11 +875,10 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSR
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	int ret = -1;
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_STAT, sizeof(USERSTREAM_STAT)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_STAT, sizeof(USERSTREAM_STAT)-1);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
@@ -899,6 +894,7 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSR
 	}
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	return ret;
 }
@@ -914,9 +910,8 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 
 	switch (option) {
 	case PHP_STREAM_OPTION_CHECK_LIVENESS:
-//???		ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1, 0);
 		ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
-		call_result = call_user_function_ex(NULL, us->object, &func_name, &retval, 0, NULL, 0, NULL TSRMLS_CC);
+		call_result = call_user_function_ex(NULL, &us->object, &func_name, &retval, 0, NULL, 0, NULL TSRMLS_CC);
 		if (call_result == SUCCESS && Z_TYPE(retval) == IS_BOOL) {
 			ret = zval_is_true(&retval) ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 		} else {
@@ -925,6 +920,8 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 					"%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 					us->wrapper->classname);
 		}
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&func_name);
 		break;
 
 	case PHP_STREAM_OPTION_LOCKING:
@@ -946,11 +943,10 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		}
 
 		/* TODO wouldblock */
-//???		ZVAL_STRINGL(&func_name, USERSTREAM_LOCK, sizeof(USERSTREAM_LOCK)-1, 0);
 		ZVAL_STRINGL(&func_name, USERSTREAM_LOCK, sizeof(USERSTREAM_LOCK)-1);
 
 		call_result = call_user_function_ex(NULL,
-											us->object,
+											&us->object,
 											&func_name,
 											&retval,
 											1, args, 0, NULL TSRMLS_CC);
@@ -968,15 +964,17 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			}
 		}
 
+		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&func_name);
+		zval_ptr_dtor(&args[0]);
 		break;
 
 	case PHP_STREAM_OPTION_TRUNCATE_API:
-//???		ZVAL_STRINGL(&func_name, USERSTREAM_TRUNCATE, sizeof(USERSTREAM_TRUNCATE)-1, 0);
 		ZVAL_STRINGL(&func_name, USERSTREAM_TRUNCATE, sizeof(USERSTREAM_TRUNCATE)-1);
 
 		switch (value) {
 		case PHP_STREAM_TRUNCATE_SUPPORTED:
-			if (zend_is_callable_ex(&func_name, us->object, IS_CALLABLE_CHECK_SILENT,
+			if (zend_is_callable_ex(&func_name, &us->object, IS_CALLABLE_CHECK_SILENT,
 					NULL, NULL, NULL TSRMLS_CC))
 				ret = PHP_STREAM_OPTION_RETURN_OK;
 			else
@@ -988,7 +986,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			if (new_size >= 0 && new_size <= (ptrdiff_t)LONG_MAX) {
 				ZVAL_LONG(&args[0], (long)new_size);
 				call_result = call_user_function_ex(NULL,
-													us->object,
+													&us->object,
 													&func_name,
 													&retval,
 													1, args, 0, NULL TSRMLS_CC);
@@ -1006,12 +1004,15 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 							"%s::" USERSTREAM_TRUNCATE " is not implemented!",
 							us->wrapper->classname);
 				}
+				zval_ptr_dtor(&retval);
+				zval_ptr_dtor(&args[0]);
 			} else { /* bad new size */
 				ret = PHP_STREAM_OPTION_RETURN_ERR;
 			}
 			break;
 		}
 		}
+		zval_ptr_dtor(&func_name);
 		break;
 
 	case PHP_STREAM_OPTION_READ_BUFFER:
@@ -1019,7 +1020,6 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 	case PHP_STREAM_OPTION_READ_TIMEOUT:
 	case PHP_STREAM_OPTION_BLOCKING: {
 
-//???		ZVAL_STRINGL(&func_name, USERSTREAM_SET_OPTION, sizeof(USERSTREAM_SET_OPTION)-1, 0);
 		ZVAL_STRINGL(&func_name, USERSTREAM_SET_OPTION, sizeof(USERSTREAM_SET_OPTION)-1);
 
 		ZVAL_LONG(&args[0], option);
@@ -1050,7 +1050,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		}
 
 		call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			3, args, 0, NULL TSRMLS_CC);
@@ -1065,16 +1065,15 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 			ret = PHP_STREAM_OPTION_RETURN_ERR;
 		}
 
+		zval_ptr_dtor(&retval);
 		zval_ptr_dtor(&args[2]);
 		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&func_name);
 
 		break;
 		}
 	}
-
-	/* clean up */
-	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&args[0]);
 
 	return ret;
 }
@@ -1086,12 +1085,12 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	zval zfuncname, zretval;
 	zval args[1];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);
-	if(object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);
+	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
 
@@ -1101,7 +1100,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	ZVAL_STRING(&zfuncname, USERSTREAM_UNLINK);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			1, args,
@@ -1114,7 +1113,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
  	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&args[1]);
@@ -1130,12 +1129,12 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	zval zfuncname, zretval;
 	zval args[2];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);	
-	if(object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);	
+	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
 
@@ -1146,7 +1145,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	ZVAL_STRING(&zfuncname, USERSTREAM_RENAME);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			2, args,
@@ -1159,7 +1158,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
  	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&zfuncname);
@@ -1176,12 +1175,12 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	zval zfuncname, zretval;
 	zval args[3];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);	
-	if(object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);	
+	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
 
@@ -1193,7 +1192,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	ZVAL_STRING(&zfuncname, USERSTREAM_MKDIR);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			3, args,
@@ -1206,7 +1205,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
  	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&zfuncname);
@@ -1224,12 +1223,12 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	zval zfuncname, zretval;
 	zval args[2];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = 0;
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);	
-	if(object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);	
+	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
 
@@ -1240,7 +1239,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	ZVAL_STRING(&zfuncname, USERSTREAM_RMDIR);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			2, args,
@@ -1253,7 +1252,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
  	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&zfuncname);
@@ -1270,7 +1269,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	zval zfuncname, zretval;
 	zval args[3];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = 0;
 
 	switch(option) {
@@ -1298,8 +1297,8 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);	
-	if (object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);	
+	if (Z_TYPE(object) == IS_UNDEF) {
 		zval_ptr_dtor(&args[2]);
 		return ret;
 	}
@@ -1311,7 +1310,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	ZVAL_STRING(&zfuncname, USERSTREAM_METADATA);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			3, args,
@@ -1324,7 +1323,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
  	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&zfuncname);
@@ -1343,12 +1342,12 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	zval zfuncname, zretval;
 	zval args[2];
 	int call_result;
-	zval *object, tmp_object;
+	zval object;
 	int ret = -1;
 
 	/* create an instance of our class */
-	object = user_stream_create_object(uwrap, context, &tmp_object TSRMLS_CC);	
-	if(object == NULL) {
+	user_stream_create_object(uwrap, context, &object TSRMLS_CC);
+	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
 
@@ -1359,7 +1358,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	ZVAL_STRING(&zfuncname, USERSTREAM_STATURL);
 
 	call_result = call_user_function_ex(NULL,
-			object,
+			&object,
 			&zfuncname,
 			&zretval,
 			2, args,
@@ -1377,7 +1376,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* clean up */
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
 
 	zval_ptr_dtor(&zfuncname);
@@ -1401,11 +1400,10 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 	if (count != sizeof(php_stream_dirent))
 		return 0;
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_READ, sizeof(USERSTREAM_DIR_READ)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_READ, sizeof(USERSTREAM_DIR_READ)-1);
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL,
@@ -1422,6 +1420,7 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 	}
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	return didread;
 }
@@ -1434,16 +1433,17 @@ static int php_userstreamop_closedir(php_stream *stream, int close_handle TSRMLS
 
 	assert(us != NULL);
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_CLOSE, sizeof(USERSTREAM_DIR_CLOSE)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_CLOSE, sizeof(USERSTREAM_DIR_CLOSE)-1);
 
 	call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
 
-	zval_ptr_dtor(us->object);
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
+	zval_ptr_dtor(&us->object);
 
 	efree(us);
 
@@ -1456,16 +1456,16 @@ static int php_userstreamop_rewinddir(php_stream *stream, off_t offset, int when
 	zval retval;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_REWIND, sizeof(USERSTREAM_DIR_REWIND)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_REWIND, sizeof(USERSTREAM_DIR_REWIND)-1);
 
 	call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	return 0;
 
@@ -1481,7 +1481,6 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr T
 	int call_result;
 	int ret = FAILURE;
 
-//???	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1, 0);
 	ZVAL_STRINGL(&func_name, USERSTREAM_CAST, sizeof(USERSTREAM_CAST)-1);
 
 	switch(castas) {
@@ -1494,7 +1493,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr T
 	}
 
 	call_result = call_user_function_ex(NULL,
-			us->object,
+			&us->object,
 			&func_name,
 			&retval,
 			1, args, 0, NULL TSRMLS_CC);
@@ -1524,6 +1523,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr T
 	} while (0);
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 	zval_ptr_dtor(&args[0]);
 
 	return ret;
