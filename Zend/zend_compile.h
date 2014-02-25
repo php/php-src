@@ -363,6 +363,9 @@ typedef struct _zend_function_state {
 	void **arguments;
 } zend_function_state;
 
+typedef struct _zend_function_call_entry {
+	zend_function *fbc;
+} zend_function_call_entry;
 
 typedef struct _zend_switch_entry {
 	znode cond;
