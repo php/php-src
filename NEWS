@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
 
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
