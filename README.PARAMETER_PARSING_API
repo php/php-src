@@ -58,13 +58,14 @@ Type specifiers
       zend_fcall_info and zend_fcall_info_cache)
  h  - array (returned as HashTable*)
  H  - array or HASH_OF(object) (returned as HashTable*)
- l  - long (long)
- L  - long, limits out-of-range numbers to LONG_MAX/LONG_MIN (long)
+ i  - php_int_t (zend_int_t), platform dependent
+ I  - php_int_t_int_t, limits out-of-range numbers to ZEND_INT_MAX/ZEND_INT_MIN (zend_int_t),
+      platform dependent
  o  - object of any type (zval*)
  O  - object of specific type given by class entry (zval*, zend_class_entry)
- p  - valid path (string without null bytes in the middle) and its length (char*, int)
+ P  - valid path (string without null bytes in the middle) and its length (char*, php_size_t)
  r  - resource (zval*)
- s  - string (with possible null bytes) and its length (char*, int)
+ S  - string (with possible null bytes) and its length (char*, php_size_t)
  z  - the actual zval (zval*)
  Z  - the actual zval (zval**)
  *  - variable arguments list (0 or more)
@@ -79,30 +80,33 @@ Type specifiers
     ! - the parameter it follows can be of specified type or NULL. If NULL is
 		passed and the output for such type is a pointer, then the output
 		pointer is set to a native NULL pointer.
-		For 'b', 'l' and 'd', an extra argument of type zend_bool* must be
-		passed after the corresponding bool*, long* or double* arguments,
+		For 'b', 'i' and 'd', an extra argument of type zend_bool* must be
+		passed after the corresponding bool*, php_int_t* or double* arguments,
 		respectively. A non-zero value will be written to the zend_bool iif a
 		PHP NULL is passed.
 
 
 Note on 64bit compatibility
 ---------------------------
-Please do not forget that int and long are two different things on 64bit 
-OSes (int is 4 bytes and long is 8 bytes), so make sure you pass longs to "l" 
-and ints to strings length (i.e. for "s" you need to pass char * and int), 
-not the other way round!
-Remember: "l" is the only case when you need to pass long (and that's why 
-it's "l", not "i" btw).
+Please do not forget that php_int_t and php_size_t are platform dependent,
+you can consult Zend/zend_int.h for which type exactly these are mapped to.
+In previous versions, long was used for integers and int for string
+sizes. Now make sure you pass php_int_t to "i" and php_size_t to strings length
+(i.e. for "S" you need to pass char * and php_size_t), not the other way round!
+Remember: "i" is the only case when you need to pass platform depnedent integer
+(and that's why it's "i", not "l" anymore). The old formats 'l' and 's' aren't
+supported anymore. Passing int instead of php_size_t, or long instead of
+php_int_t is wrong.
 
 Both mistakes cause memory corruptions and segfaults on 64bit OSes:
 1)
   char *str;
-  long str_len; /* XXX THIS IS WRONG!! Use int instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)
+  int str_len; /* XXX THIS IS WRONG!! Use php_size_t instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len)
 
 2)
-  int num; /* XXX THIS IS WRONG!! Use long instead. */
-  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &num)
+  long num; /* XXX THIS IS WRONG!! Use php_int_t instead. */
+  zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &num)
 
 If you're in doubt, use check_parameters.php script to the parameters 
 and their types (it can be found in ./scripts/dev/ directory of PHP sources):
@@ -112,12 +116,12 @@ and their types (it can be found in ./scripts/dev/ directory of PHP sources):
 
 Examples
 --------
-/* Gets a long, a string and its length, and a zval */
-long l;
+/* Gets a php_int_t, a string and its length, and a zval */
+php_int_t i;
 char *s;
-int s_len;
+php_size_t s_len;
 zval *param;
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsz",
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iSz",
                           &l, &s, &s_len, &param) == FAILURE) {
     return;
 }
@@ -150,8 +154,8 @@ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/!",
     return;
 }
 
-/* Get either a set of 3 longs or a string. */
-long l1, l2, l3;
+/* Get either a set of 3 php_int_t vars or a string. */
+php_int_t i1, i2, i3;
 char *s;
 /* 
  * The function expects a pointer to a integer in this case, not a long
@@ -160,13 +164,13 @@ char *s;
  * properly, leading to random crashes on platforms like
  * Tru64 or Linux/Alpha.
  */
-int length;
+php_size_t length;
 
 if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-                             "lll", &l1, &l2, &l3) == SUCCESS) {
-    /* manipulate longs */
+                             "iii", &i1, &i2, &i3) == SUCCESS) {
+    /* manipulate php_int_t */
 } else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-                                    "s", &s, &length) == SUCCESS) {
+                                    "S", &s, &length) == SUCCESS) {
     /* manipulate string */
 } else {
     /* output error */
@@ -197,11 +201,11 @@ if (varargs) {
 /* Function that accepts a string, followed by varargs (1 or more) */
 
 char *str;
-int str_len;
+php_size_t str_len;
 int i, num_varargs;
 zval ***varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S+", &str, &str_len, &varargs, &num_varargs) == FAILURE) {
     return;
 }
 
@@ -214,13 +218,13 @@ if (varargs) {
 }
 
 
-/* Function that takes an array, followed by varargs, and ending with a long */
-long num;
+/* Function that takes an array, followed by varargs, and ending with a php_int_t */
+php_int_t num;
 zval *array;
 int i, num_varargs;
 zval ***varargs = NULL;
 
-if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*l", &array, &varargs, &num_varargs, &num) == FAILURE) {
+if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a*i", &array, &varargs, &num_varargs, &num) == FAILURE) {
     return;
 }
 
