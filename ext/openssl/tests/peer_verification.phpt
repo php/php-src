@@ -50,13 +50,6 @@ $clientCode = <<<'CODE'
         'CN_match' => 'bug54992.local',
     ]]);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
-
-    // Should succeed with globally available CA file specified via php.ini
-    ini_set('openssl.cafile', $caFile);
-    $clientCtx = stream_context_create(['ssl' => [
-        'CN_match' => 'bug54992.local',
-    ]]);
-    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 CODE;
 
 include 'ServerClientTestCase.inc';
@@ -64,6 +57,5 @@ ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 bool(false)
 bool(false)
-resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
