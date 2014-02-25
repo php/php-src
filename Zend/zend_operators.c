@@ -2306,11 +2306,11 @@ string_cmp:
 }
 /* }}} */
 
-static int hash_zval_compare_function(const zval **z1, const zval **z2 TSRMLS_DC) /* {{{ */
+static int hash_zval_compare_function(const zval *z1, const zval *z2 TSRMLS_DC) /* {{{ */
 {
 	zval result;
 
-	if (compare_function(&result, (zval *) *z1, (zval *) *z2 TSRMLS_CC)==FAILURE) {
+	if (compare_function(&result, z1, z2 TSRMLS_CC)==FAILURE) {
 		return 1;
 	}
 	return Z_LVAL(result);
