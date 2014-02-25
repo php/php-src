@@ -3979,11 +3979,12 @@ PHP_FUNCTION(str_ireplace)
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
 	char *str;
-	char *heb_str, *tmp, *target, *broken_str;
+	char *heb_str, *tmp, *target;
 	int block_start, block_end, block_type, block_length, i;
 	long max_chars=0;
 	int begin, end, char_count, orig_begin;
 	int str_len;
+	zend_string *broken_str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &max_chars) == FAILURE) {
 		return;
@@ -4075,9 +4076,9 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	} while (block_end < str_len-1);
 
 
-	broken_str = (char *) emalloc(str_len+1);
-	begin=end=str_len-1;
-	target = broken_str;
+	broken_str = STR_ALLOC(str_len, 0);
+	begin = end = str_len-1;
+	target = broken_str->val;
 
 	while (1) {
 		char_count=0;
@@ -4134,11 +4135,10 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	efree(heb_str);
 
 	if (convert_newlines) {
-		php_char_to_str(broken_str, str_len,'\n', "<br />\n", 7, return_value);
-		efree(broken_str);
+		php_char_to_str(broken_str->val, broken_str->len,'\n', "<br />\n", 7, return_value);
+		STR_FREE(broken_str);
 	} else {
-//???		RETURN_STRINGL(broken_str, str_len, 0);
-		RETURN_STRINGL(broken_str, str_len);
+		RETURN_STR(broken_str);
 	}
 }
 /* }}} */
