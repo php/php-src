@@ -5422,10 +5422,11 @@ PHP_FUNCTION(str_word_count)
    Convert monetary value(s) to string */
 PHP_FUNCTION(money_format)
 {
-	int format_len = 0, str_len;
-	char *format, *str, *p, *e;
+	int format_len = 0;
+	char *format, *p, *e;
 	double value;
 	zend_bool check = 0;
+	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sd", &format, &format_len, &value) == FAILURE) {
 		return;
@@ -5445,16 +5446,14 @@ PHP_FUNCTION(money_format)
 		}
 	}
 
-	str_len = format_len + 1024;
-	str = emalloc(str_len);
-	if ((str_len = strfmon(str, str_len, format, value)) < 0) {
-		efree(str);
+	str = STR_ALLOC(format_len + 1024, 0);
+	if ((str->len = strfmon(str->val, str->len, format, value)) < 0) {
+		STR_FREE(str);
 		RETURN_FALSE;
 	}
-	str[str_len] = 0;
+	str->val[str->len] = '\0';
 
-//???	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
-	RETURN_STRINGL(erealloc(str, str_len + 1), str_len);
+	RETURN_STR(STR_REALLOC(str, str->len, 0));
 }
 /* }}} */
 #endif
