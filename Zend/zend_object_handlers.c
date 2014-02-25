@@ -86,7 +86,9 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    prop_info->offset >= 0 &&
 				    Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
 					zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-					ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+					if (EXPECTED(zv)) {
+						ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
+					}
 				}
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
@@ -100,7 +102,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    prop_info->offset >= 0 &&
 						Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
 						zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-						if (zv) {
+						if (EXPECTED(zv != NULL)) {
 							ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
 						}
 					}
@@ -567,7 +569,7 @@ found:
 
 						/* To check: can't *variable_ptr be some system variable like error_zval here? */
 						ZVAL_COPY_VALUE(Z_REFVAL_P(variable_ptr), value);
-						if (Z_REFCOUNT_P(value) > 0) {
+						if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
 							zval_copy_ctor(Z_REFVAL_P(variable_ptr));
 						}
 						zval_dtor(&garbage);

@@ -810,6 +810,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL TSRMLS_CC);
 					BG(serialize_lock)--;
+					zval_dtor(&fname);
                     
 					if (EG(exception)) {
 						zval_ptr_dtor(&retval);
@@ -830,9 +831,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 						}
 						return;
 					}
+					zval_ptr_dtor(&retval);
 				}
 
-				zval_ptr_dtor(&retval);
 				/* fall-through */
 			}
 		case IS_ARRAY: {

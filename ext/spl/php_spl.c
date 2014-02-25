@@ -394,14 +394,16 @@ typedef struct {
 	zend_class_entry *ce;
 } autoload_func_info;
 
-static void autoload_func_info_dtor(autoload_func_info *alfi)
+static void autoload_func_info_dtor(zval *element)
 {
+	autoload_func_info *alfi = (autoload_func_info*)Z_PTR_P(element);
 	if (alfi->obj) {
 		zval_ptr_dtor(alfi->obj);
 	}
 	if (alfi->closure) {
 		zval_ptr_dtor(alfi->closure);
 	}
+	efree(alfi);
 }
 
 /* {{{ proto void spl_autoload_call(string class_name)
@@ -553,10 +555,9 @@ PHP_FUNCTION(spl_autoload_register)
 			alfi.closure = zcallable;
 			Z_ADDREF_P(zcallable);
 
-			lc_name = STR_ALLOC(func_name_len + 2 + sizeof(zend_uint), 0);
+			lc_name = STR_ALLOC(func_name_len + sizeof(zend_uint), 0);
 			zend_str_tolower_copy(lc_name->val, func_name, func_name_len);
 			memcpy(lc_name->val + func_name_len, &Z_OBJ_HANDLE_P(zcallable), sizeof(zend_uint));
-			lc_name->len += sizeof(zend_uint);
 			lc_name->val[lc_name->len] = '\0';
 		} else {
 			lc_name = STR_ALLOC(func_name_len, 0);
@@ -597,14 +598,14 @@ PHP_FUNCTION(spl_autoload_register)
 			spl_alfi.ce = NULL;
 			spl_alfi.closure = NULL;
 			zend_hash_str_add_mem(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload") - 1,
-					(void *)&spl_alfi, sizeof(autoload_func_info));
+					&spl_alfi, sizeof(autoload_func_info));
 			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
 				/* Move the newly created element to the head of the hashtable */
 				HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
 			}
 		}
 
-		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi.func_ptr, sizeof(autoload_func_info)) == NULL) {
+		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi, sizeof(autoload_func_info)) == NULL) {
 			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 				Z_DELREF_P(alfi.obj);
 			}				

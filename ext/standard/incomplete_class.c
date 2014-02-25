@@ -41,10 +41,10 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 	class_name = php_lookup_class_name(object);
 
 	if (class_name) {
-		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, "unknown");
-	} else {
 		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
 		STR_RELEASE(class_name);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
 }
 /* }}} */
