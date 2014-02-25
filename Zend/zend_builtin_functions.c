@@ -2058,7 +2058,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 						Z_OBJCE(ptr->object) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
-				ptr->function_state.function->common.function_name->val;
+				(ptr->function_state.function->common.function_name ?
+				 ptr->function_state.function->common.function_name->val :
+				 NULL);
 
 		if (function_name) {
 			if (Z_TYPE(ptr->object) != IS_UNDEF) {
