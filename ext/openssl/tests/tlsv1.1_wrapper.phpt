@@ -2,46 +2,47 @@
 tlsv1.1 stream wrapper
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 if (OPENSSL_VERSION_NUMBER < 0x10001001) die("skip OpenSSL 1.0.1 required");
-if (!function_exists('pcntl_fork')) die("skip no fork");
 --FILE--
 <?php
-$flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
-$ctx = stream_context_create(array('ssl' => array(
-	'local_cert' => __DIR__ . '/streams_crypto_method.pem',
-)));
+$serverCode = <<<'CODE'
+    $flags = STREAM_SERVER_BIND|STREAM_SERVER_LISTEN;
+    $ctx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/streams_crypto_method.pem',
+    ]]);
 
-$server = stream_socket_server('tlsv1.1://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
-var_dump($server);
+    $server = stream_socket_server('tlsv1.1://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
+    phpt_notify();
 
-$pid = pcntl_fork();
-if ($pid == -1) {
-	die('could not fork');
-} elseif ($pid) {
-	$flags = STREAM_CLIENT_CONNECT;
-	$ctx = stream_context_create(array('ssl' => array(
-		'verify_peer' => false,
-		'verify_host' => false
-	)));
-	
-	$client = stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
-	var_dump($client);
-	
-	$client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
-	var_dump($client);
-	
-	$client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
-	var_dump($client);
-	
-} else {	
-	@pcntl_wait($status);
-	for ($i=0; $i < 3; $i++) {
-		@stream_socket_accept($server, 1);
-	}
-}
+    for ($i=0; $i < 3; $i++) {
+        @stream_socket_accept($server, 1);
+    }
+CODE;
+
+$clientCode = <<<'CODE'
+    $flags = STREAM_CLIENT_CONNECT;
+    $ctx = stream_context_create(['ssl' => [
+        'verify_peer' => false,
+        'verify_host' => false,
+    ]]);
+
+    phpt_wait();
+
+    $client = stream_socket_client("tlsv1.1://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    var_dump($client);
+    
+    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    var_dump($client);
+    
+    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    var_dump($client);
+CODE;
+
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-resource(%d) of type (stream)
 resource(%d) of type (stream)
 bool(false)
 bool(false)
