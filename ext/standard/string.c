@@ -4285,16 +4285,17 @@ PHP_FUNCTION(setlocale)
 
 #ifdef HAVE_SETLOCALE
 	if (Z_TYPE_P(pcategory) == IS_LONG) {
-		convert_to_long_ex(pcategory);
 		cat = Z_LVAL_P(pcategory);
 	} else {
 		/* FIXME: The following behaviour should be removed. */
 		char *category;
+		zval tmp;
 
 		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "Passing locale category name as string is deprecated. Use the LC_* -constants instead");
 
-		convert_to_string_ex(pcategory);
-		category = Z_STRVAL_P(pcategory);
+		ZVAL_DUP(&tmp, pcategory);
+		convert_to_string_ex(&tmp);
+		category = Z_STRVAL(tmp);
 
 		if (!strcasecmp("LC_ALL", category)) {
 			cat = LC_ALL;
@@ -4315,11 +4316,13 @@ PHP_FUNCTION(setlocale)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category);
 
+			zval_dtor(&tmp);
 			if (args) {
 				efree(args);
 			}
 			RETURN_FALSE;
 		}
+		zval_dtor(&tmp);
 	}
 
 	if (Z_TYPE(args[0]) == IS_ARRAY) {
@@ -4327,6 +4330,7 @@ PHP_FUNCTION(setlocale)
 	}
 
 	while (1) {
+		zval tmp;
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			if (!zend_hash_num_elements(Z_ARRVAL(args[0]))) {
 				break;
@@ -4338,14 +4342,16 @@ PHP_FUNCTION(setlocale)
 			plocale = &args[i];
 		}
 
-		convert_to_string_ex(plocale);
+		ZVAL_DUP(&tmp, plocale);
+		convert_to_string(&tmp);
 
-		if (!strcmp ("0", Z_STRVAL_P(plocale))) {
+		if (!strcmp ("0", Z_STRVAL(tmp))) {
 			loc = NULL;
 		} else {
-			loc = Z_STRVAL_P(plocale);
-			if (Z_STRLEN_P(plocale) >= 255) {
+			loc = Z_STRVAL(tmp);
+			if (Z_STRLEN(tmp) >= 255) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Specified locale name is too long");
+				zval_dtor(&tmp);
 				break;
 			}
 		}
@@ -4362,11 +4368,13 @@ PHP_FUNCTION(setlocale)
 				BG(locale_string) = estrdup(retval);
 			}
 
+			zval_dtor(&tmp);
 			if (args) {
 				efree(args);
 			}
 			RETURN_STRING(retval);
 		}
+		zval_dtor(&tmp);
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			if (zend_hash_move_forward(Z_ARRVAL(args[0])) == FAILURE) break;
