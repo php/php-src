@@ -295,9 +295,9 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
-ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name TSRMLS_DC);
-ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zend_string **callable_name TSRMLS_DC);
+ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API int zend_get_module_started(const char *module_name);
 ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment TSRMLS_DC);
@@ -467,7 +467,7 @@ ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
  * The callable_name argument may be NULL.
  * Set check_flags to IS_CALLABLE_STRICT for every new usage!
  */
-ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC);
+ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_string **callable_name, char **error TSRMLS_DC);
 
 /** Clear arguments connected with zend_fcall_info *fci
  * If free_mem is not zero then the params array gets free'd as well

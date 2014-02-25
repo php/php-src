@@ -1469,7 +1469,7 @@ ZEND_FUNCTION(trigger_error)
 ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
-	char *error_handler_name = NULL;
+	zend_string *error_handler_name = NULL;
 	long error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
@@ -1479,11 +1479,11 @@ ZEND_FUNCTION(set_error_handler)
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
-			efree(error_handler_name);
+					   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name->val:"unknown");
+			STR_RELEASE(error_handler_name);
 			return;
 		}
-		efree(error_handler_name);
+		STR_RELEASE(error_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -1536,7 +1536,7 @@ ZEND_FUNCTION(restore_error_handler)
 ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
-	char *exception_handler_name = NULL;
+	zend_string *exception_handler_name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &exception_handler) == FAILURE) {
 		return;
@@ -1545,11 +1545,11 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(exception_handler, 0, &exception_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
-			efree(exception_handler_name);
+					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name->val:"unknown");
+			STR_RELEASE(exception_handler_name);
 			return;
 		}
-		efree(exception_handler_name);
+		STR_RELEASE(exception_handler_name);
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {

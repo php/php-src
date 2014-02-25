@@ -1320,7 +1320,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	long			limit = -1;
 	zend_string		*string_key;
 	ulong			 num_key;
-	char			*callback_name;
+	zend_string		*callback_name;
 	int				 replace_count=0, old_replace_count;
 	
 	/* Get function parameters and do error-checking. */
@@ -1339,12 +1339,12 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	}
 	if (is_callable_replace) {
 		if (!zend_is_callable(replace, 0, &callback_name TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%s', to be a valid callback", callback_name);
-			efree(callback_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Requires argument 2, '%s', to be a valid callback", callback_name->val);
+			STR_RELEASE(callback_name);
 			ZVAL_DUP(return_value, subject);
 			return;
 		}
-		efree(callback_name);
+		STR_RELEASE(callback_name);
 	}
 
 	SEPARATE_ZVAL(regex);

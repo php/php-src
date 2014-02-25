@@ -476,7 +476,8 @@ PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_outp
  * Create a user level output handler */
 PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, size_t chunk_size, int flags TSRMLS_DC)
 {
-	char *handler_name = NULL, *error = NULL;
+	zend_string *handler_name = NULL;
+	char *error = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t alias = NULL;
 	php_output_handler_user_func_t *user = NULL;
@@ -493,7 +494,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 		default:
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error TSRMLS_CC)) {
-				handler = php_output_handler_init(handler_name, strlen(handler_name), chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER TSRMLS_CC);
+				handler = php_output_handler_init(handler_name->val, handler_name->len, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER TSRMLS_CC);
 				Z_ADDREF_P(output_handler);
 				user->zoh = output_handler;
 				handler->func.user = user;
@@ -505,7 +506,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				efree(error);
 			}
 			if (handler_name) {
-				efree(handler_name);
+				STR_RELEASE(handler_name);
 			}
 	}
 

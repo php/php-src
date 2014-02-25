@@ -2880,7 +2880,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 
 		ftable = &fcc->calling_scope->function_table;
 		if (ce_org && !instanceof_function(ce_org, fcc->calling_scope TSRMLS_CC)) {
-			if (error) zend_spprintf(error, 0, "class '%s' is not a subclass of '%s'", ce_org->name, fcc->calling_scope->name);
+			if (error) zend_spprintf(error, 0, "class '%s' is not a subclass of '%s'", ce_org->name->val, fcc->calling_scope->name->val);
 			return 0;
 		}
 		mname = STR_INIT(Z_STRVAL_P(callable) + clen + 2, mlen, 0);
@@ -3080,17 +3080,13 @@ get_function_via_handler:
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, char **callable_name, int *callable_name_len, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
 	zend_bool ret;
-	int callable_name_len_local;
 	zend_fcall_info_cache fcc_local;
 
 	if (callable_name) {
 		*callable_name = NULL;
-	}
-	if (callable_name_len == NULL) {
-		callable_name_len = &callable_name_len_local;
 	}
 	if (fcc == NULL) {
 		fcc = &fcc_local;
@@ -3124,17 +3120,16 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				if (callable_name) {
 					char *ptr;
 
-					*callable_name_len = fcc->calling_scope->name->len + Z_STRLEN_P(callable) + sizeof("::") - 1;
-					ptr = *callable_name = emalloc(*callable_name_len + 1);
-					memcpy(ptr, fcc->calling_scope->name, fcc->calling_scope->name->len);
+					*callable_name = STR_ALLOC(fcc->calling_scope->name->len + Z_STRLEN_P(callable) + sizeof("::") - 1, 0);
+					ptr = (*callable_name)->val;
+					memcpy(ptr, fcc->calling_scope->name->val, fcc->calling_scope->name->len);
 					ptr += fcc->calling_scope->name->len;
 					memcpy(ptr, "::", sizeof("::") - 1);
 					ptr += sizeof("::") - 1;
 					memcpy(ptr, Z_STRVAL_P(callable), Z_STRLEN_P(callable) + 1);
 				}
 			} else if (callable_name) {
-				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				*callable_name_len = Z_STRLEN_P(callable);
+				*callable_name = STR_COPY(Z_STR_P(callable));
 			}
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				fcc->called_scope = fcc->calling_scope;
@@ -3174,8 +3169,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						if (callable_name) {
 							char *ptr;
 
-							*callable_name_len = Z_STRLEN_P(obj) + Z_STRLEN_P(method) + sizeof("::") - 1;
-							ptr = *callable_name = emalloc(*callable_name_len + 1);
+							
+							*callable_name = STR_ALLOC(Z_STRLEN_P(obj) + Z_STRLEN_P(method) + sizeof("::") - 1, 0);
+							ptr = (*callable_name)->val;
 							memcpy(ptr, Z_STRVAL_P(obj), Z_STRLEN_P(obj));
 							ptr += Z_STRLEN_P(obj);
 							memcpy(ptr, "::", sizeof("::") - 1);
@@ -3204,9 +3200,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						if (callable_name) {
 							char *ptr;
 
-							*callable_name_len = fcc->calling_scope->name->len + Z_STRLEN_P(method) + sizeof("::") - 1;
-							ptr = *callable_name = emalloc(*callable_name_len + 1);
-							memcpy(ptr, fcc->calling_scope->name, fcc->calling_scope->name->len);
+							*callable_name = STR_ALLOC(fcc->calling_scope->name->len + Z_STRLEN_P(method) + sizeof("::") - 1, 0);
+							ptr = (*callable_name)->val;
+							memcpy(ptr, fcc->calling_scope->name->val, fcc->calling_scope->name->len);
 							ptr += fcc->calling_scope->name->len;
 							memcpy(ptr, "::", sizeof("::") - 1);
 							ptr += sizeof("::") - 1;
@@ -3244,8 +3240,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						if (error) zend_spprintf(error, 0, "array must have exactly two members");
 					}
 					if (callable_name) {
-						*callable_name = estrndup("Array", sizeof("Array")-1);
-						*callable_name_len = sizeof("Array") - 1;
+						*callable_name = STR_INIT("Array", sizeof("Array")-1, 0);
 					}
 				}
 			}
@@ -3257,10 +3252,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				if (callable_name) {
 					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
 
-					*callable_name_len = ce->name->len + sizeof("::__invoke") - 1;
-					*callable_name = emalloc(*callable_name_len + 1);
-					memcpy(*callable_name, ce->name, ce->name->len);
-					memcpy((*callable_name) + ce->name->len, "::__invoke", sizeof("::__invoke"));
+					*callable_name = STR_ALLOC(ce->name->len + sizeof("::__invoke") - 1, 0);
+					memcpy((*callable_name)->val, ce->name->val, ce->name->len);
+					memcpy((*callable_name)->val + ce->name->len, "::__invoke", sizeof("::__invoke"));
 				}									
 				return 1;
 			}
@@ -3272,8 +3266,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				int use_copy;
 
 				zend_make_printable_zval(callable, &expr_copy, &use_copy);
-				*callable_name = estrndup(Z_STRVAL(expr_copy), Z_STRLEN(expr_copy));
-				*callable_name_len = Z_STRLEN(expr_copy);
+				*callable_name = STR_COPY(Z_STR(expr_copy));
 				zval_dtor(&expr_copy);
 			}
 			if (error) zend_spprintf(error, 0, "no array or string given");
@@ -3282,17 +3275,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, char **callable_name TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zend_string **callable_name TSRMLS_DC) /* {{{ */
 {
-	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL, NULL TSRMLS_CC);
+	return zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, NULL TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info_cache fcc;
 
-	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, NULL, &fcc, NULL TSRMLS_CC)) {
+	if (zend_is_callable_ex(callable, NULL, IS_CALLABLE_STRICT, callable_name, &fcc, NULL TSRMLS_CC)) {
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
 			zval_dtor(callable);
 			array_init(callable);
@@ -3315,9 +3308,9 @@ ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRML
 }
 /* }}} */
 
-ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC) /* {{{ */
+ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zend_string **callable_name, char **error TSRMLS_DC) /* {{{ */
 {
-	if (!zend_is_callable_ex(callable, NULL, check_flags, callable_name, NULL, fcc, error TSRMLS_CC)) {
+	if (!zend_is_callable_ex(callable, NULL, check_flags, callable_name, fcc, error TSRMLS_CC)) {
 		return FAILURE;
 	}
 

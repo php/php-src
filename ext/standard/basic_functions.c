@@ -4987,17 +4987,17 @@ static int user_shutdown_function_call(zval *zv TSRMLS_DC) /* {{{ */
 {
     php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
 	zval retval;
-	char *function_name;
+	zend_string *function_name;
 
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
-		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name);
+		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 		if (function_name) {
-			efree(function_name);
+			STR_RELEASE(function_name);
 		}
 		return 0;
 	}
 	if (function_name) {
-		efree(function_name);
+		STR_RELEASE(function_name);
 	}
 
 	if (call_user_function(EG(function_table), NULL,
@@ -5120,7 +5120,7 @@ void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
 PHP_FUNCTION(register_shutdown_function)
 {
 	php_shutdown_function_entry shutdown_function_entry;
-	char *callback_name = NULL;
+	zend_string *callback_name = NULL;
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
@@ -5138,7 +5138,7 @@ PHP_FUNCTION(register_shutdown_function)
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
 	} else {
@@ -5153,7 +5153,7 @@ PHP_FUNCTION(register_shutdown_function)
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}
 	if (callback_name) {
-		efree(callback_name);
+		STR_RELEASE(callback_name);
 	}
 }
 /* }}} */
@@ -5730,7 +5730,7 @@ PHP_FUNCTION(register_tick_function)
 {
 	user_tick_function_entry tick_fe;
 	int i;
-	char *function_name = NULL;
+	zend_string *function_name = NULL;
 
 	tick_fe.calling = 0;
 	tick_fe.arg_count = ZEND_NUM_ARGS();
@@ -5748,11 +5748,11 @@ PHP_FUNCTION(register_tick_function)
 
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
 		efree(tick_fe.arguments);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name);
-		efree(function_name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name->val);
+		STR_RELEASE(function_name);
 		RETURN_FALSE;
 	} else if (function_name) {
-		efree(function_name);
+		STR_RELEASE(function_name);
 	}
 
 	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {

@@ -777,20 +777,20 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	if (!fci_cache || !fci_cache->initialized) {
-		char *callable_name;
+		zend_string *callable_name;
 		char *error = NULL;
 
 		if (!fci_cache) {
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object_ptr, IS_CALLABLE_CHECK_SILENT, &callable_name, NULL, fci_cache, &error TSRMLS_CC)) {
+		if (!zend_is_callable_ex(&fci->function_name, fci->object_ptr, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
 			if (error) {
-				zend_error(E_WARNING, "Invalid callback %s, %s", callable_name, error);
+				zend_error(E_WARNING, "Invalid callback %s, %s", callable_name->val, error);
 				efree(error);
 			}
 			if (callable_name) {
-				efree(callable_name);
+				STR_RELEASE(callable_name);
 			}
 			return FAILURE;
 		} else if (error) {
@@ -801,7 +801,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			zend_error(E_STRICT, "%s", error);
 			efree(error);
 		}
-		efree(callable_name);
+		STR_RELEASE(callable_name);
 	}
 
 	EX(function_state).function = fci_cache->function_handler;

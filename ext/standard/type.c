@@ -374,7 +374,7 @@ PHP_FUNCTION(is_scalar)
 PHP_FUNCTION(is_callable)
 {
 	zval *var, *callable_name = NULL;
-	char *name;
+	zend_string *name;
 	char *error;
 	zend_bool retval;
 	zend_bool syntax_only = 0;
@@ -389,12 +389,14 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL, &error TSRMLS_CC);
+		if (callable_name && Z_ISREF_P(callable_name)) {
+			callable_name = Z_REFVAL_P(callable_name);
+		}
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
-//???		ZVAL_STRING(callable_name, name, 0);
-		ZVAL_STRING(callable_name, name);
+		ZVAL_STR(callable_name, name);
 	} else {
-		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, NULL, &error TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
 	}
 	if (error) {
 		/* ignore errors */
