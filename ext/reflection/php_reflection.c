@@ -204,6 +204,7 @@ typedef enum {
 /* Struct for reflection objects */
 typedef struct {
 	zend_object zo;
+	zval dummy; /* holder for the second property */
 	void *ptr;
 	reflection_type_t ref_type;
 	zval obj;
@@ -310,7 +311,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 	}
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
-//???	zend_objects_free_object_storage(object TSRMLS_CC);
+	zend_object_free(object TSRMLS_CC);
 }
 /* }}} */
 
@@ -1222,7 +1223,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	zval name;
 
 	if (closure_object) {
-		Z_ADDREF_P(closure_object);
+		if (Z_REFCOUNTED_P(closure_object)) Z_ADDREF_P(closure_object);
 	}
 	if (arg_info->name) {
 		ZVAL_STRINGL(&name, arg_info->name, arg_info->name_len);
@@ -1616,7 +1617,11 @@ ZEND_METHOD(reflection_function, __construct)
 	reflection_update_property(object, "name", &name);
 	intern->ptr = fptr;
 	intern->ref_type = REF_TYPE_FUNCTION;
-	ZVAL_COPY_VALUE(&intern->obj, closure);
+	if (closure) {
+		ZVAL_COPY_VALUE(&intern->obj, closure);
+	} else {
+		ZVAL_UNDEF(&intern->obj);
+	}
 	intern->ce = NULL;
 }
 /* }}} */
