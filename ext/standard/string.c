@@ -1542,7 +1542,7 @@ PHP_FUNCTION(pathinfo)
 
 	if (have_basename) {
 		ret = php_basename(path, path_len, NULL, 0 TSRMLS_CC);
-		add_assoc_str(&tmp, "basename", ret);
+		add_assoc_str(&tmp, "basename", STR_COPY(ret));
 	}
 
 	if ((opt & PHP_PATHINFO_EXTENSION) == PHP_PATHINFO_EXTENSION) {
@@ -2537,7 +2537,7 @@ PHP_FUNCTION(substr_replace)
 			result->val[result->len] = '\0';
 
 			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(str), &str_index, &num_index, 0, &pos_str) == HASH_KEY_IS_STRING) {
-				add_assoc_str(return_value, str_index->val, result);
+				add_assoc_str_ex(return_value, str_index->val, str_index->len, result);
 			} else {
 				add_index_str(return_value, num_index, result);
 			}

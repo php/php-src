@@ -4045,7 +4045,7 @@ PHP_FUNCTION(array_rand)
 			} else {
 				/* Append the result to the return value. */
 				if (key_type == HASH_KEY_IS_STRING) {
-					add_next_index_str(return_value, string_key);
+					add_next_index_str(return_value, STR_COPY(string_key));
 				} else {
 					add_next_index_long(return_value, num_key);
 				}

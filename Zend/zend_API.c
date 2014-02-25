@@ -1339,7 +1339,6 @@ ZEND_API int add_assoc_str_ex(zval *arg, const char *key, uint key_len, zend_str
 	zval *ret, tmp;
 
 	ZVAL_STR(&tmp, str);
-	STR_ADDREF(str);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
 }
@@ -1506,7 +1505,7 @@ ZEND_API int add_next_index_str(zval *arg, zend_string *str) /* {{{ */
 {
 	zval tmp;
 
-	ZVAL_STR(&tmp, STR_COPY(str));
+	ZVAL_STR(&tmp, str);
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
 }
 /* }}} */
@@ -1582,7 +1581,7 @@ ZEND_API zval *add_get_index_str(zval *arg, ulong index, zend_string *str) /* {{
 	zval tmp;
 
 //???	ZVAL_STRING(tmp, str, duplicate);
-	ZVAL_STR(&tmp, STR_COPY(str));
+	ZVAL_STR(&tmp, str);
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
 }
 /* }}} */
@@ -3297,8 +3296,8 @@ ZEND_API zend_bool zend_make_callable(zval *callable, char **callable_name TSRML
 		if (Z_TYPE_P(callable) == IS_STRING && fcc.calling_scope) {
 			zval_dtor(callable);
 			array_init(callable);
-			add_next_index_str(callable, fcc.calling_scope->name);
-			add_next_index_str(callable, fcc.function_handler->common.function_name);
+			add_next_index_str(callable, STR_COPY(fcc.calling_scope->name));
+			add_next_index_str(callable, STR_COPY(fcc.function_handler->common.function_name));
 		}
 		if (fcc.function_handler &&
 			((fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&

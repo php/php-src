@@ -613,7 +613,7 @@ ZEND_FUNCTION(each)
 	/* add the key elements */
 	switch (zend_hash_get_current_key_ex(target_hash, &key, &num_key, 0, NULL)) {
 		case HASH_KEY_IS_STRING:
-			inserted_pointer = add_get_index_str(return_value, 0, key);
+			inserted_pointer = add_get_index_str(return_value, 0, STR_COPY(key));
 			break;
 		case HASH_KEY_IS_LONG:
 			inserted_pointer = add_get_index_long(return_value, 0, num_key);
@@ -1427,7 +1427,7 @@ ZEND_FUNCTION(get_included_files)
 	array_init(return_value);
 	zend_hash_internal_pointer_reset(&EG(included_files));
 	while (zend_hash_get_current_key_ex(&EG(included_files), &entry, NULL, 0, NULL) == HASH_KEY_IS_STRING) {
-		add_next_index_str(return_value, entry);
+		add_next_index_str(return_value, STR_COPY(entry));
 		zend_hash_move_forward(&EG(included_files));
 	}
 }
@@ -1601,9 +1601,9 @@ static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int nu
 		if (ce->refcount > 1 && 
 		    (ce->name->len != hash_key->key->len - 1 || 
 		     !same_name(hash_key->key->val, ce->name->val, ce->name->len))) {
-			add_next_index_str(array, hash_key->key);
+			add_next_index_str(array, STR_COPY(hash_key->key));
 		} else {
-			add_next_index_str(array, ce->name);
+			add_next_index_str(array, STR_COPY(ce->name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -1669,9 +1669,9 @@ static int copy_function_name(zend_function *func TSRMLS_DC, int num_args, va_li
 	}
 
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		add_next_index_str(internal_ar, hash_key->key);
+		add_next_index_str(internal_ar, STR_COPY(hash_key->key));
 	} else if (func->type == ZEND_USER_FUNCTION) {
-		add_next_index_str(user_ar, hash_key->key);
+		add_next_index_str(user_ar, STR_COPY(hash_key->key));
 	}
 
 	return 0;
@@ -2219,7 +2219,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}				    
 				if (prev->op_array) {
-					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, prev->op_array->filename);
+					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_COPY(prev->op_array->filename));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
 					break;
 				}
@@ -2244,10 +2244,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 			if (Z_TYPE(ptr->object) == IS_OBJECT) {
 				if (ptr->function_state.function->common.scope) {
-					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, ptr->function_state.function->common.scope->name);
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(ptr->function_state.function->common.scope->name));
 				} else {
 					class_name = zend_get_object_classname(&ptr->object TSRMLS_CC);
-					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, class_name);
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(class_name));
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
@@ -2257,7 +2257,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
-				add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, ptr->function_state.function->common.scope->name);
+				add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(ptr->function_state.function->common.scope->name));
 				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "::", 1);
 			}
 
@@ -2408,7 +2408,7 @@ ZEND_FUNCTION(get_extension_funcs)
 				array_init(return_value);
 				array = 1;
 			}
-			add_next_index_str(return_value, zif->common.function_name);
+			add_next_index_str(return_value, STR_COPY(zif->common.function_name));
 		}
 		zend_hash_move_forward_ex(CG(function_table), &iterator);
 	}

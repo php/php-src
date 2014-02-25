@@ -744,18 +744,18 @@ PHP_FUNCTION(spl_autoload_functions)
 					Z_ADDREF_P(alfi->obj);
 					add_next_index_zval(&tmp, alfi->obj);
 				} else {
-					add_next_index_str(&tmp, alfi->ce->name);
+					add_next_index_str(&tmp, STR_COPY(alfi->ce->name));
 				}
-				add_next_index_str(&tmp, alfi->func_ptr->common.function_name);
+				add_next_index_str(&tmp, STR_COPY(alfi->func_ptr->common.function_name));
 				add_next_index_zval(return_value, &tmp);
 			} else {
 				if (strncmp(alfi->func_ptr->common.function_name->val, "__lambda_func", sizeof("__lambda_func") - 1)) {
-					add_next_index_str(return_value, alfi->func_ptr->common.function_name);
+					add_next_index_str(return_value, STR_COPY(alfi->func_ptr->common.function_name));
 				} else {
 					zend_string *key;
 					ulong dummy;
 					zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &dummy, 0, &function_pos); 
-					add_next_index_str(return_value, key);
+					add_next_index_str(return_value, STR_COPY(key));
 				}
 			}
 
@@ -765,7 +765,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	}
 
 	array_init(return_value);
-	add_next_index_str(return_value, EG(autoload_func)->common.function_name);
+	add_next_index_str(return_value, STR_COPY(EG(autoload_func)->common.function_name));
 } /* }}} */
 
 /* {{{ proto string spl_object_hash(object obj)

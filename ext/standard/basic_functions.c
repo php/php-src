@@ -4581,7 +4581,6 @@ static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args
 
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if (hash_key->key) {
-//???
 			add_assoc_str_ex(retval, hash_key->key->val, hash_key->key->len, STR_COPY(Z_STR_P(entry)));
 		} else {
 			add_index_str(retval, hash_key->h, STR_COPY(Z_STR_P(entry)));
@@ -4589,7 +4588,6 @@ static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		array_init(&tmp);
 		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, tmp);
-//???
 		add_assoc_zval_ex(retval, hash_key->key->val, hash_key->key->len, &tmp);
 	}
 	return 0;
