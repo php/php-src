@@ -663,6 +663,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		zend_ast_evaluate(&const_value, Z_ASTVAL_P(p), scope TSRMLS_CC);
 		if (inline_change) {
 			zend_ast_destroy(Z_ASTVAL_P(p));
+			efree(Z_AST_P(p));
 		}
 		ZVAL_COPY_VALUE(p, &const_value);
 	}
