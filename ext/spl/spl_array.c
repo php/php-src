@@ -1148,6 +1148,8 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 
 	iterator     = emalloc(sizeof(spl_array_it));
 
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	Z_ADDREF_P(object);
 	iterator->intern.it.data = (void*)object;
 	iterator->intern.it.funcs = &spl_array_it_funcs;

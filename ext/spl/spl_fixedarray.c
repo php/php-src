@@ -1052,6 +1052,9 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 	Z_ADDREF_P(object);
 
 	iterator = emalloc(sizeof(spl_fixedarray_it));
+
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	
 	iterator->intern.it.data = object;
 	iterator->intern.it.funcs = &spl_fixedarray_it_funcs;
 	iterator->intern.ce = ce;

@@ -675,19 +675,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	iterator = &generator->iterator;
 	
-//???
-#if 1
-	iterator->intern.std.gc.refcount = 1;
-	iterator->intern.std.gc.u.v.type = IS_OBJECT;
-	iterator->intern.std.gc.u.v.flags = 0;
-	iterator->intern.std.gc.u.v.buffer = 0;
-	iterator->intern.std.ce = NULL;
-	iterator->intern.std.properties = NULL;
-	iterator->intern.std.guards = NULL;
-	zend_objects_store_put(&iterator->intern.std);
-#else
-	zend_object_std_init(&iterator->intern.std, ???);
-#endif
+	zend_iterator_init(&iterator->intern TSRMLS_CC);
 
 	iterator->intern.funcs = &zend_generator_iterator_functions;
 	iterator->intern.data = (void *) generator;

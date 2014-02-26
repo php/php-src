@@ -1291,6 +1291,9 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 	Z_ADDREF_P(object);
 
 	iterator                     = emalloc(sizeof(spl_dllist_it));
+
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	
 	iterator->intern.it.data     = (void*)object;
 	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
 	iterator->intern.ce          = ce;

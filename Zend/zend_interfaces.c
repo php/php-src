@@ -259,6 +259,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	iterator = emalloc(sizeof(zend_user_iterator));
 
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	Z_ADDREF_P(object);
 	iterator->it.data = (void*)object;
 	iterator->it.funcs = ce->iterator_funcs.funcs;
