@@ -1895,7 +1895,10 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
-	cainfo = INI_STR("curl.cainfo");
+	cainfo = INI_STR("openssl.cafile");
+	if (!(cainfo && strlen(cainfo) > 0)) {
+		cainfo = INI_STR("curl.cainfo");
+	}
 	if (cainfo && strlen(cainfo) > 0) {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
 	}

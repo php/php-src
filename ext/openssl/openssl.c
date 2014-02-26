@@ -53,6 +53,15 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 
+/* Windows platform includes */
+#ifdef PHP_WIN32
+# include <Wincrypt.h>
+/* These are from Wincrypt.h, they conflict with OpenSSL */
+# undef X509_NAME
+# undef X509_CERT_PAIR
+# undef X509_EXTENSIONS
+#endif
+
 /* Common */
 #include <time.h>
 
@@ -629,6 +638,8 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 static X509_REQ * php_openssl_csr_from_zval(zval ** val, int makeresource, php_int_t * resourceval TSRMLS_DC);
 static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req TSRMLS_DC);
 
+#define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
+
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
 	zval **data;
@@ -1101,8 +1112,8 @@ static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(php_int_t algo) {
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("openssl.cafile", NULL, PHP_INI_PERDIR, NULL)
+	PHP_INI_ENTRY("openssl.capath", NULL, PHP_INI_PERDIR, NULL)
 PHP_INI_END()
 /* }}} */
  
@@ -5371,17 +5382,174 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 }
 /* }}} */
 
+#if defined(PHP_WIN32) && OPENSSL_VERSION_NUMBER >= 0x00907000L
+#define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
+static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
+{
+	PCCERT_CONTEXT cert_ctx = NULL;
+	PCCERT_CHAIN_CONTEXT cert_chain_ctx = NULL;
+
+	php_stream *stream;
+	php_openssl_netstream_data_t *sslsock;
+	zval **val;
+	zend_bool is_self_signed = 0;
+
+	TSRMLS_FETCH();
+
+	stream = (php_stream*)arg;
+	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	{ /* First convert the x509 struct back to a DER encoded buffer and let Windows decode it into a form it can work with */
+		unsigned char *der_buf = NULL;
+		php_size_t der_len;
+
+		der_len = i2d_X509(x509_store_ctx->cert, &der_buf);
+		if (der_len < 0) {
+			unsigned long err_code, e;
+			char err_buf[512];
+
+			while ((e = ERR_get_error()) != 0) {
+				err_code = e;
+			}
+
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error encoding X509 certificate: %d: %s", err_code, ERR_error_string(err_code, err_buf));
+			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+		}
+
+		cert_ctx = CertCreateCertificateContext(X509_ASN_ENCODING, der_buf, der_len);
+		OPENSSL_free(der_buf);
+
+		if (cert_ctx == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error creating certificate context: %s", php_win_err());
+			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+		}
+	}
+
+	{ /* Next fetch the relevant cert chain from the store */
+		CERT_ENHKEY_USAGE enhkey_usage = {0};
+		CERT_USAGE_MATCH cert_usage = {0};
+		CERT_CHAIN_PARA chain_params = {sizeof(CERT_CHAIN_PARA)};
+		DWORD chain_flags = 0;
+		unsigned long verify_depth = PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
+		unsigned int i;
+
+		enhkey_usage.cUsageIdentifier = 0;
+		enhkey_usage.rgpszUsageIdentifier = NULL;
+		cert_usage.dwType = USAGE_MATCH_TYPE_AND;
+		cert_usage.Usage = enhkey_usage;
+		chain_params.RequestedUsage = cert_usage;
+		chain_flags = CERT_CHAIN_CACHE_END_CERT | CERT_CHAIN_REVOCATION_CHECK_CHAIN;
+
+		if (!CertGetCertificateChain(NULL, cert_ctx, NULL, NULL, &chain_params, chain_flags, NULL, &cert_chain_ctx)) {
+			CertFreeCertificateContext(cert_ctx);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error getting certificate chain: %s", php_win_err());
+			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+		}
+
+		/* check if the cert is self-signed */
+		if (cert_chain_ctx->cChain > 0 && cert_chain_ctx->rgpChain[0]->cElement > 0
+			&& (cert_chain_ctx->rgpChain[0]->rgpElement[0]->TrustStatus.dwInfoStatus & CERT_TRUST_IS_SELF_SIGNED) != 0) {
+			is_self_signed = 1;
+		}
+
+		/* check the depth */
+		if (GET_VER_OPT("verify_depth")) {
+			convert_to_int_ex(val);
+			verify_depth = (unsigned long)Z_IVAL_PP(val);
+		}
+
+		for (i = 0; i < cert_chain_ctx->cChain; i++) {
+			if (cert_chain_ctx->rgpChain[i]->cElement > verify_depth) {
+				CertFreeCertificateContext(cert_ctx);
+				RETURN_CERT_VERIFY_FAILURE(X509_V_ERR_CERT_CHAIN_TOO_LONG);
+			}
+		}
+	}
+
+	{ /* Then verify it against a policy */
+		SSL_EXTRA_CERT_CHAIN_POLICY_PARA ssl_policy_params = {sizeof(SSL_EXTRA_CERT_CHAIN_POLICY_PARA)};
+		CERT_CHAIN_POLICY_PARA chain_policy_params = {sizeof(CERT_CHAIN_POLICY_PARA)};
+		CERT_CHAIN_POLICY_STATUS chain_policy_status = {sizeof(CERT_CHAIN_POLICY_STATUS)};
+		LPWSTR server_name = NULL;
+		BOOL verify_result;
+
+		{ /* This looks ridiculous and it is - but we validate the name ourselves using the CN_match
+		     ctx option, so just use the CN from the cert here */
+
+			X509_NAME *cert_name;
+			unsigned char *cert_name_utf8;
+			int index, cert_name_utf8_len;
+			DWORD num_wchars;
+
+			cert_name = X509_get_subject_name(x509_store_ctx->cert);
+			index = X509_NAME_get_index_by_NID(cert_name, NID_commonName, -1);
+			if (index < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate certificate CN");
+				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+			}
+
+			cert_name_utf8_len = PHP_X509_NAME_ENTRY_TO_UTF8(cert_name, index, cert_name_utf8);
+
+			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, NULL, 0);
+			if (num_wchars == 0) {
+				OPENSSL_free(cert_name_utf8);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
+				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+			}
+
+			server_name = emalloc((num_wchars * sizeof(WCHAR)) + sizeof(WCHAR));
+
+			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, server_name, num_wchars);
+			if (num_wchars == 0) {
+				OPENSSL_free(cert_name_utf8);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
+				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+			}
+
+			OPENSSL_free(cert_name_utf8);
+		}
+
+		ssl_policy_params.dwAuthType = (sslsock->is_client) ? AUTHTYPE_SERVER : AUTHTYPE_CLIENT;
+		ssl_policy_params.pwszServerName = server_name;
+		chain_policy_params.pvExtraPolicyPara = &ssl_policy_params;
+
+		verify_result = CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_SSL, cert_chain_ctx, &chain_policy_params, &chain_policy_status);
+
+		CertFreeCertificateChain(cert_chain_ctx);
+		CertFreeCertificateContext(cert_ctx);
+		efree(server_name);
+
+		if (!verify_result) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error verifying certificate chain policy: %s", php_win_err());
+			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+		}
+
+		if (chain_policy_status.dwError != 0) {
+			/* The chain does not match the policy */
+			if (is_self_signed && chain_policy_status.dwError == CERT_E_UNTRUSTEDROOT
+				&& GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
+				/* allow self-signed certs */
+				X509_STORE_CTX_set_error(x509_store_ctx, X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT);
+			} else {
+				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
+			}
+		}
+	}
+
+	return 1;
+}
+/* }}} */
+#endif
+
 static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 	X509 *cert;
 	BIO *buffer;
-	int buffer_active;
+	int buffer_active = 0;
 	char *line;
 	size_t line_len;
 	long certs_added = 0;
-	const char *begin_line = "-----BEGIN CERTIFICATE-----\n";
-	const char *end_line = "-----END CERTIFICATE-----\n";
 
 	stream = php_stream_open_wrapper(cafile, "rb", 0, NULL);
 
@@ -5398,12 +5566,15 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 		line = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (line == NULL) {
 			goto stream_complete;
-		} else if (strcmp(line, begin_line)) {
-			efree(line);
-			goto cert_start;
-		} else {
+		} else if (!strcmp(line, "-----BEGIN CERTIFICATE-----\n") ||
+				!strcmp(line, "-----BEGIN CERTIFICATE-----\r\n")
+		) {
 			buffer = BIO_new(BIO_s_mem());
 			buffer_active = 1;
+			goto cert_line;
+		} else {
+			efree(line);
+			goto cert_start;
 		}
 	}
 
@@ -5413,10 +5584,13 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 		line = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (line == NULL) {
 			goto stream_complete;
-		} else if (strcmp(line, end_line)) {
-			goto cert_line;
-		} else {
+		} else if (!strcmp(line, "-----END CERTIFICATE-----") ||
+			!strcmp(line, "-----END CERTIFICATE-----\n") ||
+			!strcmp(line, "-----END CERTIFICATE-----\r\n")
+		) {
 			goto add_cert;
+		} else {
+			goto cert_line;
 		}
 	}
 
@@ -5434,17 +5608,44 @@ static long load_stream_cafile(X509_STORE *cert_store, const char *cafile TSRMLS
 
 	stream_complete: {
 		php_stream_close(stream);
-		if (buffer_active) {
+		if (buffer_active == 1) {
 			BIO_free(buffer);
 		}
 	}
-	
+
+	if (certs_added == 0) {
+		php_error(E_WARNING, "no valid certs found cafile stream: `%s'", cafile);
+	}
+
 	return certs_added;
 }
 /* }}} */
 
-static int load_verify_locations(SSL_CTX *ctx, php_stream *stream, char *cafile, char *capath TSRMLS_DC) /* {{{ */
+static void enable_peer_verify_callback(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 {
+	zval **val = NULL;
+
+	/* turn on verification callback */
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+
+	if (GET_VER_OPT("verify_depth")) {
+		convert_to_int_ex(val);
+		SSL_CTX_set_verify_depth(ctx, Z_IVAL_PP(val));
+	} else {
+		SSL_CTX_set_verify_depth(ctx, PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH);
+	}
+}
+/* }}} */
+
+static int enable_peer_verification(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
+{
+	zval **val = NULL;
+	char *cafile = NULL;
+	char *capath = NULL;
+
+	GET_VER_OPT_STRING("cafile", cafile);
+	GET_VER_OPT_STRING("capath", capath);
+
 	if (!cafile) {
 		cafile = zend_ini_string("openssl.cafile", sizeof("openssl.cafile"), 0);
 		cafile = strlen(cafile) ? cafile : NULL;
@@ -5461,15 +5662,33 @@ static int load_verify_locations(SSL_CTX *ctx, php_stream *stream, char *cafile,
 				return 0;
 			}
 		}
+
+		enable_peer_verify_callback(ctx, stream);
 	} else {
+#if defined(PHP_WIN32) && OPENSSL_VERSION_NUMBER >= 0x00907000L
+		SSL_CTX_set_cert_verify_callback(ctx, win_cert_verify_callback, (void *)stream);
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
+#else
 		php_openssl_netstream_data_t *sslsock;
 		sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
 		if (sslsock->is_client && !SSL_CTX_set_default_verify_paths(ctx)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"Unable to set default verify locations and no CA settings specified");
 			return 0;
 		}
+
+		enable_peer_verify_callback(ctx, stream);
+#endif
 	}
+
+	return 1;
+}
+/* }}} */
+
+static int disable_peer_verification(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
+{
+	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
 	return 1;
 }
@@ -5478,36 +5697,22 @@ static int load_verify_locations(SSL_CTX *ctx, php_stream *stream, char *cafile,
 SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
-	char *cafile = NULL;
-	char *capath = NULL;
 	char *certfile = NULL;
 	char *cipherlist = NULL;
 	int ok = 1;
+	SSL *ssl;
 
 	ERR_clear_error();
 
 	/* look at context options in the stream and set appropriate verification flags */
 	if (GET_VER_OPT("verify_peer") && !zval_is_true(*val)) {
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+		ok = disable_peer_verification(ctx, stream TSRMLS_CC);
 	} else {
+		ok = enable_peer_verification(ctx, stream TSRMLS_CC);
+	}
 
-		/* turn on verification callback */
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
-
-		/* CA stuff */
-		GET_VER_OPT_STRING("cafile", cafile);
-		GET_VER_OPT_STRING("capath", capath);
-
-		if (!load_verify_locations(ctx, stream, cafile, capath TSRMLS_CC)) {
-			return NULL;
-		}
-
-		if (GET_VER_OPT("verify_depth")) {
-			convert_to_int_ex(val);
-			SSL_CTX_set_verify_depth(ctx, Z_IVAL_PP(val));
-		} else {
-			SSL_CTX_set_verify_depth(ctx, PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH);
-		}
+	if (!ok) {
+		return NULL;
 	}
 
 	/* callback for the passphrase (for localcert) */
@@ -5574,17 +5779,14 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		}
 	}
 
-	if (ok) {
-		SSL *ssl = SSL_new(ctx);
+	ssl = SSL_new(ctx);
 
-		if (ssl) {
-			/* map SSL => stream */
-			SSL_set_ex_data(ssl, ssl_stream_data_index, stream);
-		}
-		return ssl;
+	if (ssl) {
+		/* map SSL => stream */
+		SSL_set_ex_data(ssl, ssl_stream_data_index, stream);
 	}
 
-	return NULL;
+	return ssl;
 }
 /* }}} */
 

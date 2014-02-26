@@ -2,8 +2,8 @@
 TLS server rate-limits client-initiated renegotiation
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
-if (!function_exists('pcntl_fork')) die("skip no fork");
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
 --FILE--
@@ -17,73 +17,70 @@ if ($code > 0) die("skip couldn't locate openssl binary");
  * given current limitations.
  */
 
-$bindTo = 'ssl://127.0.0.1:12345';
-$flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-$server = stream_socket_server($bindTo, $errNo, $errStr, $flags, stream_context_create(['ssl' => [
-	'local_cert' => __DIR__ . '/bug54992.pem',
-	'reneg_limit' => 0,
-	'reneg_window' => 30,
-	'reneg_limit_callback' => function($stream) {
-		var_dump($stream);
-	}
-]]));
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/bug54992.pem',
+        'reneg_limit' => 0,
+        'reneg_window' => 30,
+        'reneg_limit_callback' => function($stream) {
+            var_dump($stream);
+        }
+    ]]);
 
-$pid = pcntl_fork();
-if ($pid == -1) {
-	die('could not fork');
-} elseif ($pid) {
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-	$cmd = 'openssl s_client -connect 127.0.0.1:12345';
-	$descriptorspec = array(
-		0 => array("pipe", "r"),
-		1 => array("pipe", "w"),
-		2 => array("pipe", "w"),
-	);
-	$process = proc_open($cmd, $descriptorspec, $pipes);
+    $clients = [];
+    while (1) {
+        $r = array_merge([$server], $clients);
+        $w = $e = [];
 
-	list($stdin, $stdout, $stderr) = $pipes;
+        stream_select($r, $w, $e, $timeout=42);
 
-	// Trigger renegotiation twice
-	// Server settings only allow one per second (should result in disconnection)
-	fwrite($stdin, "R\nR\nR\nR\n");
+        foreach ($r as $sock) {
+            if ($sock === $server && ($client = stream_socket_accept($server, $timeout = 42))) {
+                $clientId = (int) $client;
+                $clients[$clientId] = $client;
+            } elseif ($sock !== $server) {
+                $clientId = (int) $sock;
+                $buffer = fread($sock, 1024);
+                if (strlen($buffer)) {
+                    continue;
+                } elseif (!is_resource($sock) || feof($sock)) {
+                    unset($clients[$clientId]);
+                    break 2;
+                }
+            }
+        }
+    }
+CODE;
 
-	$lines = [];
-	while(!feof($stderr)) {
-		fgets($stderr);
-	}
+$clientCode = <<<'CODE'
+    $cmd = 'openssl s_client -connect 127.0.0.1:64321';
+    $descriptorSpec = [["pipe", "r"], ["pipe", "w"], ["pipe", "w"]];
+    $process = proc_open($cmd, $descriptorSpec, $pipes);
 
-	fclose($stdin);
-	fclose($stdout);
-	fclose($stderr);
-	proc_terminate($process);
-	pcntl_wait($status);
+    list($stdin, $stdout, $stderr) = $pipes;
 
-} else {
+    // Trigger renegotiation twice
+    // Server settings only allow one per second (should result in disconnection)
+    fwrite($stdin, "R\nR\nR\nR\n");
 
-	$clients = [];
+    $lines = [];
+    while(!feof($stderr)) {
+        fgets($stderr);
+    }
 
-	while (1) {
-		$r = array_merge([$server], $clients);
-		$w = $e = [];
+    fclose($stdin);
+    fclose($stdout);
+    fclose($stderr);
+    proc_terminate($process);
+    pcntl_wait($status);
+CODE;
 
-		stream_select($r, $w, $e, $timeout=42);
-
-		foreach ($r as $sock) {
-			if ($sock === $server && ($client = stream_socket_accept($server, $timeout = 42))) {
-				$clientId = (int) $client;
-				$clients[$clientId] = $client;
-			} elseif ($sock !== $server) {
-				$clientId = (int) $sock;
-				$buffer = fread($sock, 1024);
-				if (strlen($buffer)) {
-					continue;
-				} elseif (!is_resource($sock) || feof($sock)) {
-					unset($clients[$clientId]);
-					break 2;
-				}
-			}
-		}
-	}
-}
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
 --EXPECTF--
 resource(%d) of type (stream)
