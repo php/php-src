@@ -2991,6 +2991,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 					SEPARATE_ZVAL(array_ptr);
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ptr = Z_REFVAL_P(array_ptr);
 					}
 				}
 			}
@@ -8045,6 +8046,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					SEPARATE_ZVAL(array_ptr);
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ptr = Z_REFVAL_P(array_ptr);
 					}
 				}
 			}
@@ -13151,6 +13153,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					SEPARATE_ZVAL(array_ptr);
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ptr = Z_REFVAL_P(array_ptr);
 					}
 				}
 			}
@@ -13399,12 +13402,9 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-		SEPARATE_ZVAL_IF_NOT_REF(value);
-		ZVAL_NEW_REF(value, value);
-		Z_ADDREF_P(value);
-	} else {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(value);
 	}
+	ZVAL_COPY(EX_VAR(opline->result.var), value);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_INC_OPCODE();
@@ -30045,6 +30045,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					SEPARATE_ZVAL(array_ptr);
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ptr = Z_REFVAL_P(array_ptr);
 					}
 				}
 			}
