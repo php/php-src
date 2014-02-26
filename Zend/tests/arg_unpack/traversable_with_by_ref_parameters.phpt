@@ -13,8 +13,6 @@ function gen($array) {
     }
 }
 
-test(...gen([1, 2, 3]), $a);
-var_dump($a);
 test(1, 2, 3, $b, ...gen([4, 5, 6]));
 var_dump($b);
 
@@ -24,7 +22,6 @@ test(...gen([1, 2]), ...gen([3, 4]));
 
 ?>
 --EXPECTF--
-int(42)
 int(42)
 
 Warning: Cannot pass by-reference argument 4 of test() by unpacking a Traversable, passing by-value instead in %s on line %d
