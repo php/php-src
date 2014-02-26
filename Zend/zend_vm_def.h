@@ -2861,7 +2861,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 //???			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 //???			    EX_T(opline->op1.var).var.fcall_returned_reference) {
 //???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-//???				zend_error(E_NOTICE, "Only variable references should be returned by reference");
+			zend_error(E_NOTICE, "Only variable references should be returned by reference");
 //???				if (EX(return_value)) {
 //???					ZVAL_DUP(EX(return_value), retval_ptr);
 //???				}
