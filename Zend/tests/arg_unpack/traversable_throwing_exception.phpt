@@ -20,11 +20,11 @@ function gen() {
 }
 
 try {
-    test(1, 2, ...new Foo, 3, 4);
+    test(1, 2, ...new Foo, ...[3, 4]);
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 try {
-    test(1, 2, ...gen(), 3, 4);
+    test(1, 2, ...gen(), ...[3, 4]);
 } catch (Exception $e) { var_dump($e->getMessage()); }
 
 ?>
