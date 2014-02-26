@@ -5401,7 +5401,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 	{ /* First convert the x509 struct back to a DER encoded buffer and let Windows decode it into a form it can work with */
 		unsigned char *der_buf = NULL;
-		int der_len;
+		php_size_t der_len;
 
 		der_len = i2d_X509(x509_store_ctx->cert, &der_buf);
 		if (der_len < 0) {
@@ -5454,8 +5454,8 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 		/* check the depth */
 		if (GET_VER_OPT("verify_depth")) {
-			convert_to_long_ex(val);
-			verify_depth = (unsigned long)Z_LVAL_PP(val);
+			convert_to_int_ex(val);
+			verify_depth = (unsigned long)Z_IVAL_PP(val);
 		}
 
 		for (i = 0; i < cert_chain_ctx->cChain; i++) {
@@ -5629,8 +5629,8 @@ static void enable_peer_verify_callback(SSL_CTX *ctx, php_stream *stream) /* {{{
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
 
 	if (GET_VER_OPT("verify_depth")) {
-		convert_to_long_ex(val);
-		SSL_CTX_set_verify_depth(ctx, Z_LVAL_PP(val));
+		convert_to_int_ex(val);
+		SSL_CTX_set_verify_depth(ctx, Z_IVAL_PP(val));
 	} else {
 		SSL_CTX_set_verify_depth(ctx, PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH);
 	}
