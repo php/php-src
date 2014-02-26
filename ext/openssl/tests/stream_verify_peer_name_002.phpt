@@ -1,5 +1,5 @@
 --TEST--
-Verify host name by default in client transfers
+Allow host name mismatch when "verify_host" disabled
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
@@ -23,8 +23,9 @@ $clientCode = <<<'CODE'
     $serverUri = "ssl://127.0.0.1:64321";
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
-        'verify_peer' => false,
-        'CN_match' => 'bug54992.local'
+        'verify_peer' => true,
+        'cafile' => __DIR__ . '/bug54992-ca.pem',
+        'verify_peer_name' => false
     ]]);
 
     phpt_wait();

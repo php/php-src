@@ -26,9 +26,9 @@ function context($host = NULL) {
 	stream_context_set_option($ctx, 'ssl', 'capture_peer_cert', true);
 	stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
 	if ($host) {
-		stream_context_set_option($ctx, 'ssl', 'CN_match', $host);
+		stream_context_set_option($ctx, 'ssl', 'peer_name', $host);
 	} else {
-		stream_context_set_option($ctx, 'ssl', 'verify_host', false);
+		stream_context_set_option($ctx, 'ssl', 'verify_peer_name', false);
 	}
 
 	return $ctx;
