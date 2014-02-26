@@ -978,9 +978,9 @@ PHP_FUNCTION(unserialize)
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
-	if (consumed) {
-		zval_dtor(consumed);
-		ZVAL_LONG(consumed, ((char*)p) - buf);
+	if (consumed && Z_ISREF_P(consumed)) {
+		zval_dtor(Z_REFVAL_P(consumed));
+		ZVAL_LONG(Z_REFVAL_P(consumed), ((char*)p) - buf);
 	}
 }
 /* }}} */
