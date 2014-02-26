@@ -51,6 +51,7 @@ typedef struct php_unserialize_data* php_unserialize_data_t;
 
 PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash_ptr) \
 do  { \
@@ -113,13 +114,9 @@ do { \
 	} \
 } while (0)
 
-PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
 PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval);
 PHPAPI void var_destroy(php_unserialize_data_t *var_hash);
-
-#define PHP_VAR_UNSERIALIZE_ZVAL_CHANGED(var_hash, ozval, nzval) \
-	var_replace((var_hash), (ozval), &(nzval))
 	
 PHPAPI zend_class_entry *php_create_empty_class(char *class_name, int len);
 
