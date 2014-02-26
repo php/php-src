@@ -1447,8 +1447,8 @@ found:
 						result = 1;
 						break;
 				}
+				goto exit;
 			}
-			goto exit;
 		}
 	}
 
