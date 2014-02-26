@@ -35,7 +35,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 	zend_op_array *op_array = execute_data->op_array;
 
 	if (generator->send_target) {
-		Z_DELREF_P(generator->send_target);
+		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
 		generator->send_target = NULL;
 	}
 
@@ -302,6 +302,9 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	generator->execute_data = execute_data;
 	generator->stack = EG(argument_stack);
 	EG(argument_stack) = current_stack;
+
+	/* EX(return_value) keeps pointer to zend_object (not a real zval) */
+	execute_data->return_value = (zval*)generator;
 }
 /* }}} */
 
@@ -515,9 +518,8 @@ ZEND_METHOD(Generator, send)
 
 	/* Put sent value in the target VAR slot, if it is used */
 	if (generator->send_target) {
-		Z_DELREF_P(generator->send_target);
-		Z_ADDREF_P(value);
-		ZVAL_COPY_VALUE(generator->send_target, value);
+		if (Z_REFCOUNTED_P(generator->send_target)) Z_DELREF_P(generator->send_target);
+		ZVAL_COPY(generator->send_target, value);
 	}
 
 	zend_generator_resume(generator TSRMLS_CC);
@@ -672,6 +674,21 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 	}
 
 	iterator = &generator->iterator;
+	
+//???
+#if 1
+	iterator->intern.std.gc.refcount = 1;
+	iterator->intern.std.gc.u.v.type = IS_OBJECT;
+	iterator->intern.std.gc.u.v.flags = 0;
+	iterator->intern.std.gc.u.v.buffer = 0;
+	iterator->intern.std.ce = NULL;
+	iterator->intern.std.properties = NULL;
+	iterator->intern.std.guards = NULL;
+	zend_objects_store_put(&iterator->intern.std);
+#else
+	zend_object_std_init(&iterator->intern.std, ???);
+#endif
+
 	iterator->intern.funcs = &zend_generator_iterator_functions;
 	iterator->intern.data = (void *) generator;
 

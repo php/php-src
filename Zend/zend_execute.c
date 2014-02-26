@@ -699,6 +699,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "none", "" TSRMLS_CC);
 		}
+		if (Z_TYPE_P(arg) == IS_REFERENCE) {
+			arg = Z_REFVAL_P(arg);
+		}
 		if (Z_TYPE_P(arg) == IS_OBJECT) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
@@ -715,6 +718,9 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
 				}
 
+				if (Z_TYPE_P(arg) == IS_REFERENCE) {
+					arg = Z_REFVAL_P(arg);
+				}
 				if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
 				}
@@ -1612,19 +1618,19 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		 * and the passed arguments
 		 */
 		int args_count = zend_vm_stack_get_args_count_ex(EG(current_execute_data));
-		size_t args_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval*)) * (args_count + 1);
+		size_t args_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval)) * (args_count + 1);
 
 		total_size += args_size + execute_data_size;
 
-		EG(argument_stack) = zend_vm_stack_new_page((total_size + (sizeof(void*) - 1)) / sizeof(void*));
+		EG(argument_stack) = zend_vm_stack_new_page((total_size + (sizeof(zval) - 1)) / sizeof(zval));
 		EG(argument_stack)->prev = NULL;
-		execute_data = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + args_size + execute_data_size + vars_size);
+		execute_data = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + execute_data_size + args_size);
 
 		/* copy prev_execute_data */
-		EX(prev_execute_data) = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + args_size);
+		EX(prev_execute_data) = (zend_execute_data*)ZEND_VM_STACK_ELEMETS(EG(argument_stack));
 		memset(EX(prev_execute_data), 0, sizeof(zend_execute_data));
 		EX(prev_execute_data)->function_state.function = (zend_function*)op_array;
-		EX(prev_execute_data)->function_state.arguments = (zval*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) * args_count);
+		EX(prev_execute_data)->function_state.arguments = (zval*)(((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + execute_data_size + args_size - sizeof(zval)));
 
 		/* copy arguments */
 		ZVAL_LONG(EX(prev_execute_data)->function_state.arguments, args_count);

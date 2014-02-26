@@ -319,6 +319,7 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 {
 	zval expr_copy;
 	int use_copy;
+	int ret;
 
 	zend_make_printable_zval(expr, &expr_copy, &use_copy);
 	if (use_copy) {
@@ -331,10 +332,11 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 		return 0;
 	}
 	write_func(Z_STRVAL_P(expr), Z_STRLEN_P(expr));
+	ret = Z_STRLEN_P(expr);
 	if (use_copy) {
 		zval_dtor(expr);
 	}
-	return Z_STRLEN_P(expr);
+	return ret;
 }
 /* }}} */
 
@@ -366,7 +368,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 				zend_printf("%s Object (", "Unknown Class");
 			}
 			if (class_name) {
-				efree((char*)class_name);
+				STR_RELEASE(class_name);
 			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);

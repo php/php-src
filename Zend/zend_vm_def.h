@@ -2881,8 +2881,8 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
@@ -5306,8 +5306,8 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
@@ -5370,7 +5370,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!IS_OP1_TMP_FREE()) {
@@ -5380,7 +5380,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				FREE_OP1_IF_VAR();
 			} else {
 				if (OP1_TYPE == IS_CV) {
-					Z_ADDREF_P(value);
+					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 				}
 				ZVAL_COPY_VALUE(&generator->value, value);
 			}
@@ -5401,7 +5401,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!IS_OP2_TMP_FREE()) {
