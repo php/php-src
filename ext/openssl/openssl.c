@@ -55,7 +55,6 @@
 
 /* Windows platform includes */
 #ifdef PHP_WIN32
-# include <windows.h>
 # include <Wincrypt.h>
 /* These are from Wincrypt.h, they conflict with OpenSSL */
 # undef X509_NAME
