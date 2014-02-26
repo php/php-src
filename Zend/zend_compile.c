@@ -4594,8 +4594,8 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, Ha
 		}
 		return FAILURE;
 	} else {
-		(*new_function->op_array.refcount)++;
-		new_function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		(*function->op_array.refcount)++;
+		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		return SUCCESS;
 	}
 }

@@ -623,7 +623,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				}
 			}
 
-			if (Z_REFCOUNT_P(element) > 1) {
+			if (Z_REFCOUNTED_P(element) && Z_REFCOUNT_P(element) > 1) {
 				ZVAL_DUP(&new_val, element);
 
 				/* preserve this bit for inheritance */

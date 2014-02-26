@@ -764,7 +764,7 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
-				add_index_stringl(return_value, i++, estrndup(s, p-s), p-s, 0);
+				add_index_stringl(return_value, i++, s, p-s, 1);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		} else {
@@ -777,7 +777,7 @@ parse_eol:
 					s = ++p;
 					continue;
 				}
-				add_index_stringl(return_value, i++, estrndup(s, p-s-windows_eol), p-s-windows_eol, 0);
+				add_index_stringl(return_value, i++, s, p-s-windows_eol, 1);
 				s = ++p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		}

@@ -1383,7 +1383,7 @@ static void zend_fetch_property_address(zval *result, zval *container, zval *pro
 {
 	if (Z_TYPE_P(container) != IS_OBJECT) {
 		if (container == &EG(error_zval)) {
-			result = &EG(error_zval);
+			ZVAL_INDIRECT(result, &EG(error_zval));
 			return;
 		}
 
@@ -1398,7 +1398,7 @@ static void zend_fetch_property_address(zval *result, zval *container, zval *pro
 			object_init(container);
 		} else {
 			zend_error(E_WARNING, "Attempt to modify property of non-object");
-			result = &EG(error_zval);
+			ZVAL_INDIRECT(result, &EG(error_zval));
 			return;
 		}
 	}
@@ -1408,7 +1408,8 @@ static void zend_fetch_property_address(zval *result, zval *container, zval *pro
 		if (NULL == ptr) {
 			if (Z_OBJ_HT_P(container)->read_property &&
 				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key TSRMLS_CC)) != NULL) {
-				ZVAL_COPY(result, ptr);
+//???				ZVAL_COPY(result, ptr);
+				ZVAL_INDIRECT(result, ptr);
 			} else {
 				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
 			}
@@ -1418,10 +1419,11 @@ static void zend_fetch_property_address(zval *result, zval *container, zval *pro
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key TSRMLS_CC);
-		ZVAL_COPY(result, ptr);
+//???		ZVAL_COPY(result, ptr);
+		ZVAL_INDIRECT(result, ptr);
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
-		result = &EG(error_zval);
+		ZVAL_INDIRECT(result, &EG(error_zval));
 	}
 }
 
