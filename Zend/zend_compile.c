@@ -2614,6 +2614,11 @@ void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC) /* {{{ */
 	function_ptr = fcall->fbc;
 	fcall->arg_num++;
 
+	if (fcall->uses_argument_unpacking) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use positional argument after argument unpacking");
+	}
+
 	if (original_op == ZEND_SEND_REF) {
 		if (function_ptr &&
 		    function_ptr->common.function_name &&
@@ -2717,6 +2722,7 @@ void zend_do_unpack_params(znode *params TSRMLS_DC) /* {{{ */
 	zend_function_call_entry *fcall;
 
 	zend_stack_top(&CG(function_call_stack), (void **) &fcall);
+	fcall->uses_argument_unpacking = 1;
 
 	if (fcall->fbc) {
 		/* If argument unpacking is used argument numbers and sending modes can no longer be

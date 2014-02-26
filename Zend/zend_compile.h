@@ -366,6 +366,7 @@ typedef struct _zend_function_state {
 typedef struct _zend_function_call_entry {
 	zend_function *fbc;
 	zend_uint arg_num;
+	zend_bool uses_argument_unpacking;
 } zend_function_call_entry;
 
 typedef struct _zend_switch_entry {
