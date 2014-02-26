@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 - Curl
   . Check for openssl.cafile ini directive when loading CA certs. (Daniel Lowrey)
+  . Remove cURL close policy related constants as these have no effect and are
+    no longer used in libcurl. (Chris Wright)
 
 - Fileinfo
   . Upgraded to libmagic-5.17 (Anatol)
