@@ -276,7 +276,9 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 	zend_object_iterator *new_iterator;
 
-	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
+	zend_class_entry *ce_it = (iterator &&
+		Z_TYPE_P(iterator) == IS_OBJECT &&
+		Z_OBJ_HT_P(iterator)->get_class_entry) ? Z_OBJCE_P(iterator) : NULL;
 
 	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		if (!EG(exception)) {

@@ -693,8 +693,6 @@ static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 
 static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-//???
-#if 0
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *args;
@@ -713,14 +711,13 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
 
 			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-			     (arg = zend_hash_get_current_data_ex(ht, &pos) != NULL;
+			     (arg = zend_hash_get_current_data_ex(ht, &pos)) != NULL;
 			     zend_hash_move_forward_ex(ht, &pos), ++arg_num
 			) {
-				char *name;
-				zend_uint name_len;
+				zend_string *name;
 				zend_ulong index;
 
-				if (zend_hash_get_current_key_ex(ht, &name, &name_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key_ex(ht, &name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
 					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
 					FREE_OP(free_op1);
 					CHECK_EXCEPTION();
@@ -731,9 +728,9 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 					Z_ADDREF_P(arg);
 				} else if (Z_ISREF_P(arg)) {
-					ZVAL_DUP(arg, Z_REFVAL_P(arg);
+					ZVAL_DUP(arg, Z_REFVAL_P(arg));
 				} else {
-					Z_ADDREF_P(arg);
+					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 				}
 
 				zend_vm_stack_push(arg TSRMLS_CC);
@@ -755,7 +752,7 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				FREE_OP(free_op1);
 				if (!EG(exception)) {
 					zend_throw_exception_ex(
-						NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name
+						NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val
 					);
 				}
 				HANDLE_EXCEPTION();
@@ -769,13 +766,13 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			}
 
 			for (; iter->funcs->valid(iter TSRMLS_CC) == SUCCESS; ++arg_num) {
-				zval **arg_ptr, *arg;
+				zval *arg;
 
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					goto unpack_iter_dtor;
 				}
 
-				iter->funcs->get_current_data(iter, &arg_ptr TSRMLS_CC);
+				arg = iter->funcs->get_current_data(iter TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					goto unpack_iter_dtor;
 				}
@@ -801,18 +798,18 @@ static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 					zend_error(
 						E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 						" by unpacking a Traversable, passing by-value instead", arg_num,
-						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name : "",
+						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name->val : "",
 						EX(call)->fbc->common.scope ? "::" : "",
-						EX(call)->fbc->common.function_name
+						EX(call)->fbc->common.function_name->val
 					);
 				}
 
-				if (Z_ISREF_PP(arg_ptr)) {
-					ALLOC_ZVAL(arg);
-					MAKE_COPY_ZVAL(arg_ptr, arg);
+				if (Z_ISREF_P(arg)) {
+//???					ALLOC_ZVAL(arg);
+//???					MAKE_COPY_ZVAL(arg_ptr, arg);
+					ZVAL_DUP(arg, Z_REFVAL_P(arg));
 				} else {
-					arg = *arg_ptr;
-					Z_ADDREF_P(arg);
+					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 				}
 
 				ZEND_VM_STACK_GROW_IF_NEEDED(1);
@@ -835,7 +832,6 @@ unpack_iter_dtor:
 
 	FREE_OP(free_op1);
 	CHECK_EXCEPTION();
-#endif
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3618,7 +3614,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -5387,7 +5383,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -6087,7 +6083,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -8723,7 +8719,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -10373,7 +10369,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -11081,7 +11077,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -14371,7 +14367,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -18775,7 +18771,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -20686,7 +20682,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -31134,7 +31130,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -35193,7 +35189,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -36978,7 +36974,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
