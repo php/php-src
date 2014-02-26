@@ -1,19 +1,30 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Alpha 3
+?? ??? 2014, PHP 5.6.0 Beta 1
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+27 Feb 2014, PHP 5.6.0 Alpha 3
+
+- Core
+  . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
+  . Implemented unified default encoding
+    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
+
+- Fileinfo
+  . Upgraded to libmagic-5.17 (Anatol)
 
 - gd:
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
-
-- Fileinfo
-  . Upgraded to libmagic-5.17 (Anatol)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
 
 - Openssl
+  . Fallback to Windows CA cert store for peer verification if no openssl.cafile
+    ini directive or "cafile" SSL context option specified in Windows.
+    (Chris Wright)
   . Fixed segfault when accessing non-existent context for client SNI use
     (Daniel Lowrey)
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
@@ -68,15 +79,10 @@ PHP                                                                        NEWS
     It also made pg_meta_data() return "is enum" always.
     (Yasuo)
 
-- Core
-  . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
-
 13 Feb 2014, PHP 5.6.0 Alpha 2
 - Core:
   . Added T_POW (**) operator
     (RFC: https://wiki.php.net/rfc/pow-operator). (Tjerk Meesters)
-  . Implemented unified default encoding
-    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
 
 - mysqli
   . Added new function mysqli_get_links_stats() as well as new INI variable

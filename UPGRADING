@@ -36,9 +36,10 @@ PHP X.Y UPGRADE NOTES
   file_get_contents(), fsockopen(), stream_socket_client()) may no longer
   connect successfully without manually disabling peer verification via the
   stream context's "verify_peer" setting. Encrypted transfers delegate to
-  operating system certificate stores by default, so many/most users *should*
-  be unaffected by this transparent security enhancement.
-  (https://wiki.php.net/rfc/tls-peer-verification)
+  operating system certificate stores by default if not overridden via the
+  new openssl.cafile/openssl.cafile ini directives or call-time SSL context
+  options, so many/most users *should* be unaffected by this transparent
+  security enhancement. (https://wiki.php.net/rfc/tls-peer-verification)
 
 ========================================
 2. New Features
@@ -68,6 +69,9 @@ PHP X.Y UPGRADE NOTES
 
 - Added gost-crypto (CryptoPro S-box) hash algo.
 
+- Stream wrappers verify peers and host names by default in encrypted client
+  streams.
+
 - Added openssl certificate fingerprint support (inclusive stream context
   option).
 
@@ -77,26 +81,26 @@ PHP X.Y UPGRADE NOTES
 - Added a range of new SSL context options for improved encrypted stream
   server security (https://wiki.php.net/rfc/improved-tls-defaults):
 
-    + "honor_cipher_order" allows servers to prioritize cipher suites of their
+    . "honor_cipher_order" allows servers to prioritize cipher suites of their
       choosing when negotiating SSL/TLS handshakes.
-    + "single_ecdh_use" and "single_dh_use" allow for improved forward
+    . "single_ecdh_use" and "single_dh_use" allow for improved forward
       secrecy in encrypted stream servers.
-    + "dh_param" allows specification of pre-generated key generation
+    . "dh_param" allows specification of pre-generated key generation
        parameters when negotiating ephemeral DHE ciphers in stream servers.
-    + "ecdh_curve" allows stream servers to specify which curve to use when
+    . "ecdh_curve" allows stream servers to specify which curve to use when
        negotiating ephemeral ECDHE ciphers (defaults to NIST P-256).
-    + "rsa_key_size" SSL context option gives stream servers control
+    . "rsa_key_size" SSL context option gives stream servers control
       over the key size (in bits) used when negotiating RSA ciphers.
-    + "capture_session_meta" if specified stores an array of data describing
+    . "capture_session_meta" if specified stores an array of data describing
       the TLS session's protocol/cipher in the "session_meta" SSL context key.
 
 - Added automatic mitigation against client-initated TLS renegotiation DoS
   attacks in encrypted server streams. Renegotiation limiting may be
   customized via three new SSL context options:
 
-    + "reneg_limit" (number of allowed renegotiations per time window)
-    + "reneg_window" (renegotiation time window in seconds)
-    + "reneg_limit_callback" (optional notification callback on limiting)
+    . "reneg_limit" (number of allowed renegotiations per time window)
+    . "reneg_window" (renegotiation time window in seconds)
+    . "reneg_limit_callback" (optional notification callback on limiting)
 
 - Added "crypto_method" SSL context option for use in encrypted streams.
 

@@ -800,6 +800,7 @@ static int php_enable_server_crypto_opts(php_stream *stream,
 	return 1;
 }
 
+#if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
 static inline void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval **val;
@@ -819,6 +820,7 @@ static inline void enable_client_sni(php_stream *stream, php_openssl_netstream_d
 	}
 }
 /* }}} */
+#endif
 
 static inline int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
