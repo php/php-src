@@ -278,7 +278,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 
 	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name : Z_OBJCE_P(object)->name);
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name->val : Z_OBJCE_P(object)->name->val);
 		}
 		if (iterator) {
 			zval_ptr_dtor(iterator);
@@ -429,7 +429,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 	}
 
 	if (result == FAILURE && !EG(exception)) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name->val);
 	}
 	return result;
 }
@@ -459,7 +459,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name->val);
 	return FAILURE;
 }
 /* }}} */
