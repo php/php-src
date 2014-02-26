@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 
 - Core
   . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
+  . Implemented unified default encoding
+    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
 
 - Fileinfo
   . Upgraded to libmagic-5.17 (Anatol)
@@ -81,8 +83,6 @@ PHP                                                                        NEWS
 - Core:
   . Added T_POW (**) operator
     (RFC: https://wiki.php.net/rfc/pow-operator). (Tjerk Meesters)
-  . Implemented unified default encoding
-    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
 
 - mysqli
   . Added new function mysqli_get_links_stats() as well as new INI variable
