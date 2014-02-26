@@ -72,11 +72,12 @@ class ServerClientTestCase
     public function runWorker()
     {
         $code = '';
+	$i = 0;
 
-        while (1) {
-            $line = fgets(STDIN);
+	while(($line = fgets(STDIN)) != false) {
+	    echo $line;
 
-            if (trim($line) === "---") {
+            if ($i++ > 128) {
                 break;
             }
 
