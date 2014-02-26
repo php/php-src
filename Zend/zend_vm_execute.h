@@ -889,7 +889,7 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	SAVE_OPLINE();
 
 	params = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	Z_DELREF_P(params);
+	if (Z_REFCOUNTED_P(params)) Z_DELREF_P(params);
 
 	if (arg_num <= arg_count) {
 		array_init_size(params, arg_count - arg_num + 1);
@@ -900,6 +900,10 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	for (; arg_num <= arg_count; ++arg_num) {
 		zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
+//??? "params" may became IS_INDIRECT because of symtable initialization in zend_error
+		if (Z_TYPE_P(params) == IS_INDIRECT) {
+			params = Z_INDIRECT_P(params);
+		}
 		zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
 		if (Z_REFCOUNTED_P(param)) {
 			Z_ADDREF_P(param);
