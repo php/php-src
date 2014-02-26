@@ -27,7 +27,7 @@ $clientCode = <<<'CODE'
 
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => false,
-        'verify_host' => false
+        'verify_peer_name' => false
     ]]);
 
     phpt_wait();

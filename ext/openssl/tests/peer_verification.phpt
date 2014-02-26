@@ -40,14 +40,14 @@ $clientCode = <<<'CODE'
     // Should succeed with peer verification disabled in context
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => false,
-        'verify_host' => false,
+        'verify_peer_name' => false,
     ]]);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
     // Should succeed with CA file specified in context
     $clientCtx = stream_context_create(['ssl' => [
         'cafile'   => $caFile,
-        'CN_match' => 'bug54992.local',
+        'peer_name' => 'bug54992.local',
     ]]);
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 CODE;

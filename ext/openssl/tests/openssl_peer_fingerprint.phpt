@@ -27,7 +27,7 @@ $clientCode = <<<'CODE'
         'verify_peer'       => true,
         'cafile'            => __DIR__ . '/bug54992-ca.pem',
         'capture_peer_cert'    => true,
-        'CN_match'          => 'bug54992.local',
+        'peer_name'          => 'bug54992.local',
     ]]);
 
     phpt_wait();

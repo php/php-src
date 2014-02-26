@@ -25,7 +25,7 @@ $clientCode = <<<'CODE'
     $clientCtx = stream_context_create(['ssl' => [
         'verify_peer' => true,
         'cafile' => __DIR__ . '/bug54992-ca.pem',
-        'CN_match' => 'buga_buga',
+        'peer_name' => 'buga_buga',
     ]]);
 
     phpt_wait();
