@@ -724,7 +724,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	}
 
 	ZVAL_UNDEF(&var_already);
-	if (var_hash && php_add_var_hash(var_hash, struc, &var_already TSRMLS_CC) == FAILURE) {
+
+	if (var_hash && 
+		php_add_var_hash(var_hash, Z_ISREF_P(struc)? Z_REFVAL_P(struc) : struc, &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, Z_LVAL(var_already));
@@ -738,6 +740,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 		}
 	}
 
+again:
 	switch (Z_TYPE_P(struc)) {
 		case IS_BOOL:
 			smart_str_appendl(buf, "b:", 2);
@@ -899,6 +902,9 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			smart_str_appendc(buf, '}');
 			return;
 		}
+		case IS_REFERENCE:
+			struc = Z_REFVAL_P(struc);
+			goto again;
 		default:
 			smart_str_appendl(buf, "i:0;", 4);
 			return;

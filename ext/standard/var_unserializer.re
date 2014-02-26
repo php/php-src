@@ -308,6 +308,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 			return 0;
 		}
 
+		ZVAL_UNDEF(&data);
 		if (!php_var_unserialize(&data, p, max, var_hash TSRMLS_CC)) {
 			zval_dtor(&key);
 			return 0;
@@ -460,7 +461,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	if (rval != NULL) {
+	if (!ZVAL_IS_UNDEF(rval)) {
 		zval_ptr_dtor(rval);
 	}
 	ZVAL_COPY(rval, rval_ref);
@@ -483,7 +484,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 //???
 	if (rval == rval_ref) return 0;
 
-	if (rval != NULL) {
+	if (!ZVAL_IS_UNDEF(rval)) {
 		var_push_dtor_no_addref(var_hash, rval);
 	}
 	ZVAL_COPY(rval, rval_ref);
