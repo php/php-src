@@ -75,8 +75,6 @@ class ServerClientTestCase
 	$i = 0;
 
 	while(($line = fgets(STDIN)) != false) {
-	    echo $line;
-
             if ($i++ > 128) {
                 break;
             }
