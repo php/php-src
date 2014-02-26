@@ -1115,6 +1115,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	/* clean up */
 	zval_ptr_dtor(&object);
 	zval_ptr_dtor(&zretval);
+	zval_ptr_dtor(&zfuncname);
 
 	zval_ptr_dtor(&args[1]);
 	zval_ptr_dtor(&args[0]);
