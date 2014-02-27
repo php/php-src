@@ -14896,7 +14896,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCOD
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -17170,7 +17170,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -19343,7 +19343,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -22706,7 +22706,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_H
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -24396,7 +24396,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CONST_HANDLER(ZEND_OP
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -25754,7 +25754,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCO
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -27028,7 +27028,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCO
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -28704,7 +28704,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV_HANDLER(ZEND_OPCOD
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -31791,7 +31791,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -33847,7 +33847,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_H
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -35895,7 +35895,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_H
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -39002,7 +39002,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 //???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
 //???	}
 //???	PZVAL_LOCK(EX_VAR(opline->result.var));
-	FREE_OP_VAR_PTR(free_res);
+//???	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
