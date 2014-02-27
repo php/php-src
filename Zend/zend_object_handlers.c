@@ -774,7 +774,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	}
 
 	if (!zobj->ce->__get ||
-		(guard = zend_get_property_guard(zobj, property_info, member)) ||
+		(guard = zend_get_property_guard(zobj, property_info, member)) == NULL ||
 		(property_info && ((*guard) & IN_GET))) {
 
 		/* we don't have access controls - will just add it */
