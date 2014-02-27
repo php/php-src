@@ -1615,7 +1615,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	} else {
 		FREE_OP2();
 	}
-	FREE_OP1_VAR_PTR();
+//???	FREE_OP1_VAR_PTR();
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
 	ZEND_VM_INC_OPCODE();
