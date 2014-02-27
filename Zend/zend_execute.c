@@ -746,6 +746,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object, zval *prope
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
+ 	zval tmp;
 
 	if (Z_TYPE_P(object) != IS_OBJECT) {
 		if (object == &EG(error_zval)) {
@@ -788,24 +789,20 @@ static inline void zend_assign_to_object(zval *retval, zval *object, zval *prope
 	}
 
 	/* separate our value if necessary */
-//???	if (value_type == IS_TMP_VAR) {
-//???		ALLOC_ZVAL(value);
-//???		ZVAL_COPY_VALUE(value, orig_value);
-//???		Z_UNSET_ISREF_P(value);
-//???		Z_SET_REFCOUNT_P(value, 0);
-//???	} else if (value_type == IS_CONST) {
-//???		zval *orig_value = value;
-//???
-//???		ALLOC_ZVAL(value);
-//???		ZVAL_COPY_VALUE(value, orig_value);
-//???		Z_UNSET_ISREF_P(value);
-//???		Z_SET_REFCOUNT_P(value, 0);
-//???		zval_copy_ctor(value);
-//???	}
-
-	if (Z_REFCOUNTED_P(value)) {
+	if (value_type == IS_TMP_VAR) {
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
+			value = &tmp;
+        }
+	} else if (value_type == IS_CONST) {
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			value = Z_REFVAL_P(value);
+		}
+		ZVAL_DUP(&tmp, value);
+	} else if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
+
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		if (!Z_OBJ_HT_P(object)->write_property) {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
