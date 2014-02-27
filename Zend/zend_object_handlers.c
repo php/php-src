@@ -424,7 +424,6 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	zend_object *zobj;
 	zval tmp_member;
 	zval *retval;
-//???	zval rv;
 	zend_property_info *property_info;
 	int silent;
 
@@ -518,9 +517,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	}
 exit:
 	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
-		Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		zval_ptr_dtor(&tmp_member);
-		Z_DELREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_DELREF_P(retval);
 	}
 	return retval;
 }
