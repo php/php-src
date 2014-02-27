@@ -3463,6 +3463,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 
 	efree(pe->putenv_string);
 	efree(pe->key);
+	efree(pe);
 }
 /* }}} */
 #endif
