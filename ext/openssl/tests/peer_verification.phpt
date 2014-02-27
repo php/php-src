@@ -2,55 +2,60 @@
 Peer verification enabled for client streams
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip");
-if (!function_exists('pcntl_fork')) die("skip no fork");
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 --FILE--
 <?php
-$flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-$ctx = stream_context_create(['ssl' => [
-	'local_cert' => __DIR__ . '/bug54992.pem',
-	'allow_self_signed' => true
-]]);
-$server = stream_socket_server('ssl://127.0.0.1:64321', $errno, $errstr, $flags, $ctx);
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/bug54992.pem'
+    ]]);
 
-$pid = pcntl_fork();
-if ($pid == -1) {
-	die('could not fork');
-} else if ($pid) {
-	// Expected to fail -- no CA File present
-	var_dump(@stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT));
-	
-	// Expected to fail -- no CA File present
-	$ctx = stream_context_create(['ssl' => ['verify_peer' => true]]);
-	var_dump(@stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
-	
-	// Should succeed with peer verification disabled in context
-	$ctx = stream_context_create(['ssl' => ['verify_peer' => false]]);
-	var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-	// Should succeed with CA file specified in context
-	$ctx = stream_context_create(['ssl' => [
-		'cafile' => __DIR__ . '/bug54992-ca.pem',
-		'CN_match' => 'bug54992.local',
-	]]);
-	var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+    for ($i = 0; $i < 5; $i++) {
+        @stream_socket_accept($server, 1);
+    }
+CODE;
 
-	// Should succeed with globally available CA file specified via php.ini
-	$cafile = __DIR__ . '/bug54992-ca.pem';
-	ini_set('openssl.cafile', $cafile);
-	var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $ctx));
+$clientCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $clientFlags = STREAM_CLIENT_CONNECT;
+    $caFile = __DIR__ . '/bug54992-ca.pem';
 
-} else {	
-	@pcntl_wait($status);
-	@stream_socket_accept($server, 3);
-	@stream_socket_accept($server, 3);
-	@stream_socket_accept($server, 3);
-	@stream_socket_accept($server, 3);
-	@stream_socket_accept($server, 3);
-}
+    phpt_wait();
+
+    // Expected to fail -- untrusted server cert and no CA File present
+    var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags));
+
+    // Expected to fail -- untrusted server cert and no CA File present
+    $clientCtx = stream_context_create(['ssl' => [
+        'verify_peer' => true,
+    ]]);
+    var_dump(@stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+
+    // Should succeed with peer verification disabled in context
+    $clientCtx = stream_context_create(['ssl' => [
+        'verify_peer' => false,
+        'verify_peer_name' => false,
+    ]]);
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+
+    // Should succeed with CA file specified in context
+    $clientCtx = stream_context_create(['ssl' => [
+        'cafile'   => $caFile,
+        'peer_name' => 'bug54992.local',
+    ]]);
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+CODE;
+
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 bool(false)
 bool(false)
-resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)

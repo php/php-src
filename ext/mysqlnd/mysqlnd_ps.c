@@ -104,6 +104,26 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
 
 	if (PASS == ret) {
+		/* Overflow ? */
+		MYSQLND_RES_BUFFERED * set = result->stored_data;
+		if (set->row_count) {
+			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+			if (set->row_count * result->meta->field_count * sizeof(zval *) > SIZE_MAX) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+			set->data = mnd_emalloc((size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+			if (!set->data) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			memset(set->data, 0, (size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+		}
+		/* Position at the first row */
+		set->data_cursor = set->data;
+
+
 		/* libmysql API docs say it should be so for SELECT statements */
 		stmt->upsert_status->affected_rows = stmt->result->stored_data->row_count;
 
