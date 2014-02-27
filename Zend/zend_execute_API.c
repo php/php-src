@@ -477,7 +477,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 	} else if ((Z_TYPE_P(p) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		int refcount;
-		zend_uchar is_ref;
+//???		zend_uchar is_ref;
 
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 

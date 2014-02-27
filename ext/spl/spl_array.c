@@ -371,7 +371,7 @@ fetch_dim_string:
 	}
 } /* }}} */
 
-static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval *offset, int type, zval *zv TSRMLS_DC) /* {{{ */
 {
 	zval *ret;
 
@@ -411,9 +411,9 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 	*/
 } /* }}} */
 
-static zval *spl_array_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) /* {{{ */
 {
-	return spl_array_read_dimension_ex(1, object, offset, type TSRMLS_CC);
+	return spl_array_read_dimension_ex(1, object, offset, type, rv TSRMLS_CC);
 } /* }}} */
 
 static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval *offset, zval *value TSRMLS_DC) /* {{{ */
@@ -690,8 +690,10 @@ SPL_METHOD(Array, offsetGet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &index) == FAILURE) {
 		return;
 	}
-	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R TSRMLS_CC);
-	RETURN_ZVAL(value, 1, 0);
+	value = spl_array_read_dimension_ex(0, getThis(), index, BP_VAR_R, return_value TSRMLS_CC);
+	if (value != return_value) {
+		RETURN_ZVAL(value, 1, 0);
+	}
 } /* }}} */
 
 /* {{{ proto void ArrayObject::offsetSet(mixed $index, mixed $newval)
@@ -826,7 +828,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, const
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
 		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
-		return spl_array_read_dimension(object, member, type TSRMLS_CC);
+		return spl_array_read_dimension(object, member, type, rv TSRMLS_CC);
 	}
 	return std_object_handlers.read_property(object, member, type, key, rv TSRMLS_CC);
 } /* }}} */

@@ -350,7 +350,7 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
-static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 

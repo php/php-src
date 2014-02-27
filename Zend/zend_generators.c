@@ -671,7 +671,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	iterator = &generator->iterator;
 	
-	zend_iterator_init(&iterator TSRMLS_CC);
+	zend_iterator_init(iterator TSRMLS_CC);
 
 	iterator->funcs = &zend_generator_iterator_functions;
 	ZVAL_COPY(&iterator->data, object);

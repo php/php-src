@@ -1781,7 +1781,7 @@ ZEND_FUNCTION(create_function)
 		}
 		new_function = emalloc(sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));
-		function_add_ref(new_function);
+		function_add_ref((zend_function*)new_function);
 
 		function_name = STR_ALLOC(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
 		function_name->val[0] = '\0';

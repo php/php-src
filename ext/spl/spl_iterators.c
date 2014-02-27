@@ -2572,7 +2572,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 				}
 			} else {
 				if (zend_is_true(&retval TSRMLS_CC)) {
-					zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
+					zend_call_method_with_0_params(intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
 					if (EG(exception)) {
 						zval_ptr_dtor(&zchildren);
 						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
