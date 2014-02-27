@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Added clear_env configuration directive to disable clearenv() call.
   (Github PR# 598, Paul Annesley)
 
+- GD
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
