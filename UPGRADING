@@ -126,6 +126,8 @@ PHP X.Y UPGRADE NOTES
 
 - Added phpdbg sapi.
   (https://wiki.php.net/rfc/phpdbg)
+- Support for fpm workers changing the apparmor profile through the pool config.
+  (https://wiki.php.net/rfc/fpm_change_hat)
 
 ========================================
 3. Deprecated Functionality
