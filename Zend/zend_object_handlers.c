@@ -86,7 +86,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    prop_info->offset >= 0 &&
 				    Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
 					zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-					if (EXPECTED(zv)) {
+					if (EXPECTED(zv != NULL)) {
 						ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
 					}
 				}
@@ -419,12 +419,12 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 }
 /* }}} */
 
-zval *zend_std_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+zval *zend_std_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
 	zval *retval;
-	zval rv;
+//???	zval rv;
 	zend_property_info *property_info;
 	int silent;
 
@@ -471,13 +471,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 				SEPARATE_ZVAL(object);
 			}
 			*guard |= IN_GET; /* prevent circular getting */
-			zend_std_call_getter(object, member, &rv TSRMLS_CC);
+			zend_std_call_getter(object, member, rv TSRMLS_CC);
 			*guard &= ~IN_GET;
 
+			if (Z_TYPE_P(rv) != IS_UNDEF) {
+				retval = rv;
 //???
 #if 0
-			if (rv) {
-				retval = rv;
 				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
 					if (Z_REFCOUNT_P(rv) > 0) {
@@ -492,15 +492,15 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name->val, Z_STRVAL_P(member));
 					}
 				}
+#endif
 			} else {
-				retval = &EG(uninitialized_zval_ptr);
+				retval = &EG(uninitialized_zval);
 			}
-			if (EXPECTED(*retval != object)) {
-				zval_ptr_dtor(&object);
+			if (EXPECTED(retval != object)) {
+				zval_ptr_dtor(object);
 			} else {
 				Z_DELREF_P(object);
 			}
-#endif
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
@@ -648,10 +648,10 @@ found:
 }
 /* }}} */
 
-zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval retval, tmp;
+	zval tmp;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC) != 0)) {
 		if(offset == NULL) {
@@ -661,11 +661,11 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /*
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
 		}
-		zend_call_method_with_1_params(object, ce, NULL, "offsetget", &retval, offset);
+		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
 
 		zval_ptr_dtor(offset);
 
-		if (UNEXPECTED(Z_TYPE(retval) == IS_UNDEF)) {
+		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 			if (UNEXPECTED(!EG(exception))) {
 				zend_error_noreturn(E_ERROR, "Undefined offset for object of type %s used as array", ce->name->val);
 			}
@@ -673,11 +673,9 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /*
 		}
 
 		/* Undo PZVAL_LOCK() */
-		if (Z_REFCOUNTED(retval)) Z_DELREF(retval);
+		if (Z_REFCOUNTED_P(rv)) Z_DELREF_P(rv);
 
-		// TODO: FIXME???
-		//???return &retval;
-		return NULL;
+		return rv;
 	} else {
 		zend_error_noreturn(E_ERROR, "Cannot use object of type %s as array", ce->name->val);
 		return NULL;

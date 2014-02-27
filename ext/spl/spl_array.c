@@ -820,7 +820,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 }
 /* }}} */
 
-static zval *spl_array_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)Z_OBJ_P(object);
 
@@ -828,7 +828,7 @@ static zval *spl_array_read_property(zval *object, zval *member, int type, const
 		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
 		return spl_array_read_dimension(object, member, type TSRMLS_CC);
 	}
-	return std_object_handlers.read_property(object, member, type, key TSRMLS_CC);
+	return std_object_handlers.read_property(object, member, type, key, rv TSRMLS_CC);
 } /* }}} */
 
 static void spl_array_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */

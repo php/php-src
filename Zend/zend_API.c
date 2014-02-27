@@ -3858,6 +3858,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 {
 	zval property, *value;
 	zend_class_entry *old_scope = EG(scope);
+	zval rv;
 
 	EG(scope) = scope;
 
@@ -3867,7 +3868,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, 0 TSRMLS_CC);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, 0, &rv TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;

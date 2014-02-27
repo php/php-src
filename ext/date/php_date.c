@@ -633,9 +633,9 @@ static HashTable *date_object_get_properties_period(zval *object TSRMLS_DC);
 static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC);
 static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n TSRMLS_DC);
 
-zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
+zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
-static zval *date_period_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
+static zval *date_period_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC);
 static void date_period_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
 
 /* {{{ Module struct */
@@ -3959,7 +3959,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 }
 
 /* {{{ date_interval_read_property */
-zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
+zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC)
 {
 	php_interval_obj *obj;
 	zval *retval;
@@ -3977,7 +3977,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 	obj = (php_interval_obj *)Z_OBJ_P(object);
 
 	if (!obj->initialized) {
-		retval = (zend_get_std_object_handlers())->read_property(object, member, type, key TSRMLS_CC);
+		retval = (zend_get_std_object_handlers())->read_property(object, member, type, key, rv TSRMLS_CC);
 		if (member == &tmp_member) {
 			zval_dtor(member);
 		}
@@ -3999,7 +3999,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 		GET_VALUE_FROM_STRUCT(invert, "invert");
 		GET_VALUE_FROM_STRUCT(days, "days");
 		/* didn't find any */
-		retval = (zend_get_std_object_handlers())->read_property(object, member, type, key TSRMLS_CC);
+		retval = (zend_get_std_object_handlers())->read_property(object, member, type, key, rv TSRMLS_CC);
 
 		if (member == &tmp_member) {
 			zval_dtor(member);
@@ -4009,7 +4009,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 	} while(0);
 
 //???	ALLOC_INIT_ZVAL(retval);
-	Z_SET_REFCOUNT_P(retval, 0);
+//???	Z_SET_REFCOUNT_P(retval, 0);
 
 	if (value != -99999) {
 		ZVAL_LONG(retval, value);
@@ -4949,7 +4949,7 @@ PHP_METHOD(DatePeriod, __wakeup)
 /* }}} */
 
 /* {{{ date_period_read_property */
-static zval *date_period_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
+static zval *date_period_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC)
 {
 	zval *zv;
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
@@ -4958,7 +4958,7 @@ static zval *date_period_read_property(zval *object, zval *member, int type, con
 
 	Z_OBJPROP_P(object); /* build properties hash table */
 
-	zv = std_object_handlers.read_property(object, member, type, key TSRMLS_CC);
+	zv = std_object_handlers.read_property(object, member, type, key, rv TSRMLS_CC);
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJ_HANDLER_P(zv, clone_obj)) {
 		/* defensive copy */
 //???		MAKE_STD_ZVAL(zv);
