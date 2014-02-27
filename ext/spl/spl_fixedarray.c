@@ -65,7 +65,6 @@ typedef struct _spl_fixedarray_object { /* {{{ */
 
 typedef struct _spl_fixedarray_it { /* {{{ */
 	zend_user_iterator     intern;
-	spl_fixedarray_object  *object;
 } spl_fixedarray_it;
 /* }}} */
 
@@ -354,7 +353,6 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_object *intern;
-	zval *retval;
 
 	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
 
@@ -862,7 +860,7 @@ static void spl_fixedarray_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ 
 	spl_fixedarray_it  *iterator = (spl_fixedarray_it *)iter;
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
-	zval_ptr_dtor(iterator->intern.it.data);
+	zval_ptr_dtor(&iterator->intern.it.data);
 
 	efree(iterator);
 }
@@ -870,27 +868,25 @@ static void spl_fixedarray_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ 
 
 static void spl_fixedarray_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
-	spl_fixedarray_object *intern   = iterator->object;
+	spl_fixedarray_object *object = (spl_fixedarray_object*)Z_OBJ(iter->data);
 
-	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_REWIND) {
+	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_REWIND) {
 		zend_user_it_rewind(iter TSRMLS_CC);
 	} else {
-		iterator->object->current = 0;
+		object->current = 0;
 	}
 }
 /* }}} */
 
 static int spl_fixedarray_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
-	spl_fixedarray_object *intern   = iterator->object;
+	spl_fixedarray_object *object = (spl_fixedarray_object*)Z_OBJ(iter->data);
 
-	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_VALID) {
+	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_VALID) {
 		return zend_user_it_valid(iter TSRMLS_CC);
 	}
 
-	if (iterator->object->current >= 0 && iterator->object->array && iterator->object->current < iterator->object->array->size) {
+	if (object->current >= 0 && object->array && object->current < object->array->size) {
 		return SUCCESS;
 	}
 
@@ -901,17 +897,16 @@ static int spl_fixedarray_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ 
 static zval *spl_fixedarray_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	zval zindex;
-	spl_fixedarray_it *iterator = (spl_fixedarray_it *)iter;
-	spl_fixedarray_object *intern   = iterator->object;
+	spl_fixedarray_object *object = (spl_fixedarray_object*)Z_OBJ(iter->data);
 
-	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_CURRENT) {
+	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_CURRENT) {
 		return zend_user_it_get_current_data(iter TSRMLS_CC);
 	} else {
 		zval *data;
 
-		ZVAL_LONG(&zindex, iterator->object->current);
+		ZVAL_LONG(&zindex, object->current);
 
-		data = spl_fixedarray_object_read_dimension_helper(intern, &zindex TSRMLS_CC);
+		data = spl_fixedarray_object_read_dimension_helper(object, &zindex TSRMLS_CC);
 		zval_ptr_dtor(&zindex);
 
 		if (data == NULL) {
@@ -924,27 +919,25 @@ static zval *spl_fixedarray_it_get_current_data(zend_object_iterator *iter TSRML
 
 static void spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
-	spl_fixedarray_it  *iterator = (spl_fixedarray_it *)iter;
-	spl_fixedarray_object *intern   = iterator->object;
+	spl_fixedarray_object *object = (spl_fixedarray_object*)Z_OBJ(iter->data);
 
-	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
+	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
 		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
-		ZVAL_LONG(key, iterator->object->current);
+		ZVAL_LONG(key, object->current);
 	}
 }
 /* }}} */
 
 static void spl_fixedarray_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
-	spl_fixedarray_object *intern   = iterator->object;
+	spl_fixedarray_object *object = (spl_fixedarray_object*)Z_OBJ(iter->data);
 
-	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_NEXT) {
+	if (object->flags & SPL_FIXEDARRAY_OVERLOADED_NEXT) {
 		zend_user_it_move_forward(iter TSRMLS_CC);
 	} else {
 		zend_user_it_invalidate_current(iter TSRMLS_CC);
-		iterator->object->current++;
+		object->current++;
 	}
 }
 /* }}} */
@@ -1042,7 +1035,6 @@ zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_it      *iterator;
-	spl_fixedarray_object  *fixedarray_object = (spl_fixedarray_object*)Z_OBJ_P(object);
 
 	if (by_ref) {
 		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0 TSRMLS_CC);
@@ -1055,13 +1047,12 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 	
-	iterator->intern.it.data = object;
+	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_fixedarray_it_funcs;
 	iterator->intern.ce = ce;
-	iterator->intern.value = NULL;
-	iterator->object = fixedarray_object;
+	ZVAL_UNDEF(&iterator->intern.value);
 
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern.it;
 }
 /* }}} */
 

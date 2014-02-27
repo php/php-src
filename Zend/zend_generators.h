@@ -25,18 +25,10 @@ BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
 
-typedef struct _zend_generator_iterator {
-	zend_object_iterator intern;
-
-	/* The generator object zval has to be stored, because the iterator is
-	 * holding a ref to it, which has to be dtored. */
-	zval *object;
-} zend_generator_iterator;
-
 typedef struct _zend_generator {
 	zend_object std;
 
-	zend_generator_iterator iterator;
+	zend_object_iterator iterator;
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;

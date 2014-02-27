@@ -960,7 +960,6 @@ static int spl_array_next(spl_array_object *intern TSRMLS_DC) /* {{{ */
 /* define an overloaded iterator structure */
 typedef struct {
 	zend_user_iterator    intern;
-	spl_array_object      *object;
 } spl_array_it;
 
 static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
@@ -968,7 +967,7 @@ static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_array_it *iterator = (spl_array_it *)iter;
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
-	zval_ptr_dtor((zval*)iterator->intern.it.data);
+	zval_ptr_dtor(&iterator->intern.it.data);
 
 	efree(iterator);
 }
@@ -976,9 +975,8 @@ static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 
 static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator = (spl_array_it *)iter;
-	spl_array_object   *object   = iterator->object;
-	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
+	spl_array_object *object = (spl_array_object*)Z_OBJ(iter->data);
+	HashTable *aht = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_VALID) {
 		return zend_user_it_valid(iter TSRMLS_CC);
@@ -994,8 +992,7 @@ static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 
 static zval *spl_array_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator = (spl_array_it *)iter;
-	spl_array_object   *object   = iterator->object;
+	spl_array_object   *object   = (spl_array_object*)Z_OBJ(iter->data);
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
@@ -1008,9 +1005,8 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter TSRMLS_DC)
 
 static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator = (spl_array_it *)iter;
-	spl_array_object   *object   = iterator->object;
-	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
+	spl_array_object *object = (spl_array_object*)Z_OBJ(iter->data);
+	HashTable *aht = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY) {
 		zend_user_it_get_current_key(iter, key TSRMLS_CC);
@@ -1026,9 +1022,8 @@ static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key T
 
 static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator = (spl_array_it *)iter;
-	spl_array_object   *object   = iterator->object;
-	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
+	spl_array_object *object = (spl_array_object*)Z_OBJ(iter->data);
+	HashTable *aht = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_NEXT) {
 		zend_user_it_move_forward(iter TSRMLS_CC);
@@ -1072,8 +1067,7 @@ static void spl_array_rewind(spl_array_object *intern TSRMLS_DC) /* {{{ */
 
 static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator = (spl_array_it *)iter;
-	spl_array_object   *object   = iterator->object;
+	spl_array_object *object = (spl_array_object*)Z_OBJ(iter->data);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_REWIND) {
 		zend_user_it_rewind(iter TSRMLS_CC);
@@ -1139,23 +1133,21 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	spl_array_it       *iterator;
-	spl_array_object   *array_object = (spl_array_object*)Z_OBJ_P(object);
+	spl_array_it *iterator;
+	spl_array_object *array_object = (spl_array_object*)Z_OBJ_P(object);
 
 	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
-	iterator     = emalloc(sizeof(spl_array_it));
+	iterator = emalloc(sizeof(spl_array_it));
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 
-	Z_ADDREF_P(object);
-	iterator->intern.it.data = (void*)object;
+	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_array_it_funcs;
 	iterator->intern.ce = ce;
-	iterator->intern.value = NULL;
-	iterator->object = array_object;
+	ZVAL_UNDEF(&iterator->intern.value);
 
 	return (zend_object_iterator*)iterator;
 }

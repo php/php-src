@@ -131,9 +131,9 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 
-	if (iter->value) {
-		zval_ptr_dtor(iter->value);
-		iter->value = NULL;
+	if (!ZVAL_IS_UNDEF(&iter->value)) {
+		zval_ptr_dtor(&iter->value);
+		ZVAL_UNDEF(&iter->value);
 	}
 }
 /* }}} */
@@ -142,7 +142,7 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS
 static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zval_ptr_dtor(object);
@@ -155,7 +155,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
-		zval *object = (zval*)iter->it.data;
+		zval *object = &iter->it.data;
 		zval more;
 		int result;
 
@@ -174,12 +174,13 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
-	if (!iter->value) {
-		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_current, "current", iter->value);
+	if (!ZVAL_IS_UNDEF(&iter->value)) {
+		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_current, "current", &iter->value);
 	}
-	return iter->value;
+
+	return &iter->value;
 }
 /* }}} */
 
@@ -197,7 +198,7 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 	zval retval;
 
 	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
@@ -212,12 +213,13 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 		ZVAL_LONG(key, 0);
 	}
 }
+/* }}} */
 
 /* {{{ zend_user_it_move_forward */
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_next, "next", NULL);
@@ -228,7 +230,7 @@ ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_rewind, "rewind", NULL);
@@ -258,11 +260,10 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 
-	Z_ADDREF_P(object);
-	iterator->it.data = (void*)object;
+	ZVAL_COPY(&iterator->it.data, object);
 	iterator->it.funcs = ce->iterator_funcs.funcs;
 	iterator->ce = Z_OBJCE_P(object);
-	iterator->value = NULL;
+	ZVAL_UNDEF(&iterator->value);
 	return (zend_object_iterator*)iterator;
 }
 /* }}} */

@@ -122,7 +122,6 @@ typedef struct _spl_recursive_it_object {
 
 typedef struct _spl_recursive_it_iterator {
 	zend_object_iterator   intern;
-	zval                   zobject;
 } spl_recursive_it_iterator;
 
 static zend_object_handlers spl_handlers_rec_it_it;
@@ -142,7 +141,7 @@ static zend_object_handlers spl_handlers_dual_it;
 static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 {
 	spl_recursive_it_iterator *iter   = (spl_recursive_it_iterator*)_iter;
-	spl_recursive_it_object   *object = (spl_recursive_it_object*)_iter->data;
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)Z_OBJ(iter->intern.data);
 	zend_object_iterator      *sub_iter;
 
 	while (object->level > 0) {
@@ -153,7 +152,7 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator));
 	object->level = 0;
 
-	zval_ptr_dtor(&iter->zobject);
+	zval_ptr_dtor(&iter->intern.data);
 	efree(iter);
 }
 
@@ -178,23 +177,21 @@ static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthi
 
 static int spl_recursive_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
-	
-	return spl_recursive_it_valid_ex(object, &((spl_recursive_it_iterator*)iter)->zobject TSRMLS_CC);
+	return spl_recursive_it_valid_ex((spl_recursive_it_object*)Z_OBJ(iter->data), &iter->data TSRMLS_CC);
 }
 
 static zval *spl_recursive_it_get_current_data(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
-	zend_object_iterator      *sub_iter = object->iterators[object->level].iterator;
+	spl_recursive_it_object *object = (spl_recursive_it_object*)Z_OBJ(iter->data);
+	zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
 	
 	return sub_iter->funcs->get_current_data(sub_iter TSRMLS_CC);
 }
 
 static void spl_recursive_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
-	spl_recursive_it_object   *object = (spl_recursive_it_object*)iter->data;
-	zend_object_iterator      *sub_iter = object->iterators[object->level].iterator;
+	spl_recursive_it_object *object = (spl_recursive_it_object*)Z_OBJ(iter->data);
+	zend_object_iterator *sub_iter = object->iterators[object->level].iterator;
 
 	if (sub_iter->funcs->get_current_key) {
 		sub_iter->funcs->get_current_key(sub_iter, key TSRMLS_CC);
@@ -400,18 +397,18 @@ static void spl_recursive_it_rewind_ex(spl_recursive_it_object *object, zval *zt
 
 static void spl_recursive_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_recursive_it_move_forward_ex((spl_recursive_it_object*)iter->data, &((spl_recursive_it_iterator*)iter)->zobject TSRMLS_CC);
+	spl_recursive_it_move_forward_ex((spl_recursive_it_object*)Z_OBJ(iter->data), &iter->data TSRMLS_CC);
 }
 
 static void spl_recursive_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_recursive_it_rewind_ex((spl_recursive_it_object*)iter->data, &((spl_recursive_it_iterator*)iter)->zobject TSRMLS_CC);
+	spl_recursive_it_rewind_ex((spl_recursive_it_object*)Z_OBJ(iter->data), &iter->data TSRMLS_CC);
 }
 
 static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce, zval *zobject, int by_ref TSRMLS_DC)
 {
 	spl_recursive_it_iterator *iterator;
-	spl_recursive_it_object   *object;
+	spl_recursive_it_object *object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
@@ -425,10 +422,8 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 	
-	Z_ADDREF_P(zobject);
-	iterator->intern.data = (void*)object;
+	ZVAL_COPY(&iterator->intern.data, zobject);
 	iterator->intern.funcs = ce->iterator_funcs.funcs;
-	iterator->zobject = *zobject;
 	return (zend_object_iterator*)iterator;
 }
 
@@ -2577,7 +2572,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 				}
 			} else {
 				if (zend_is_true(&retval TSRMLS_CC)) {
-					zend_call_method_with_0_params(intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
+					zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
 					if (EG(exception)) {
 						zval_ptr_dtor(&zchildren);
 						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {

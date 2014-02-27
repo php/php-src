@@ -127,8 +127,8 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 		zend_object_iterator *iterator;
 		iterator = (zend_object_iterator*)
 				spl_filesystem_object_to_iterator(intern);
-		if (iterator->data != NULL) {
-			iterator->data = NULL;
+		if (!ZVAL_IS_UNDEF(&iterator->data)) {
+			ZVAL_UNDEF(&iterator->data);
 			iterator->funcs->dtor(iterator TSRMLS_CC);
 		}
 	}
@@ -1645,19 +1645,19 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
-	iterator   = spl_filesystem_object_to_iterator(dir_object);
+	iterator = spl_filesystem_object_to_iterator(dir_object);
 
+	Z_ADDREF_P(object);
 	/* initialize iterator if it wasn't gotten before */
-	if (iterator->intern.data == NULL) {
-		iterator->intern.data = object;
+	if (ZVAL_IS_UNDEF(&iterator->intern.data)) {
+		ZVAL_COPY_VALUE(&iterator->intern.data, object);
 		iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 		/* ->current must be initialized; rewind doesn't set it and valid
 		 * doesn't check whether it's set */
 		iterator->current = *object;
 	}
-	zval_add_ref(object);
 	
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern;
 }
 /* }}} */
 
@@ -1666,8 +1666,8 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
-	if (iterator->intern.data) {
-		zval *object = iterator->intern.data;
+	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
+		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	}
 	/* Otherwise we were called from the owning object free storage handler as
@@ -1737,8 +1737,8 @@ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
 
-	if (iterator->intern.data) {
-		zval *object = iterator->intern.data;
+	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
+		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	} else {
 		if (!ZVAL_IS_UNDEF(&iterator->current)) {
@@ -1768,7 +1768,7 @@ static zval *spl_filesystem_tree_it_current_data(zend_object_iterator *iter TSRM
 		}
 		return &iterator->current;
 	} else {
-		return (zval*)iterator->intern.data;
+		return &iterator->intern.data;
 	}
 }
 /* }}} */
@@ -1851,14 +1851,14 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
 	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
+	Z_ADDREF_P(object);
 	/* initialize iterator if wasn't gotten before */
-	if (iterator->intern.data == NULL) {
-		iterator->intern.data = object;
+	if (ZVAL_IS_UNDEF(&iterator->intern.data)) {
+		ZVAL_COPY_VALUE(&iterator->intern.data, object);
 		iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	}
-	zval_add_ref(object);
 	
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern;
 }
 /* }}} */
 

@@ -56,7 +56,7 @@ typedef struct _zend_object_iterator_funcs {
 
 struct _zend_object_iterator {
 	zend_object std;
-	void *data;
+	zval data;
 	zend_object_iterator_funcs *funcs;
 	ulong index; /* private to fe_reset/fe_fetch opcodes */
 };

@@ -56,7 +56,6 @@ typedef struct _spl_other_handler {
 typedef struct {
 	zend_object_iterator  intern;
 	zval                  current;
-	spl_filesystem_object *object;
 } spl_filesystem_iterator;
 
 struct _spl_filesystem_object {
