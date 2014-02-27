@@ -589,15 +589,13 @@ ZEND_METHOD(Generator, __wakeup)
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zval *object = ((zend_generator_iterator *) iterator)->object;
-
-	zval_ptr_dtor(object);
+	zval_ptr_dtor(&iterator->data);
 }
 /* }}} */
 
 static int zend_generator_iterator_valid(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zend_generator *generator = (zend_generator *) iterator->data;
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
@@ -607,7 +605,7 @@ static int zend_generator_iterator_valid(zend_object_iterator *iterator TSRMLS_D
 
 static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zend_generator *generator = (zend_generator *) iterator->data;
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
@@ -617,7 +615,7 @@ static zval *zend_generator_iterator_get_data(zend_object_iterator *iterator TSR
 
 static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval *key TSRMLS_DC) /* {{{ */
 {
-	zend_generator *generator = (zend_generator *) iterator->data;
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
@@ -631,7 +629,7 @@ static void zend_generator_iterator_get_key(zend_object_iterator *iterator, zval
 
 static void zend_generator_iterator_move_forward(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zend_generator *generator = (zend_generator *) iterator->data;
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
@@ -641,7 +639,7 @@ static void zend_generator_iterator_move_forward(zend_object_iterator *iterator 
 
 static void zend_generator_iterator_rewind(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zend_generator *generator = (zend_generator *) iterator->data;
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 
 	zend_generator_rewind(generator TSRMLS_CC);
 }
@@ -658,10 +656,8 @@ static zend_object_iterator_funcs zend_generator_iterator_functions = {
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	zend_generator_iterator *iterator;
-	zend_generator *generator;
-
-	generator = (zend_generator *) Z_OBJ_P(object);
+	zend_object_iterator *iterator;
+	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);
 
 	if (!generator->execute_data) {
 		zend_throw_exception(NULL, "Cannot traverse an already closed generator", 0 TSRMLS_CC);
@@ -675,17 +671,12 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	iterator = &generator->iterator;
 	
-	zend_iterator_init(&iterator->intern TSRMLS_CC);
+	zend_iterator_init(&iterator TSRMLS_CC);
 
-	iterator->intern.funcs = &zend_generator_iterator_functions;
-	iterator->intern.data = (void *) generator;
+	iterator->funcs = &zend_generator_iterator_functions;
+	ZVAL_COPY(&iterator->data, object);
 
-	/* We have to keep a reference to the generator object zval around,
-	 * otherwise the generator may be destroyed during iteration. */
-	Z_ADDREF_P(object);
-	iterator->object = object;
-
-	return (zend_object_iterator *) iterator;
+	return iterator;
 }
 /* }}} */
 

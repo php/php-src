@@ -318,7 +318,7 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret TSRMLS_DC) /* {{
 static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to TSRMLS_DC) /* {{{ */
 {
 	spl_ptr_llist_element *current = from->head, *next;
-	spl_ptr_llist_ctor_func  ctor    = from->ctor;
+	spl_ptr_llist_ctor_func ctor = from->ctor;
 
 	while (current) {
 		next = current->next;
@@ -913,7 +913,7 @@ static void spl_dllist_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	SPL_LLIST_CHECK_DELREF(iterator->traverse_pointer);
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
-	zval_ptr_dtor(iterator->intern.it.data);
+	zval_ptr_dtor(&iterator->intern.it.data);
 
 	efree(iterator);
 }
@@ -971,9 +971,9 @@ static void spl_dllist_it_helper_move_forward(spl_ptr_llist_element **traverse_p
 
 static void spl_dllist_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_dllist_it     *iterator = (spl_dllist_it *)iter;
-	spl_dllist_object *object   = iterator->object;
-	spl_ptr_llist     *llist    = object->llist;
+	spl_dllist_it *iterator = (spl_dllist_it *)iter;
+	spl_dllist_object *object = (spl_dllist_object*)Z_OBJ(iter->data);
+	spl_ptr_llist *llist = object->llist;
 
 	spl_dllist_it_helper_rewind(&iterator->traverse_pointer, &iterator->traverse_position, llist, object->flags TSRMLS_CC);
 }
@@ -1011,8 +1011,8 @@ static void spl_dllist_it_get_current_key(zend_object_iterator *iter, zval *key 
 
 static void spl_dllist_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_dllist_it     *iterator = (spl_dllist_it *)iter;
-	spl_dllist_object *object   = iterator->object;
+	spl_dllist_it *iterator = (spl_dllist_it *)iter;
+	spl_dllist_object *object = (spl_dllist_object*)Z_OBJ(iter->data);
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
 
@@ -1280,7 +1280,7 @@ zend_object_iterator_funcs spl_dllist_it_funcs = {
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	spl_dllist_it     *iterator;
+	spl_dllist_it *iterator;
 	spl_dllist_object *dllist_object = (spl_dllist_object*)Z_OBJ_P(object);
 
 	if (by_ref) {
@@ -1288,25 +1288,21 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 		return NULL;
 	}
 
-	Z_ADDREF_P(object);
-
-	iterator                     = emalloc(sizeof(spl_dllist_it));
+	iterator = emalloc(sizeof(spl_dllist_it));
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 	
-	iterator->intern.it.data     = (void*)object;
+	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
 	iterator->intern.ce          = ce;
-	iterator->intern.value       = NULL;
 	iterator->traverse_position  = dllist_object->traverse_position;
 	iterator->traverse_pointer   = dllist_object->traverse_pointer;
 	iterator->flags              = dllist_object->flags & SPL_DLLIST_IT_MASK;
-	iterator->object             = dllist_object;
+	ZVAL_UNDEF(&iterator->intern.value);
 
 	SPL_LLIST_CHECK_ADDREF(iterator->traverse_pointer);
 
-
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern.it;
 }
 /* }}} */
 

@@ -67,7 +67,7 @@ NULL
 
 -- Testing stream_set_timeout() function with a closed socket --
 
-Warning: stream_set_timeout(): %i is not a valid stream resource in %s on line %i
+Warning: stream_set_timeout(): supplied resource is not a valid stream resource in %s on line %i
 bool(false)
 
 -- Testing stream_set_timeout() function with an invalid stream --

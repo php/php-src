@@ -1534,7 +1534,8 @@ PHP_FUNCTION(stream_resolve_include_path)
 
 	if (resolved_path) {
 //???		RETURN_STRING(resolved_path, 0);
-		RETURN_STRING(resolved_path);
+		RETVAL_STRING(resolved_path);
+		efree(resolved_path);
 	}
 	RETURN_FALSE;
 }

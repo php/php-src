@@ -82,7 +82,6 @@ struct _spl_heap_object {
 struct _spl_heap_it {
 	zend_user_iterator  intern;
 	int                 flags;
-	spl_heap_object    *object;
 };
 
 static void spl_ptr_heap_zval_dtor(zval *elem TSRMLS_DC) { /* {{{ */
@@ -869,7 +868,7 @@ static void spl_heap_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 	spl_heap_it *iterator = (spl_heap_it *)iter;
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
-	zval_ptr_dtor(iterator->intern.it.data);
+	zval_ptr_dtor(&iterator->intern.it.data);
 
 	efree(iterator);
 }
@@ -883,23 +882,21 @@ static void spl_heap_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 
 static int spl_heap_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_heap_it         *iterator = (spl_heap_it *)iter;
-
-	return (iterator->object->heap->count != 0 ? SUCCESS : FAILURE);
+	return (((spl_heap_object *)Z_OBJ(iter->data))->heap->count != 0 ? SUCCESS : FAILURE);
 }
 /* }}} */
 
 static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_heap_it *iterator = (spl_heap_it *)iter;
-	zval *element = &iterator->object->heap->elements[0];
+	spl_heap_object *object = (spl_heap_object*)Z_OBJ(iter->data);
+	zval *element = &object->heap->elements[0];
 
-	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
+	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
 		return NULL;
 	}
 
-	if (iterator->object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
+	if (object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
 		return NULL;
 	} else {
 		return element;
@@ -909,18 +906,18 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) 
 
 static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_heap_it  *iterator = (spl_heap_it *)iter;
-	zval *element  = &iterator->object->heap->elements[0];
+	spl_heap_object *object = (spl_heap_object*)Z_OBJ(iter->data);
+	zval *element = &object->heap->elements[0];
 
-	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
+	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
 		return NULL;
 	}
 
-	if (iterator->object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
+	if (object->heap->count == 0 || ZVAL_IS_UNDEF(element)) {
 		return NULL;
 	} else {
-		zval *data = spl_pqueue_extract_helper(element, iterator->object->flags);
+		zval *data = spl_pqueue_extract_helper(element, object->flags);
 		if (!data) {
 			zend_error(E_RECOVERABLE_ERROR, "Unable to extract from the PriorityQueue node");
 		}
@@ -931,24 +928,23 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC
 
 static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
-	spl_heap_it *iterator = (spl_heap_it *)iter;
+	spl_heap_object *object = (spl_heap_object*)Z_OBJ(iter->data);
 
-	ZVAL_LONG(key, iterator->object->heap->count - 1);
+	ZVAL_LONG(key, object->heap->count - 1);
 }
 /* }}} */
 
 static void spl_heap_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	zval *object = (zval*)((zend_user_iterator *)iter)->it.data;
-	spl_heap_it *iterator = (spl_heap_it *)iter;
+	spl_heap_object *object = (spl_heap_object*)Z_OBJ(iter->data);
 	zval *elem;
 
-	if (iterator->object->heap->flags & SPL_HEAP_CORRUPTED) {
+	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
 		return;
 	}
 
-	elem = spl_ptr_heap_delete_top(iterator->object->heap, object TSRMLS_CC);
+	elem = spl_ptr_heap_delete_top(object->heap, &iter->data TSRMLS_CC);
 
 	if (elem != NULL) {
 		zval_ptr_dtor(elem);
@@ -1088,20 +1084,17 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 		return NULL;
 	}
 
-	Z_ADDREF_P(object);
-
-	iterator                  = emalloc(sizeof(spl_heap_it));
+	iterator = emalloc(sizeof(spl_heap_it));
 	
-	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	zend_iterator_init(&iterator->intern.it TSRMLS_CC);
 
-	iterator->intern.it.data  = (void*)object;
+	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_heap_it_funcs;
 	iterator->intern.ce       = ce;
-	iterator->intern.value    = NULL;
 	iterator->flags           = heap_object->flags;
-	iterator->object          = heap_object;
+	ZVAL_UNDEF(&iterator->intern.value);
 
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern.it;
 }
 /* }}} */
 
@@ -1115,20 +1108,18 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 		return NULL;
 	}
 
-	Z_ADDREF_P(object);
-
-	iterator                  = emalloc(sizeof(spl_heap_it));
+	iterator = emalloc(sizeof(spl_heap_it));
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 
-	iterator->intern.it.data  = (void*)object;
+	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
 	iterator->intern.ce       = ce;
-	iterator->intern.value    = NULL;
 	iterator->flags           = heap_object->flags;
-	iterator->object          = heap_object;
 
-	return (zend_object_iterator*)iterator;
+	ZVAL_UNDEF(&iterator->intern.value);
+
+	return &iterator->intern.it;
 }
 /* }}} */
 

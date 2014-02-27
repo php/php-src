@@ -1836,7 +1836,6 @@ PHP_FUNCTION(getdate)
 /* define an overloaded iterator structure */
 typedef struct {
 	zend_object_iterator  intern;
-	zval                 *date_period_zval;
 	zval                  current;
 	php_period_obj       *object;
 	int                   current_index;
@@ -1862,7 +1861,7 @@ static void date_period_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 
 	date_period_it_invalidate_current(iter TSRMLS_CC);
 
-	zval_ptr_dtor(iterator->date_period_zval);
+	zval_ptr_dtor(&iterator->intern.data);
 
 	efree(iterator);
 }
@@ -1873,7 +1872,7 @@ static void date_period_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 static int date_period_it_has_more(zend_object_iterator *iter TSRMLS_DC)
 {
 	date_period_it *iterator = (date_period_it *)iter;
-	php_period_obj *object   = iterator->object;
+	php_period_obj *object   = (php_period_obj *)Z_OBJ(iterator->intern.data);
 	timelib_time   *it_time = object->current;
 
 	/* apply modification if it's not the first iteration */
@@ -1898,7 +1897,7 @@ static int date_period_it_has_more(zend_object_iterator *iter TSRMLS_DC)
 static zval *date_period_it_current_data(zend_object_iterator *iter TSRMLS_DC)
 {
 	date_period_it *iterator = (date_period_it *)iter;
-	php_period_obj *object   = iterator->object;
+	php_period_obj *object   = (php_period_obj *)Z_OBJ(iterator->intern.data);
 	timelib_time   *it_time = object->current;
 	php_date_obj   *newdateobj;
 
@@ -1970,7 +1969,6 @@ zend_object_iterator_funcs date_period_it_funcs = {
 zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	date_period_it  *iterator = emalloc(sizeof(date_period_it));
-	php_period_obj  *dpobj    = (php_period_obj *)Z_OBJ_P(object);
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
@@ -1978,11 +1976,8 @@ zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval
 
 	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
 
-	Z_ADDREF_P(object);
-	iterator->intern.data = (void*) dpobj;
+	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &date_period_it_funcs;
-	iterator->date_period_zval = object;
-	iterator->object = dpobj;
 	ZVAL_UNDEF(&iterator->current);
 
 	return (zend_object_iterator*)iterator;
