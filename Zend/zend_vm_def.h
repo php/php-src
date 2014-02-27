@@ -1326,6 +1326,9 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 		zend_free_op free_res;
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
+		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
+			retval_ptr = Z_INDIRECT_P(retval_ptr);
+		}
 		PZVAL_UNLOCK(retval_ptr, &free_res);
 		SEPARATE_ZVAL_IF_NOT_REF(retval_ptr);
 		PZVAL_LOCK(retval_ptr);
@@ -1552,8 +1555,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_res;
-	zval *container;
-	zval *property;
+	zval *container, *property, *retval_ptr;
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_UNSET);
@@ -1579,12 +1581,14 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 //???	}
 	FREE_OP1_VAR_PTR();
 
-//???	PZVAL_UNLOCK(EX_VAR(opline->result.var), &free_res);
-//???	if (EX_T(opline->result.var).var.ptr_ptr != &EG(uninitialized_zval_ptr)) {
-//???		SEPARATE_ZVAL_IF_NOT_REF(EX_T(opline->result.var).var.ptr_ptr);
-//???	}
-//???	PZVAL_LOCK(EX_VAR(opline->result.var));
-//???	FREE_OP_VAR_PTR(free_res);
+	retval_ptr = EX_VAR(opline->result.var);
+	if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
+		retval_ptr = Z_INDIRECT_P(retval_ptr);
+	}
+	PZVAL_UNLOCK(retval_ptr, &free_res);
+	SEPARATE_ZVAL_IF_NOT_REF(retval_ptr);
+	PZVAL_LOCK(retval_ptr);
+	FREE_OP_VAR_PTR(free_res);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
