@@ -423,6 +423,8 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 				"the parent constructor has not been called");
 	}
 
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	
 	Z_ADDREF_P(zobject);
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = ce->iterator_funcs.funcs;

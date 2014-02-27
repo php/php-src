@@ -1096,7 +1096,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 	}
 
-	if (EXPECTED(retval)) {
+	if (EXPECTED(retval != NULL)) {
 		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -2861,7 +2861,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 //???			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 //???			    EX_T(opline->op1.var).var.fcall_returned_reference) {
 //???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-//???				zend_error(E_NOTICE, "Only variable references should be returned by reference");
+			zend_error(E_NOTICE, "Only variable references should be returned by reference");
 //???				if (EX(return_value)) {
 //???					ZVAL_DUP(EX(return_value), retval_ptr);
 //???				}
@@ -2881,8 +2881,8 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
@@ -3134,8 +3134,6 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
 
 ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 {
-//???
-#if 0
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *args;
@@ -3154,14 +3152,13 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
 
 			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-			     (arg = zend_hash_get_current_data_ex(ht, &pos) != NULL;
+			     (arg = zend_hash_get_current_data_ex(ht, &pos)) != NULL;
 			     zend_hash_move_forward_ex(ht, &pos), ++arg_num
 			) {
-				char *name;
-				zend_uint name_len;
+				zend_string *name;
 				zend_ulong index;
 
-				if (zend_hash_get_current_key_ex(ht, &name, &name_len, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key_ex(ht, &name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
 					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
 					FREE_OP1();
 					CHECK_EXCEPTION();
@@ -3172,9 +3169,9 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 					Z_ADDREF_P(arg);
 				} else if (Z_ISREF_P(arg)) {
-					ZVAL_DUP(arg, Z_REFVAL_P(arg);
+					ZVAL_DUP(arg, Z_REFVAL_P(arg));
 				} else {
-					Z_ADDREF_P(arg);
+					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 				}
 
 				zend_vm_stack_push(arg TSRMLS_CC);
@@ -3196,7 +3193,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 				FREE_OP1();
 				if (!EG(exception)) {
 					zend_throw_exception_ex(
-						NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name
+						NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name->val
 					);
 				}
 				HANDLE_EXCEPTION();
@@ -3210,13 +3207,13 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 			}
 
 			for (; iter->funcs->valid(iter TSRMLS_CC) == SUCCESS; ++arg_num) {
-				zval **arg_ptr, *arg;
+				zval *arg;
 
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZEND_VM_C_GOTO(unpack_iter_dtor);
 				}
 
-				iter->funcs->get_current_data(iter, &arg_ptr TSRMLS_CC);
+				arg = iter->funcs->get_current_data(iter TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZEND_VM_C_GOTO(unpack_iter_dtor);
 				}
@@ -3242,18 +3239,18 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 					zend_error(
 						E_WARNING, "Cannot pass by-reference argument %d of %s%s%s()"
 						" by unpacking a Traversable, passing by-value instead", arg_num,
-						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name : "",
+						EX(call)->fbc->common.scope ? EX(call)->fbc->common.scope->name->val : "",
 						EX(call)->fbc->common.scope ? "::" : "",
-						EX(call)->fbc->common.function_name
+						EX(call)->fbc->common.function_name->val
 					);
 				}
 				
-				if (Z_ISREF_PP(arg_ptr)) {
-					ALLOC_ZVAL(arg);
-					MAKE_COPY_ZVAL(arg_ptr, arg);
+				if (Z_ISREF_P(arg)) {
+//???					ALLOC_ZVAL(arg);
+//???					MAKE_COPY_ZVAL(arg_ptr, arg);
+					ZVAL_DUP(arg, Z_REFVAL_P(arg));
 				} else {
-					arg = *arg_ptr;
-					Z_ADDREF_P(arg);
+					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 				}
 
 				ZEND_VM_STACK_GROW_IF_NEEDED(1);
@@ -3276,7 +3273,6 @@ ZEND_VM_C_LABEL(unpack_iter_dtor):
 
 	FREE_OP1();
 	CHECK_EXCEPTION();
-#endif
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3357,7 +3353,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 	SAVE_OPLINE();
 
 	params = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	Z_DELREF_P(params);
+	if (Z_REFCOUNTED_P(params)) Z_DELREF_P(params);
 
 	if (arg_num <= arg_count) {
 		array_init_size(params, arg_count - arg_num + 1);
@@ -3368,6 +3364,10 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 	for (; arg_num <= arg_count; ++arg_num) {
 		zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
+//??? "params" may became IS_INDIRECT because of symtable initialization in zend_error
+		if (Z_TYPE_P(params) == IS_INDIRECT) {
+			params = Z_INDIRECT_P(params);
+		}
 		zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
 		if (Z_REFCOUNTED_P(param)) {
 			Z_ADDREF_P(param);
@@ -4196,6 +4196,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 					SEPARATE_ZVAL(array_ptr);
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ptr = Z_REFVAL_P(array_ptr);						
 					}
 				}
 			}
@@ -4253,7 +4254,10 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			FREE_OP1_IF_VAR();
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zend_iterator_wrap(iter, array_ptr TSRMLS_CC);
+			zval iterator;
+
+			array_ptr = &iterator;
+			ZVAL_OBJ(array_ptr, &iter->std);
 		} else {
 			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
@@ -4441,12 +4445,9 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	}
 
 	if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
-		SEPARATE_ZVAL_IF_NOT_REF(value);
-		ZVAL_NEW_REF(value, value);
-		Z_ADDREF_P(value);
-	} else {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(value);
 	}
+	ZVAL_COPY(EX_VAR(opline->result.var), value);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_INC_OPCODE();
@@ -4465,6 +4466,12 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -5306,8 +5313,8 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 {
 	USE_OPLINE
 
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
@@ -5370,7 +5377,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!IS_OP1_TMP_FREE()) {
@@ -5380,7 +5387,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				FREE_OP1_IF_VAR();
 			} else {
 				if (OP1_TYPE == IS_CV) {
-					Z_ADDREF_P(value);
+					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 				}
 				ZVAL_COPY_VALUE(&generator->value, value);
 			}
@@ -5401,7 +5408,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!IS_OP2_TMP_FREE()) {

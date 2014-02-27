@@ -1976,6 +1976,8 @@ zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	Z_ADDREF_P(object);
 	iterator->intern.data = (void*) dpobj;
 	iterator->intern.funcs = &date_period_it_funcs;

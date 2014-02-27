@@ -655,7 +655,8 @@ ZEND_METHOD(exception, __toString)
 	zend_update_property_string(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
 
 //???	RETURN_STRINGL(str, len, 0);
-	RETURN_STRINGL(str, len);
+	RETVAL_STRINGL(str, len);
+	efree(str);
 }
 /* }}} */
 

@@ -120,12 +120,9 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 /* iterator interface, c-level functions used by engine */
 
 /* {{{ zend_user_it_new_iterator */
-ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval TSRMLS_DC)
 {
-	zval retval;
-
-	return zend_call_method_with_0_params(object, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
-
+	zend_call_method_with_0_params(object, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", retval);
 }
 /* }}} */
 
@@ -259,6 +256,8 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	iterator = emalloc(sizeof(zend_user_iterator));
 
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	Z_ADDREF_P(object);
 	iterator->it.data = (void*)object;
 	iterator->it.funcs = ce->iterator_funcs.funcs;
@@ -271,23 +270,23 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* {{{ zend_user_it_get_new_iterator */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
+	zval iterator;
 	zend_object_iterator *new_iterator;
 
-	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
+	zend_user_it_new_iterator(ce, object, &iterator TSRMLS_CC);
+	zend_class_entry *ce_it = (Z_TYPE(iterator) == IS_OBJECT &&
+		Z_OBJ_HT(iterator)->get_class_entry) ? Z_OBJCE(iterator) : NULL;
 
-	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
+	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && Z_OBJ(iterator) == Z_OBJ_P(object))) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name->val : Z_OBJCE_P(object)->name->val);
 		}
-		if (iterator) {
-			zval_ptr_dtor(iterator);
-		}
+		zval_ptr_dtor(&iterator);
 		return NULL;
 	}
 
-	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
-	zval_ptr_dtor(iterator);
+	new_iterator = ce_it->get_iterator(ce_it, &iterator, by_ref TSRMLS_CC);
+	zval_ptr_dtor(&iterator);
 	return new_iterator;
 }
 /* }}} */

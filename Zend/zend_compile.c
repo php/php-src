@@ -2789,7 +2789,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	if (do_end_vparse) {
 		if (returns_reference && !zend_is_function_or_method_call(expr)) {
-			zend_do_end_variable_parse(expr, BP_VAR_W, 0 TSRMLS_CC);
+			zend_do_end_variable_parse(expr, BP_VAR_W, 1 TSRMLS_CC);
 		} else {
 			zend_do_end_variable_parse(expr, BP_VAR_R, 0 TSRMLS_CC);
 		}
@@ -2851,7 +2851,7 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 
 	if (is_variable) {
 		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(value)) {
-			zend_do_end_variable_parse(value, BP_VAR_W, 0 TSRMLS_CC);
+			zend_do_end_variable_parse(value, BP_VAR_W, 1 TSRMLS_CC);
 		} else {
 			zend_do_end_variable_parse(value, BP_VAR_R, 0 TSRMLS_CC);
 		}

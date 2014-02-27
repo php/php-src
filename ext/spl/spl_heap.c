@@ -1091,6 +1091,9 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 	Z_ADDREF_P(object);
 
 	iterator                  = emalloc(sizeof(spl_heap_it));
+	
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	iterator->intern.it.data  = (void*)object;
 	iterator->intern.it.funcs = &spl_heap_it_funcs;
 	iterator->intern.ce       = ce;
@@ -1115,6 +1118,9 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 	Z_ADDREF_P(object);
 
 	iterator                  = emalloc(sizeof(spl_heap_it));
+
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
 	iterator->intern.it.data  = (void*)object;
 	iterator->intern.it.funcs = &spl_pqueue_it_funcs;
 	iterator->intern.ce       = ce;

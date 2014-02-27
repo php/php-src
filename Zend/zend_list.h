@@ -66,8 +66,10 @@ void zend_destroy_rsrc_list_dtors(void);
 
 ZEND_API zval *zend_list_insert(void *ptr, int type TSRMLS_DC);
 ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC);
+ZEND_API int _zend_list_close(zend_resource *res TSRMLS_DC);
 
 #define zend_list_delete(res)		_zend_list_delete(res TSRMLS_CC)
+#define zend_list_close(res)		_zend_list_close(res TSRMLS_CC)
 
 ZEND_API zend_resource *zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type TSRMLS_DC);
 ZEND_API void *zend_fetch_resource(zval *passed_id TSRMLS_DC, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
