@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.11
 
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+
 ?? ??? 2014, PHP 5.5.10
 
 - Core:
