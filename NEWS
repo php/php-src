@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - Fileinfo
   . Upgraded to libmagic-5.17 (Anatol)
+  . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
 
 - gd:
   . Fixed imagettftext to load the correct character map rather than the last one.
