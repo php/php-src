@@ -77,7 +77,6 @@ $clientCode = <<<'CODE'
     fclose($stdout);
     fclose($stderr);
     proc_terminate($process);
-    pcntl_wait($status);
 CODE;
 
 include 'ServerClientTestCase.inc';
