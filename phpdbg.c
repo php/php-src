@@ -144,6 +144,7 @@ static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 		function TSRMLS_CC);
 } /* }}} */
 
+
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);

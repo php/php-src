@@ -12,12 +12,18 @@
 #include <stdio.h>
 #include <string.h>
 
-static inline int phpdbg_needs_params(phpdbg_param_t *param TSRMLS_DC) {
-	return 0;
+static inline void phpdbg_append_string(phpdbg_param_t *param, const char *string, size_t length TSRMLS_DC) {
+	if (!param->str) {
+		param->str = malloc(length+1);
+	} else param->str = realloc(param->str, param->len + (length+1));
+	
+	memcpy(&param->str[param->len], string, length);
+	param->len += length;
+	param->str[param->len] = 0;
 }
 %}
 
-%s RAW
+%s RAW 
 
 %option outfile="sapi/phpdbg/phpdbg_lexer.c" header-file="sapi/phpdbg/phpdbg_lexer.h"
 %option warn nodefault
@@ -44,24 +50,7 @@ ADDR				0x[a-fA-F0-9]+
 OPCODE				?i:ZEND_([A-Za-z])+
 INPUT				[^\n]+
 %%
-<INITIAL>[a-zA-Z]+	{
-	phpdbg_init_param(yylval, STR_PARAM);
-	yylval->str = strndup(yytext, yyleng);
-	yylval->len = yyleng;
-	if (phpdbg_needs_params(yylval TSRMLS_CC)) {
-		BEGIN(PARAMS);
-	}
-	return T_ID;
-}
-
-<PARAMS>[0-9]+		{
-	phpdbg_init_param(yylval, NUMERIC_PARAM);
-	yylval->num = atoi(yytext);
-	return T_ID;
-}
-
-<INITIAL>
-{
+<INITIAL>{
 	[#]{1}		{ return T_POUND;  }
 	[:]{2}		{ return T_DCOLON; }
 	[:]{1}		{ return T_COLON;  }
@@ -113,6 +102,7 @@ INPUT				[^\n]+
 		return T_ID; 
 	}
 }
+
 <RAW>{INPUT}		{
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = strndup(yytext, yyleng);
@@ -120,5 +110,6 @@ INPUT				[^\n]+
 	BEGIN(INITIAL);
 	return T_INPUT;
 }
+
 {WS}        		{ /* ignore whitespace */ }
 %%

@@ -513,8 +513,18 @@ static yyconst flex_int16_t yy_chk[231] =
 #include <stdio.h>
 #include <string.h>
 
+static inline void phpdbg_append_string(phpdbg_param_t *param, const char *string, size_t length TSRMLS_DC) {
+	if (!param->str) {
+		param->str = malloc(length+1);
+	} else param->str = realloc(param->str, param->len + (length+1));
+	
+	memcpy(&param->str[param->len], string, length);
+	param->len += length;
+	param->str[param->len] = 0;
+}
+ 
 #define YY_NO_UNISTD_H 1
-#line 518 "sapi/phpdbg/phpdbg_lexer.c"
+#line 528 "sapi/phpdbg/phpdbg_lexer.c"
 
 #define INITIAL 0
 #define RAW 1
@@ -752,9 +762,9 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 42 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 52 "sapi/phpdbg/dev/phpdbg_lexer.l"
 
-#line 758 "sapi/phpdbg/phpdbg_lexer.c"
+#line 768 "sapi/phpdbg/phpdbg_lexer.c"
 
     yylval = yylval_param;
 
@@ -837,22 +847,22 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 45 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 54 "sapi/phpdbg/dev/phpdbg_lexer.l"
 { return T_POUND;  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 46 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 55 "sapi/phpdbg/dev/phpdbg_lexer.l"
 { return T_DCOLON; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 47 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 56 "sapi/phpdbg/dev/phpdbg_lexer.l"
 { return T_COLON;  }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 48 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 57 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -861,7 +871,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 53 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 62 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -870,7 +880,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 58 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 67 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -879,7 +889,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 63 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 72 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 1;		
@@ -888,7 +898,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 68 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 77 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 0;
@@ -897,7 +907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 73 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 82 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
@@ -906,7 +916,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 78 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 87 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, ADDR_PARAM);
 		yylval->addr = strtoul(yytext, NULL, 10);
@@ -915,7 +925,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 83 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 92 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, OP_PARAM);
 		yylval->str = strndup(yytext, yyleng);
@@ -925,7 +935,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 89 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 98 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
@@ -936,7 +946,7 @@ YY_RULE_SETUP
 
 case 13:
 YY_RULE_SETUP
-#line 96 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 106 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = strndup(yytext, yyleng);
@@ -948,15 +958,15 @@ YY_RULE_SETUP
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
-#line 103 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 114 "sapi/phpdbg/dev/phpdbg_lexer.l"
 { /* ignore whitespace */ }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 104 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 115 "sapi/phpdbg/dev/phpdbg_lexer.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 960 "sapi/phpdbg/phpdbg_lexer.c"
+#line 970 "sapi/phpdbg/phpdbg_lexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(RAW):
 	yyterminate();
@@ -2122,7 +2132,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 104 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 115 "sapi/phpdbg/dev/phpdbg_lexer.l"
 
 
 

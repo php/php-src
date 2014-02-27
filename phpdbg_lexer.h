@@ -339,7 +339,7 @@ extern int yylex \
 #undef YY_DECL
 #endif
 
-#line 104 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 115 "sapi/phpdbg/dev/phpdbg_lexer.l"
 
 
 #line 346 "sapi/phpdbg/phpdbg_lexer.h"
