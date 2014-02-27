@@ -907,7 +907,6 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	intern->std.handlers = &spl_handlers_rec_it_it;
 	return &intern->std;
 }
@@ -2272,7 +2271,6 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	intern->std.handlers = &spl_handlers_dual_it;
 	return &intern->std;
 }

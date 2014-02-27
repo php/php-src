@@ -439,8 +439,6 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 		inherited = 1;
 	}
 
-	zend_objects_store_put(&intern->std);
-
 	if (!parent) { /* this must never happen */
 		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplHeap");
 	}

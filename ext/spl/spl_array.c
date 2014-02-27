@@ -155,8 +155,8 @@ static void spl_array_object_free_storage(zend_object *object TSRMLS_DC)
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
-	zval_ptr_dtor(&intern->array);
-	zval_ptr_dtor(&intern->retval);
+	zval_dtor(&intern->array);
+	zval_dtor(&intern->retval);
 
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
@@ -210,7 +210,6 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		intern->ar_flags &= ~SPL_ARRAY_IS_REF;
 	}
 
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	while (parent) {
 		if (parent == spl_ce_ArrayIterator || parent == spl_ce_RecursiveArrayIterator) {
 			intern->std.handlers = &spl_handler_ArrayIterator;
@@ -959,19 +958,12 @@ static int spl_array_next(spl_array_object *intern TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
-/* define an overloaded iterator structure */
-typedef struct {
-	zend_user_iterator    intern;
-} spl_array_it;
-
 static void spl_array_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
-	spl_array_it *iterator = (spl_array_it *)iter;
-
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
-	zval_ptr_dtor(&iterator->intern.it.data);
+	zval_ptr_dtor(&iter->data);
 
-	efree(iterator);
+	efree(iter);
 }
 /* }}} */
 
@@ -1135,23 +1127,23 @@ zend_object_iterator_funcs spl_array_it_funcs = {
 
 zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
-	spl_array_it *iterator;
+	zend_user_iterator *iterator;
 	spl_array_object *array_object = (spl_array_object*)Z_OBJ_P(object);
 
 	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 
-	iterator = emalloc(sizeof(spl_array_it));
+	iterator = emalloc(sizeof(zend_user_iterator));
 
-	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	zend_iterator_init(&iterator->it TSRMLS_CC);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
-	iterator->intern.it.funcs = &spl_array_it_funcs;
-	iterator->intern.ce = ce;
-	ZVAL_UNDEF(&iterator->intern.value);
+	ZVAL_COPY(&iterator->it.data, object);
+	iterator->it.funcs = &spl_array_it_funcs;
+	iterator->ce = ce;
+	ZVAL_UNDEF(&iterator->value);
 
-	return (zend_object_iterator*)iterator;
+	return &iterator->it;
 }
 /* }}} */
 
@@ -1915,8 +1907,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.unset_property = spl_array_unset_property;
 
 	spl_handler_ArrayObject.compare_objects = spl_array_compare_objects;
-	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 	spl_handler_ArrayObject.dtor_obj = zend_objects_destroy_object;
+	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 
 	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, spl_funcs_ArrayIterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Iterator);

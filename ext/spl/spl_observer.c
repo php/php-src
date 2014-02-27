@@ -253,7 +253,6 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zval
 
 	zend_hash_init(&intern->storage, 0, NULL, spl_object_storage_dtor, 0);
 
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	intern->std.handlers = &spl_handler_SplObjectStorage;
 
 	if (orig) {

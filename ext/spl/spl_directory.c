@@ -159,7 +159,6 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type TS
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	intern->std.handlers = &spl_filesystem_object_handlers;
 	return &intern->std;
 }
