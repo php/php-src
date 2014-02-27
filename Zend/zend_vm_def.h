@@ -4466,6 +4466,12 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 

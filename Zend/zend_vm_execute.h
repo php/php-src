@@ -4110,6 +4110,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -5765,6 +5771,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -6433,6 +6445,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -9121,6 +9139,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -10759,6 +10783,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -11316,6 +11346,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -15598,6 +15634,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -19971,6 +20013,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -21199,6 +21247,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -32147,6 +32201,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -36268,6 +36328,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
@@ -37379,6 +37445,12 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			if (Z_TYPE_P(value) == IS_REFERENCE) {
+				value = Z_REFVAL_P(value);
+			}
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
