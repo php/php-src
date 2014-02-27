@@ -643,7 +643,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -744,7 +744,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);

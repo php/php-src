@@ -14180,7 +14180,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -14281,7 +14281,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -16616,7 +16616,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -16717,7 +16717,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -18627,7 +18627,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -18728,7 +18728,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -22152,7 +22152,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -22253,7 +22253,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -24020,7 +24020,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -24121,7 +24121,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -25378,7 +25378,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -25479,7 +25479,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -26652,7 +26652,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -26753,7 +26753,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -28328,7 +28328,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -28429,7 +28429,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -31079,7 +31079,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -31180,7 +31180,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -33297,7 +33297,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -33398,7 +33398,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -35183,7 +35183,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -35284,7 +35284,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
@@ -38452,7 +38452,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 				}
 				z = value;
 			}
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
 			incdec_op(z);
 			ZVAL_COPY_VALUE(retval, z);
@@ -38553,7 +38553,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
 			incdec_op(&z_copy);
-			Z_ADDREF_P(z);
+			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(z);
