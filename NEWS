@@ -155,6 +155,10 @@ PHP                                                                        NEWS
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
     or safe_mode). (Adam)
 
+- FPM
+  . Included apparmor support in fpm
+    (RFC: https://wiki.php.net/rfc/fpm_change_hat). (Gernot Vormayr)
+
 - GMP:
   . Moved GMP to use object as the underlying structure and implemented various
     improvements based on this.
