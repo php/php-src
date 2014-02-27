@@ -5908,9 +5908,8 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 				zend_string *key;
 //???				int len = sizeof(zend_ast *);
 //???				Z_TYPE(element) |= IS_CONSTANT_INDEX;
-				Z_STR(offset->u.constant)->gc.u.v.flags |= IS_STR_AST;
-
-				key = STR_INIT((char*)Z_AST(offset->u.constant), sizeof(zend_ast*), 0);
+				key = STR_INIT((char*)&Z_AST(offset->u.constant), sizeof(zend_ast*), 0);
+				key->gc.u.v.flags |= IS_STR_AST;
 //???				key[len] = Z_TYPE(offset->u.constant);
 //???				key[len + 1] = 0;
 				zend_symtable_update(Z_ARRVAL(result->u.constant), key, &element);

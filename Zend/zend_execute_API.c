@@ -582,8 +582,11 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			}
 
 			if (str_index->gc.u.v.flags & IS_STR_AST) {
-				zend_ast_evaluate(&const_value, (zend_ast *)str_index->val, scope TSRMLS_CC);
-				zend_ast_destroy((zend_ast *)str_index->val);
+				zend_ast_ref *ast = *(zend_ast_ref **)str_index->val;
+
+				zend_ast_evaluate(&const_value, ast->ast, scope TSRMLS_CC);
+				zend_ast_destroy(ast->ast);
+				efree(ast);
 //???
 			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, str_index->gc.u.v.flags TSRMLS_CC)) {
 				char *actual, *str;
