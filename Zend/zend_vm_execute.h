@@ -14484,6 +14484,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -14491,12 +14493,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_VAR == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_VAR == IS_VAR && (free_op1.var != NULL) && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+
+//???
+	if (IS_VAR == IS_VAR && do_free) {
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -16740,6 +16750,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -16747,12 +16759,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_VAR == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR, BP_VAR_W TSRMLS_CC);
 	zval_dtor(free_op2.var);
 //???	if (IS_VAR == IS_VAR && (free_op1.var != NULL) && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+
+//???
+	if (IS_VAR == IS_VAR && do_free) {
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -18894,6 +18914,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -18901,12 +18923,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_VAR == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR, BP_VAR_W TSRMLS_CC);
 	zval_ptr_dtor_nogc(free_op2.var);
 //???	if (IS_VAR == IS_VAR && (free_op1.var != NULL) && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+
+//???
+	if (IS_VAR == IS_VAR && do_free) {
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -20794,6 +20824,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -20801,12 +20833,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_VAR == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, NULL, IS_UNUSED, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_VAR == IS_VAR && (free_op1.var != NULL) && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+
+//???
+	if (IS_VAR == IS_VAR && do_free) {
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -22227,6 +22267,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -22234,12 +22276,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_VAR == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_VAR == IS_VAR && (free_op1.var != NULL) && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+
+//???
+	if (IS_VAR == IS_VAR && do_free) {
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -31265,6 +31315,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -31272,11 +31324,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_CV == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, opline->op2.zv, IS_CONST, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_CV == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
+
+//???
+	if (IS_CV == IS_VAR && do_free) {
+
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -33302,6 +33363,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -33309,11 +33372,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_CV == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_TMP_VAR, BP_VAR_W TSRMLS_CC);
 	zval_dtor(free_op2.var);
 //???	if (IS_CV == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
+
+//???
+	if (IS_CV == IS_VAR && do_free) {
+
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -35330,6 +35402,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -35337,11 +35411,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_CV == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC), IS_VAR, BP_VAR_W TSRMLS_CC);
 	zval_ptr_dtor_nogc(free_op2.var);
 //???	if (IS_CV == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
+
+//???
+	if (IS_CV == IS_VAR && do_free) {
+
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -37104,6 +37187,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -37111,11 +37196,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_CV == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, NULL, IS_UNUSED, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_CV == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
+
+//???
+	if (IS_CV == IS_VAR && do_free) {
+
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
@@ -38405,6 +38499,8 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -38412,11 +38508,20 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (IS_CV == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC), IS_CV, BP_VAR_W TSRMLS_CC);
 
 //???	if (IS_CV == IS_VAR && 0 && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
+
+//???
+	if (IS_CV == IS_VAR && do_free) {
+
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {

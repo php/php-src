@@ -1178,6 +1178,8 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
+//???
+	int do_free = 1;
 
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR(BP_VAR_W);
@@ -1185,12 +1187,20 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+//??? we must not free implicitly created array (it should be fixed in another way)
+	if (OP1_TYPE == IS_VAR && !Z_REFCOUNTED_P(container)) {
+		do_free = 0;
+	}
 	zend_fetch_dimension_address(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_W TSRMLS_CC);
 	FREE_OP2();
 //???	if (OP1_TYPE == IS_VAR && OP1_FREE && READY_TO_DESTROY(free_op1.var)) {
 //???		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 //???	}
-	FREE_OP1_VAR_PTR();
+
+//???
+	if (OP1_TYPE == IS_VAR && do_free) {
+		FREE_OP1_VAR_PTR();
+	}
 
 	/* We are going to assign the result by reference */
 	if (UNEXPECTED(opline->extended_value != 0)) {
