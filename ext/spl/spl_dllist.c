@@ -106,7 +106,6 @@ struct _spl_dllist_it {
 	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
 	int                    flags;
-	spl_dllist_object     *object;
 };
 
 /* {{{  spl_ptr_llist */
@@ -119,7 +118,9 @@ static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem TSRMLS_DC) { /* 
 /* }}} */
 
 static void spl_ptr_llist_zval_ctor(spl_ptr_llist_element *elem TSRMLS_DC) { /* {{{ */
-	Z_ADDREF_P(&elem->data);
+	if (Z_REFCOUNTED(elem->data)) {
+		Z_ADDREF_P(&elem->data);
+	}
 }
 /* }}} */
 
