@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
 
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+
 - Openssl
   . Fallback to Windows CA cert store for peer verification if no openssl.cafile
     ini directive or "cafile" SSL context option specified in Windows.
