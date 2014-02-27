@@ -30,6 +30,7 @@ PHP                                                                        NEWS
 
 - OPCache
   . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
 - Openssl
   . Fallback to Windows CA cert store for peer verification if no openssl.cafile
