@@ -170,9 +170,9 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval TSRMLS
 
 	zval_ptr_dtor(member);
 
-	if (Z_REFCOUNTED_P(retval)) {
-		Z_DELREF_P(retval);
-	}
+//???	if (Z_REFCOUNTED_P(retval)) {
+//???		Z_DELREF_P(retval);
+//???	}
 }
 /* }}} */
 
