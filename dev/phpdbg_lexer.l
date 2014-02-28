@@ -51,9 +51,15 @@ OPCODE				?i:ZEND_([A-Za-z])+
 INPUT				[^\n]+
 %%
 <INITIAL>{
-	[#]{1}		{ return T_POUND;  }
-	[:]{2}		{ return T_DCOLON; }
-	[:]{1}		{ return T_COLON;  }
+	{ID}[:]{1}[//]{2}	{
+		phpdbg_init_param(yylval, STR_PARAM);
+		yylval->str = strndup(yytext, yyleng);
+		yylval->len = yyleng;
+		return T_PROTO;
+	}
+	[#]{1}			{ return T_POUND;  }
+	[:]{2}			{ return T_DCOLON; }
+	[:]{1}			{ return T_COLON;  }
 	{T_EVAL}		{
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);

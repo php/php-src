@@ -221,14 +221,20 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
-	struct stat sb;
-
-	if (VCWD_STAT(path, &sb) != FAILURE) {
-		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
+	php_stream_statbuf ssb;
+	char realpath[MAXPATHLEN];
+	
+	if (php_stream_stat_path(path, &ssb) != FAILURE) {
+		if (ssb.sb.st_mode & (S_IFREG|S_IFLNK)) {
 			HashTable *broken;
 			phpdbg_breakfile_t new_break;
-			size_t path_len = strlen(path);
-
+			size_t path_len = 0L;
+			
+			if (VCWD_REALPATH(path, realpath)) {
+				path = realpath;
+			}
+			path_len = strlen(path);
+			
 			if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
 				path, path_len, (void**)&broken) == FAILURE) {
 				HashTable breaks;

@@ -61,7 +61,7 @@ typedef void* yyscan_t;
 %token T_COLON		": (colon)"
 %token T_DCOLON		":: (double colon)"
 %token T_POUND		"# (pound sign)"
-
+%token T_PROTO		"protocol (file://)"
 %token T_DIGITS	 			"digits (numbers)"
 %token T_LITERAL 			"literal (string)"
 %token T_ADDR	 			"address"
@@ -84,13 +84,35 @@ parameters
 parameter
 	: T_ID T_COLON T_DIGITS					{ 	
 		$$.type = FILE_PARAM;
-		$$.file.name = $1.str;
+		$$.file.name = $2.str;
 		$$.file.line = $3.num;
 	}
-	| T_ID T_COLON T_POUND T_DIGITS {
+	| T_ID T_COLON T_POUND T_DIGITS 		{
 		$$.type = NUMERIC_FILE_PARAM;
 		$$.file.name = $1.str;
 		$$.file.line = $4.num;
+	}
+	| T_PROTO T_ID T_COLON T_DIGITS			{
+		$$.type = FILE_PARAM;
+		$$.file.name = malloc($1.len + 
+							  $2.len + 1);
+		if ($$.file.name) {
+			memcpy(&$$.file.name[0], $1.str, $1.len);
+			memcpy(&$$.file.name[$1.len], $2.str, $2.len);
+			$$.file.name[$1.len + $2.len] = '\0';
+		}
+		$$.file.line = $4.num;
+	}
+	| T_PROTO T_ID T_COLON T_POUND T_DIGITS			{
+		$$.type = NUMERIC_FILE_PARAM;
+		$$.file.name = malloc($1.len + 
+							  $2.len + 1);
+		if ($$.file.name) {
+			memcpy(&$$.file.name[0], $1.str, $1.len);
+			memcpy(&$$.file.name[$1.len], $2.str, $2.len);
+			$$.file.name[$1.len + $2.len] = '\0';
+		}
+		$$.file.line = $5.num;
 	}
 	| T_ID T_DCOLON T_ID					{ 
 		$$.type = METHOD_PARAM;
