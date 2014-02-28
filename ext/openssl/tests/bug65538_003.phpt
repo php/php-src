@@ -38,7 +38,7 @@ $clientCode = <<<'CODE'
     $serverUri = "https://127.0.0.1:64321/";
     $clientCtx = stream_context_create(['ssl' => [
         'cafile' => 'phar://' . __DIR__ . '/bug65538.phar/bug54992-ca.pem',
-        'CN_match' => 'bug54992.local',
+        'peer_name' => 'bug54992.local',
     ]]);
 
     phpt_wait();

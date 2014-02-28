@@ -33,7 +33,7 @@ $clientCode = <<<'CODE'
         $clientCtx = stream_context_create(['ssl' => [
             'verify_peer'       => true,
             'allow_self_signed'    => true,
-            'CN_match'          => $expected_name,
+            'peer_name'          => $expected_name,
         ]]);
 
         var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));

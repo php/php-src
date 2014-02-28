@@ -69,8 +69,8 @@ PHP X.Y UPGRADE NOTES
 
 - Added gost-crypto (CryptoPro S-box) hash algo.
 
-- Stream wrappers verify peers and host names by default in encrypted client
-  streams.
+- Stream wrappers verify peer certificates and host names by default in
+  encrypted client streams.
 
 - Added openssl certificate fingerprint support (inclusive stream context
   option).
@@ -104,10 +104,14 @@ PHP X.Y UPGRADE NOTES
 
 - Added "crypto_method" SSL context option for use in encrypted streams.
 
+- Added "peer_name" SSL context option to better reflect peer certificate
+  name matching using SAN extension (replaces deprecated "CN_match").
+
 - Added stream wrapper support when specifying "cafile" SSL context paths.
 
-- Independent peer cert and host names validation is now available via a new
-  "verify_host" SSL context option.
+- Independent peer cert and peer name validation is now available via a new
+  boolean "verify_peer_name" SSL context option. This option is enabled by
+  default in encrypted client streams.
 
 - Added protocol-specific tlsv1.0://, tlsv1.1:// and tlsv1.2:// encryption
   stream wrappers. tls:// wrapper now supports TLSv1.1 and TLSv1.2 (previously
@@ -122,6 +126,8 @@ PHP X.Y UPGRADE NOTES
 
 - Added phpdbg sapi.
   (https://wiki.php.net/rfc/phpdbg)
+- Support for fpm workers changing the apparmor profile through the pool config.
+  (https://wiki.php.net/rfc/fpm_change_hat)
 
 ========================================
 3. Deprecated Functionality
@@ -130,6 +136,13 @@ PHP X.Y UPGRADE NOTES
 - Incompatible context calls:
   Instance calls from an incompatible context are now deprecated and issue
   E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
+
+- The "CN_match" SSL context option is deprecated in favor of the new
+  "peer_name" option. Name verification now checks certificate SAN names as
+  well as the CN field and "CN_match" is deprecated to avoid confusion. Its
+  use triggers E_DEPRECATED but continues to work as before. If both values
+  are specified "CN_match" takes precedence. Otherwise, the two options are
+  interchangeable.
 
 ========================================
 4. Changed Functions

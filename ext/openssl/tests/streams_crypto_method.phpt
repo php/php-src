@@ -39,7 +39,7 @@ $clientCode = <<<'CODE'
     $clientCtx = stream_context_create(['ssl' => [
         'crypto_method' => STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
         'verify_peer' => false,
-        'verify_host' => false
+        'verify_peer_name' => false
     ]]);
 
     phpt_wait();

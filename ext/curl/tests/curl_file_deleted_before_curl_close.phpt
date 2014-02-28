@@ -33,6 +33,5 @@ echo "Closed correctly\n";
 <?php
 unlink(dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp');
 ?>
---EXPECTF--
-* Closing connection #%d
+--EXPECT--
 Closed correctly

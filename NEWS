@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 1
 
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
 
@@ -10,27 +14,47 @@ PHP                                                                        NEWS
   . Implemented unified default encoding
     (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
 
+- Curl
+  . Check for openssl.cafile ini directive when loading CA certs. (Daniel Lowrey)
+  . Remove cURL close policy related constants as these have no effect and are
+    no longer used in libcurl. (Chris Wright)
+
 - Fileinfo
   . Upgraded to libmagic-5.17 (Anatol)
+  . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
 
-- gd:
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
+- GD:
   . Fixed imagettftext to load the correct character map rather than the last one.
     (Scott)
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
   (chobieeee@php.net)
 
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
+
 - Openssl
   . Fallback to Windows CA cert store for peer verification if no openssl.cafile
     ini directive or "cafile" SSL context option specified in Windows.
     (Chris Wright)
+  . The openssl.cafile and openssl.capath ini directives introduced in alpha2
+    now have PHP_INI_PERDIR accessibility (was PHP_INI_ALL). (Daniel Lowrey)
+  . New "peer_name" SSL context option replaces "CN_match" (which still works
+    as before but triggers E_DEPRECATED). (Daniel Lowrey)
   . Fixed segfault when accessing non-existent context for client SNI use
     (Daniel Lowrey)
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
     (Mark Zedwood)
-  . Fixed Bug #47030 (add new boolean "verify_host" SSL context option
-    allowing clients to verify names separately from peer certs).
+  . Fixed Bug #47030 (add new boolean "verify_peer_name" SSL context option
+    allowing clients to verify cert names separately from the cert itself).
+    "verify_peer_name" is enabled by default for client streams.
     (Daniel Lowrey)
   . Fixed Bug #65538 ("cafile" SSL context option now supports stream
     wrappers). (Daniel Lowrey)
@@ -130,6 +154,10 @@ PHP                                                                        NEWS
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
     or safe_mode). (Adam)
+
+- FPM
+  . Included apparmor support in fpm
+    (RFC: https://wiki.php.net/rfc/fpm_change_hat). (Gernot Vormayr)
 
 - GMP:
   . Moved GMP to use object as the underlying structure and implemented various

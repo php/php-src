@@ -116,6 +116,10 @@ typedef struct {
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
 	char		*query;
+#ifndef MYSQLI_USE_MYSQLND
+	/* used to manage refcount with libmysql (already implement in mysqlnd) */
+	zend_object_handle link_handle;
+#endif
 } MY_STMT;
 
 typedef struct {

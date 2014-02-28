@@ -30,10 +30,10 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    stream_context_set_option($clientCtx, 'ssl', 'CN_match', 'example.org');
+    stream_context_set_option($clientCtx, 'ssl', 'peer_name', 'example.org');
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 
-    stream_context_set_option($clientCtx, 'ssl', 'CN_match', 'moar.example.org');
+    stream_context_set_option($clientCtx, 'ssl', 'peer_name', 'moar.example.org');
     var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
 CODE;
 
