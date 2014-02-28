@@ -4585,6 +4585,9 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;

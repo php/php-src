@@ -15759,6 +15759,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset = opline->op2.zv;
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -17774,6 +17777,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -20183,6 +20189,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -23372,6 +23381,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -24815,6 +24827,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	offset = opline->op2.zv;
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -26090,6 +26105,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -27365,6 +27383,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -29040,6 +29061,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -32465,6 +32489,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset = opline->op2.zv;
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -34355,6 +34382,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -36639,6 +36669,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
@@ -39572,6 +39605,9 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
+	if (Z_TYPE_P(container) == IS_REFERENCE) {
+		container = Z_REFVAL_P(container);
+	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;

@@ -1125,6 +1125,11 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
+//	zval *p = pp;
+
+	if (Z_TYPE_P(pp) == IS_REFERENCE) {
+		pp = Z_REFVAL_P(pp);
+	}
 	if (IS_CONSTANT_TYPE(Z_TYPE_P(pp))) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
