@@ -830,7 +830,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 
-	if (retval && EG(exception) != NULL) {
+	if (retval && !EG(exception)) {
 		ZVAL_COPY(retval, value);
 	}
 	zval_ptr_dtor(value);
