@@ -488,12 +488,12 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	}
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
-	if ((c->name->len == sizeof("__COMPILER_HALT_OFFSET__")
+	if ((c->name->len == sizeof("__COMPILER_HALT_OFFSET__")-1
 		&& !memcmp(name->val, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
 		|| zend_hash_add_mem(EG(zend_constants), name, c, sizeof(zend_constant)) == NULL) {
 		
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
-		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")
+		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")-1
 			&& memcmp(name->val, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
 //???			name++;
 		}
