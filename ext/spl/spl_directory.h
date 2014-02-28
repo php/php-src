@@ -87,7 +87,7 @@ struct _spl_filesystem_object {
 		struct {
 			php_stream         *stream;
 			php_stream_context *context;
-			zval               zcontext;
+			zval               *zcontext;
 			char               *open_mode;
 			int                open_mode_len;
 			zval               current_zval;

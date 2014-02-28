@@ -275,7 +275,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		return FAILURE;
 	}
 
-	intern->u.file.context = php_stream_context_from_zval(&intern->u.file.zcontext, 0);
+	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
 	intern->u.file.stream = php_stream_open_wrapper_ex(intern->file_name, intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | REPORT_ERRORS, NULL, intern->u.file.context);
 
 	if (!intern->file_name_len || !intern->u.file.stream) {
@@ -287,10 +287,12 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 		return FAILURE;
 	}
 
-	if (!ZVAL_IS_UNDEF(&intern->u.file.zcontext)) {
+	/*
+	if (intern->u.file.zcontext) {
 		//zend_list_addref(Z_RES_VAL(intern->u.file.zcontext));
-		Z_ADDREF_P(&intern->u.file.zcontext);
+		Z_ADDREF_P(intern->u.file.zcontext);
 	}
+	*/
 
 	if (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name_len--;
@@ -2339,7 +2341,6 @@ SPL_METHOD(SplTempFileObject, __construct)
 	}
 	intern->u.file.open_mode = "wb";
 	intern->u.file.open_mode_len = 1;
-	ZVAL_UNDEF(&intern->u.file.zcontext);
 	
 	if (spl_filesystem_file_open(intern, 0, 0 TSRMLS_CC) == SUCCESS) {
 		intern->_path_len = 0;
