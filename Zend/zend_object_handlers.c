@@ -683,7 +683,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv TSR
 		}
 
 		/* Undo PZVAL_LOCK() */
-		if (Z_REFCOUNTED_P(rv)) Z_DELREF_P(rv);
+//???		if (Z_REFCOUNTED_P(rv)) Z_DELREF_P(rv);
 
 		return rv;
 	} else {
