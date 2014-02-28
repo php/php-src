@@ -178,15 +178,6 @@ Parse and execute
 .IR file
 .TP
 .PD 0
-.B \-\-global \fIname\fP
-.TP
-.PD 1
-.B \-g \fIname\fP
-Make variable
-.IR name
-global in script.
-.TP
-.PD 0
 .B \-\-help
 .TP
 .PD 1
@@ -298,7 +289,7 @@ Specify the document root to be used by the built-in web server
 Version number
 .TP
 .PD 0
-.B \-\-stripped
+.B \-\-strip
 .TP
 .PD 1
 .B \-w

@@ -5276,24 +5276,26 @@ static zend_bool matches_common_name(X509 *peer, const char *subject_name TSRMLS
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
-	char *cnmatch = NULL;
+	char *peer_name = NULL;
 	int err;
 	zend_bool must_verify_peer;
-	zend_bool must_verify_host;
+	zend_bool must_verify_peer_name;
 	zend_bool must_verify_fingerprint;
+	zend_bool has_cnmatch_ctx_opt;
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
 	must_verify_peer = GET_VER_OPT("verify_peer")
 		? zend_is_true(*val TSRMLS_CC)
 		: sslsock->is_client;
 
-	must_verify_host = GET_VER_OPT("verify_host")
+	has_cnmatch_ctx_opt = GET_VER_OPT("CN_match");
+	must_verify_peer_name = (has_cnmatch_ctx_opt || GET_VER_OPT("verify_peer_name"))
 		? zend_is_true(*val TSRMLS_CC)
 		: sslsock->is_client;
 
 	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(*val TSRMLS_CC));
 
-	if ((must_verify_peer || must_verify_host || must_verify_fingerprint) && peer == NULL) {
+	if ((must_verify_peer || must_verify_peer_name || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
 		return FAILURE;
 	}
@@ -5321,7 +5323,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		}
 	}
 
-	/* If a peer_fingerprint match is required this trumps host verification */
+	/* If a peer_fingerprint match is required this trumps peer and peer_name verification */
 	if (must_verify_fingerprint) {
 		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
 			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
@@ -5338,18 +5340,24 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	}
 
 	/* verify the host name presented in the peer certificate */
+	if (must_verify_peer_name) {
+		GET_VER_OPT_STRING("peer_name", peer_name);
 
-	if (must_verify_host) {
-		GET_VER_OPT_STRING("CN_match", cnmatch);
-		/* If no CN_match was specified assign the autodetected url name in client environments */
-		if (cnmatch == NULL && sslsock->is_client) {
-			cnmatch = sslsock->url_name;
+		if (has_cnmatch_ctx_opt) {
+			GET_VER_OPT_STRING("CN_match", peer_name);
+			php_error(E_DEPRECATED,
+				"the 'CN_match' SSL context option is deprecated in favor of 'peer_name'"
+			);
+		}
+		/* If no peer name was specified we use the autodetected url name in client environments */
+		if (peer_name == NULL && sslsock->is_client) {
+			peer_name = sslsock->url_name;
 		}
 
-		if (cnmatch) {
-			if (matches_san_list(peer, cnmatch TSRMLS_CC)) {
+		if (peer_name) {
+			if (matches_san_list(peer, peer_name TSRMLS_CC)) {
 				return SUCCESS;
-			} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
+			} else if (matches_common_name(peer, peer_name TSRMLS_CC)) {
 				return SUCCESS;
 			} else {
 				return FAILURE;
@@ -5473,7 +5481,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		LPWSTR server_name = NULL;
 		BOOL verify_result;
 
-		{ /* This looks ridiculous and it is - but we validate the name ourselves using the CN_match
+		{ /* This looks ridiculous and it is - but we validate the name ourselves using the peer_name
 		     ctx option, so just use the CN from the cert here */
 
 			X509_NAME *cert_name;

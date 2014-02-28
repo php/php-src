@@ -488,7 +488,7 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 
 static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 {
-	int fd;
+	php_socket_t fd;
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
 
 	assert(data != NULL);
@@ -512,31 +512,31 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 				}
 				
 				*(FILE**)ret = data->file;
-				data->fd = -1;
+				data->fd = SOCK_ERR;
 			}
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			PHP_STDIOP_GET_FD(fd, data);
-			if (fd < 0) {
+			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
 			if (ret) {
-				*(int*)ret = fd;
+				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
 
-			if (fd < 0) {
+			if (SOCK_ERR == fd) {
 				return FAILURE;
 			}
 			if (data->file) {
 				fflush(data->file);
 			}
 			if (ret) {
-				*(int*)ret = fd;
+				*(php_socket_t *)ret = fd;
 			}
 			return SUCCESS;
 		default:

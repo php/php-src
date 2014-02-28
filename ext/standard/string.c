@@ -5587,14 +5587,13 @@ PHP_FUNCTION(substr_compare)
 	php_size_t s1_len, s2_len;
 	php_int_t offset, len=0;
 	zend_bool cs=0;
-	php_size_t cmp_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi|ib", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() >= 4 && len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than zero");
+	if (ZEND_NUM_ARGS() >= 4 && len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 
@@ -5608,12 +5607,10 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (php_size_t) (len ? len : MAX(s2_len, (s1_len - offset)));
-
 	if (!cs) {
-		RETURN_INT(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_INT(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
 	} else {
-		RETURN_INT(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_INT(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
 	}
 }
 /* }}} */
