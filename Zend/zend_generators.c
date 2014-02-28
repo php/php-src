@@ -222,6 +222,7 @@ static zend_object *zend_generator_create(zend_class_entry *class_type TSRMLS_DC
 	generator->largest_used_integer_key = -1;
 
 	zend_object_std_init(&generator->std, class_type TSRMLS_CC);
+	zend_objects_store_put(&generator->std TSRMLS_CC);
 	generator->std.handlers = &zend_generator_handlers;
 
 	return (zend_object*)generator;

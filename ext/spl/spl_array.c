@@ -180,6 +180,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 	memset(intern, 0, sizeof(spl_array_object));
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	zend_objects_store_put(&intern->std TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 
 	intern->ar_flags = 0;

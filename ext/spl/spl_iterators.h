@@ -126,9 +126,8 @@ typedef struct _spl_cbfilter_it_intern {
 typedef struct _spl_dual_it_object {
 	zend_object              std;
 	struct {
-		zval                 *zobject;
+		zval                 zobject;
 		zend_class_entry     *ce;
-		zend_object          *object;
 		zend_object_iterator *iterator;
 	} inner;
 	struct {

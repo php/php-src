@@ -325,6 +325,7 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type TSRMLS_D
 	intern->zo.ce = class_type;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
+	zend_objects_store_put(&intern->zo TSRMLS_CC);
 	object_properties_init(&intern->zo, class_type);
 	intern->zo.handlers = &reflection_object_handlers;
 	return (zend_object*)intern;
