@@ -5608,9 +5608,9 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if (!cs) {
-		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
+		RETURN_INT(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
+		RETURN_INT(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, (php_size_t)len));
 	}
 }
 /* }}} */
