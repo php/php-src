@@ -7021,7 +7021,7 @@ void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRM
 //???		Z_TYPE(result->u.constant) = IS_STRING;
 //???		Z_STRVAL(result->u.constant) = NULL;
 //???		Z_STRLEN(result->u.constant) = 0;
-		ZVAL_UNDEF(&result->u.constant);
+		ZVAL_EMPTY_STRING(&result->u.constant);
 	}
 	/* prefix = result */
 	zend_do_build_full_name(NULL, result, name, 0 TSRMLS_CC);
