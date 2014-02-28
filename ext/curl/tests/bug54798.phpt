@@ -58,15 +58,14 @@ foreach($options_to_check as $option) {
 --EXPECTF--
 Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %sbug54798.php on line %d
 * About to connect() %a
-* Closing connection #%d
+* Closing connection %d
 Ok for CURLOPT_STDERR
 
 Warning: curl_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %sbug54798.php on line 24
 Ok for CURLOPT_WRITEHEADER
 
 Warning: curl_exec(): CURLOPT_FILE resource has gone away, resetting to default in %sbug54798.php on line 24
-%a
-Ok for CURLOPT_FILE
+%aOk for CURLOPT_FILE
 
 Warning: curl_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %sbug54798.php on line %d
 Ok for CURLOPT_INFILE
