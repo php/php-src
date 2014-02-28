@@ -5345,8 +5345,9 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-static int php_ini_get_option(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
+	zend_ini_entry *ini_entry = Z_PTR_P(zv);
 	zval *ini_array = va_arg(args, zval *);
 	int module_number = va_arg(args, int);
 	int details = va_arg(args, int);
