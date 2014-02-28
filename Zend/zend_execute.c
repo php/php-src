@@ -839,7 +839,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 
 static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, int value_type TSRMLS_DC)
 {
-	zend_string *str = Z_STR_OFFSET_P(str_offset)->str;
+	zval *str = Z_STR_OFFSET_P(str_offset)->str;
 	zend_uint offset = Z_STR_OFFSET_P(str_offset)->offset;
 
 	if ((int)offset < 0) {
@@ -847,12 +847,13 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 		return 0;
 	}
 
-	if (offset >= str->len) {
-		str = STR_REALLOC(str, offset + 1, 0);
-		memset(str->val + str->len, ' ', offset - str->len);
-		str->val[offset+1] = 0;
-	} else if (IS_INTERNED(str)) {
-		str = STR_DUP(str, 0);
+	if (offset >= Z_STRLEN_P(str)) {
+		int old_len = Z_STRLEN_P(str);
+		Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), offset + 1, 0);
+		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
+		Z_STRVAL_P(str)[offset+1] = 0;
+	} else if (IS_INTERNED(Z_STR_P(str))) {
+		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
 	}
 
 	if (Z_TYPE_P(value) != IS_STRING) {
@@ -863,10 +864,10 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 			zval_copy_ctor(&tmp);
 		}
 		convert_to_string(&tmp);
-		str->val[offset] = Z_STRVAL(tmp)[0];
+		Z_STRVAL_P(str)[offset] = Z_STRVAL(tmp)[0];
 		zval_dtor(&tmp);
 	} else {
-		str->val[offset] = Z_STRVAL_P(value)[0];
+		Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
 		if (value_type == IS_TMP_VAR) {
 			/* we can safely free final_value here
 			 * because separation is done only
@@ -1240,7 +1241,7 @@ convert_to_array:
 				if (Z_TYPE_P(container) == IS_INDIRECT) {
 					container = Z_INDIRECT_P(container);
 				}
-				ZVAL_STR_OFFSET(result, Z_STR_P(container), Z_LVAL_P(dim));
+				ZVAL_STR_OFFSET(result, container, Z_LVAL_P(dim));
 				Z_ADDREF_P(container);				
 				return;
 			}

@@ -117,7 +117,7 @@ struct _zend_string {
 
 struct _zend_str_offset {
 	zend_refcounted   gc;
-	zend_string      *str;
+	zval             *str;
 	int               offset;
 };
 

@@ -1684,11 +1684,14 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
 			if (zend_assign_to_string_offset(EX_VAR((opline+1)->op2.var), value, (opline+1)->op1_type TSRMLS_CC)) {
 				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str->val + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
+					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
 				}
 			} else if (RETURN_VALUE_USED(opline)) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
+//??? instead of FREE_OP_VAR_PTR(free_op_data2);
+//???			zval_ptr_dtor(Z_STR_OFFSET_P(variable_ptr)->str);
+			efree(Z_STR_OFFSET_P(variable_ptr));
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -1696,6 +1699,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
+//???		FREE_OP_VAR_PTR(free_op_data2);
 		} else {
 			if ((opline+1)->op1_type == IS_TMP_VAR) {
 			 	value = zend_assign_tmp_to_variable(variable_ptr, value TSRMLS_CC);
@@ -1707,8 +1711,8 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_COPY(EX_VAR(opline->result.var), value);
 			}
-		}
 //???		FREE_OP_VAR_PTR(free_op_data2);
+		}
 	 	FREE_OP_IF_VAR(free_op_data1);
 	}
  	FREE_OP1_VAR_PTR();
@@ -1732,11 +1736,14 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
 		if (zend_assign_to_string_offset(EX_VAR(opline->op1.var), value, OP2_TYPE TSRMLS_CC)) {
 			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str->val + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
+				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
 			}
 		} else if (RETURN_VALUE_USED(opline)) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
+//??? instead of FREE_OP1_VAR_PTR()
+//???		zval_ptr_dtor(Z_STR_OFFSET_P(variable_ptr)->str);
+		efree(Z_STR_OFFSET_P(variable_ptr));
 	} else if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (IS_OP2_TMP_FREE()) {
 			zval_dtor(value);
@@ -1755,9 +1762,8 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
 		}
+		FREE_OP1_VAR_PTR();
 	}
-
-	FREE_OP1_VAR_PTR();
 
 	/* zend_assign_to_variable() always takes care of op2, never free it! */
  	FREE_OP2_IF_VAR();
