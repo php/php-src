@@ -4175,7 +4175,7 @@ ZEND_METHOD(reflection_class, isInstance)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
 {
-	zval *retval_ptr = NULL;
+	zval retval;
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
 	zend_function *constructor;
@@ -4216,7 +4216,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		ZVAL_UNDEF(&fci.function_name);
 		fci.symbol_table = NULL;
 		fci.object_ptr = return_value;
-		fci.retval = retval_ptr;
+		fci.retval = &retval;
 		fci.param_count = num_args;
 		fci.params = params;
 		fci.no_separation = 1;
@@ -4231,15 +4231,15 @@ ZEND_METHOD(reflection_class, newInstance)
 			if (params) {
 				efree(params);
 			}
-			if (retval_ptr) {
-				zval_ptr_dtor(retval_ptr);
+			if (!ZVAL_IS_UNDEF(&retval)) {
+				zval_ptr_dtor(&retval);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
-		if (retval_ptr) {
-			zval_ptr_dtor(retval_ptr);
+		if (!ZVAL_IS_UNDEF(&retval)) {
+			zval_ptr_dtor(&retval);
 		}
 		if (params) {
 			efree(params);
