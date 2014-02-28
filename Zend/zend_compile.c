@@ -3865,7 +3865,13 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, con
 	zval *old_constant;
 
 	if ((old_constant = zend_hash_find(child_constants_table, hash_key->key)) != NULL) {
-		if (old_constant != parent_constant) {
+//???	if (old_constant != parent_constant) {
+//??? see Zend/tests/errmsg_025.phpt
+		if ((Z_TYPE_P(old_constant) != Z_TYPE_P(parent_constant)) ||
+		    (Z_TYPE_P(old_constant) == IS_LONG && Z_LVAL_P(old_constant) != Z_LVAL_P(parent_constant)) ||
+		    (Z_TYPE_P(old_constant) == IS_BOOL && Z_LVAL_P(old_constant) != Z_LVAL_P(parent_constant)) ||
+		    (Z_TYPE_P(old_constant) == IS_DOUBLE && Z_DVAL_P(old_constant) != Z_DVAL_P(parent_constant)) ||
+		    (Z_REFCOUNTED_P(old_constant) && Z_COUNTED_P(old_constant) != Z_COUNTED_P(parent_constant))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->key->val, iface->name->val);
 		}
 		return 0;
