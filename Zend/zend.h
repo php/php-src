@@ -703,6 +703,15 @@ END_EXTERN_C()
 
 #define SEPARATE_ZVAL_IF_REF(zv)				\
 	if (Z_ISREF_P(zv)) {						\
+		if (Z_REFCOUNT_P(zv) == 1) {			\
+			zend_reference *ref = Z_REF_P(zv);	\
+			ZVAL_COPY_VALUE(zv, &ref->val);		\
+			efree(ref);							\
+		} else {								\
+			zval *ref = Z_REFVAL_P(zv);			\
+			Z_DELREF_P(zv);						\
+			ZVAL_DUP(zv, ref);					\
+		}										\
 		SEPARATE_ZVAL(zv);						\
 	}
 

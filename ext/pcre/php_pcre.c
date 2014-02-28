@@ -96,6 +96,7 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
 	pefree(pce->locale, 1);
 #endif
+	pefree(pce, 1);
 }
 /* }}} */
 
@@ -1392,8 +1393,10 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		old_replace_count = replace_count;
 		if ((result = php_replace_in_subject(regex, replace, subject, &result_len, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 			if (!is_filter || replace_count > old_replace_count) {
+//??? TODO: reimpplement to avoid double reallocation
 //???				RETVAL_STRINGL(result, result_len, 0);
 				RETVAL_STRINGL(result, result_len);
+				efree(result);
 			} else {
 				efree(result);
 			}

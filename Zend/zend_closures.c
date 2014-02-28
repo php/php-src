@@ -339,7 +339,9 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 				}
 				info_len = zend_spprintf(&info, 0, "%s",
 								i >= required ? "<optional>" : "<required>");				
-				add_assoc_stringl_ex(&val, name, name_len, info, info_len, 0);
+//??? TODO: avoid reallocation
+				add_assoc_stringl_ex(&val, name, name_len, info, info_len, 1);
+				efree(info);
 				efree(name);
 				arg_info++;
 			}

@@ -1125,6 +1125,11 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
+//	zval *p = pp;
+
+	if (Z_TYPE_P(pp) == IS_REFERENCE) {
+		pp = Z_REFVAL_P(pp);
+	}
 	if (IS_CONSTANT_TYPE(Z_TYPE_P(pp))) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
@@ -3736,7 +3741,7 @@ ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, co
 {
 	zval tmp;
 
-	ZVAL_STR(&tmp, STR_COPY(value));
+	ZVAL_STR(&tmp, value);
 	zend_update_property(scope, object, name, name_length, &tmp TSRMLS_CC);
 }
 /* }}} */
