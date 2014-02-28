@@ -1659,8 +1659,9 @@ ZEND_FUNCTION(get_declared_interfaces)
 /* }}} */
 
 
-static int copy_function_name(zend_function *func TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int copy_function_name(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+	zend_function *func = Z_PTR_P(zv);
 	zval *internal_ar = va_arg(args, zval *),
 	     *user_ar     = va_arg(args, zval *);
 
