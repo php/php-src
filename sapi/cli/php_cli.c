@@ -173,8 +173,9 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int print_module_info(zend_module_entry *module TSRMLS_DC) /* {{{ */
+static int print_module_info(zval *element TSRMLS_DC) /* {{{ */
 {
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(element);
 	php_printf("%s\n", module->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
