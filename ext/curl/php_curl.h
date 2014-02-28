@@ -142,9 +142,19 @@ typedef struct {
 } php_curl_progress, php_curl_fnmatch;
 
 typedef struct {
+   zval            *func_name;
+   zend_fcall_info_cache fci_cache;
+   FILE            *fp;
+   long            fd;
+   int             method;
+   zval            *stream;
+} php_curl_seek;
+
+typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
+  php_curl_seek  *seek;
 #if CURLOPT_PASSWDFUNCTION != 0
 	zval           *passwd;
 #endif
