@@ -1498,14 +1498,16 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_CallbackFilterIterator:
 		case DIT_RecursiveCallbackFilterIterator: {
 			_spl_cbfilter_it_intern *cfi = emalloc(sizeof(*cfi));
+			cfi->fci.object_ptr = NULL;
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Of", &zobject, ce_inner, &cfi->fci, &cfi->fcc) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				efree(cfi);
 				return NULL;
 			}
 			Z_ADDREF(cfi->fci.function_name);
-			if (cfi->fci.object_ptr) {
-				Z_ADDREF_P(cfi->fci.object_ptr);
+			if (cfi->fcc.object_ptr) {
+				ZVAL_COPY(&cfi->object, cfi->fcc.object_ptr);
+				cfi->fcc.object_ptr = &cfi->object;
 			}
 			intern->u.cbfilter = cfi;
 			break;
@@ -2215,7 +2217,7 @@ static void spl_dual_it_dtor(zend_object *_object TSRMLS_DC)
 /* {{{ spl_dual_it_free_storage */
 static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 {
-	spl_dual_it_object        *object = (spl_dual_it_object *)_object;
+	spl_dual_it_object *object = (spl_dual_it_object *)_object;
 
 
 	if (!ZVAL_IS_UNDEF(&object->inner.zobject)) {
@@ -2232,7 +2234,7 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 	if (object->dit_type == DIT_CachingIterator || object->dit_type == DIT_RecursiveCachingIterator) {
 		if (Z_TYPE(object->u.caching.zcache) != IS_UNDEF) {
 			zval_ptr_dtor(&object->u.caching.zcache);
-			ZVAL_UNDEF(&object->u.caching.zcache);
+			//ZVAL_UNDEF(&object->u.caching.zcache);
 		}
 	}
 
@@ -2249,15 +2251,17 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 
 	if (object->dit_type == DIT_CallbackFilterIterator || object->dit_type == DIT_RecursiveCallbackFilterIterator) {
 		if (object->u.cbfilter) {
-			zval_ptr_dtor(&object->u.cbfilter->fci.function_name);
-			if (object->u.cbfilter->fci.object_ptr) {
-				zval_ptr_dtor(object->u.cbfilter->fci.object_ptr);
+			_spl_cbfilter_it_intern *cbfilter = object->u.cbfilter;
+			object->u.cbfilter = NULL;
+			zval_ptr_dtor(&cbfilter->fci.function_name);
+			if (cbfilter->fci.object_ptr) {
+				zval_ptr_dtor(cbfilter->fci.object_ptr);
 			}
-			efree(object->u.cbfilter);
+			efree(cbfilter);
 		}
 	}
 
-	zend_object_std_dtor(&object->std TSRMLS_CC);
+	//zend_object_std_dtor(&object->std TSRMLS_CC);
 
 	efree(object);
 }
@@ -3290,7 +3294,7 @@ SPL_METHOD(AppendIterator, append)
 		}
 		do {
 			spl_append_it_next_iterator(intern TSRMLS_CC);
-		} while (Z_OBJ(intern->inner.zobject) != Z_OBJCE_P(it));
+		} while (Z_OBJ(intern->inner.zobject) != Z_OBJ_P(it));
 		spl_append_it_fetch(intern TSRMLS_CC);
 	}
 } /* }}} */
