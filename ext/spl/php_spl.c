@@ -312,7 +312,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
  Default implementation for __autoload() */
 PHP_FUNCTION(spl_autoload)
 {
-	int found = 0, pos_len;
+	int found = 0, pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
 	zend_op **original_opline_ptr = EG(opline_ptr);
@@ -337,14 +337,16 @@ PHP_FUNCTION(spl_autoload)
 		EG(active_op_array) = original_active_op_array;
 		pos1 = strchr(pos, ',');
 		if (pos1) { 
-			pos_len = pos1 - pos;
+			pos1_len = pos1 - pos;
+		} else {
+			pos1_len = pos_len;
 		}
-		if (spl_autoload(class_name, lc_name, pos, pos_len TSRMLS_CC)) {
+		if (spl_autoload(class_name, lc_name, pos, pos1_len TSRMLS_CC)) {
 			found = 1;
 			break; /* loaded */
 		}
 		pos = pos1 ? pos1 + 1 : NULL;
-		pos_len = pos1 ? pos1 - pos : pos_len;
+		pos_len = pos1? pos_len - pos1_len - 1 : 0;
 	}
 	STR_FREE(lc_name);
 
@@ -357,7 +359,7 @@ PHP_FUNCTION(spl_autoload)
 		 * the Zend engine.
 		 */
 		if (active_opline->opcode != ZEND_FETCH_CLASS) {
-			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name);
+			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name->val);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name->val);
 		}
@@ -375,9 +377,9 @@ PHP_FUNCTION(spl_autoload_extensions)
 	}
 	if (file_exts) {
 		if (SPL_G(autoload_extensions)) {
-			STR_REFCOUNT(SPL_G(autoload_extensions));
+			STR_RELEASE(SPL_G(autoload_extensions));
 		}
-		SPL_G(autoload_extensions) = STR_DUP(file_exts, 0);
+		SPL_G(autoload_extensions) = STR_COPY(file_exts);
 	}
 
 	if (SPL_G(autoload_extensions) == NULL) {
@@ -426,10 +428,10 @@ PHP_FUNCTION(spl_autoload_call)
 		lc_name = STR_ALLOC(Z_STRLEN_P(class_name), 0);
 		zend_str_tolower_copy(lc_name->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
+		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &dummy, 0, &function_pos);
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
-			zend_call_method(&alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
+			zend_call_method(ZVAL_IS_UNDEF(&alfi->obj)? NULL : &alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
 			zend_exception_save(TSRMLS_C);
 			if (retval) {
 				zval_ptr_dtor(retval);
@@ -543,7 +545,6 @@ PHP_FUNCTION(spl_autoload_register)
 			STR_RELEASE(func_name);
 			RETURN_FALSE;
 		}
-		ZVAL_UNDEF(&alfi.closure);
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
 		obj_ptr = fcc.object_ptr;
@@ -559,6 +560,7 @@ PHP_FUNCTION(spl_autoload_register)
 			memcpy(lc_name->val + func_name->len, &Z_OBJ_HANDLE_P(zcallable), sizeof(zend_uint));
 			lc_name->val[lc_name->len] = '\0';
 		} else {
+			ZVAL_UNDEF(&alfi.closure);
 			lc_name = STR_ALLOC(func_name->len, 0);
 			zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
 		}
@@ -573,8 +575,8 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
-			STR_REALLOC(lc_name, lc_name->len + 2 + sizeof(zend_uint), 0);
-			memcpy(lc_name->val + lc_name->len - 2 - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
+			lc_name = STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
+			memcpy(lc_name->val + lc_name->len - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
 			lc_name->val[lc_name->len] = '\0';
 			ZVAL_COPY(&alfi.obj, obj_ptr);
 		} else {
@@ -661,7 +663,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	}
 
 	if (Z_TYPE_P(zcallable) == IS_OBJECT) {
-		lc_name = STR_ALLOC(func_name->len + 2 + sizeof(zend_uint), 0);
+		lc_name = STR_ALLOC(func_name->len + sizeof(zend_uint), 0);
 		zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
 		memcpy(lc_name->val + func_name->len, &Z_OBJ_HANDLE_P(zcallable), sizeof(zend_uint));
 		lc_name->len += sizeof(zend_uint);
@@ -684,15 +686,15 @@ PHP_FUNCTION(spl_autoload_unregister)
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			if (success != SUCCESS && obj_ptr) {
-				STR_REALLOC(lc_name, lc_name->len + 2 + sizeof(zend_uint), 0);
-				memcpy(lc_name->val + lc_name->len - 2 - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
+				STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
+				memcpy(lc_name->val + lc_name->len - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
 				lc_name->val[lc_name->len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			}
 		}
 	} else if (lc_name->len == sizeof("spl_autoload")-1 && !strcmp(lc_name->val, "spl_autoload")) {
 		/* register single spl_autoload() */
-		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload"));
+		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
 
 		if (EG(autoload_func) == spl_func_ptr) {
 			success = SUCCESS;
@@ -730,7 +732,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	if (EG(autoload_func) == fptr) {
 		array_init(return_value);
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
-		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
+		while (zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
 			if (!ZVAL_IS_UNDEF(&alfi->closure)) {
 				Z_ADDREF(alfi->closure);
