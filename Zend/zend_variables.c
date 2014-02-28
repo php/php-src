@@ -187,11 +187,26 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void zval_add_ref(zval *p)
 {
-    if (Z_REFCOUNTED_P(p)) {
+	if (Z_REFCOUNTED_P(p)) {
 		Z_ADDREF_P(p);
 	}
 }
 
+ZEND_API void zval_add_ref_unref(zval *p)
+{
+	if (Z_REFCOUNTED_P(p)) {
+		if (Z_ISREF_P(p)) {
+			if (Z_REFCOUNT_P(p) == 1) {
+				zval *q = Z_REFVAL_P(p);
+				ZVAL_DUP(p, q);
+			} else {
+				Z_ADDREF_P(p);
+			}
+		} else {
+			Z_ADDREF_P(p);
+		}
+	}
+}
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
