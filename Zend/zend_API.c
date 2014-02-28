@@ -3741,7 +3741,7 @@ ZEND_API void zend_update_property_str(zend_class_entry *scope, zval *object, co
 {
 	zval tmp;
 
-	ZVAL_STR(&tmp, STR_COPY(value));
+	ZVAL_STR(&tmp, value);
 	zend_update_property(scope, object, name, name_length, &tmp TSRMLS_CC);
 }
 /* }}} */
