@@ -680,15 +680,20 @@ END_EXTERN_C()
 		Z_UNSET_ISREF_P(z);						\
 	} while (0)
 
-// TODO: support objects and resources???
-#define SEPARATE_ZVAL(zv) do {					\
-		if (Z_REFCOUNTED_P(zv)) {				\
-			if (Z_REFCOUNT_P(zv) > 1) {			\
-				Z_DELREF_P(zv);					\
-				zval_copy_ctor(zv);				\
-				Z_SET_REFCOUNT_P(zv, 1);		\
-			}									\
-		}										\
+// TODO: support objects and resources in more optimal way ???
+#define SEPARATE_ZVAL(zv) do {						\
+		if (Z_REFCOUNTED_P(zv)) {					\
+			if (Z_REFCOUNT_P(zv) > 1) {				\
+				if (Z_TYPE_P(zv) == IS_OBJECT ||    \
+				    Z_TYPE_P(zv) == IS_RESOURCE) {	\
+					Z_ADDREF_P(zv);					\
+				} else {							\
+					Z_DELREF_P(zv);					\
+					zval_copy_ctor(zv);				\
+					Z_SET_REFCOUNT_P(zv, 1);		\
+				}									\
+			}										\
+		}											\
 	} while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(zv)			\
