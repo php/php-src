@@ -15841,7 +15841,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -17859,7 +17859,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -20271,7 +20271,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -23463,7 +23463,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -24909,7 +24909,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -26187,7 +26187,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -27465,7 +27465,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -29143,7 +29143,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -32571,7 +32571,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -34464,7 +34464,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -36751,7 +36751,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -39687,7 +39687,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (Z_TYPE_P(offset) <= IS_BOOL /* simple scalar types */
+			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
