@@ -279,6 +279,11 @@ PHP 5.6 UPGRADE NOTES
   - The "SNI_enabled" SSL stream context option is now set to TRUE by default
     if supported by the underlying openssl library.
 
+- PCRE:
+  - The information collected by the (*MARK) backtracking control verb is now
+    collected into the "MARK" index of the $matches array for preg_match(),
+    preg_match_all() and preg_replace_callback().
+
 - Pgsql:
   - pg_insert()/pg_select()/pg_update()/pg_delete()/pg_meta_data()/pg_convert()
     are no longer EXPERIMENTAL

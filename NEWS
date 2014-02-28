@@ -64,6 +64,9 @@ PHP                                                                        NEWS
     via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
   . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
 
+- PCRE:
+  . Added support for (*MARK) backtracking verbs. (Nikita)
+
 - PDO_pgsql:
   . Cleaned up code by increasing the requirements to libpq versions providing
     PQexecParams, PQprepare, PQescapeStringConn, PQescapeByteaConn. According
