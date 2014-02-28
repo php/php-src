@@ -320,17 +320,17 @@ fetch_dim_string:
 		if ((retval = (zend_symtable_find(ht, offset_key))) == NULL) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
 				case BP_VAR_W: {
 				    zval value;
 					ZVAL_UNDEF(&value);
-				    retval = zend_symtable_update(ht, Z_STR_P(offset), &value);
+				    retval = zend_symtable_update(ht, offset_key, &value);
 				}
 			}
 		}
