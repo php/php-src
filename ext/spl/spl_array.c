@@ -440,49 +440,52 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
-		Z_ADDREF_P(value);
+		if (Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
 		zend_hash_next_index_insert(ht, value);
 		return;
 	}
-	switch(Z_TYPE_P(offset)) {
-	case IS_STRING:
-		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-		if (ht->nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-			return;
-		}
+
+	if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
-		zend_symtable_update(ht, Z_STR_P(offset), value);
-		return;
-	case IS_DOUBLE:
-	case IS_RESOURCE:
-	case IS_BOOL:
-	case IS_LONG:
-		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-		if (ht->nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+	}
+	switch (Z_TYPE_P(offset)) {
+		case IS_STRING:
+			ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+			if (ht->nApplyCount > 0) {
+				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+				return;
+			}
+			zend_symtable_update(ht, Z_STR_P(offset), value);
 			return;
-		}
-		if (offset->type == IS_DOUBLE) {
-			index = (long)Z_DVAL_P(offset);
-		} else {
-			index = Z_LVAL_P(offset);
-		}
-		Z_ADDREF_P(value);
-		zend_hash_index_update(ht, index, value);
-		return;
-	case IS_NULL:
-		ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-		if (ht->nApplyCount > 0) {
-			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		case IS_DOUBLE:
+		case IS_RESOURCE:
+		case IS_BOOL:
+		case IS_LONG:
+			ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+			if (ht->nApplyCount > 0) {
+				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+				return;
+			}
+			if (offset->type == IS_DOUBLE) {
+				index = (long)Z_DVAL_P(offset);
+			} else {
+				index = Z_LVAL_P(offset);
+			}
+			zend_hash_index_update(ht, index, value);
 			return;
-		}
-		Z_ADDREF_P(value);
-		zend_hash_next_index_insert(ht, value);
-		return;
-	default:
-		zend_error(E_WARNING, "Illegal offset type");
-		return;
+		case IS_NULL:
+			ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
+			if (ht->nApplyCount > 0) {
+				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+				return;
+			}
+			zend_hash_next_index_insert(ht, value);
+			return;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			return;
 	}
 } /* }}} */
 

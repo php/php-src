@@ -166,7 +166,9 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 		for (i = 0; i < intern->array->size; i++) {
 			if (!ZVAL_IS_UNDEF(&intern->array->elements[i])) {
 				zend_hash_index_update(ht, i, &intern->array->elements[i]);
-				Z_ADDREF_P(&intern->array->elements[i]);
+				if (Z_REFCOUNTED(intern->array->elements[i])){
+					Z_ADDREF(intern->array->elements[i]);
+				}
 			} else {
 				zend_hash_index_update(ht, i, &EG(uninitialized_zval));
 			}
@@ -596,7 +598,9 @@ SPL_METHOD(SplFixedArray, __wakeup)
 		spl_fixedarray_init(intern->array, size TSRMLS_CC);
 
 		for (zend_hash_internal_pointer_reset_ex(intern_ht, &ptr); (data = zend_hash_get_current_data_ex(intern_ht, &ptr)) != NULL; zend_hash_move_forward_ex(intern_ht, &ptr)) {
-			Z_ADDREF_P(data);
+			if (Z_REFCOUNTED_P(data)) {
+				Z_ADDREF_P(data);
+			}
 			ZVAL_COPY_VALUE(&intern->array->elements[index++], data);
 		}
 
@@ -644,10 +648,11 @@ SPL_METHOD(SplFixedArray, toArray)
 		for (; i < intern->array->size; i++) {
 			if (!ZVAL_IS_UNDEF(&intern->array->elements[i])) {
 				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array->elements[i]);
-				Z_ADDREF_P(&intern->array->elements[i]);
+				if (Z_REFCOUNTED(intern->array->elements[i])) {
+					Z_ADDREF(intern->array->elements[i]);
+				}
 			} else {
 				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &EG(uninitialized_zval));
-				Z_ADDREF_P(&EG(uninitialized_zval));
 			}
 		}
 	}
@@ -1037,8 +1042,6 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0 TSRMLS_CC);
 		return NULL;
 	}
-
-	Z_ADDREF_P(object);
 
 	iterator = emalloc(sizeof(spl_fixedarray_it));
 

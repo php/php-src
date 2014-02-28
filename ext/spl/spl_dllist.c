@@ -119,7 +119,7 @@ static void spl_ptr_llist_zval_dtor(spl_ptr_llist_element *elem TSRMLS_DC) { /* 
 
 static void spl_ptr_llist_zval_ctor(spl_ptr_llist_element *elem TSRMLS_DC) { /* {{{ */
 	if (Z_REFCOUNTED(elem->data)) {
-		Z_ADDREF_P(&elem->data);
+		Z_ADDREF(elem->data);
 	}
 }
 /* }}} */
@@ -527,7 +527,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 			next = current->next;
 
 			add_index_zval(&dllist_array, i, &current->data);
-			Z_ADDREF_P(&current->data);
+			if (Z_REFCOUNTED(current->data)) {
+				Z_ADDREF(current->data);
+			}
 			i++;
 
 			current = next;
@@ -1234,7 +1236,9 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		return;
 	}
 
-	Z_ADDREF_P(value);
+	if (Z_REFCOUNTED_P(value)) {
+		Z_ADDREF_P(value);
+	}
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);

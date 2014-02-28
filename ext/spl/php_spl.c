@@ -284,7 +284,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 			new_op_array = NULL;
 			zend_file_handle_dtor(&file_handle TSRMLS_CC);
 		}
-		STR_FREE(opened_path);
+		STR_RELEASE(opened_path);
 		if (new_op_array) {
 			EG(active_op_array) = new_op_array;
 			if (!EG(active_symbol_table)) {

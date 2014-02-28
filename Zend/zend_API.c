@@ -1639,7 +1639,9 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 	}
 
 	if (result) {
-		Z_ADDREF_P(result);
+		if (Z_REFCOUNTED_P(result)) {
+			Z_ADDREF_P(result);
+		}
 		return SUCCESS;
 	} else {
 		return FAILURE;

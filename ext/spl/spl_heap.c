@@ -92,7 +92,9 @@ static void spl_ptr_heap_zval_dtor(zval *elem TSRMLS_DC) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem TSRMLS_DC) { /* {{{ */
-	Z_ADDREF_P(elem);
+	if (Z_REFCOUNTED_P(elem)) {
+		Z_ADDREF_P(elem);
+	}
 }
 /* }}} */
 
@@ -398,8 +400,8 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 			int i;
 			intern->heap = spl_ptr_heap_clone(other->heap TSRMLS_CC);
 			for (i = 0; i < intern->heap->count; ++i) {
-				if (!ZVAL_IS_UNDEF(&intern->heap->elements[i])) {
-					Z_ADDREF_P(&intern->heap->elements[i]);
+				if (Z_REFCOUNTED(intern->heap->elements[i])) {
+					Z_ADDREF(intern->heap->elements[i]);
 				}
 			}
 		} else {
@@ -537,7 +539,9 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 		for (i = 0; i < intern->heap->count; ++i) {
 			add_index_zval(&heap_array, i, &intern->heap->elements[i]);
-			Z_ADDREF_P(&intern->heap->elements[i]);
+			if (Z_REFCOUNTED(intern->heap->elements[i])) {
+				Z_ADDREF(intern->heap->elements[i]);
+			}
 		}
 
 		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1 TSRMLS_CC);
@@ -710,7 +714,9 @@ SPL_METHOD(SplPriorityQueue, extract)
 		return;
 	}
 
-	Z_ADDREF_P(value_out);
+	if (Z_REFCOUNTED_P(value_out)) {
+		Z_ADDREF_P(value_out);
+	}
 	zval_ptr_dtor(value);
 
 	RETURN_ZVAL(value_out, 1, 1);
