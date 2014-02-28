@@ -389,19 +389,19 @@ PHP_FUNCTION(spl_autoload_extensions)
 
 typedef struct {
 	zend_function *func_ptr;
-	zval *obj;
-	zval *closure;
+	zval obj;
+	zval closure;
 	zend_class_entry *ce;
 } autoload_func_info;
 
 static void autoload_func_info_dtor(zval *element)
 {
 	autoload_func_info *alfi = (autoload_func_info*)Z_PTR_P(element);
-	if (alfi->obj) {
-		zval_ptr_dtor(alfi->obj);
+	if (!ZVAL_IS_UNDEF(&alfi->obj)) {
+		zval_ptr_dtor(&alfi->obj);
 	}
-	if (alfi->closure) {
-		zval_ptr_dtor(alfi->closure);
+	if (!ZVAL_IS_UNDEF(&alfi->closure)) {
+		zval_ptr_dtor(&alfi->closure);
 	}
 	efree(alfi);
 }
@@ -429,7 +429,7 @@ PHP_FUNCTION(spl_autoload_call)
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &dummy, 0, &function_pos);
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
-			zend_call_method(alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
+			zend_call_method(&alfi->obj, alfi->ce, &alfi->func_ptr, func_name->val, func_name->len, retval, 1, class_name, NULL TSRMLS_CC);
 			zend_exception_save(TSRMLS_C);
 			if (retval) {
 				zval_ptr_dtor(retval);
@@ -543,7 +543,7 @@ PHP_FUNCTION(spl_autoload_register)
 			STR_RELEASE(func_name);
 			RETURN_FALSE;
 		}
-		alfi.closure = NULL;
+		ZVAL_UNDEF(&alfi.closure);
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
 		obj_ptr = fcc.object_ptr;
@@ -552,8 +552,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 
 		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
-			alfi.closure = zcallable;
-			Z_ADDREF_P(zcallable);
+			ZVAL_COPY(&alfi.closure, zcallable);
 
 			lc_name = STR_ALLOC(func_name->len + sizeof(zend_uint), 0);
 			zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
@@ -566,8 +565,8 @@ PHP_FUNCTION(spl_autoload_register)
 		STR_RELEASE(func_name);
 
 		if (SPL_G(autoload_functions) && zend_hash_exists(SPL_G(autoload_functions), lc_name)) {
-			if (alfi.closure) {
-				Z_DELREF_P(zcallable);
+			if (!ZVAL_IS_UNDEF(&alfi.closure)) {
+				Z_DELREF_P(&alfi.closure);
 			}
 			goto skip;
 		}
@@ -577,10 +576,9 @@ PHP_FUNCTION(spl_autoload_register)
 			STR_REALLOC(lc_name, lc_name->len + 2 + sizeof(zend_uint), 0);
 			memcpy(lc_name->val + lc_name->len - 2 - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
 			lc_name->val[lc_name->len] = '\0';
-			alfi.obj = obj_ptr;
-			Z_ADDREF_P(alfi.obj);
+			ZVAL_COPY(&alfi.obj, obj_ptr);
 		} else {
-			alfi.obj = NULL;
+			ZVAL_UNDEF(&alfi.obj);
 		}
 
 		if (!SPL_G(autoload_functions)) {
@@ -594,9 +592,9 @@ PHP_FUNCTION(spl_autoload_register)
 			autoload_func_info spl_alfi;
 
 			spl_alfi.func_ptr = spl_func_ptr;
-			spl_alfi.obj = NULL;
+			ZVAL_UNDEF(&spl_alfi.obj);
+			ZVAL_UNDEF(&spl_alfi.closure);
 			spl_alfi.ce = NULL;
-			spl_alfi.closure = NULL;
 			zend_hash_str_add_mem(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload") - 1,
 					&spl_alfi, sizeof(autoload_func_info));
 			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
@@ -607,10 +605,10 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi, sizeof(autoload_func_info)) == NULL) {
 			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
-				Z_DELREF_P(alfi.obj);
+				Z_DELREF(alfi.obj);
 			}				
-			if (alfi.closure) {
-				Z_DELREF_P(alfi.closure);
+			if (!ZVAL_IS_UNDEF(&alfi.closure)) {
+				Z_DELREF(alfi.closure);
 			}
 		}
 		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
@@ -734,16 +732,16 @@ PHP_FUNCTION(spl_autoload_functions)
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &function_pos);
 		while(zend_hash_has_more_elements_ex(SPL_G(autoload_functions), &function_pos) == SUCCESS) {
 			alfi = zend_hash_get_current_data_ptr_ex(SPL_G(autoload_functions), &function_pos);
-			if (alfi->closure) {
-				Z_ADDREF_P(alfi->closure);
-				add_next_index_zval(return_value, alfi->closure);
+			if (!ZVAL_IS_UNDEF(&alfi->closure)) {
+				Z_ADDREF(alfi->closure);
+				add_next_index_zval(return_value, &alfi->closure);
 			} else if (alfi->func_ptr->common.scope) {
 				zval tmp;
 
 				array_init(&tmp);
-				if (alfi->obj) {
-					Z_ADDREF_P(alfi->obj);
-					add_next_index_zval(&tmp, alfi->obj);
+				if (!ZVAL_IS_UNDEF(&alfi->obj)) {
+					Z_ADDREF(alfi->obj);
+					add_next_index_zval(&tmp, &alfi->obj);
 				} else {
 					add_next_index_str(&tmp, STR_COPY(alfi->ce->name));
 				}
