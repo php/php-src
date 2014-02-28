@@ -84,6 +84,7 @@ ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(zval *array_ptr, ze
 
 /* given an iterator, wrap it up as a zval for use by the engine opcodes */
 ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC);
+ZEND_API void zend_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
 
 ZEND_API void zend_register_iterator_wrapper(TSRMLS_D);
 END_EXTERN_C()

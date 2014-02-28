@@ -129,7 +129,7 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 				spl_filesystem_object_to_iterator(intern);
 		if (!ZVAL_IS_UNDEF(&iterator->data)) {
 			ZVAL_UNDEF(&iterator->data);
-			iterator->funcs->dtor(iterator TSRMLS_CC);
+			zend_iterator_dtor(iterator TSRMLS_CC);
 		}
 	}
 	efree(object);

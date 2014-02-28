@@ -71,6 +71,15 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC)
 	iter->std.handlers = &iterator_object_handlers;
 }
 
+ZEND_API void zend_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+{
+	if (--iter->std.gc.refcount > 0) {
+		return;
+	}
+
+	zend_objects_store_del(&iter->std TSRMLS_CC);
+}
+
 ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
 	zval *array_ptr, zend_object_iterator **iter TSRMLS_DC)
 {
