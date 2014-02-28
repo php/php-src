@@ -393,6 +393,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 {
 	zend_property_info info;
 	zval stub, *guard;
+	zend_string *str = NULL;
 
 	if (!property_info) {
 		property_info = &info;
@@ -402,7 +403,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
 		if (class_name) {
 			/* use unmangled name for protected properties */
-			info.name = STR_INIT(prop_name, strlen(prop_name), 0);
+			str = info.name = STR_INIT(prop_name, strlen(prop_name), 0);
 			property_info = &info;
 		}
 	}
@@ -410,11 +411,17 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 		ALLOC_HASHTABLE(zobj->guards);
 		zend_hash_init(zobj->guards, 0, NULL, NULL, 0);
 	} else if ((guard = zend_hash_find(zobj->guards, property_info->name)) != NULL) {
+		if (str) {
+			STR_RELEASE(str);
+		}
 		return &Z_LVAL_P(guard);
 	}
 
 	ZVAL_LONG(&stub, 0);
 	guard = zend_hash_add(zobj->guards, property_info->name, &stub);
+	if (str) {
+		STR_RELEASE(str);
+	}
 	return &Z_LVAL_P(guard);
 }
 /* }}} */
@@ -508,6 +515,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
 				}
 			}
+			if (!silent) {
+				zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
+			}
+			retval = &EG(uninitialized_zval);
 		}
 	} else {
 		if (!silent) {
