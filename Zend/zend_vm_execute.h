@@ -8883,6 +8883,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	zval *function_name;
 	zend_free_op free_op1;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -8896,7 +8897,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -8933,11 +8939,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -9709,6 +9711,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	zval *function_name;
 	zend_free_op free_op1, free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -9722,7 +9725,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -9759,11 +9767,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -10526,6 +10530,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	zval *function_name;
 	zend_free_op free_op1, free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -10539,7 +10544,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -10576,11 +10586,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -11917,6 +11923,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	zval *function_name;
 	zend_free_op free_op1;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -11930,7 +11937,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -11967,11 +11979,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -15060,6 +15068,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	zval *function_name;
 	zend_free_op free_op1;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -15073,7 +15082,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -15110,11 +15124,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -17342,6 +17352,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	zval *function_name;
 	zend_free_op free_op1, free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -17355,7 +17366,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -17392,11 +17408,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -19581,6 +19593,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	zval *function_name;
 	zend_free_op free_op1, free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -19594,7 +19607,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -19631,11 +19649,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -22948,6 +22962,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	zval *function_name;
 	zend_free_op free_op1;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -22961,7 +22976,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC));
+	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -22998,11 +23018,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -24504,6 +24520,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	zval *function_name;
 
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -24517,7 +24534,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_obj_zval_ptr_unused(TSRMLS_C));
+	object = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -24554,11 +24576,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -25874,6 +25892,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	zval *function_name;
 	zend_free_op free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -25887,7 +25906,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_obj_zval_ptr_unused(TSRMLS_C));
+	object = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -25924,11 +25948,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -27152,6 +27172,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	zval *function_name;
 	zend_free_op free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -27165,7 +27186,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_obj_zval_ptr_unused(TSRMLS_C));
+	object = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -27202,11 +27228,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -28831,6 +28853,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	zval *function_name;
 
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -28844,7 +28867,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_obj_zval_ptr_unused(TSRMLS_C));
+	object = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -28881,11 +28909,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -31997,6 +32021,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	zval *function_name;
 
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -32010,7 +32035,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC));
+	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -32047,11 +32077,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -34061,6 +34087,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	zval *function_name;
 	zend_free_op free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -34074,7 +34101,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC));
+	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -34111,11 +34143,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -36175,6 +36203,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	zval *function_name;
 	zend_free_op free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -36188,7 +36217,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC));
+	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -36225,11 +36259,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -39286,6 +39316,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	zval *function_name;
 
 	call_slot *call = EX(call_slots) + opline->result.num;
+	zval *object;
 
 	SAVE_OPLINE();
 
@@ -39299,7 +39330,12 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 		zend_error_noreturn(E_ERROR, "Method name must be a string");
 	}
 
-	ZVAL_COPY_VALUE(&call->object, _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC));
+	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	if (Z_TYPE_P(object) == IS_REFERENCE) {
+		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
+	} else {
+		ZVAL_COPY_VALUE(&call->object, object);
+	}
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -39336,11 +39372,7 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		ZVAL_UNDEF(&call->object);
 	} else {
-		if (!Z_ISREF(call->object)) {
-			Z_ADDREF(call->object); /* For $this pointer */
-		} else {
-			ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-		}
+		Z_ADDREF(call->object); /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
