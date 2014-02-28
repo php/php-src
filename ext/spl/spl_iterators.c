@@ -325,9 +325,8 @@ next_step:
 				}
 				object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator) * (++object->level+1));
 				sub_iter = ce->get_iterator(ce, &child, 0 TSRMLS_CC);
-				Z_ADDREF(child);
+				ZVAL_COPY(&object->iterators[object->level].zobject, &child);
 				object->iterators[object->level].iterator = sub_iter;
-				object->iterators[object->level].zobject = child;
 				object->iterators[object->level].ce = ce;
 				object->iterators[object->level].state = RS_START;
 				if (sub_iter->funcs->rewind) {
@@ -839,7 +838,7 @@ static union _zend_function *spl_recursive_it_get_method(zval *object_ptr, zend_
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
 			if (Z_OBJ_HT_P(zobj)->get_method) {
-				object_ptr = zobj;
+				*object_ptr = *zobj;
 				function_handler = Z_OBJ_HT_P(object_ptr)->get_method(object_ptr, method, key TSRMLS_CC);
 			}
 		}

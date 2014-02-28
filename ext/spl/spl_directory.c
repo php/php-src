@@ -123,15 +123,10 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 		break;
 	}
 
-	{
-		zend_object_iterator *iterator;
-		iterator = (zend_object_iterator*)
-				spl_filesystem_object_to_iterator(intern);
-		if (!ZVAL_IS_UNDEF(&iterator->data)) {
-			ZVAL_UNDEF(&iterator->data);
-			zend_iterator_dtor(iterator TSRMLS_CC);
-		}
-	}
+	//???if (intern->it) {
+	//zend_iterator_dtor(intern->it TSRMLS_CC);
+	//}
+
 	efree(object);
 } /* }}} */
 
@@ -158,9 +153,8 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type TS
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
-	zend_iterator_init(&intern->it.intern TSRMLS_CC);
-
 	intern->std.handlers = &spl_filesystem_object_handlers;
+
 	return &intern->std;
 }
 /* }}} */
@@ -635,7 +629,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 		if (intern->u.dir.sub_path) {
 			ZVAL_STRINGL(&tmp, intern->u.dir.sub_path, intern->u.dir.sub_path_len);
 		} else {
-			ZVAL_STRINGL(&tmp, "", 0);
+			ZVAL_STR(&tmp, STR_EMPTY_ALLOC());
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
 		STR_RELEASE(pnstr);
@@ -1646,16 +1640,11 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	}
 	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
-
-	Z_ADDREF_P(object);
-	/* initialize iterator if it wasn't gotten before */
-	if (ZVAL_IS_UNDEF(&iterator->intern.data)) {
-		ZVAL_COPY_VALUE(&iterator->intern.data, object);
-		iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
-		/* ->current must be initialized; rewind doesn't set it and valid
-		 * doesn't check whether it's set */
-		iterator->current = *object;
-	}
+	ZVAL_COPY(&iterator->intern.data, object);
+	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
+	/* ->current must be initialized; rewind doesn't set it and valid
+	 * doesn't check whether it's set */
+	iterator->current = *object;
 	
 	return &iterator->intern;
 }
@@ -1670,6 +1659,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	}
+	efree(iter);
 	/* Otherwise we were called from the owning object free storage handler as
 	 * it sets
 	 * iterator->intern.data to NULL.
@@ -1849,14 +1839,10 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
-	iterator   = spl_filesystem_object_to_iterator(dir_object);
+	iterator = spl_filesystem_object_to_iterator(dir_object);
 
-	Z_ADDREF_P(object);
-	/* initialize iterator if wasn't gotten before */
-	if (ZVAL_IS_UNDEF(&iterator->intern.data)) {
-		ZVAL_COPY_VALUE(&iterator->intern.data, object);
-		iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
-	}
+	ZVAL_COPY(&iterator->intern.data, object);
+	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
 	
 	return &iterator->intern;
 }

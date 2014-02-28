@@ -56,6 +56,7 @@ typedef struct _spl_other_handler {
 typedef struct {
 	zend_object_iterator  intern;
 	zval                  current;
+	void                 *object;
 } spl_filesystem_iterator;
 
 struct _spl_filesystem_object {
@@ -101,17 +102,24 @@ struct _spl_filesystem_object {
 			char               escape;
 		} file;
 	} u;
-	spl_filesystem_iterator    it;
+	spl_filesystem_iterator    *it;
 };
 
-static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
+static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj TSRMLS_DC)
 {
-	return &obj->it;
+	if (obj->it) {
+		zend_iterator_dtor(&obj->it->intern TSRMLS_CC);
+	}
+
+	obj->it = ecalloc(1, sizeof(spl_filesystem_iterator));
+	obj->it->object = (void *)obj;
+	zend_iterator_init(&obj->it->intern TSRMLS_CC);
+	return obj->it;
 }
 
-static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
+static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it TSRMLS_DC)
 {
-	return (spl_filesystem_object*)((char*)it - XtOffsetOf(spl_filesystem_object, it));
+	return (spl_filesystem_object*)it->object;
 }
 
 #define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
