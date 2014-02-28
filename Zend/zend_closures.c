@@ -93,6 +93,7 @@ ZEND_METHOD(Closure, bind)
 			zend_string *class_name;
 			zval tmp_zval;
 
+			ZVAL_UNDEF(&tmp_zval);
 			if (Z_TYPE_P(scope_arg) == IS_STRING) {
 				class_name = Z_STR_P(scope_arg);
 			} else {
