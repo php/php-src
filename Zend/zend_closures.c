@@ -254,7 +254,6 @@ static zend_object *zend_closure_new(zend_class_entry *class_type TSRMLS_DC) /* 
 
 	zend_object_std_init(&closure->std, class_type TSRMLS_CC);
 	closure->std.handlers = &closure_handlers;
-	zend_objects_store_put(&closure->std);
 
 	return (zend_object*)closure;
 }

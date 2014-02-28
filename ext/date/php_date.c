@@ -2108,7 +2108,6 @@ static inline zend_object *date_object_new_date_ex(zend_class_entry *class_type 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_date;
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	
 	return (zend_object*)intern;
 }
@@ -2243,7 +2242,6 @@ static inline zend_object *date_object_new_timezone_ex(zend_class_entry *class_t
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_timezone;
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	
 	return (zend_object*)intern;
 }
@@ -2335,7 +2333,6 @@ static inline zend_object *date_object_new_interval_ex(zend_class_entry *class_t
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_interval;
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	
 	return (zend_object*)intern;
 }
@@ -2417,7 +2414,6 @@ static inline zend_object *date_object_new_period_ex(zend_class_entry *class_typ
 	object_properties_init(&intern->std, class_type);
 //???	date_object_free_storage_period, NULL TSRMLS_CC);
 	intern->std.handlers = &date_object_handlers_period;
-	zend_objects_store_put(&intern->std TSRMLS_CC);
 	
 	return (zend_object*)intern;
 }

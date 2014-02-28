@@ -36,6 +36,7 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 	object->properties = NULL;
 	object->guards = NULL;
 	memset(object->properties_table, 0, sizeof(zval) * ce->default_properties_count);
+	zend_objects_store_put(object);
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
@@ -132,7 +133,6 @@ ZEND_API zend_object *zend_objects_new(zend_class_entry *ce TSRMLS_DC)
 	zend_object *object = emalloc(sizeof(zend_object) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init(object, ce);
-	zend_objects_store_put(object);
 	object->handlers = &std_object_handlers;
 	return object;
 }
