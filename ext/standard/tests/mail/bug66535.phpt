@@ -1,5 +1,5 @@
 --TEST--
-Test mail() function : basic functionality 
+Bug #66535: Extra newline if add_x_header and no additional headers are used
 --INI--
 sendmail_path=tee mailBasic.out >/dev/null
 mail.add_x_header = On
