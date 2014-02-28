@@ -137,7 +137,7 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 
 static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	zval *obj = (zval*)thisfilter->abstract;
+	zval *obj = &thisfilter->abstract;
 	zval func_name;
 	zval retval;
 
@@ -146,7 +146,6 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 		return;
 	}
 
-//???	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1, 0);
 	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1);
 
 	call_user_function_ex(NULL,
@@ -157,6 +156,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 			0, NULL TSRMLS_CC);
 
 	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&func_name);
 
 	/* kill the object */
 	zval_ptr_dtor(obj);
@@ -172,7 +172,7 @@ php_stream_filter_status_t userfilter_filter(
 			TSRMLS_DC)
 {
 	int ret = PSFS_ERR_FATAL;
-	zval *obj = (zval*)thisfilter->abstract;
+	zval *obj = &thisfilter->abstract;
 	zval func_name;
 	zval retval;
 	zval args[4];
@@ -190,7 +190,6 @@ php_stream_filter_status_t userfilter_filter(
 		zval_ptr_dtor(&tmp);
 	}
 
-//???	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1, 0);
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
 	/* Setup calling arguments */
@@ -212,6 +211,8 @@ php_stream_filter_status_t userfilter_filter(
 			&retval,
 			4, args,
 			0, NULL TSRMLS_CC);
+
+	zval_ptr_dtor(&func_name);
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_long(&retval);
@@ -246,9 +247,9 @@ php_stream_filter_status_t userfilter_filter(
 	/* filter resources are cleaned up by the stream destructor,
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
-//???	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1, 0);
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1);
 	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, 0 TSRMLS_CC);
+	zval_ptr_dtor(&zpropname);
 
 	zval_ptr_dtor(&args[3]);
 	zval_ptr_dtor(&args[2]);
@@ -347,7 +348,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	}
 
 	/* invoke the constructor */
-//???	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1, 0);
 	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1);
 
 	call_user_function_ex(NULL,
@@ -363,7 +363,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			zval_ptr_dtor(&retval);
 
 			/* Kill the filter (safely) */
-			filter->abstract = NULL;
+			ZVAL_UNDEF(&filter->abstract);
 			php_stream_filter_free(filter TSRMLS_CC);
 
 			/* Kill the object */
@@ -374,11 +374,11 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		}			
 		zval_ptr_dtor(&retval);
 	}
+	zval_ptr_dtor(&func_name);
 
 	/* set the filter property, this will be used during cleanup */
 	ZEND_REGISTER_RESOURCE(&zfilter, filter, le_userfilters);
-//???
-	filter->abstract = &obj;
+	ZVAL_COPY_VALUE(&filter->abstract, &obj);
 	add_property_zval(&obj, "filter", &zfilter);
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zfilter);
@@ -390,8 +390,10 @@ static php_stream_filter_factory user_filter_factory = {
 	user_filter_factory_create
 };
 
-static void filter_item_dtor(struct php_user_filter_data *fdat)
+static void filter_item_dtor(zval *zv)
 {
+	struct php_user_filter_data *fdat = Z_PTR_P(zv);
+	efree(fdat);
 }
 
 /* {{{ proto object stream_bucket_make_writeable(resource brigade)
@@ -544,8 +546,7 @@ PHP_FUNCTION(stream_get_filters)
 			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT;
 			zend_hash_move_forward(filters_hash))
 				if (key_flags == HASH_KEY_IS_STRING) {
-//???
-					add_next_index_stringl(return_value, filter_name->val, filter_name->len, 1);
+					add_next_index_str(return_value, STR_COPY(filter_name));
 				}
 	}
 	/* It's okay to return an empty array if no filters are registered */

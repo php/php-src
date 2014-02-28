@@ -211,7 +211,7 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
-	php_strip_tags_filter *inst = (php_strip_tags_filter *) thisfilter->abstract;
+	php_strip_tags_filter *inst = (php_strip_tags_filter *) Z_PTR(thisfilter->abstract);
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
@@ -231,11 +231,11 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 
 static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	assert(thisfilter->abstract != NULL);
+	assert(Z_PTR(thisfilter->abstract) != NULL);
 
-	php_strip_tags_filter_dtor((php_strip_tags_filter *)thisfilter->abstract);
+	php_strip_tags_filter_dtor((php_strip_tags_filter *)Z_PTR(thisfilter->abstract));
 
-	pefree(thisfilter->abstract, ((php_strip_tags_filter *)thisfilter->abstract)->persistent);
+	pefree(Z_PTR(thisfilter->abstract), ((php_strip_tags_filter *)Z_PTR(thisfilter->abstract))->persistent);
 }
 
 static php_stream_filter_ops strfilter_strip_tags_ops = {
@@ -1742,7 +1742,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 {
 	php_stream_bucket *bucket = NULL;
 	size_t consumed = 0;
-	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
+	php_convert_filter *inst = (php_convert_filter *)Z_PTR(thisfilter->abstract);
 
 	while (buckets_in->head != NULL) {
 		bucket = buckets_in->head;
@@ -1781,10 +1781,10 @@ out_failure:
 
 static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	assert(thisfilter->abstract != NULL);
+	assert(Z_PTR(thisfilter->abstract) != NULL);
 
-	php_convert_filter_dtor((php_convert_filter *)thisfilter->abstract);
-	pefree(thisfilter->abstract, ((php_convert_filter *)thisfilter->abstract)->persistent);
+	php_convert_filter_dtor((php_convert_filter *)Z_PTR(thisfilter->abstract));
+	pefree(Z_PTR(thisfilter->abstract), ((php_convert_filter *)Z_PTR(thisfilter->abstract))->persistent);
 }
 
 static php_stream_filter_ops strfilter_convert_ops = {
@@ -1859,7 +1859,7 @@ static php_stream_filter_status_t consumed_filter_filter(
 	int flags
 	TSRMLS_DC)
 {
-	php_consumed_filter_data *data = (php_consumed_filter_data *)(thisfilter->abstract);
+	php_consumed_filter_data *data = (php_consumed_filter_data *)Z_PTR(thisfilter->abstract);
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
 
@@ -1884,8 +1884,8 @@ static php_stream_filter_status_t consumed_filter_filter(
 
 static void consumed_filter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_consumed_filter_data *data = (php_consumed_filter_data*)thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_consumed_filter_data *data = (php_consumed_filter_data*)Z_PTR(thisfilter->abstract);
 		pefree(data, data->persistent);
 	}
 }
@@ -2074,7 +2074,7 @@ static php_stream_filter_status_t php_chunked_filter(
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
-	php_chunked_filter_data *data = (php_chunked_filter_data *) thisfilter->abstract;
+	php_chunked_filter_data *data = (php_chunked_filter_data *) Z_PTR(thisfilter->abstract);
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
@@ -2092,8 +2092,8 @@ static php_stream_filter_status_t php_chunked_filter(
 
 static void php_chunked_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_chunked_filter_data *data = (php_chunked_filter_data *) thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_chunked_filter_data *data = (php_chunked_filter_data *) Z_PTR(thisfilter->abstract);
 		pefree(data, data->persistent);
 	}
 }

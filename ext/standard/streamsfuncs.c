@@ -1232,6 +1232,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (filter) {
 		filter->res = ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter());
+		filter->res->gc.refcount++;
 		RETURN_RES(filter->res);
 	} else {
 		RETURN_FALSE;
