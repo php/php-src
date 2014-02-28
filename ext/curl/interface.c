@@ -2300,7 +2300,7 @@ static int _php_curl_setopt(php_curl *ch, php_int_t option, zval **zvalue TSRMLS
 #endif
 		{
 			convert_to_string_ex(zvalue);
-			return php_curl_option_str(ch, option, Z_STRSIZE_PP(zvalue), Z_STRSIZE_PP(zvalue), 0 TSRMLS_CC);
+			return php_curl_option_str(ch, option, Z_STRVAL_PP(zvalue), Z_STRSIZE_PP(zvalue), 0 TSRMLS_CC);
 		}
 
 		/* Curl nullable string options */
