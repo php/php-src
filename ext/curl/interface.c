@@ -169,16 +169,20 @@ static int php_curl_option_str(php_curl *ch, php_int_t option, const char *str, 
 {
 	CURLcode error = CURLE_OK;
 
-	if (make_copy || LIBCURL_VERSION_NUM < 0x071100) {
+#if LIBCURL_VERSION_NUM >= 0x071100
+	if (make_copy) {
+#endif
 		char *copystr;
 
 		/* Strings passed to libcurl as 'char *' arguments, are copied by the library since 7.17.0 */
 		copystr = estrndup(str, len);
 		error = curl_easy_setopt(ch->cp, option, copystr);
 		zend_llist_add_element(&ch->to_free->str, &copystr);
+#if LIBCURL_VERSION_NUM >= 0x071100
 	} else {
 		error = curl_easy_setopt(ch->cp, option, str);
 	}
+#endif
 
 	SAVE_CURL_ERROR(ch, error)
 
