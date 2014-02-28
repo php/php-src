@@ -431,7 +431,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 	closure->func = *func;
 	closure->func.common.prototype = NULL;
 
-	if ((scope == NULL) && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
+	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
 		/* use dummy scope if we're binding an object without specifying a scope */
 		/* maybe it would be better to create one for this purpose */
 		scope = zend_ce_closure;
