@@ -289,7 +289,7 @@ Specify the document root to be used by the built-in web server
 Version number
 .TP
 .PD 0
-.B \-\-stripped
+.B \-\-strip
 .TP
 .PD 1
 .B \-w
