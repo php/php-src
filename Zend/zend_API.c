@@ -1011,7 +1011,7 @@ ZEND_API int zend_parse_method_parameters(int num_args TSRMLS_DC, zval *this_ptr
 	zval **object;
 	zend_class_entry *ce;
 
-	if (!this_ptr) {
+	if (!this_ptr || Z_TYPE_P(this_ptr) != IS_OBJECT) {
 		RETURN_IF_ZERO_ARGS(num_args, p, 0);
 
 		va_start(va, type_spec);
