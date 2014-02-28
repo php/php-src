@@ -336,6 +336,7 @@ static zend_object *spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	old_object = Z_OBJ_P(zobject);
 	source = (spl_filesystem_object*)old_object;
 	new_object = spl_filesystem_object_new_ex(old_object->ce TSRMLS_CC);
+	intern = (spl_filesystem_object*)new_object;
 
 	intern->flags = source->flags;
 
