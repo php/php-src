@@ -1888,9 +1888,9 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
-	zval ***args,		/* Function arguments array */
+	zval   *args,		/* Function arguments array */
 		   *stack,		/* Input array */
-		   *new_var;	/* Variable to be pushed */
+		    new_var;	/* Variable to be pushed */
 	int i,				/* Loop counter */
 		argc;			/* Number of function arguments */
 
@@ -1901,11 +1901,10 @@ PHP_FUNCTION(array_push)
 
 	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
 	for (i = 0; i < argc; i++) {
-		new_var = *args[i];
-		Z_ADDREF_P(new_var);
+		ZVAL_COPY(&new_var, &args[i]);
 
-		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), new_var) == NULL) {
-			Z_DELREF_P(new_var);
+		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
+			if (Z_REFCOUNTED(new_var)) Z_DELREF(new_var);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot add element to the array as the next element is already occupied");
 			efree(args);
 			RETURN_FALSE;
