@@ -30,7 +30,7 @@ string(3) "php"
 bool(true)
 bool(true)
 
-Warning: session_serializer_name(): Cannot find serialization handler 'none' in %s/session_serializer_name_basic.php on line 16
+Warning: session_serializer_name(): Cannot find serialization handler 'none' in %s%esession_serializer_name_basic.php on line 16
 bool(false)
 string(10) "php_binary"
 Done
