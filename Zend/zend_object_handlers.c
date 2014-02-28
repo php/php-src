@@ -482,23 +482,31 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 
 			if (Z_TYPE_P(rv) != IS_UNDEF) {
 				retval = rv;
-//???
-#if 0
 				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					if (Z_REFCOUNT_P(rv) > 0) {
-						zval *tmp = rv;
+					if (Z_REFCOUNTED_P(rv) && Z_REFCOUNT_P(rv) > 1) {
 
-						ALLOC_ZVAL(rv);
-						ZVAL_DUP(rv, tmp);
-						Z_UNSET_ISREF_P(rv);
-						Z_SET_REFCOUNT_P(rv, 0);
+						SEPARATE_ZVAL(rv);
+
+//???						if (Z_TYPE_P(rv) == IS_OBJECT ||
+//???						    Z_TYPE_P(rv) == IS_RESOURCE) {
+//???							Z_ADDREF_P(rv);
+//???						} else {
+//???							zval_copy_ctor(rv);
+//???							Z_SET_REFCOUNT_P(rv, 1);
+//???						}
+
+//???						zval *tmp = rv;
+//???
+//???						ALLOC_ZVAL(rv);
+//???						ZVAL_DUP(rv, tmp);
+//???						Z_UNSET_ISREF_P(rv);
+//???						Z_SET_REFCOUNT_P(rv, 0);
 					}
 					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name->val, Z_STRVAL_P(member));
 					}
 				}
-#endif
 			} else {
 				retval = &EG(uninitialized_zval);
 			}
