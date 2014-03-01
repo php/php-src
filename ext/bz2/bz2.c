@@ -346,10 +346,9 @@ static PHP_FUNCTION(bzread)
 	Z_STRVAL_P(return_value) = emalloc(len + 1);
 	Z_STRSIZE_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 	
-	if (Z_STRSIZE_P(return_value) < 0) {
+	if (Z_STRSIZE_P(return_value) == 0) {
 		efree(Z_STRVAL_P(return_value));
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
-		RETURN_FALSE;		
+		RETURN_STRINGL("", 0, 1);
 	}
 	
 	Z_STRVAL_P(return_value)[Z_STRSIZE_P(return_value)] = 0;
