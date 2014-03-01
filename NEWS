@@ -6,6 +6,16 @@ PHP                                                                        NEWS
   . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
   (Remi)
 
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- cURL:
+  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
+
+- Core:
+  . Allow zero length comparison in substr_compare() (Tjerk)
+
+
 ?? ??? 2014, PHP 5.5.10
 
 - Core:
