@@ -21,7 +21,7 @@ echo "*** Testing mcrypt_decrypt() : basic functionality ***\n";
 $cipher = MCRYPT_3DES;
 $mode = MCRYPT_MODE_CBC;
 
-// tripledes uses keys upto 192 bits (24 bytes)
+// tripledes uses keys with exactly 192 bits (24 bytes)
 $keys = array(
    b'12345678', 
    b'12345678901234567890', 
@@ -53,7 +53,7 @@ for ($i = 0; $i < sizeof($keys); $i++) {
    special_var_dump(mcrypt_decrypt($cipher, $keys[$i], base64_decode($data1[$i]), $mode, $iv));
 }
 
-$key = b'1234567890123456';  
+$key = b'123456789012345678901234';
 echo "\n--- testing different iv lengths\n";
 for ($i = 0; $i < sizeof($ivs); $i++) {
    echo "\niv length=".strlen($ivs[$i])."\n";
@@ -71,18 +71,22 @@ function special_var_dump($str) {
 --- testing different key lengths
 
 key length=8
-string(32) "736563726574206d6573736167650000"
+
+Warning: mcrypt_decrypt(): Key of length 8 not supported by this algorithm in %s on line %d
+string(0) ""
 
 key length=20
-string(32) "736563726574206d6573736167650000"
+
+Warning: mcrypt_decrypt(): Key of length 20 not supported by this algorithm in %s on line %d
+string(0) ""
 
 key length=24
 string(32) "736563726574206d6573736167650000"
 
 key length=26
 
-Warning: mcrypt_decrypt(): Size of key is too large for this algorithm in %s on line %d
-string(32) "736563726574206d6573736167650000"
+Warning: mcrypt_decrypt(): Key of length 26 not supported by this algorithm in %s on line %d
+string(0) ""
 
 --- testing different iv lengths
 
@@ -92,7 +96,7 @@ Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in 
 string(0) ""
 
 iv length=8
-string(32) "736563726574206d6573736167650000"
+string(32) "659ec947f4dc3a3b9c50de744598d3c8"
 
 iv length=9
 
