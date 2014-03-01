@@ -247,7 +247,7 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userda
 	heap->ctor(elem TSRMLS_CC);
 
 	/* sifting up */
-	for(i = heap->count++; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
+	for (i = heap->count++; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
 		heap->elements[i] = heap->elements[(i-1)/2];
 	}
 
@@ -1219,6 +1219,8 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	spl_handler_SplPriorityQueue.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_debug_info = spl_pqueue_object_get_debug_info;
+	spl_handler_SplPriorityQueue.dtor_obj = zend_objects_destroy_object;
+	spl_handler_SplPriorityQueue.free_obj = spl_heap_object_free_storage;
 
 	REGISTER_SPL_IMPLEMENTS(SplPriorityQueue, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplPriorityQueue, Countable);
