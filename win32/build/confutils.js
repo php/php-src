@@ -1553,7 +1553,7 @@ function write_summary()
 	} else if (PHP_PGI == "yes") {
 		ar[4] = ['Optimization', "PGI"];
 	} else {
-		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "standard"];
+		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
 	}
 	if (PHP_STATIC_ANALYZE == "yes") {
 		ar[5] = ['Static analyzer', 'Visual Studio'];
