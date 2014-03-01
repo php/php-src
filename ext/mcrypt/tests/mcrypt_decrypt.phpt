@@ -16,13 +16,14 @@ $enc_data = mcrypt_encrypt($cipher, $key, $secret, $mode, $iv);
 echo trim(mcrypt_decrypt($cipher, $key, $enc_data, $mode, $iv)) . "\n";
 
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
-mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC);
+var_dump(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC));
 
-var_dump(strpos(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv), "Testfest") !== false);
+var_dump(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv));
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_decrypt(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
+Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector in %s on line %d
+bool(false)
 
 Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
 bool(false)

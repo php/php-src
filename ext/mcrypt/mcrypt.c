@@ -1230,9 +1230,9 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 				memcpy(iv_s, iv, iv_size);
 			}
 		} else if (argc == 4) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommend");
-			iv_s = emalloc(iv_size + 1);
-			memset(iv_s, 0, iv_size + 1);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Encryption mode requires an initialization vector");
+			efree(key_s);
+			RETURN_FALSE;
 		}
 	}
 
