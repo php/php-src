@@ -1548,6 +1548,18 @@ function write_summary()
 	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
 	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
 	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	if (PHP_PGO == "yes") {
+		ar[4] = ['Optimization', "PGO"];
+	} else if (PHP_PGI == "yes") {
+		ar[4] = ['Optimization', "PGI"];
+	} else {
+		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	if (PHP_STATIC_ANALYZE == "yes") {
+		ar[5] = ['Static analyzer', 'Visual Studio'];
+	} else {
+		ar[5] = ['Static analyzer', 'disabled'];
+	}
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);
