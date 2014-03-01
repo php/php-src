@@ -83,7 +83,7 @@ iv length=4
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
 Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(112) "440a6f54601969b127aad3c217ce7583c7f7b29989693130645569301db0020b29a34a3dcd104b2d0e3ba19d6cbd8a33d352b9c27cc34ef1"
+string(0) ""
 
 iv length=8
 
@@ -95,5 +95,5 @@ iv length=9
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
 Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
-string(112) "440a6f54601969b127aad3c217ce7583c7f7b29989693130645569301db0020b29a34a3dcd104b2d0e3ba19d6cbd8a33d352b9c27cc34ef1"
+string(0) ""
 ===DONE===

@@ -1223,6 +1223,8 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 		if (argc == 5) {
 			if (iv_size != iv_len) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
+				efree(key_s);
+				RETURN_FALSE;
 			} else {
 				iv_s = emalloc(iv_size + 1);
 				memcpy(iv_s, iv, iv_size);
