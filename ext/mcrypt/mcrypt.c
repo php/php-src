@@ -1169,7 +1169,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	int block_size, max_key_length, use_key_length, i, count, iv_size;
+	int block_size, use_key_length, i, count, iv_size;
 	unsigned long int data_size;
 	int *key_length_sizes;
 	char *key_s = NULL, *iv_s;
@@ -1184,33 +1184,27 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 		RETURN_FALSE;
 	}
 	/* Checking for key-length */
-	max_key_length = mcrypt_enc_get_key_size(td);
-	if (key_len > max_key_length) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Size of key is too large for this algorithm");
-	}
 	key_length_sizes = mcrypt_enc_get_supported_key_sizes(td, &count);
 	if (count == 0 && key_length_sizes == NULL) { /* all lengths 1 - k_l_s = OK */
 		use_key_length = key_len;
 		key_s = emalloc(use_key_length);
 		memset(key_s, 0, use_key_length);
 		memcpy(key_s, key, use_key_length);
-	} else if (count == 1) {  /* only m_k_l = OK */
-		key_s = emalloc(key_length_sizes[0]);
-		memset(key_s, 0, key_length_sizes[0]);
-		memcpy(key_s, key, MIN(key_len, key_length_sizes[0]));
-		use_key_length = key_length_sizes[0];
-	} else { /* dertermine smallest supported key > length of requested key */
-		use_key_length = max_key_length; /* start with max key length */
+	} else {
 		for (i = 0; i < count; i++) {
-			if (key_length_sizes[i] >= key_len && 
-				key_length_sizes[i] < use_key_length)
-			{
-				use_key_length = key_length_sizes[i];
+			if (key_length_sizes[i] == key_len) {
+				use_key_length = key_len;
+				key_s = emalloc(use_key_length);
+				memcpy(key_s, key, use_key_length);
+				break;
 			}
 		}
-		key_s = emalloc(use_key_length);
-		memset(key_s, 0, use_key_length);
-		memcpy(key_s, key, MIN(key_len, use_key_length));
+
+		if (!key_s) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key of length %d not supported by this algorithm", key_len);
+			mcrypt_free(key_length_sizes);
+			RETURN_FALSE;
+		}
 	}
 	mcrypt_free (key_length_sizes);
 	
