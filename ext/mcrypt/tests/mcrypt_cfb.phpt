@@ -15,7 +15,7 @@ $enc_data = mcrypt_cfb($cipher, $key, $secret, MCRYPT_ENCRYPT, $iv);
 echo trim(mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
-mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
+var_dump(mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT));
 
 --EXPECTF--
 
@@ -26,4 +26,5 @@ PHP Testfest 2008
 
 Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 
-Warning: mcrypt_cfb(): Attempt to use an empty IV, which is NOT recommend in %s on line %d
+Warning: mcrypt_cfb(): Encryption mode requires an initialization vector in %s on line %d
+bool(false)
