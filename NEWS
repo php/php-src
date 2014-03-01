@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
   (Remi)
 
+- Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
 ?? ??? 2014, PHP 5.4.26
 
 - JSON:
