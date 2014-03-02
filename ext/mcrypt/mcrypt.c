@@ -1268,6 +1268,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 
 	/* Checking for key-length */
 	if (php_mcrypt_ensure_valid_key_size(td, key_len TSRMLS_CC) == FAILURE) {
+		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
 	
@@ -1275,11 +1276,13 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 	if (mcrypt_enc_mode_has_iv(td) == 1) {
 		if (!iv) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Encryption mode requires an initialization vector");
+			mcrypt_module_close(td);
 			RETURN_FALSE;
 		}
 
 		if (iv_len != mcrypt_enc_get_iv_size(td)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
+			mcrypt_module_close(td);
 			RETURN_FALSE;
 		}
 	}
@@ -1299,6 +1302,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 
 	if (mcrypt_generic_init(td, (void *) key, key_len, (void *) iv) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Mcrypt initialisation failed");
+		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
 
