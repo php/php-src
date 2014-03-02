@@ -669,6 +669,12 @@ spaces) (willfitch, iliaa)
     CURLOPT_RTSP_REQUEST, CURLOPT_RESOLVE, CURLOPT_ACCEPT_ENCODING,
     CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
     (Pierrick)
+  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
+    curl_pause, curl_reset, curl_share_close, curl_share_init,
+    curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
+  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
+    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
+    CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
     still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
@@ -676,12 +682,6 @@ spaces) (willfitch, iliaa)
 - DateTime
   . Added DateTimeImmutable - a variant of DateTime that only returns the
     modified state instead of changing itself. (Derick)
-  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
-    curl_pause, curl_reset, curl_share_close, curl_share_init,
-    curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
-  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
-    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
-    CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
   . Fixed bug #64825 (Invalid free when unserializing DateTimeZone).
     (Anatol)
   . Fixed bug #64359 (strftime crash with VS2012). (Anatol)
