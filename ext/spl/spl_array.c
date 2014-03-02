@@ -1412,6 +1412,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	zval tmp, *arg = NULL;
 	zval retval;
 
+	// ??? how to pass aht as a reference to later method call?
 	array_init(&tmp);
 	zend_hash_copy(Z_ARRVAL(tmp), aht, (copy_ctor_func_t)zval_add_ref);
 
