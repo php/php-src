@@ -121,22 +121,25 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type TSRMLS_DC)
 
 /* {{{ php_ini_displayer
  */
-static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS_DC)
+static int php_ini_displayer(zval *el, void *arg TSRMLS_DC)
 {
+	zend_ini_entry *ini_entry = (zend_ini_entry*)Z_PTR_P(el);
+	int module_number = *(int *)arg;
+
 	if (ini_entry->module_number != module_number) {
 		return 0;
 	}
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<tr>");
 		PUTS("<td class=\"e\">");
-		PHPWRITE(ini_entry->name, ini_entry->name_length - 1);
+		PHPWRITE(ini_entry->name, ini_entry->name_length);
 		PUTS("</td><td class=\"v\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE TSRMLS_CC);
 		PUTS("</td><td class=\"v\">");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG TSRMLS_CC);
 		PUTS("</td></tr>\n");
 	} else {
-		PHPWRITE(ini_entry->name, ini_entry->name_length - 1);
+		PHPWRITE(ini_entry->name, ini_entry->name_length);
 		PUTS(" => ");
 		php_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE TSRMLS_CC);
 		PUTS(" => ");
@@ -149,10 +152,12 @@ static int php_ini_displayer(zend_ini_entry *ini_entry, int module_number TSRMLS
 
 /* {{{ php_ini_available
  */
-static int php_ini_available(zend_ini_entry *ini_entry, int *module_number_available TSRMLS_DC)
+static int php_ini_available(zval *el, void *arg TSRMLS_DC)
 {
-	if (ini_entry->module_number == *module_number_available) {
-		*module_number_available = -1;
+	zend_ini_entry *ini_entry = (zend_ini_entry *)Z_PTR_P(el);
+	int *module_number_available = (int *)arg;
+	if (ini_entry->module_number == *(int *)module_number_available) {
+		*(int *)module_number_available = -1;
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		return ZEND_HASH_APPLY_KEEP;
@@ -173,11 +178,11 @@ PHPAPI void display_ini_entries(zend_module_entry *module)
 		module_number = 0;
 	}
 	module_number_available = module_number;
-	zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_available, &module_number_available TSRMLS_CC);
+	zend_hash_apply_with_argument(EG(ini_directives), php_ini_available, &module_number_available TSRMLS_CC);
 	if (module_number_available == -1) {
 		php_info_print_table_start();
 		php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-		zend_hash_apply_with_argument(EG(ini_directives), (apply_func_arg_t) php_ini_displayer, (void *) (zend_intptr_t) module_number TSRMLS_CC);
+		zend_hash_apply_with_argument(EG(ini_directives), php_ini_displayer, (void *)&module_number TSRMLS_CC);
 		php_info_print_table_end();
 	}
 }
@@ -350,7 +355,6 @@ static void php_load_php_extension_cb(void *arg TSRMLS_DC)
 static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
 	char *filename = *((char **) arg);
-	int length = strlen(filename);
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename TSRMLS_CC);

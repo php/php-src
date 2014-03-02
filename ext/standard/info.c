@@ -170,8 +170,9 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int _display_module_info_func(zend_module_entry *module TSRMLS_DC) /* {{{ */
+static int _display_module_info_func(zval *el TSRMLS_DC) /* {{{ */
 {
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
 	if (module->info_func || module->version) {
 		php_info_print_module(module TSRMLS_CC);
 	}
@@ -179,8 +180,9 @@ static int _display_module_info_func(zend_module_entry *module TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static int _display_module_info_def(zend_module_entry *module TSRMLS_DC) /* {{{ */
+static int _display_module_info_def(zval *el TSRMLS_DC) /* {{{ */
 {
+	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(el);
 	if (!module->info_func && !module->version) {
 		php_info_print_module(module TSRMLS_CC);
 	}
@@ -268,6 +270,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			zend_hash_move_forward(Z_ARRVAL_P(data));
 		}
 	}
+	STR_FREE(key);
 }
 /* }}} */
 
@@ -828,12 +831,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
 		zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
 
-		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_func TSRMLS_CC);
+		zend_hash_apply(&sorted_registry, _display_module_info_func TSRMLS_CC);
 
 		SECTION("Additional Modules");
 		php_info_print_table_start();
 		php_info_print_table_header(1, "Module Name");
-		zend_hash_apply(&sorted_registry, (apply_func_t) _display_module_info_def TSRMLS_CC);
+		zend_hash_apply(&sorted_registry, _display_module_info_def TSRMLS_CC);
 		php_info_print_table_end();
 
 		zend_hash_destroy(&sorted_registry);
