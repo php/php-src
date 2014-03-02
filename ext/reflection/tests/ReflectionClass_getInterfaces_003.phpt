@@ -34,13 +34,13 @@ var_dump($a);
 An object is in an array and is referenced. As expected, var_dumping the array shows '&':
 array(1) {
   [0]=>
-  &object(stdClass)#%d (0) {
+  object(stdClass)#%d (0) {
   }
 }
 Naturally, this remains true if we modify the object:
 array(1) {
   [0]=>
-  &object(stdClass)#%d (1) {
+  object(stdClass)#%d (1) {
     ["x"]=>
     int(1)
   }
@@ -52,7 +52,7 @@ The result is an array in which each element is an object (an instance of Reflec
 Var_dumping this array shows that the elements are referenced. By what?
 array(1) {
   ["I"]=>
-  &object(ReflectionClass)#%d (1) {
+  object(ReflectionClass)#%d (1) {
     ["name"]=>
     string(1) "I"
   }
