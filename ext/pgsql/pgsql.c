@@ -2850,7 +2850,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	zval *result;
 	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
-	php_uint_t colno=0;
+	php_int_t colno=0;
 	int pg_numrows, pg_row;
 	size_t num_fields;
 
@@ -2863,7 +2863,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	pgsql_result = pg_result->result;
 
 	num_fields = PQnfields(pgsql_result);
-	if (colno >= num_fields || colno < 0) {
+	if (colno < 0 || colno >= num_fields) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%pd'", colno);
 		RETURN_FALSE;
 	}
@@ -3419,7 +3419,8 @@ PHP_FUNCTION(pg_lo_read)
 {
 	zval *pgsql_id;
 	php_int_t len;
-	php_size_t buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes;
+	php_size_t buf_len = PGSQL_LO_READ_BUF_SIZE;
+	int nbytes;
 	int argc = ZEND_NUM_ARGS();
 	char *buf;
 	pgLofp *pgsql;
@@ -3763,7 +3764,7 @@ PHP_FUNCTION(pg_lo_tell)
 PHP_FUNCTION(pg_lo_truncate)
 {
 	zval *pgsql_id = NULL;
-	size_t size;
+	php_int_t size;
 	pgLofp *pgsql;
 	int argc = ZEND_NUM_ARGS();
 	int result;
@@ -6183,7 +6184,7 @@ PHP_FUNCTION(pg_convert)
 	zval *pgsql_link, *values;
 	char *table_name;
 	php_size_t table_name_len;
-	php_uint_t option = 0;
+	php_int_t option = 0;
 	PGconn *pg_link;
 	php_int_t id = -1;
 
@@ -6191,7 +6192,7 @@ PHP_FUNCTION(pg_convert)
 							  "rSa|i", &pgsql_link, &table_name, &table_name_len, &values, &option) == FAILURE) {
 		return;
 	}
-	if (option & ~PGSQL_CONV_OPTS) {
+	if (option < 0 || option & ~PGSQL_CONV_OPTS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
@@ -6402,7 +6403,8 @@ PHP_FUNCTION(pg_insert)
 	zval *pgsql_link, *values;
 	char *table, *sql = NULL;
 	php_size_t table_len;
-	php_uint_t option = PGSQL_DML_EXEC, return_sql;
+	php_int_t option = PGSQL_DML_EXEC;
+	php_uint_t return_sql;
 	PGconn *pg_link;
 	PGresult *pg_result;
 	ExecStatusType status;
@@ -6414,7 +6416,7 @@ PHP_FUNCTION(pg_insert)
 							  &pgsql_link, &table, &table_len, &values, &option) == FAILURE) {
 		return;
 	}
-	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
+	if (option < 0 || option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
@@ -6625,7 +6627,7 @@ PHP_FUNCTION(pg_update)
 	zval *pgsql_link, *values, *ids;
 	char *table, *sql = NULL;
 	php_size_t table_len;
-	php_uint_t option =  PGSQL_DML_EXEC;
+	php_int_t option =  PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	php_int_t id = -1;
 	int argc = ZEND_NUM_ARGS();
@@ -6634,7 +6636,7 @@ PHP_FUNCTION(pg_update)
 							  &pgsql_link, &table, &table_len, &values, &ids, &option) == FAILURE) {
 		return;
 	}
-	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
+	if (option < 0 || option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
@@ -6718,7 +6720,7 @@ PHP_FUNCTION(pg_delete)
 	zval *pgsql_link, *ids;
 	char *table, *sql = NULL;
 	php_size_t table_len;
-	php_uint_t option = PGSQL_DML_EXEC;
+	php_int_t option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	php_int_t id = -1;
 	int argc = ZEND_NUM_ARGS();
@@ -6727,7 +6729,7 @@ PHP_FUNCTION(pg_delete)
 							  &pgsql_link, &table, &table_len, &ids, &option) == FAILURE) {
 		return;
 	}
-	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
+	if (option < 0 || option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
@@ -6857,7 +6859,7 @@ PHP_FUNCTION(pg_select)
 	zval *pgsql_link, *ids;
 	char *table, *sql = NULL;
 	php_size_t table_len;
-	php_uint_t option = PGSQL_DML_EXEC;
+	php_int_t option = PGSQL_DML_EXEC;
 	PGconn *pg_link;
 	php_int_t id = -1;
 	int argc = ZEND_NUM_ARGS();
@@ -6866,7 +6868,7 @@ PHP_FUNCTION(pg_select)
 							  &pgsql_link, &table, &table_len, &ids, &option) == FAILURE) {
 		return;
 	}
-	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
+	if (option < 0 || option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
