@@ -14,7 +14,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
-
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
 ?? ??? 2014, PHP 5.5.10
 
