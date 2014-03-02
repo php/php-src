@@ -5437,6 +5437,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 						dep->version ? " " : "",
 						dep->version ? dep->version : "");
 		add_assoc_stringl(return_value, dep->name, relation, len, 0);
+		efree(relation);
 		dep++;
 	}
 }
