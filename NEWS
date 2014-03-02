@@ -6,7 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
   (Remi)
 
-- Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- Core:
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
 ?? ??? 2014, PHP 5.4.26
 
