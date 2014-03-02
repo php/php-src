@@ -80,7 +80,7 @@ static zend_class_entry *dir_class_entry_ptr;
 	} \
 	if (ZEND_NUM_ARGS() == 0) { \
 		myself = getThis(); \
-		if (myself) { \
+		if (!ZVAL_IS_UNDEF(myself)) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find my handle property"); \
 				RETURN_FALSE; \
