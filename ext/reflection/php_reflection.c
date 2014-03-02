@@ -3698,7 +3698,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
 		efree(lc_name);
-	} else if (ce == zend_ce_closure && !ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
+	} else if (ce == zend_ce_closure && ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(&obj_tmp TSRMLS_CC)) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
