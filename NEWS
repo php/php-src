@@ -15,6 +15,12 @@ PHP                                                                        NEWS
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
 
+- Openssl:
+  . Fixed memory leak in windows cert verification on verify failure.
+    (Chris Wright)
+  . Peer certificate capturing via SSL context options now functions even if
+    peer verification fails. (Daniel Lowrey)
+
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
 
