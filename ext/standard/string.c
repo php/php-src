@@ -2409,18 +2409,23 @@ PHP_FUNCTION(substr_replace)
 			zval *orig_str;
 			zval dummy;
 			ulong refcount;
-//???			int was_ref;
 
-			if(Z_TYPE_P(tmp_str) != IS_STRING) {
+			if (Z_ISREF_P(tmp_str)) {
+				/* see bug #55871 */
+				ZVAL_DUP(&dummy, Z_REFVAL_P(tmp_str));
+				convert_to_string(&dummy);
+				orig_str = &dummy;
+			} else if (Z_TYPE_P(tmp_str) != IS_STRING) {
 				ZVAL_DUP(&dummy, tmp_str);
 				convert_to_string(&dummy);
 				orig_str = &dummy;
 			} else {
 				orig_str = tmp_str;
 			}
-//???			was_ref = Z_ISREF_P(orig_str);
-//???			Z_UNSET_ISREF_P(orig_str);
+
+			/*
 			refcount = Z_REFCOUNT_P(orig_str);
+			*/
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				if (NULL != (tmp_from = zend_hash_get_current_data_ex(Z_ARRVAL_P(from), &pos_from))) {
@@ -2496,21 +2501,27 @@ PHP_FUNCTION(substr_replace)
 				if (NULL != (tmp_repl = zend_hash_get_current_data_ex(Z_ARRVAL_P(repl), &pos_repl))) {
 					zval *repl_str;
 					zval zrepl;
-					if(Z_TYPE_P(tmp_repl) != IS_STRING) {
+
+					if (Z_ISREF_P(tmp_repl)) {
+						tmp_repl = Z_REFVAL_P(tmp_repl);
+					}
+
+					if (Z_TYPE_P(tmp_repl) != IS_STRING) {
 						ZVAL_DUP(&zrepl, tmp_repl);
 						convert_to_string(&zrepl);
 						repl_str = &zrepl;
 					} else {
 						repl_str = tmp_repl;
 					}
-
-					if(Z_REFCOUNT_P(orig_str) != refcount) {
+					/*
+					if (Z_REFCOUNT_P(orig_str) != refcount) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument was modified while replacing");
-						if(Z_TYPE_P(tmp_repl) != IS_STRING) {
+						if (Z_TYPE_P(tmp_repl) != IS_STRING) {
 							zval_dtor(repl_str);
 						}
 						break;
 					}
+					*/
 
 					result_len += Z_STRLEN_P(repl_str);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(repl), &pos_repl);
