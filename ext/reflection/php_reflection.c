@@ -3462,7 +3462,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-				"Class %s does not have a property named %s", ce->name->val, name);
+				"Class %s does not have a property named %s", ce->name->val, name->val);
 		return;
 	}
 //???	refcount = Z_REFCOUNT_PP(variable_ptr);
