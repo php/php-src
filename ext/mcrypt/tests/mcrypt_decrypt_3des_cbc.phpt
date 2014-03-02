@@ -72,12 +72,12 @@ function special_var_dump($str) {
 
 key length=8
 
-Warning: mcrypt_decrypt(): Key of length 8 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
-Warning: mcrypt_decrypt(): Key of length 20 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
@@ -85,7 +85,7 @@ string(32) "736563726574206d6573736167650000"
 
 key length=26
 
-Warning: mcrypt_decrypt(): Key of length 26 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 --- testing different iv lengths

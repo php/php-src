@@ -65,12 +65,12 @@ foreach ($ivs as $iv) {
 
 key length=8
 
-Warning: mcrypt_encrypt(): Key of length 8 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=20
 
-Warning: mcrypt_encrypt(): Key of length 20 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 key length=24
@@ -78,7 +78,7 @@ string(112) "b85e21072239d60c63a80e7c9ae493cb741a1cd407e52f451c5f43a0d103f55a7b6
 
 key length=26
 
-Warning: mcrypt_encrypt(): Key of length 26 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 26 not supported by this algorithm. Only keys of size 24 supported in %s on line %d
 string(0) ""
 
 --- testing different iv lengths

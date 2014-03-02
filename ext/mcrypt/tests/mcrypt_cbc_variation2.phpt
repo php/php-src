@@ -125,47 +125,47 @@ fclose($fp);
 
 --int 0--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --int 1--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --int 12345--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --int -12345--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --float 10.5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --float -10.5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --float 12.3456789000e10--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --float -12.3456789000e10--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --float .5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --empty array--
@@ -190,47 +190,47 @@ string(0) ""
 
 --uppercase NULL--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --lowercase null--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --lowercase true--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --lowercase false--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --uppercase TRUE--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --uppercase FALSE--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --empty string DQ--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --empty string SQ--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --instance of classWithToString--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --instance of classWithoutToString--
@@ -240,12 +240,12 @@ string(0) ""
 
 --undefined var--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --unset var--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): Key of length %d not supported by this algorithm, %s(%d)
+Error: 2 - mcrypt_cbc(): Key of size %d not supported by this algorithm. Only keys of size 24 supported, %s(%d)
 string(0) ""
 
 --resource--

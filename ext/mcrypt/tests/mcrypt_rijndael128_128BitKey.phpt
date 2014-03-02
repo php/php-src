@@ -76,32 +76,32 @@ foreach ($ivs as $iv) {
 
 key length=0
 
-Warning: mcrypt_encrypt(): Key of length 0 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): Key of length 0 not supported by this algorithm in %s on line %d
+Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=0
 
-Warning: mcrypt_encrypt(): Key of length 0 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): Key of length 0 not supported by this algorithm in %s on line %d
+Warning: mcrypt_cbc(): Key of size 0 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=8
 
-Warning: mcrypt_encrypt(): Key of length 8 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): Key of length 8 not supported by this algorithm in %s on line %d
+Warning: mcrypt_cbc(): Key of size 8 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=16
