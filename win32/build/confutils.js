@@ -1393,7 +1393,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 			if (PHP_ANALYZER == "pvs") {
 				MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
-					+ " --cfg PVS-Studio.conf ");
+					+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
 			}
 			MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
