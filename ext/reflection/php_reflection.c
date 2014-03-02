@@ -304,7 +304,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 			break;
 		case REF_TYPE_DYNAMIC_PROPERTY:
 			prop_reference = (property_reference*)intern->ptr;
-			efree((char*)prop_reference->prop.name);
+			STR_RELEASE(prop_reference->prop.name);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_OTHER:
