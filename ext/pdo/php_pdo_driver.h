@@ -242,10 +242,10 @@ typedef struct {
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 /* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, php_uint_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC);
+typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC);
 
 /* execute a statement (that does not return a result set) */
-typedef php_int_t (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, php_uint_t sql_len TSRMLS_DC);
+typedef php_int_t (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, php_size_t sql_len TSRMLS_DC);
 
 /* quote a string */
 typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, php_size_t unquotedlen, char **quoted, php_size_t *quotedlen, enum pdo_param_type paramtype TSRMLS_DC);
