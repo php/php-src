@@ -339,7 +339,7 @@ typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno TSRMLS_DC)
  * If the driver sets caller_frees, ptr should point to emalloc'd memory
  * and PDO will free it as soon as it is done using it.
  */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC);
+typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_size_t *len, int *caller_frees TSRMLS_DC);
 
 /* hook for bound params */
 enum pdo_param_event {

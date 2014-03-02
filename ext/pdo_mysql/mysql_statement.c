@@ -702,7 +702,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_size_t *len, int *caller_frees TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 

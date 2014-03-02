@@ -213,7 +213,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 }
 
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr,
-	 php_uint_t *len, int *caller_frees TSRMLS_DC)
+	 php_size_t *len, int *caller_frees TSRMLS_DC)
 {
 	
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
