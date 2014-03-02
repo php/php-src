@@ -4466,14 +4466,14 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 	if (ce->trait_aliases) {
 		zend_uint i = 0;
 		while (ce->trait_aliases[i]) {
-			char *method_name;
-			int method_name_len;
+			zend_string *mname;
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
 
 			if (ce->trait_aliases[i]->alias) {
-				method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->ce->name->val, cur_ref->method_name->val);
-//???
-				add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias->val, ce->trait_aliases[i]->alias->len, method_name, method_name_len, 0);
+
+				mname = STR_ALLOC(cur_ref->ce->name->len + cur_ref->method_name->len + 2, 0);
+				snprintf(mname->val, mname->len + 1, "%s::%s", cur_ref->ce->name->val, cur_ref->method_name->val);
+				add_assoc_str_ex(return_value, ce->trait_aliases[i]->alias->val, ce->trait_aliases[i]->alias->len, mname);
 			}
 			i++;
 		}
@@ -5411,33 +5411,45 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	}
 
 	while(dep->name) {
-		char *relation;
+		zend_string *relation;
 		char *rel_type;
-		int len;
+		int len = 0;
 
 		switch(dep->type) {
-		case MODULE_DEP_REQUIRED:
-			rel_type = "Required";
-			break;
-		case MODULE_DEP_CONFLICTS:
-			rel_type = "Conflicts";
-			break;
-		case MODULE_DEP_OPTIONAL:
-			rel_type = "Optional";
-			break;
-		default:
-			rel_type = "Error"; /* shouldn't happen */
-			break;
+			case MODULE_DEP_REQUIRED:
+				rel_type = "Required";
+				len += sizeof("Required") - 1;
+				break;
+			case MODULE_DEP_CONFLICTS:
+				rel_type = "Conflicts";
+				len += sizeof("Conflicts") - 1;
+				break;
+			case MODULE_DEP_OPTIONAL:
+				rel_type = "Optional";
+				len += sizeof("Optional") - 1;
+				break;
+			default:
+				rel_type = "Error"; /* shouldn't happen */
+				len += sizeof("Error") - 1;
+				break;
 		}
 
-		len = spprintf(&relation, 0, "%s%s%s%s%s",
+		if (dep->rel) {
+			len += strlen(dep->rel) + 1;
+		}
+
+		if (dep->version) {
+			len += strlen(dep->version) + 1;
+		}
+
+		relation = STR_ALLOC(len, 0);
+		snprintf(relation->val, relation->len + 1, "%s%s%s%s%s",
 						rel_type,
 						dep->rel ? " " : "",
 						dep->rel ? dep->rel : "",
 						dep->version ? " " : "",
 						dep->version ? dep->version : "");
-		add_assoc_stringl(return_value, dep->name, relation, len, 0);
-		efree(relation);
+		add_assoc_str(return_value, dep->name, relation);
 		dep++;
 	}
 }
