@@ -5038,7 +5038,9 @@ ZEND_METHOD(reflection_property, setValue)
 				
 				ZVAL_COPY_VALUE(&garbage, variable_ptr);
 				/* if we assign referenced variable, we should separate it */
-				Z_ADDREF_P(value);
+				if (Z_REFCOUNTED_P(value)) {
+					Z_ADDREF_P(value);
+				}
 				if (Z_ISREF_P(value)) {
 					SEPARATE_ZVAL(value);
 				}
