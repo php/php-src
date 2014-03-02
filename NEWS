@@ -2,18 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 1
 
-- MySQLi:
-  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
-  (Remi)
+- Core:
+  . Allow zero length comparison in substr_compare() (Tjerk)
+
+- cURL:
+  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
+    (Tjerk)
 
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
-- cURL:
-  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
-
-- Core:
-  . Allow zero length comparison in substr_compare() (Tjerk)
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+    (Remi)
 
 - Openssl:
   . Fixed memory leak in windows cert verification on verify failure.
