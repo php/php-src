@@ -1691,7 +1691,7 @@ ZEND_METHOD(reflection_function, getClosureThis)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (!ZVAL_IS_UNDEF(&intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj TSRMLS_CC);
-		if (closure_this) {
+		if (!ZVAL_IS_UNDEF(closure_this)) {
 			RETURN_ZVAL(closure_this, 1, 0);
 		}
 	}
