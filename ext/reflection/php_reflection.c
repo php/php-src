@@ -820,7 +820,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	 * swallowed, leading to an unaligned comment.
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		string_printf(str, "%s%s\n", indent, fptr->op_array.doc_comment);
+		string_printf(str, "%s%s\n", indent, fptr->op_array.doc_comment->val);
 	}
 
 	string_write(str, indent, strlen(indent));
@@ -3432,7 +3432,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 			RETURN_ZVAL(def_value, 1, 0);
 		} else {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-				"Class %s does not have a property named %s", ce->name->val, name);
+				"Class %s does not have a property named %s", ce->name->val, name->val);
 		}
 		return;
 	} else {
@@ -3870,13 +3870,14 @@ ZEND_METHOD(reflection_class, getProperty)
 		str_name = tmp + 2;
 
 		ce2 = zend_lookup_class(classname TSRMLS_CC);
-		STR_FREE(classname);
 		if (!ce2) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname);
+				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname->val);
 			}
+			STR_FREE(classname);
 			return;
 		}
+		STR_FREE(classname);
 
 		if (!instanceof_function(ce, ce2 TSRMLS_CC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
