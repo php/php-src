@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
