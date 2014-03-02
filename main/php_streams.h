@@ -348,11 +348,11 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 #define php_stream_closedir(dirstream)	php_stream_close((dirstream))
 #define php_stream_rewinddir(dirstream)	php_stream_rewind((dirstream))
 
-PHPAPI int php_stream_dirent_alphasort(const char **a, const char **b);
-PHPAPI int php_stream_dirent_alphasortr(const char **a, const char **b);
+PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b);
+PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b);
 
-PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags, php_stream_context *context,
-			int (*compare) (const char **a, const char **b) TSRMLS_DC);
+PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+			int (*compare) (const zend_string **a, const zend_string **b) TSRMLS_DC);
 #define php_stream_scandir(dirname, namelist, context, compare) _php_stream_scandir((dirname), (namelist), 0, (context), (compare) TSRMLS_CC)
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);

@@ -2243,28 +2243,28 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 
 /* {{{ php_stream_dirent_alphasort
  */
-PHPAPI int php_stream_dirent_alphasort(const char **a, const char **b)
+PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b)
 {
-	return strcoll(*a, *b);
+	return strcoll((*a)->val, (*b)->val);
 }
 /* }}} */
 
 /* {{{ php_stream_dirent_alphasortr
  */
-PHPAPI int php_stream_dirent_alphasortr(const char **a, const char **b)
+PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b)
 {
-	return strcoll(*b, *a);
+	return strcoll((*b)->val, (*a)->val);
 }
 /* }}} */
 
 /* {{{ php_stream_scandir
  */
-PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags, php_stream_context *context,
-			  int (*compare) (const char **a, const char **b) TSRMLS_DC)
+PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+			  int (*compare) (const zend_string **a, const zend_string **b) TSRMLS_DC)
 {
 	php_stream *stream;
 	php_stream_dirent sdp;
-	char **vector = NULL;
+	zend_string **vector = NULL;
 	unsigned int vector_size = 0;
 	unsigned int nfiles = 0;
 
@@ -2290,10 +2290,10 @@ PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags
 				}
 				vector_size *= 2;
 			}
-			vector = (char **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
+			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
-		vector[nfiles] = estrdup(sdp.d_name);
+		vector[nfiles] = STR_INIT(sdp.d_name, strlen(sdp.d_name), 0);
 
 		nfiles++;
 		if(vector_size < 10 || nfiles == 0) {
@@ -2308,7 +2308,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags
 	*namelist = vector;
 
 	if (nfiles > 0 && compare) {
-		qsort(*namelist, nfiles, sizeof(char *), (int(*)(const void *, const void *))compare);
+		qsort(*namelist, nfiles, sizeof(zend_string *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
 }
