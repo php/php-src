@@ -40,6 +40,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_rand.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_mcrypt_filter.h"
 
 static int le_mcrypt;
@@ -1165,35 +1166,87 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 }
 /* }}} */
 
-static zend_bool php_mcrypt_is_valid_key_size(MCRYPT td, int key_len) /* {{{ */
+static char *php_mcrypt_get_key_size_str(
+		int max_key_size, const int *key_sizes, int key_size_count) /* {{{ */
 {
-	if (key_len <= 0) {
+	if (key_size_count == 0) {
+		char *str;
+		spprintf(&str, 0, "Only keys of size 1 to %d supported", max_key_size);
+		return str;
+	} else if (key_size_count == 1) {
+		char *str;
+		spprintf(&str, 0, "Only keys of size %d supported", key_sizes[0]);
+		return str;
+	} else {
+		int i;
+		smart_str str = {0};
+		smart_str_appends(&str, "Only keys of sizes ");
+
+		for (i = 0; i < key_size_count; ++i) {
+			if (i == key_size_count - 1) {
+				smart_str_appends(&str, " or ");
+			} else if (i != 0) {
+				smart_str_appends(&str, ", ");
+			}
+
+			smart_str_append_long(&str, key_sizes[i]);
+		}
+
+		smart_str_appends(&str, " supported");
+		smart_str_0(&str);
+		return str.c;
+	}
+}
+/* }}} */
+
+static zend_bool php_mcrypt_is_valid_key_size(
+		int key_size, int max_key_size, int *key_sizes, int key_size_count) /* {{{ */
+{
+	int i;
+
+	if (key_size <= 0 || key_size > max_key_size) {
 		return 0;
 	}
 
-	if (key_len > mcrypt_enc_get_key_size(td)) {
-		return 0;
+	if (key_size_count == 0) {
+		/* All key sizes are valid */
+		return 1;
 	}
 
-	{
-		int count, i;
-		int *key_sizes = mcrypt_enc_get_supported_key_sizes(td, &count);
-
-		if (!key_sizes) {
-			/* All key sizes are valid */
+	for (i = 0; i < key_size_count; i++) {
+		if (key_sizes[i] == key_size) {
 			return 1;
 		}
-
-		for (i = 0; i < count; i++) {
-			if (key_sizes[i] == key_len) {
-				mcrypt_free(key_sizes);
-				return 1;
-			}
-		}
-
-		mcrypt_free(key_sizes);
-		return 0;
 	}
+
+	return 0;
+}
+/* }}} */
+
+static int php_mcrypt_ensure_valid_key_size(MCRYPT td, int key_size TSRMLS_DC) /* {{{ */
+{
+	int key_size_count;
+	int max_key_size = mcrypt_enc_get_key_size(td);
+	int *key_sizes = mcrypt_enc_get_supported_key_sizes(td, &key_size_count);
+
+	zend_bool is_valid_key_size = php_mcrypt_is_valid_key_size(
+		key_size, max_key_size, key_sizes, key_size_count
+	);
+	if (!is_valid_key_size) {
+		char *key_size_str = php_mcrypt_get_key_size_str(
+			max_key_size, key_sizes, key_size_count
+		);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Key of size %d not supported by this algorithm. %s", key_size, key_size_str
+		);
+		efree(key_size_str);
+	}
+
+	if (key_sizes) {
+		mcrypt_free(key_sizes);
+	}
+
+	return is_valid_key_size ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -1214,8 +1267,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 	}
 
 	/* Checking for key-length */
-	if (!php_mcrypt_is_valid_key_size(td, key_len)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key of length %d not supported by this algorithm", key_len);
+	if (php_mcrypt_ensure_valid_key_size(td, key_len TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	}
 	

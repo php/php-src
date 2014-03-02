@@ -63,10 +63,10 @@ foreach ($keys as $key) {
 
 key length=20
 
-Warning: mcrypt_encrypt(): Key of length 20 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): Key of length 20 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=24
@@ -75,10 +75,10 @@ string(128) "546869732069732074686520736563726574206d657373616765207768696368206
 
 key length=30
 
-Warning: mcrypt_encrypt(): Key of length 30 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): Key of length 30 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
 key length=32
@@ -87,9 +87,9 @@ string(128) "546869732069732074686520736563726574206d657373616765207768696368206
 
 key length=40
 
-Warning: mcrypt_encrypt(): Key of length 40 not supported by this algorithm in %s on line %d
+Warning: mcrypt_encrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): Key of length 40 not supported by this algorithm in %s on line %d
+Warning: mcrypt_decrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
 string(0) ""
 ===DONE===
