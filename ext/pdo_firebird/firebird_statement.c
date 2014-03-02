@@ -300,7 +300,7 @@ fetch_blob_end:
 /* }}} */
 
 static int firebird_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr,  /* {{{ */
-	php_uint_t *len, int *caller_frees TSRMLS_DC)
+	php_size_t *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLVAR const *var = &S->out_sqlda.sqlvar[colno];

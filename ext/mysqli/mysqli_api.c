@@ -1298,7 +1298,7 @@ PHP_FUNCTION(mysqli_field_seek)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	php_uint_t	fieldnr;
+	php_int_t	fieldnr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &mysql_result, mysqli_result_class_entry, &fieldnr) == FAILURE) {
 		return;
@@ -2306,7 +2306,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 	my_bool	mode_b;
 #endif
 	php_uint_t	mode;
-	php_uint_t	attr;
+	php_int_t	attr;
 	void	*mode_p;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii", &mysql_stmt, mysqli_stmt_class_entry, &attr, &mode_in) == FAILURE) {
@@ -2316,6 +2316,11 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 
 	if (mode_in < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mode should be non-negative, %pd passed", mode_in);
+		RETURN_FALSE;
+	}
+
+	if (attr < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "attr should be non-negative, %pd passed", attr);
 		RETURN_FALSE;
 	}
 
@@ -2349,12 +2354,18 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
 	php_uint_t	value = 0;
-	php_uint_t	attr;
+	php_int_t	attr;
 	int		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &mysql_stmt, mysqli_stmt_class_entry, &attr) == FAILURE) {
 		return;
 	}
+
+	if (attr < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "attr should be non-negative, %pd passed", attr);
+		RETURN_FALSE;
+	}
+
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 
 	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {

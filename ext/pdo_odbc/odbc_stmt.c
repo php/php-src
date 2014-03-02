@@ -613,7 +613,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC)
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_size_t *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];

@@ -490,7 +490,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_uint_t *len, int *caller_frees  TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, php_int_t colno, char **ptr, php_size_t *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
