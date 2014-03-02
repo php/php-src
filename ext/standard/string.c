@@ -1138,6 +1138,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
 
 	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), &pos)) != NULL) {
+again:
 		switch (Z_TYPE_P(tmp)) {
 			case IS_STRING:
 				smart_str_appendl(&implstr, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
@@ -1177,9 +1178,12 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 				}
 			}
 				break;
-
+			case IS_REFERENCE:
+				tmp = Z_REFVAL_P(tmp);
+				goto again;
 			default:
 				ZVAL_DUP(&tmp_val, tmp);
+				convert_to_string(&tmp_val);
 				smart_str_appendl(&implstr, Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
 				zval_dtor(&tmp_val);
 				break;
