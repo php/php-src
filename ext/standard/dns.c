@@ -945,10 +945,12 @@ PHP_FUNCTION(dns_get_mx)
 		return;
 	}
 
+	mx_list = Z_REFVAL_P(mx_list);
 	zval_dtor(mx_list);
 	array_init(mx_list);
 
 	if (weight_list) {
+		weight_list = Z_REFVAL_P(weight_list);
 		zval_dtor(weight_list);
 		array_init(weight_list);
 	}
