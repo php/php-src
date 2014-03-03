@@ -897,8 +897,11 @@ PHP_FUNCTION(proc_open)
 	proc->env = env;
 
 	if (pipes != NULL) {
+		ZEND_ASSERT(Z_ISREF_P(pipes));
+		pipes = Z_REFVAL_P(pipes);
 		zval_dtor(pipes);
-	}
+	} 
+
 	array_init(pipes);
 
 #if PHP_CAN_DO_PTS
