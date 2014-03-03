@@ -525,7 +525,7 @@ void php_get_windows_cpu(char *buf, int bufsize)
 
 /* {{{ php_get_uname
  */
-PHPAPI char *php_get_uname(char mode)
+PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
 	char tmp_uname[256];
@@ -627,7 +627,7 @@ PHPAPI char *php_get_uname(char mode)
 	php_uname = PHP_UNAME;
 #endif
 #endif
-	return estrdup(php_uname);
+	return STR_INIT(php_uname, strlen(php_uname), 0);
 }
 /* }}} */
 
@@ -662,7 +662,7 @@ static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 PHPAPI void php_print_info(int flag TSRMLS_DC)
 {
 	char **env, *tmp1, *tmp2;
-	char *php_uname;
+	zend_string *php_uname;
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_print_info_htmlhead(TSRMLS_C);
@@ -702,8 +702,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 		php_info_print_box_end();
 		php_info_print_table_start();
-		php_info_print_table_row(2, "System", php_uname );
-		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__ );
+		php_info_print_table_row(2, "System", php_uname->val);
+		php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__);
 #ifdef COMPILER
 		php_info_print_table_row(2, "Compiler", COMPILER);
 #endif
@@ -805,7 +805,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
 		}
 		php_info_print_box_end();
-		efree(php_uname);
+		STR_FREE(php_uname);
 	}
 
 	zend_ini_sort_entries(TSRMLS_C);
@@ -1221,8 +1221,7 @@ PHP_FUNCTION(php_uname)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
 		return;
 	}
-//???	RETURN_STRING(php_get_uname(*mode), 0);
-	RETURN_STRING(php_get_uname(*mode));
+	RETURN_STR(php_get_uname(*mode));
 }
 
 /* }}} */
