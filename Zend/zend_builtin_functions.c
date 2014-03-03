@@ -1103,7 +1103,9 @@ ZEND_FUNCTION(method_exists)
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		ce = zend_lookup_class(Z_STR_P(klass) TSRMLS_CC);
+		if ((ce = zend_lookup_class(Z_STR_P(klass) TSRMLS_CC)) == NULL) {
+			RETURN_FALSE;
+		}
 	} else {
 		RETURN_FALSE;
 	}
