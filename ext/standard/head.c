@@ -75,11 +75,12 @@ PHPAPI int php_header(TSRMLS_D)
 
 PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
-	char *cookie, *encoded_value = NULL;
+	char *cookie;
 	int len=sizeof("Set-Cookie: ");
 	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
+	zend_string *encoded_value = NULL;
 
 	if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
 		zend_error( E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
@@ -93,14 +94,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 	len += name_len;
 	if (value && url_encode) {
-		int encoded_value_len;
-
-		encoded_value = php_url_encode(value, value_len, &encoded_value_len);
-		len += encoded_value_len;
-	} else if ( value ) {
-		encoded_value = estrdup(value);
-		len += value_len;
+		encoded_value = php_url_encode(value, value_len);
+	} else if (value) {
+		encoded_value = STR_INIT(value, value_len, 0);
 	}
+
+	len += encoded_value->len;
 	if (path) {
 		len += path_len;
 	}
@@ -120,7 +119,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt);
 		efree(dt);
 	} else {
-		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
+		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value->val : "");
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
@@ -131,7 +130,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			if (!p || *(p + 5) != ' ') {
 				efree(dt);
 				efree(cookie);
-				efree(encoded_value);
+				STR_FREE(encoded_value);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
@@ -145,7 +144,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	if (encoded_value) {
-		efree(encoded_value);
+		STR_FREE(encoded_value);
 	}
 
 	if (path && path_len > 0) {

@@ -485,15 +485,17 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 /* {{{ php_url_encode
  */
-PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
+PHPAPI zend_string *php_url_encode(char const *s, int len)
 {
 	register unsigned char c;
-	unsigned char *to, *start;
+	unsigned char *to;
 	unsigned char const *from, *end;
+	zend_string *start;
 	
 	from = (unsigned char *)s;
 	end = (unsigned char *)s + len;
-	start = to = (unsigned char *) safe_emalloc(3, len, 1);
+	start = STR_ALLOC(3 * len, 0);
+	to = (unsigned char*)start->val;
 
 	while (from < end) {
 		c = *from++;
@@ -521,11 +523,11 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
 			*to++ = c;
 		}
 	}
-	*to = 0;
-	if (new_length) {
-		*new_length = to - start;
-	}
-	return (char *) start;
+	*to = '\0';
+
+	start = STR_REALLOC(start, to - (unsigned char*)start->val, 0);
+
+	return start;
 }
 /* }}} */
 
@@ -533,17 +535,13 @@ PHPAPI char *php_url_encode(char const *s, int len, int *new_length)
    URL-encodes string */
 PHP_FUNCTION(urlencode)
 {
-	char *in_str, *out_str;
-	int in_str_len, out_str_len;
+	zend_string *in_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
 
-	out_str = php_url_encode(in_str, in_str_len, &out_str_len);
-//???	RETURN_STRINGL(out_str, out_str_len, 0);
-	RETURN_STRINGL(out_str, out_str_len);
+	RETURN_STR(php_url_encode(in_str->val, in_str->len));
 }
 /* }}} */
 
@@ -551,19 +549,16 @@ PHP_FUNCTION(urlencode)
    Decodes URL-encoded string */
 PHP_FUNCTION(urldecode)
 {
-	char *in_str, *out_str;
-	int in_str_len, out_str_len;
+	zend_string *in_str, *out_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
 
-	out_str = estrndup(in_str, in_str_len);
-	out_str_len = php_url_decode(out_str, in_str_len);
+	out_str = STR_DUP(in_str, 0);
+	out_str->len = php_url_decode(out_str->val, out_str->len);
 
-//???    RETURN_STRINGL(out_str, out_str_len, 0);
-    RETURN_STRINGL(out_str, out_str_len);
+    RETURN_STR(out_str);
 }
 /* }}} */
 
@@ -600,35 +595,34 @@ PHPAPI int php_url_decode(char *str, int len)
 
 /* {{{ php_raw_url_encode
  */
-PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
+PHPAPI zend_string *php_raw_url_encode(char const *s, int len)
 {
 	register int x, y;
-	unsigned char *str;
+	zend_string *str;
 
-	str = (unsigned char *) safe_emalloc(3, len, 1);
+	str = STR_ALLOC(3 * len, 0);
 	for (x = 0, y = 0; len--; x++, y++) {
-		str[y] = (unsigned char) s[x];
+		str->val[y] = (unsigned char) s[x];
 #ifndef CHARSET_EBCDIC
-		if ((str[y] < '0' && str[y] != '-' && str[y] != '.') ||
-			(str[y] < 'A' && str[y] > '9') ||
-			(str[y] > 'Z' && str[y] < 'a' && str[y] != '_') ||
-			(str[y] > 'z' && str[y] != '~')) {
-			str[y++] = '%';
-			str[y++] = hexchars[(unsigned char) s[x] >> 4];
-			str[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((str->val[y] < '0' && str->val[y] != '-' && str->val[y] != '.') ||
+			(str->val[y] < 'A' && str->val[y] > '9') ||
+			(str->val[y] > 'Z' && str->val[y] < 'a' && str->val[y] != '_') ||
+			(str->val[y] > 'z' && str->val[y] != '~')) {
+			str->val[y++] = '%';
+			str->val[y++] = hexchars[(unsigned char) s[x] >> 4];
+			str->val[y] = hexchars[(unsigned char) s[x] & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(str[y]) && strchr("_-.~", str[y]) != NULL) {
-			str[y++] = '%';
-			str[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			str[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(str->val[y]) && str->valchr("_-.~", str->val[y]) != NULL) {
+			str->val[y++] = '%';
+			str->val[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
+			str->val[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	str[y] = '\0';
-	if (new_length) {
-		*new_length = y;
-	}
-	return ((char *) str);
+	str->val[y] = '\0';
+	str = STR_REALLOC(str, y, 0);
+
+	return str;
 }
 /* }}} */
 
@@ -636,17 +630,13 @@ PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length)
    URL-encodes string */
 PHP_FUNCTION(rawurlencode)
 {
-	char *in_str, *out_str;
-	int in_str_len, out_str_len;
+	zend_string *in_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
 
-	out_str = php_raw_url_encode(in_str, in_str_len, &out_str_len);
-//???	RETURN_STRINGL(out_str, out_str_len, 0);
-	RETURN_STRINGL(out_str, out_str_len);
+	RETURN_STR(php_raw_url_encode(in_str->val, in_str->len));
 }
 /* }}} */
 
@@ -654,16 +644,13 @@ PHP_FUNCTION(rawurlencode)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	char *in_str;
-	int in_str_len;
-	zend_string *out_str;
+	zend_string *in_str, *out_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
-							  &in_str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
 		return;
 	}
 
-	out_str = STR_INIT(in_str, in_str_len, 0);
+	out_str = STR_DUP(in_str, 0);
 	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
 
     RETURN_STR(out_str);

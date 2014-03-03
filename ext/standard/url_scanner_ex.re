@@ -470,9 +470,8 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 
 PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
 {
-	char *encoded = NULL;
-	int encoded_len;
 	smart_str val;
+	zend_string *encoded;
 	
 	if (! BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_activate(TSRMLS_C);
@@ -486,8 +485,8 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	}
 
 	if (urlencode) {
-		encoded = php_url_encode(value, value_len, &encoded_len);
-		smart_str_setl(&val, encoded, encoded_len);
+		encoded = php_url_encode(value, value_len);
+		smart_str_setl(&val, encoded->val, encoded->len);
 	} else {
 		smart_str_setl(&val, value, value_len);
 	}
@@ -502,8 +501,9 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	smart_str_append(&BG(url_adapt_state_ex).form_app, &val);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" />");
 
-	if (urlencode)
-		efree(encoded);
+	if (urlencode) {
+		STR_FREE(encoded);
+	}
 
 	return SUCCESS;
 }
