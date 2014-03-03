@@ -95,11 +95,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	len += name_len;
 	if (value && url_encode) {
 		encoded_value = php_url_encode(value, value_len);
+		len += encoded_value->len;
 	} else if (value) {
 		encoded_value = STR_INIT(value, value_len, 0);
+		len += encoded_value->len;
 	}
 
-	len += encoded_value->len;
 	if (path) {
 		len += path_len;
 	}
