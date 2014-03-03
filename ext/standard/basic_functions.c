@@ -6008,7 +6008,7 @@ PHP_FUNCTION(parse_ini_file)
 	array_init(return_value);
 	if (zend_parse_ini_file(&fh, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		efree(Z_ARRVAL_P(return_value));
+		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -6048,7 +6048,7 @@ PHP_FUNCTION(parse_ini_string)
 	array_init(return_value);
 	if (zend_parse_ini_string(string, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		efree(Z_ARRVAL_P(return_value));
+		zval_dtor(return_value);
 		RETVAL_FALSE;
 	}
 	efree(string);
