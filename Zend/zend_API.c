@@ -3165,7 +3165,13 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
 					obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
+					if (UNEXPECTED(Z_ISREF_P(obj))) {
+						obj = Z_REFVAL_P(obj);
+					}
 					method = zend_hash_index_find(Z_ARRVAL_P(callable), 1);
+					if (UNEXPECTED(Z_ISREF_P(method))) {
+						method = Z_REFVAL_P(method);
+					}
 				}
 				if (obj && method &&
 					(Z_TYPE_P(obj) == IS_OBJECT ||

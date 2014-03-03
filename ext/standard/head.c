@@ -77,7 +77,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 {
 	char *cookie;
 	int len=sizeof("Set-Cookie: ");
-	char *dt;
+	zend_string *dt;
 	sapi_header_line ctr = {0};
 	int result;
 	zend_string *encoded_value = NULL;
@@ -95,11 +95,12 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	len += name_len;
 	if (value && url_encode) {
 		encoded_value = php_url_encode(value, value_len);
+		len += encoded_value->len;
 	} else if (value) {
 		encoded_value = STR_INIT(value, value_len, 0);
+		len += encoded_value->len;
 	}
 
-	len += encoded_value->len;
 	if (path) {
 		len += path_len;
 	}
@@ -116,8 +117,8 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt);
-		efree(dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt->val);
+		STR_FREE(dt);
 	} else {
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value->val : "");
 		if (expires > 0) {
@@ -126,16 +127,16 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
-			p = zend_memrchr(dt, '-', strlen(dt));
+			p = zend_memrchr(dt->val, '-', dt->len);
 			if (!p || *(p + 5) != ' ') {
-				efree(dt);
+				STR_FREE(dt);
 				efree(cookie);
 				STR_FREE(encoded_value);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
-			strlcat(cookie, dt, len + 100);
-			efree(dt);
+			strlcat(cookie, dt->val, len + 100);
+			STR_FREE(dt);
 
 			snprintf(tsdelta, sizeof(tsdelta), "%li", (long) difftime(expires, time(NULL)));
 			strlcat(cookie, "; Max-Age=", len + 100);

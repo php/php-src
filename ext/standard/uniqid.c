@@ -82,7 +82,8 @@ PHP_FUNCTION(uniqid)
 	}
 
 //???	RETURN_STRING(uniqid, 0);
-	RETURN_STRING(uniqid);
+	RETVAL_STRING(uniqid);
+	efree(uniqid);
 }
 #endif
 /* }}} */
