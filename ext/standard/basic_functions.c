@@ -4607,7 +4607,7 @@ PHP_FUNCTION(get_cfg_var)
 		return;
 	}
 
-	retval = cfg_get_entry(varname, varname_len + 1);
+	retval = cfg_get_entry(varname, varname_len);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
