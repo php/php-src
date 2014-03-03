@@ -654,19 +654,19 @@ PHP_FUNCTION(rawurlencode)
    Decodes URL-encodes string */
 PHP_FUNCTION(rawurldecode)
 {
-	char *in_str, *out_str;
-	int in_str_len, out_str_len;
+	char *in_str;
+	int in_str_len;
+	zend_string *out_str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &in_str,
 							  &in_str_len) == FAILURE) {
 		return;
 	}
 
-	out_str = estrndup(in_str, in_str_len);
-	out_str_len = php_raw_url_decode(out_str, in_str_len);
+	out_str = STR_INIT(in_str, in_str_len, 0);
+	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
 
-//???    RETURN_STRINGL(out_str, out_str_len, 0);
-    RETURN_STRINGL(out_str, out_str_len);
+    RETURN_STR(out_str);
 }
 /* }}} */
 
