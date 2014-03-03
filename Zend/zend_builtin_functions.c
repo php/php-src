@@ -2406,8 +2406,8 @@ ZEND_FUNCTION(get_extension_funcs)
 	} else {
 		array = 0;
 	}
-	while ((zif = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) == SUCCESS) {
-		if (zif->common.type==ZEND_INTERNAL_FUNCTION
+	while ((zif = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) != NULL) {
+		if (zif->common.type == ZEND_INTERNAL_FUNCTION
 			&& zif->internal_function.module == module) {
 			if (!array) {
 				array_init(return_value);
