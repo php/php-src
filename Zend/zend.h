@@ -643,85 +643,100 @@ END_EXTERN_C()
 #define ZMSG_LOG_SCRIPT_NAME			6L
 #define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
-#define ZVAL_COPY_VALUE(z, v)					\
-	do {										\
-		(z)->value = (v)->value;				\
-		Z_TYPE_P(z) = Z_TYPE_P(v);				\
+#define ZVAL_COPY_VALUE(z, v)							\
+	do {												\
+		zval *_z1 = (z);								\
+		zval *_z2 = (v);								\
+		(_z1)->value = (_z2)->value;					\
+		Z_TYPE_P(_z1) = Z_TYPE_P(_z2);					\
 	} while (0)
 
-#define ZVAL_COPY(z, v)							\
-	do {										\
-		ZVAL_COPY_VALUE(z, v);					\
-		if (Z_REFCOUNTED_P(z)) {				\
-			Z_ADDREF_P(z);						\
-		}										\
+#define ZVAL_COPY(z, v)									\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
+		if (Z_REFCOUNTED_P(__z1)) {						\
+			Z_ADDREF_P(__z1);							\
+		}												\
 	} while (0)
 
-#define ZVAL_DUP(z, v)							\
-	do {										\
-		ZVAL_COPY_VALUE(z, v);					\
-		zval_copy_ctor(z);						\
+#define ZVAL_DUP(z, v)									\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
+		zval_copy_ctor(__z1);							\
 	} while (0)
 
-#define ZVAL_DUP_DEREF(z, v)					\
-	do {										\
-		if (Z_ISREF_P(v)) {						\
-			ZVAL_COPY_VALUE(z, Z_REFVAL_P(v));	\
-		} else {								\
-			ZVAL_COPY_VALUE(z, v);				\
-		}										\
-		zval_copy_ctor(z);						\
+#define ZVAL_DUP_DEREF(z, v)							\
+	do {												\
+		zval *__z1 = (z);								\
+		zval *__z2 = (v);								\
+		if (Z_ISREF_P(__z2)) {							\
+			ZVAL_COPY_VALUE(__z1, Z_REFVAL_P(__z2));	\
+		} else {										\
+			ZVAL_COPY_VALUE(__z1, __z2);				\
+		}												\
+		zval_copy_ctor(__z1);							\
 	} while (0)
 
-#define INIT_PZVAL_COPY(z, v)					\
-	do {										\
-		ZVAL_COPY_VALUE(z, v);					\
-		Z_SET_REFCOUNT_P(z, 1);					\
-		Z_UNSET_ISREF_P(z);						\
+// TODO: invalud ???
+#define INIT_PZVAL_COPY(z, v)							\
+	do {												\
+		ZVAL_COPY_VALUE(z, v);							\
+		Z_SET_REFCOUNT_P(z, 1);							\
+		Z_UNSET_ISREF_P(z);								\
 	} while (0)
 
 // TODO: support objects and resources in more optimal way ???
-#define SEPARATE_ZVAL(zv) do {						\
-		if (Z_REFCOUNTED_P(zv)) {					\
-			if (Z_REFCOUNT_P(zv) > 1) {				\
-				if (Z_TYPE_P(zv) == IS_OBJECT ||    \
-				    Z_TYPE_P(zv) == IS_RESOURCE) {	\
-					Z_ADDREF_P(zv);					\
-				} else {							\
-					Z_DELREF_P(zv);					\
-					zval_copy_ctor(zv);				\
-					Z_SET_REFCOUNT_P(zv, 1);		\
-				}									\
-			}										\
-		}											\
+#define SEPARATE_ZVAL(zv) do {							\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNTED_P(_zv)) {						\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (Z_TYPE_P(_zv) == IS_OBJECT ||		\
+				    Z_TYPE_P(_zv) == IS_RESOURCE) {		\
+					Z_ADDREF_P(_zv);					\
+				} else {								\
+					Z_DELREF_P(_zv);					\
+					zval_copy_ctor(_zv);				\
+					Z_SET_REFCOUNT_P(_zv, 1);			\
+				}										\
+			}											\
+		}												\
 	} while (0)
 
-#define SEPARATE_ZVAL_IF_NOT_REF(zv)			\
-	if (!Z_ISREF_P(zv)) {						\
-		SEPARATE_ZVAL(zv);						\
-	}
+#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+			SEPARATE_ZVAL(__zv);						\
+		}      											\
+	} while (0)
 
-#define SEPARATE_ZVAL_IF_REF(zv)				\
-	if (Z_ISREF_P(zv)) {						\
-		if (Z_REFCOUNT_P(zv) == 1) {			\
-			zend_reference *ref = Z_REF_P(zv);	\
-			ZVAL_COPY_VALUE(zv, &ref->val);		\
-			efree(ref);							\
-		} else {								\
-			zval *ref = Z_REFVAL_P(zv);			\
-			Z_DELREF_P(zv);						\
-			ZVAL_DUP(zv, ref);					\
-		}										\
-		SEPARATE_ZVAL(zv);						\
-	}
+#define SEPARATE_ZVAL_IF_REF(zv) do {					\
+		zval *__zv = (zv);								\
+		if (Z_ISREF_P(__zv)) {							\
+			if (Z_REFCOUNT_P(__zv) == 1) {				\
+				zend_reference *ref = Z_REF_P(__zv);	\
+				ZVAL_COPY_VALUE(__zv, &ref->val);		\
+				efree(ref);								\
+			} else {									\
+				zval *ref = Z_REFVAL_P(__zv);			\
+				Z_DELREF_P(__zv);						\
+				ZVAL_DUP(__zv, ref);					\
+			}											\
+		}												\
+	} while (0)
 
-#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv)		\
-	if (!Z_ISREF_P(zv)) {						\
-		zval ref;								\
-		ZVAL_COPY_VALUE(&ref, zv);				\
-		SEPARATE_ZVAL(&ref);					\
-		ZVAL_NEW_REF(zv, &ref);					\
-	}
+#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+			zval ref;									\
+			ZVAL_COPY_VALUE(&ref, __zv);				\
+			SEPARATE_ZVAL(&ref);						\
+			ZVAL_NEW_REF(__zv, &ref);					\
+		}												\
+	} while (0)
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	ZVAL_COPY_VALUE(&(zv), (pzv));			\
@@ -747,12 +762,14 @@ END_EXTERN_C()
 	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\
 }
 
-#define SEPARATE_ARG_IF_REF(varptr) 				\
-	if (Z_ISREF_P(varptr)) { 						\
-		ZVAL_DUP(varptr, Z_REFVAL_P(varptr)); 		\
-	} else if (IS_REFCOUNTED(Z_TYPE_P(varptr))) { 	\
-		Z_ADDREF_P(varptr); 						\
-	}
+#define SEPARATE_ARG_IF_REF(varptr) do { 				\
+		zval *_varptr = (varptr);						\
+		if (Z_ISREF_P(_varptr)) { 						\
+			ZVAL_DUP(_varptr, Z_REFVAL_P(_varptr)); 	\
+		} else if (IS_REFCOUNTED(Z_TYPE_P(_varptr))) { 	\
+			Z_ADDREF_P(_varptr); 						\
+		}												\
+	} while (0)
 
 #define READY_TO_DESTROY(zv) \
 	(Z_REFCOUNT_P(zv) == 1 && \
