@@ -120,8 +120,8 @@
 #endif
 /* }}} */
 
-static char *php_gethostbyaddr(char *ip);
-static char *php_gethostbyname(char *name);
+static zend_string *php_gethostbyaddr(char *ip);
+static zend_string *php_gethostbyname(char *name);
 
 #ifdef HAVE_GETHOSTNAME
 /* {{{ proto string gethostname()
@@ -154,7 +154,7 @@ PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
 	int addr_len;
-	char *hostname;
+	zend_string *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
 		return;
@@ -170,14 +170,13 @@ PHP_FUNCTION(gethostbyaddr)
 #endif
 		RETVAL_FALSE;
 	} else {
-//???		RETVAL_STRING(hostname, 0);
-		RETVAL_STRING(hostname);
+		RETVAL_STR(hostname);
 	}
 }
 /* }}} */
 
 /* {{{ php_gethostbyaddr */
-static char *php_gethostbyaddr(char *ip)
+static zend_string *php_gethostbyaddr(char *ip)
 {
 #if HAVE_IPV6 && HAVE_INET_PTON
 	struct in6_addr addr6;
@@ -204,10 +203,10 @@ static char *php_gethostbyaddr(char *ip)
 #endif
 
 	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
-		return estrdup(ip);
+		return STR_INIT(ip, strlen(ip), 0);
 	}
 
-	return estrdup(hp->h_name);
+	return STR_INIT(hp->h_name, strlen(hp->h_name), 0);
 }
 /* }}} */
 
@@ -217,16 +216,12 @@ PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
 	int hostname_len;
-	char *addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &hostname_len) == FAILURE) {
 		return;
 	}
 
-	addr = php_gethostbyname(hostname);
-
-//???	RETVAL_STRING(addr, 0);
-	RETVAL_STRING(addr);
+	RETURN_STR(php_gethostbyname(hostname));
 }
 /* }}} */
 
@@ -259,20 +254,22 @@ PHP_FUNCTION(gethostbynamel)
 /* }}} */
 
 /* {{{ php_gethostbyname */
-static char *php_gethostbyname(char *name)
+static zend_string *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
 	struct in_addr in;
+	char *address;
 
 	hp = gethostbyname(name);
 
 	if (!hp || !*(hp->h_addr_list)) {
-		return estrdup(name);
+		return STR_INIT(name, strlen(name), 0);
 	}
 
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
 
-	return estrdup(inet_ntoa(in));
+	address = inet_ntoa(in);
+	return STR_INIT(address, strlen(address), 0);
 }
 /* }}} */
 
