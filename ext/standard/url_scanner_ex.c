@@ -1021,14 +1021,14 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	smart_str val;
 	zend_string *encoded;
 	
-	if (! BG(url_adapt_state_ex).active) {
+	if (BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_activate(TSRMLS_C);
 		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		BG(url_adapt_state_ex).active = 1;
 	}
 
 
-	if (BG(url_adapt_state_ex).url_app.s->len != 0) {
+	if (BG(url_adapt_state_ex).url_app.s) {
 		smart_str_appends(&BG(url_adapt_state_ex).url_app, PG(arg_separator).output);
 	}
 
