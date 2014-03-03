@@ -556,7 +556,7 @@ PHP_FUNCTION(file_get_contents)
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
 		RETVAL_STR(contents);
 	} else {
-		RETVAL_FALSE;
+		RETVAL_STR(STR_EMPTY_ALLOC());
 	}
 
 	php_stream_close(stream);
@@ -825,6 +825,9 @@ PHP_FUNCTION(tempnam)
 		close(fd);
 //???		RETVAL_STRING(opened_path, 0);
 		RETVAL_STRING(opened_path);
+		//??? temporary fixed the memory leak, I've tried to make opened_path a zend_string
+		//but too too many places need to be changed.... let's keep it simple for now
+		efree(opened_path);
 	}
 	STR_RELEASE(p);
 }
