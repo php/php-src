@@ -1101,7 +1101,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
 {
 	zend_string *res;
-	char *tmpbuf = NULL;
+	char tmpbuf[MAX_LENGTH_OF_DOUBLE];
 	char *s, *t;  /* source, target */
 	char *dp;
 	int integral;
@@ -1117,10 +1117,9 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	dec = MAX(0, dec);
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
 
-	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
+	tmplen = snprintf(tmpbuf, sizeof(tmpbuf), "%.*F", dec, d);
 
 	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
-//???		return tmpbuf;
 		return STR_INIT(tmpbuf, tmplen, 0);
 	}
 
@@ -1206,8 +1205,6 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		*t-- = '-';
 	}
 
-	efree(tmpbuf);
-	
 	res->len = reslen;
 	return res;
 }
