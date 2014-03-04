@@ -66,7 +66,7 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 
 static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *should_free, int unref TSRMLS_DC)
 {
-	should_free->var = 0;
+	should_free->var = NULL;
 	if (Z_REFCOUNTED_P(z)) {
 		if (!Z_DELREF_P(z)) {
 			Z_SET_REFCOUNT_P(z, 1);
@@ -184,7 +184,10 @@ ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute
 
 static zend_always_inline zval *_get_zval_ptr_tmp(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
 {
-	return should_free->var = EX_VAR(var);
+	zval *ret = EX_VAR(var);
+
+	should_free->var = ret;
+	return ret;
 }
 
 static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
@@ -504,25 +507,27 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execu
 
 static inline zval *_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
-/*	should_free->is_var = 0; */
+	zval *ret;
+
 	switch (op_type) {
 		case IS_CONST:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return node->zv;
 			break;
 		case IS_TMP_VAR:
-			should_free->var = TMP_FREE(EX_VAR(node->var));
-			return EX_VAR(node->var);
+			ret = EX_VAR(node->var);
+			should_free->var = TMP_FREE(ret);
+			return ret;
 			break;
 		case IS_VAR:
 			return _get_zval_ptr_var(node->var, execute_data, should_free TSRMLS_CC);
 			break;
 		case IS_UNUSED:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return NULL;
 			break;
 		case IS_CV:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return _get_zval_ptr_cv(node->var, type TSRMLS_CC);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -532,25 +537,27 @@ static inline zval *_get_zval_ptr(int op_type, const znode_op *node, const zend_
 
 static inline zval *_get_zval_ptr_deref(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
-/*	should_free->is_var = 0; */
+	zval *ret;
+
 	switch (op_type) {
 		case IS_CONST:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return node->zv;
 			break;
 		case IS_TMP_VAR:
-			should_free->var = TMP_FREE(EX_VAR(node->var));
-			return EX_VAR(node->var);
+			ret = EX_VAR(node->var);
+			should_free->var = TMP_FREE(ret);
+			return ret;
 			break;
 		case IS_VAR:
 			return _get_zval_ptr_var_deref(node->var, execute_data, should_free TSRMLS_CC);
 			break;
 		case IS_UNUSED:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return NULL;
 			break;
 		case IS_CV:
-			should_free->var = 0;
+			should_free->var = NULL;
 			return _get_zval_ptr_cv_deref(node->var, type TSRMLS_CC);
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -558,21 +565,22 @@ static inline zval *_get_zval_ptr_deref(int op_type, const znode_op *node, const
 	return NULL;
 }
 
-//???
-#if 0
-static zend_always_inline zval **_get_zval_ptr_ptr_var(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
 {
-	zval** ptr_ptr = EX_T(var).var.ptr_ptr;
+	zval *ret = EX_VAR(var);
 
-	if (EXPECTED(ptr_ptr != NULL)) {
-		PZVAL_UNLOCK(*ptr_ptr, should_free);
-	} else {
-		/* string offset */
-		PZVAL_UNLOCK(EX_T(var).str_offset.str, should_free);
+	if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+		ret = Z_INDIRECT_P(ret);
+	} else if (!Z_REFCOUNTED_P(ret)) {
+		should_free->var = ret;
+		return ret;
 	}
-	return ptr_ptr;
+	PZVAL_UNLOCK(ret, should_free);
+	return ret;
 }
 
+//???
+#if 0
 static zend_always_inline zval *_get_zval_ptr_var_fast(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
 {
 	zval* ptr = EX_VAR(var);
@@ -601,7 +609,7 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_exec
 {
 	if (op_type == IS_UNUSED) {
 		if (EXPECTED(Z_TYPE(EG(This)) != IS_UNDEF)) {
-			should_free->var = 0;
+			should_free->var = NULL;
 			return &EG(This);
 		} else {
 			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
@@ -798,8 +806,10 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 	if (value_type == IS_TMP_VAR) {
 		if (UNEXPECTED(Z_ISREF_P(value))) {
 			ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
-			value = &tmp;
+        } else {
+			ZVAL_COPY_VALUE(&tmp, value);
         }
+		value = &tmp;
 	} else if (value_type == IS_CONST) {
 		if (UNEXPECTED(Z_ISREF_P(value))) {
 			value = Z_REFVAL_P(value);
@@ -1286,7 +1296,7 @@ convert_to_array:
 					result = &EG(error_zval);
 				}
 //???				if (dim_type == IS_TMP_VAR) {
-//???					zval_ptr_dtor(&dim);
+//???					zval_ptr_dtor(dim);
 //???				}
 			}
 			return;
@@ -1396,7 +1406,7 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 					}
 				}
 //???				if (dim_type == IS_TMP_VAR) {
-//???					zval_ptr_dtor(&dim);
+//???					zval_ptr_dtor(dim);
 //???				}
 			}
 			return;

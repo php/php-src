@@ -358,7 +358,7 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
 /* former zend_execute_locks.h */
 typedef struct _zend_free_op {
-	zval* var;
+	zval *var;
 /*	int   is_var; */
 } zend_free_op;
 

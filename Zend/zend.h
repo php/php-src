@@ -356,11 +356,13 @@ static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) 
 
 static zend_always_inline zend_uint zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+//???	if (Z_TYPE_P(pz) == IS_STRING && IS_INTERNED(Z_STR_P(pz))) return 1;
 	return ++Z_COUNTED_P(pz)->refcount;
 }
 
 static zend_always_inline zend_uint zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
+//???	if (Z_TYPE_P(pz) == IS_STRING && IS_INTERNED(Z_STR_P(pz))) return 1;
 	return --Z_COUNTED_P(pz)->refcount;
 }
 
