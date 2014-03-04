@@ -774,9 +774,7 @@ END_EXTERN_C()
 	} while (0)
 
 #define READY_TO_DESTROY(zv) \
-	(Z_REFCOUNT_P(zv) == 1 && \
-	 (Z_TYPE_P(zv) != IS_OBJECT || \
-	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
+	(Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 

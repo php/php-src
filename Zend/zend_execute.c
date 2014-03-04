@@ -113,20 +113,11 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 #define PZVAL_LOCK(z) if (Z_REFCOUNTED_P(z)) Z_ADDREF_P((z))
 #define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
 
-#define EXTRACT_ZVAL_PTR(t) do {				\
-		temp_variable *__t = (t);				\
-		__t->var.ptr = *__t->var.ptr_ptr;		\
-		__t->var.ptr_ptr = &__t->var.ptr;		\
-		if (!PZVAL_IS_REF(__t->var.ptr) && 		\
-		    Z_REFCOUNT_P(__t->var.ptr) > 2) {	\
-			SEPARATE_ZVAL(__t->var.ptr_ptr);	\
-		}										\
-	} while (0)
-
-#define AI_SET_PTR(t, val) do {				\
-		temp_variable *__t = (t);			\
-		__t->var.ptr = (val);				\
-		__t->var.ptr_ptr = &__t->var.ptr;	\
+#define EXTRACT_ZVAL_PTR(zv) do {						\
+		zval *__zv = (zv);								\
+		if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
+			ZVAL_COPY_VALUE(__zv, Z_INDIRECT_P(__zv));	\
+		}												\
 	} while (0)
 
 #define FREE_OP(should_free) \
