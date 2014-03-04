@@ -601,6 +601,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
+
 	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
 		 (elem = zend_hash_get_current_data(Z_ARRVAL_P(stream_array))) != NULL;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
@@ -778,6 +779,7 @@ PHP_FUNCTION(stream_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
+		r_array = Z_REFVAL_P(r_array);
 		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
@@ -785,6 +787,7 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (w_array != NULL) {
+		w_array = Z_REFVAL_P(w_array);
 		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
@@ -792,6 +795,7 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (e_array != NULL) {
+		e_array = Z_REFVAL_P(e_array);
 		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;

@@ -1030,16 +1030,15 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	/* resize buffer if it's much larger than the result.
 	 * Only needed if the user requested a buffer size. */
-	if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
+//??	if (argc > 1 && line_len < len / 2) {
 //???		
-		ZVAL_STRINGL(return_value, buf, line_len + 1);
-		Z_STRLEN_P(return_value)--;
-		efree(buf);
-	} else {
-//???
 		ZVAL_STRINGL(return_value, buf, line_len);
 		efree(buf);
-	}
+//??	} else {
+//???
+//???		ZVAL_STRINGL(return_value, buf, line_len);
+//???	efree(buf);
+//???	}
 	return;
 
 exit_failed:
