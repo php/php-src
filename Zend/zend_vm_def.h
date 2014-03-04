@@ -1790,9 +1790,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-//???	if (OP1_TYPE == IS_VAR && UNEXPECTED(EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr)) {
-//???		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
-//???	}
+	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
+	}
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 	if ((OP2_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(value_ptr) == IS_STR_OFFSET)) ||

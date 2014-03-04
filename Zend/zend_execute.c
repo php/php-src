@@ -569,7 +569,7 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_
 {
 	zval *ret = EX_VAR(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		ret = Z_INDIRECT_P(ret);
 	} else if (!Z_REFCOUNTED_P(ret)) {
 		should_free->var = ret;
@@ -1187,7 +1187,7 @@ fetch_from_array:
 
 		case IS_NULL:
 			if (container == &EG(error_zval)) {
-				result = &EG(error_zval);
+				ZVAL_INDIRECT(result, &EG(error_zval));
 			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
 				if (Z_TYPE_P(container_ptr) != IS_REFERENCE) {
@@ -1293,7 +1293,7 @@ convert_to_array:
 						ZVAL_INDIRECT(result, overloaded_result);
 					}
 				} else {
-					result = &EG(error_zval);
+					ZVAL_INDIRECT(result, &EG(error_zval));
 				}
 //???				if (dim_type == IS_TMP_VAR) {
 //???					zval_ptr_dtor(dim);
@@ -1314,7 +1314,7 @@ convert_to_array:
 				ZVAL_NULL(result);
 			} else {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
-				ZVAL_NULL(result);
+				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
 			break;
 	}
