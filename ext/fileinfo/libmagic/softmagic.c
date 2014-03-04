@@ -76,8 +76,8 @@ private void cvt_16(union VALUETYPE *, const struct magic *);
 private void cvt_32(union VALUETYPE *, const struct magic *);
 private void cvt_64(union VALUETYPE *, const struct magic *);
 
-/*#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) >= ((n) - (o))) */
-#define OFFSET_OOB(n, o, i)	(n < o + i)
+#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) > ((n) - (o)))
+
 /*
  * softmagic - lookup one file in parsed, in-memory copy of database
  * Passed the name and FILE * of one file to be typed.
