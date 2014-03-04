@@ -1480,7 +1480,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 				if (elapsed_time.tv_sec > timeout->tv_sec ||
 						(elapsed_time.tv_sec == timeout->tv_sec &&
 						elapsed_time.tv_usec > timeout->tv_usec)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: crypto enabling timeout");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: Handshake timed out");
 					return -1;
 				}
 			}
