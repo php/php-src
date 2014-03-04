@@ -638,9 +638,10 @@ found:
 	} else if (EXPECTED(property_info != NULL)) {
 		/* if we assign referenced variable, we should separate it */
 		if (IS_REFCOUNTED(Z_TYPE_P(value))) {
-			Z_ADDREF_P(value);
 			if (Z_ISREF_P(value)) {
-				SEPARATE_ZVAL(value);
+				ZVAL_DUP(value, Z_REFVAL_P(value));
+			} else {
+				Z_ADDREF_P(value);
 			}
 		}
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&

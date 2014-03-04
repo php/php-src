@@ -696,7 +696,10 @@ END_EXTERN_C()
 		zval *_zv = (zv);								\
 		if (Z_REFCOUNTED_P(_zv)) {						\
 			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_TYPE_P(_zv) == IS_OBJECT ||		\
+				if (Z_ISREF_P(_zv)) {					\
+					Z_DELREF_P(_zv);					\
+					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
+				} else if (Z_TYPE_P(_zv) == IS_OBJECT ||\
 				    Z_TYPE_P(_zv) == IS_RESOURCE) {		\
 					Z_ADDREF_P(_zv);					\
 				} else {								\
