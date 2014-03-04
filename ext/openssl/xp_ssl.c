@@ -834,7 +834,7 @@ static int capture_peer_certs(php_stream *stream,
 
 	if (SUCCESS == php_stream_context_get_option(stream->context,
 			"ssl", "capture_peer_cert", &val) &&
-		zend_is_true(*val)
+		zend_is_true(*val TSRMLS_CC)
 	) {
 		MAKE_STD_ZVAL(zcert);
 		ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, php_openssl_get_x509_list_id() TSRMLS_CC));
@@ -845,7 +845,7 @@ static int capture_peer_certs(php_stream *stream,
 
 	if (SUCCESS == php_stream_context_get_option(stream->context,
 			"ssl", "capture_peer_cert_chain", &val) &&
-		zend_is_true(*val)
+		zend_is_true(*val TSRMLS_CC)
 	) {
 		zval *arr;
 		STACK_OF(X509) *chain;
@@ -997,7 +997,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 					if (SUCCESS == php_stream_context_get_option(stream->context,
 							"ssl", "capture_session_meta", &val) &&
-						zend_is_true(*val)
+						zend_is_true(*val TSRMLS_CC)
 					) {
 						zval *meta_arr = php_capture_ssl_session_meta(sslsock->ssl_handle);
 						php_stream_context_set_option(stream->context, "ssl", "session_meta", meta_arr);
