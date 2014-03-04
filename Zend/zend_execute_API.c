@@ -43,7 +43,7 @@ ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0},0}, NULL, NULL, 0, NULL, NULL, 0 };
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
+ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, {{0},0} };
 
 #ifdef ZEND_WIN32
 #include <process.h>
@@ -811,12 +811,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(function_state).function = fci_cache->function_handler;
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
-	fci->object_ptr = fci_cache->object_ptr;
-	if (fci->object_ptr) {
-		ZVAL_COPY_VALUE(&EX(object), fci->object_ptr);
-	} else {
-		ZVAL_UNDEF(&EX(object));
-	}
+	fci->object_ptr = &fci_cache->object;
+	ZVAL_COPY_VALUE(&EX(object), fci->object_ptr);
 	if (fci->object_ptr && Z_TYPE_P(fci->object_ptr) == IS_OBJECT &&
 	    (!EG(objects_store).object_buckets ||
 	     !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(fci->object_ptr)]))) {
@@ -1084,7 +1080,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_li
 	fcall_cache.function_handler = EG(autoload_func);
 	fcall_cache.calling_scope = NULL;
 	fcall_cache.called_scope = NULL;
-	fcall_cache.object_ptr = NULL;
+	ZVAL_UNDEF(&fcall_cache.object);
 
 	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);

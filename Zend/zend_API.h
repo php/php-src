@@ -57,7 +57,7 @@ typedef struct _zend_fcall_info_cache {
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
-	zval *object_ptr;
+	zval object;
 } zend_fcall_info_cache;
 
 #define ZEND_NS_NAME(ns, name)			ns "\\" name

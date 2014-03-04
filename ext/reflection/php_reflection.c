@@ -1388,7 +1388,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fcc.function_handler = ce_ptr->constructor;
 	fcc.calling_scope = ce_ptr;
 	fcc.called_scope = Z_OBJCE(reflector);
-	fcc.object_ptr = &reflector;
+	ZVAL_COPY_VALUE(&fcc.object, &reflector);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -1904,7 +1904,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	fcc.object_ptr = NULL;
+	ZVAL_UNDEF(&fcc.object);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -1972,7 +1972,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	fcc.object_ptr = NULL;
+	ZVAL_UNDEF(&fcc.object);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2886,7 +2886,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	fcc.object_ptr = &object;
+	ZVAL_COPY_VALUE(&fcc.object, &object);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2995,7 +2995,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	fcc.object_ptr = object;
+	ZVAL_COPY_VALUE(&fcc.object, object);
 	
 	/* 
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
@@ -4228,7 +4228,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		fcc.object_ptr = return_value;
+		ZVAL_COPY_VALUE(&fcc.object, return_value);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			if (params) {
@@ -4333,7 +4333,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		fcc.object_ptr = return_value;
+		ZVAL_COPY_VALUE(&fcc.object, return_value);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			if (params) {
