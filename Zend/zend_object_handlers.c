@@ -708,7 +708,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC) != 0)) {
 		if (!offset) {
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
