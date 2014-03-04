@@ -623,10 +623,11 @@ static void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_pt
 	if (variable_ptr == &EG(error_zval) || value_ptr == &EG(error_zval)) {
 		ZVAL_NULL(variable_ptr);
 	} else if (EXPECTED(variable_ptr != value_ptr)) {
+		zval tmp;
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
-		Z_ADDREF_P(value_ptr);
+		ZVAL_COPY(&tmp, value_ptr);
 		zval_ptr_dtor(variable_ptr);
-		ZVAL_COPY_VALUE(variable_ptr, value_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, &tmp);
 	} else if (!Z_ISREF_P(variable_ptr)) {
 		ZVAL_NEW_REF(variable_ptr, variable_ptr);
 	}
