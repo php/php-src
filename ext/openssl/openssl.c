@@ -5437,20 +5437,21 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		CERT_ENHKEY_USAGE enhkey_usage = {0};
 		CERT_USAGE_MATCH cert_usage = {0};
 		CERT_CHAIN_PARA chain_params = {sizeof(CERT_CHAIN_PARA)};
+		LPSTR usages[] = {szOID_PKIX_KP_SERVER_AUTH, szOID_SERVER_GATED_CRYPTO, szOID_SGC_NETSCAPE};
 		DWORD chain_flags = 0;
 		unsigned long verify_depth = PHP_OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 		unsigned int i;
 
-		enhkey_usage.cUsageIdentifier = 0;
-		enhkey_usage.rgpszUsageIdentifier = NULL;
-		cert_usage.dwType = USAGE_MATCH_TYPE_AND;
+		enhkey_usage.cUsageIdentifier = 3;
+		enhkey_usage.rgpszUsageIdentifier = usages;
+		cert_usage.dwType = USAGE_MATCH_TYPE_OR;
 		cert_usage.Usage = enhkey_usage;
 		chain_params.RequestedUsage = cert_usage;
-		chain_flags = CERT_CHAIN_CACHE_END_CERT | CERT_CHAIN_REVOCATION_CHECK_CHAIN;
+		chain_flags = CERT_CHAIN_CACHE_END_CERT | CERT_CHAIN_REVOCATION_CHECK_CHAIN_EXCLUDE_ROOT;
 
 		if (!CertGetCertificateChain(NULL, cert_ctx, NULL, NULL, &chain_params, chain_flags, NULL, &cert_chain_ctx)) {
-			CertFreeCertificateContext(cert_ctx);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error getting certificate chain: %s", php_win_err());
+			CertFreeCertificateContext(cert_ctx);
 			RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 		}
 
@@ -5468,6 +5469,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 		for (i = 0; i < cert_chain_ctx->cChain; i++) {
 			if (cert_chain_ctx->rgpChain[i]->cElement > verify_depth) {
+				CertFreeCertificateChain(cert_chain_ctx);
 				CertFreeCertificateContext(cert_ctx);
 				RETURN_CERT_VERIFY_FAILURE(X509_V_ERR_CERT_CHAIN_TOO_LONG);
 			}
@@ -5493,6 +5495,8 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 			index = X509_NAME_get_index_by_NID(cert_name, NID_commonName, -1);
 			if (index < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate certificate CN");
+				CertFreeCertificateChain(cert_chain_ctx);
+				CertFreeCertificateContext(cert_ctx);
 				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 			}
 
@@ -5500,8 +5504,10 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, NULL, 0);
 			if (num_wchars == 0) {
-				OPENSSL_free(cert_name_utf8);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
+				OPENSSL_free(cert_name_utf8);
+				CertFreeCertificateChain(cert_chain_ctx);
+				CertFreeCertificateContext(cert_ctx);
 				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 			}
 
@@ -5509,8 +5515,11 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 			num_wchars = MultiByteToWideChar(CP_UTF8, 0, (char*)cert_name_utf8, -1, server_name, num_wchars);
 			if (num_wchars == 0) {
-				OPENSSL_free(cert_name_utf8);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to convert %s to wide character string", cert_name_utf8);
+				efree(server_name);
+				OPENSSL_free(cert_name_utf8);
+				CertFreeCertificateChain(cert_chain_ctx);
+				CertFreeCertificateContext(cert_ctx);
 				RETURN_CERT_VERIFY_FAILURE(SSL_R_CERTIFICATE_VERIFY_FAILED);
 			}
 
@@ -5523,9 +5532,9 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 
 		verify_result = CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_SSL, cert_chain_ctx, &chain_policy_params, &chain_policy_status);
 
+		efree(server_name);
 		CertFreeCertificateChain(cert_chain_ctx);
 		CertFreeCertificateContext(cert_ctx);
-		efree(server_name);
 
 		if (!verify_result) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error verifying certificate chain policy: %s", php_win_err());
