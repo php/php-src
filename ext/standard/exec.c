@@ -192,6 +192,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	if (!ret_array) {
 		ret = php_exec(mode, cmd, NULL, return_value TSRMLS_CC);
 	} else {
+		ret_array = Z_REFVAL_P(ret_array);
 		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
 			zval_dtor(ret_array);
 			array_init(ret_array);
@@ -199,6 +200,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(2, cmd, ret_array, return_value TSRMLS_CC);
 	}
 	if (ret_code) {
+		ret_code = Z_REFVAL_P(ret_code);
 		zval_dtor(ret_code);
 		ZVAL_LONG(ret_code, ret);
 	}
