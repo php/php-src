@@ -1696,11 +1696,19 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		ms->o.buf = sbuf;
 		ms->offset = soffset;
 		if (rv == 1) {
-	  	if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
-			    file_printf(ms, m->desc, offset) == -1)
-			return -1;
-			if (file_printf(ms, "%s", rbuf) == -1)
+			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
+			    file_printf(ms, m->desc, offset) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
 				return -1;
+			}
+			if (file_printf(ms, "%s", rbuf) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
+				return -1;
+			}
 		}
 		if (rbuf) {
 			efree(rbuf);
