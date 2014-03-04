@@ -822,12 +822,67 @@ static inline void enable_client_sni(php_stream *stream, php_openssl_netstream_d
 /* }}} */
 #endif
 
+static int capture_peer_certs(php_stream *stream,
+	php_openssl_netstream_data_t *sslsock,
+	X509 *peer_cert
+	TSRMLS_DC)
+{
+	zval **val, *zcert;
+	int cert_captured = 0;
+
+	if (SUCCESS == php_stream_context_get_option(stream->context,
+			"ssl", "capture_peer_cert", &val) &&
+		zend_is_true(*val)
+	) {
+		MAKE_STD_ZVAL(zcert);
+		ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, php_openssl_get_x509_list_id() TSRMLS_CC));
+		php_stream_context_set_option(stream->context, "ssl", "peer_certificate", zcert);
+		cert_captured = 1;
+		FREE_ZVAL(zcert);
+	}
+
+	if (SUCCESS == php_stream_context_get_option(stream->context,
+			"ssl", "capture_peer_cert_chain", &val) &&
+		zend_is_true(*val)
+	) {
+		zval *arr;
+		STACK_OF(X509) *chain;
+
+		MAKE_STD_ZVAL(arr);
+		chain = SSL_get_peer_cert_chain(sslsock->ssl_handle);
+
+		if (chain && sk_X509_num(chain) > 0) {
+			int i;
+			array_init(arr);
+
+			for (i = 0; i < sk_X509_num(chain); i++) {
+				X509 *mycert = X509_dup(sk_X509_value(chain, i));
+				MAKE_STD_ZVAL(zcert);
+				ZVAL_RESOURCE(zcert, zend_list_insert(mycert, php_openssl_get_x509_list_id() TSRMLS_CC));
+				add_next_index_zval(arr, zcert);
+			}
+
+		} else {
+			ZVAL_NULL(arr);
+		}
+
+		php_stream_context_set_option(stream->context, "ssl", "peer_certificate_chain", arr);
+		zval_dtor(arr);
+		efree(arr);
+	}
+
+	return cert_captured;
+}
+
 static inline int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam
 		TSRMLS_DC)
 {
-	int n, retry = 1;
+	int n;
+	int retry = 1;
+	int cert_captured;
+	X509 *peer_cert;
 
 	if (cparam->inputs.activate && !sslsock->ssl_active) {
 		struct timeval	start_time,
@@ -924,9 +979,10 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		}
 
 		if (n == 1) {
-			X509 *peer_cert;
-
 			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
+			if (peer_cert && stream->context) {
+				cert_captured = capture_peer_certs(stream, sslsock, peer_cert TSRMLS_CC);
+			}
 
 			if (FAILURE == php_openssl_apply_verification_policy(sslsock->ssl_handle, peer_cert, stream TSRMLS_CC)) {
 				SSL_shutdown(sslsock->ssl_handle);
@@ -934,80 +990,32 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 			} else {	
 				sslsock->ssl_active = 1;
 
-				/* allow the script to capture the peer cert
-				 * and/or the certificate chain */
 				if (stream->context) {
-					zval **val, *zcert;
+					zval **val;
 
-					if (SUCCESS == php_stream_context_get_option(
-								stream->context, "ssl",
-								"capture_session_meta", &val) &&
-							zend_is_true(*val)) {
+					if (SUCCESS == php_stream_context_get_option(stream->context,
+							"ssl", "capture_session_meta", &val) &&
+						zend_is_true(*val)
+					) {
 						zval *meta_arr = php_capture_ssl_session_meta(sslsock->ssl_handle);
-						php_stream_context_set_option(stream->context,
-								"ssl", "session_meta",
-								meta_arr);
+						php_stream_context_set_option(stream->context, "ssl", "session_meta", meta_arr);
 						zval_dtor(meta_arr);
 						efree(meta_arr);
 					}
-
-					if (SUCCESS == php_stream_context_get_option(
-								stream->context, "ssl",
-								"capture_peer_cert", &val) &&
-							zend_is_true(*val)) {
-						MAKE_STD_ZVAL(zcert);
-						ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, 
-									php_openssl_get_x509_list_id() TSRMLS_CC));
-						php_stream_context_set_option(stream->context,
-								"ssl", "peer_certificate",
-								zcert);
-						peer_cert = NULL;
-						FREE_ZVAL(zcert);
-					}
-
-					if (SUCCESS == php_stream_context_get_option(
-								stream->context, "ssl",
-								"capture_peer_cert_chain", &val) &&
-							zend_is_true(*val)) {
-						zval *arr;
-						STACK_OF(X509) *chain;
-
-						MAKE_STD_ZVAL(arr);
-						chain = SSL_get_peer_cert_chain(
-									sslsock->ssl_handle);
-
-						if (chain && sk_X509_num(chain) > 0) {
-							int i;
-							array_init(arr);
-
-							for (i = 0; i < sk_X509_num(chain); i++) {
-								X509 *mycert = X509_dup(
-										sk_X509_value(chain, i));
-								MAKE_STD_ZVAL(zcert);
-								ZVAL_RESOURCE(zcert,
-										zend_list_insert(mycert,
-											php_openssl_get_x509_list_id() TSRMLS_CC));
-								add_next_index_zval(arr, zcert);
-							}
-
-						} else {
-							ZVAL_NULL(arr);
-						}
-
-						php_stream_context_set_option(stream->context,
-								"ssl", "peer_certificate_chain",
-								arr);
-						zval_dtor(arr);
-						efree(arr);
-					}
 				}
 			}
-
-			if (peer_cert) {
-				X509_free(peer_cert);
+		} else if (errno == EAGAIN) {
+			n = 0;
+		} else {
+			n = -1;
+			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
+			if (peer_cert && stream->context) {
+				cert_captured = capture_peer_certs(stream, sslsock, peer_cert TSRMLS_CC);
 			}
-		} else  {
-			n = errno == EAGAIN ? 0 : -1;
+		}
+
+		if (n && peer_cert && cert_captured == 0) {
+			X509_free(peer_cert);
 		}
 
 		return n;
@@ -1017,6 +1025,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		SSL_shutdown(sslsock->ssl_handle);
 		sslsock->ssl_active = 0;
 	}
+
 	return -1;
 }
 
