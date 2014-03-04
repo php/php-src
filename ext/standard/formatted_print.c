@@ -414,13 +414,17 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		format_offset = 0;
 	}
 	
-	convert_to_string_ex(&args[format_offset]);
+	if (Z_TYPE(args[format_offset]) != IS_STRING) {
+		convert_to_string(&args[format_offset]);
+	} else if (Z_REFCOUNTED(args[format_offset])) {
+		Z_ADDREF(args[format_offset]);
+	}
 	format = Z_STRVAL(args[format_offset]);
 	result = STR_ALLOC(size, 0);
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN(args[format_offset])) {
+	while (inpos < Z_STRLEN(args[format_offset])) {
 		int expprec = 0;
 		zval tmp;
 
@@ -450,6 +454,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 					if (argnum <= 0) {
 						efree(result);
+						zval_dtor(&args[format_offset]);
 						efree(args);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument number must be greater than zero");
 						return NULL;
@@ -491,6 +496,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(format, &inpos)) < 0) {
 						efree(result);
+						zval_dtor(&args[format_offset]);
 						efree(args);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width must be greater than zero and less than %d", INT_MAX);
 						return NULL;
@@ -508,6 +514,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					if (isdigit((int)format[inpos])) {
 						if ((precision = php_sprintf_getnumber(format, &inpos)) < 0) {
 							efree(result);
+							zval_dtor(&args[format_offset]);
 							efree(args);
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Precision must be greater than zero and less than %d", INT_MAX);
 							return NULL;
@@ -528,6 +535,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 			if (argnum >= argc) {
 				efree(result);
+				zval_dtor(&args[format_offset]);
 				efree(args);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
 				return NULL;
@@ -649,6 +657,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		}
 	}
 	
+	zval_dtor(&args[format_offset]);
 	efree(args);
 	
 	/* possibly, we have to make sure we have room for the terminating null? */
