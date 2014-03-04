@@ -1181,13 +1181,8 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			if (!EG(active_symbol_table)) {
 				ZVAL_NULL(&params[4]);
 			} else {
-//???
-#if 1
-				ZVAL_NULL(&params[4]);
-#else
-				ZVAL_ARR(&params[4], EG(active_symbol_table));
-				zval_copy_ctor(&params[4]);
-#endif
+				array_init_size(&params[4], zend_hash_num_elements(EG(active_symbol_table)));
+				zend_hash_copy(Z_ARRVAL(params[4]), EG(active_symbol_table), zval_add_ref);
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

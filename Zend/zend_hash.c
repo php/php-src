@@ -99,6 +99,7 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor,
 {
 	uint i = 3;
 
+	ht->flags = 0;
 	SET_INCONSISTENT(HT_OK);
 
 	if (nSize >= 0x80000000) {
@@ -119,7 +120,7 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor,
 	ht->nNumOfElements = 0;
 	ht->nNextFreeElement = 0;
 	ht->nInternalPointer = INVALID_IDX;
-	ht->flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->flags |= HASH_FLAG_APPLY_PROTECTION;
 	if (persistent) {
 		ht->flags |= HASH_FLAG_PERSISTENT;
 	}
