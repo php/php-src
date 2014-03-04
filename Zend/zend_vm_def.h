@@ -2823,16 +2823,14 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	if (!EX(return_value)) {
 		FREE_OP1();
 	} else {
-		if (OP1_TYPE == IS_CONST ||
-		    OP1_TYPE == IS_TMP_VAR ||
-		    Z_ISREF_P(retval_ptr)) {
-			zval ret;
-
-			ZVAL_COPY_VALUE(&ret, retval_ptr);
+		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {		    
+			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (OP1_TYPE != IS_TMP_VAR) {
-				zval_copy_ctor(&ret);
+				zval_copy_ctor(EX(return_value));
 			}
-			ZVAL_COPY_VALUE(EX(return_value), &ret);
+			FREE_OP1_IF_VAR();
+		} else if (Z_ISREF_P(retval_ptr)) {
+			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 			FREE_OP1_IF_VAR();
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);

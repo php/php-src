@@ -2567,16 +2567,14 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	if (!EX(return_value)) {
 
 	} else {
-		if (IS_CONST == IS_CONST ||
-		    IS_CONST == IS_TMP_VAR ||
-		    Z_ISREF_P(retval_ptr)) {
-			zval ret;
-
-			ZVAL_COPY_VALUE(&ret, retval_ptr);
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CONST != IS_TMP_VAR) {
-				zval_copy_ctor(&ret);
+				zval_copy_ctor(EX(return_value));
 			}
-			ZVAL_COPY_VALUE(EX(return_value), &ret);
+
+		} else if (Z_ISREF_P(retval_ptr)) {
+			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
@@ -7639,16 +7637,14 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (!EX(return_value)) {
 		zval_dtor(free_op1.var);
 	} else {
-		if (IS_TMP_VAR == IS_CONST ||
-		    IS_TMP_VAR == IS_TMP_VAR ||
-		    Z_ISREF_P(retval_ptr)) {
-			zval ret;
-
-			ZVAL_COPY_VALUE(&ret, retval_ptr);
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_TMP_VAR != IS_TMP_VAR) {
-				zval_copy_ctor(&ret);
+				zval_copy_ctor(EX(return_value));
 			}
-			ZVAL_COPY_VALUE(EX(return_value), &ret);
+
+		} else if (Z_ISREF_P(retval_ptr)) {
+			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
@@ -12669,16 +12665,14 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (!EX(return_value)) {
 		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
-		if (IS_VAR == IS_CONST ||
-		    IS_VAR == IS_TMP_VAR ||
-		    Z_ISREF_P(retval_ptr)) {
-			zval ret;
-
-			ZVAL_COPY_VALUE(&ret, retval_ptr);
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_VAR != IS_TMP_VAR) {
-				zval_copy_ctor(&ret);
+				zval_copy_ctor(EX(return_value));
 			}
-			ZVAL_COPY_VALUE(EX(return_value), &ret);
+			zval_ptr_dtor_nogc(free_op1.var);
+		} else if (Z_ISREF_P(retval_ptr)) {
+			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 			zval_ptr_dtor_nogc(free_op1.var);
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
@@ -29785,16 +29779,14 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (!EX(return_value)) {
 
 	} else {
-		if (IS_CV == IS_CONST ||
-		    IS_CV == IS_TMP_VAR ||
-		    Z_ISREF_P(retval_ptr)) {
-			zval ret;
-
-			ZVAL_COPY_VALUE(&ret, retval_ptr);
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CV != IS_TMP_VAR) {
-				zval_copy_ctor(&ret);
+				zval_copy_ctor(EX(return_value));
 			}
-			ZVAL_COPY_VALUE(EX(return_value), &ret);
+
+		} else if (Z_ISREF_P(retval_ptr)) {
+			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
