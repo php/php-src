@@ -159,8 +159,7 @@ static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper TSRML
     if (!FG(wrapper_errors)) {
         return NULL;
     } else {
-        return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper,
-            sizeof wrapper);
+        return (zend_llist*) zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper) - 1);
     }
 }
 
@@ -232,7 +231,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
 {
 	if (wrapper && FG(wrapper_errors)) {
-		zend_hash_str_del(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
+		zend_hash_str_del(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper) - 1);
 	}
 }
 
@@ -265,14 +264,14 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 			ALLOC_HASHTABLE(FG(wrapper_errors));
 			zend_hash_init(FG(wrapper_errors), 8, NULL, wrapper_list_dtor, 0);
 		} else {
-			list = zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper));
+			list = zend_hash_str_find_ptr(FG(wrapper_errors), (const char*)&wrapper, sizeof(wrapper) - 1);
 		}
 
 		if (!list) {
 			zend_llist new_list;
 			zend_llist_init(&new_list, sizeof(buffer), wrapper_error_dtor, 0);
 			list = zend_hash_str_update_mem(FG(wrapper_errors), (const char*)&wrapper, 
-					sizeof(wrapper), &new_list, sizeof(new_list));
+					sizeof(wrapper) - 1, &new_list, sizeof(new_list));
 		}
 
 		/* append to linked list */
