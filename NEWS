@@ -21,6 +21,11 @@ PHP                                                                        NEWS
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
+- Mcrypt:
+  . No longer allow invalid key sizes, invalid IV sizes or missing required IV
+    in mcrypt_encrypt, mcrypt_decrypt and the deprecated mode functions.
+    (Nikita)
+
 - MySQLi:
   . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
     (Remi)
