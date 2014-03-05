@@ -868,7 +868,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		           /* don't separate references for __call */
 		           (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) == 0 ) {
 			param = &tmp;
-			ZVAL_DUP(param, &fci->params[i]);
+			ZVAL_DUP(param, Z_REFVAL(fci->params[i]));
 		} else {
 			param = &tmp;
 			ZVAL_COPY(param, &fci->params[i]);
