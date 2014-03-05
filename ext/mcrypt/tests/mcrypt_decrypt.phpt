@@ -22,8 +22,8 @@ var_dump(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $
 --EXPECTF--
 PHP Testfest 2008
 
-Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector in %s on line %d
+Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector of size 16 in %s on line %d
 bool(false)
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_decrypt(): Received initialization vector of size 16, but size 8 is required for this encryption mode in %s on line %d
 bool(false)

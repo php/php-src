@@ -85,7 +85,7 @@ string(0) ""
 
 iv length=4
 
-Warning: mcrypt_encrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_encrypt(): Received initialization vector of size 4, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=8
@@ -93,6 +93,6 @@ string(112) "b85e21072239d60c63a80e7c9ae493cb741a1cd407e52f451c5f43a0d103f55a7b6
 
 iv length=9
 
-Warning: mcrypt_encrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_encrypt(): Received initialization vector of size 9, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""
 ===DONE===

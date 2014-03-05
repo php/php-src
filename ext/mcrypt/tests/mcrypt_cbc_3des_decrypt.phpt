@@ -103,7 +103,7 @@ iv length=4
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 4, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=8
@@ -115,6 +115,6 @@ iv length=9
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 9, but size 8 is required for this encryption mode in %s on line %d
 string(0) ""
 ===DONE===

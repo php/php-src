@@ -1250,6 +1250,31 @@ static int php_mcrypt_ensure_valid_key_size(MCRYPT td, int key_size TSRMLS_DC) /
 }
 /* }}} */
 
+static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, int iv_size TSRMLS_DC) /* {{{ */
+{
+	if (mcrypt_enc_mode_has_iv(td) == 1) {
+		int expected_iv_size = mcrypt_enc_get_iv_size(td);
+
+		if (!iv) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Encryption mode requires an initialization vector of size %d", expected_iv_size
+			);
+			return FAILURE;
+		}
+
+		if (iv_size != expected_iv_size) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Received initialization vector of size %d, but size %d is required "
+				"for this encryption mode", iv_size, expected_iv_size
+			);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, const char *data, int data_len, char *mode, const char *iv, int iv_len, int dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
 {
 	char *cipher_dir_string;
@@ -1266,25 +1291,14 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 		RETURN_FALSE;
 	}
 
-	/* Checking for key-length */
 	if (php_mcrypt_ensure_valid_key_size(td, key_len TSRMLS_CC) == FAILURE) {
 		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
-	
-	/* IV is required */
-	if (mcrypt_enc_mode_has_iv(td) == 1) {
-		if (!iv) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Encryption mode requires an initialization vector");
-			mcrypt_module_close(td);
-			RETURN_FALSE;
-		}
 
-		if (iv_len != mcrypt_enc_get_iv_size(td)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
-			mcrypt_module_close(td);
-			RETURN_FALSE;
-		}
+	if (php_mcrypt_ensure_valid_iv(td, iv, iv_len TSRMLS_CC) == FAILURE) {
+		mcrypt_module_close(td);
+		RETURN_FALSE;
 	}
 
 	/* Check blocksize */

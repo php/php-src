@@ -124,39 +124,39 @@ fclose($fp);
 *** Testing mcrypt_decrypt() : usage variation ***
 
 --int 0--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int 1--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int 12345--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --int -12345--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float 10.5--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float -10.5--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float 12.3456789000e10--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float -12.3456789000e10--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --float .5--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty array--
@@ -176,39 +176,39 @@ Error: 2 - mcrypt_decrypt() expects parameter 5 to be string, array given, %s(%d
 string(0) ""
 
 --uppercase NULL--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase null--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase true--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --lowercase false--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --uppercase TRUE--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --uppercase FALSE--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty string DQ--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --empty string SQ--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --instance of classWithToString--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --instance of classWithoutToString--
@@ -216,11 +216,11 @@ Error: 2 - mcrypt_decrypt() expects parameter 5 to be string, object given, %s(%
 string(0) ""
 
 --undefined var--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --unset var--
-Error: 2 - mcrypt_decrypt(): The IV parameter must be as long as the blocksize, %s(%d)
+Error: 2 - mcrypt_decrypt(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
 string(0) ""
 
 --resource--

@@ -116,30 +116,30 @@ iv length=0
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=0
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_decrypt(): Received initialization vector of size 0, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=8
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_decrypt(): Received initialization vector of size 8, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
 iv length=16
@@ -152,9 +152,9 @@ iv length=17
 
 Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
-Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_cbc(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 
-Warning: mcrypt_decrypt(): The IV parameter must be as long as the blocksize in %s on line %d
+Warning: mcrypt_decrypt(): Received initialization vector of size 17, but size 16 is required for this encryption mode in %s on line %d
 string(0) ""
 ===DONE===

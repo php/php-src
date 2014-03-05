@@ -26,5 +26,5 @@ PHP Testfest 2008
 
 Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 
-Warning: mcrypt_cfb(): Encryption mode requires an initialization vector in %s on line %d
+Warning: mcrypt_cfb(): Encryption mode requires an initialization vector of size 16 in %s on line %d
 bool(false)
