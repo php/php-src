@@ -385,7 +385,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	/* verify the number of args */
 	if ((use_array && argc != (2 + format_offset)) 
 			|| (!use_array && argc < (1 + format_offset))) {
-		efree(args);
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
 	
@@ -408,7 +407,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 			ZVAL_COPY_VALUE(&newargs[i], zv);
 			i++;
 		}
-		efree(args);
 		zval_dtor(&array);
 		args = newargs;
 		format_offset = 0;
@@ -450,7 +448,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 					if (argnum <= 0) {
 						efree(result);
-						efree(args);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument number must be greater than zero");
 						return NULL;
 					}
@@ -491,7 +488,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(format, &inpos)) < 0) {
 						efree(result);
-						efree(args);
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width must be greater than zero and less than %d", INT_MAX);
 						return NULL;
 					}
@@ -508,7 +504,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					if (isdigit((int)format[inpos])) {
 						if ((precision = php_sprintf_getnumber(format, &inpos)) < 0) {
 							efree(result);
-							efree(args);
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Precision must be greater than zero and less than %d", INT_MAX);
 							return NULL;
 						}
@@ -528,7 +523,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 			if (argnum >= argc) {
 				efree(result);
-				efree(args);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
 				return NULL;
 			}
@@ -648,8 +642,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 			inpos++;
 		}
 	}
-	
-	efree(args);
 	
 	/* possibly, we have to make sure we have room for the terminating null? */
 	result->val[outpos]=0;

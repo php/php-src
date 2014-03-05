@@ -920,22 +920,11 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			type_spec++;
 
 			if (num_varargs > 0) {
-				int iv = 0;
-				zval *p = (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
-
 				*n_varargs = num_varargs;
-
-				/* allocate space for array and store args */
-				*varargs = (zval*)safe_emalloc(num_varargs, sizeof(zval), 0);
-				while (num_varargs-- > 0) {
-					ZVAL_COPY_VALUE(&(*varargs)[iv], p);
-					iv++;
-					p++;
-				}
-
+				*varargs = (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
 				/* adjust how many args we have left and restart loop */
-				num_args = num_args + 1 - iv;
-				i += iv;
+				num_args += 1 - num_varargs;
+				i += num_varargs;
 				continue;
 			} else {
 				*varargs = NULL;

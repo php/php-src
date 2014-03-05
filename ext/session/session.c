@@ -1875,7 +1875,6 @@ static PHP_FUNCTION(session_set_save_handler)
 	/* at this point argc can only be 6 or 7 */
 	for (i = 0; i < argc; i++) {
 		if (!zend_is_callable(*args[i], 0, &name TSRMLS_CC)) {
-			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
 			efree(name);
 			RETURN_FALSE;
@@ -1895,7 +1894,6 @@ static PHP_FUNCTION(session_set_save_handler)
 		PS(mod_user_names).names[i] = *args[i];
 	}
 
-	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */

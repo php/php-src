@@ -969,10 +969,6 @@ PHP_FUNCTION(min)
 
 		RETVAL_ZVAL_FAST(min);
 	}
-
-	if (args) {
-		efree(args);
-	}
 }
 /* }}} */
 
@@ -1019,10 +1015,6 @@ PHP_FUNCTION(max)
 		}
 
 		RETVAL_ZVAL_FAST(max);
-	}
-	
-	if (args) {
-		efree(args);
 	}
 }
 /* }}} */
@@ -1474,10 +1466,6 @@ PHP_FUNCTION(compact)
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
 		php_compact_var(EG(active_symbol_table), return_value, &args[i] TSRMLS_CC);
 	}
-
-	if (args) {
-		efree(args);
-	}
 }
 /* }}} */
 
@@ -1906,13 +1894,11 @@ PHP_FUNCTION(array_push)
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
 			if (Z_REFCOUNTED(new_var)) Z_DELREF(new_var);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			efree(args);
 			RETURN_FALSE;
 		}
 	}
 
 	/* Clean up and return the number of values in the stack */
-	efree(args);
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
@@ -2029,7 +2015,6 @@ PHP_FUNCTION(array_unshift)
 	zend_hash_destroy(&old_hash);
 
 	/* Clean up and return the number of elements in the stack */
-	efree(args);
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
@@ -2353,7 +2338,6 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
-			efree(args);
 			RETURN_NULL();
 		} else {
 			int num = zend_hash_num_elements(Z_ARRVAL(args[i]));
@@ -2375,8 +2359,6 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL(args[i]), zval_add_ref, 1);
 		}
 	}
-
-	efree(args);
 }
 /* }}} */
 
@@ -3164,7 +3146,6 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 
 			efree(ptrs);
 			efree(lists);
-			efree(args);
 			RETURN_FALSE;
 		}
 		lists[i] = list;
@@ -3303,7 +3284,6 @@ out:
 
 	efree(ptrs);
 	efree(lists);
-	efree(args);
 }
 /* }}} */
 
@@ -3408,8 +3388,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
-			RETVAL_NULL();
-			goto out;
+			RETURN_NULL();
 		}
 	}
 
@@ -3450,8 +3429,6 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			}
 		}
 	}
-out:
-	efree(args);
 }
 /* }}} */
 
@@ -3585,7 +3562,6 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 
 			efree(ptrs);
 			efree(lists);
-			efree(args);
 			RETURN_FALSE;
 		}
 		lists[i] = list;
@@ -3720,7 +3696,6 @@ out:
 
 	efree(ptrs);
 	efree(lists);
-	efree(args);
 }
 /* }}} */
 
@@ -3936,7 +3911,6 @@ PHP_FUNCTION(array_multisort)
 			efree(ARRAYG(multisort_flags)[k]);
 		}
 		efree(arrays);
-		efree(args);
 		RETURN_TRUE;
 	}
 
@@ -3993,7 +3967,6 @@ PHP_FUNCTION(array_multisort)
 		efree(ARRAYG(multisort_flags)[k]);
 	}
 	efree(arrays);
-	efree(args);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -4314,7 +4287,6 @@ PHP_FUNCTION(array_map)
 	for (i = 0; i < n_arrays; i++) {
 		if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 2);
-			efree(arrays);
 			efree(args);
 			efree(array_len);
 			efree(array_pos);
@@ -4333,7 +4305,6 @@ PHP_FUNCTION(array_map)
 	/* Short-circuit: if no callback and only one array, just return it. */
 	if (!ZEND_FCI_INITIALIZED(fci) && n_arrays == 1) {
 		RETVAL_ZVAL(args[0], 1, 0);
-		efree(arrays);
 		efree(array_len);
 		efree(array_pos);
 		efree(args);
@@ -4408,7 +4379,6 @@ PHP_FUNCTION(array_map)
 		}
 	}
 
-	efree(arrays);
 	efree(params);
 	efree(array_len);
 	efree(array_pos);

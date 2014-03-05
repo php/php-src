@@ -1908,10 +1908,6 @@ ZEND_METHOD(reflection_function, invoke)
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
-	if (num_args) {
-		efree(params);
-	}
-
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 			"Invocation of function %s() failed", fptr->common.function_name->val);
@@ -2854,7 +2850,6 @@ ZEND_METHOD(reflection_method, invoke)
 		obj_ce = mptr->common.scope;
 	} else {
 		if (Z_TYPE(params[0]) != IS_OBJECT) {
-			efree(params);
 			_DO_THROW("Non-object passed to Invoke()");
 			/* Returns from this function */
 		}
@@ -2862,9 +2857,6 @@ ZEND_METHOD(reflection_method, invoke)
 		obj_ce = Z_OBJCE(params[0]);
 
 		if (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC)) {
-			if (params) {
-				efree(params);
-			}
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
 		}
@@ -2889,10 +2881,6 @@ ZEND_METHOD(reflection_method, invoke)
 	ZVAL_COPY_VALUE(&fcc.object, &object);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
-
-	if (params) {
-		efree(params);
-	}
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
@@ -4207,9 +4195,6 @@ ZEND_METHOD(reflection_class, newInstance)
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
-			if (params) {
-				efree(params);
-			}
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -4231,9 +4216,6 @@ ZEND_METHOD(reflection_class, newInstance)
 		ZVAL_COPY_VALUE(&fcc.object, return_value);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			if (params) {
-				efree(params);
-			}
 			if (!ZVAL_IS_UNDEF(&retval)) {
 				zval_ptr_dtor(&retval);
 			}
@@ -4243,9 +4225,6 @@ ZEND_METHOD(reflection_class, newInstance)
 		}
 		if (!ZVAL_IS_UNDEF(&retval)) {
 			zval_ptr_dtor(&retval);
-		}
-		if (params) {
-			efree(params);
 		}
 	} else if (ZEND_NUM_ARGS()) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);

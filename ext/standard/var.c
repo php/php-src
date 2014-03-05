@@ -187,7 +187,6 @@ PHP_FUNCTION(var_dump)
 	for (i = 0; i < argc; i++) {
 		php_var_dump(&args[i], 1 TSRMLS_CC);
 	}
-	efree(args);
 }
 /* }}} */
 
@@ -338,7 +337,6 @@ PHP_FUNCTION(debug_zval_dump)
 	for (i = 0; i < argc; i++) {
 		php_debug_zval_dump(&args[i], 1 TSRMLS_CC);
 	}
-	efree(args);
 }
 /* }}} */
 

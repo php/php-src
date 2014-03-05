@@ -1143,25 +1143,16 @@ PHP_FUNCTION(fscanf)
 	 * with a leak if we have an invalid filehandle. This needs changing
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc */
 	if (!what) {
-		if (args) {
-			efree(args);
-		}
 		RETURN_FALSE;
 	}
 
 	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
 	if (buf == NULL) {
-		if (args) {
-			efree(args);
-		}
 		RETURN_FALSE;
 	}
 
 	result = php_sscanf_internal(buf, format, argc, args, 0, return_value TSRMLS_CC);
 
-	if (args) {
-		efree(args);
-	}
 	efree(buf);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {

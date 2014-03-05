@@ -174,7 +174,6 @@ PHP_FUNCTION(pack)
 			case 'h': 
 			case 'H':
 				if (currentarg >= num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough arguments", code);
@@ -220,7 +219,6 @@ PHP_FUNCTION(pack)
 				currentarg += arg;
 
 				if (currentarg > num_args) {
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: too few arguments", code);
@@ -229,7 +227,6 @@ PHP_FUNCTION(pack)
 				break;
 
 			default:
-				efree(argv);
 				efree(formatcodes);
 				efree(formatargs);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: unknown format code", code);
@@ -485,7 +482,6 @@ PHP_FUNCTION(pack)
 		}
 	}
 
-	efree(argv);
 	efree(formatcodes);
 	efree(formatargs);
 	output[outputpos] = '\0';

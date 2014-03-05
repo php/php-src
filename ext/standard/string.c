@@ -4333,9 +4333,6 @@ PHP_FUNCTION(setlocale)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid locale category name %s, must be one of LC_ALL, LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME", category);
 
 			zval_dtor(&tmp);
-			if (args) {
-				efree(args);
-			}
 			RETURN_FALSE;
 		}
 		zval_dtor(&tmp);
@@ -4385,9 +4382,6 @@ PHP_FUNCTION(setlocale)
 			}
 
 			zval_dtor(&tmp);
-			if (args) {
-				efree(args);
-			}
 			RETURN_STRING(retval);
 		}
 		zval_dtor(&tmp);
@@ -4400,9 +4394,6 @@ PHP_FUNCTION(setlocale)
 	}
 
 #endif
-	if (args) {
-		efree(args);
-	}
 	RETURN_FALSE;
 }
 /* }}} */
@@ -5271,10 +5262,6 @@ PHP_FUNCTION(sscanf)
 	}
 
 	result = php_sscanf_internal(str, format, num_args, args, 0, return_value TSRMLS_CC);
-
-	if (args) {
-		efree(args);
-	}
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
