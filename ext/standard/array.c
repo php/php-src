@@ -3860,7 +3860,12 @@ PHP_FUNCTION(array_multisort)
 	 * accordingly. There can't be two sort flags of the same type after an
 	 * array, and the very first argument has to be an array. */
 	for (i = 0; i < argc; i++) {
-		if (Z_TYPE(args[i]) == IS_ARRAY) {
+		zval *arg = &args[i];
+
+		if (Z_TYPE_P(arg) == IS_REFERENCE) {
+			arg = Z_REFVAL_P(arg);
+		}
+		if (Z_TYPE_P(arg) == IS_ARRAY) {
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
@@ -3869,14 +3874,14 @@ PHP_FUNCTION(array_multisort)
 				sort_order = PHP_SORT_ASC;
 				sort_type = PHP_SORT_REGULAR;
 			}
-			arrays[num_arrays++] = &args[i];
+			arrays[num_arrays++] = arg;
 
 			/* Next one may be an array or a list of sort flags. */
 			for (k = 0; k < MULTISORT_LAST; k++) {
 				parse_state[k] = 1;
 			}
-		} else if (Z_TYPE(args[i]) == IS_LONG) {
-			switch (Z_LVAL(args[i]) & ~PHP_SORT_FLAG_CASE) {
+		} else if (Z_TYPE_P(arg) == IS_LONG) {
+			switch (Z_LVAL_P(arg) & ~PHP_SORT_FLAG_CASE) {
 				case PHP_SORT_ASC:
 				case PHP_SORT_DESC:
 					/* flag allowed here */
