@@ -2970,8 +2970,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
-			RETVAL_NULL();
-			goto out;
+			RETURN_NULL();
 		}
 	}
 
@@ -3016,8 +3015,6 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			}
 		}
 	}
-out:
-	efree(args);
 }
 /* }}} */
 
@@ -3805,7 +3802,6 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	for (k = 0; k < MULTISORT_LAST; k++)	\
 		efree(ARRAYG(multisort_flags)[k]);	\
 	efree(arrays);							\
-	efree(args);							\
 	RETURN_FALSE;
 
 /* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
@@ -4297,7 +4293,6 @@ PHP_FUNCTION(array_map)
 	for (i = 0; i < n_arrays; i++) {
 		if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 2);
-			efree(args);
 			efree(array_len);
 			efree(array_pos);
 			return;
@@ -4317,7 +4312,6 @@ PHP_FUNCTION(array_map)
 		RETVAL_ZVAL(args[0], 1, 0);
 		efree(array_len);
 		efree(array_pos);
-		efree(args);
 		return;
 	}
 
@@ -4369,7 +4363,6 @@ PHP_FUNCTION(array_map)
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				efree(array_len);
-				efree(args);
 				efree(array_pos);
 				zval_dtor(return_value);
 				efree(params);
@@ -4392,7 +4385,6 @@ PHP_FUNCTION(array_map)
 	efree(params);
 	efree(array_len);
 	efree(array_pos);
-	efree(args);
 }
 /* }}} */
 
