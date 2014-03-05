@@ -4213,20 +4213,18 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr;
+	zval *array_ptr, *array_ref;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
 	zend_bool is_empty = 0;
-	zval *array_ref = NULL;
 
 	SAVE_OPLINE();
 
 	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
 	    (opline->extended_value & ZEND_FE_RESET_VARIABLE)) {
-		array_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
-		if (Z_ISREF_P(array_ptr)) {
-			array_ref = array_ptr;
+		array_ptr = array_ref = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ptr);
 		}
 		if (Z_TYPE_P(array_ptr) == IS_NULL) {
@@ -4238,27 +4236,29 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || ce->get_iterator == NULL) {
-				if (!array_ref) {
+				if (!Z_ISREF_P(array_ref)) {
 					SEPARATE_ZVAL(array_ptr);
 				}
 				Z_ADDREF_P(array_ptr);
 			}
+			array_ref = array_ptr;
 		} else {
 			if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-				if (!array_ref) {
+				if (!Z_ISREF_P(array_ref)) {
 					SEPARATE_ZVAL(array_ptr);
+					array_ref = array_ptr;
 					if (opline->extended_value & ZEND_FE_FETCH_BYREF) {
 						ZVAL_NEW_REF(array_ptr, array_ptr);
+						array_ref = array_ptr;
 						array_ptr = Z_REFVAL_P(array_ptr);						
 					}
 				}
 			}
-			if (Z_REFCOUNTED_P(array_ptr)) Z_ADDREF_P(array_ptr);
+			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		}
 	} else {
-		array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		if (Z_ISREF_P(array_ptr)) {
-			array_ref = array_ptr;
+		array_ptr = array_ref = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		if (Z_ISREF_P(array_ref)) {
 			array_ptr = Z_REFVAL_P(array_ptr);
 		}
 		if (IS_OP1_TMP_FREE()) { /* IS_TMP_VAR */
@@ -4269,33 +4269,33 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 				ce = Z_OBJCE_P(array_ptr);
 				if (ce && ce->get_iterator) {
-					Z_DELREF_P(array_ptr);
+					Z_DELREF_P(array_ref);
 				}
 			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
 			if (!ce || !ce->get_iterator) {
 				if (OP1_TYPE == IS_CV) {
-					Z_ADDREF_P(array_ptr);
+					Z_ADDREF_P(array_ref);
 				}
 			}
-		} else if (Z_REFCOUNTED_P(array_ptr)) {
+		} else if (Z_REFCOUNTED_P(array_ref)) {
 			if (OP1_TYPE == IS_CONST ||
 			           (OP1_TYPE == IS_CV && 
-			            (array_ref == NULL) &&
-			            Z_REFCOUNT_P(array_ptr) > 1) ||
+			            !Z_ISREF_P(array_ref) &&
+			            Z_REFCOUNT_P(array_ref) > 1) ||
 			           (OP1_TYPE == IS_VAR &&
-			            (array_ref == NULL) &&
-			            Z_REFCOUNT_P(array_ptr) > 2)) {
+			            !Z_ISREF_P(array_ref) &&
+			            Z_REFCOUNT_P(array_ref) > 2)) {
 				zval tmp;
 
 				if (OP1_TYPE == IS_VAR) {
-					Z_DELREF_P(array_ptr);
+					Z_DELREF_P(array_ref);
 				}
-				ZVAL_DUP(&tmp, array_ptr);
-				array_ptr = &tmp;
+				ZVAL_DUP(&tmp, array_ref);
+				array_ptr = array_ref = &tmp;
 			} else if (OP1_TYPE == IS_CV) {
-				Z_ADDREF_P(array_ptr);
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}
@@ -4309,8 +4309,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		if (iter && EXPECTED(EG(exception) == NULL)) {
 			zval iterator;
 
-			array_ptr = &iterator;
+			array_ptr = array_ref = &iterator;
 			ZVAL_OBJ(array_ptr, &iter->std);
+
 		} else {
 			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
@@ -4323,14 +4324,14 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ptr);
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
 
 	if (iter) {
 		iter->index = 0;
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				zval_ptr_dtor(array_ptr);
+				zval_ptr_dtor(array_ref);
 				if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 					FREE_OP1_VAR_PTR();
 				}
@@ -4339,7 +4340,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		}
 		is_empty = iter->funcs->valid(iter TSRMLS_CC) != SUCCESS;
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor(array_ptr);
+			zval_ptr_dtor(array_ref);
 			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
 			}
@@ -4386,12 +4387,16 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array = EX_VAR(opline->op1.var);
+	zval *array, *array_ref;
 	zval *value;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
-
 	zval *key = NULL;
+
+	array = array_ref = EX_VAR(opline->op1.var);
+	if (Z_TYPE_P(array) == IS_REFERENCE) {
+		array = Z_REFVAL_P(array);
+	}
 	if (opline->extended_value & ZEND_FE_FETCH_WITH_KEY) {
 		key = EX_VAR((opline+1)->result.var);
 	}
@@ -4461,7 +4466,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				 * In case that ever happens we need an additional flag. */
 				iter->funcs->move_forward(iter TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor(array);
+					zval_ptr_dtor(array_ref);
 					HANDLE_EXCEPTION();
 				}
 			}
@@ -4469,14 +4474,14 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			if (!iter || (iter->index > 0 && iter->funcs->valid(iter TSRMLS_CC) == FAILURE)) {
 				/* reached end of iteration */
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					zval_ptr_dtor(array);
+					zval_ptr_dtor(array_ref);
 					HANDLE_EXCEPTION();
 				}
 				ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
 			}
 			value = iter->funcs->get_current_data(iter TSRMLS_CC);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				zval_ptr_dtor(array);
+				zval_ptr_dtor(array_ref);
 				HANDLE_EXCEPTION();
 			}
 			if (!value) {
@@ -4487,7 +4492,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, key TSRMLS_CC);
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						zval_ptr_dtor(array);
+						zval_ptr_dtor(array_ref);
 						HANDLE_EXCEPTION();
 					}
 				} else {
