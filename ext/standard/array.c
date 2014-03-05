@@ -1525,6 +1525,10 @@ PHP_FUNCTION(array_fill_keys)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos);
 	while ((entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(keys), &pos)) != NULL) {
 
+		if (UNEXPECTED(Z_ISREF_P(entry))) {
+			entry = Z_REFVAL_P(entry);
+		}
+
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			zval_add_ref(val);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
