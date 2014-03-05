@@ -51,7 +51,7 @@ $clientCode = <<<'CODE'
     var_dump($meta['protocol']);
 
     stream_context_set_option($clientCtx, 'ssl', 'crypto_method', STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
-    stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
+    stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
     $meta = stream_context_get_options($clientCtx)['ssl']['session_meta'];
     var_dump($meta['protocol']);
 CODE;

@@ -36,7 +36,7 @@ $clientCode = <<<'CODE'
             'peer_name'          => $expected_name,
         ]]);
 
-        var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+        var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
     }
 CODE;
 
