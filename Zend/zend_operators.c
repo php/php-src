@@ -1868,6 +1868,8 @@ static void increment_string(zval *str) /* {{{ */
 	} else if (Z_REFCOUNT_P(str) > 1) {
 		Z_DELREF_P(str);
 		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
+	} else {
+		STR_FORGET_HASH_VAL(Z_STR_P(str));
 	}
 	s = Z_STRVAL_P(str);
 
