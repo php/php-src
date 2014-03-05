@@ -837,34 +837,33 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval *param;
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
-			if (Z_REFCOUNTED(fci->params[i])) {
-				if (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1) {
-					zval new_zval;
+			if (!Z_REFCOUNTED(fci->params[i]) ||
+			    (!Z_ISREF(fci->params[i]) && Z_REFCOUNT(fci->params[i]) > 1)) {
 
-					if (fci->no_separation &&
-						!ARG_MAY_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
-						if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
-							/* hack to clean up the stack */
-							ZVAL_LONG(&tmp, i);
-							zend_vm_stack_push(&tmp TSRMLS_CC);
-							zend_vm_stack_clear_multiple(0 TSRMLS_CC);
-						}
-
-						zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-							i+1,
-							EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name->val : "",
-							EX(function_state).function->common.scope ? "::" : "",
-							EX(function_state).function->common.function_name->val);
-						return FAILURE;
+				if (fci->no_separation &&
+					!ARG_MAY_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
+					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
+						/* hack to clean up the stack */
+						ZVAL_LONG(&tmp, i);
+						zend_vm_stack_push(&tmp TSRMLS_CC);
+						zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 					}
 
-					ZVAL_DUP(&new_zval, &fci->params[i]);
-					Z_DELREF(fci->params[i]);
-					ZVAL_COPY_VALUE(&fci->params[i], &new_zval);
+					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+						i+1,
+						EX(function_state).function->common.scope ? EX(function_state).function->common.scope->name->val : "",
+						EX(function_state).function->common.scope ? "::" : "",
+						EX(function_state).function->common.function_name->val);
+					return FAILURE;
 				}
+
+				zval_copy_ctor(&fci->params[i]);
+			} else if (!Z_ISREF(fci->params[i])) {
+				ZVAL_NEW_REF(&fci->params[i], &fci->params[i]);
+				Z_ADDREF(fci->params[i]);
+			} else if (Z_REFCOUNTED(fci->params[i])) {
 				Z_ADDREF(fci->params[i]);
 			}
-//???			Z_SET_ISREF_PP(fci->params[i]);
 			param = &fci->params[i];
 		} else if (Z_ISREF(fci->params[i]) &&
 		           /* don't separate references for __call */
