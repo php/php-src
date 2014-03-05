@@ -183,7 +183,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 				if ((gpc_element_p = zend_symtable_str_find(symtable1, index, index_len)) == NULL
 					|| Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
 					array_init(&gpc_element);
-					gpc_element_p = zend_symtable_str_update(symtable1, index, index_len + 1, &gpc_element);
+					gpc_element_p = zend_symtable_str_update(symtable1, index, index_len, &gpc_element);
 				}
 			}
 			symtable1 = Z_ARRVAL_P(gpc_element_p);

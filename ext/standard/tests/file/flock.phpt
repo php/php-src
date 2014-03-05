@@ -43,7 +43,7 @@ NULL
 Warning: flock() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Warning: flock(): %d is not a valid stream resource in %s on line %d
+Warning: flock(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 bool(true)
 bool(true)

@@ -1118,7 +1118,8 @@ PHPAPI PHP_FUNCTION(fgetss)
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
 //???	RETURN_STRINGL(retval, retval_len, 0);
-	RETURN_STRINGL(retval, retval_len);
+	RETVAL_STRINGL(retval, retval_len);
+	efree(retval);
 }
 /* }}} */
 

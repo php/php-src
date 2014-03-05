@@ -20,9 +20,9 @@
 
 #define _GNU_SOURCE
 #include "php.h"
+#include "ext/standard/base64.h"
 
 PHPAPI int php_url_decode(char *str, int len);
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length);
 
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream
@@ -607,6 +607,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	off_t newoffs;
 	zval meta;
 	int base64 = 0, ilen;
+	zend_string *base64_comma = NULL;
 
 	ZVAL_NULL(&meta);
 	if (memcmp(path, "data:", 5)) {
@@ -674,7 +675,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			plen = sep - path;
 			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
 			key = estrndup(path, plen);
-			add_assoc_stringl_ex(&meta, key, plen + 1, sep + 1, vlen, 1);
+			add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen, 1);
 			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
@@ -695,12 +696,14 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	dlen--;
 
 	if (base64) {
-		comma = (char*)php_base64_decode((const unsigned char *)comma, dlen, &ilen);
-		if (!comma) {
+		base64_comma = php_base64_decode((const unsigned char *)comma, dlen);
+		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: unable to decode");
 			return NULL;
 		}
+		comma = base64_comma->val;
+		ilen = base64_comma->len;
 	} else {
 		comma = estrndup(comma, dlen);
 		ilen = dlen = php_url_decode(comma, dlen);
@@ -723,7 +726,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
 		ZVAL_COPY_VALUE(&ts->meta, &meta);
 	}
-	efree(comma);
+	if (base64_comma) {
+		STR_FREE(base64_comma);
+	} else {
+		efree(comma);
+	}
 
 	return stream;
 }

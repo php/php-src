@@ -5488,7 +5488,7 @@ PHP_FUNCTION(set_include_path)
 		return;
 	}
 
-	old_value = zend_ini_string("include_path", sizeof("include_path")-1, 0);
+	old_value = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
 		RETVAL_STRING(old_value);
@@ -5496,7 +5496,7 @@ PHP_FUNCTION(set_include_path)
 		RETVAL_FALSE;
 	}
 
-	key = STR_INIT("include_path", sizeof("include_path")-1, 0);
+	key = STR_INIT("include_path", sizeof("include_path") - 1, 0);
 	if (zend_alter_ini_entry_ex(key, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == FAILURE) {
 		STR_RELEASE(key);
 		zval_dtor(return_value);
@@ -5516,7 +5516,7 @@ PHP_FUNCTION(get_include_path)
 		return;
 	}
 
-	str = zend_ini_string("include_path", sizeof("include_path"), 0);
+	str = zend_ini_string("include_path", sizeof("include_path") - 1, 0);
 
 	if (str == NULL) {
 		RETURN_FALSE;

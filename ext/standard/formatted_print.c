@@ -418,7 +418,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN(args[format_offset])) {
+	while (inpos < Z_STRLEN(args[format_offset])) {
 		int expprec = 0;
 		zval tmp;
 

@@ -1015,13 +1015,13 @@ static const char *_php_stream_search_delim(php_stream *stream,
 	}
 }
 
-PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, const char *delim, size_t delim_len TSRMLS_DC)
+PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, const char *delim, size_t delim_len TSRMLS_DC)
 {
-	char	*ret_buf;				/* returned buffer */
+	zend_string	*ret_buf;				/* returned buffer */
 	const char *found_delim = NULL;
 	size_t	buffered_len,
 			tent_ret_len;			/* tentative returned length */
-	int		has_delim	 = delim_len > 0;
+	int	has_delim = delim_len > 0;
 
 	if (maxlen == 0) {
 		return NULL;
@@ -1090,16 +1090,16 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		}
 	}
 
-	ret_buf = emalloc(tent_ret_len + 1);
+	ret_buf = STR_ALLOC(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
 	 * data is guaranteedly buffered */
-	*returned_len = php_stream_read(stream, ret_buf, tent_ret_len);
+	ret_buf->len = php_stream_read(stream, ret_buf->val, tent_ret_len);
 
 	if (found_delim) {
 		stream->readpos += delim_len;
 		stream->position += delim_len;
 	}
-	ret_buf[*returned_len] = '\0';
+	ret_buf->val[ret_buf->len] = '\0';
 	return ret_buf;
 }
 

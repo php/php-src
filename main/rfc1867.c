@@ -188,16 +188,23 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
+static int unlink_filename(zval *el TSRMLS_DC) /* {{{ */
 {
-	VCWD_UNLINK(*filename);
+	char *filename = (char*)Z_PTR_P(el);
+	VCWD_UNLINK(filename);
 	return 0;
 }
 /* }}} */
 
+
+static void free_filename(zval *el) {
+	char *filename = (char*)Z_PTR_P(el);
+	efree(filename);
+}
+
 void destroy_uploaded_files_hash(TSRMLS_D) /* {{{ */
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename TSRMLS_CC);
+	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename TSRMLS_CC);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
@@ -758,7 +765,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
 
 	ALLOC_HASHTABLE(uploaded_files);
-	zend_hash_init(uploaded_files, 5, NULL, free_string_zval, 0);
+	zend_hash_init(uploaded_files, 5, NULL, free_filename, 0);
 	SG(rfc1867_uploaded_files) = uploaded_files;
 
 	array_init(&PG(http_globals)[TRACK_VARS_FILES]);
