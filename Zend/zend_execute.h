@@ -115,6 +115,7 @@ static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 {
 	int result;
 
+again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			result = 0;
@@ -139,7 +140,7 @@ static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
 			break;
 		case IS_OBJECT:
-			if(IS_ZEND_STD_OBJECT(*op)) {
+			if (IS_ZEND_STD_OBJECT(*op)) {
 				if (Z_OBJ_HT_P(op)->cast_object) {
 					zval tmp;
 					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_BOOL TSRMLS_CC) == SUCCESS) {
@@ -158,6 +159,10 @@ static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 				}
 			}
 			result = 1;
+			break;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto again;
 			break;
 		default:
 			result = 0;
