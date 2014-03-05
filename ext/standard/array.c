@@ -2591,18 +2591,20 @@ PHP_FUNCTION(array_column)
 			zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
 		}
 
-		Z_ADDREF_P(zcolval);
 		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
-//???
+			Z_ADDREF_P(zcolval);
 			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
+			Z_ADDREF_P(zcolval);
 			SEPARATE_ZVAL(zkeyval);
 			convert_to_string(zkeyval);
-//???
 			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
 		} else {
+			if (Z_REFCOUNTED_P(zcolval)) {
+				Z_ADDREF_P(zcolval);
+			}
 			add_next_index_zval(return_value, zcolval);
 		}
 	}
@@ -2785,7 +2787,7 @@ PHP_FUNCTION(array_change_key_case)
 					php_strtolower(new_key->val, new_key->len);
 				}
 				zend_hash_update(Z_ARRVAL_P(return_value), new_key, entry);
-				STR_FREE(new_key);
+				STR_RELEASE(new_key);
 				break;
 		}
 
@@ -2990,7 +2992,9 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 				}
 			}
 			if (ok) {
-				Z_ADDREF(p->val);
+				if (Z_REFCOUNTED(p->val)) {
+					Z_ADDREF(p->val);
+				}
 				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, &p->val);
 			}
 		} else {
@@ -3005,7 +3009,9 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 				}
 			}
 			if (ok) {
-				Z_ADDREF(p->val);
+				if (Z_REFCOUNTED(p->val)) {
+					Z_ADDREF(p->val);
+				}
 				zend_hash_update(Z_ARRVAL_P(return_value), p->key, &p->val);
 			}
 		}
@@ -3409,7 +3415,9 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 				}
 			}
 			if (ok) {
-				Z_ADDREF(p->val);
+				if (Z_REFCOUNTED(p->val)) {
+					Z_ADDREF(p->val);
+				}
 				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, &p->val);
 			}
 		} else {
@@ -3424,7 +3432,9 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 				}
 			}
 			if (ok) {
-				Z_ADDREF(p->val);
+				if (Z_REFCOUNTED(p->val)) {
+					Z_ADDREF(p->val);
+				}
 				zend_hash_update(Z_ARRVAL_P(return_value), p->key, &p->val);
 			}
 		}
