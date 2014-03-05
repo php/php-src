@@ -188,16 +188,17 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
+static int unlink_filename(zval *el TSRMLS_DC) /* {{{ */
 {
-	VCWD_UNLINK(*filename);
+	char *filename = (char*)Z_PTR_P(el);
+	VCWD_UNLINK(filename);
 	return 0;
 }
 /* }}} */
 
 void destroy_uploaded_files_hash(TSRMLS_D) /* {{{ */
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename TSRMLS_CC);
+	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename TSRMLS_CC);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
