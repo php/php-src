@@ -38,7 +38,7 @@ object(bad)#4 (1) {
 */
 ?>
 --EXPECTF--
-bject(bad)#%d (1) {
+object(bad)#%d (1) {
   ["_private":"bad":private]=>
   array(1) {
     [0]=>

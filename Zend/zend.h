@@ -696,7 +696,10 @@ END_EXTERN_C()
 		zval *_zv = (zv);								\
 		if (Z_REFCOUNTED_P(_zv)) {						\
 			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_TYPE_P(_zv) == IS_OBJECT ||		\
+				if (Z_ISREF_P(_zv)) {					\
+					Z_DELREF_P(_zv);					\
+					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
+				} else if (Z_TYPE_P(_zv) == IS_OBJECT ||\
 				    Z_TYPE_P(_zv) == IS_RESOURCE) {		\
 					Z_ADDREF_P(_zv);					\
 				} else {								\
@@ -774,9 +777,7 @@ END_EXTERN_C()
 	} while (0)
 
 #define READY_TO_DESTROY(zv) \
-	(Z_REFCOUNT_P(zv) == 1 && \
-	 (Z_TYPE_P(zv) != IS_OBJECT || \
-	  zend_objects_store_get_refcount(zv TSRMLS_CC) == 1))
+	(Z_REFCOUNTED_P(zv) && Z_REFCOUNT_P(zv) == 1)
 
 #define ZEND_MAX_RESERVED_RESOURCES	4
 

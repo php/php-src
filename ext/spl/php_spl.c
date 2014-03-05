@@ -496,9 +496,9 @@ PHP_FUNCTION(spl_autoload_register)
 		if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_STRICT, &func_name, &fcc, &error TSRMLS_CC)) {
 			alfi.ce = fcc.calling_scope;
 			alfi.func_ptr = fcc.function_handler;
-			obj_ptr = fcc.object_ptr;
+			obj_ptr = &fcc.object;
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
-				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				if (Z_TYPE_P(obj_ptr) == IS_UNDEF && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
 						zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array specifies a non static method but no object (%s)", error);
 					}
@@ -508,7 +508,7 @@ PHP_FUNCTION(spl_autoload_register)
 					STR_RELEASE(func_name);
 					RETURN_FALSE;
 				} else if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
+					zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", Z_TYPE_P(obj_ptr) == IS_UNDEF ? "static " : "", error);
 				}
 				if (error) {
 					efree(error);
@@ -547,7 +547,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
-		obj_ptr = fcc.object_ptr;
+		obj_ptr = &fcc.object;
 		if (error) {
 			efree(error);
 		}
@@ -573,7 +573,7 @@ PHP_FUNCTION(spl_autoload_register)
 			goto skip;
 		}
 
-		if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+		if (Z_TYPE_P(obj_ptr) == IS_OBJECT && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 			/* add object id to the hash to ensure uniqueness, for more reference look at bug #40091 */
 			lc_name = STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
 			memcpy(lc_name->val + lc_name->len - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
@@ -606,7 +606,7 @@ PHP_FUNCTION(spl_autoload_register)
 		}
 
 		if (zend_hash_add_mem(SPL_G(autoload_functions), lc_name, &alfi, sizeof(autoload_func_info)) == NULL) {
-			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+			if (Z_TYPE_P(obj_ptr) == IS_OBJECT && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 				Z_DELREF(alfi.obj);
 			}				
 			if (!ZVAL_IS_UNDEF(&alfi.closure)) {
@@ -657,7 +657,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 		RETURN_FALSE;
 	}
-	obj_ptr = fcc.object_ptr;
+	obj_ptr = &fcc.object;
 	if (error) {
 		efree(error);
 	}
@@ -685,7 +685,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		} else {
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
-			if (success != SUCCESS && obj_ptr) {
+			if (success != SUCCESS && Z_TYPE_P(obj_ptr) == IS_OBJECT) {
 				STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
 				memcpy(lc_name->val + lc_name->len - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
 				lc_name->val[lc_name->len] = '\0';

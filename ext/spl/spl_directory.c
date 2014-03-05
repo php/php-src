@@ -2102,7 +2102,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
 	fcic.called_scope = NULL;
-	fcic.object_ptr = NULL;
+	ZVAL_UNDEF(&fcic.object);
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	

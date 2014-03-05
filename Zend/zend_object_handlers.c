@@ -638,9 +638,10 @@ found:
 	} else if (EXPECTED(property_info != NULL)) {
 		/* if we assign referenced variable, we should separate it */
 		if (IS_REFCOUNTED(Z_TYPE_P(value))) {
-			Z_ADDREF_P(value);
 			if (Z_ISREF_P(value)) {
-				SEPARATE_ZVAL(value);
+				ZVAL_DUP(value, Z_REFVAL_P(value));
+			} else {
+				Z_ADDREF_P(value);
 			}
 		}
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -708,7 +709,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1 TSRMLS_CC) != 0)) {
 		if (!offset) {
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);

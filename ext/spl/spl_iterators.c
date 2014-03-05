@@ -1504,9 +1504,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				return NULL;
 			}
 			Z_ADDREF(cfi->fci.function_name);
-			if (cfi->fcc.object_ptr) {
-				ZVAL_COPY(&cfi->object, cfi->fcc.object_ptr);
-				cfi->fcc.object_ptr = &cfi->object;
+			if (Z_TYPE(cfi->fcc.object) == IS_OBJECT) {
+				ZVAL_COPY(&cfi->object, &cfi->fcc.object);
 			}
 			intern->u.cbfilter = cfi;
 			break;

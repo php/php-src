@@ -313,7 +313,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fcc.function_handler = uwrap->ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(object);
-		fcc.object_ptr = object;
+		ZVAL_COPY_VALUE(&fcc.object, object);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name->val, uwrap->ce->constructor->common.function_name->val);

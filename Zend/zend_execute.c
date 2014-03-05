@@ -113,20 +113,11 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 #define PZVAL_LOCK(z) if (Z_REFCOUNTED_P(z)) Z_ADDREF_P((z))
 #define SELECTIVE_PZVAL_LOCK(pzv, opline)	if (RETURN_VALUE_USED(opline)) { PZVAL_LOCK(pzv); }
 
-#define EXTRACT_ZVAL_PTR(t) do {				\
-		temp_variable *__t = (t);				\
-		__t->var.ptr = *__t->var.ptr_ptr;		\
-		__t->var.ptr_ptr = &__t->var.ptr;		\
-		if (!PZVAL_IS_REF(__t->var.ptr) && 		\
-		    Z_REFCOUNT_P(__t->var.ptr) > 2) {	\
-			SEPARATE_ZVAL(__t->var.ptr_ptr);	\
-		}										\
-	} while (0)
-
-#define AI_SET_PTR(t, val) do {				\
-		temp_variable *__t = (t);			\
-		__t->var.ptr = (val);				\
-		__t->var.ptr_ptr = &__t->var.ptr;	\
+#define EXTRACT_ZVAL_PTR(zv) do {						\
+		zval *__zv = (zv);								\
+		if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
+			ZVAL_COPY_VALUE(__zv, Z_INDIRECT_P(__zv));	\
+		}												\
 	} while (0)
 
 #define FREE_OP(should_free) \
@@ -569,7 +560,7 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_
 {
 	zval *ret = EX_VAR(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
+	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		ret = Z_INDIRECT_P(ret);
 	} else if (!Z_REFCOUNTED_P(ret)) {
 		should_free->var = ret;
@@ -623,10 +614,11 @@ static void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_pt
 	if (variable_ptr == &EG(error_zval) || value_ptr == &EG(error_zval)) {
 		ZVAL_NULL(variable_ptr);
 	} else if (EXPECTED(variable_ptr != value_ptr)) {
+		zval tmp;
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
-		Z_ADDREF_P(value_ptr);
+		ZVAL_COPY(&tmp, value_ptr);
 		zval_ptr_dtor(variable_ptr);
-		ZVAL_COPY_VALUE(variable_ptr, value_ptr);
+		ZVAL_COPY_VALUE(variable_ptr, &tmp);
 	} else if (!Z_ISREF_P(variable_ptr)) {
 		ZVAL_NEW_REF(variable_ptr, variable_ptr);
 	}
@@ -1187,7 +1179,7 @@ fetch_from_array:
 
 		case IS_NULL:
 			if (container == &EG(error_zval)) {
-				result = &EG(error_zval);
+				ZVAL_INDIRECT(result, &EG(error_zval));
 			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
 				if (Z_TYPE_P(container_ptr) != IS_REFERENCE) {
@@ -1293,7 +1285,7 @@ convert_to_array:
 						ZVAL_INDIRECT(result, overloaded_result);
 					}
 				} else {
-					result = &EG(error_zval);
+					ZVAL_INDIRECT(result, &EG(error_zval));
 				}
 //???				if (dim_type == IS_TMP_VAR) {
 //???					zval_ptr_dtor(dim);
@@ -1314,7 +1306,7 @@ convert_to_array:
 				ZVAL_NULL(result);
 			} else {
 				zend_error(E_WARNING, "Cannot use a scalar value as an array");
-				ZVAL_NULL(result);
+				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
 			break;
 	}

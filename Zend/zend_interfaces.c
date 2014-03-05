@@ -96,7 +96,11 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		} else {
 			fcic.called_scope = EG(called_scope);
 		}
-		fcic.object_ptr = object;
+		if (object) {
+			ZVAL_COPY_VALUE(&fcic.object, object);
+		} else {
+			ZVAL_UNDEF(&fcic.object);
+		}
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 		zval_ptr_dtor(&fci.function_name);
 	}
