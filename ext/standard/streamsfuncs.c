@@ -492,6 +492,7 @@ PHP_FUNCTION(stream_get_meta_data)
 	array_init(return_value);
 
 	if (!ZVAL_IS_UNDEF(&stream->wrapperdata)) {
+		Z_ADDREF_P(&stream->wrapperdata);
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
 	}
 	if (stream->wrapper) {
@@ -779,7 +780,6 @@ PHP_FUNCTION(stream_select)
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
-		r_array = Z_REFVAL_P(r_array);
 		set_count = stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
@@ -787,7 +787,6 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (w_array != NULL) {
-		w_array = Z_REFVAL_P(w_array);
 		set_count = stream_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;
@@ -795,7 +794,6 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (e_array != NULL) {
-		e_array = Z_REFVAL_P(e_array);
 		set_count = stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count)
 			max_set_count = set_count;

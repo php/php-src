@@ -1510,7 +1510,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr T
 					us->wrapper->classname);
 			break;
 		}
-		if (Z_TYPE(retval) != IS_UNDEF || !zend_is_true(&retval TSRMLS_CC)) {
+		if (ZVAL_IS_UNDEF(&retval) || !zend_is_true(&retval TSRMLS_CC)) {
 			break;
 		}
 		php_stream_from_zval_no_verify(intstream, &retval);
