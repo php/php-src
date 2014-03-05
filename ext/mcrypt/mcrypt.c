@@ -310,48 +310,6 @@ zend_module_entry mcrypt_module_entry = {
 ZEND_GET_MODULE(mcrypt)
 #endif
 
-#define MCRYPT_ARGS2 											\
-	zval **cipher, **data, **key, **mode; 						\
-	int td; 													\
-	char *ndata; 												\
-	size_t bsize; 												\
-	size_t nr; 													\
-	size_t nsize
-
-#define MCRYPT_ARGS 											\
-	MCRYPT_ARGS2; 												\
-	zval **iv
-
-#define MCRYPT_SIZE 										\
-	bsize = mcrypt_get_block_size(Z_LVAL_PP(cipher)); 		\
-	nr = (Z_STRLEN_PP(data) + bsize - 1) / bsize; 			\
-	nsize = nr * bsize
-
-#define MCRYPT_CHECK_TD_CPY 									\
-	if (td < 0) { 												\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_FAILED); 					\
-		RETURN_FALSE; 											\
-	} 															\
-	ndata = ecalloc(nr, bsize); 								\
-	memcpy(ndata, Z_STRVAL_PP(data), Z_STRLEN_PP(data))
-
-#define MCRYPT_CHECK_IV 										\
-	convert_to_string_ex(iv);	 								\
-	if (Z_STRLEN_PP(iv) != bsize) { 							\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE); 			\
-		RETURN_FALSE; 											\
-	}
-
-#define MCRYPT_ACTION(x) 										\
-	if (Z_LVAL_PP(mode) == 0) { 								\
-		mcrypt_##x(td, ndata, nsize); 							\
-	} else {													\
-		mdecrypt_##x(td, ndata, nsize); 						\
-	}															\
-	end_mcrypt_##x(td)
-
-#define MCRYPT_IV_WRONG_SIZE "The IV parameter must be as long as the blocksize"
-
 #define MCRYPT_ENCRYPT 0
 #define MCRYPT_DECRYPT 1
 
