@@ -411,6 +411,15 @@ static int php_array_natural_general_compare(const void *a, const void *b, int f
 
 	fval = &f->val;
 	sval = &s->val;
+
+	if (Z_ISREF_P(fval)) {
+		fval = Z_REFVAL_P(fval);
+	}
+
+	if (Z_ISREF_P(sval)) {
+		sval = Z_REFVAL_P(sval);
+	}
+
 	ZVAL_COPY_VALUE(&first, fval);
 	ZVAL_COPY_VALUE(&second, sval);
 
@@ -2605,20 +2614,18 @@ PHP_FUNCTION(array_column)
 			zkeyval = zend_hash_index_find(ht, Z_LVAL_P(zkey));
 		}
 
-		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
+		if (Z_REFCOUNTED_P(zcolval)) {
 			Z_ADDREF_P(zcolval);
+		}
+		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
 			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
-			Z_ADDREF_P(zcolval);
 			SEPARATE_ZVAL(zkeyval);
 			convert_to_string(zkeyval);
 			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
 		} else {
-			if (Z_REFCOUNTED_P(zcolval)) {
-				Z_ADDREF_P(zcolval);
-			}
 			add_next_index_zval(return_value, zcolval);
 		}
 	}
