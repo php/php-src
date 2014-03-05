@@ -597,7 +597,7 @@ found:
 						ZVAL_COPY_VALUE(&garbage, variable_ptr);
 
 						/* if we assign referenced variable, we should separate it */
-						if (IS_REFCOUNTED(Z_TYPE_P(value))) {
+						if (Z_REFCOUNTED_P(value)) {
 							Z_ADDREF_P(value);
 							if (Z_ISREF_P(value)) {
 								SEPARATE_ZVAL(value);
@@ -637,7 +637,7 @@ found:
 		}
 	} else if (EXPECTED(property_info != NULL)) {
 		/* if we assign referenced variable, we should separate it */
-		if (IS_REFCOUNTED(Z_TYPE_P(value))) {
+		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
 				ZVAL_DUP(value, Z_REFVAL_P(value));
 			} else {
@@ -1494,7 +1494,7 @@ found:
 						zend_std_call_getter(object, member, &rv TSRMLS_CC);
 						(*guard) &= ~IN_GET;
 						if (Z_TYPE(rv) != IS_UNDEF) {
-							Z_ADDREF(rv);
+							if (Z_REFCOUNTED(rv)) Z_ADDREF(rv);
 							result = i_zend_is_true(&rv TSRMLS_CC);
 							zval_ptr_dtor(&rv);
 						} else {

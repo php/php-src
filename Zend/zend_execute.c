@@ -955,7 +955,7 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 {
 	zval garbage;
 
-	if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(variable_ptr)))) {
+	if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 		if (EXPECTED(!Z_ISREF_P(value))) {
 			ZVAL_COPY(variable_ptr, value);
 		} else {
@@ -966,7 +966,7 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 		variable_ptr = Z_REFVAL_P(variable_ptr);
 	}
 
-	if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(variable_ptr)))) {
+	if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 		if (EXPECTED(!Z_ISREF_P(value))) {
 			ZVAL_COPY(variable_ptr, value);
 		} else {
@@ -977,7 +977,7 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
 	} else if (EXPECTED(variable_ptr != value)) {
 		if (Z_REFCOUNT_P(variable_ptr)==1) {
-//???			if (EXPECTED(!IS_REFCOUNTED(Z_TYPE_P(value)))) {
+//???			if (EXPECTED(!Z_REFCOUNTED_P(value))) {
 //???				_zval_dtor_func(variable_ptr ZEND_FILE_LINE_CC);
 //???				ZVAL_COPY(variable_ptr, value);
 //???			} else if (EXPECTED(!Z_ISREF_P(value))) {
@@ -1244,7 +1244,7 @@ convert_to_array:
 					container = Z_INDIRECT_P(container);
 				}
 				ZVAL_STR_OFFSET(result, container, Z_LVAL_P(dim));
-				Z_ADDREF_P(container);				
+				if (!IS_INTERNED(Z_STR_P(container))) STR_ADDREF(Z_STR_P(container));
 				return;
 			}
 			break;

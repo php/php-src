@@ -244,7 +244,9 @@ struct _zend_ast_ref {
 #define Z_OBJ_INC_APPLY_COUNT_P(zv) Z_OBJ_INC_APPLY_COUNT(*(zv))
 #define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
 
-#define Z_REFCOUNTED(zval)			IS_REFCOUNTED(Z_TYPE(zval))
+#define Z_REFCOUNTED(zval)			(IS_REFCOUNTED(Z_TYPE(zval)) && \
+									 (Z_TYPE(zval) != IS_STRING || \
+									  !IS_INTERNED(Z_STR(zval))))
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)

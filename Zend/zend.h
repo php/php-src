@@ -356,13 +356,11 @@ static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) 
 
 static zend_always_inline zend_uint zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-//???	if (Z_TYPE_P(pz) == IS_STRING && IS_INTERNED(Z_STR_P(pz))) return 1;
 	return ++Z_COUNTED_P(pz)->refcount;
 }
 
 static zend_always_inline zend_uint zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-//???	if (Z_TYPE_P(pz) == IS_STRING && IS_INTERNED(Z_STR_P(pz))) return 1;
 	return --Z_COUNTED_P(pz)->refcount;
 }
 
@@ -745,7 +743,7 @@ END_EXTERN_C()
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	ZVAL_COPY_VALUE(&(zv), (pzv));			\
-	if (IS_REFCOUNTED(Z_TYPE_P(pzv))) {		\
+	if (Z_REFCOUNTED_P(pzv)) {				\
 		if (Z_REFCOUNT_P(pzv)>1) {			\
 			zval_copy_ctor(&(zv));			\
 			Z_DELREF_P((pzv));				\
@@ -771,7 +769,7 @@ END_EXTERN_C()
 		zval *_varptr = (varptr);						\
 		if (Z_ISREF_P(_varptr)) { 						\
 			ZVAL_DUP(_varptr, Z_REFVAL_P(_varptr)); 	\
-		} else if (IS_REFCOUNTED(Z_TYPE_P(_varptr))) { 	\
+		} else if (Z_REFCOUNTED_P(_varptr)) { 			\
 			Z_ADDREF_P(_varptr); 						\
 		}												\
 	} while (0)

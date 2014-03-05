@@ -1583,8 +1583,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		Z_TYPE_P(zendlval) = IS_CONSTANT;
 	} else {
 		if (ce && ce->name) {
-			ZVAL_STR(zendlval, ce->name);
-			Z_ADDREF_P(zendlval);
+			ZVAL_STR(zendlval, STR_COPY(ce->name));
 		} else {
 			ZVAL_EMPTY_STRING(zendlval);
 		}
@@ -1595,8 +1594,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"__TRAIT__" {
 	zend_class_entry *ce = CG(active_class_entry);
 	if (ce && ce->name && ZEND_ACC_TRAIT == (ce->ce_flags & ZEND_ACC_TRAIT)) {
-		ZVAL_STR(zendlval, ce->name);
-		Z_ADDREF_P(zendlval);
+		ZVAL_STR(zendlval, STR_COPY(ce->name));
 	} else {
 		ZVAL_EMPTY_STRING(zendlval);
 	}

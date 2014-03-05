@@ -3771,7 +3771,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 		for (i = 0; i < parent_ce->default_properties_count; i++) {
 			ZVAL_COPY_VALUE(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
-			if (IS_REFCOUNTED(Z_TYPE(ce->default_properties_table[i]))) {
+			if (Z_REFCOUNTED(ce->default_properties_table[i])) {
 #ifdef ZTS
 				if (parent_ce->type != ce->type) {
 					zval *p;

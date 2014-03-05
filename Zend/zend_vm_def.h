@@ -1098,7 +1098,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -2835,7 +2835,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (OP1_TYPE == IS_CV) {
-				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
+				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -3048,7 +3048,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
 	} else if (OP1_TYPE == IS_CV) {
-		if (IS_REFCOUNTED(Z_TYPE_P(varptr))) Z_ADDREF_P(varptr);
+		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -3344,7 +3344,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
 		var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-		if (IS_REFCOUNTED(Z_TYPE_P(var_ptr))) Z_DELREF_P(var_ptr);
+		if (Z_REFCOUNTED_P(var_ptr)) Z_DELREF_P(var_ptr);
 		ZVAL_COPY(var_ptr, param);
 	}
 
@@ -4006,7 +4006,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (OP2_TYPE != IS_UNUSED) {
@@ -4091,7 +4091,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 						break;
 					case IS_STRING:
 						if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (OP2_TYPE != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_dim));
@@ -4684,7 +4684,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -5384,7 +5384,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 				value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!IS_OP1_TMP_FREE()) {

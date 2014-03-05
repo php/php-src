@@ -45,7 +45,7 @@
 		zval member; \
 		ZVAL_STRINGL(&member, name, sizeof(name)-1); \
 		zend_std_write_property(object, &member, value, NULL TSRMLS_CC); \
-		Z_DELREF_P(value); \
+		if (Z_REFCOUNTED_P(value)) Z_DELREF_P(value); \
 		zval_ptr_dtor(&member); \
 	} while (0)
 

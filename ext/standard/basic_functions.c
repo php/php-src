@@ -5135,7 +5135,7 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			Z_ADDREF(shutdown_function_entry.arguments[i]);
+			if (Z_REFCOUNTED(shutdown_function_entry.arguments[i])) Z_ADDREF(shutdown_function_entry.arguments[i]);
 		}
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}

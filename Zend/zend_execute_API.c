@@ -428,7 +428,7 @@ ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 
 ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-	if (IS_REFCOUNTED(Z_TYPE_P(zval_ptr))) {
+	if (Z_REFCOUNTED_P(zval_ptr)) {
 		Z_DELREF_P(zval_ptr);
 		if (Z_REFCOUNT_P(zval_ptr) == 0) {
 			_zval_internal_dtor_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
@@ -551,7 +551,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			ZVAL_COPY_VALUE(p, &const_value);
 		}
 
-		if (IS_REFCOUNTED(Z_TYPE_P(p))) Z_SET_REFCOUNT_P(p, refcount);
+		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 //???		Z_SET_ISREF_TO_P(p, is_ref);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval *element, new_val;
