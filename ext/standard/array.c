@@ -4316,6 +4316,7 @@ PHP_FUNCTION(array_map)
 	for (i = 0; i < n_arrays; i++) {
 		if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d should be an array", i + 2);
+			efree(args);
 			efree(array_len);
 			efree(array_pos);
 			return;
@@ -4335,6 +4336,7 @@ PHP_FUNCTION(array_map)
 		RETVAL_ZVAL(args[0], 1, 0);
 		efree(array_len);
 		efree(array_pos);
+		efree(args);
 		return;
 	}
 
@@ -4386,6 +4388,7 @@ PHP_FUNCTION(array_map)
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the map callback");
 				efree(array_len);
+				efree(args);
 				efree(array_pos);
 				zval_dtor(return_value);
 				efree(params);
@@ -4408,6 +4411,7 @@ PHP_FUNCTION(array_map)
 	efree(params);
 	efree(array_len);
 	efree(array_pos);
+	efree(args);
 }
 /* }}} */
 
