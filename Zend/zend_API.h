@@ -677,18 +677,18 @@ END_EXTERN_C()
 																										\
 		if ((orig_var = zend_hash_str_find(symtable, (name), (name_length))) != NULL					\
 			&& Z_ISREF_P(orig_var)) {																	\
-			Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(orig_var));												\
-			/*???Z_SET_ISREF_P(var);*/																	\
-																										\
-			if (_refcount) {																			\
-				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);								\
+			if (Z_REFCOUNTED_P(var)) {																	\
+				Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(orig_var));											\
+				if (_refcount) {																		\
+					Z_SET_REFCOUNT_P(var, Z_REFCOUNT_P(var) + _refcount - 1);							\
+				}																						\
 			}																							\
 			zval_dtor(orig_var);																		\
 			ZVAL_COPY_VALUE(orig_var, var);																\
 			/*???FREE_ZVAL(var);*/																		\
 		} else {																						\
 			/*???Z_SET_ISREF_TO_P(var, _is_ref);*/														\
-			if (_refcount) {																			\
+			if (_refcount && Z_REFCOUNTED_P(var)) {														\
 				Z_SET_REFCOUNT_P(var, _refcount);														\
 			}																							\
 			zend_hash_str_update(symtable, (name), (name_length), var);									\

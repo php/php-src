@@ -120,10 +120,12 @@ PHP_FUNCTION(stream_socket_client)
 	tv.tv_usec = conv % 1000000;
 #endif
 	if (zerrno)	{
+		zerrno = Z_REFVAL_P(zerrno);
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
+		zerrstr = Z_REFVAL_P(zerrstr);
 		zval_dtor(zerrstr);
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
@@ -156,6 +158,7 @@ PHP_FUNCTION(stream_socket_client)
 			zval_dtor(zerrstr);
 //???			ZVAL_STRING(zerrstr, errstr, 0);
 			ZVAL_STRING(zerrstr, errstr);
+			efree(errstr);
 		} else if (errstr) {
 			efree(errstr);
 		}

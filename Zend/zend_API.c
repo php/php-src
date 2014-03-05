@@ -3156,18 +3156,19 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
 					obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
-					if (UNEXPECTED(Z_ISREF_P(obj))) {
-						obj = Z_REFVAL_P(obj);
-					}
 					method = zend_hash_index_find(Z_ARRVAL_P(callable), 1);
-					if (UNEXPECTED(Z_ISREF_P(method))) {
-						method = Z_REFVAL_P(method);
-					}
 				}
 				if (obj && method &&
 					(Z_TYPE_P(obj) == IS_OBJECT ||
 					Z_TYPE_P(obj) == IS_STRING) &&
 					Z_TYPE_P(method) == IS_STRING) {
+
+					if (UNEXPECTED(Z_ISREF_P(obj))) {
+						obj = Z_REFVAL_P(obj);
+					}
+					if (UNEXPECTED(Z_ISREF_P(method))) {
+						method = Z_REFVAL_P(method);
+					}
 
 					if (Z_TYPE_P(obj) == IS_STRING) {
 						if (callable_name) {
@@ -3235,7 +3236,9 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 
 				} else {
 					if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
-						if (!obj || (Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT)) {
+						if (!obj || (Z_ISREF_P(obj)?
+							(Z_TYPE_P(Z_REFVAL_P(obj)) != IS_STRING && Z_TYPE_P(Z_REFVAL_P(obj)) != IS_OBJECT) :
+						   	(Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT))) {
 							if (error) zend_spprintf(error, 0, "first array member is not a valid class name or object");
 						} else {
 							if (error) zend_spprintf(error, 0, "second array member is not a valid method");
