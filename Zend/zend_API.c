@@ -939,7 +939,6 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
 			if (varargs && *varargs) {
-				efree(*varargs);
 				*varargs = NULL;
 			}
 			return FAILURE;
