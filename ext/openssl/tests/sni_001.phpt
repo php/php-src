@@ -20,12 +20,18 @@ SNI 001
  * the server returned.
  */
 
-function context() {
-	return stream_context_create(array(
-		'ssl' => array(
-			'capture_peer_cert' => true,
-		),
-	));
+function context($host = NULL) {
+
+	$ctx = stream_context_create();
+	stream_context_set_option($ctx, 'ssl', 'capture_peer_cert', true);
+	stream_context_set_option($ctx, 'ssl', 'verify_peer', false);
+	if ($host) {
+		stream_context_set_option($ctx, 'ssl', 'peer_name', $host);
+	} else {
+		stream_context_set_option($ctx, 'ssl', 'verify_peer_name', false);
+	}
+
+	return $ctx;
 }
 
 function get_CN($context) {
@@ -72,13 +78,13 @@ function do_enable_crypto_test($url, $context) {
 /* Test https:// streams */
 
 echo "-- auto host name (1) --\n";
-do_http_test('https://alice.sni.velox.ch/', context());
+do_http_test('https://alice.sni.velox.ch/', context('alice.sni.velox.ch'));
 
 echo "-- auto host name (2) --\n";
-do_http_test('https://bob.sni.velox.ch/', context());
+do_http_test('https://bob.sni.velox.ch/', context('bob.sni.velox.ch'));
 
 echo "-- auto host name (3) --\n";
-do_http_test('https://bob.sni.velox.ch./', context());
+do_http_test('https://bob.sni.velox.ch./', context('bob.sni.velox.ch'));
 
 echo "-- user supplied server name --\n";
 
@@ -96,14 +102,14 @@ do_http_test('https://bob.sni.velox.ch/', $context);
 /* Test ssl:// socket streams */
 
 echo "-- raw SSL stream (1) --\n";
-do_ssl_test('ssl://bob.sni.velox.ch:443', context());
+do_ssl_test('ssl://bob.sni.velox.ch:443', context('bob.sni.velox.ch'));
 
 echo "-- raw SSL stream (2) --\n";
-do_ssl_test('ssl://mallory.sni.velox.ch:443', context());
+do_ssl_test('ssl://mallory.sni.velox.ch:443', context('mallory.sni.velox.ch'));
 
 echo "-- raw SSL stream with user supplied sni --\n";
 
-$context = context();
+$context = context('bob.sni.velox.ch');
 stream_context_set_option($context, 'ssl', 'SNI_server_name', 'bob.sni.velox.ch');
 
 do_ssl_test('ssl://mallory.sni.velox.ch:443', $context);

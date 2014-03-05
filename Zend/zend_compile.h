@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 #define ZEND_COMPILE_H
 
 #include "zend.h"
+#include "zend_ast.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -74,7 +75,7 @@ typedef struct _zend_literal {
 #define Z_HASH_P(zv) \
 	(((zend_literal*)(zv))->hash_value)
 
-typedef union _znode_op {	
+typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
 	zend_uint      num;
@@ -86,12 +87,13 @@ typedef union _znode_op {
 	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
-typedef struct _znode { /* used only during compilation */ 
+typedef struct _znode { /* used only during compilation */
 	int op_type;
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
 		zend_op_array *op_array;
+		zend_ast *ast;
 	} u;
 	zend_uint EA;      /* extended attributes */
 } znode;
@@ -212,6 +214,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+/* function has arguments with type hinting */
+#define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 
@@ -239,7 +244,7 @@ typedef struct _zend_arg_info {
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_arg_info,
- * but its fields have different meaning. It's used as the first element of 
+ * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
  */
 typedef struct _zend_internal_function_info {
@@ -262,7 +267,7 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	const char *function_name;		
+	const char *function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -358,6 +363,11 @@ typedef struct _zend_function_state {
 	void **arguments;
 } zend_function_state;
 
+typedef struct _zend_function_call_entry {
+	zend_function *fbc;
+	zend_uint arg_num;
+	zend_bool uses_argument_unpacking;
+} zend_function_call_entry;
 
 typedef struct _zend_switch_entry {
 	znode cond;
@@ -378,6 +388,7 @@ typedef struct _call_slot {
 	zend_function     *fbc;
 	zval              *object;
 	zend_class_entry  *called_scope;
+	zend_uint          num_additional_args;
 	zend_bool          is_ctor_call;
 	zend_bool          is_ctor_result_used;
 } call_slot;
@@ -396,6 +407,7 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	zval *delayed_exception;
 	call_slot *call_slots;
 	call_slot *call;
 };
@@ -438,7 +450,9 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
+void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
+void zend_resolve_function_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC);
+void zend_resolve_const_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name TSRMLS_DC);
 ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
@@ -509,7 +523,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TS
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
-void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
+void zend_do_end_function_call(znode *function_name, znode *result, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
@@ -545,7 +559,8 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
 
-void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
+void zend_do_pass_param(znode *param, zend_uchar op TSRMLS_DC);
+void zend_do_unpack_params(znode *params TSRMLS_DC);
 
 
 void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC);
@@ -575,7 +590,7 @@ void zend_do_pop_object(znode *object TSRMLS_DC);
 
 
 void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC);
-void zend_do_end_new_object(znode *result, const znode *new_token, const znode *argument_list TSRMLS_DC);
+void zend_do_end_new_object(znode *result, const znode *new_token TSRMLS_DC);
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode, zend_bool check_namespace TSRMLS_DC);
 
@@ -637,7 +652,11 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_D
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int is_function, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC);
+void zend_do_use_function(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use_const(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
+void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
 
@@ -675,7 +694,7 @@ void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
 #define zend_unmangle_property_name(mangled_property, mangled_property_len, class_name, prop_name) \
-        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL) 
+        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL)
 ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name, int *prop_len);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
@@ -840,6 +859,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_NEW      1<<1
+#define ZEND_RETURNS_VALUE    1<<2
 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2
@@ -858,6 +878,7 @@ END_EXTERN_C()
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
+#define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

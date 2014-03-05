@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,6 +82,7 @@ PHP_METHOD(DateTimeImmutable, setTime);
 PHP_METHOD(DateTimeImmutable, setDate);
 PHP_METHOD(DateTimeImmutable, setISODate);
 PHP_METHOD(DateTimeImmutable, setTimestamp);
+PHP_METHOD(DateTimeImmutable, createFromMutable);
 
 PHP_METHOD(DateTimeZone, __construct);
 PHP_METHOD(DateTimeZone, __wakeup);
@@ -137,14 +138,9 @@ struct _php_timezone_obj {
 	int             initialized;
 	int             type;
 	union {
-		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
-		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
-		struct                      /* TIMELIB_ZONETYPE_ABBR */
-		{
-			timelib_sll  utc_offset;
-			char        *abbr;
-			int          dst;
-		} z;
+		timelib_tzinfo   *tz;         /* TIMELIB_ZONETYPE_ID */
+		timelib_sll       utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
+		timelib_abbr_info z;          /* TIMELIB_ZONETYPE_ABBR */
 	} tzi;
 	HashTable *props;
 };

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@
 #include "libxml/uri.h"
 
 #include "ext/standard/md5.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -791,11 +791,11 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 		}
 	}
 
-	new_state.cwd = strdup(cwd);
+	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
 	if (virtual_file_ex(&new_state, filepath, NULL, realpath_mode TSRMLS_CC)) {
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return NULL;
 	}
 
@@ -806,7 +806,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	} else {
 		real_path = estrndup(new_state.cwd, new_state.cwd_length);
 	}
-	free(new_state.cwd);
+	efree(new_state.cwd);
 
 	return real_path;
 }

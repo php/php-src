@@ -20,32 +20,14 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Core:
-  Removed $HTTP_RAW_POST_DATA global variable. Restore backwards compatibility 
-  by:
-  <?php
-  global $HTTP_RAW_POST_DATA;
-  if (!isset($HTTP_RAW_POST_DATA)) {
-      $HTTP_RAW_POST_DATA = file_get_contents("php://input");
-  }
-  ?>
+- DBA
+  . dba_delete() now returns false if the key was not found for the inifile 
+    handler, too.
 
 ========================================
 2. New Features
 ========================================
 
-- Added dedicated syntax for variadic functions.
-  (https://wiki.php.net/rfc/variadics)
-
-- The php://input stream is now re-usable and can be used concurrently with 
-  enable_post_data_reading=0.
-
-- Added gost-crypto (CryptoPro S-box) hash algo.
-
-- Added openssl certificate fingerprint support (inclusive stream context 
-  option).
-
-- Added openssl crypto method stream context option.
 
 ========================================
 2. Changes in SAPI modules
@@ -56,38 +38,16 @@ PHP X.Y UPGRADE NOTES
 3. Deprecated Functionality
 ========================================
 
-- Incompatible context calls:
-  Instance calls from an incompatible context are now deprecated and issue
-  E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
 ========================================
 4. Changed Functions
 ========================================
 
-- cURL:
-  CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
-  do not work unless it is explicitly set to false.
-
-- Crypt:
-  crypt() will now raise an E_NOTICE error if the salt parameter is omitted.
-  See: https://wiki.php.net/rfc/crypt_function_salt
-
-- XMLReader:
-  XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
-  the attribute could not be found, just like XMLReader::getAttribute.
 
 ========================================
 5. New Functions
 ========================================
 
-- Openssl:
-  Added string openssl_x509_fingerprint($x509, $type, $binary).
-
-- LDAP:
-  Added ldap_escape($value, $ignore = "", $flags = 0).
-
-- Zip:
-  Added ZipArchive::setPassword($password)
 
 ========================================
 6. New Classes and Interfaces
@@ -103,47 +63,18 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
-- GMP:
-  The GMP extension now uses objects as the underlying data structure, rather
-  than resources. GMP instances now support dumping, serialization, cloning,
-  casts to primitive types and have overloaded operators.
-  (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
-
-- OCI8:
-  - Added Implicit Result Set support for Oracle Database 12c with a
-    new oci_get_implicit_resultset() function.
-  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
-    unnecessarily initiates an internal ROLLBACK during connection
-    close.
-  - Added DTrace probes enabled with PHP's generic --enable-dtrace
-  - The oci_internal_debug() function is now a no-op.
-  - The phpinfo() output format for OCI8 has changed.
 
 ========================================
 9. New Global Constants
 ========================================
 
-- LDAP:
-  LDAP_ESCAPE_FILTER int(1)
-  LDAP_ESCAPE_DN     int(2)
 
 ========================================
 10. Changes to INI File Handling
 ========================================
 
-- Core:
-  Removed always_populate_raw_post_data.
 
 ========================================
 11. Other Changes
 ========================================
 
-- File upload:
-  Uploads equal or greater than 2GB in size are now accepted.
-
-- HTTP stream wrapper:
-  HTTP 1.1 requests now include a Connection: close header unless explicitly
-  overridden by setting a Connection header via the header context option.
-
-- Zip:
-  New --with-libzip option allow to use system libzip. Version > 0.11 required.

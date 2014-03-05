@@ -26,6 +26,8 @@ var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var MFO = null;
 var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
+var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)");
+var VCINSTALLDIR = WshShell.Environment("Process").Item("VCINSTALLDIR");
 var DSP_FLAGS = new Array();
 var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
@@ -47,6 +49,7 @@ VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
 VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
+VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1200] = 'VC6';
@@ -56,6 +59,7 @@ VC_VERSIONS_SHORT[1400] = 'VC8';
 VC_VERSIONS_SHORT[1500] = 'VC9';
 VC_VERSIONS_SHORT[1600] = 'VC10';
 VC_VERSIONS_SHORT[1700] = 'VC11';
+VC_VERSIONS_SHORT[1800] = 'VC12';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1386,6 +1390,11 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 			}
 		} else {
 			MFO.WriteLine(sub_build + obj + ": " + dir + "\\" + src);
+
+			if (PHP_ANALYZER == "pvs") {
+				MFO.WriteLine("\t@\"$(PVS_STUDIO)\" --cl-params $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " --source-file "  + dir + "\\" + src
+					+ " --cfg PVS-Studio.conf --errors-off \"V122 V117 V111\" ");
+			}
 			MFO.WriteLine("\t@$(CC) $(" + flags + ") $(CFLAGS) $(" + bd_flags_name + ") /c " + dir + "\\" + src + " /Fo" + sub_build + obj);
 		}
 	}
@@ -1546,6 +1555,20 @@ function write_summary()
 	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
 	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
 	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	if (PHP_PGO == "yes") {
+		ar[4] = ['Optimization', "PGO"];
+	} else if (PHP_PGI == "yes") {
+		ar[4] = ['Optimization', "PGI"];
+	} else {
+		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	if (PHP_ANALYZER == "vs") {
+		ar[5] = ['Static analyzer', 'Visual Studio'];
+	} else if (PHP_ANALYZER == "pvs") {
+		ar[5] = ['Static analyzer', 'PVS-Studio'];
+	} else {
+		ar[5] = ['Static analyzer', 'disabled'];
+	}
 
 	output_as_table(["",""], ar);
 	STDOUT.WriteBlankLines(2);

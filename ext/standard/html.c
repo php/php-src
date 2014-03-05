@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1432,8 +1432,8 @@ encode_amp:
  */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0;
+	char *str, *hint_charset = PHP_DEFAULT_CHARSET;
+	int str_len, hint_charset_len = sizeof(PHP_DEFAULT_CHARSET)-1;
 	size_t new_len;
 	long flags = ENT_COMPAT;
 	char *replaced;
@@ -1504,8 +1504,8 @@ PHP_FUNCTION(htmlspecialchars_decode)
    Convert all HTML entities to their applicable characters */
 PHP_FUNCTION(html_entity_decode)
 {
-	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0;
+	char *str, *hint_charset = PHP_DEFAULT_CHARSET;
+	int str_len, hint_charset_len = sizeof(PHP_DEFAULT_CHARSET)-1;
 	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;

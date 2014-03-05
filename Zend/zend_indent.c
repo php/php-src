@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -47,7 +47,7 @@ static void handle_whitespace(int *emit_whitespace)
 }
 
 
-ZEND_API void zend_indent()
+ZEND_API void zend_indent(TSRMLS_D)
 {
 	zval token;
 	int token_type;
@@ -55,7 +55,6 @@ ZEND_API void zend_indent()
 	int nest_level=0;
 	int emit_whitespace[256];
 	int i;
-	TSRMLS_FETCH();
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 

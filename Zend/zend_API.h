@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -197,6 +197,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__set = handle_propset;					\
 		class_container.__unset = handle_propunset;				\
 		class_container.__isset = handle_propisset;				\
+		class_container.__debugInfo = NULL;					\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
 		class_container.serialize = NULL;						\
@@ -266,7 +267,7 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, 
 
 ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
-ZEND_API int zend_startup_module(zend_module_entry *module_entry);
+ZEND_API int zend_startup_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC);

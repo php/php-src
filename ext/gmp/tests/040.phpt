@@ -37,7 +37,13 @@ NULL
 
 Warning: gmp_init(): Bad base for conversion: -1 (should be between 2 and %d) in %s on line %d
 bool(false)
+
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
+
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
+
+Warning: gmp_init(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 string(1) "0"
 Done

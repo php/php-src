@@ -3,7 +3,7 @@
 
 /*
   zipint.h -- internal declarations.
-  Copyright (C) 1999-2013 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -56,19 +56,14 @@
 # include "config.h"
 #endif
 
-#if defined(HAVE_MOVEFILEEXA) && defined(_WIN32)
+#ifdef HAVE_MOVEFILEEXA
 #include <windows.h>
-#define _zip_rename(s, t)						\
-	(!MoveFileExA((s), (t),	MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING))
+#define _zip_rename(s, t)	(!MoveFileExA((s), (t), MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING))
 #else
 #define _zip_rename	rename
 #endif
 
 #ifdef _WIN32
-#undef strcasecmp
-#  define strcasecmp _strcmpi
-#endif
-
 #if defined(HAVE__CLOSE)
 #define close		_close
 #endif
@@ -86,11 +81,12 @@
 #if defined(HAVE__OPEN)
 #define open(a, b, c)	_open((a), (b))
 #endif
-#if defined(HAVE__SNPRINTF)
+#if defined(HAVE__SNPRINTF) && !defined(PHP_WIN32)
 #define snprintf	_snprintf
 #endif
-#if defined(HAVE__STRDUP) && !defined(strdup)
+#if defined(HAVE__STRDUP) && !defined(HAVE_STRDUP)
 #define strdup		_strdup
+#endif
 #endif
 
 #ifndef HAVE_FSEEKO
@@ -122,6 +118,18 @@ int _zip_mkstemp(char *);
 #error unsupported size of off_t
 #endif
 
+#ifndef SIZE_MAX
+#if SIZEOF_SIZE_T == 8
+#define SIZE_MAX ZIP_INT64_MAX
+#elif SIZEOF_SIZE_T == 4
+#define SIZE_MAX ZIP_INT32_MAX
+#elif SIZEOF_SIZE_T == 2
+#define SIZE_MAX ZIP_INT16_MAX
+#else
+#error unsupported size of size_t
+#endif
+#endif
+
 #define CENTRAL_MAGIC "PK\1\2"
 #define LOCAL_MAGIC   "PK\3\4"
 #define EOCD_MAGIC    "PK\5\6"
@@ -151,7 +159,12 @@ int _zip_mkstemp(char *);
 #define ZIP_EF_ZIP64		0x0001
 
 #define ZIP_EF_IS_INTERNAL(id)	((id) == ZIP_EF_UTF_8_COMMENT || (id) == ZIP_EF_UTF_8_NAME || (id) == ZIP_EF_ZIP64)
-
+
+/* according to unzip-6.0's zipinfo.c, this corresponds to a regular file with rw permissions for everyone */
+#define ZIP_EXT_ATTRIB_DEFAULT		(0100666<<16)
+/* according to unzip-6.0's zipinfo.c, this corresponds to a directory with rwx permissions for everyone */
+#define ZIP_EXT_ATTRIB_DEFAULT_DIR	(0040777<<16)
+
 
 /* This section contains API that won't materialize like this.  It's
    placed in the internal section, pending cleanup. */
@@ -296,12 +309,13 @@ struct zip_file {
 #define ZIP_DIRENT_FILENAME	0x0002u
 #define ZIP_DIRENT_COMMENT	0x0004u
 #define ZIP_DIRENT_EXTRA_FIELD	0x0008u
+#define ZIP_DIRENT_ATTRIBUTES	0x0010u
 #define ZIP_DIRENT_ALL		0xffffu
 
 struct zip_dirent {
     zip_uint32_t changed;
     int local_extra_fields_read;		/*      whether we already read in local header extra fields */
-    int cloned;                                 /*      wether this instance is cloned, and thus shares non-changed strings */
+    int cloned;                                 /*      whether this instance is cloned, and thus shares non-changed strings */
 
     zip_uint16_t version_madeby;		/* (c)  version of creator */
     zip_uint16_t version_needed;		/* (cl) version needed to extract */

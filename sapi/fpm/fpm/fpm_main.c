@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,6 +157,7 @@ static const opt_struct OPTIONS[] = {
 	{'R', 0, "allow-to-run-as-root"},
 	{'D', 0, "daemonize"},
 	{'F', 0, "nodaemonize"},
+	{'O', 0, "force-stderr"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -315,7 +316,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static void sapi_cgibin_flush(void *server_context)
+static void sapi_cgibin_flush(void *server_context TSRMLS_DC)
 {
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
@@ -921,7 +922,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F [-O]]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -940,6 +941,8 @@ static void php_cgi_usage(char *argv0)
 				"  -D, --daemonize  force to run in background, and ignore daemonize option from config file\n"
 				"  -F, --nodaemonize\n"
 				"                   force to stay in foreground, and ignore daemonize option from config file\n"
+                                "  -O, --force-stderr\n"
+                                "                   force output to stderr in nodaemonize even if stderr is not a TTY\n"
 				"  -R, --allow-to-run-as-root\n"
 				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
@@ -1353,7 +1356,7 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1572,6 +1575,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int force_daemon = -1;
+	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
 
@@ -1700,6 +1704,10 @@ int main(int argc, char *argv[])
 				force_daemon = 0;
 				break;
 
+			case 'O': /* force stderr even on non tty */
+				force_stderr = 1;
+				break;
+
 			default:
 			case 'h':
 			case '?':
@@ -1724,9 +1732,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
@@ -1827,7 +1835,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon)) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr)) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;

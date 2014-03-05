@@ -364,7 +364,7 @@ _zip_checkcons(FILE *fp, struct zip_cdir *cd, struct zip_error *error)
 
 
 /* _zip_check_torrentzip:
-   check wether ZA has a valid TORRENTZIP comment, i.e. is torrentzipped */
+   check whether ZA has a valid TORRENTZIP comment, i.e. is torrentzipped */
 
 static void
 _zip_check_torrentzip(struct zip *za, const struct zip_cdir *cdir)
@@ -498,6 +498,11 @@ _zip_find_central_dir(FILE *fp, unsigned int flags, int *zep, off_t len)
     zip_int64_t best;
     struct zip_error zerr;
 
+    if (len < (off_t)EOCDLEN) {
+        set_error(zep, NULL, ZIP_ER_NOZIP);
+        return NULL;
+    }
+    
     i = fseeko(fp, -(len < CDBUFSIZE ? len : CDBUFSIZE), SEEK_END);
     if (i == -1 && errno != EFBIG) {
 	/* seek before start of file on my machine */

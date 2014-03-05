@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -187,9 +187,11 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 	if (set->data) {
 		unsigned int copy_on_write_performed = 0;
 		unsigned int copy_on_write_saved = 0;
+		zval **data = set->data;
+		set->data = NULL; /* prevent double free if following loop is interrupted */
 
 		for (row = set->row_count - 1; row >= 0; row--) {
-			zval **current_row = set->data + row * field_count;
+			zval **current_row = data + row * field_count;
 			MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
 			int64_t col;
 
@@ -211,8 +213,7 @@ MYSQLND_METHOD(mysqlnd_res, free_buffered_data)(MYSQLND_RES * result TSRMLS_DC)
 
 		MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(STAT_COPY_ON_WRITE_PERFORMED, copy_on_write_performed,
 											  STAT_COPY_ON_WRITE_SAVED, copy_on_write_saved);
-		mnd_efree(set->data);
-		set->data = NULL;
+		mnd_efree(data);
 	}
 
 	if (set->row_buffers) {
@@ -415,6 +416,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 				DBG_INF("UPSERT");
 				conn->last_query_type = QUERY_UPSERT;
 				conn->field_count = rset_header->field_count;
+				memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 				conn->upsert_status->warning_count = rset_header->warning_count;
 				conn->upsert_status->server_status = rset_header->server_status;
 				conn->upsert_status->affected_rows = rset_header->affected_rows;
@@ -702,6 +704,7 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -828,6 +831,7 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 		/* Mark the connection as usable again */
 		DBG_INF_FMT("warnings=%u server_status=%u", row_packet->warning_count, row_packet->server_status);
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1151,23 +1155,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		*/
 	}
 	/* Overflow ? */
-	if (set->row_count) {
-		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
-		if (set->row_count * meta->field_count * sizeof(zval *) > SIZE_MAX) {
-			SET_OOM_ERROR(*conn->error_info);
-			ret = FAIL;
-			goto end;
-		}
-		/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
-		set->data = mnd_emalloc((size_t)(set->row_count * meta->field_count * sizeof(zval *)));
-		if (!set->data) {
-			SET_OOM_ERROR(*conn->error_info);
-			ret = FAIL;
-			goto end;
-		}
-		memset(set->data, 0, (size_t)(set->row_count * meta->field_count * sizeof(zval *)));
-	}
-
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(conn->stats,
 									   binary_protocol? STAT_ROWS_BUFFERED_FROM_CLIENT_PS:
 														STAT_ROWS_BUFFERED_FROM_CLIENT_NORMAL,
@@ -1175,6 +1162,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	/* Finally clean */
 	if (row_packet->eof) { 
+		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 		conn->upsert_status->warning_count = row_packet->warning_count;
 		conn->upsert_status->server_status = row_packet->server_status;
 	}
@@ -1198,9 +1186,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(set->error_info, row_packet->error_info);
 	} else {
-		/* Position at the first row */
-		set->data_cursor = set->data;
-
 		/* libmysql's documentation says it should be so for SELECT statements */
 		conn->upsert_status->affected_rows = set->row_count;
 	}
@@ -1250,7 +1235,27 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 			SET_OOM_ERROR(*conn->error_info);
 		}
 		DBG_RETURN(NULL);
+	} else {
+	/* Overflow ? */
+		MYSQLND_RES_BUFFERED * set = result->stored_data;
+		if (set->row_count) {
+			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+			if (set->row_count * result->meta->field_count * sizeof(zval *) > SIZE_MAX) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+			set->data = mnd_emalloc((size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+			if (!set->data) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			memset(set->data, 0, (size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+		}
+		/* Position at the first row */
+		set->data_cursor = set->data;
 	}
+
 	/* libmysql's documentation says it should be so for SELECT statements */
 	conn->upsert_status->affected_rows = result->stored_data->row_count;
 

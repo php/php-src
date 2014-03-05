@@ -204,7 +204,7 @@ pkware_decrypt(struct zip_source *src, void *ud, void *data,
 
 	    st->encryption_method = ZIP_EM_NONE;
 	    st->valid |= ZIP_STAT_ENCRYPTION_METHOD;
-	    /* XXX: deduce HEADERLEN from size for uncompressed */
+	    /* TODO: deduce HEADERLEN from size for uncompressed */
 	    if (st->valid & ZIP_STAT_COMP_SIZE)
 		st->comp_size -= HEADERLEN;
 	}

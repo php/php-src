@@ -49,7 +49,8 @@ _zip_add_entry(struct zip *za)
     if (za->nentry+1 >= za->nentry_alloc) {
 	struct zip_entry *rentries;
 	zip_uint64_t nalloc = za->nentry_alloc + 16;
-	rentries = (struct zip_entry *)realloc(za->entry, sizeof(struct zip_entry) * nalloc);
+        /* TODO check for overflow */
+	rentries = (struct zip_entry *)realloc(za->entry, sizeof(struct zip_entry) * (size_t)nalloc);
 	if (!rentries) {
 	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	    return -1;

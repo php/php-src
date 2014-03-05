@@ -1,6 +1,6 @@
 /*
   zip_extra_field_api.c -- public extra fields API functions
-  Copyright (C) 2012-2013 Dieter Baron and Thomas Klausner
+  Copyright (C) 2012-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -46,6 +46,11 @@ zip_file_extra_field_delete(struct zip *za, zip_uint64_t idx, zip_uint16_t ef_id
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
+
+    if (((flags & ZIP_EF_BOTH) == ZIP_EF_BOTH) && (ef_idx != ZIP_EXTRA_FIELD_ALL)) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
     
     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)
 	return -1;
@@ -72,6 +77,11 @@ zip_file_extra_field_delete_by_id(struct zip *za, zip_uint64_t idx, zip_uint16_t
     struct zip_dirent *de;
 
     if ((flags & ZIP_EF_BOTH) == 0) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
+
+    if (((flags & ZIP_EF_BOTH) == ZIP_EF_BOTH) && (ef_idx != ZIP_EXTRA_FIELD_ALL)) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }

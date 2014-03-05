@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,8 +112,17 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_get_current_data_ex(target_hash, (void **) &element, &pos) == SUCCESS;
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
-		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		if (Z_TYPE_PP(element) != IS_STRING) {
+			zval tmp;
+
+			MAKE_COPY_ZVAL(element, &tmp);
+			convert_to_string(&tmp);
+			el_len = Z_STRLEN(tmp);
+
+			zval_dtor(&tmp);
+		} else {
+			el_len = Z_STRLEN_PP(element);
+		}
 		if (el_len == 0) {
 			continue;
 		}
@@ -125,7 +134,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				if (string_length == 0) {
 					continue;
 				}
-				sizeenv += string_length+1;
+				sizeenv += string_length;
 				break;
 		}
 	}
@@ -138,19 +147,26 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	for (zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 			zend_hash_get_current_data_ex(target_hash, (void **) &element, &pos) == SUCCESS;
 			zend_hash_move_forward_ex(target_hash, &pos)) {
+		zval tmp;
 
-		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
-
-		if (el_len == 0) {
-			continue;
+		if (Z_TYPE_PP(element) != IS_STRING) {
+			MAKE_COPY_ZVAL(element, &tmp);
+			convert_to_string(&tmp);
+		} else {
+			tmp = **element;
 		}
 
-		data = Z_STRVAL_PP(element);
+		el_len = Z_STRLEN(tmp);
+
+		if (el_len == 0) {
+			goto next_element;
+		}
+
+		data = Z_STRVAL(tmp);
 		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (string_length == 0) {
-					continue;
+					goto next_element;
 				}
 
 				l = string_length + el_len + 1;
@@ -174,6 +190,11 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				break;
 			case HASH_KEY_NON_EXISTENT:
 				break;
+		}
+
+next_element:
+		if (Z_TYPE_PP(element) != IS_STRING) {
+			zval_dtor(&tmp);
 		}
 	}
 

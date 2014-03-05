@@ -119,6 +119,10 @@ SOURCE=.\zend_API.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ast.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_builtin_functions.c
 # End Source File
 # Begin Source File
@@ -260,6 +264,14 @@ SOURCE=.\zend_ts_hash.c
 # Begin Source File
 
 SOURCE=.\zend_variables.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_vm_opcodes.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_virtual_cwd.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -775,7 +775,7 @@ PHP_FUNCTION(mysqli_poll)
 	MYSQLND			**new_r_array = NULL, **new_e_array = NULL, **new_dont_poll_array = NULL;
 	long			sec = 0, usec = 0;
 	enum_func_status ret;
-	uint 			desc_num;
+	int 			desc_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!al|l", &r_array, &e_array, &dont_poll_array, &sec, &usec) == FAILURE) {
 		return;
@@ -1205,6 +1205,23 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	RETURN_TRUE;
 }
 /* }}} */
+
+
+/* {{{ proto bool mysqli_get_links_stats()
+   Returns information about open and cached links */
+PHP_FUNCTION(mysqli_get_links_stats)
+{
+	if (ZEND_NUM_ARGS()) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no parameters expected");
+		return;	
+	}
+	array_init(return_value);
+	add_assoc_long_ex(return_value, "total", sizeof("total"), MyG(num_links));
+	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks"), MyG(num_active_persistent));
+	add_assoc_long_ex(return_value, "cached_plinks", sizeof("cached_plinks"), MyG(num_inactive_persistent));
+}
+/* }}} */
+
 
 
 /*

@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ $header_text = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -911,9 +911,15 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#undef CHECK_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION\n");
 							out($f,"#undef HANDLE_EXCEPTION_LEAVE\n");
-							out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
-							out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
-							out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+							if (ZEND_VM_SPEC) {
+								out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_SPEC_HANDLER\n");
+							} else {
+								out($f,"#define CHECK_EXCEPTION() if (UNEXPECTED(EG(exception) != NULL)) goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_HANDLER\n");
+							}
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
@@ -1201,13 +1207,39 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	fputs($f, "#ifndef ZEND_VM_OPCODES_H\n#define ZEND_VM_OPCODES_H\n\n");
+	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n\n");
+	
 	foreach ($opcodes as $code => $dsc) {
 		$code = str_pad((string)$code,$code_len," ",STR_PAD_LEFT);
 		$op = str_pad($dsc["op"],$max_opcode_len);
 		fputs($f,"#define $op $code\n");
 	}
+
+	fputs($f, "\n#endif\n");
 	fclose($f);
 	echo "zend_vm_opcodes.h generated successfully.\n";
+
+	// zend_vm_opcodes.c
+	$f = fopen(__DIR__ . "/zend_vm_opcodes.c", "w+") or die("ERROR: Cannot create zend_vm_opcodes.c\n");
+
+	// Insert header
+	out($f, $GLOBALS['header_text']);
+	fputs($f,"#include <stdio.h>\n");
+	fputs($f,"#include <zend.h>\n\n");
+	
+	fputs($f,"const char *zend_vm_opcodes_map[".($max_opcode + 1)."] = {\n");
+	for ($i = 0; $i <= $max_opcode; $i++) {
+		fputs($f,"\t".(isset($opcodes[$i]["op"])?'"'.$opcodes[$i]["op"].'"':"NULL").",\n");
+	}
+	fputs($f, "};\n\n");
+	
+    fputs($f, "ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {\n");
+    fputs($f, "\treturn zend_vm_opcodes_map[opcode];\n");
+    fputs($f, "}\n");
+    
+	fclose($f);
+	echo "zend_vm_opcodes.c generated successfully.\n";
 
 	// Generate zend_vm_execute.h
 	$f = fopen(__DIR__ . "/zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
@@ -1232,7 +1264,7 @@ function gen_vm($def, $skel) {
 		out($f, "# pragma warning(once : 6285)\n");
 		// Suppress (<non-zero constant> || <expression>) warnings on windows
 		out($f, "# pragma warning(once : 6286)\n");
-		// Suppress constant with constant comparsion warnings on windows
+		// Suppress constant with constant comparison warnings on windows
 		out($f, "# pragma warning(once : 6326)\n");
 	}
 	out($f, "#endif\n");

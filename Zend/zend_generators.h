@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,7 +49,7 @@ typedef struct _zend_generator {
 	/* Current key */
 	zval *key;
 	/* Variable to put sent value into */
-	temp_variable *send_target;
+	zval **send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	long largest_used_integer_key;
 

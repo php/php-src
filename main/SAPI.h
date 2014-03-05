@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,7 @@
 #ifndef SAPI_H
 #define SAPI_H
 
+#include "php.h"
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_llist.h"
@@ -227,7 +228,7 @@ struct _sapi_module_struct {
 	int (*deactivate)(TSRMLS_D);
 
 	int (*ub_write)(const char *str, unsigned int str_length TSRMLS_DC);
-	void (*flush)(void *server_context);
+	void (*flush)(void *server_context TSRMLS_DC);
 	struct stat *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
 
@@ -291,7 +292,7 @@ struct _sapi_post_entry {
 #define SAPI_HEADER_SEND_FAILED			3
 
 #define SAPI_DEFAULT_MIMETYPE		"text/html"
-#define SAPI_DEFAULT_CHARSET		""
+#define SAPI_DEFAULT_CHARSET		PHP_DEFAULT_CHARSET
 #define SAPI_PHP_VERSION_HEADER		"X-Powered-By: PHP/" PHP_VERSION
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(TSRMLS_D)

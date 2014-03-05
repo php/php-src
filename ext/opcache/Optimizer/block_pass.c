@@ -643,8 +643,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode != ZEND_FREE
 			) {
 			zend_op *src = VAR_SOURCE(opline->op1);
+			zval c = ZEND_OP1_LITERAL(src);
 			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, src->op1);
+			zval_copy_ctor(&c);
+			update_op1_const(op_array, opline, &c TSRMLS_CC);
+			literal_dtor(&ZEND_OP1_LITERAL(src));
 			MAKE_NOP(src);
 		}
 
@@ -654,51 +657,12 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op2)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op2)) == IS_CONST) {
 			zend_op *src = VAR_SOURCE(opline->op2);
+			zval c = ZEND_OP1_LITERAL(src);
 			VAR_UNSET(opline->op2);
-			COPY_NODE(opline->op2, src->op1);
+			zval_copy_ctor(&c);
+			update_op2_const(op_array, opline, &c TSRMLS_CC);
+			literal_dtor(&ZEND_OP1_LITERAL(src));
 			MAKE_NOP(src);
-
-#if ZEND_EXTENSION_API_NO >= PHP_5_4_X_API_NO
-			/* numeric string constants used as array indeces have to be
-			   converted to long at compile time */
-			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT ||
-			    opline->opcode == ZEND_INIT_ARRAY ||
-			    opline->opcode == ZEND_UNSET_DIM ||
-			    opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ||
-			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_DIM_W ||
-			    opline->opcode == ZEND_FETCH_DIM_RW ||
-			    opline->opcode == ZEND_FETCH_DIM_IS ||
-			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
-			    opline->opcode == ZEND_FETCH_DIM_UNSET ||
-			    opline->opcode == ZEND_FETCH_DIM_TMP_VAR ||
-			    (opline->opcode == ZEND_OP_DATA &&
-			     ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-			      ((opline-1)->extended_value == ZEND_ASSIGN_DIM &&
-			       ((opline-1)->opcode == ZEND_ASSIGN_ADD ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SUB ||
-			        (opline-1)->opcode == ZEND_ASSIGN_MUL ||
-			        (opline-1)->opcode == ZEND_ASSIGN_DIV ||
-			        (opline-1)->opcode == ZEND_ASSIGN_MOD ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SL ||
-			        (opline-1)->opcode == ZEND_ASSIGN_SR ||
-			        (opline-1)->opcode == ZEND_ASSIGN_CONCAT ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_OR ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_AND ||
-			        (opline-1)->opcode == ZEND_ASSIGN_BW_XOR))))) {
-
-				if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-					ulong index;
-					int numeric = 0;
-
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline))+1, index, numeric = 1);
-					if (numeric) {
-						zval_dtor(&ZEND_OP2_LITERAL(opline));
-						ZVAL_LONG(&ZEND_OP2_LITERAL(opline), index);
-		        	}
-				}
-			}
-#endif
 		}
 
 		/* T = PRINT(X), F(T) => ECHO(X), F(1) */
@@ -1070,10 +1034,9 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
-				ZEND_OP1_LITERAL(opline) = result;
-				SET_UNUSED(opline->op2);
-
 				opline->opcode = ZEND_QM_ASSIGN;
+				SET_UNUSED(opline->op2);
+				update_op1_const(op_array, opline, &result TSRMLS_CC);
 			}
 			EG(error_reporting) = er;
 		} else if ((opline->opcode == ZEND_BOOL ||
@@ -1094,11 +1057,12 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				/* BOOL */
 				result = ZEND_OP1_LITERAL(opline);
 				convert_to_boolean(&result);
+				Z_TYPE(ZEND_OP1_LITERAL(opline)) = IS_NULL;
 			}
 			PZ_SET_REFCOUNT_P(&result, 1);
 			PZ_UNSET_ISREF_P(&result);
-			ZEND_OP1_LITERAL(opline) = result;
 			opline->opcode = ZEND_QM_ASSIGN;
+			update_op1_const(op_array, opline, &result TSRMLS_CC);
 		} else if ((opline->opcode == ZEND_RETURN || opline->opcode == ZEND_EXIT) &&
 					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 				   	VAR_SOURCE(opline->op1) &&
@@ -1502,7 +1466,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 		case ZEND_JMPNZ:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ) {
 					should_jmp = !should_jmp;
 				}
@@ -1645,7 +1614,12 @@ next_target:
 		case ZEND_JMPZ_EX:
 			/* constant conditional JMPs */
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC);
+#else
 				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(last_op));
+#endif
+
 				if (last_op->opcode == ZEND_JMPZ_EX) {
 					should_jmp = !should_jmp;
 				}
@@ -1766,7 +1740,11 @@ next_target_ex:
 			}
 
 			if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+#if ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op) TSRMLS_CC)) {
+#else
 				if (!zend_is_true(&ZEND_OP1_LITERAL(last_op))) {
+#endif
 					/* JMPZNZ(false,L1,L2) -> JMP(L1) */
 					zend_code_block *todel;
 
@@ -1931,7 +1909,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 			if (RESULT_USED(opline)) {
 				if (!defined_here[VAR_NUM(ZEND_RESULT(opline).var)] && !used_ext[VAR_NUM(ZEND_RESULT(opline).var)] &&
 				    (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 				     opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
 					(opline->opcode == ZEND_OP_DATA && ZEND_RESULT_TYPE(opline) == IS_TMP_VAR) ||
 					opline->opcode == ZEND_ADD_ARRAY_ELEMENT)) {
 					/* these opcodes use the result as argument */
@@ -2016,7 +1996,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 			if (opline->opcode == ZEND_RECV ||
                 opline->opcode == ZEND_RECV_INIT ||
+#if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
                 opline->opcode == ZEND_RECV_VARIADIC ||
+#endif
                 opline->opcode == ZEND_ADD_ARRAY_ELEMENT) {
 				if (ZEND_OP1_TYPE(opline) == IS_VAR || ZEND_OP1_TYPE(opline) == IS_TMP_VAR) {
 					usage[VAR_NUM(ZEND_RESULT(opline).var)] = 1;

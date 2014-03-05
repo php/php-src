@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -511,7 +511,7 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 		if (!intern->array->elements[index]) {
 			retval = 0;
 		} else if (check_empty) {
-			if (zend_is_true(intern->array->elements[index])) {
+			if (zend_is_true(intern->array->elements[index] TSRMLS_CC)) {
 				retval = 1;
 			} else {
 				retval = 0;
@@ -540,7 +540,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 			zval_ptr_dtor(&intern->retval);
 			MAKE_STD_ZVAL(intern->retval);
 			ZVAL_ZVAL(intern->retval, rv, 1, 1);
-			return zend_is_true(intern->retval);
+			return zend_is_true(intern->retval TSRMLS_CC);
 		}
 		return 0;
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -91,8 +91,6 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 	sapi_globals_ctor(&sapi_globals);
 #endif
 
-	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
-
 #ifdef PHP_WIN32
 	tsrm_win32_startup();
 #endif
@@ -109,8 +107,6 @@ SAPI_API void sapi_shutdown(void)
 #endif
 
 	reentrancy_shutdown();
-
-	virtual_cwd_shutdown();
 
 #ifdef PHP_WIN32
 	tsrm_win32_shutdown();
@@ -137,6 +133,7 @@ PHP_FUNCTION(header_register_callback)
 		efree(callback_name);
 		RETURN_FALSE;
 	}
+
 	efree(callback_name);
 
 	if (SG(callback_func)) {
@@ -144,10 +141,10 @@ PHP_FUNCTION(header_register_callback)
 		SG(fci_cache) = empty_fcall_info_cache;
 	}
 
-	Z_ADDREF_P(callback_func);
-
 	SG(callback_func) = callback_func;
-	
+
+	Z_ADDREF_P(SG(callback_func));
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -156,24 +153,30 @@ static void sapi_run_header_callback(TSRMLS_D)
 {
 	int   error;
 	zend_fcall_info fci;
+	char *callback_name = NULL;
+	char *callback_error = NULL;
 	zval *retval_ptr = NULL;
-
-	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
-	fci.object_ptr = NULL;
-	fci.function_name = SG(callback_func);
-	fci.retval_ptr_ptr = &retval_ptr;
-	fci.param_count = 0;
-	fci.params = NULL;
-	fci.no_separation = 0;
-	fci.symbol_table = NULL;
-
-	error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
-	if (error == FAILURE) {
+	
+	if (zend_fcall_info_init(SG(callback_func), 0, &fci, &SG(fci_cache), &callback_name, &callback_error TSRMLS_CC) == SUCCESS) {
+		fci.retval_ptr_ptr = &retval_ptr;
+		
+		error = zend_call_function(&fci, &SG(fci_cache) TSRMLS_CC);
+		if (error == FAILURE) {
+			goto callback_failed;
+		} else if (retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
+	} else {
+callback_failed:
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the sapi_header_callback");
-	} else if (retval_ptr) {
-		zval_ptr_dtor(&retval_ptr);
 	}
+	
+	if (callback_name) {
+		efree(callback_name);
+	}
+	if (callback_error) {
+		efree(callback_error);
+	}	
 }
 
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
@@ -996,7 +999,7 @@ SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, ch
 SAPI_API int sapi_flush(TSRMLS_D)
 {
 	if (sapi_module.flush) {
-		sapi_module.flush(SG(server_context));
+		sapi_module.flush(SG(server_context) TSRMLS_CC);
 		return SUCCESS;
 	} else {
 		return FAILURE;

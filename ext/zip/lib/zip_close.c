@@ -1,6 +1,6 @@
 /*
   zip_close.c -- close zip archive and update changes
-  Copyright (C) 1999-2011 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
-
+ 
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -73,7 +73,7 @@ zip_close(struct zip *za)
     int error;
     char *temp;
     FILE *out;
-#ifndef PHP_WIN32
+#ifndef _WIN32
     mode_t mask;
 #endif
     struct zip_filelist *filelist;
@@ -110,18 +110,18 @@ zip_close(struct zip *za)
         return -1;
     }
     
-    if ((filelist=(struct zip_filelist *)malloc(sizeof(filelist[0])*survivors)) == NULL)
+    if ((filelist=(struct zip_filelist *)malloc(sizeof(filelist[0])*(size_t)survivors)) == NULL)
 	return -1;
 
     /* archive comment is special for torrentzip */
     if (zip_get_archive_flag(za, ZIP_AFL_TORRENT, 0)) {
-	/* XXX: use internal function when zip_set_archive_comment clears TORRENT flag */
+	/* TODO: use internal function when zip_set_archive_comment clears TORRENT flag */
 	if (zip_set_archive_comment(za, TORRENT_SIG "XXXXXXXX", TORRENT_SIG_LEN + TORRENT_CRC_LEN) < 0) {
 	    free(filelist);
 	    return -1;
 	}
     }
-    /* XXX: if no longer torrentzip and archive comment not changed by user, delete it */
+    /* TODO: if no longer torrentzip and archive comment not changed by user, delete it */
 
 
     /* create list of files with index into original archive  */
@@ -153,7 +153,7 @@ zip_close(struct zip *za)
     
     
     if (zip_get_archive_flag(za, ZIP_AFL_TORRENT, 0))
-	qsort(filelist, survivors, sizeof(filelist[0]),
+	qsort(filelist, (size_t)survivors, sizeof(filelist[0]),
 	      _zip_torrentzip_cmp);
 
     new_torrentzip = (zip_get_archive_flag(za, ZIP_AFL_TORRENT, 0) == 1
@@ -189,7 +189,7 @@ zip_close(struct zip *za)
 	    _zip_dirent_torrent_normalize(entry->changes);
 
 
-	de->offset = (zip_uint64_t)ftello(out); /* XXX: check for errors */
+	de->offset = (zip_uint64_t)ftello(out); /* TODO: check for errors */
 
 	if (new_data) {
 	    struct zip_source *zs;
@@ -225,7 +225,7 @@ zip_close(struct zip *za)
 		error = 1;
 		break;
 	    }
-	    if ((fseek(za->zp, (off_t)offset, SEEK_SET) < 0)) {
+	    if ((fseeko(za->zp, (off_t)offset, SEEK_SET) < 0)) {
 		_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 		error = 1;
 		break;
@@ -273,7 +273,7 @@ zip_close(struct zip *za)
 	}
 	return -1;
     }
-#ifndef PHP_WIN32
+#ifndef _WIN32
     mask = umask(0);
     umask(mask);
     chmod(za->zn, 0666&~mask);
@@ -367,7 +367,7 @@ add_data(struct zip *za, struct zip_source *src, struct zip_dirent *de, FILE *ft
 	    return -1;
 	}
 
-	/* XXX: deflate 0-byte files for torrentzip? */
+	/* TODO: deflate 0-byte files for torrentzip? */
 	if (de->comp_method != ZIP_CM_STORE && ((st.valid & ZIP_STAT_SIZE) == 0 || st.size != 0)) {
 	    if ((comp_impl=_zip_get_compression_implementation(de->comp_method)) == NULL) {
 		_zip_error_set(&za->error, ZIP_ER_COMPNOTSUPP, 0);
@@ -398,7 +398,7 @@ add_data(struct zip *za, struct zip_source *src, struct zip_dirent *de, FILE *ft
     
     while (s2 != src) {
 	if ((s2=zip_source_pop(s2)) == NULL) {
-	    /* XXX: set erorr */
+	    /* TODO: set erorr */
 	    ret = -1;
 	    break;
 	}
@@ -461,7 +461,7 @@ copy_data(FILE *fs, zip_uint64_t len, FILE *ft, struct zip_error *error)
 	return 0;
 
     while (len > 0) {
-	nn = len > sizeof(buf) ? sizeof(buf) : len;
+	nn = len > sizeof(buf) ? sizeof(buf) : len > SIZE_MAX ? SIZE_MAX : (size_t)len;
 	if ((n=fread(buf, 1, nn, fs)) == 0) {
             if (ferror(fs)) {
                 _zip_error_set(error, ZIP_ER_READ, errno);
@@ -477,7 +477,7 @@ copy_data(FILE *fs, zip_uint64_t len, FILE *ft, struct zip_error *error)
 	    _zip_error_set(error, ZIP_ER_WRITE, errno);
 	    return -1;
 	}
-
+	
 	len -= n;
     }
 
@@ -615,7 +615,7 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
-
+    
     if ((tfp=fdopen(tfd, "r+b")) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_TMPOPEN, errno);
 	close(tfd);
@@ -623,7 +623,8 @@ _zip_create_temp_output(struct zip *za, FILE **outp)
 	free(temp);
 	return NULL;
     }
-#ifdef PHP_WIN32
+
+#ifdef _WIN32
     /*
       According to Pierre Joye, Windows in some environments per
       default creates text files, so force binary mode.

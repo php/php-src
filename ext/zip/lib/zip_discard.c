@@ -74,6 +74,7 @@ zip_discard(struct zip *za)
 	}
     }
 
+    _zip_error_fini(&za->error);
     free(za->file);
     
     free(za);

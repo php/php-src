@@ -32,7 +32,7 @@ bool mail ( string \$to , string \$subject , string \$message [, string \$additi
 Send an email message
 HERE;
 
-$extra_headers = "FRom: user@company.com";
+$extra_headers = "FRom: user@example.com";
 
 $res = mail($to, $subject, $message, $extra_headers);
 

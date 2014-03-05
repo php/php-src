@@ -69,9 +69,11 @@ The next few rules are more of a technical nature::
       branches) an empty merge should be done.
 
    2. All news updates intended for public viewing, such as new features,
-      bug fixes, improvements, etc., should go into the NEWS file of the
-      *first* to be released version with the given change. In other words
-      any NEWS file change only needs to done in one branch.
+      bug fixes, improvements, etc., should go into the NEWS file of *any
+      stable release* version with the given change. In other words,
+      news about a bug fix which went into PHP-5.4, PHP-5.5 and master
+      should be noted in both PHP-5.4/NEWS and PHP-5.5/NEWS but
+      not master, which is not a public released version yet.
 
    3. Do not commit multiple file and dump all messages in one commit. If you
       modified several unrelated files, commit each group separately and

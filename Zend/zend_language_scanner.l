@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
@@ -1381,6 +1381,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"*=" {
 	return T_MUL_EQUAL;
+}
+
+<ST_IN_SCRIPTING>"*\*" {
+	return T_POW;
+}
+
+<ST_IN_SCRIPTING>"*\*=" {
+	return T_POW_EQUAL;
 }
 
 <ST_IN_SCRIPTING>"/=" {

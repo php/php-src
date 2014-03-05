@@ -1,0 +1,23 @@
+#################################################
+# name: set
+# purpose: tests for set commands
+# expect: TEST::CISTRING
+# options: -rr
+#################################################
+# setting prompt color
+# setting error color
+# setting notice color
+# Failed to find breakpoint #0
+# oplog disabled
+# not enabled
+# opened oplog test.log
+# nothing
+#################################################
+set color prompt none
+set color error none
+set color notice none
+set prompt promot>
+set break 0
+set oplog
+set oplog 0
+set oplog test.log

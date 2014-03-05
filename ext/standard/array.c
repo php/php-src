@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1521,13 +1521,17 @@ PHP_FUNCTION(array_fill)
 		return;
 	}
 
-	if (num < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
+	if (num < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements can't be negative");
 		RETURN_FALSE;
 	}
 
 	/* allocate an array for return */
 	array_init_size(return_value, num);
+
+	if (num == 0) {
+		return;
+	}
 
 	num--;
 	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
@@ -4273,7 +4277,7 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
-				int retval_true = zend_is_true(retval);
+				int retval_true = zend_is_true(retval TSRMLS_CC);
 
 				zval_ptr_dtor(&retval);
 				if (use_type) {
@@ -4286,7 +4290,7 @@ PHP_FUNCTION(array_filter)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
-		} else if (!zend_is_true(*operand)) {
+		} else if (!zend_is_true(*operand TSRMLS_CC)) {
 			continue;
 		}
 

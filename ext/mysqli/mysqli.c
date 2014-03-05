@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -176,8 +176,11 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 	php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	/* Clean output bind */
 	php_free_stmt_bind_buffer(stmt->result, FETCH_RESULT);
-#endif
 
+	if (stmt->link_handle) {
+	    zend_objects_store_del_ref_by_handle(stmt->link_handle TSRMLS_CC);
+	}
+#endif
 	if (stmt->query) {
 		efree(stmt->query);
 	}
@@ -558,6 +561,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mysqli.max_persistent",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_mysqli_globals,		mysqli_globals,	display_link_numbers)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.rollback_on_cached_plink",	"0",PHP_INI_SYSTEM,		OnUpdateBool,		rollback_on_cached_plink,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
@@ -597,6 +601,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 #else
 	mysqli_globals->embedded = 0;
 #endif
+	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
 /* }}} */
 
@@ -1069,6 +1074,10 @@ PHP_FUNCTION(mysqli_stmt_construct)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+#ifndef MYSQLI_USE_MYSQLND
+	stmt->link_handle = Z_OBJ_HANDLE(*mysql_link);
+	zend_objects_store_add_ref_by_handle(stmt->link_handle TSRMLS_CC);
+#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;

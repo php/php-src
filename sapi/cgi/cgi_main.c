@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -324,14 +324,14 @@ static int sapi_fcgi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_cgi_flush(void *server_context)
+static void sapi_cgi_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void sapi_fcgi_flush(void *server_context)
+static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
@@ -818,7 +818,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		}
 
 		if (real_path) {
-			free(real_path);
+			efree(real_path);
 		}
 		entry->expires = request_time + PG(user_ini_cache_ttl);
 	}
@@ -928,7 +928,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 				php_handle_aborted_connection();
 			}
 		} else {
-			sapi_cgi_flush(SG(server_context));
+			sapi_cgi_flush(SG(server_context) TSRMLS_CC);
 		}
 	}
 	return SUCCESS;
@@ -1399,7 +1399,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1691,8 +1691,8 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if (!&SG(sapi_headers).headers) {
@@ -2226,9 +2226,9 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 #if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
@@ -2240,7 +2240,7 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'z': /* load extension file */
-							zend_load_extension(php_optarg);
+							zend_load_extension(php_optarg TSRMLS_CC);
 							break;
 
 						default:
@@ -2493,7 +2493,7 @@ consult the installation file that came with this distribution, or visit \n\
 				/* Zeev might want to do something with this one day */
 				case PHP_MODE_INDENT:
 					open_file_for_scanning(&file_handle TSRMLS_CC);
-					zend_indent();
+					zend_indent(TSRMLS_C);
 					zend_file_handle_dtor(&file_handle TSRMLS_CC);
 					php_output_teardown();
 					return SUCCESS;

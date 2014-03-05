@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,6 @@
    |                Wez Furlong <wez@omniti.com>                          |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1251,6 +1249,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("SQLT_BDOUBLE",SQLT_BDOUBLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_BFLOAT",SQLT_BFLOAT, CONST_CS | CONST_PERSISTENT);
 #endif
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+	REGISTER_LONG_CONSTANT("SQLT_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
+#endif
 
 	REGISTER_LONG_CONSTANT("OCI_B_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLT_NTY",SQLT_NTY, CONST_CS | CONST_PERSISTENT);
@@ -1265,6 +1266,9 @@ PHP_MINIT_FUNCTION(oci)
 	REGISTER_LONG_CONSTANT("OCI_B_BIN",SQLT_BIN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_INT",SQLT_INT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OCI_B_NUM",SQLT_NUM, CONST_CS | CONST_PERSISTENT);
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+	REGISTER_LONG_CONSTANT("OCI_B_BOL",SQLT_BOL, CONST_CS | CONST_PERSISTENT);
+#endif
 
 /* for OCIFetchStatement */
 	REGISTER_LONG_CONSTANT("OCI_FETCHSTATEMENT_BY_COLUMN", PHP_OCI_FETCHSTATEMENT_BY_COLUMN, CONST_CS | CONST_PERSISTENT);
@@ -2201,6 +2205,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 {
 	sword errstatus;
+#if (!((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2))))
+	char version[256];
+#endif
 
 	OCI_G(errcode) = 0;  		/* assume ping is successful */
 
@@ -2212,7 +2219,6 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
 	PHP_OCI_CALL_RETURN(errstatus, OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
-	char version[256];
 	/* use good old OCIServerVersion() */
 	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, OCI_G(err), (text *)version, sizeof(version), OCI_HTYPE_SVCCTX));
 #endif

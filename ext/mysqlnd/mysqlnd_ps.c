@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,7 @@ const char * const mysqlnd_stmt_not_prepared = "Statement not prepared";
 
 /* Exported by mysqlnd_ps_codec.c */
 enum_func_status mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
+enum_func_status mysqlnd_stmt_execute_batch_generate_request(MYSQLND_STMT * const s, zend_uchar ** request, size_t *request_len, zend_bool * free_buffer TSRMLS_DC);
 
 enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES *result, void *param,
 												unsigned int flags,
@@ -104,6 +105,26 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
 
 	if (PASS == ret) {
+		/* Overflow ? */
+		MYSQLND_RES_BUFFERED * set = result->stored_data;
+		if (set->row_count) {
+			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
+			if (set->row_count * result->meta->field_count * sizeof(zval *) > SIZE_MAX) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			/* if pecalloc is used valgrind barks gcc version 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036] (SUSE Linux) */
+			set->data = mnd_emalloc((size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+			if (!set->data) {
+				SET_OOM_ERROR(*conn->error_info);
+				DBG_RETURN(NULL);
+			}
+			memset(set->data, 0, (size_t)(set->row_count * result->meta->field_count * sizeof(zval *)));
+		}
+		/* Position at the first row */
+		set->data_cursor = set->data;
+
+
 		/* libmysql API docs say it should be so for SELECT statements */
 		stmt->upsert_status->affected_rows = stmt->result->stored_data->row_count;
 
@@ -486,6 +507,7 @@ mysqlnd_stmt_execute_parse_response(MYSQLND_STMT * const s TSRMLS_DC)
 	ret = mysqlnd_query_read_result_set_header(stmt->conn, s TSRMLS_CC);
 	if (ret == FAIL) {
 		COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
+		memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 		stmt->upsert_status->affected_rows = conn->upsert_status->affected_rows;
 		if (CONN_GET_STATE(conn) == CONN_QUIT_SENT) {
 			/* close the statement here, the connection has been closed */
@@ -905,6 +927,7 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES *result, void *param, unsigned int
 		DBG_INF("EOF");
 		/* Mark the connection as usable again */
 		result->unbuf->eof_reached = TRUE;
+		memset(result->conn->upsert_status, 0, sizeof(*result->conn->upsert_status));
 		result->conn->upsert_status->warning_count = row_packet->warning_count;
 		result->conn->upsert_status->server_status = row_packet->server_status;
 		/*
@@ -1014,6 +1037,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES *result, void *param, unsigned int fla
 
 	row_packet->skip_extraction = stmt->result_bind? FALSE:TRUE;
 
+	memset(stmt->upsert_status, 0, sizeof(*stmt->upsert_status));
 	if (PASS == (ret = PACKET_READ(row_packet, result->conn)) && !row_packet->eof) {
 		unsigned int i, field_count = result->field_count;
 

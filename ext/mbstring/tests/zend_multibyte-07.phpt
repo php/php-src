@@ -1,14 +1,11 @@
 --TEST--
 zend multibyte (7)
 --SKIPIF--
-<?php
-ini_set("mbstring.script_encoding","SJIS");
-if (ini_set("mbstring.script_encoding","SJIS") != "SJIS") {
-	die("skip zend-multibyte is not available");
-}
-?>
+--XFAIL--
+https://bugs.php.net/bug.php?id=66582
 --INI--
-mbstring.script_encoding=ISO-8859-1
+zend.multibyte=On
+zend.script_encoding=ISO-8859-1
 mbstring.internal_encoding=EUC-JP
 --FILE--
 <?php

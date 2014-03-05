@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -561,6 +561,10 @@ enum mysqlnd_packet_type
 };
 
 
+/*
+  After adding new elements please update
+  `mysqlnd_command_to_text` in mysqlnd_wireprotocol.c
+*/
 enum php_mysqlnd_server_command
 {
 	COM_SLEEP = 0,
@@ -593,6 +597,8 @@ enum php_mysqlnd_server_command
 	COM_SET_OPTION = 27,
 	COM_STMT_FETCH = 28,
 	COM_DAEMON,
+	COM_BINLOG_DUMP_GTID,
+	COM_RESET_CONNECTION,
 	COM_END
 };
 

@@ -138,16 +138,6 @@
 ;   Development Value: "GP"
 ;   Production Value: "GP"
 
-; session.bug_compat_42
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
-; session.bug_compat_warn
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
 ; session.gc_divisor
 ;   Default Value: 100
 ;   Development Value: 1000
@@ -690,13 +680,22 @@ default_mimetype = "text/html"
 
 ; PHP's default character set is set to empty.
 ; http://php.net/default-charset
-;default_charset = "UTF-8"
+default_charset = "UTF-8"
 
-; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature. If post reading is disabled through
-; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
-; http://php.net/always-populate-raw-post-data
-;always_populate_raw_post_data = On
+; PHP internal character encoding is set to empty.
+; If empty, default_charset is used.
+; http://php.net/internal-encoding
+;internal_encoding =
+
+; PHP input character encoding is set to empty.
+; http://php.net/input-encoding
+;input_encoding =
+
+; PHP output character encoding is set to empty.
+; mbstring or iconv output handler is used.
+; See also output_buffer.
+; http://php.net/output-encoding
+;output_encoding =
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
@@ -941,9 +940,17 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-;iconv.input_encoding = ISO-8859-1
-;iconv.internal_encoding = ISO-8859-1
-;iconv.output_encoding = ISO-8859-1
+; Use of this INI entory is deprecated, use global input_encoding instead.
+; If empty, input_encoding is used.
+;iconv.input_encoding =
+
+; Use of this INI entory is deprecated, use global internal_encoding instead.
+; If empty, internal_encoding is used.
+;iconv.internal_encoding =
+
+; Use of this INI entory is deprecated, use global output_encoding instead.
+; If empty, output_encoding is used.
+;iconv.output_encoding =
 
 [intl]
 ;intl.default_locale =
@@ -1487,31 +1494,6 @@ session.gc_maxlifetime = 1440
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
-; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you if this feature is used.
-; You can disable the feature and the warning separately. At this time,
-; the warning is only displayed, if bug_compat_42 is enabled. This feature
-; introduces some serious security problems if not handled correctly. We
-; recommend you not use this feature on production servers. You
-; should enable this on development servers and enable the warning as well. If you
-; do not enable the feature on development servers, you won't be warned when it's
-; used, so debugging errors caused by this can be difficult to track down.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-42
-session.bug_compat_42 = Off
-
-; This setting controls whether or not you are warned by PHP when initializing a
-; session value into the global space. session.bug_compat_42 must be enabled before
-; these warnings can be issued by PHP. See the directive above for more information.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-warn
-session.bug_compat_warn = Off
-
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
 ; considered as valid.
@@ -1731,23 +1713,30 @@ mssql.secure_connection = Off
 
 [mbstring]
 ; language for internal character representation.
+; This affects mb_send_mail() and mbstrig.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
+; Use of this INI entory is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
-; Some encoding cannot work as internal encoding.
-; (e.g. SJIS, BIG5, ISO-2022-*)
+; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
+; If empty, default_charset or internal_encoding is used in order.
 ; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = UTF-8
+;mbstring.internal_encoding =
 
+; Use of this INI entory is deprecated, use global input_encoding instead.
 ; http input encoding.
+; If empty, input_encoding is used.
+; mbstring.encoding_traslation = On is needed to use this setting.
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = UTF-8
+;mbstring.http_input =
 
-; http output encoding. mb_output_handler must be
-; registered as output buffer to function
+; Use of this INI entory is deprecated, use global output_encoding instead.
+; http output encoding.
+; mb_output_handler must be registered as output buffer to function.
+; If empty, output_encoding is used.
 ; http://php.net/mbstring.http-output
-;mbstring.http_output = pass
+;mbstring.http_output =
 
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
@@ -1758,7 +1747,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; auto means
+; "auto" detect order is changed accoding to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
@@ -1779,6 +1768,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
+; Default: Off
 ;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()

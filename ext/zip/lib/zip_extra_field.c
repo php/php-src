@@ -1,6 +1,6 @@
 /*
   zip_extra_field.c -- manipulate extra fields
-  Copyright (C) 2012-2013 Dieter Baron and Thomas Klausner
+  Copyright (C) 2012-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -78,7 +78,7 @@ _zip_ef_delete_by_id(struct zip_extra_field *ef, zip_uint16_t id, zip_uint16_t i
     head = ef;
     prev = NULL;
     for (; ef; ef=(prev ? prev->next : head)) {
-	if ((ef->flags & flags & ZIP_EF_BOTH) && ef->id == id) {
+	if ((ef->flags & flags & ZIP_EF_BOTH) && ((ef->id == id) || (id == ZIP_EXTRA_FIELD_ALL))) {
 	    if (id_idx == ZIP_EXTRA_FIELD_ALL || i == id_idx) {
 		ef->flags &= ~(flags & ZIP_EF_BOTH);
 		if ((ef->flags & ZIP_EF_BOTH) == 0) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1437,6 +1437,19 @@ PHPAPI void php_basename(const char *s, size_t len, char *suffix, size_t sufflen
 						state = 0;
 						cend = c;
 					}
+#if defined(PHP_WIN32) || defined(NETWARE)
+				/* Catch relative paths in c:file.txt style. They're not to confuse
+				   with the NTFS streams. This part ensures also, that no drive 
+				   letter traversing happens. */
+				} else if ((*c == ':' && (c - comp == 1))) {
+					if (state == 0) {
+						comp = c;
+						state = 1;
+					} else {
+						cend = c;
+						state = 0;
+					}
+#endif
 				} else {
 					if (state == 0) {
 						comp = c;
@@ -5572,14 +5585,13 @@ PHP_FUNCTION(substr_compare)
 	int s1_len, s2_len;
 	long offset, len=0;
 	zend_bool cs=0;
-	uint cmp_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() >= 4 && len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than zero");
+	if (ZEND_NUM_ARGS() >= 4 && len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 
@@ -5593,12 +5605,10 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
-
 	if (!cs) {
-		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, (uint)len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, (uint)len));
 	}
 }
 /* }}} */

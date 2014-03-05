@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,64 @@
 #include "ext/standard/php_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
+
+#if !defined(MYSQLI_USE_MYSQLND)
+/* {{{ mysqli_tx_cor_options_to_string */
+static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const unsigned int mode)
+{
+	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
+	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
+	}
+
+	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
+	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
+	}
+	smart_str_0(str);
+}
+/* }}} */
+
+
+/* {{{ proto bool mysqli_commit_or_rollback_libmysql */
+static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name)
+{
+	int ret;
+	smart_str tmp_str = {0, 0, 0};
+	mysqli_tx_cor_options_to_string(conn, &tmp_str, mode);
+	smart_str_0(&tmp_str);
+
+	{
+		char * commented_name = NULL;
+		unsigned int commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
+		char * query;
+		unsigned int query_len = spprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
+										  commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+		smart_str_free(&tmp_str);
+
+		ret = mysql_real_query(conn, query, query_len);
+		efree(query);
+		if (commented_name) {
+			efree(commented_name);
+		}
+	}
+}
+/* }}} */
+#endif
 
 /* {{{ proto mixed mysqli_affected_rows(object link)
    Get number of affected rows in previous MySQL operation */
@@ -385,7 +443,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 				/* Changed to my_bool in MySQL 5.1. See MySQL Bug #16144 */
 				my_bool tmp;
 #else
-				uint tmp = 0;
+				ulong tmp = 0;
 #endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				/*
@@ -599,10 +657,20 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 #if defined(MYSQLI_USE_MYSQLND)
 				mysqlnd_end_psession(mysql->mysql);
 #endif
-				zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 
+				if (MyG(rollback_on_cached_plink) &&
+#if !defined(MYSQLI_USE_MYSQLND)
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
+#else
+					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
+#endif
+				{
+					mysqli_close(mysql->mysql, close_type);			
+				} else {
+					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
+					MyG(num_inactive_persistent)++;
+				}
 				MyG(num_active_persistent)--;
-				MyG(num_inactive_persistent)++;
 			}
 		}
 		mysql->persistent = FALSE;
@@ -635,66 +703,6 @@ PHP_FUNCTION(mysqli_close)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
-#if !defined(MYSQLI_USE_MYSQLND)
-/* {{{ mysqli_tx_cor_options_to_string */
-static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const unsigned int mode)
-{
-	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
-		if (str->len) {
-			smart_str_appendl(str, ", ", sizeof(", ") - 1);
-		}
-		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
-	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
-		if (str->len) {
-			smart_str_appendl(str, ", ", sizeof(", ") - 1);
-		}
-		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
-	}
-
-	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
-		if (str->len) {
-			smart_str_appendl(str, ", ", sizeof(", ") - 1);
-		}
-		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
-	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
-		if (str->len) {
-			smart_str_appendl(str, ", ", sizeof(", ") - 1);
-		}
-		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
-	}
-	smart_str_0(str);
-}
-/* }}} */
-
-
-/* {{{ proto bool mysqli_commit_or_rollback_libmysql */
-static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name)
-{
-	int ret;
-	smart_str tmp_str = {0, 0, 0};
-	mysqli_tx_cor_options_to_string(conn, &tmp_str, mode);
-	smart_str_0(&tmp_str);
-
-	{
-		char * commented_name = NULL;
-		unsigned int commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
-		char * query;
-		unsigned int query_len = spprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
-										  commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
-		smart_str_free(&tmp_str);
-
-		ret = mysql_real_query(conn, query, query_len);
-		efree(query);
-		if (commented_name) {
-			efree(commented_name);
-		}
-	}
-}
-/* }}} */
-#endif
-
 
 /* {{{ proto bool mysqli_commit(object link)
    Commit outstanding actions and close transaction */
@@ -1869,6 +1877,10 @@ PHP_FUNCTION(mysqli_prepare)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+#ifndef MYSQLI_USE_MYSQLND
+	stmt->link_handle = Z_OBJ_HANDLE(*mysql_link);
+	zend_objects_store_add_ref_by_handle(stmt->link_handle TSRMLS_CC);
+#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
@@ -2413,6 +2425,10 @@ PHP_FUNCTION(mysqli_stmt_init)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+#ifndef MYSQLI_USE_MYSQLND
+	stmt->link_handle = Z_OBJ_HANDLE(*mysql_link);
+	zend_objects_store_add_ref_by_handle(stmt->link_handle TSRMLS_CC);
+#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->status = MYSQLI_STATUS_INITIALIZED;

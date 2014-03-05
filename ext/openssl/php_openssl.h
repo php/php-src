@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,10 @@ extern zend_module_entry openssl_module_entry;
 
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
+
+/* Used for client-initiated handshake renegotiation DoS protection*/
+#define DEFAULT_RENEG_LIMIT 2
+#define DEFAULT_RENEG_WINDOW 300
 
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
@@ -85,6 +89,8 @@ PHP_FUNCTION(openssl_spki_new);
 PHP_FUNCTION(openssl_spki_verify);
 PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
+
+PHP_FUNCTION(openssl_get_cert_locations);
 #else
 
 #define phpext_openssl_ptr NULL

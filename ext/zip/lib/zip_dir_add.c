@@ -1,6 +1,6 @@
 /*
   zip_dir_add.c -- add directory
-  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2014 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -46,7 +46,7 @@ ZIP_EXTERN zip_int64_t
 zip_dir_add(struct zip *za, const char *name, zip_flags_t flags)
 {
     size_t len;
-    zip_int64_t ret;
+    zip_int64_t idx;
     char *s;
     struct zip_source *source;
 
@@ -78,11 +78,18 @@ zip_dir_add(struct zip *za, const char *name, zip_flags_t flags)
 	return -1;
     }
 	
-    ret = _zip_file_replace(za, ZIP_UINT64_MAX, s ? s : name, source, flags);
+    idx = _zip_file_replace(za, ZIP_UINT64_MAX, s ? s : name, source, flags);
 
     free(s);
-    if (ret < 0)
-	zip_source_free(source);
 
-    return ret;
+    if (idx < 0)
+	zip_source_free(source);
+    else {
+	if (zip_file_set_external_attributes(za, (zip_uint64_t)idx, 0, ZIP_OPSYS_DEFAULT, ZIP_EXT_ATTRIB_DEFAULT_DIR) < 0) {
+	    zip_delete(za, (zip_uint64_t)idx);
+	    return -1;
+	}
+    }
+
+    return idx;
 }

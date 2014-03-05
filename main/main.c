@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -179,7 +179,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
-	return zend_set_memory_limit(PG(memory_limit));
+	return zend_set_memory_limit(PG(memory_limit) TSRMLS_CC);
 }
 /* }}} */
 
@@ -417,6 +417,45 @@ static PHP_INI_DISP(display_errors_mode)
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnUpdateInternalEncoding)
+{
+	if (new_value_length) {
+		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	} else {
+		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateInputEncoding)
+{
+	if (new_value_length) {
+		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	} else {
+		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnUpdateOutputEncoding)
+{
+	if (new_value_length) {
+		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	} else {
+		OnUpdateString(entry, SG(default_charset), strlen(SG(default_charset))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateErrorLog)
 {
 	/* Only do the safemode/open_basedir check at runtime */
@@ -522,8 +561,11 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset",		SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct,sapi_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_charset",		PHP_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateString,			default_charset,		sapi_globals_struct, sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",		SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateString,			default_mimetype,		sapi_globals_struct, sapi_globals)
+	STD_PHP_INI_ENTRY("internal_encoding",		"",			PHP_INI_ALL,	OnUpdateInternalEncoding,	internal_encoding,	php_core_globals, core_globals)
+	STD_PHP_INI_ENTRY("input_encoding",			"",			PHP_INI_ALL,	OnUpdateInputEncoding,				input_encoding,		php_core_globals, core_globals)
+	STD_PHP_INI_ENTRY("output_encoding",		"",			PHP_INI_ALL,	OnUpdateOutputEncoding,				output_encoding,	php_core_globals, core_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateErrorLog,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			PHP_EXTENSION_DIR,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("sys_temp_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	sys_temp_dir,			php_core_globals,	core_globals)
@@ -1166,7 +1208,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					CG(parse_error) = 0;
 				} else {
 					/* restore memory limit */
-					zend_set_memory_limit(PG(memory_limit));
+					zend_set_memory_limit(PG(memory_limit) TSRMLS_CC);
 					efree(buffer);
 					zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
 					zend_bailout();
@@ -1793,7 +1835,7 @@ void php_request_shutdown(void *dummy)
 		}
 	} zend_end_try();
 
-	/* 7.5 free last error information */
+	/* 8. free last error information */
 	if (PG(last_error_message)) {
 		free(PG(last_error_message));
 		PG(last_error_message) = NULL;
@@ -1803,31 +1845,34 @@ void php_request_shutdown(void *dummy)
 		PG(last_error_file) = NULL;
 	}
 
-	/* 7. Shutdown scanner/executor/compiler and restore ini entries */
+	/* 9. Shutdown scanner/executor/compiler and restore ini entries */
 	zend_deactivate(TSRMLS_C);
 
-	/* 8. Call all extensions post-RSHUTDOWN functions */
+	/* 10. Call all extensions post-RSHUTDOWN functions */
 	zend_try {
 		zend_post_deactivate_modules(TSRMLS_C);
 	} zend_end_try();
 
-	/* 9. SAPI related shutdown (free stuff) */
+	/* 11. SAPI related shutdown (free stuff) */
 	zend_try {
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	/* 10. Destroy stream hashes */
+	/* 12. free virtual CWD memory */
+	virtual_cwd_deactivate(TSRMLS_C);
+
+	/* 13. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes(TSRMLS_C);
 	} zend_end_try();
 
-	/* 11. Free Willy (here be crashes) */
+	/* 14. Free Willy (here be crashes) */
 	zend_try {
 		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
 	zend_interned_strings_restore(TSRMLS_C);
 
-	/* 12. Reset max_execution_time */
+	/* 15. Reset max_execution_time */
 	zend_try {
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
@@ -1925,6 +1970,23 @@ int php_register_extensions(zend_module_entry **ptr, int count TSRMLS_DC)
 			}
 		}
 		ptr++;
+	}
+	return SUCCESS;
+}
+
+/* A very long time ago php_module_startup() was refactored in a way
+ * which broke calling it with more than one additional module.
+ * This alternative to php_register_extensions() works around that
+ * by walking the shallower structure.
+ *
+ * See algo: https://bugs.php.net/bug.php?id=63159
+ */
+static int php_register_extensions_bc(zend_module_entry *ptr, int count TSRMLS_DC)
+{
+	while (count--) {
+		if (zend_register_internal_module(ptr++ TSRMLS_CC) == NULL) {
+			return FAILURE;
+ 		}
 	}
 	return SUCCESS;
 }
@@ -2198,7 +2260,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* start additional PHP extensions */
-	php_register_extensions(&additional_modules, num_additional_modules TSRMLS_CC);
+	php_register_extensions_bc(additional_modules, num_additional_modules TSRMLS_CC);
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
@@ -2243,9 +2305,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 #endif
 
-#ifdef ZTS
 	zend_post_startup(TSRMLS_C);
-#endif
 
 	module_initialized = 1;
 
@@ -2315,6 +2375,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	shutdown_memory_manager(1, 0 TSRMLS_CC);
 	zend_interned_strings_snapshot(TSRMLS_C);
+ 	virtual_cwd_activate(TSRMLS_C);
 
 	/* we're done */
 	return retval;
@@ -2624,9 +2685,9 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 #ifdef PHP_WIN32
 /* {{{ dummy_indent
    just so that this symbol gets exported... */
-PHPAPI void dummy_indent(void)
+PHPAPI void dummy_indent(TSRMLS_D)
 {
-	zend_indent();
+	zend_indent(TSRMLS_C);
 }
 /* }}} */
 #endif
