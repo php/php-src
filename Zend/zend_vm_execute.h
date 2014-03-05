@@ -1603,12 +1603,30 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	zval_ptr_dtor(var_ptr);
 	if (param == NULL) {
+//???
+#if 1
+		if (IS_CONSTANT_TYPE(Z_TYPE_P(opline->op2.zv))) {
+			zval tmp;
+
+			ZVAL_COPY_VALUE(&tmp, opline->op2.zv);
+			zval_update_constant(&tmp, 0 TSRMLS_CC);
+//???: var_ptr may become INDIRECT
+			if (Z_TYPE_P(var_ptr) == IS_INDIRECT) {
+				var_ptr = Z_INDIRECT_P(var_ptr);
+			}
+			ZVAL_COPY_VALUE(var_ptr, &tmp);
+		} else {
+			ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
+			zval_copy_ctor(var_ptr);
+		}
+#else
 		ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
 		if (IS_CONSTANT_TYPE(Z_TYPE_P(var_ptr))) {
 			zval_update_constant(var_ptr, 0 TSRMLS_CC);
 		} else {
 			zval_copy_ctor(var_ptr);
 		}
+#endif
 	} else {
 		ZVAL_COPY(var_ptr, param);
 	}
