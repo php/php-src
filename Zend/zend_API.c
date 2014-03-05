@@ -93,7 +93,9 @@ ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval *argument_
 
 	while (param_count-->0) {
 		param_ptr = (p-arg_count);
-		if (!Z_ISREF_P(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
+		if (Z_REFCOUNTED_P(param_ptr) && 
+		    !Z_ISREF_P(param_ptr) &&		    
+		    Z_REFCOUNT_P(param_ptr) > 1) {
 			zval new_tmp;
 
 			ZVAL_DUP(&new_tmp, param_ptr);

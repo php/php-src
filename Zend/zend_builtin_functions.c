@@ -468,7 +468,7 @@ ZEND_FUNCTION(func_get_args)
 		arg = p-(arg_count-i);
 		if (!Z_ISREF_P(arg)) {
 			element = arg;
-			if (IS_REFCOUNTED(Z_TYPE_P(element))) Z_ADDREF_P(element);
+			if (Z_REFCOUNTED_P(element)) Z_ADDREF_P(element);
 		} else {
 			ZVAL_DUP(&tmp, Z_REFVAL_P(arg));
 			element = &tmp;
@@ -602,13 +602,13 @@ ZEND_FUNCTION(each)
 	/* add value elements */
 	if (Z_ISREF_P(entry)) {
 		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
-		if (IS_REFCOUNTED(Z_TYPE(tmp))) Z_SET_REFCOUNT(tmp, 0);
+//???		if (Z_REFCOUNTED(tmp)) Z_SET_REFCOUNT(tmp, 0);
 		entry = &tmp;
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
-	if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
+	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
-	if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
+	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 
 	/* add the key elements */
 	switch (zend_hash_get_current_key_ex(target_hash, &key, &num_key, 0, NULL)) {
@@ -620,7 +620,7 @@ ZEND_FUNCTION(each)
 			break;
 	}
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
-	if (IS_REFCOUNTED(Z_TYPE_P(inserted_pointer))) Z_ADDREF_P(inserted_pointer);
+	if (Z_REFCOUNTED_P(inserted_pointer)) Z_ADDREF_P(inserted_pointer);
 	zend_hash_move_forward(target_hash);
 }
 /* }}} */
@@ -1003,7 +1003,7 @@ ZEND_FUNCTION(get_object_vars)
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
 				zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
 				/* Not separating references */
-				if (IS_REFCOUNTED(Z_TYPE_P(value))) Z_ADDREF_P(value);
+				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 				add_assoc_zval_ex(return_value, prop_name, prop_len, value);
 			}
 		}
@@ -1980,7 +1980,7 @@ static void debug_backtrace_get_args(zval *curpos, zval *arg_array TSRMLS_DC)
 //???			if (Z_TYPE_P(arg) != IS_OBJECT) {
 //???				SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
 //???			}
-			if (IS_REFCOUNTED(Z_TYPE_P(arg))) Z_ADDREF_P(arg);
+			if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
 			add_next_index_zval(arg_array, arg);
 		} else {
 			add_next_index_null(arg_array);

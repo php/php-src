@@ -867,7 +867,7 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
 		var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-		if (IS_REFCOUNTED(Z_TYPE_P(var_ptr))) Z_DELREF_P(var_ptr);
+		if (Z_REFCOUNTED_P(var_ptr)) Z_DELREF_P(var_ptr);
 		ZVAL_COPY(var_ptr, param);
 	}
 
@@ -2579,7 +2579,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CONST == IS_CV) {
-				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
+				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -3627,7 +3627,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -4062,7 +4062,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_CONST != IS_UNUSED) {
@@ -4268,7 +4268,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -4915,7 +4915,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -5401,7 +5401,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -5722,7 +5722,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_VAR != IS_UNUSED) {
@@ -5895,7 +5895,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -6106,7 +6106,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -6395,7 +6395,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
@@ -6586,7 +6586,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -7291,7 +7291,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -7649,7 +7649,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_TMP_VAR == IS_CV) {
-				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
+				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -8748,7 +8748,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -9091,7 +9091,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_CONST != IS_UNUSED) {
@@ -9264,7 +9264,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -9921,7 +9921,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -10407,7 +10407,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -10738,7 +10738,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_VAR != IS_UNUSED) {
@@ -10911,7 +10911,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -11122,7 +11122,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -11300,7 +11300,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
@@ -11473,7 +11473,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -12127,7 +12127,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -12677,7 +12677,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_VAR == IS_CV) {
-				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
+				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -12789,7 +12789,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_AR
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
 	} else if (IS_VAR == IS_CV) {
-		if (IS_REFCOUNTED(Z_TYPE_P(varptr))) Z_ADDREF_P(varptr);
+		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -14437,7 +14437,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -15490,7 +15490,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_CONST != IS_UNUSED) {
@@ -15575,7 +15575,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 						break;
 					case IS_STRING:
 						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CONST != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -15870,7 +15870,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -15950,7 +15950,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -17692,7 +17692,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 						break;
 					case IS_STRING:
 						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_TMP_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -17893,7 +17893,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -17973,7 +17973,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -18906,7 +18906,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -19923,7 +19923,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_VAR != IS_UNUSED) {
@@ -20008,7 +20008,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 						break;
 					case IS_STRING:
 						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -20303,7 +20303,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -20383,7 +20383,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -20844,7 +20844,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -21305,7 +21305,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
@@ -21496,7 +21496,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -23286,7 +23286,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					case IS_STRING:
 						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CV != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -23487,7 +23487,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -23567,7 +23567,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -24742,7 +24742,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 						break;
 					case IS_STRING:
 						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CONST != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -24941,7 +24941,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -25019,7 +25019,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -26028,7 +26028,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 						break;
 					case IS_STRING:
 						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_TMP_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -26227,7 +26227,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -26305,7 +26305,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -27314,7 +27314,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 						break;
 					case IS_STRING:
 						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -27513,7 +27513,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -27591,7 +27591,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -27992,7 +27992,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -28998,7 +28998,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 						break;
 					case IS_STRING:
 						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CV != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -29197,7 +29197,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -29275,7 +29275,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -29806,7 +29806,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CV == IS_CV) {
-				if (IS_REFCOUNTED(Z_TYPE_P(retval_ptr))) Z_ADDREF_P(retval_ptr);
+				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -29917,7 +29917,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
 	} else if (IS_CV == IS_CV) {
-		if (IS_REFCOUNTED(Z_TYPE_P(varptr))) Z_ADDREF_P(varptr);
+		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -31424,7 +31424,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -32266,7 +32266,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_CONST != IS_UNUSED) {
@@ -32351,7 +32351,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 						break;
 					case IS_STRING:
 						if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CONST != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -32644,7 +32644,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -32722,7 +32722,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -34343,7 +34343,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					case IS_STRING:
 						if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_TMP_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -34542,7 +34542,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -34620,7 +34620,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -35550,7 +35550,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -36448,7 +36448,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_VAR != IS_UNUSED) {
@@ -36533,7 +36533,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 						break;
 					case IS_STRING:
 						if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_VAR != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -36826,7 +36826,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -36904,7 +36904,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -37362,7 +37362,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 	}
 
 	if (EXPECTED(retval != NULL)) {
-		if (IS_REFCOUNTED(Z_TYPE_P(retval))) Z_ADDREF_P(retval);
+		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
 			case BP_VAR_IS:
@@ -37710,7 +37710,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		convert_to_string(&tmp);
 		varname = &tmp;
 	} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
-		Z_ADDREF_P(varname);
+		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
 	}
 
 	if (IS_UNUSED != IS_UNUSED) {
@@ -37883,7 +37883,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -39551,7 +39551,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 						break;
 					case IS_STRING:
 						if (IS_CV == IS_CV || IS_CV == IS_VAR) {
-							Z_ADDREF_P(offset);
+							if (Z_REFCOUNTED_P(offset)) Z_ADDREF_P(offset);
 						}
 						if (IS_CV != IS_CONST) {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
@@ -39750,7 +39750,7 @@ num_index_prop:
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
-			if (!Z_REFCOUNTED_P(offset) /* simple scalar types */
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
@@ -39828,7 +39828,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {

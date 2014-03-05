@@ -1849,7 +1849,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		/* ..for each one, create a new zval, copy entry into it and copy it into the output hash */
 		for (i = 0; i < list_count; i++) {
 			entry = &list[i];
-			if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
+			if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 			zend_hash_next_index_insert(out_hash, entry);
 		}
 	}
@@ -1859,7 +1859,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		p = in_hash->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		entry = &p->val;
-		if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 		if (p->key == NULL) {
 			zend_hash_next_index_insert(out_hash, entry);
 		} else {

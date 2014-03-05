@@ -316,7 +316,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
 /*
 				if (!Z_ISREF_P(p)) {
-					if (IS_REFCOUNTED(Z_TYPE_P(p)) && Z_REFCOUNT_P(p) > 1) {
+					if (Z_REFCOUNTED_P(p) && Z_REFCOUNT_P(p) > 1) {
 						Z_DELREF_P(p);
 						ZVAL_NEW_REF(p, p);
 						zval_copy_ctor(Z_REFVAL_P(p));
