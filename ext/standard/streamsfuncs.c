@@ -440,9 +440,11 @@ PHP_FUNCTION(stream_get_contents)
 		}
 	}
 
-	contents = php_stream_copy_to_mem(stream, maxlen, 0);
-
-	RETURN_STR(contents);
+	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0))) {
+		RETURN_STR(contents);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
