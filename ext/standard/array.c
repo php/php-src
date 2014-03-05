@@ -4178,7 +4178,6 @@ PHP_FUNCTION(array_filter)
 	zval *operand;
 	zval args[2];
 	zval retval;
-//???    zval *key = NULL;
 	zend_bool have_callback = 0;
 	long use_type = 0;
 	zend_string *string_key;
@@ -4200,16 +4199,7 @@ PHP_FUNCTION(array_filter)
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval = &retval;
-
-		if (use_type == ARRAY_FILTER_USE_BOTH) {
-			fci.param_count = 2;
-//???			args[1] = &key;
-		} else {
-			fci.param_count = 1;
-			if (use_type == ARRAY_FILTER_USE_KEY) {
-//???				args[0] = &key;
-			}
-		}
+		fci.param_count = 1;
 	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
@@ -4223,28 +4213,40 @@ PHP_FUNCTION(array_filter)
 				/* Set up the key */
 				switch (key_type) {
 					case HASH_KEY_IS_LONG:
-						ZVAL_LONG(&args[0], num_key);
+						if (use_type == ARRAY_FILTER_USE_BOTH) {
+							fci.param_count = 2;
+							ZVAL_LONG(&args[1], num_key);
+						} else if (use_type == ARRAY_FILTER_USE_KEY) {
+							ZVAL_LONG(&args[0], num_key);
+						}
 						break;
 
 					case HASH_KEY_IS_STRING:
-						ZVAL_STR(&args[0], STR_COPY(string_key));
+						if (use_type == ARRAY_FILTER_USE_BOTH) {
+							ZVAL_STR(&args[1], STR_COPY(string_key));
+						} else if (use_type == ARRAY_FILTER_USE_KEY) {
+							ZVAL_STR(&args[0], STR_COPY(string_key));
+						}
 						break;
 				}
 			}
-
 			if (use_type != ARRAY_FILTER_USE_KEY) {
 				ZVAL_COPY_VALUE(&args[0], operand);
 			}
 			fci.params = args;
 
-			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-				int retval_true = zend_is_true(&retval TSRMLS_CC);
+			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
+				if (!ZVAL_IS_UNDEF(&retval)) {
+					int retval_true = zend_is_true(&retval TSRMLS_CC);
 
-				zval_ptr_dtor(&retval);
-				if (use_type) {
-					zval_ptr_dtor(&args[0]);
-				}
-				if (!retval_true) {
+					zval_ptr_dtor(&retval);
+					if (use_type) {
+						zval_ptr_dtor(&args[0]);
+					}
+					if (!retval_true) {
+						continue;
+					}
+				} else {
 					continue;
 				}
 			} else {
