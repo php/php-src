@@ -1296,15 +1296,15 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_encrypt)
 {
-	zval **mode;
-	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	char *cipher, *key, *data, *mode, *iv = NULL;
+	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
-	MCRYPT_GET_CRYPT_ARGS
-	
-	convert_to_string_ex(mode);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
+		return;
+	}
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, Z_STRVAL_PP(mode), iv, iv_len, MCRYPT_ENCRYPT, return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_ENCRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1312,15 +1312,15 @@ PHP_FUNCTION(mcrypt_encrypt)
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_decrypt)
 {
-	zval **mode;
-	char *cipher, *key, *data, *iv = NULL;
-	int cipher_len, key_len, data_len, iv_len = 0;
+	char *cipher, *key, *data, *mode, *iv = NULL;
+	int cipher_len, key_len, data_len, mode_len, iv_len = 0;
 
-	MCRYPT_GET_CRYPT_ARGS
-	
-	convert_to_string_ex(mode);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
+		return;
+	}
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, Z_STRVAL_PP(mode), iv, iv_len, MCRYPT_DECRYPT, return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_DECRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
