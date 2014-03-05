@@ -1205,17 +1205,19 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (UNEXPECTED(opline->extended_value != 0)) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
-		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
-			retval_ptr = Z_INDIRECT_P(retval_ptr);
-		}
-		if (!Z_ISREF_P(retval_ptr)) {
-			if (Z_REFCOUNTED_P(retval_ptr)) {
-				Z_DELREF_P(retval_ptr);
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
-			} else {
-				ZVAL_NEW_REF(retval_ptr, retval_ptr);
+		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
+				retval_ptr = Z_INDIRECT_P(retval_ptr);
 			}
-			Z_ADDREF_P(retval_ptr);
+			if (!Z_ISREF_P(retval_ptr)) {
+				if (Z_REFCOUNTED_P(retval_ptr)) {
+					Z_DELREF_P(retval_ptr);
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr);
+				} else {
+					ZVAL_NEW_REF(retval_ptr, retval_ptr);
+				}
+				Z_ADDREF_P(retval_ptr);
+			}
 		}
 	}
 
