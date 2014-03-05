@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -176,8 +176,11 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 	php_free_stmt_bind_buffer(stmt->param, FETCH_SIMPLE);
 	/* Clean output bind */
 	php_free_stmt_bind_buffer(stmt->result, FETCH_RESULT);
-#endif
 
+	if (stmt->link_handle) {
+	    zend_objects_store_del_ref_by_handle(stmt->link_handle TSRMLS_CC);
+	}
+#endif
 	if (stmt->query) {
 		efree(stmt->query);
 	}
@@ -1069,6 +1072,10 @@ PHP_FUNCTION(mysqli_stmt_construct)
 		efree(stmt);
 		RETURN_FALSE;
 	}
+#ifndef MYSQLI_USE_MYSQLND
+	stmt->link_handle = Z_OBJ_HANDLE(*mysql_link);
+	zend_objects_store_add_ref_by_handle(stmt->link_handle TSRMLS_CC);
+#endif
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;

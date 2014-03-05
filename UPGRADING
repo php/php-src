@@ -299,6 +299,9 @@ PHP 5.5 UPGRADE NOTES
   - IntlDateFormatter::getTimeZone()
   - IntlDateFormatter::setTimeZone()
 
+- LDAP:
+  - ldap_modify_batch() (5.5.10)
+
 - Sockets:
   - socket_sendmsg()
   - socket_recvmsg()

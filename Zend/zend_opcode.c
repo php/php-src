@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -489,17 +489,22 @@ static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_nu
 	zend_uint i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].try_op > op_num) {
-			break;
-		}
-		if ((op_num >= op_array->try_catch_array[i].finally_op 
+		if ((op_num < op_array->try_catch_array[i].finally_op ||
+					op_num >= op_array->try_catch_array[i].finally_end)
+				&& (dst_num >= op_array->try_catch_array[i].finally_op &&
+					 dst_num <= op_array->try_catch_array[i].finally_end)) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
+			zend_error_noreturn(E_COMPILE_ERROR, "jump into a finally block is disallowed");
+		} else if ((op_num >= op_array->try_catch_array[i].finally_op 
 					&& op_num <= op_array->try_catch_array[i].finally_end)
 				&& (dst_num > op_array->try_catch_array[i].finally_end 
 					|| dst_num < op_array->try_catch_array[i].finally_op)) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
-			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+			zend_error_noreturn(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
 		}
 	} 
 }

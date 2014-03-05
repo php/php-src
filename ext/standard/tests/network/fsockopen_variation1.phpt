@@ -4,11 +4,17 @@ testing fsockopen without a protocol string
 <?php
 
 echo "Open a server socket\n";
-$server = stream_socket_server('tcp://127.0.0.1:31337');
+for ($i=0; $i<100; $i++) {
+  $port = rand(10000, 65000);
+  /* Setup socket server */
+  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  if ($server) {
+    break;
+  }
+}
 
 echo "\nCalling fsockopen() without a protocol in the hostname string:\n";
 $hostname = '127.0.0.1';
-$port = '31337';
 $client = fsockopen($hostname, $port);
 var_dump($client);
 fclose($client);

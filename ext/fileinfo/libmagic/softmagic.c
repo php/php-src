@@ -67,6 +67,8 @@ private void cvt_16(union VALUETYPE *, const struct magic *);
 private void cvt_32(union VALUETYPE *, const struct magic *);
 private void cvt_64(union VALUETYPE *, const struct magic *);
 
+#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) > ((n) - (o)))
+
 /*
  * softmagic - lookup one file in parsed, in-memory copy of database
  * Passed the name and FILE * of one file to be typed.
@@ -74,13 +76,13 @@ private void cvt_64(union VALUETYPE *, const struct magic *);
 /*ARGSUSED1*/		/* nbytes passed for regularity, maybe need later */
 protected int
 file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
-    int mode, int text)
+    size_t level, int mode, int text)
 {
 	struct mlist *ml;
 	int rv, printed_something = 0, need_separator = 0;
 	for (ml = ms->mlist[0]->next; ml != ms->mlist[0]; ml = ml->next)
 		if ((rv = match(ms, ml->magic, ml->nmagic, buf, nbytes, 0, mode,
-		    text, 0, 0, &printed_something, &need_separator,
+		    text, 0, level, &printed_something, &need_separator,
 		    NULL)) != 0)
 			return rv;
 
@@ -1171,7 +1173,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		}
 		switch (cvt_flip(m->in_type, flip)) {
 		case FILE_BYTE:
-			if (nbytes < (offset + 1))
+			if (OFFSET_OOB(nbytes, offset, 1))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1206,7 +1208,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				offset = ~offset;
 			break;
 		case FILE_BESHORT:
-			if (nbytes < (offset + 2))
+			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1258,7 +1260,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				offset = ~offset;
 			break;
 		case FILE_LESHORT:
-			if (nbytes < (offset + 2))
+			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1310,7 +1312,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				offset = ~offset;
 			break;
 		case FILE_SHORT:
-			if (nbytes < (offset + 2))
+			if (OFFSET_OOB(nbytes, offset, 2))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1347,7 +1349,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			break;
 		case FILE_BELONG:
 		case FILE_BEID3:
-			if (nbytes < (offset + 4))
+			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1418,7 +1420,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			break;
 		case FILE_LELONG:
 		case FILE_LEID3:
-			if (nbytes < (offset + 4))
+			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1488,7 +1490,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				offset = ~offset;
 			break;
 		case FILE_MELONG:
-			if (nbytes < (offset + 4))
+			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1558,7 +1560,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				offset = ~offset;
 			break;
 		case FILE_LONG:
-			if (nbytes < (offset + 4))
+			if (OFFSET_OOB(nbytes, offset, 4))
 				return 0;
 			if (off) {
 				switch (m->in_op & FILE_OPS_MASK) {
@@ -1630,14 +1632,14 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 	/* Verify we have enough data to match magic type */
 	switch (m->type) {
 	case FILE_BYTE:
-		if (nbytes < (offset + 1)) /* should always be true */
+		if (OFFSET_OOB(nbytes, offset, 1))
 			return 0;
 		break;
 
 	case FILE_SHORT:
 	case FILE_BESHORT:
 	case FILE_LESHORT:
-		if (nbytes < (offset + 2))
+		if (OFFSET_OOB(nbytes, offset, 2))
 			return 0;
 		break;
 
@@ -1656,55 +1658,67 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 	case FILE_FLOAT:
 	case FILE_BEFLOAT:
 	case FILE_LEFLOAT:
-		if (nbytes < (offset + 4))
+		if (OFFSET_OOB(nbytes, offset, 4))
 			return 0;
 		break;
 
 	case FILE_DOUBLE:
 	case FILE_BEDOUBLE:
 	case FILE_LEDOUBLE:
-		if (nbytes < (offset + 8))
+		if (OFFSET_OOB(nbytes, offset, 8))
 			return 0;
 		break;
 
 	case FILE_STRING:
 	case FILE_PSTRING:
 	case FILE_SEARCH:
-		if (nbytes < (offset + m->vallen))
+		if (OFFSET_OOB(nbytes, offset, m->vallen))
 			return 0;
 		break;
 
 	case FILE_REGEX:
-		if (nbytes < offset)
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 		break;
 
 	case FILE_INDIRECT:
-		if (nbytes < offset)
+		if (offset == 0)
+			return 0;
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 		sbuf = ms->o.buf;
 		soffset = ms->offset;
 		ms->o.buf = NULL;
 		ms->offset = 0;
 		rv = file_softmagic(ms, s + offset, nbytes - offset,
-		    BINTEST, text);
+		    recursion_level, BINTEST, text);
 		if ((ms->flags & MAGIC_DEBUG) != 0)
 			fprintf(stderr, "indirect @offs=%u[%d]\n", offset, rv);
 		rbuf = ms->o.buf;
 		ms->o.buf = sbuf;
 		ms->offset = soffset;
 		if (rv == 1) {
-	  	if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
-			    file_printf(ms, m->desc, offset) == -1)
-			return -1;
-			if (file_printf(ms, "%s", rbuf) == -1)
+			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
+			    file_printf(ms, m->desc, offset) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
 				return -1;
+			}
+			if (file_printf(ms, "%s", rbuf) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
+				return -1;
+			}
+		}
+		if (rbuf) {
 			efree(rbuf);
 		}
 		return rv;
 
 	case FILE_USE:
-		if (nbytes < offset)
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 		sbuf = m->value.s;
 		if (*sbuf == '^') {

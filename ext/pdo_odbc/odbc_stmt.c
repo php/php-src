@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -472,7 +472,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					if (P->outbuf) {
 						unsigned long ulen;
 						char *srcbuf;
-						unsigned long srclen;
+						unsigned long srclen = 0;
 
 						switch (P->len) {
 							case SQL_NULL_DATA:
@@ -551,7 +551,8 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	struct pdo_column_data *col = &stmt->columns[colno];
 	RETCODE rc;
 	SWORD	colnamelen;
-	SDWORD	colsize, displaysize;
+	SDWORD	colsize;
+	SQLLEN displaysize;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,
 			sizeof(S->cols[colno].colname)-1, &colnamelen,

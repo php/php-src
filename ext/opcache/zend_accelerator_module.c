@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,9 +57,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
 	ZEND_ARG_INFO(0, force)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_is_script_cached, 0, 0, 1)
+	ZEND_ARG_INFO(0, script)
+ZEND_END_ARG_INFO()
+
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
 static ZEND_FUNCTION(opcache_invalidate);
+static ZEND_FUNCTION(opcache_is_script_cached);
 
 /* Private functions */
 static ZEND_FUNCTION(opcache_get_status);
@@ -71,6 +76,7 @@ static zend_function_entry accel_functions[] = {
 	ZEND_FE(opcache_reset,					arginfo_opcache_none)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
+	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
@@ -259,7 +265,8 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.consistency_checks"    , "0"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.consistency_checks,        zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.force_restart_timeout" , "180" , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.force_restart_timeout,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.revalidate_freq"       , "2"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.revalidate_freq,           zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,        accel_directives.memory_model,              zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.file_update_protection", "2"   , PHP_INI_ALL   , OnUpdateLong,                accel_directives.file_update_protection,    zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,       accel_directives.memory_model,              zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateString,	             accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_file_size"         , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.max_file_size,             zend_accel_globals, accel_globals)
 
@@ -312,13 +319,15 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 	if (IS_ABSOLUTE_PATH(filename, filename_len)) {
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len + 1);
 		if (persistent_script) {
-			return !persistent_script->corrupted;
+			return !persistent_script->corrupted &&
+				validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
 		}
 	}
 
 	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1);
-		return persistent_script && !persistent_script->corrupted;
+		return persistent_script && !persistent_script->corrupted &&
+			validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
 	}
 
 	return 0;
@@ -435,6 +444,14 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Free memory", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
+				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+				php_info_print_table_row(2, "Interned Strings Used memory", buf);
+				snprintf(buf, sizeof(buf), "%ld", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+				php_info_print_table_row(2, "Interned Strings Free memory", buf);
+			}
+#endif
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
 			php_info_print_table_row(2, "Cached scripts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
@@ -564,6 +581,20 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
 	add_assoc_zval(return_value, "memory_usage", memory_usage);
 
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
+		zval *interned_strings_usage;
+
+		MAKE_STD_ZVAL(interned_strings_usage);
+		array_init(interned_strings_usage);
+		add_assoc_long(interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
+		add_assoc_long(interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+		add_assoc_long(interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+		add_assoc_long(interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
+		add_assoc_zval(return_value, "interned_strings_usage", interned_strings_usage);
+	}
+#endif
+	
 	/* Accelerator statistics */
 	MAKE_STD_ZVAL(statistics);
 	array_init(statistics);
@@ -755,4 +786,26 @@ static ZEND_FUNCTION(opcache_compile_file)
 		RETVAL_FALSE;
 	}
 	zend_destroy_file_handle(&handle TSRMLS_CC);
+}
+
+/* {{{ proto bool opcache_is_script_cached(string $script)
+   Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
+static ZEND_FUNCTION(opcache_is_script_cached)
+{
+	char *script_name;
+	int script_name_len;
+
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(filename_is_in_cache(script_name, script_name_len TSRMLS_CC));
 }

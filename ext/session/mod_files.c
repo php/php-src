@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,10 +145,12 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 
 				if (fstat(data->fd, &sbuf)) {
 					close(data->fd);
+					data->fd = -1;
 					return;
 				}
 				if (S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
 					close(data->fd);
+					data->fd = -1;
 					return;
 				}
 			}
@@ -342,6 +344,7 @@ PS_READ_FUNC(files)
 			PS(send_cookie) = 1;
 		}
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 
 	ps_files_open(data, PS(id) TSRMLS_CC);

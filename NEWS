@@ -1,8 +1,199 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.6
+?? ??? 2014, PHP 5.5.11
+
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- cURL:
+  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
 
 - Core:
+  . Allow zero length comparison in substr_compare() (Tjerk)
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+
+?? ??? 2014, PHP 5.5.10
+
+- Core:
+  . Fixed Request #66574i (Allow multiple paths in php_ini_scanned_path). (Remi)
+
+- Date:
+  . Fixed bug #45528 (Allow the DateTimeZone constructor to accept timezones
+    per offset too). (Derick)
+
+- Fileinfo:
+  . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo). (Remi)
+
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
+- GD
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+
+- JSON:
+  . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
+  (chobieeee@php.net)
+
+- LDAP:
+  . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
+  (Ondřej Hošek)
+
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
+
+- Openssl:
+  . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
+  (Mark Zedwood)
+
+- PCRE:
+  . Upgraded to PCRE 8.34. (Anatol)
+
+- Pgsql:
+  . Added warning for dangerous client encoding and remove possible injections
+    for pg_insert()/pg_update()/pg_delete()/pg_select(). (Yasuo)
+
+
+06 Feb 2014, PHP 5.5.9
+
+- Core:
+  . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). (willfitch)
+
+- GD:
+  . Fixed bug #66356 (Heap Overflow Vulnerability in imagecrop()).
+    (Laruence, Remi)
+
+- OPCache:
+  . Fixed bug #66474 (Optimizer bug in constant string to boolean conversion).
+    (Dmitry)
+  . Fixed bug #66461 (PHP crashes if opcache.interned_strings_buffer=0).
+    (Dmitry)
+  . Fixed bug #66298 (ext/opcache/Optimizer/zend_optimizer.c has dos-style 
+    ^M as lineend). (Laruence)
+
+- PDO_pgsql:
+  . Fixed bug #62479 (PDO-psql cannot connect if password contains
+spaces) (willfitch, iliaa)
+
+- Readline
+  . Fixed Bug #66412 (readline_clear_history() with libedit causes segfault after
+    #65714). (Remi)
+
+- Session
+  . Fixed bug #66469 (Session module is sending multiple set-cookie headers when
+    session.use_strict_mode=1) (Yasuo)
+  . Fixed bug #66481 (Segfaults on session_name()).
+    (cmcdermottroe at engineyard dot com, Yasuo)
+
+- Standard
+  . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
+
+- Sockets:
+  . Fixed bug #66381 (__ss_family was changed on AIX 5.3). (Felipe)
+
+- Zend Engine
+  . Fixed bug #66009 (Failed compilation of PHP extension with C++ std
+    library using VS 2012). (Anatol)
+
+09 Jan 2014, PHP 5.5.8
+
+- Core:
+  . Disallowed JMP into a finally block. (Laruence)
+  . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
+  . Fixed ZEND_MM_MEM_TYPE=mmap_zero. (Dmitry, Tony)
+  . Fixed bug #66041 (list() fails to unpack yielded ArrayAccess object).
+    (Nikita)
+  . Fixed bug #65764 (generators/throw_rethrow FAIL with
+    ZEND_COMPILE_EXTENDED_INFO). (Nikita)
+  . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
+  . Fixed bug #66218 (zend_register_functions breaks reflection). (Remi)
+
+- Date:
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval) (CVE-2013-6712). 
+    (Remi)
+  . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
+  
+- DOM:
+  . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
+    Produces invalid Markup). (Mike)
+
+- Exif:
+  . Fixed bug #65873 (Integer overflow in exif_read_data()). (Stas)
+
+- Filter:
+  . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
+
+- GD:
+  . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
+    (Adam)
+    
+- PDO_odbc:
+  . Fixed bug #66311 (Stack smashing protection kills PDO/ODBC queries). 
+    (michael at orlitzky dot com)
+
+- MySQLi:
+  . Fixed bug #65486 (mysqli_poll() is broken on win x64). (Anatol)
+
+- OPCache:
+  . Fixed revalidate_path=1 behavior to avoid caching of symlinks values.
+    (Dmitry)
+  . Fixed Issue #140: "opcache.enable_file_override" doesn't respect
+    "opcache.revalidate_freq". (Dmitry).
+
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
+- SOAP
+  . Fixed bug #66112 (Use after free condition in SOAP extension).
+    (martin dot koegler at brz dot gv dot at)
+
+- Sockets:
+  . Fixed bug #65923 (ext/socket assumes AI_V4MAPPED is defined). (Felipe)
+
+- XSL
+  . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
+    function). (Mike)
+
+- ZIP:
+  . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
+
+12 Dec 2013, PHP 5.5.7
+
+- CLI server:
+  . Added some MIME types to the CLI web server (Chris Jones)
+  . Implemented FR #65917 (getallheaders() is not supported by the built-in web
+    server) - also implements apache_response_headers() (Andrea Faulds)
+
+- Core:
+  . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
+    string). (Laruence)
+  . Fixed bug #65969 (Chain assignment with T_LIST failure). (Dmitry)
+
+- OPCache
+  . Fixed bug #66176 (Invalid constant substitution). (Dmitry)
+  . Fixed bug #65915 (Inconsistent results with require return value). (Dmitry)
+  . Fixed bug #65559 (Opcache: cache not cleared if changes occur while
+    running). (Dmitry)
+
+- readline
+  . Fixed Bug #65714 (PHP cli forces the tty to cooked mode). (Remi)
+
+- Openssl:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
+
+14 Nov 2013, PHP 5.5.6
+
+- Core:
+  . Fixed bug #65947 (basename is no more working after fgetcsv in certain 
+    situation). (Laruence)
   . Improved performance of array_merge() and func_get_args() by eliminating
     useless copying. (Dmitry)
   . Fixed bug #65939 (Space before ";" breaks php.ini parsing).
@@ -14,12 +205,27 @@ PHP                                                                        NEWS
 - FPM:
   . Changed default listen() backlog to 65535. (Tony)
 
+- JSON
+  . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
+    case-sensitivity incorrectly"). (Andrea Faulds)
+
+- MySQLi:
+  . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
+
 - OPcache
   . Increased limit for opcache.max_accelerated_files to 1,000,000. (Chris)
+  . Fixed issue #115 (path issue when using phar). (Dmitry)
+  . Fixed issue #149 (Phar mount points not working with OPcache enabled).
+  (Dmitry)
 
 - ODBC
   . Fixed bug #65950 (Field name truncation if the field name is bigger than
     32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
+- PDO:
+  . Fixed bug #66033 (Segmentation Fault when constructor of PDO statement 
+    throws an exception). (Laruence)
+  . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
 - Standard:
   . Fixed bug #64760 (var_export() does not use full precision for floating-point
@@ -71,7 +277,6 @@ PHP                                                                        NEWS
     imap). (ryotakatsuki at gmail dot com)
 
 - OPcache:
-  . Fixed issue #115 (path issue when using phar). (Laruence)
   . Added support for GNU Hurd. (Svante Signell)
   . Added function opcache_compile_file() to load PHP scripts into cache
     without execution. (Julien)
@@ -465,6 +670,12 @@ PHP                                                                        NEWS
     CURLOPT_RTSP_REQUEST, CURLOPT_RESOLVE, CURLOPT_ACCEPT_ENCODING,
     CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
     (Pierrick)
+  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
+    curl_pause, curl_reset, curl_share_close, curl_share_init,
+    curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
+  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
+    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
+    CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
     still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
@@ -472,12 +683,6 @@ PHP                                                                        NEWS
 - DateTime
   . Added DateTimeImmutable - a variant of DateTime that only returns the
     modified state instead of changing itself. (Derick)
-  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
-    curl_pause, curl_reset, curl_share_close, curl_share_init,
-    curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
-  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
-    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
-    CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
   . Fixed bug #64825 (Invalid free when unserializing DateTimeZone).
     (Anatol)
   . Fixed bug #64359 (strftime crash with VS2012). (Anatol)

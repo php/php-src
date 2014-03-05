@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ static int zend_mm_dev_zero_fd = -1;
 
 static zend_mm_storage* zend_mm_mem_mmap_zero_init(void *params)
 {
-	if (zend_mm_dev_zero_fd != -1) {
+	if (zend_mm_dev_zero_fd == -1) {
 		zend_mm_dev_zero_fd = open("/dev/zero", O_RDWR, S_IRUSR | S_IWUSR);
 	}
 	if (zend_mm_dev_zero_fd >= 0) {

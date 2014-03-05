@@ -13,7 +13,7 @@ for all languages
 
 EOT;
 $dirname = 'readgzfile_temp';
-$filename = $dirname.'/plainfile.txt.gz';
+$filename = $dirname.'/readgzfile_basic.txt.gz';
 mkdir($dirname);
 $h = gzopen($filename, 'w');
 gzwrite($h, $plaintxt);

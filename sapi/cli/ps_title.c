@@ -4,7 +4,7 @@
  * PostgreSQL Database Management System (formerly known as Postgres, then as
  * Postgres95)
  *
- * Portions Copyright (c) 1996-2013, The PostgreSQL Global Development Group
+ * Portions Copyright (c) 1996-2014, The PostgreSQL Global Development Group
  *
  * Portions Copyright (c) 1994, The Regents of the University of California
  *

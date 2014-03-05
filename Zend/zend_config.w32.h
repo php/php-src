@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,10 +62,15 @@ typedef unsigned int uint;
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary
  */
-#undef inline
 #ifdef ZEND_WIN32_FORCE_INLINE
+/* _ALLOW_KEYWORD_MACROS is only relevant for C++ */
+# if (_MSC_VER >= 1700) && !defined(_ALLOW_KEYWORD_MACROS)
+#  define _ALLOW_KEYWORD_MACROS
+# endif
+# undef inline
 # define inline __forceinline
-#else
+#elif !defined(ZEND_WIN32_KEEP_INLINE)
+# undef inline
 # define inline
 #endif
 

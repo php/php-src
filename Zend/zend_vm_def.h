@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1166,28 +1166,17 @@ ZEND_VM_HANDLER(81, ZEND_FETCH_DIM_R, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval **container;
+	zval *container;
 
 	SAVE_OPLINE();
 
-	if ((opline->extended_value & ZEND_FETCH_ADD_LOCK) &&
-	    OP1_TYPE != IS_CV &&
-	    EX_T(opline->op1.var).var.ptr_ptr) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
+	if (OP1_TYPE == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
+		PZVAL_LOCK(EX_T(opline->op1.var).var.ptr);
 	}
-
-	if (OP1_TYPE == IS_TMP_VAR || OP1_TYPE == IS_CONST) {
-		zval *container = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		zend_fetch_dimension_address_read(&EX_T(opline->result.var), &container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
-		FREE_OP2();
-		FREE_OP1();
-	} else {
-		container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
-		zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
-		FREE_OP2();
-		FREE_OP1_VAR_PTR();
-	}
-
+	container = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
+	FREE_OP2();
+	FREE_OP1();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1252,13 +1241,13 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval **container;
+	zval *container;
 
 	SAVE_OPLINE();
-	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_IS);
+	container = GET_OP1_ZVAL_PTR(BP_VAR_IS);
 	zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_IS TSRMLS_CC);
 	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+	FREE_OP1();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -1267,12 +1256,12 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval **container;
 
 	SAVE_OPLINE();
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, (opline->extended_value & ZEND_FETCH_ARG_MASK))) {
-		container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
+		zval **container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
+
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(container == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 		}
@@ -1280,15 +1269,19 @@ ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		if (OP1_TYPE == IS_VAR && OP1_FREE && READY_TO_DESTROY(free_op1.var)) {
 			EXTRACT_ZVAL_PTR(&EX_T(opline->result.var));
 		}
+		FREE_OP2();
+		FREE_OP1_VAR_PTR();
 	} else {
+		zval *container;
+
 		if (OP2_TYPE == IS_UNUSED) {
 			zend_error_noreturn(E_ERROR, "Cannot use [] for reading");
 		}
-		container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+		container = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
+		FREE_OP2();
+		FREE_OP1();
 	}
-	FREE_OP2();
-	FREE_OP1_VAR_PTR();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5360,11 +5353,15 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
+	if (RETURN_VALUE_USED(opline)) {
+		/* If the return value of yield is used set the send
+		 * target and initialize it to NULL */
+		generator->send_target = &EX_T(opline->result.var).var.ptr;
+		Z_ADDREF(EG(uninitialized_zval));
+		EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
+	} else {
+		generator->send_target = NULL;
+	}
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
