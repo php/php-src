@@ -13,10 +13,16 @@ echo "*** Testing stream_set_timeout() : error conditions ***\n";
 //Test stream_set_timeout with one more than the expected number of arguments
 echo "\n-- Testing stream_set_timeout() function with more than expected no. of arguments --\n";
 
-/* Setup socket server */
-$server = stream_socket_server('tcp://127.0.0.1:31337');
+for ($i=0; $i<100; $i++) {
+  $port = rand(10000, 65000);
+  /* Setup socket server */
+  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  if ($server) {
+    break;
+  }
+}
 /* Connect to it */
-$client = fsockopen('tcp://127.0.0.1:31337');
+$client = fsockopen("tcp://127.0.0.1:$port");
 
 $seconds = 10;
 $microseconds = 10;

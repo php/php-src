@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2296,7 +2296,7 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size, format;
+	int size = 0, format;
 	dom_doc_propsptr doc_props;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
@@ -2324,7 +2324,22 @@ PHP_FUNCTION(dom_document_save_html)
 			RETURN_FALSE;
 		}
 		
-		size = htmlNodeDump(buf, docp, node);
+		if (node->type == XML_DOCUMENT_FRAG_NODE) {
+			int one_size;
+
+			for (node = node->children; node; node = node->next) {
+				one_size = htmlNodeDump(buf, docp, node);
+
+				if (one_size >= 0) {
+					size += one_size;
+				} else {
+					size = -1;
+					break;
+				}
+			}
+		} else {
+			size = htmlNodeDump(buf, docp, node);
+		}
 		if (size >= 0) {
 			mem = (xmlChar*) xmlBufferContent(buf);
 			if (!mem) {

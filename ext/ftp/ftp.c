@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,6 +177,10 @@ ftp_close(ftpbuf_t *ftp)
 	}
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
+	}
+	if (ftp->stream && ftp->closestream) {
+		TSRMLS_FETCH();
+		php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
 #if HAVE_OPENSSL_EXT

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1206,7 +1206,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_fstat, 0)
 	ZEND_ARG_INFO(0, fp)
 ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_INFO(arginfo_copy, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_copy, 0, 0, 2)
 	ZEND_ARG_INFO(0, source_file)
 	ZEND_ARG_INFO(0, destination_file)
 	ZEND_ARG_INFO(0, context)
@@ -5724,7 +5724,7 @@ PHP_FUNCTION(unregister_tick_function)
 		return;
 	}
 
-	if (Z_TYPE_P(function) != IS_ARRAY) {
+	if (Z_TYPE_P(function) != IS_ARRAY && Z_TYPE_P(function) != IS_OBJECT) {
 		convert_to_string(function);
 	}
 

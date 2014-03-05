@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -593,13 +593,18 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "r"(op2)
 			: "rax");
 #else
-			Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
+			/*
+			 * 'result' may alias with op1 or op2, so we need to
+			 * ensure that 'result' is not updated until after we
+			 * have read the values of op1 and op2.
+			 */
 
 			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
-				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != ((Z_LVAL_P(op1) + Z_LVAL_P(op2)) & LONG_SIGN_MASK))) {
 				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2);
 				Z_TYPE_P(result) = IS_DOUBLE;
 			} else {
+				Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
 				Z_TYPE_P(result) = IS_LONG;
 			}
 #endif
@@ -736,6 +741,7 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+#if 0
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && 0) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
@@ -790,6 +796,7 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 			return SUCCESS;
 		}
 	}
+#endif
 	return div_function(result, op1, op2 TSRMLS_CC);
 }
 

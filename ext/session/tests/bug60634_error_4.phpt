@@ -1,7 +1,5 @@
 --TEST--
 Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) - exception in write after exec
---XFAIL--
-Long term low priority bug, working on it
 --INI--
 session.save_path=
 session.name=PHPSESSID
@@ -46,3 +44,9 @@ session_start();
 write: goodbye cruel world
 
 Fatal error: Uncaught exception 'Exception' in %s
+Stack trace:
+#0 [internal function]: write('%s', '')
+#1 {main}
+  thrown in %s on line %d
+close: goodbye cruel world
+

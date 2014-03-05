@@ -138,16 +138,6 @@
 ;   Development Value: "GP"
 ;   Production Value: "GP"
 
-; session.bug_compat_42
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
-; session.bug_compat_warn
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
 ; session.gc_divisor
 ;   Default Value: 100
 ;   Development Value: 1000
@@ -1475,31 +1465,6 @@ session.gc_maxlifetime = 1440
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          find /path/to/sessions -cmin +24 -type f | xargs rm
-
-; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you, if this feature is used.
-; You can disable the feature and the warning separately. At this time,
-; the warning is only displayed, if bug_compat_42 is enabled. This feature
-; introduces some serious security problems if not handled correctly. It's
-; recommended that you do not use this feature on production servers. But you
-; should enable this on development servers and enable the warning as well. If you
-; do not enable the feature on development servers, you won't be warned when it's
-; used and debugging errors caused by this can be difficult to track down.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-42
-session.bug_compat_42 = Off
-
-; This setting controls whether or not you are warned by PHP when initializing a
-; session value into the global space. session.bug_compat_42 must be enabled before
-; these warnings can be issued by PHP. See the directive above for more information.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-warn
-session.bug_compat_warn = Off
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be

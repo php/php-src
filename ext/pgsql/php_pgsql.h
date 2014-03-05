@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,7 +16,7 @@
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 #ifndef PHP_PGSQL_H
@@ -257,7 +257,7 @@ typedef enum _php_pgsql_data_type {
 	PG_PATH,
 	PG_POLYGON,
 	PG_CIRCLE,
-	/* unkown and system */
+	/* unknown and system */
 	PG_UNKNOWN
 } php_pgsql_data_type;
 

@@ -15,7 +15,7 @@ $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
 if (!$ftp) die("Couldn't connect to the server");
 
-$local_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "localfile.txt";
+$local_file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt";
 file_put_contents($local_file, 'ASCIIFoo');
 $handle = fopen($local_file, 'a');
 
@@ -24,7 +24,7 @@ var_dump(file_get_contents($local_file));
 ?>
 --CLEAN--
 <?php
-@unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "localfile.txt");
+@unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . "ftp_nb_fget_basic2.txt");
 ?>
 --EXPECT--
 int(2)

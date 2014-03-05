@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 
-$filename = "temp.txt.gz";
+$filename = "zlib_wrapper_fflush_basic.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written.";
 $length = 10;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -57,7 +57,7 @@ ZEND_API void zend_html_putc(char c)
 ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
 	const unsigned char *ptr = (const unsigned char*)s, *end = ptr + len;
-	unsigned char *filtered;
+	unsigned char *filtered = NULL;
 	size_t filtered_len;
 
 	if (LANG_SCNG(output_filter)) {

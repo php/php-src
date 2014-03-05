@@ -1,8 +1,133 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.23
+?? ??? 2014, PHP 5.4.27
 
-?? ??? 2013, PHP 5.4.22
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- Core:
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+
+?? ??? 2014, PHP 5.4.26
+
+- JSON:
+  . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
+  (chobieeee@php.net)
+
+- Fileinfo:
+  . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo). (Remi)
+
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
+- LDAP:
+  . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
+  (Ondřej Hošek)
+
+- Openssl:
+  . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
+  (Mark Zedwood)
+
+- Pgsql:
+  . Added warning for dangerous client encoding and remove possible injections
+    for pg_insert()/pg_update()/pg_delete()/pg_select(). (Yasuo)
+
+06 Feb 2014, PHP 5.4.25
+
+- Core:
+  . Fixed bug #66286 (Incorrect object comparison with inheritance). (Nikita)
+  . Fixed bug #66509 (copy() arginfo has changed starting from 5.4). 
+    (Will Fitch)
+
+- mysqlnd:
+  . Fixed bug #66283 (Segmentation fault after memory_limit). (Johannes)
+
+- PDO_pgsql:
+  . Fixed bug #62479 (PDO-psql cannot connect if password contains spaces).
+    (Will Fitch, Ilia)
+
+- Session:
+  . Fixed bug #66481 (Calls to session_name() segfault when session.name is
+    null). (Laruence)
+
+10 Jan 2014, PHP 5.4.24
+
+- Core:
+  . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
+  . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
+
+- Date:
+  . Fixed bug #66060 (Heap buffer over-read in DateInterval). (CVE-2013-6712) 
+    (Remi)
+  . Fixed bug #63391 (Incorrect/inconsistent day of week prior to the year
+    1600). (Derick, T. Carter)
+  . Fixed bug #61599 (Wrong Day of Week). (Derick, T. Carter)
+
+- DOM:
+  . Fixed bug #65196 (Passing DOMDocumentFragment to DOMDocument::saveHTML() 
+    Produces invalid Markup). (Mike)
+
+- Exif:
+  . Fixed bug #65873 (Integer overflow in exif_read_data()). (Stas)
+
+- Filter:
+  . Fixed bug #66229 (128.0.0.0/16 isn't reserved any longer). (Adam)
+
+- GD:
+  . Fixed bug #64405 (Use freetype-config for determining freetype2 dir(s)).
+    (Adam)
+    
+- PDO_odbc:
+  . Fixed bug #66311 (Stack smashing protection kills PDO/ODBC queries). 
+    (michael at orlitzky dot com)
+
+- SNMP:
+  . Fixed SNMP_ERR_TOOBIG handling for bulk walk operations. (Boris Lytochkin)
+
+- XSL
+  . Fixed bug #49634 (Segfault throwing an exception in a XSL registered
+    function). (Mike)
+
+- ZIP:
+  . Fixed Bug #66321 (ZipArchive::open() ze_obj->filename_len not real). (Remi)
+
+12 Dec 2013, PHP 5.4.23
+
+- Core:
+  . Fixed bug #66094 (unregister_tick_function tries to cast a Closure to a 
+    string). (Laruence)
+  . Fixed bug #65969 (Chain assignment with T_LIST failure). (Dmitry)
+  . Fixed bug #65947 (basename is no more working after fgetcsv in certain 
+    situation). (Laruence)
+
+- JSON
+  . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
+    case-sensitivity incorrectly"). (Andrea Faulds)
+
+- MySQLi:
+  . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
+
+- mysqlnd:
+  . Fixed bug #66124 (mysqli under mysqlnd loses precision when bind_param
+    with 'i'). (Andrey)
+  . Fixed bug #66141 (mysqlnd quote function is wrong with NO_BACKSLASH_ESCAPES
+    after failed query). (Andrey)
+
+- Openssl:
+  . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
+    (Stefan Esser).
+
+- PDO
+  . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
+
+14 Nov 2013, PHP 5.4.22
 
 - Core:
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
@@ -18,9 +143,13 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
 
-- ODBC
+- ODBC:
   . Fixed bug #65950 (Field name truncation if the field name is bigger than 
     32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
+- PDO:
+  . Fixed bug #66033 (Segmentation Fault when constructor of PDO statement 
+    throws an exception). (Laruence)
 
 - Sockets:
   . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
@@ -29,6 +158,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #64760 (var_export() does not use full precision for floating-point
     numbers) (Yasuo)
+  . Fixed bug #66395 (basename function doesn't remove drive letter). (Anatol)
 
 - XMLReader:
   . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
