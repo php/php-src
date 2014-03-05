@@ -30,11 +30,13 @@ PHP                                                                        NEWS
   . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
     (Remi)
 
-- Openssl:
+- OpenSSL:
   . Fixed memory leak in windows cert verification on verify failure.
     (Chris Wright)
   . Peer certificate capturing via SSL context options now functions even if
     peer verification fails. (Daniel Lowrey)
+  . Encrypted TLS servers now support the server name indication TLS extension
+    via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
@@ -70,7 +72,7 @@ PHP                                                                        NEWS
   . Added function opcache_is_script_cached(). (Danack)
   . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
-- Openssl
+- OpenSSL
   . Fallback to Windows CA cert store for peer verification if no openssl.cafile
     ini directive or "cafile" SSL context option specified in Windows.
     (Chris Wright)
@@ -148,7 +150,7 @@ PHP                                                                        NEWS
 - ldap
   . Added new function ldap_modify_batch(). (Ondrej Hosek)
 
-- Openssl
+- OpenSSL
   . Peer certificates now verified by default in client socket operations
     (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
   . New openssl.cafile and openssl.capath ini directives. (Daniel Lowrey)
@@ -216,7 +218,7 @@ PHP                                                                        NEWS
     cache_slots) in op_array->literals table. (Laruence, Dmitry)
   . Added script level constant replacement optimization pass. (Dmitry)
 
-- Openssl:
+- OpenSSL:
   . Added crypto_method option for the ssl stream context. (Martin Jansen)
   . Added certificate fingerprint support. (Tjerk Meesters)
   . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
