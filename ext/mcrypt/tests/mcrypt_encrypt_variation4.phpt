@@ -160,24 +160,20 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --empty array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
+NULL
 
 --int indexed array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
+NULL
 
 --associative array--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
+NULL
 
 --nested arrays--
-Error: 8 - Array to string conversion, %s(%d)
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, array given, %s(%d)
+NULL
 
 --uppercase NULL--
 Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
@@ -216,10 +212,8 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 4096 - Object of class classWithoutToString could not be converted to string, %s(%d)
-Error: 8 - Object of class classWithoutToString to string conversion, %s(%d)
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, object given, %s(%d)
+NULL
 
 --undefined var--
 Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
@@ -230,6 +224,6 @@ Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
 bool(false)
 
 --resource--
-Error: 2 - mcrypt_encrypt(): Module initialization failed, %s(%d)
-bool(false)
+Error: 2 - mcrypt_encrypt() expects parameter 4 to be string, resource given, %s(%d)
+NULL
 ===DONE===
