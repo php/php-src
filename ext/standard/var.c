@@ -428,86 +428,91 @@ PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf TSRMLS_DC) 
 	zend_string *class_name;
 	zend_string *ztmp, *ztmp2;
 
+again:
 	switch (Z_TYPE_P(struc)) {
-	case IS_BOOL:
-		if (Z_LVAL_P(struc)) {
-			smart_str_appendl(buf, "true", 4);
-		} else {
-			smart_str_appendl(buf, "false", 5);
-		}
-		break;
-	case IS_NULL:
-		smart_str_appendl(buf, "NULL", 4);
-		break;
-	case IS_LONG:
-		smart_str_append_long(buf, Z_LVAL_P(struc));
-		break;
-	case IS_DOUBLE:
-		tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
-		smart_str_appendl(buf, tmp_str, tmp_len);
-		efree(tmp_str);
-		break;
-	case IS_STRING:
-		ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2 TSRMLS_CC);
-		ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
-
-		smart_str_appendc(buf, '\'');
-		smart_str_appendl(buf, ztmp2->val, ztmp2->len);
-		smart_str_appendc(buf, '\'');
-
-		STR_FREE(ztmp);
-		STR_FREE(ztmp2);
-		break;
-	case IS_ARRAY:
-		myht = Z_ARRVAL_P(struc);
-		if (myht->nApplyCount > 0){
+		case IS_BOOL:
+			if (Z_LVAL_P(struc)) {
+				smart_str_appendl(buf, "true", 4);
+			} else {
+				smart_str_appendl(buf, "false", 5);
+			}
+			break;
+		case IS_NULL:
 			smart_str_appendl(buf, "NULL", 4);
-			zend_error(E_WARNING, "var_export does not handle circular references");
-			return;
-		}
-		if (level > 1) {
-			smart_str_appendc(buf, '\n');
-			buffer_append_spaces(buf, level - 1);
-		}
-		smart_str_appendl(buf, "array (\n", 8);
-		zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 2, level, buf);
+			break;
+		case IS_LONG:
+			smart_str_append_long(buf, Z_LVAL_P(struc));
+			break;
+		case IS_DOUBLE:
+			tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_P(struc));
+			smart_str_appendl(buf, tmp_str, tmp_len);
+			efree(tmp_str);
+			break;
+		case IS_STRING:
+			ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2 TSRMLS_CC);
+			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
 
-		if (level > 1) {
-			buffer_append_spaces(buf, level - 1);
-		}
-		smart_str_appendc(buf, ')');
-    
-		break;
+			smart_str_appendc(buf, '\'');
+			smart_str_appendl(buf, ztmp2->val, ztmp2->len);
+			smart_str_appendc(buf, '\'');
 
-	case IS_OBJECT:
-		myht = Z_OBJPROP_P(struc);
-		if(myht && myht->nApplyCount > 0){
+			STR_FREE(ztmp);
+			STR_FREE(ztmp2);
+			break;
+		case IS_ARRAY:
+			myht = Z_ARRVAL_P(struc);
+			if (myht->nApplyCount > 0){
+				smart_str_appendl(buf, "NULL", 4);
+				zend_error(E_WARNING, "var_export does not handle circular references");
+				return;
+			}
+			if (level > 1) {
+				smart_str_appendc(buf, '\n');
+				buffer_append_spaces(buf, level - 1);
+			}
+			smart_str_appendl(buf, "array (\n", 8);
+			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_array_element_export, 2, level, buf);
+
+			if (level > 1) {
+				buffer_append_spaces(buf, level - 1);
+			}
+			smart_str_appendc(buf, ')');
+		
+			break;
+
+		case IS_OBJECT:
+			myht = Z_OBJPROP_P(struc);
+			if(myht && myht->nApplyCount > 0){
+				smart_str_appendl(buf, "NULL", 4);
+				zend_error(E_WARNING, "var_export does not handle circular references");
+				return;
+			}
+			if (level > 1) {
+				smart_str_appendc(buf, '\n');
+				buffer_append_spaces(buf, level - 1);
+			}
+			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
+
+			smart_str_appendl(buf, class_name->val, class_name->len);
+			smart_str_appendl(buf, "::__set_state(array(\n", 21);
+
+			STR_RELEASE(class_name);
+			if (myht) {
+				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf);
+			}
+			if (level > 1) {
+				buffer_append_spaces(buf, level - 1);
+			}
+			smart_str_appendl(buf, "))", 2);
+
+			break;
+		case IS_REFERENCE:
+			struc = Z_REFVAL_P(struc);
+			goto again;
+			break;
+		default:
 			smart_str_appendl(buf, "NULL", 4);
-			zend_error(E_WARNING, "var_export does not handle circular references");
-			return;
-		}
-		if (level > 1) {
-			smart_str_appendc(buf, '\n');
-			buffer_append_spaces(buf, level - 1);
-		}
-		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
-
-		smart_str_appendl(buf, class_name->val, class_name->len);
-		smart_str_appendl(buf, "::__set_state(array(\n", 21);
-
-		STR_RELEASE(class_name);
-		if (myht) {
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_object_element_export, 1, level, buf);
-		}
-		if (level > 1) {
-			buffer_append_spaces(buf, level - 1);
-		}
-		smart_str_appendl(buf, "))", 2);
-
-		break;
-	default:
-		smart_str_appendl(buf, "NULL", 4);
-		break;
+			break;
 	}
 }
 /* }}} */
