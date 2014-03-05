@@ -35,6 +35,8 @@ PHP                                                                        NEWS
 
 - GD
   . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+  . Fixed Bug #66815 (imagecrop(): insufficient fix for NULL defer
+    CVE-2013-7327). (Tomas Hoger, Remi)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
