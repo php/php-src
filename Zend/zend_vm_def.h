@@ -1422,6 +1422,10 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
+			if (retval_ptr == &EG(uninitialized_zval)) {
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
 		}
 		if (!Z_ISREF_P(retval_ptr)) {
 			if (Z_REFCOUNTED_P(retval_ptr)) {
