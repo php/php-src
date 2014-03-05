@@ -1820,7 +1820,9 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		pos++;
 		/* Get entry and increase reference count */
 		entry = &p->val;
-		Z_ADDREF_P(entry);
+		if (Z_REFCOUNTED_P(entry)) {
+			Z_ADDREF_P(entry);
+		}
 
 		/* Update output hash depending on key type */
 		if (p->key == NULL) {
@@ -1837,7 +1839,9 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			pos++;
 			entry = &p->val;
-			Z_ADDREF_P(entry);
+			if (Z_REFCOUNTED_P(entry)) {
+				Z_ADDREF_P(entry);
+			}
 			if (p->key == NULL) {
 				zend_hash_next_index_insert(removed, entry);
 			} else {
@@ -1863,7 +1867,9 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		p = in_hash->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		entry = &p->val;
-		if (IS_REFCOUNTED(Z_TYPE_P(entry))) Z_ADDREF_P(entry);
+		if (Z_REFCOUNTED_P(entry)) {
+			Z_ADDREF_P(entry);
+		}
 		if (p->key == NULL) {
 			zend_hash_next_index_insert(out_hash, entry);
 		} else {
@@ -2288,7 +2294,9 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 					(dest_entry = zend_hash_find(dest, string_key)) == NULL ||
 					Z_TYPE_P(dest_entry) != IS_ARRAY) {
 
-					Z_ADDREF_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
 					zend_hash_update(dest, string_key, src_entry);
 
 					continue;
@@ -2300,7 +2308,9 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 					(dest_entry = zend_hash_index_find(dest, num_key)) == NULL ||
 					Z_TYPE_P(dest_entry) != IS_ARRAY) {
 
-					Z_ADDREF_P(src_entry);
+					if (Z_REFCOUNTED_P(src_entry)) {
+						Z_ADDREF_P(src_entry);
+					}
 					zend_hash_index_update(dest, num_key, src_entry);
 
 					continue;
