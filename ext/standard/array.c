@@ -1392,7 +1392,7 @@ PHP_FUNCTION(extract)
 				}
 			} else {
 				ZVAL_DUP(&data, entry);
-				ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, &data, 1, 0);
+				ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1, 0);
 			}
 			count++;
 		}
