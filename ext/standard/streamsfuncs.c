@@ -1298,8 +1298,7 @@ PHP_FUNCTION(stream_get_line)
 	int str_len = 0;
 	long max_length;
 	zval *zstream;
-	char *buf;
-	size_t buf_size;
+	zend_string *buf;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|s", &zstream, &max_length, &str, &str_len) == FAILURE) {
@@ -1316,9 +1315,8 @@ PHP_FUNCTION(stream_get_line)
 
 	php_stream_from_zval(stream, zstream);
 
-	if ((buf = php_stream_get_record(stream, max_length, &buf_size, str, str_len TSRMLS_CC))) {
-//???		RETURN_STRINGL(buf, buf_size, 0);
-		RETURN_STRINGL(buf, buf_size);
+	if ((buf = php_stream_get_record(stream, max_length, str, str_len TSRMLS_CC))) {
+		RETURN_STR(buf);
 	} else {
 		RETURN_FALSE;
 	}

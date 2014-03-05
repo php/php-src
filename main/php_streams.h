@@ -322,7 +322,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, 
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
 
 #define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
-PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, const char *delim, size_t delim_len TSRMLS_DC);
+PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, const char *delim, size_t delim_len TSRMLS_DC);
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, const char *buf TSRMLS_DC);
