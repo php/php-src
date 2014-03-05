@@ -3569,7 +3569,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -4094,7 +4094,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -4172,7 +4172,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -5343,7 +5343,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -5754,7 +5754,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -5832,7 +5832,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -6048,7 +6048,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -6427,7 +6427,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -6505,7 +6505,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CONST == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -8690,7 +8690,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -9123,7 +9123,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -9201,7 +9201,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -10349,7 +10349,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -10770,7 +10770,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -10848,7 +10848,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -11064,7 +11064,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -11332,7 +11332,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -11410,7 +11410,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_TMP_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -13897,7 +13897,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	zend_free_op free_op1, free_op_data1;
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = opline->op2.zv;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -13905,6 +13905,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -14379,7 +14386,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -15522,7 +15529,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -15742,7 +15749,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -16342,7 +16349,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	zend_free_op free_op1, free_op2, free_op_data1;
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -16350,6 +16357,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -18365,7 +18379,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	zend_free_op free_op1, free_op2, free_op_data1;
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -18373,6 +18387,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -18848,7 +18869,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -19955,7 +19976,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -20175,7 +20196,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -20500,7 +20521,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	zend_free_op free_op1, free_op_data1;
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = NULL;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -20508,6 +20529,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -20786,7 +20814,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -21337,7 +21365,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -21415,7 +21443,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_VAR == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -21888,7 +21916,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	zend_free_op free_op1, free_op_data1;
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -21896,6 +21924,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -23764,7 +23799,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	zend_free_op free_op_data1;
 	zval *object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	zval *property = opline->op2.zv;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -23772,6 +23807,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -25133,7 +25175,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	zend_free_op free_op2, free_op_data1;
 	zval *object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -25141,6 +25183,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -26419,7 +26468,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	zend_free_op free_op2, free_op_data1;
 	zval *object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -26427,6 +26476,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -27706,7 +27762,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	zend_free_op free_op_data1;
 	zval *object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	zval *property = NULL;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -27714,6 +27770,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -28106,7 +28169,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	zend_free_op free_op_data1;
 	zval *object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -28114,6 +28177,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -30885,7 +30955,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	zend_free_op free_op_data1;
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = opline->op2.zv;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -30893,6 +30963,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -31366,7 +31443,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -32298,7 +32375,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -32516,7 +32593,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -33112,7 +33189,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	zend_free_op free_op2, free_op_data1;
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -33120,6 +33197,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -35010,7 +35094,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	zend_free_op free_op2, free_op_data1;
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -35018,6 +35102,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -35492,7 +35583,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -36480,7 +36571,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -36698,7 +36789,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -37019,7 +37110,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	zend_free_op free_op_data1;
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = NULL;
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -37027,6 +37118,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -37304,7 +37402,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -37742,7 +37840,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -37820,7 +37918,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (IS_CV == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
@@ -38273,7 +38371,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	zend_free_op free_op_data1;
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -38281,6 +38379,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");

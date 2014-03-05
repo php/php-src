@@ -333,7 +333,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	zend_free_op free_op1, free_op2, free_op_data1;
 	zval *object = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+	zval *value;
 	int have_get_ptr = 0;
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(object) == IS_STR_OFFSET)) {
@@ -341,6 +341,13 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	}
 
 	make_real_object(object TSRMLS_CC);
+
+//???: object may become INDIRECT
+	if (OP1_TYPE == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
+		object = Z_INDIRECT_P(object);
+	}
+
+	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
@@ -1040,7 +1047,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 /*
@@ -4038,7 +4045,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-		if (Z_TYPE_P(varname) == IS_INDIRECT) {
+		if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 			varname = Z_INDIRECT_P(varname);
 		}
 		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
@@ -4556,7 +4563,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 //???: STRING may become INDIRECT
-			if (Z_TYPE_P(varname) == IS_INDIRECT) {
+			if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
 				varname = Z_INDIRECT_P(varname);
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
