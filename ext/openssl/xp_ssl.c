@@ -77,6 +77,12 @@ extern int php_openssl_get_x509_list_id(void);
 
 php_stream_ops php_openssl_socket_ops;
 
+/* Certificate contexts used for server-side SNI selection */
+typedef struct _php_openssl_sni_cert_t {
+	char *name;
+	SSL_CTX *ctx;
+} php_openssl_sni_cert_t;
+
 /* Provides leaky bucket handhsake renegotiation rate-limiting  */
 typedef struct _php_openssl_handshake_bucket_t {
 	long prev_handshake;
@@ -1168,6 +1174,131 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) 
 /* }}} */
 
 #ifdef HAVE_SNI
+static int server_sni_callback(SSL *ssl_handle, int *al, void *arg) /* {{{ */
+{
+	php_stream *stream;
+	php_openssl_netstream_data_t *sslsock;
+	unsigned i;
+	const char *server_name;
+
+	server_name = SSL_get_servername(ssl_handle, TLSEXT_NAMETYPE_host_name);
+
+	if (!server_name) {
+		return SSL_TLSEXT_ERR_NOACK;
+	}
+
+	stream = (php_stream*)SSL_get_ex_data(ssl_handle, php_openssl_get_ssl_stream_data_index());
+	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+
+	if (!(sslsock->sni_cert_count && sslsock->sni_certs)) {
+		return SSL_TLSEXT_ERR_NOACK;
+	}
+
+	for (i=0; i < sslsock->sni_cert_count; i++) {
+		if (matches_wildcard_name(server_name, sslsock->sni_certs[i].name)) {
+			SSL_set_SSL_CTX(ssl_handle, sslsock->sni_certs[i].ctx);
+			return SSL_TLSEXT_ERR_OK;
+		}
+	}
+
+	return SSL_TLSEXT_ERR_NOACK;
+}
+/* }}} */
+
+static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock TSRMLS_DC)
+{
+	zval **val;
+	zval **current;
+	char *key;
+	uint key_len;
+	ulong key_index;
+	int key_type;
+	HashPosition pos;
+	int i = 0;
+	char resolved_path_buff[MAXPATHLEN];
+	SSL_CTX *ctx;
+
+	/* If the stream ctx disables SNI we're finished here */
+	if (GET_VER_OPT("SNI_enabled") && !zend_is_true(*val)) {
+		return SUCCESS;
+	}
+
+	/* If no SNI cert array is specified we're finished here */
+	if (!GET_VER_OPT("SNI_server_certs")) {
+		return SUCCESS;
+	}
+
+	if (Z_TYPE_PP(val) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"SNI_server_certs requires an array mapping host names to cert paths"
+		);
+		return FAILURE;
+	}
+
+	sslsock->sni_cert_count = zend_hash_num_elements(Z_ARRVAL_PP(val));
+	if (sslsock->sni_cert_count == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"SNI_server_certs host cert array must not be empty"
+		);
+		return FAILURE;
+	}
+
+	sslsock->sni_certs = (php_openssl_sni_cert_t*)safe_pemalloc(sslsock->sni_cert_count,
+		sizeof(php_openssl_sni_cert_t), 0, php_stream_is_persistent(stream)
+	);
+
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(val), &pos);
+		zend_hash_get_current_data_ex(Z_ARRVAL_PP(val), (void **)&current, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL_PP(val), &pos)
+	) {
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_PP(val), &key, &key_len, &key_index, 0, &pos);
+		if (key_type != HASH_KEY_IS_STRING) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"SNI_server_certs array requires string host name keys"
+			);
+			return FAILURE;
+		}
+
+		if (VCWD_REALPATH(Z_STRVAL_PP(current), resolved_path_buff)) {
+			/* The hello method is not inherited by SSL structs when assigning a new context
+			 * inside the SNI callback, so the just use SSLv23 */
+			ctx = SSL_CTX_new(SSLv23_server_method());
+
+			if (SSL_CTX_use_certificate_chain_file(ctx, resolved_path_buff) != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"failed setting local cert chain file `%s'; " \
+					"check that your cafile/capath settings include " \
+					"details of your certificate and its issuer",
+					resolved_path_buff
+				);
+				SSL_CTX_free(ctx);
+				return FAILURE;
+			} else if (SSL_CTX_use_PrivateKey_file(ctx, resolved_path_buff, SSL_FILETYPE_PEM) != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"failed setting private key from file `%s'",
+					resolved_path_buff
+				);
+				SSL_CTX_free(ctx);
+				return FAILURE;
+			} else {
+				sslsock->sni_certs[i].name = pestrdup(key, php_stream_is_persistent(stream));
+				sslsock->sni_certs[i].ctx = ctx;
+				++i;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"failed setting local cert chain file `%s'; file not found",
+				Z_STRVAL_PP(current)
+			);
+			return FAILURE;
+		}
+	}
+
+	SSL_CTX_set_tlsext_servername_callback(sslsock->ctx, server_sni_callback);
+
+	return SUCCESS;
+}
+
 static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
 {
 	zval **val;
@@ -1310,6 +1441,13 @@ int php_openssl_setup_crypto(php_stream *stream,
 	if (!SSL_set_fd(sslsock->ssl_handle, sslsock->s.socket)) {
 		handle_ssl_error(stream, 0, 1 TSRMLS_CC);
 	}
+
+#ifdef HAVE_SNI
+	/* Enable server-side SNI */
+	if (sslsock->is_client == 0 && enable_server_sni(stream, sslsock TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+#endif
 
 	/* Enable server-side handshake renegotiation rate-limiting */
 	if (sslsock->is_client == 0) {
@@ -1685,6 +1823,15 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			closesocket(sslsock->s.socket);
 			sslsock->s.socket = SOCK_ERR;
 		}
+	}
+
+	if (sslsock->sni_certs) {
+		for (i=0; i<sslsock->sni_cert_count; i++) {
+			SSL_CTX_free(sslsock->sni_certs[i].ctx);
+			pefree(sslsock->sni_certs[i].name, php_stream_is_persistent(stream));
+		}
+		pefree(sslsock->sni_certs, php_stream_is_persistent(stream));
+		sslsock->sni_certs = NULL;
 	}
 
 	if (sslsock->url_name) {
