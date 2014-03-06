@@ -3195,6 +3195,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg_num = opline->op2.num + EX(call)->num_additional_args + 1;
 
+again:
 	switch (Z_TYPE_P(args)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(args);
@@ -3319,6 +3320,10 @@ ZEND_VM_C_LABEL(unpack_iter_dtor):
 			iter->funcs->dtor(iter TSRMLS_CC);
 			break;
 		}
+		case IS_REFERENCE:
+			args = Z_REFVAL_P(args);
+			goto again;
+			break;
 		default:
 			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
 	}
@@ -3753,7 +3758,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 			Z_ADDREF_P(expr_ptr);
 		}
 	} else {
-		expr_ptr=GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+		expr_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 		if (IS_OP1_TMP_FREE()) { /* temporary variable */
 			zval new_expr;
 
@@ -3772,9 +3777,10 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 
 	if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		ulong hval;
 
+again:
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -3793,6 +3799,10 @@ ZEND_VM_C_LABEL(num_index):
 				break;
 			case IS_NULL:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
+				break;
+			case IS_REFERENCE:
+				offset = Z_REFVAL_P(offset);
+				goto again;
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3841,6 +3851,8 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			zval_copy_ctor(result);
 		}
 	}
+
+again:
 	switch (opline->extended_value) {
 		case IS_NULL:
 			convert_to_null(result);
@@ -3877,6 +3889,10 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 			break;
 		case IS_OBJECT:
 			convert_to_object(result);
+			break;
+		case IS_REFERENCE:
+			result = Z_REFVAL_P(result);
+			goto again;
 			break;
 	}
 	FREE_OP1_IF_VAR();
@@ -4105,13 +4121,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 	if (OP1_TYPE != IS_VAR || container) {
 //???deref
-		if (Z_TYPE_P(container) == IS_REFERENCE) {
-			container = Z_REFVAL_P(container);
-		}
+container_again:
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
-
+offset_again:
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4148,6 +4162,10 @@ ZEND_VM_C_LABEL(num_index_dim):
 					case IS_NULL:
 						zend_hash_del(ht, STR_EMPTY_ALLOC());
 						break;
+					case IS_REFERENCE:
+						offset = Z_REFVAL_P(offset);
+						goto offset_again;
+						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
 						break;
@@ -4176,6 +4194,10 @@ ZEND_VM_C_LABEL(num_index_dim):
 			case IS_STRING:
 				zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 				ZEND_VM_CONTINUE(); /* bailed out before */
+			case IS_REFERENCE:
+				container = Z_REFVAL_P(container);
+				goto container_again;
+				break;
 			default:
 				FREE_OP2();
 				break;
@@ -4650,6 +4672,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 
 		ht = Z_ARRVAL_P(container);
 
+again:
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4675,6 +4698,10 @@ ZEND_VM_C_LABEL(num_index_prop):
 				if ((value = zend_hash_find(ht, STR_EMPTY_ALLOC())) != NULL) {
 					isset = 1;
 				}
+				break;
+			case IS_REFERENCE:
+				offset = Z_REFVAL_P(offset);
+				goto again;
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type in isset or empty");
