@@ -16,7 +16,7 @@ PHP                                                                        NEWS
   . Allow zero length comparison in substr_compare() (Tjerk)
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
-?? ??? 2014, PHP 5.5.10
+06 Mar 2014, PHP 5.5.10
 
 - Core:
   . Fixed Request #66574i (Allow multiple paths in php_ini_scanned_path). (Remi)
