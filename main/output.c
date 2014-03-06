@@ -495,7 +495,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error TSRMLS_CC)) {
 				handler = php_output_handler_init(handler_name->val, handler_name->len, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER TSRMLS_CC);
-				Z_ADDREF_P(output_handler);
+				if (Z_REFCOUNTED_P(output_handler)) Z_ADDREF_P(output_handler);
 				user->zoh = output_handler;
 				handler->func.user = user;
 			} else {
