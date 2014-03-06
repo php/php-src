@@ -508,13 +508,17 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint idx, Buc
 			}
 		}
 	}
-	if (ht->pDestructor) {
-		ht->pDestructor(&p->val);
-	}
 	if (p->key) {
 		STR_RELEASE(p->key);
 	}
-	Z_TYPE(p->val) = IS_UNDEF;
+	if (ht->pDestructor) {
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, &p->val);
+		ZVAL_UNDEF(&p->val);
+		ht->pDestructor(&tmp);
+	} else {
+		ZVAL_UNDEF(&p->val);
+	}
 }
 
 static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint idx, Bucket *p)
