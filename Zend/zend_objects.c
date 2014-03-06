@@ -141,11 +141,12 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 {
 	int i;
 
-	for (i = 0; i < old_object->ce->default_properties_count; i++) {
-		zval_ptr_dtor(&new_object->properties_table[i]);
-		ZVAL_COPY(&new_object->properties_table[i], &old_object->properties_table[i]);
-	}
-	if (old_object->properties) {
+	if (!old_object->properties) {
+		for (i = 0; i < old_object->ce->default_properties_count; i++) {
+			zval_ptr_dtor(&new_object->properties_table[i]);
+			ZVAL_COPY(&new_object->properties_table[i], &old_object->properties_table[i]);
+		}
+	} else {
 		if (!new_object->properties) {
 			ALLOC_HASHTABLE(new_object->properties);
 			zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -160,8 +161,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 			     (prop_info = zend_hash_get_current_data_ptr_ex(&old_object->ce->properties_info, &pos)) != NULL;
 			     zend_hash_move_forward_ex(&old_object->ce->properties_info, &pos)) {
 				if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
-					if ((prop = zend_hash_find_ptr(new_object->properties, prop_info->name)) != NULL) {
-						ZVAL_COPY(&new_object->properties_table[prop_info->offset], prop);
+					if ((prop = zend_hash_find(new_object->properties, prop_info->name)) != NULL) {
+						ZVAL_INDIRECT(&new_object->properties_table[prop_info->offset], prop);
 					} else {
 						ZVAL_UNDEF(&new_object->properties_table[prop_info->offset]);
 					}
