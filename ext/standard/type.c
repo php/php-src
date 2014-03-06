@@ -394,6 +394,8 @@ PHP_FUNCTION(is_callable)
 		}
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
+		//??? is it necessary to be consistent with old PHP
+		name->len = strlen(name->val);
 		ZVAL_STR(callable_name, name);
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
