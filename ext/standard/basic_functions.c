@@ -5756,7 +5756,9 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		Z_ADDREF(tick_fe.arguments[i]);
+		if (Z_REFCOUNTED(tick_fe.arguments[i])) {
+			Z_ADDREF(tick_fe.arguments[i]);
+		}
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
