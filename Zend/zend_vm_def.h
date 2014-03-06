@@ -1661,7 +1661,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
-	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_OBJECT) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
@@ -1689,7 +1689,8 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			if (zend_assign_to_string_offset(EX_VAR((opline+1)->op2.var), value, (opline+1)->op1_type TSRMLS_CC)) {
+			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
+			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
 				}
@@ -1697,7 +1698,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
 //??? instead of FREE_OP_VAR_PTR(free_op_data2);
-//???		zval_ptr_dtor(Z_STR_OFFSET_P(variable_ptr)->str);
+			STR_RELEASE(old_str);
 			efree(Z_STR_OFFSET_P(variable_ptr));
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
@@ -1741,7 +1742,8 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		if (zend_assign_to_string_offset(EX_VAR(opline->op1.var), value, OP2_TYPE TSRMLS_CC)) {
+		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
+		if (zend_assign_to_string_offset(variable_ptr, value, OP2_TYPE TSRMLS_CC)) {
 			if (RETURN_VALUE_USED(opline)) {
 				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
 			}
@@ -1749,7 +1751,7 @@ ZEND_VM_HANDLER(38, ZEND_ASSIGN, VAR|CV, CONST|TMP|VAR|CV)
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 //??? instead of FREE_OP1_VAR_PTR()
-//???		zval_ptr_dtor(Z_STR_OFFSET_P(variable_ptr)->str);
+		STR_RELEASE(old_str);
 		efree(Z_STR_OFFSET_P(variable_ptr));
 	} else if (OP1_TYPE == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (IS_OP2_TMP_FREE()) {
