@@ -4824,6 +4824,8 @@ PHP_FUNCTION(call_user_method)
 		return;
 	}
 
+	object = Z_REFVAL_P(object);
+
 	if (Z_TYPE_P(object) != IS_OBJECT &&
 		Z_TYPE_P(object) != IS_STRING
 	) {
@@ -4855,6 +4857,8 @@ PHP_FUNCTION(call_user_method_array)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/zA/", &callback, &object, &params) == FAILURE) {
 		return;
 	}
+
+	object = Z_REFVAL_P(object);
 
 	if (Z_TYPE_P(object) != IS_OBJECT &&
 		Z_TYPE_P(object) != IS_STRING
