@@ -539,7 +539,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	if (subpats) {
+	if (subpats && Z_TYPE_P(subpats) == IS_REFERENCE) {
 		subpats = Z_REFVAL_P(subpats);
 	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
