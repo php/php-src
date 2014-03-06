@@ -29,7 +29,6 @@ PHP 5.6 UPGRADE NOTES
   accepted.
 
 - OpenSSL:
-
   To prevent man-in-the-middle attacks against encrypted transfers client
   streams now verify peer certificates by default. Previous versions
   required users to manually enable peer verification. As a result of this
