@@ -626,6 +626,8 @@ found:
 			}
 			(*guard) &= ~IN_SET;
 			zval_ptr_dtor(object);
+		} else if (EXPECTED(property_info != NULL)) {
+			goto write_std_property;
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
@@ -636,6 +638,7 @@ found:
 			}
 		}
 	} else if (EXPECTED(property_info != NULL)) {
+write_std_property:
 		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
