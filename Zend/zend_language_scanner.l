@@ -1751,7 +1751,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way, no copying intentional */
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1944,7 +1945,8 @@ inline_html:
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
