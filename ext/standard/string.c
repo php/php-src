@@ -3221,6 +3221,7 @@ PHP_FUNCTION(similar_text)
 	}
 
 	if (ac > 2) {
+		percent = Z_REFVAL_P(percent);
 		convert_to_double_ex(percent);
 	}
 
