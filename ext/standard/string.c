@@ -5346,7 +5346,7 @@ PHP_FUNCTION(str_shuffle)
 */
 PHP_FUNCTION(str_word_count)
 {
-	char *buf, *str, *char_list = NULL, *p, *e, *s, ch[256];
+	char c, *str, *char_list = NULL, *p, *e, *s, ch[256];
 	int str_len, char_list_len = 0, word_count = 0;
 	long type = 0;
 
@@ -5398,12 +5398,16 @@ PHP_FUNCTION(str_word_count)
 			switch (type)
 			{
 				case 1:
-					buf = estrndup(s, (p-s));
-					add_next_index_stringl(return_value, buf, (p-s), 0);
+					c = s[p - s];
+					s[p - s] = '\0';
+					add_next_index_stringl(return_value, s, p - s, 1);
+					s[p - s] = c;
 					break;
 				case 2:
-					buf = estrndup(s, (p-s));
-					add_index_stringl(return_value, (s - str), buf, p-s, 0);
+					c = s[p - s];
+					s[p - s] = '\0';
+					add_index_stringl(return_value, (s - str), s, p - s, 1);
+					s[p - s] = c;
 					break;
 				default:
 					word_count++;
