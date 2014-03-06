@@ -35,6 +35,9 @@ const T_25 = 1 + 2 * 3;
 // Test for memory leaks
 const T_26 = "1" + 2 + "3";
 
+// Allow T_POW
+const T_27 = 2 ** 3;
+
 var_dump(T_1);
 var_dump(T_2);
 var_dump(T_3);
@@ -61,6 +64,7 @@ var_dump(T_23);
 var_dump(T_24);
 var_dump(T_25);
 var_dump(T_26);
+var_dump(T_27);
 ?>
 --EXPECT--
 int(2)
@@ -89,3 +93,4 @@ bool(false)
 bool(true)
 int(7)
 int(6)
+int(8)
