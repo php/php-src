@@ -1615,7 +1615,7 @@ PHP_FUNCTION(checkdate)
 /* {{{ php_strftime - (gm)strftime helper */
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	char                *format, *buf;
+	char                *format;
 	int                  format_len;
 	long                 timestamp = 0;
 	struct tm            ta;
@@ -1624,6 +1624,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	timelib_time        *ts;
 	timelib_tzinfo      *tzi;
 	timelib_time_offset *offset = NULL;
+	zend_string 		*buf;
 
 	timestamp = (long) time(NULL);
 
@@ -1676,10 +1677,10 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
 	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
-	buf = (char *) emalloc(buf_len);
-	while ((real_len=strftime(buf, buf_len, format, &ta))==buf_len || real_len==0) {
+	buf = STR_ALLOC(buf_len, 0);
+	while ((real_len = strftime(buf->val, buf_len, format, &ta)) == buf_len || real_len == 0) {
 		buf_len *= 2;
-		buf = (char *) erealloc(buf, buf_len);
+		buf = STR_REALLOC(buf, buf_len, 0);
 		if (!--max_reallocs) {
 			break;
 		}
@@ -1698,11 +1699,10 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	}
 
 	if (real_len && real_len != buf_len) {
-		buf = (char *) erealloc(buf, real_len + 1);
-//???		RETURN_STRINGL(buf, real_len, 0);
-		RETURN_STRINGL(buf, real_len);
+		buf = STR_REALLOC(buf, real_len, 0);
+		RETURN_STR(buf);
 	}
-	efree(buf);
+	STR_FREE(buf);
 	RETURN_FALSE;
 }
 /* }}} */
