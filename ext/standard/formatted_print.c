@@ -388,6 +388,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
 	
+	convert_to_string_ex(&args[format_offset]);
 	if (use_array) {
 		int i = 1;
 		zval *zv;
@@ -412,7 +413,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		format_offset = 0;
 	}
 	
-	convert_to_string_ex(&args[format_offset]);
 	format = Z_STRVAL(args[format_offset]);
 	result = STR_ALLOC(size, 0);
 
