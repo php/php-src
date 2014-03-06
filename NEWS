@@ -16,6 +16,14 @@ PHP                                                                        NEWS
   . Allow zero length comparison in substr_compare() (Tjerk)
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
+- GD:
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
+
+
 06 Mar 2014, PHP 5.5.10
 
 - Core:
@@ -34,7 +42,6 @@ PHP                                                                        NEWS
   (Github PR# 598, Paul Annesley)
 
 - GD
-  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
   . Fixed Bug #66815 (imagecrop(): insufficient fix for NULL defer
     CVE-2013-7327). (Tomas Hoger, Remi)
 
@@ -45,10 +52,6 @@ PHP                                                                        NEWS
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
-
-- OPCache
-  . Added function opcache_is_script_cached(). (Danack)
-  . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
 - Openssl:
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
