@@ -1613,12 +1613,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"__METHOD__" {
 	if (CG(active_class_entry)) {
-		int len = 2;
+		int len = 0;
 
 		if (CG(active_class_entry)->name) {
 			len += CG(active_class_entry)->name->len;
 		}
 		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			len += sizeof("::")-1;
 			len += CG(active_op_array)->function_name->len;
 		}
 		ZVAL_STR(zendlval, STR_ALLOC(len, 0));
@@ -1627,9 +1628,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			memcpy(Z_STRVAL_P(zendlval), CG(active_class_entry)->name->val, CG(active_class_entry)->name->len);
 			len += CG(active_class_entry)->name->len;
 		}
-		memcpy(Z_STRVAL_P(zendlval) + len, "::", sizeof("::")-1);
-		len += sizeof("::")-1;
 		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			memcpy(Z_STRVAL_P(zendlval) + len, "::", sizeof("::")-1);
+			len += sizeof("::")-1;
 			memcpy(Z_STRVAL_P(zendlval) + len, CG(active_op_array)->function_name->val, CG(active_op_array)->function_name->len);
 			len += CG(active_op_array)->function_name->len;
 		}
@@ -1653,7 +1654,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	if (!filename) {
 		filename = STR_EMPTY_ALLOC();
 	}
-	ZVAL_STR(zendlval, filename);
+	ZVAL_STR(zendlval, STR_COPY(filename));
 	return T_FILE;
 }
 
