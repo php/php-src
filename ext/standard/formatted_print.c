@@ -543,9 +543,6 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 					efree(newargs);
 				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
-				if (newargs) {
-					efree(newargs);
-				}
 				return NULL;
 			}
 
