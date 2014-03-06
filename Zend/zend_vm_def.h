@@ -401,7 +401,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {

@@ -14063,7 +14063,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -16542,7 +16542,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -18599,7 +18599,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -20768,7 +20768,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -22174,7 +22174,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -24084,7 +24084,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -25475,7 +25475,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -26783,7 +26783,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -28092,7 +28092,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -28499,7 +28499,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -31307,7 +31307,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -33568,7 +33568,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -35500,7 +35500,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -37543,7 +37543,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
@@ -38815,7 +38815,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 					}
 					z = value;
 				}
-				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+//???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
 				binary_op(z, z, value TSRMLS_CC);
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
