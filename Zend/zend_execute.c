@@ -1264,14 +1264,24 @@ convert_to_array:
 
 				if (overloaded_result && Z_TYPE_P(overloaded_result) != IS_UNDEF) {
 					if (!Z_ISREF_P(overloaded_result)) {
-//???						if (Z_REFCOUNT_P(overloaded_result) > 0) {
+						if (Z_REFCOUNTED_P(overloaded_result) && Z_REFCOUNT_P(overloaded_result) > 1) {
+//???
+#if 1
+							Z_DELREF_P(overloaded_result);
+                            if (Z_ISREF_P(overloaded_result)) {
+								overloaded_result = Z_REFVAL_P(overloaded_result);
+                            }
+							ZVAL_DUP(result, overloaded_result);
+							overloaded_result = result;
+#else
 //???							zval *tmp = overloaded_result;
 //???
 //???							ALLOC_ZVAL(overloaded_result);
 //???							ZVAL_DUP(overloaded_result, tmp);
 //???							Z_UNSET_ISREF_P(overloaded_result);
 //???							Z_SET_REFCOUNT_P(overloaded_result, 0);
-//???						}
+#endif
+						}
 						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
 							zend_class_entry *ce = Z_OBJCE_P(container);
 							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
