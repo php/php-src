@@ -723,7 +723,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_method, 0, 0, 2)
 	ZEND_ARG_INFO(0, method_name)
-	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(1, object)
 	ZEND_ARG_INFO(0, parameter)
 	ZEND_ARG_INFO(0, ...)
 ZEND_END_ARG_INFO()
