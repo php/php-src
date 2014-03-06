@@ -1,6 +1,6 @@
 $Id$
 
-PHP X.Y UPGRADE NOTES
+PHP 5.6 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -29,7 +29,8 @@ PHP X.Y UPGRADE NOTES
   accepted.
 
 - OpenSSL:
-  To prevent Man-in-the-Middle attacks against encrypted transfers client
+
+  To prevent man-in-the-middle attacks against encrypted transfers client
   streams now verify peer certificates by default. Previous versions
   required users to manually enable peer verification. As a result of this
   change, existing code using ssl:// or tls:// stream wrappers (e.g.
@@ -37,8 +38,8 @@ PHP X.Y UPGRADE NOTES
   connect successfully without manually disabling peer verification via the
   stream context's "verify_peer" setting. Encrypted transfers delegate to
   operating system certificate stores by default if not overridden via the
-  new openssl.cafile/openssl.cafile ini directives or call-time SSL context
-  options, so many/most users *should* be unaffected by this transparent
+  new openssl.cafile and openssl.cafile ini directives or via call-time SSL
+  context options, so most users should be unaffected by this transparent
   security enhancement. (https://wiki.php.net/rfc/tls-peer-verification)
 
 ========================================
@@ -54,12 +55,11 @@ PHP X.Y UPGRADE NOTES
 - Added support for argument unpacking to complement the variadic syntax.
   (https://wiki.php.net/rfc/argument_unpacking)
 
-- Added T_POW (**) operator.
+- Added an exponentiation operator (**).
   (https://wiki.php.net/rfc/pow-operator)
 
 - Added unified default encoding. default_charset=UTF-8 and functions/extensions
   use encoding settings honor default_charset.
-  (https://wiki.php.net/rfc/default_encoding)
 
 - The php://input stream is now re-usable and can be used concurrently with
   enable_post_data_reading=0.
@@ -67,7 +67,7 @@ PHP X.Y UPGRADE NOTES
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
 
-- Added gost-crypto (CryptoPro S-box) hash algo.
+- Added gost-crypto (CryptoPro S-box) hash algorithm.
 
 - Stream wrappers verify peer certificates and host names by default in
   encrypted client streams.
@@ -127,9 +127,10 @@ PHP X.Y UPGRADE NOTES
 2. Changes in SAPI modules
 ========================================
 
-- Added phpdbg sapi.
+- Added phpdbg SAPI.
   (https://wiki.php.net/rfc/phpdbg)
-- Support for fpm workers changing the apparmor profile through the pool config.
+
+- Support for FPM workers changing the apparmor profile through the pool configuration.
   (https://wiki.php.net/rfc/fpm_change_hat)
 
 ========================================
@@ -183,7 +184,8 @@ PHP X.Y UPGRADE NOTES
 
 - LDAP:
   Added ldap_escape($value, $ignore = "", $flags = 0).
-  Added ldap_modify_batch($link_identifier, $dn, $modifications) described in https://wiki.php.net/rfc/ldap_modify_batch.
+  Added ldap_modify_batch($link_identifier, $dn, $modifications) described in 
+  https://wiki.php.net/rfc/ldap_modify_batch.
 
 - Zip:
   Added ZipArchive::setPassword($password)
