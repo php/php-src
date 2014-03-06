@@ -541,7 +541,7 @@ ZEND_METHOD(Generator, throw)
 		return;
 	}
 
-	ZVAL_COPY_VALUE(&exception_copy, exception);
+	ZVAL_DUP(&exception_copy, exception);
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
