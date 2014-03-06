@@ -1289,9 +1289,8 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 }
 /* }}} */
 
-static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	char *temp;
 	int itype = 0;
 	struct gfxinfo *result = NULL;
 
@@ -1306,7 +1305,7 @@ static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERN
 			break;
 		case IMAGE_FILETYPE_JPEG:
 			if (info) {
-				result = php_handle_jpeg(stream, *info TSRMLS_CC);
+				result = php_handle_jpeg(stream, info TSRMLS_CC);
 			} else {
 				result = php_handle_jpeg(stream, NULL TSRMLS_CC);
 			}
@@ -1360,11 +1359,12 @@ static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERN
 	}
 
 	if (result) {
+		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
-		spprintf(&temp, 0, "width=\"%d\" height=\"%d\"", result->width, result->height);
+		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
 		add_index_string(return_value, 3, temp, 0);
 
 		if (result->bits != 0) {
@@ -1385,21 +1385,21 @@ static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERN
 #define FROM_PATH 1
 
 static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) {  /* {{{ */
-	zval **info = NULL;
+	zval *info = NULL;
 	php_stream *stream = NULL;
 	char *input;
 	int input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|z", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 
 	if (argc == 2) {
-			zval_dtor(*info);
-			array_init(*info);
+		info = Z_REFVAL_P(info);
+		zval_dtor(info);
+		array_init(info);
 	}
-
 
 	if (mode == FROM_PATH) {
 		stream = php_stream_open_wrapper(input, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
