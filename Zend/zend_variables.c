@@ -188,7 +188,12 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 ZEND_API void zval_add_ref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
-		Z_ADDREF_P(p);
+//???: autoconversion from reverence to ordinal value
+		if (Z_ISREF_P(p) && Z_REFCOUNT_P(p) == 1) {
+			ZVAL_DUP(p, Z_REFVAL_P(p));
+		} else {
+			Z_ADDREF_P(p);
+		}
 	}
 }
 
