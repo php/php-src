@@ -1101,12 +1101,12 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
 {
 	zend_string *res;
-	char tmpbuf[MAX_LENGTH_OF_DOUBLE];
+	char *tmpbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
 	int integral;
-	int tmplen, reslen=0;
-	int count=0;
+	int tmplen, reslen = 0;
+	int count = 0;
 	int is_negative=0;
 
 	if (d < 0) {
@@ -1116,11 +1116,13 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	dec = MAX(0, dec);
 	d = _php_math_round(d, dec, PHP_ROUND_HALF_UP);
-
-	tmplen = snprintf(tmpbuf, sizeof(tmpbuf), "%.*F", dec, d);
-
-	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
-		return STR_INIT(tmpbuf, tmplen, 0);
+	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
+	if (tmpbuf == NULL) {
+		return NULL;
+	} else if (!isdigit((int)tmpbuf[0])) {
+		res = STR_INIT(tmpbuf, tmplen, 0);
+		efree(tmpbuf);
+		return res;
 	}
 
 	/* find decimal point, if expected */
@@ -1159,8 +1161,8 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 	res = STR_ALLOC(reslen, 0);
 
-	s = tmpbuf+tmplen-1;
-	t = res->val+reslen;
+	s = tmpbuf + tmplen - 1;
+	t = res->val + reslen;
 	*t-- = '\0';
 
 	/* copy the decimal places.
@@ -1206,6 +1208,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 
 	res->len = reslen;
+	efree(tmpbuf);
 	return res;
 }
 
