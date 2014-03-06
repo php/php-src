@@ -15002,6 +15002,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 
 		zval *property_name = opline->op2.zv;
@@ -17301,6 +17304,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -19497,6 +19503,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -21082,6 +21091,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 
@@ -22880,6 +22892,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 
@@ -32096,6 +32111,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 
 		zval *property_name = opline->op2.zv;
@@ -34177,6 +34195,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -36248,6 +36269,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
@@ -37711,6 +37735,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 
@@ -39371,6 +39398,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 

@@ -1661,6 +1661,9 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
+	if (Z_TYPE_P(object_ptr) == IS_REFERENCE) {
+		object_ptr = Z_REFVAL_P(object_ptr);
+	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
 		zend_free_op free_op2;
 		zval *property_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
