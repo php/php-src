@@ -5657,7 +5657,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *offset = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -7226,7 +7226,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 
 	if (IS_CV != IS_UNUSED) {
 
-		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *offset = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -10674,7 +10674,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *offset = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -12063,7 +12063,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 
 	if (IS_CV != IS_UNUSED) {
 
-		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *offset = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -19912,7 +19912,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *offset = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -23297,7 +23297,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 
 	if (IS_CV != IS_UNUSED) {
 
-		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *offset = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -36565,7 +36565,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *offset = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
@@ -39690,7 +39690,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 
 	if (IS_CV != IS_UNUSED) {
 
-		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *offset = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {

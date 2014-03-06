@@ -3772,7 +3772,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 
 	if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
-		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zval *offset = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 		ulong hval;
 
 		switch (Z_TYPE_P(offset)) {
