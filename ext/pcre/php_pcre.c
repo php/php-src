@@ -539,6 +539,9 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
+	if (subpats) {
+		subpats = Z_REFVAL_P(subpats);
+	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 }
