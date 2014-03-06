@@ -97,7 +97,10 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	}
 
 	if (Z_TYPE_P(struc) == IS_REFERENCE) {
-		is_ref = 1;
+//??? hide references with refcount==1 (for compatibility)
+		if (Z_REFCOUNT_P(struc) > 1) {
+			is_ref = 1;
+		}
 		struc = Z_REFVAL_P(struc);
 	}
 	
@@ -256,7 +259,10 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 	}
 
 	if (Z_TYPE_P(struc) == IS_REFERENCE) {
-		is_ref = 1;
+//??? hide references with refcount==1 (for compatibility)
+		if (Z_REFCOUNT_P(struc) > 1) {
+			is_ref = 1;
+		}
 		struc = Z_REFVAL_P(struc);
 	}
 
