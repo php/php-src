@@ -35,7 +35,8 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
-  . Fixed bug #66820 (out-of-bounds memory access in fileinfo). (Remi)
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo)
+    (CVE-2014-2270). (Remi)
 
 - FPM:
   . Added clear_env configuration directive to disable clearenv() call.
