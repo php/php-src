@@ -1262,8 +1262,8 @@ convert_to_array:
 //???				}
 				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
-				if (overloaded_result) {
-//???					if (!Z_ISREF_P(overloaded_result)) {
+				if (overloaded_result && Z_TYPE_P(overloaded_result) != IS_UNDEF) {
+					if (!Z_ISREF_P(overloaded_result)) {
 //???						if (Z_REFCOUNT_P(overloaded_result) > 0) {
 //???							zval *tmp = overloaded_result;
 //???
@@ -1272,11 +1272,11 @@ convert_to_array:
 //???							Z_UNSET_ISREF_P(overloaded_result);
 //???							Z_SET_REFCOUNT_P(overloaded_result, 0);
 //???						}
-//???						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
-//???							zend_class_entry *ce = Z_OBJCE_P(container);
-//???							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name);
-//???						}
-//???					}
+						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
+							zend_class_entry *ce = Z_OBJCE_P(container);
+							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
+						}
+					}
 //???					AI_SET_PTR(result, overloaded_result);
 //???					PZVAL_LOCK(overloaded_result);
 //???					ZVAL_COPY(result, overloaded_result);
