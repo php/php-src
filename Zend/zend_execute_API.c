@@ -539,7 +539,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				p->type = IS_STRING;
 				if (!inline_change) {
 					ZVAL_STRINGL(p, actual, actual_len);
-				} else if (save) {
+				} else if (save && save->val != actual) {
 					STR_RELEASE(save);
 				}
 			}
