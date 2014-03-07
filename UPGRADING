@@ -268,7 +268,7 @@ PHP 5.6 UPGRADE NOTES
 
 - Core:
   Changed always_populate_raw_post_data to throw a deprecation warning when
-  enabled and to recognize ohe value -1 for never populating the global 
+  enabled and to recognize the value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
 
 - OpenSSL:
