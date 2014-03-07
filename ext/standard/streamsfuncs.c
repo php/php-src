@@ -1542,6 +1542,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 //???		RETURN_STRING(resolved_path, 0);
 		RETVAL_STRING(resolved_path);
 		efree(resolved_path);
+		return;
 	}
 	RETURN_FALSE;
 }
