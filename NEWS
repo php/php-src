@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Allow zero length comparison in substr_compare() (Tjerk)
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
+- SPL:
+  . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
 
