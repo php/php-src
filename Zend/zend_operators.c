@@ -1504,8 +1504,8 @@ ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_
 {
 	zval op1_copy, op2_copy;
 
-	ZVAL_DUP(&op1_copy, op1);
-	ZVAL_DUP(&op2_copy, op2);
+	ZVAL_DUP_DEREF(&op1_copy, op1);
+	ZVAL_DUP_DEREF(&op2_copy, op2);
 
 	convert_to_double(&op1_copy);
 	convert_to_double(&op2_copy);
