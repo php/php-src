@@ -91,6 +91,7 @@ typedef union _zend_value {
 struct _zval_struct {
 	zend_value        value;			/* value */
 	zend_uchar        type;				/* active type */
+	zend_uchar        var_flags;		/* various IS_VAR flags */
 	union {
 		zend_uint     next;             /* hash collision chain */
 	} u;
@@ -211,6 +212,9 @@ struct _zend_ast_ref {
 
 #define Z_TYPE(zval)				(zval).type
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
+
+/* zval.var_flags */
+#define IS_VAR_RET_REF				(1<<0) /* return by by reference */
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
