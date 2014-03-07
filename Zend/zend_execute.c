@@ -954,6 +954,7 @@ static inline zval* zend_assign_const_to_variable(zval *variable_ptr, zval *valu
 static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRMLS_DC)
 {
 	zval garbage;
+	int is_ref = 0;
 
 	if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 		if (EXPECTED(!Z_ISREF_P(value))) {
@@ -964,11 +965,16 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 		return variable_ptr;
 	} else if (Z_ISREF_P(variable_ptr)) {
 		variable_ptr = Z_REFVAL_P(variable_ptr);
+		is_ref = 1;
 	}
 
 	if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
 		if (EXPECTED(!Z_ISREF_P(value))) {
-			ZVAL_COPY(variable_ptr, value);
+			if (!is_ref) {
+				ZVAL_COPY(variable_ptr, value);
+			} else {
+				ZVAL_DUP(variable_ptr, value);
+			}
 		} else {
 			ZVAL_DUP(variable_ptr, Z_REFVAL_P(value));
 		}
