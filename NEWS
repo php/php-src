@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
   . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
 
+- SPL:
+  . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
     (Tjerk)
