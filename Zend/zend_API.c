@@ -3163,16 +3163,22 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						method = Z_REFVAL_P(method);
 					}
 				}
-				if (obj && method &&
-					(Z_TYPE_P(obj) == IS_OBJECT ||
-					Z_TYPE_P(obj) == IS_STRING) &&
-					Z_TYPE_P(method) == IS_STRING) {
+
+				do {
+					if (obj == NULL || method == NULL) {
+						break;
+					}
+
+					if (UNEXPECTED(Z_ISREF_P(method))) {
+						method = Z_REFVAL_P(method);
+					}
+
+					if (Z_TYPE_P(method) != IS_STRING) {
+						break;
+					}
 
 					if (UNEXPECTED(Z_ISREF_P(obj))) {
 						obj = Z_REFVAL_P(obj);
-					}
-					if (UNEXPECTED(Z_ISREF_P(method))) {
-						method = Z_REFVAL_P(method);
 					}
 
 					if (Z_TYPE_P(obj) == IS_STRING) {
@@ -3197,7 +3203,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 							return 0;
 						}
 
-					} else {
+					} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 						if (!EG(objects_store).object_buckets ||
 						    !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
 							return 0;
@@ -3223,6 +3229,8 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 							fcc->called_scope = fcc->calling_scope;
 							return 1;
 						}
+					} else {
+						break;
 					}
 
 					ret = zend_is_callable_check_func(check_flags, method, fcc, strict_class, error TSRMLS_CC);
@@ -3239,21 +3247,20 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 					}
 					return ret;
 
-				} else {
-					if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
-						if (!obj || (Z_ISREF_P(obj)?
-							(Z_TYPE_P(Z_REFVAL_P(obj)) != IS_STRING && Z_TYPE_P(Z_REFVAL_P(obj)) != IS_OBJECT) :
-						   	(Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT))) {
-							if (error) zend_spprintf(error, 0, "first array member is not a valid class name or object");
-						} else {
-							if (error) zend_spprintf(error, 0, "second array member is not a valid method");
-						}
+				} while (0);
+				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
+					if (!obj || (!Z_ISREF_P(obj)?
+								(Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) :
+								(Z_TYPE_P(Z_REFVAL_P(obj)) != IS_STRING && Z_TYPE_P(Z_REFVAL_P(obj)) != IS_OBJECT))) {
+						if (error) zend_spprintf(error, 0, "first array member is not a valid class name or object");
 					} else {
-						if (error) zend_spprintf(error, 0, "array must have exactly two members");
+						if (error) zend_spprintf(error, 0, "second array member is not a valid method");
 					}
-					if (callable_name) {
-						*callable_name = STR_INIT("Array", sizeof("Array")-1, 0);
-					}
+				} else {
+					if (error) zend_spprintf(error, 0, "array must have exactly two members");
+				}
+				if (callable_name) {
+					*callable_name = STR_INIT("Array", sizeof("Array")-1, 0);
 				}
 			}
 			return 0;
