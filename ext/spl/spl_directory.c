@@ -2865,7 +2865,8 @@ SPL_METHOD(SplFileObject, fread)
 	Z_STRVAL_P(return_value) = emalloc(length + 1);
 	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
 
-	Z_STRVAL_P(return_value)[length] = 0;
+	/* needed because recv/read/gzread doesnt put a null at the end*/
+	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 	Z_TYPE_P(return_value) = IS_STRING;
 }
 
