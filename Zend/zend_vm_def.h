@@ -1794,8 +1794,8 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	if (OP2_TYPE == IS_VAR &&
 	    value_ptr &&
 	    !Z_ISREF_P(value_ptr) &&
-	    opline->extended_value == ZEND_RETURNS_FUNCTION /*???&&
-	    !EX_T(opline->op2.var).var.fcall_returned_reference*/) {
+	    opline->extended_value == ZEND_RETURNS_FUNCTION &&
+	    !(value_ptr->var_flags & IS_VAR_RET_REF)) {
 		if (!OP2_FREE) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
@@ -1997,7 +1997,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 			ZVAL_NULL(ret);
 //???			ret->var.ptr_ptr = &ret->var.ptr;
-//???			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+			ret->var_flags = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
@@ -2022,7 +2022,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 			ZVAL_NULL(return_value);
 //???			ret->var.ptr_ptr = &ret->var.ptr;
-//???			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+			return_value->var_flags = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 		}
 
 		if (UNEXPECTED((EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
@@ -2064,7 +2064,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		} else {
 //???			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
 //???			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
-//???			EX_T(opline->result.var).var.fcall_returned_reference = 0;
+			EX_VAR(opline->result.var)->var_flags = 0;
 //???			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		}
 	}
@@ -2894,9 +2894,10 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 		}
 
 		if (OP1_TYPE == IS_VAR && !Z_ISREF_P(retval_ptr)) {
-//???			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-//???			    EX_T(opline->op1.var).var.fcall_returned_reference) {
+			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			    (retval_ptr->var_flags & IS_VAR_RET_REF)) {
 //???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 //???					ZVAL_DUP(EX(return_value), retval_ptr);
@@ -2905,7 +2906,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 					ZVAL_NEW_REF(EX(return_value), &tmp);
 				}
 				break;
-//???			}
+			}
 		}
 
 		if (EX(return_value)) {
@@ -3094,29 +3095,23 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	}
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-//???
-#if 0
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
-	     EX_T(opline->op1.var).var.fcall_returned_reference) &&
-	    (Z_ISREF_P(varptr) || Z_REFCOUNT_P(varptr) == 1)) {
-		Z_SET_ISREF_P(varptr);
-		if (OP1_TYPE == IS_CV) {
-			Z_ADDREF_P(varptr);
+	     (varptr->var_flags & IS_VAR_RET_REF)) &&
+	    (!Z_REFCOUNTED_P(varptr) || 
+	     Z_ISREF_P(varptr) ||
+	     Z_REFCOUNT_P(varptr) == 1)) {
+
+		if (Z_ISREF_P(varptr)) {
+			if (OP1_TYPE == IS_CV) {
+				Z_ADDREF_P(varptr);
+			}
+		} else {
+			ZVAL_NEW_REF(varptr, varptr);
+			if (OP1_TYPE == IS_CV) {
+				Z_ADDREF_P(varptr);
+			}
 		}
 		zend_vm_stack_push(varptr TSRMLS_CC);
-#else
-	if (Z_ISREF_P(varptr)) {
-		if (OP1_TYPE == IS_CV) {
-			Z_ADDREF_P(varptr);
-		}
-		zend_vm_stack_push(varptr TSRMLS_CC);
-	} else if (!Z_REFCOUNTED_P(varptr) || Z_REFCOUNT_P(varptr) == 1) {
-		ZVAL_NEW_REF(varptr, varptr);
-		if (OP1_TYPE == IS_CV) {
-			Z_ADDREF_P(varptr);
-		}
-		zend_vm_stack_push(varptr TSRMLS_CC);
-#endif
 	} else {
 		zval val;
 
@@ -5468,8 +5463,8 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				/* If a function call result is yielded and the function did
 				 * not return by reference we throw a notice. */
 				if (OP1_TYPE == IS_VAR && !Z_ISREF_P(value_ptr)
-//???				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-//???				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && (value_ptr->var_flags & IS_VAR_RET_REF))
 //???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 ) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
