@@ -221,18 +221,12 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy) /* {{{ */
 {
-	if (Z_TYPE_P(expr)==IS_STRING) {
+	if (Z_TYPE_P(expr) == IS_STRING) {
 		*use_copy = 0;
 		return;
 	}
-	if (Z_TYPE_P(expr) == IS_REFERENCE) {
-		expr = Z_REFVAL_P(expr);
-		if (Z_TYPE_P(expr) == IS_STRING) {
-			ZVAL_STR(expr_copy, STR_COPY(Z_STR_P(expr)));
-			*use_copy = 1;
-			return;
-		}
-	}
+
+again:
 	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
 			Z_STR_P(expr_copy) = STR_EMPTY_ALLOC();
@@ -298,6 +292,15 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		case IS_DOUBLE:
 			ZVAL_DUP(expr_copy, expr);
 			zend_locale_sprintf_double(expr_copy ZEND_FILE_LINE_CC);
+			break;
+		case IS_REFERENCE:
+			expr = Z_REFVAL_P(expr);
+			if (Z_TYPE_P(expr) == IS_STRING) {
+				ZVAL_STR(expr_copy, STR_COPY(Z_STR_P(expr)));
+				*use_copy = 1;
+				return;
+			}
+			goto again;
 			break;
 		default:
 			ZVAL_DUP(expr_copy, expr);
