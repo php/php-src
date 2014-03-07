@@ -629,7 +629,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		if (fd != -1) {
 			char *tmp;
 			int len;
-			char *error_time_str;
+			zend_string *error_time_str;
 
 			time(&error_time);
 #ifdef ZTS
@@ -647,7 +647,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #endif
 			php_ignore_value(write(fd, tmp, len));
 			efree(tmp);
-			efree(error_time_str);
+			STR_FREE(error_time_str);
 			close(fd);
 			PG(in_error_log) = 0;
 			return;

@@ -409,7 +409,7 @@ PHP_FUNCTION(escapeshellcmd)
 	}
 
 	if (command_len) {
-		RETVAL_STRING(php_escape_shell_cmd(command));
+		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
