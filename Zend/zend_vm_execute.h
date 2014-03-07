@@ -12909,9 +12909,10 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     (varptr->var_flags & IS_VAR_RET_REF)) &&
-	    (!Z_REFCOUNTED_P(varptr) ||
+	    ((!Z_REFCOUNTED_P(varptr) && Z_TYPE_P(varptr) != IS_STRING) ||
 	     Z_ISREF_P(varptr) ||
-	     Z_REFCOUNT_P(varptr) == 1)) {
+	     Z_TYPE_P(varptr) == IS_OBJECT ||
+	     (Z_REFCOUNTED_P(varptr) && Z_REFCOUNT_P(varptr) == 1))) {
 
 		if (Z_ISREF_P(varptr)) {
 			if (IS_VAR == IS_CV) {
@@ -30292,9 +30293,10 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     (varptr->var_flags & IS_VAR_RET_REF)) &&
-	    (!Z_REFCOUNTED_P(varptr) ||
+	    ((!Z_REFCOUNTED_P(varptr) && Z_TYPE_P(varptr) != IS_STRING) ||
 	     Z_ISREF_P(varptr) ||
-	     Z_REFCOUNT_P(varptr) == 1)) {
+	     Z_TYPE_P(varptr) == IS_OBJECT ||
+	     (Z_REFCOUNTED_P(varptr) && Z_REFCOUNT_P(varptr) == 1))) {
 
 		if (Z_ISREF_P(varptr)) {
 			if (IS_CV == IS_CV) {

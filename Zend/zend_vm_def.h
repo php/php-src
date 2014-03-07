@@ -3097,9 +3097,10 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
 	     (varptr->var_flags & IS_VAR_RET_REF)) &&
-	    (!Z_REFCOUNTED_P(varptr) || 
+	    ((!Z_REFCOUNTED_P(varptr) && Z_TYPE_P(varptr) != IS_STRING) || 
 	     Z_ISREF_P(varptr) ||
-	     Z_REFCOUNT_P(varptr) == 1)) {
+	     Z_TYPE_P(varptr) == IS_OBJECT ||
+	     (Z_REFCOUNTED_P(varptr) && Z_REFCOUNT_P(varptr) == 1))) {
 
 		if (Z_ISREF_P(varptr)) {
 			if (OP1_TYPE == IS_CV) {
