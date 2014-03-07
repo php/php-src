@@ -1813,7 +1813,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
 
-			Z_ADDREF_P(entry);
+			if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &num_key, 0, NULL))
