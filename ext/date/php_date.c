@@ -1458,6 +1458,11 @@ PHP_FUNCTION(strtotime)
 		efree(initial_ts);
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &times, &time_len, &preset_ts) != FAILURE) {
 		/* We have no initial timestamp */
+		while (isspace(*times)) {
+			times++;
+		}
+		time_len = strlen(times);
+
 		now = timelib_time_ctor();
 		now->tz_info = tzi;
 		now->zone_type = TIMELIB_ZONETYPE_ID;
