@@ -1508,13 +1508,13 @@ PHP_FUNCTION(ob_get_status)
 		return;
 	}
 	
-	array_init(return_value);
-
 	if (!OG(active)) {
+		array_init(return_value);
 		return;
 	}
 
 	if (full_status) {
+		array_init(return_value);
 		zend_stack_apply_with_argument(&OG(handlers), ZEND_STACK_APPLY_BOTTOMUP, php_output_stack_apply_status, return_value);
 	} else {
 		php_output_handler_status(OG(active), return_value);
