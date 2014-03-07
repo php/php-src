@@ -1379,10 +1379,12 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 					case HASH_KEY_IS_STRING:
 //???
 						add_assoc_stringl_ex(return_value, string_key->val, string_key->len, result, result_len, 0);
+						efree(result);
 						break;
 
 					case HASH_KEY_IS_LONG:
 						add_index_stringl(return_value, num_key, result, result_len, 0);
+						efree(result);
 						break;
 					}
 				} else {
