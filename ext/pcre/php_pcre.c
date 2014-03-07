@@ -1718,7 +1718,8 @@ static PHP_FUNCTION(preg_quote)
 	
 	/* Reallocate string and return it */
 //???	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
-	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str);
+	RETVAL_STRINGL(out_str, q - out_str);
+	efree(out_str);
 }
 /* }}} */
 
