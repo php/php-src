@@ -2197,7 +2197,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	}
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("Y-m-d H:i:s", sizeof("Y-m-d H:i:s")-1, dateobj->time, 1));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
