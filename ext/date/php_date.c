@@ -2220,6 +2220,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 //???				ZVAL_STRING(zv, tmpstr, 0);
 				ZVAL_STRING(&zv, tmpstr);
+				efree(tmpstr);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
@@ -2312,6 +2313,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
 
 //???			ZVAL_STRING(zv, tmpstr, 0);
 			ZVAL_STRING(&zv, tmpstr);
+			efree(tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
@@ -3747,7 +3749,9 @@ PHP_FUNCTION(timezone_name_get)
 				abs((utc_offset % 60)));
 
 //???			RETURN_STRING(tmpstr, 0);
-			RETURN_STRING(tmpstr);
+			RETVAL_STRING(tmpstr);
+			efree(tmpstr);
+			return;
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
@@ -4622,7 +4626,9 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		case SUNFUNCS_RET_STRING:
 			spprintf(&retstr, 0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
 //???			RETURN_STRINGL(retstr, 5, 0);
-			RETURN_STRINGL(retstr, 5);
+			RETVAL_STRINGL(retstr, 5);
+			efree(retstr);
+			return;
 			break;
 		case SUNFUNCS_RET_DOUBLE:
 			RETURN_DOUBLE(N);
