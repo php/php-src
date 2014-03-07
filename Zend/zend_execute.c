@@ -1086,7 +1086,7 @@ static inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval
 		case IS_STRING:
 			offset_key = Z_STR_P(dim);
 			if (dim_type != IS_CONST) {
-				ZEND_HANDLE_NUMERIC_EX(offset_key->val, offset_key->len, hval, goto num_index);
+				ZEND_HANDLE_NUMERIC_EX(offset_key->val, offset_key->len + 1, hval, goto num_index);
 			}
 fetch_string_dim:
 			retval = zend_hash_find(ht, offset_key);
