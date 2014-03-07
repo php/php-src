@@ -699,7 +699,7 @@ END_EXTERN_C()
 					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
 				} else if (Z_TYPE_P(_zv) == IS_OBJECT ||\
 				    Z_TYPE_P(_zv) == IS_RESOURCE) {		\
-					Z_ADDREF_P(_zv);					\
+					/*Z_ADDREF_P(_zv);*/				\
 				} else {								\
 					Z_DELREF_P(_zv);					\
 					zval_copy_ctor(_zv);				\
@@ -734,10 +734,17 @@ END_EXTERN_C()
 #define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
 		zval *__zv = (zv);								\
 		if (!Z_ISREF_P(__zv)) {							\
-			zval ref;									\
-			ZVAL_COPY_VALUE(&ref, __zv);				\
-			SEPARATE_ZVAL(&ref);						\
-			ZVAL_NEW_REF(__zv, &ref);					\
+			if (!Z_REFCOUNTED_P(__zv) || 				\
+			    Z_REFCOUNT_P(__zv) == 1) {				\
+				ZVAL_NEW_REF(__zv, __zv);				\
+			} else if (Z_TYPE_P(__zv) == IS_OBJECT ||	\
+			    Z_TYPE_P(__zv) == IS_RESOURCE) {		\
+			} else {									\
+				zval ref;								\
+				ZVAL_COPY_VALUE(&ref, __zv);			\
+				SEPARATE_ZVAL(&ref);					\
+				ZVAL_NEW_REF(__zv, &ref);				\
+			}											\
 		}												\
 	} while (0)
 
