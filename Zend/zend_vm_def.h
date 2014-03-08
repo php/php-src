@@ -4733,8 +4733,17 @@ ZEND_VM_C_LABEL(num_index_prop):
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(container)->has_dimension) {
-				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(*container)->has_dimension) {
+				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
+					zval *val = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+					if (opline->extended_value & ZEND_ISSET) {
+						result = Z_TYPE_P(val) != IS_NULL;
+					} else {
+						result = i_zend_is_true(val);
+					}
+				} else {
+					result = 0;
+				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
