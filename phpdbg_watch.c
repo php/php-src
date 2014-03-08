@@ -398,7 +398,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC)
 	/* re-enable writing */
 	mprotect(page, size, PROT_NONE | PROT_READ | PROT_WRITE);
 
-	dump = emalloc(MEMDUMP_SIZE(size));
+	dump = malloc(MEMDUMP_SIZE(size));
 	dump->page = page;
 	dump->size = size;
 
@@ -431,7 +431,7 @@ static void phpdbg_watch_mem_dtor(void *llist_data) {
 	void *page = (*(phpdbg_watch_memdump **)llist_data)->page;
 	size_t size = (*(phpdbg_watch_memdump **)llist_data)->size;
 
-	efree(*(void **)llist_data);
+	free(*(void **)llist_data);
 
 	/* Disble writing again */
 	mprotect(page, size, PROT_NONE | PROT_READ);
@@ -448,7 +448,7 @@ void phpdbg_setup_watchpoints(TSRMLS_D) {
 	phpdbg_pagesize = sysconf(_SC_NUTC_OS_PAGESIZE);
 #endif
 
-	zend_llist_init(&PHPDBG_G(watchlist_mem), sizeof(void *), phpdbg_watch_mem_dtor, 0);
+	zend_llist_init(&PHPDBG_G(watchlist_mem), sizeof(void *), phpdbg_watch_mem_dtor, 1);
 	phpdbg_btree_init(&PHPDBG_G(watchpoint_tree), sizeof(void *) * 8);
 	_zend_hash_init(&PHPDBG_G(watchpoints), 8, phpdbg_watch_dtor, 0 ZEND_FILE_LINE_CC);
 }
