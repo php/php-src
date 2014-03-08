@@ -49,7 +49,6 @@ typedef struct _spl_fixedarray { /* {{{ */
 /* }}} */
 
 typedef struct _spl_fixedarray_object { /* {{{ */
-	zend_object            std;
 	spl_fixedarray        *array;
 	zval                   retval;
 	zend_function         *fptr_offset_get;
@@ -60,6 +59,7 @@ typedef struct _spl_fixedarray_object { /* {{{ */
 	int                    current;
 	int                    flags;
 	zend_class_entry      *ce_get_iterator;
+	zend_object            std;
 } spl_fixedarray_object;
 /* }}} */
 
@@ -73,6 +73,13 @@ typedef struct _spl_fixedarray_it { /* {{{ */
 #define SPL_FIXEDARRAY_OVERLOADED_KEY     0x0004
 #define SPL_FIXEDARRAY_OVERLOADED_CURRENT 0x0008
 #define SPL_FIXEDARRAY_OVERLOADED_NEXT    0x0010
+
+static inline spl_fixedarray_object *spl_fixed_array_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_fixedarray_object*)((char*)(obj) - XtOffsetOf(spl_fixedarray_object, std));
+}
+/* }}} */
+
+#define Z_SPLFIXEDARRAY_P(zv)  spl_fixed_array_from_obj(Z_OBJ_P((zv)))
 
 static void spl_fixedarray_init(spl_fixedarray *array, long size TSRMLS_DC) /* {{{ */
 {
@@ -186,7 +193,7 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 
 static void spl_fixedarray_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object *)object;
+	spl_fixedarray_object *intern = spl_fixed_array_from_obj(object);
 	long i;
 
 	if (intern->array) {
@@ -203,7 +210,7 @@ static void spl_fixedarray_object_free_storage(zend_object *object TSRMLS_DC) /*
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	zval_ptr_dtor(&intern->retval);
 
-	efree(object);
+	efree(intern);
 }
 /* }}} */
 
@@ -215,7 +222,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	zend_class_entry     *parent = class_type;
 	int                   inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_fixedarray_object));
+	intern = ecalloc(1, sizeof(spl_fixedarray_object) + (sizeof(zval) * parent->default_properties_count - 1));
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
@@ -224,7 +231,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	intern->flags = 0;
 
 	if (orig && clone_orig) {
-		spl_fixedarray_object *other = (spl_fixedarray_object*)Z_OBJ_P(orig);
+		spl_fixedarray_object *other = Z_SPLFIXEDARRAY_P(orig);
 		intern->ce_get_iterator = other->ce_get_iterator;
 		if (!other->array) {
 			/* leave a empty object, will be dtor later by CLONE handler */
@@ -353,7 +360,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 {
 	spl_fixedarray_object *intern;
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_get) {
 		zval tmp, rv;
@@ -410,7 +417,7 @@ static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zv
 {
 	spl_fixedarray_object *intern;
 
-	intern = (spl_fixedarray_object *)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_set) {
 		zval tmp;
@@ -455,7 +462,7 @@ static void spl_fixedarray_object_unset_dimension(zval *object, zval *offset TSR
 {
 	spl_fixedarray_object *intern;
 
-	intern = (spl_fixedarray_object *)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_del) {
 		SEPARATE_ARG_IF_REF(offset);
@@ -504,7 +511,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 {
 	spl_fixedarray_object *intern;
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->fptr_offset_get) {
 		zval rv;
@@ -527,7 +534,7 @@ static int spl_fixedarray_object_count_elements(zval *object, long *count TSRMLS
 {
 	spl_fixedarray_object *intern;
 	
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 	if (intern->fptr_count) {
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
@@ -565,7 +572,7 @@ SPL_METHOD(SplFixedArray, __construct)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 
 	if (intern->array) {
 		/* called __construct() twice, bail out */
@@ -581,7 +588,7 @@ SPL_METHOD(SplFixedArray, __construct)
 */
 SPL_METHOD(SplFixedArray, __wakeup)
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 	HashPosition ptr;
 	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
 	zval *data;
@@ -622,7 +629,7 @@ SPL_METHOD(SplFixedArray, count)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 	if (intern->array) {
 		RETURN_LONG(intern->array->size);
 	}
@@ -640,7 +647,7 @@ SPL_METHOD(SplFixedArray, toArray)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(getThis());
 
 	array_init(return_value);
 	if (intern->array) {
@@ -754,7 +761,7 @@ SPL_METHOD(SplFixedArray, getSize)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 	if (intern->array) {
 		RETURN_LONG(intern->array->size);
 	}
@@ -779,7 +786,7 @@ SPL_METHOD(SplFixedArray, setSize)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(object);
+	intern = Z_SPLFIXEDARRAY_P(object);
 	if (!intern->array) {
 		intern->array = ecalloc(1, sizeof(spl_fixedarray));
 	}
@@ -789,7 +796,7 @@ SPL_METHOD(SplFixedArray, setSize)
 }
 /* }}} */
 
-/* {{{ proto bool SplFixedArray::offsetExists(mixed $index) U
+/* {{{ proto bool SplFixedArray::offsetExists(mixed $index)
  Returns whether the requested $index exists. */
 SPL_METHOD(SplFixedArray, offsetExists)
 {
@@ -800,12 +807,12 @@ SPL_METHOD(SplFixedArray, offsetExists)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(getThis());
 
 	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0 TSRMLS_CC));
 } /* }}} */
 
-/* {{{ proto mixed SplFixedArray::offsetGet(mixed $index) U
+/* {{{ proto mixed SplFixedArray::offsetGet(mixed $index)
  Returns the value at the specified $index. */
 SPL_METHOD(SplFixedArray, offsetGet)
 {
@@ -816,7 +823,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(getThis());
 	value = spl_fixedarray_object_read_dimension_helper(intern, zindex TSRMLS_CC);
 
 	if (value) {
@@ -825,7 +832,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 	RETURN_NULL();
 } /* }}} */
 
-/* {{{ proto void SplFixedArray::offsetSet(mixed $index, mixed $newval) U
+/* {{{ proto void SplFixedArray::offsetSet(mixed $index, mixed $newval)
  Sets the value at the specified $index to $newval. */
 SPL_METHOD(SplFixedArray, offsetSet)
 {
@@ -836,12 +843,12 @@ SPL_METHOD(SplFixedArray, offsetSet)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(getThis());
 	spl_fixedarray_object_write_dimension_helper(intern, zindex, value TSRMLS_CC);
 
 } /* }}} */
 
-/* {{{ proto void SplFixedArray::offsetUnset(mixed $index) U
+/* {{{ proto void SplFixedArray::offsetUnset(mixed $index)
  Unsets the value at the specified $index. */
 SPL_METHOD(SplFixedArray, offsetUnset)
 {
@@ -852,7 +859,7 @@ SPL_METHOD(SplFixedArray, offsetUnset)
 		return;
 	}
 
-	intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFIXEDARRAY_P(getThis());
 	spl_fixedarray_object_unset_dimension_helper(intern, zindex TSRMLS_CC);
 
 } /* }}} */
@@ -948,7 +955,7 @@ static void spl_fixedarray_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
    Return current array key */
 SPL_METHOD(SplFixedArray, key)
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -962,7 +969,7 @@ SPL_METHOD(SplFixedArray, key)
    Move to next entry */
 SPL_METHOD(SplFixedArray, next)
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -976,7 +983,7 @@ SPL_METHOD(SplFixedArray, next)
    Check whether the datastructure contains more entries */
 SPL_METHOD(SplFixedArray, valid)
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -990,7 +997,7 @@ SPL_METHOD(SplFixedArray, valid)
    Rewind the datastructure back to the start */
 SPL_METHOD(SplFixedArray, rewind)
 {
-	spl_fixedarray_object *intern = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1005,7 +1012,7 @@ SPL_METHOD(SplFixedArray, rewind)
 SPL_METHOD(SplFixedArray, current)
 {
 	zval zindex, *value;
-	spl_fixedarray_object *intern  = (spl_fixedarray_object*)Z_OBJ_P(getThis());
+	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
