@@ -1460,8 +1460,8 @@ PHP_FUNCTION(strtotime)
 		/* We have no initial timestamp */
 		while (isspace(*times)) {
 			times++;
+			time_len--;
 		}
-		time_len = strlen(times);
 
 		now = timelib_time_ctor();
 		now->tz_info = tzi;
