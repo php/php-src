@@ -44,10 +44,9 @@ typedef struct {
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
 	/* The following two variables have the same purpose. Unfortunately we need
-	   to keep track of two different attributes having the same effect.
-	   It might be worth to deprecate the driver specific one soon. */
+	   to keep track of two different attributes having the same effect. */
 	int		emulate_prepares;
-	int		disable_native_prepares;
+	int		disable_native_prepares; /* deprecated since 5.6 */
 	unsigned int	stmt_counter;
 } pdo_pgsql_db_handle;
 
