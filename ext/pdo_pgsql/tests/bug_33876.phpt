@@ -54,7 +54,7 @@ echo "EMUL\n";
 
 
 $res = $db->prepare('SELECT foo from test where bar = ?', array(
-	PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT => true));
+	PDO::ATTR_EMULATE_PREPARES => true));
 
 # this is the portable approach to binding a bool
 $res->bindValue(1, false, PDO::PARAM_BOOL);
