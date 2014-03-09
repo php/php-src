@@ -942,15 +942,15 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-; Use of this INI entory is deprecated, use global input_encoding instead.
+; Use of this INI entry is deprecated, use global input_encoding instead.
 ; If empty, input_encoding is used.
 ;iconv.input_encoding =
 
-; Use of this INI entory is deprecated, use global internal_encoding instead.
+; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; If empty, internal_encoding is used.
 ;iconv.internal_encoding =
 
-; Use of this INI entory is deprecated, use global output_encoding instead.
+; Use of this INI entry is deprecated, use global output_encoding instead.
 ; If empty, output_encoding is used.
 ;iconv.output_encoding =
 
