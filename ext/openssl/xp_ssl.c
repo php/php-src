@@ -65,7 +65,7 @@
 /* Simplify ssl context option retrieval */
 #define GET_VER_OPT(name)               (stream->context && SUCCESS == php_stream_context_get_option(stream->context, "ssl", name, &val))
 #define GET_VER_OPT_STRING(name, str)   if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_PP(val); }
-#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_long_ex(val); num = Z_LVAL_PP(val); }
+#define GET_VER_OPT_LONG(name, num)     if (GET_VER_OPT(name)) { convert_to_int_ex(val); num = Z_IVAL_PP(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
@@ -464,9 +464,9 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 	GET_VER_OPT_STRING("passphrase", passphrase);
 
 	if (passphrase) {
-		if (Z_STRLEN_PP(val) < num - 1) {
-			memcpy(buf, Z_STRVAL_PP(val), Z_STRLEN_PP(val)+1);
-			return Z_STRLEN_PP(val);
+		if (Z_STRSIZE_PP(val) < num - 1) {
+			memcpy(buf, Z_STRVAL_PP(val), Z_STRSIZE_PP(val)+1);
+			return Z_STRSIZE_PP(val);
 		}
 	}
 	return 0;
@@ -988,8 +988,8 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		SUCCESS == php_stream_context_get_option(stream->context,
 				"ssl", "reneg_limit", &val)
 	) {
-		convert_to_long(*val);
-		limit = Z_LVAL_PP(val);
+		convert_to_int(*val);
+		limit = Z_IVAL_PP(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -1001,8 +1001,8 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 		SUCCESS == php_stream_context_get_option(stream->context,
 				"ssl", "reneg_window", &val)
 	) {
-		convert_to_long(*val);
-		window = Z_LVAL_PP(val);
+		convert_to_int(*val);
+		window = Z_IVAL_PP(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
@@ -1026,7 +1026,7 @@ static int set_server_rsa_key(php_stream *stream, SSL_CTX *ctx TSRMLS_DC) /* {{{
 	RSA* rsa;
 
 	if (php_stream_context_get_option(stream->context, "ssl", "rsa_key_size", &val) == SUCCESS) {
-		rsa_key_size = (int) Z_LVAL_PP(val);
+		rsa_key_size = (int) Z_IVAL_PP(val);
 		if ((rsa_key_size != 1) && (rsa_key_size & (rsa_key_size - 1))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSA key size requires a power of 2: %d", rsa_key_size);
 			rsa_key_size = 2048;
@@ -1497,7 +1497,7 @@ static zval *capture_session_meta(SSL *ssl_handle) /* {{{ */
 	array_init(meta_arr);
 	add_assoc_string(meta_arr, "protocol", proto_str, 1);
 	add_assoc_string(meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher), 1);
-	add_assoc_long(meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
+	add_assoc_int(meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 	add_assoc_string(meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher), 1);
 
 	return meta_arr;

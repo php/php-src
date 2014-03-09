@@ -825,7 +825,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 
 				for (i = 0; i < field_count; i++, field++) {
 					zval * data = result->unbuf->last_row_data[i];
-					php_size_t = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRSIZE_P(data);
+					php_size_t len = (Z_TYPE_P(data) == IS_NULL)? 0:Z_STRSIZE_P(data);
 
 					if (flags & MYSQLND_FETCH_NUM) {
 						Z_ADDREF_P(data);

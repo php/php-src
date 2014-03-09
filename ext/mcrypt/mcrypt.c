@@ -1147,7 +1147,7 @@ static char *php_mcrypt_get_key_size_str(
 				smart_str_appends(&str, ", ");
 			}
 
-			smart_str_append_long(&str, key_sizes[i]);
+			smart_str_append_int(&str, key_sizes[i]);
 		}
 
 		smart_str_appends(&str, " supported");
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(mcrypt_encrypt)
 	char *cipher, *key, *data, *mode, *iv = NULL;
 	php_size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSSS|S", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
@@ -1315,7 +1315,7 @@ PHP_FUNCTION(mcrypt_decrypt)
 	char *cipher, *key, *data, *mode, *iv = NULL;
 	php_size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSSS|S", &cipher, &cipher_len,
 		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
 		return;
 	}
@@ -1336,7 +1336,7 @@ PHP_FUNCTION(mcrypt_ecb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_IVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1352,7 +1352,7 @@ PHP_FUNCTION(mcrypt_cbc)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_IVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1368,7 +1368,7 @@ PHP_FUNCTION(mcrypt_cfb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_IVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(mcrypt_ofb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_IVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 

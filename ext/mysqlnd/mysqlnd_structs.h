@@ -681,7 +681,7 @@ struct st_mysqlnd_res_methods
 
 
 typedef uint64_t			(*func_mysqlnd_result_unbuffered__num_rows)(const MYSQLND_RES_UNBUFFERED * const result TSRMLS_DC);
-typedef unsigned long *		(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result TSRMLS_DC);
+typedef php_uint_t *		(*func_mysqlnd_result_unbuffered__fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result TSRMLS_DC);
 typedef void				(*func_mysqlnd_result_unbuffered__free_last_data)(MYSQLND_RES_UNBUFFERED * result, MYSQLND_STATS * const global_stats TSRMLS_DC);
 typedef void				(*func_mysqlnd_result_unbuffered__free_result)(MYSQLND_RES_UNBUFFERED * const result, MYSQLND_STATS * const global_stats TSRMLS_DC);
 
@@ -698,7 +698,7 @@ struct st_mysqlnd_result_unbuffered_methods
 typedef uint64_t			(*func_mysqlnd_result_buffered__num_rows)(const MYSQLND_RES_BUFFERED * const result TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__initialize_result_set_rest)(MYSQLND_RES_BUFFERED * const result, MYSQLND_RES_METADATA * const meta,
 																						MYSQLND_STATS * stats, zend_bool int_and_float_native TSRMLS_DC);
-typedef unsigned long *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC);
+typedef php_uint_t *		(*func_mysqlnd_result_buffered__fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_result_buffered__data_seek)(MYSQLND_RES_BUFFERED * const result, const uint64_t row TSRMLS_DC);
 typedef void				(*func_mysqlnd_result_buffered__free_result)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC);
 
