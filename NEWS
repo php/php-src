@@ -2,21 +2,32 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.11
 
-- MySQLi:
-  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
-  (Remi)
-
-- Mail:
-  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
-
-- cURL:
-  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
-
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
-?? ??? 2014, PHP 5.5.10
+- SPL:
+  . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+
+- cURL:
+  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
+
+- GD:
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
+
+
+06 Mar 2014, PHP 5.5.10
 
 - Core:
   . Fixed Request #66574i (Allow multiple paths in php_ini_scanned_path). (Remi)
@@ -27,14 +38,16 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
-  . Fixed bug #66820 (out-of-bounds memory access in fileinfo). (Remi)
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo)
+    (CVE-2014-2270). (Remi)
 
 - FPM:
   . Added clear_env configuration directive to disable clearenv() call.
   (Github PR# 598, Paul Annesley)
 
 - GD
-  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+  . Fixed Bug #66815 (imagecrop(): insufficient fix for NULL defer
+    CVE-2013-7327). (Tomas Hoger, Remi)
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
@@ -43,10 +56,6 @@ PHP                                                                        NEWS
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
   (Ondřej Hošek)
-
-- OPCache
-  . Added function opcache_is_script_cached(). (Danack)
-  . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
 - Openssl:
   . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
