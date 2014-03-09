@@ -5906,33 +5906,27 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				ulong key = (ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
-
-					zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
-				} else {
-					ZVAL_COPY_VALUE(&hash, find_hash);
-				}
+					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
+				} 
 			} else {
 				if ((find_hash = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(arg1))) == NULL) {
 					array_init(&hash);
-
-					zend_hash_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
-				} else {
-					ZVAL_COPY_VALUE(&hash, find_hash);
-				}
+					find_hash = zend_hash_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
+				} 
 			}
 
-			if (Z_TYPE(hash) != IS_ARRAY) {
-				zval_dtor(&hash);
-				array_init(&hash);
+			if (Z_TYPE_P(find_hash) != IS_ARRAY) {
+				zval_dtor(find_hash);
+				array_init(find_hash);
 			}
 
 			ZVAL_DUP(&element, arg2);
 
 			if (arg3 && Z_STRLEN_P(arg3) > 0) {
 //???
-				add_assoc_zval_ex(&hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3), &element);
+				add_assoc_zval_ex(find_hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3), &element);
 			} else {
-				add_next_index_zval(&hash, &element);
+				add_next_index_zval(find_hash, &element);
 			}
 		}
 		break;

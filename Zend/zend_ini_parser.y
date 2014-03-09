@@ -136,7 +136,7 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name)+1, &curval) == SUCCESS) {
+	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name), &curval) == SUCCESS) {
 		ZVAL_PSTRINGL(result, Z_STRVAL(curval), Z_STRLEN(curval));
 	/* ..or if not found, try ENV */
 	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
