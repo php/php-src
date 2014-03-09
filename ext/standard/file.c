@@ -966,7 +966,7 @@ PHP_FUNCTION(pclose)
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	FG(pclose_wait) = 1;
-	zend_list_delete(stream->res);
+	zend_list_close(stream->res);
 	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
