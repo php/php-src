@@ -947,15 +947,15 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-; Use of this INI entory is deprecated, use global input_encoding instead.
+; Use of this INI entry is deprecated, use global input_encoding instead.
 ; If empty, input_encoding is used.
 ;iconv.input_encoding =
 
-; Use of this INI entory is deprecated, use global internal_encoding instead.
+; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; If empty, internal_encoding is used.
 ;iconv.internal_encoding =
 
-; Use of this INI entory is deprecated, use global output_encoding instead.
+; Use of this INI entry is deprecated, use global output_encoding instead.
 ; If empty, output_encoding is used.
 ;iconv.output_encoding =
 
@@ -1724,21 +1724,21 @@ mssql.secure_connection = Off
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
-; Use of this INI entory is deprecated, use global internal_encoding instead.
+; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
 ; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
 ; If empty, default_charset or internal_encoding is used in order.
 ; http://php.net/mbstring.internal-encoding
 ;mbstring.internal_encoding =
 
-; Use of this INI entory is deprecated, use global input_encoding instead.
+; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
 ; If empty, input_encoding is used.
 ; mbstring.encoding_traslation = On is needed to use this setting.
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
-; Use of this INI entory is deprecated, use global output_encoding instead.
+; Use of this INI entry is deprecated, use global output_encoding instead.
 ; http output encoding.
 ; mb_output_handler must be registered as output buffer to function.
 ; If empty, output_encoding is used.
