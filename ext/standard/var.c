@@ -96,81 +96,82 @@ PHPAPI void php_var_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 		php_printf("%*c", level - 1, ' ');
 	}
 
-	if (Z_TYPE_P(struc) == IS_REFERENCE) {
-//??? hide references with refcount==1 (for compatibility)
-		if (Z_REFCOUNT_P(struc) > 1) {
-			is_ref = 1;
-		}
-		struc = Z_REFVAL_P(struc);
-	}
-	
+again:
 	switch (Z_TYPE_P(struc)) {
-	case IS_BOOL:
-		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc) ? "true" : "false");
-		break;
-	case IS_NULL:
-		php_printf("%sNULL\n", COMMON);
-		break;
-	case IS_LONG:
-		php_printf("%sint(%ld)\n", COMMON, Z_LVAL_P(struc));
-		break;
-	case IS_DOUBLE:
-		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
-		break;
-	case IS_STRING:
-		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
-		PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
-		PUTS("\"\n");
-		break;
-	case IS_ARRAY:
-		myht = Z_ARRVAL_P(struc);
-		if (++myht->nApplyCount > 1) {
-			PUTS("*RECURSION*\n");
-			--myht->nApplyCount;
-			return;
-		}
-		php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
-		php_element_dump_func = php_array_element_dump;
-		is_temp = 0;
-		goto head_done;
-	case IS_OBJECT:
-		myht = Z_OBJDEBUG_P(struc, is_temp);
-		if (myht && ++myht->nApplyCount > 1) {
-			PUTS("*RECURSION*\n");
-			--myht->nApplyCount;
-			return;
-		}
-
-		if (Z_OBJ_HANDLER_P(struc, get_class_name)) {
-			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
-			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
-			STR_RELEASE(class_name);
-		} else {
-			php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
-		}
-		php_element_dump_func = php_object_property_dump;
-head_done:
-		if (myht) {
-			zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 1, level);
-			--myht->nApplyCount;
-			if (is_temp) {
-				zend_hash_destroy(myht);
-				efree(myht);
+		case IS_BOOL:
+			php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc) ? "true" : "false");
+			break;
+		case IS_NULL:
+			php_printf("%sNULL\n", COMMON);
+			break;
+		case IS_LONG:
+			php_printf("%sint(%ld)\n", COMMON, Z_LVAL_P(struc));
+			break;
+		case IS_DOUBLE:
+			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
+			break;
+		case IS_STRING:
+			php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
+			PHPWRITE(Z_STRVAL_P(struc), Z_STRLEN_P(struc));
+			PUTS("\"\n");
+			break;
+		case IS_ARRAY:
+			myht = Z_ARRVAL_P(struc);
+			if (++myht->nApplyCount > 1) {
+				PUTS("*RECURSION*\n");
+				--myht->nApplyCount;
+				return;
 			}
+			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
+			php_element_dump_func = php_array_element_dump;
+			is_temp = 0;
+			goto head_done;
+		case IS_OBJECT:
+			myht = Z_OBJDEBUG_P(struc, is_temp);
+			if (myht && ++myht->nApplyCount > 1) {
+				PUTS("*RECURSION*\n");
+				--myht->nApplyCount;
+				return;
+			}
+
+			if (Z_OBJ_HANDLER_P(struc, get_class_name)) {
+				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
+				php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
+				STR_RELEASE(class_name);
+			} else {
+				php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
+			}
+			php_element_dump_func = php_object_property_dump;
+	head_done:
+			if (myht) {
+				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 1, level);
+				--myht->nApplyCount;
+				if (is_temp) {
+					zend_hash_destroy(myht);
+					efree(myht);
+				}
+			}
+			if (level > 1) {
+				php_printf("%*c", level-1, ' ');
+			}
+			PUTS("}\n");
+			break;
+		case IS_RESOURCE: {
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc) TSRMLS_CC);
+			php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
+			break;
 		}
-		if (level > 1) {
-			php_printf("%*c", level-1, ' ');
-		}
-		PUTS("}\n");
-		break;
-	case IS_RESOURCE: {
-		const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc) TSRMLS_CC);
-		php_printf("%sresource(%ld) of type (%s)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown");
-		break;
-	}
-	default:
-		php_printf("%sUNKNOWN:0\n", COMMON);
-		break;
+		case IS_REFERENCE:
+	//??? hide references with refcount==1 (for compatibility)
+			if (Z_REFCOUNT_P(struc) > 1) {
+				is_ref = 1;
+			}
+			struc = Z_REFVAL_P(struc);
+			goto again;
+			break;
+		default:
+			php_printf("%sUNKNOWN:0\n", COMMON);
+			break;
 	}
 }
 /* }}} */
