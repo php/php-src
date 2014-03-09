@@ -1391,7 +1391,7 @@ PHP_FUNCTION(extract)
 				zval *orig_var;
 
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
-				zval_add_ref(entry);
+				Z_ADDREF_P(entry);
 
 				if ((orig_var = zend_hash_find(EG(active_symbol_table), Z_STR(final_name))) != NULL) {
 					zval_ptr_dtor(orig_var);
