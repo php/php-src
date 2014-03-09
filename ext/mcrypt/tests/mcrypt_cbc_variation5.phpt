@@ -27,7 +27,7 @@ set_error_handler('test_error_handler');
 
 // Initialise function arguments not being substituted (if any)
 $cipher = MCRYPT_TRIPLEDES;
-$key = b'string_val';
+$key = b"string_val\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 $data = b'string_val';
 $mode = MCRYPT_ENCRYPT;
 
@@ -125,48 +125,48 @@ fclose($fp);
 
 --int 0--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --int 1--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --int 12345--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --int -12345--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --float 10.5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --float -10.5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --float 12.3456789000e10--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --float -12.3456789000e10--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --float .5--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --empty array--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
@@ -190,48 +190,48 @@ string(0) ""
 
 --uppercase NULL--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --lowercase null--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --lowercase true--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --lowercase false--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --uppercase TRUE--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --uppercase FALSE--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --empty string DQ--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --empty string SQ--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --instance of classWithToString--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --instance of classWithoutToString--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
@@ -240,13 +240,13 @@ string(0) ""
 
 --undefined var--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --unset var--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
-Error: 2 - mcrypt_cbc(): The IV parameter must be as long as the blocksize, %s(%d)
-string(32) "6438db90653c4d3080c3ceab43618c05"
+Error: 2 - mcrypt_cbc(): Received initialization vector of size %d, but size 8 is required for this encryption mode, %s(%d)
+string(0) ""
 
 --resource--
 Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)

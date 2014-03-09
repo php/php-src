@@ -1476,8 +1476,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 			}
 
 			result->type = MYSQLND_RES_NORMAL;
-			result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
-			result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+			result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, FALSE, result->persistent TSRMLS_CC);
 			if (!result->unbuf) {
 				/* OOM */
 				SET_OOM_ERROR(*conn->error_info);

@@ -150,8 +150,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
-#define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+#define mysqlnd_fetch_lengths(result)	(result)->m.fetch_lengths((result) TSRMLS_CC)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)
