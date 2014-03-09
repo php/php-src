@@ -278,7 +278,7 @@ PHP_FUNCTION(closedir)
 	}
 
 	res = dirp->res;
-	zend_list_delete(dirp->res);
+	zend_list_close(dirp->res);
 
 	if (res == DIRG(default_dir)) {
 		php_set_default_dir(NULL TSRMLS_CC);
