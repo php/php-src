@@ -1,6 +1,6 @@
 $Id$
 
-PHP X.Y UPGRADE NOTES
+PHP 5.6 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -28,8 +28,8 @@ PHP X.Y UPGRADE NOTES
   containing non-lowercase values inside JSON arrays or objects has never been
   accepted.
 
-- openssl:
-  To prevent Man-in-the-Middle attacks against encrypted transfers client
+- OpenSSL:
+  To prevent man-in-the-middle attacks against encrypted transfers client
   streams now verify peer certificates by default. Previous versions
   required users to manually enable peer verification. As a result of this
   change, existing code using ssl:// or tls:// stream wrappers (e.g.
@@ -37,8 +37,8 @@ PHP X.Y UPGRADE NOTES
   connect successfully without manually disabling peer verification via the
   stream context's "verify_peer" setting. Encrypted transfers delegate to
   operating system certificate stores by default if not overridden via the
-  new openssl.cafile/openssl.cafile ini directives or call-time SSL context
-  options, so many/most users *should* be unaffected by this transparent
+  new openssl.cafile and openssl.cafile ini directives or via call-time SSL
+  context options, so most users should be unaffected by this transparent
   security enhancement. (https://wiki.php.net/rfc/tls-peer-verification)
 
 ========================================
@@ -54,12 +54,11 @@ PHP X.Y UPGRADE NOTES
 - Added support for argument unpacking to complement the variadic syntax.
   (https://wiki.php.net/rfc/argument_unpacking)
 
-- Added T_POW (**) operator.
+- Added an exponentiation operator (**).
   (https://wiki.php.net/rfc/pow-operator)
 
 - Added unified default encoding. default_charset=UTF-8 and functions/extensions
   use encoding settings honor default_charset.
-  (https://wiki.php.net/rfc/default_encoding)
 
 - The php://input stream is now re-usable and can be used concurrently with
   enable_post_data_reading=0.
@@ -67,7 +66,7 @@ PHP X.Y UPGRADE NOTES
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
 
-- Added gost-crypto (CryptoPro S-box) hash algo.
+- Added gost-crypto (CryptoPro S-box) hash algorithm.
 
 - Stream wrappers verify peer certificates and host names by default in
   encrypted client streams.
@@ -102,6 +101,9 @@ PHP X.Y UPGRADE NOTES
     . "reneg_window" (renegotiation time window in seconds)
     . "reneg_limit_callback" (optional notification callback on limiting)
 
+- Encrypted TLS servers now support the server name indication (SNI) TLS
+  extension via the new "SNI_server_certs" SSL context option.
+
 - Added "crypto_method" SSL context option for use in encrypted streams.
 
 - Added "peer_name" SSL context option to better reflect peer certificate
@@ -124,9 +126,10 @@ PHP X.Y UPGRADE NOTES
 2. Changes in SAPI modules
 ========================================
 
-- Added phpdbg sapi.
+- Added phpdbg SAPI.
   (https://wiki.php.net/rfc/phpdbg)
-- Support for fpm workers changing the apparmor profile through the pool config.
+
+- Support for FPM workers changing the apparmor profile through the pool configuration.
   (https://wiki.php.net/rfc/fpm_change_hat)
 
 ========================================
@@ -170,7 +173,7 @@ PHP X.Y UPGRADE NOTES
 - GMP:
   Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.
 
-- Openssl:
+- OpenSSL:
   Added string openssl_x509_fingerprint($x509, $type, $binary).
   Added string openssl_spki_new($private_key, $challenge, $algorithm)
   Added bool openssl_spki_verify($spkac)
@@ -180,7 +183,8 @@ PHP X.Y UPGRADE NOTES
 
 - LDAP:
   Added ldap_escape($value, $ignore = "", $flags = 0).
-  Added ldap_modify_batch($link_identifier, $dn, $modifications) described in https://wiki.php.net/rfc/ldap_modify_batch.
+  Added ldap_modify_batch($link_identifier, $dn, $modifications) described in 
+  https://wiki.php.net/rfc/ldap_modify_batch.
 
 - Zip:
   Added ZipArchive::setPassword($password)
@@ -198,6 +202,16 @@ PHP X.Y UPGRADE NOTES
 ========================================
 8. Other Changes to Extensions
 ========================================
+
+- cURL:
+  - The following constants have been removed as they are now marked "obsolete"
+    in the underlying library and never had any effect to begin with:
+      . CURLOPT_CLOSEPOLICY
+      . CURLCLOSEPOLICY_CALLBACK
+      . CURLCLOSEPOLICY_LEAST_RECENTLY_USED
+      . CURLCLOSEPOLICY_LEAST_TRAFFIC
+      . CURLCLOSEPOLICY_OLDEST
+      . CURLCLOSEPOLICY_SLOWEST
 
 - GMP:
   The GMP extension now uses objects as the underlying data structure, rather
@@ -237,7 +251,7 @@ PHP X.Y UPGRADE NOTES
 - Pgsql:
   PGSQL_DML_ESCAPE   int(4096)
 
-- Openssl:
+- OpenSSL:
   STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT   int(9)
   STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT   int(17)
   STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT   int(33)
@@ -254,10 +268,10 @@ PHP X.Y UPGRADE NOTES
 
 - Core:
   Changed always_populate_raw_post_data to throw a deprecation warning when
-  enabled and to recognize ohe value -1 for never populating the global 
+  enabled and to recognize the value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
 
-- Openssl:
+- OpenSSL:
   openssl.cafile and openssl.capath ini directives have been added to allow
   global CA default specification as necessary.
 

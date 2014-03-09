@@ -24,7 +24,7 @@ $clientCode = <<<'CODE'
     $clientFlags = STREAM_CLIENT_CONNECT;
     $clientCtx = stream_context_create(['ssl' => [
         'capture_peer_cert' => true,
-	'cafile' => __DIR__ . '/bug54992-ca.pem'
+        'cafile' => __DIR__ . '/bug54992-ca.pem'
     ]]);
 
     phpt_wait();

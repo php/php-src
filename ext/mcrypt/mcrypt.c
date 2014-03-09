@@ -40,6 +40,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_rand.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_mcrypt_filter.h"
 
 static int le_mcrypt;
@@ -308,48 +309,6 @@ zend_module_entry mcrypt_module_entry = {
 #ifdef COMPILE_DL_MCRYPT
 ZEND_GET_MODULE(mcrypt)
 #endif
-
-#define MCRYPT_ARGS2 											\
-	zval **cipher, **data, **key, **mode; 						\
-	int td; 													\
-	char *ndata; 												\
-	size_t bsize; 												\
-	size_t nr; 													\
-	size_t nsize
-
-#define MCRYPT_ARGS 											\
-	MCRYPT_ARGS2; 												\
-	zval **iv
-
-#define MCRYPT_SIZE 										\
-	bsize = mcrypt_get_block_size(Z_IVAL_PP(cipher)); 		\
-	nr = (Z_STRSIZE_PP(data) + bsize - 1) / bsize; 			\
-	nsize = nr * bsize
-
-#define MCRYPT_CHECK_TD_CPY 									\
-	if (td < 0) { 												\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_FAILED); 					\
-		RETURN_FALSE; 											\
-	} 															\
-	ndata = ecalloc(nr, bsize); 								\
-	memcpy(ndata, Z_STRVAL_PP(data), Z_STRSIZE_PP(data))
-
-#define MCRYPT_CHECK_IV 										\
-	convert_to_string_ex(iv);	 								\
-	if (Z_STRSIZE_PP(iv) != bsize) { 							\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE); 			\
-		RETURN_FALSE; 											\
-	}
-
-#define MCRYPT_ACTION(x) 										\
-	if (Z_IVAL_PP(mode) == 0) { 								\
-		mcrypt_##x(td, ndata, nsize); 							\
-	} else {													\
-		mdecrypt_##x(td, ndata, nsize); 						\
-	}															\
-	end_mcrypt_##x(td)
-
-#define MCRYPT_IV_WRONG_SIZE "The IV parameter must be as long as the blocksize"
 
 #define MCRYPT_ENCRYPT 0
 #define MCRYPT_DECRYPT 1
@@ -658,8 +617,8 @@ PHP_FUNCTION(mcrypt_generic)
 	char *data;
 	php_size_t data_len;
 	php_mcrypt *pm;
-	unsigned char* data_s;
-	size_t block_size, data_size;
+	char* data_s;
+	php_size_t block_size, data_size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS", &mcryptind, &data, &data_len) == FAILURE) {
 		return;
@@ -1165,15 +1124,120 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 }
 /* }}} */
 
-static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_len, const char *data, php_size_t data_len, char *mode, const char *iv, php_size_t iv_len, int argc, php_int_t dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
+static char *php_mcrypt_get_key_size_str(
+		php_size_t max_key_size, const php_size_t *key_sizes, php_size_t key_size_count) /* {{{ */
+{
+	if (key_size_count == 0) {
+		char *str;
+		spprintf(&str, 0, "Only keys of size 1 to %pd supported", max_key_size);
+		return str;
+	} else if (key_size_count == 1) {
+		char *str;
+		spprintf(&str, 0, "Only keys of size %pd supported", key_sizes[0]);
+		return str;
+	} else {
+		php_size_t i;
+		smart_str str = {0};
+		smart_str_appends(&str, "Only keys of sizes ");
+
+		for (i = 0; i < key_size_count; ++i) {
+			if (i + 1 == key_size_count) {
+				smart_str_appends(&str, " or ");
+			} else if (i != 0) {
+				smart_str_appends(&str, ", ");
+			}
+
+			smart_str_append_long(&str, key_sizes[i]);
+		}
+
+		smart_str_appends(&str, " supported");
+		smart_str_0(&str);
+		return str.c;
+	}
+}
+/* }}} */
+
+static zend_bool php_mcrypt_is_valid_key_size(
+		php_size_t key_size, php_size_t max_key_size, php_size_t *key_sizes, php_size_t key_size_count) /* {{{ */
+{
+	php_size_t i;
+
+	if (key_size == 0 || key_size > max_key_size) {
+		return 0;
+	}
+
+	if (key_size_count == 0) {
+		/* All key sizes are valid */
+		return 1;
+	}
+
+	for (i = 0; i < key_size_count; i++) {
+		if (key_sizes[i] == key_size) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+static int php_mcrypt_ensure_valid_key_size(MCRYPT td, php_size_t key_size TSRMLS_DC) /* {{{ */
+{
+	php_size_t key_size_count;
+	php_size_t max_key_size = mcrypt_enc_get_key_size(td);
+	php_size_t *key_sizes = mcrypt_enc_get_supported_key_sizes(td, &key_size_count);
+
+	zend_bool is_valid_key_size = php_mcrypt_is_valid_key_size(
+		key_size, max_key_size, key_sizes, key_size_count
+	);
+	if (!is_valid_key_size) {
+		char *key_size_str = php_mcrypt_get_key_size_str(
+			max_key_size, key_sizes, key_size_count
+		);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Key of size %pd not supported by this algorithm. %s", key_size, key_size_str
+		);
+		efree(key_size_str);
+	}
+
+	if (key_sizes) {
+		mcrypt_free(key_sizes);
+	}
+
+	return is_valid_key_size ? SUCCESS : FAILURE;
+}
+/* }}} */
+
+static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, php_size_t iv_size TSRMLS_DC) /* {{{ */
+{
+	if (mcrypt_enc_mode_has_iv(td) == 1) {
+		php_size_t expected_iv_size = mcrypt_enc_get_iv_size(td);
+
+		if (!iv) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Encryption mode requires an initialization vector of size %pd", expected_iv_size
+			);
+			return FAILURE;
+		}
+
+		if (iv_size != expected_iv_size) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+				"Received initialization vector of size %pd, but size %pd is required "
+				"for this encryption mode", iv_size, expected_iv_size
+			);
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_len, const char *data, php_size_t data_len, char *mode, const char *iv, php_size_t iv_len, int dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	int block_size, i, count, iv_size;
-	php_size_t max_key_length, use_key_length;
-	size_t data_size;
-	int *key_length_sizes;
-	char *key_s = NULL, *iv_s;
+	unsigned long int data_size;
 	char *data_s;
 	MCRYPT td;
 
@@ -1184,96 +1248,47 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_le
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
 		RETURN_FALSE;
 	}
-	/* Checking for key-length */
-	max_key_length = mcrypt_enc_get_key_size(td);
-	if (key_len > max_key_length) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Size of key is too large for this algorithm");
+
+	if (php_mcrypt_ensure_valid_key_size(td, key_len TSRMLS_CC) == FAILURE) {
+		mcrypt_module_close(td);
+		RETURN_FALSE;
 	}
-	key_length_sizes = mcrypt_enc_get_supported_key_sizes(td, &count);
-	if (count == 0 && key_length_sizes == NULL) { /* all lengths 1 - k_l_s = OK */
-		use_key_length = key_len;
-		key_s = emalloc(use_key_length);
-		memset(key_s, 0, use_key_length);
-		memcpy(key_s, key, use_key_length);
-	} else if (count == 1) {  /* only m_k_l = OK */
-		key_s = emalloc(key_length_sizes[0]);
-		memset(key_s, 0, key_length_sizes[0]);
-		memcpy(key_s, key, MIN(key_len, key_length_sizes[0]));
-		use_key_length = key_length_sizes[0];
-	} else { /* dertermine smallest supported key > length of requested key */
-		use_key_length = max_key_length; /* start with max key length */
-		for (i = 0; i < count; i++) {
-			if (key_length_sizes[i] >= key_len && 
-				key_length_sizes[i] < use_key_length)
-			{
-				use_key_length = key_length_sizes[i];
-			}
-		}
-		key_s = emalloc(use_key_length);
-		memset(key_s, 0, use_key_length);
-		memcpy(key_s, key, MIN(key_len, use_key_length));
-	}
-	mcrypt_free (key_length_sizes);
-	
-	/* Check IV */
-	iv_s = NULL;
-	iv_size = mcrypt_enc_get_iv_size (td);
-	
-	/* IV is required */
-	if (mcrypt_enc_mode_has_iv(td) == 1) {
-		if (argc == 5) {
-			if (iv_size != iv_len) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, MCRYPT_IV_WRONG_SIZE);
-			} else {
-				iv_s = emalloc(iv_size + 1);
-				memcpy(iv_s, iv, iv_size);
-			}
-		} else if (argc == 4) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Attempt to use an empty IV, which is NOT recommend");
-			iv_s = emalloc(iv_size + 1);
-			memset(iv_s, 0, iv_size + 1);
-		}
+
+	if (php_mcrypt_ensure_valid_iv(td, iv, iv_len TSRMLS_CC) == FAILURE) {
+		mcrypt_module_close(td);
+		RETURN_FALSE;
 	}
 
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(td) == 1) { /* It's a block algorithm */
-		block_size = mcrypt_enc_get_block_size(td);
-		if (0 == data_len) {
-			data_size = block_size;
-		} else {
-			data_size = (((data_len - 1) / block_size) + 1) * block_size;
-		}
-		data_s = emalloc(data_size);
+		php_size_t block_size = mcrypt_enc_get_block_size(td);
+		data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */
 		data_size = data_len;
-		data_s = emalloc(data_size);
-		memset(data_s, 0, data_size);
+		data_s = emalloc(data_size + 1);
 		memcpy(data_s, data, data_len);
 	}
 
-	if (mcrypt_generic_init(td, key_s, use_key_length, iv_s) < 0) {
+	if (mcrypt_generic_init(td, (void *) key, key_len, (void *) iv) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Mcrypt initialisation failed");
+		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
+
 	if (dencrypt == MCRYPT_ENCRYPT) {
 		mcrypt_generic(td, data_s, data_size);
 	} else {
 		mdecrypt_generic(td, data_s, data_size);
 	}
 	
-	RETVAL_STRINGL(data_s, data_size, 1);
+	data_s[data_size] = 0;
+	RETVAL_STRINGL(data_s, data_size, 0);
 
 	/* freeing vars */
 	mcrypt_generic_end(td);
-	if (key_s != NULL) {
-		efree (key_s);
-	}
-	if (iv_s != NULL) {
-		efree (iv_s);
-	}
-	efree (data_s);
 }
 /* }}} */
 
@@ -1281,15 +1296,15 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_le
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_encrypt)
 {
-	zval **mode;
-	char *cipher, *key, *data, *iv = NULL;
-	php_size_t data_len, key_len, cipher_len, iv_len = 0;
+	char *cipher, *key, *data, *mode, *iv = NULL;
+	php_size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 	
-	MCRYPT_GET_CRYPT_ARGS
-	
-	convert_to_string_ex(mode);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
+		return;
+	}
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, Z_STRVAL_PP(mode), iv, iv_len, ZEND_NUM_ARGS(), MCRYPT_ENCRYPT, return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_ENCRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1297,15 +1312,15 @@ PHP_FUNCTION(mcrypt_encrypt)
    OFB crypt/decrypt data using key key with cipher cipher starting with iv */
 PHP_FUNCTION(mcrypt_decrypt)
 {
-	zval **mode;
-	char *cipher, *key, *data, *iv = NULL;
-	php_size_t cipher_len, key_len, data_len, iv_len = 0;
+	char *cipher, *key, *data, *mode, *iv = NULL;
+	php_size_t cipher_len, key_len, data_len, mode_len, iv_len = 0;
 
-	MCRYPT_GET_CRYPT_ARGS
-	
-	convert_to_string_ex(mode);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssss|s", &cipher, &cipher_len,
+		&key, &key_len, &data, &data_len, &mode, &mode_len, &iv, &iv_len) == FAILURE) {
+		return;
+	}
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, Z_STRVAL_PP(mode), iv, iv_len, ZEND_NUM_ARGS(), MCRYPT_DECRYPT, return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, mode, iv, iv_len, MCRYPT_DECRYPT, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1321,7 +1336,7 @@ PHP_FUNCTION(mcrypt_ecb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, ZEND_NUM_ARGS(), Z_IVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ecb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1337,7 +1352,7 @@ PHP_FUNCTION(mcrypt_cbc)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, ZEND_NUM_ARGS(), Z_IVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cbc", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1353,7 +1368,7 @@ PHP_FUNCTION(mcrypt_cfb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, ZEND_NUM_ARGS(), Z_IVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "cfb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1369,7 +1384,7 @@ PHP_FUNCTION(mcrypt_ofb)
 
 	convert_to_int_ex(mode);
 
-	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, ZEND_NUM_ARGS(), Z_IVAL_PP(mode), return_value TSRMLS_CC);
+	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_PP(mode), return_value TSRMLS_CC);
 }
 /* }}} */
 

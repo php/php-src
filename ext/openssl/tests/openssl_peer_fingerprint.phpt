@@ -34,12 +34,12 @@ $clientCode = <<<'CODE'
 
     // should be: 81cafc260aa8d82956ebc6212a362ecc
     stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', '81cafc260aa8d82956ebc6212a362ece');
-    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 
     stream_context_set_option($clientCtx, 'ssl', 'peer_fingerprint', [
         'sha256' => '78ea579f2c3b439359dec5dac9d445108772927427c4780037e87df3799a0aa0',
     ]);
-    var_dump(stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx));
+    var_dump(stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx));
 CODE;
 
 include 'ServerClientTestCase.inc';

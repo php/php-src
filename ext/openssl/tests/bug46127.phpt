@@ -31,7 +31,7 @@ $clientCode = <<<'CODE'
     ]]);
 
     phpt_wait();
-    $sock = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
+    $sock = stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
 
     echo fgets($sock);
 CODE;
