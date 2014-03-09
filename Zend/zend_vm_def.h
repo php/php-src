@@ -3743,7 +3743,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr_ptr;
+	zval *expr_ptr, new_expr;
 
 	SAVE_OPLINE();
 	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && opline->extended_value) {
@@ -3758,14 +3758,13 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 	} else {
 		expr_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 		if (IS_OP1_TMP_FREE()) { /* temporary variable */
-			zval new_expr;
-
 			ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 			expr_ptr = &new_expr;
-		} else if (OP1_TYPE == IS_CONST || Z_ISREF_P(expr_ptr)) {
-			zval new_expr;
-            
-            ZVAL_DUP(&new_expr, expr_ptr);
+		} else if (OP1_TYPE == IS_CONST) {
+			ZVAL_DUP(&new_expr, expr_ptr);
+			expr_ptr = &new_expr;
+		} else if (Z_ISREF_P(expr_ptr)) {
+			ZVAL_DUP(&new_expr, Z_REFVAL_P(expr_ptr));
 			expr_ptr = &new_expr;
 			FREE_OP1_IF_VAR();
 		} else if (OP1_TYPE == IS_CV && Z_REFCOUNTED_P(expr_ptr)) {
