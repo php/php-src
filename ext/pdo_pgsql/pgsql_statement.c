@@ -204,7 +204,17 @@ stmt_retry:
 				S->param_lengths,
 				S->param_formats,
 				0);
+	} else if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED) {
+		/* execute query with parameters */
+		S->result = PQexecParams(H->server, S->query,
+				stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
+				S->param_types,
+				(const char**)S->param_values,
+				S->param_lengths,
+				S->param_formats,
+				0);
 	} else {
+		/* execute plain query (with embedded parameters) */
 		S->result = PQexec(H->server, stmt->active_query_string);
 	}
 	status = PQresultStatus(S->result);
@@ -234,7 +244,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
-	if (S->stmt_name && param->is_param) {
+	if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED && param->is_param) {
 		switch (event_type) {
 			case PDO_PARAM_EVT_FREE:
 				if (param->driver_data) {

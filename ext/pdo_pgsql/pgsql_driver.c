@@ -224,6 +224,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	char *nsql = NULL;
 	int nsql_len = 0;
 	int emulate = 0;
+	int execute_only = 0;
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -246,8 +247,12 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
 			emulate = 1;
 		}
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
+			execute_only = 1;
+		}
 	} else {
 		emulate = H->disable_native_prepares || H->emulate_prepares;
+		execute_only = H->disable_prepares;
 	}
 
 	if (!emulate && PQprotocolVersion(H->server) > 2) {
@@ -264,8 +269,11 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 			return 0;
 		}
 
-		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
-		/* that's all for now; we'll defer the actual prepare until the first execute call */
+		if (!execute_only) {
+			/* prepared query: set the query name and defer the
+			   actual prepare until the first execute call */
+			spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
+		}
 
 		if (nsql) {
 			S->query = nsql;
@@ -1111,6 +1119,9 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
 			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			H->disable_native_prepares = Z_LVAL_P(val);
+			return 1;
+		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			H->disable_prepares = Z_LVAL_P(val);
 			return 1;
 		default:
 			return 0;

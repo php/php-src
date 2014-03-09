@@ -47,6 +47,7 @@ typedef struct {
 	   to keep track of two different attributes having the same effect. */
 	int		emulate_prepares;
 	int		disable_native_prepares; /* deprecated since 5.6 */
+	int		disable_prepares;
 	unsigned int	stmt_counter;
 } pdo_pgsql_db_handle;
 
@@ -90,6 +91,7 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_DISABLE_PREPARES,
 };
 
 struct pdo_pgsql_lob_self {
