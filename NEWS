@@ -46,6 +46,9 @@ PHP                                                                        NEWS
   . Encrypted TLS servers now support the server name indication TLS extension
     via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
 
+- SQLite:
+  . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
+
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
 
