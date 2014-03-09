@@ -81,6 +81,6 @@ object(Directory)#%d (2) {
 }
 
 Test read after closing the dir:
-Warning: Directory::read(): %d is not a valid Directory resource in %s on line %d
+Warning: Directory::read(): supplied resource is not a valid Directory resource in %s on line %d
 bool(false)
 Done
