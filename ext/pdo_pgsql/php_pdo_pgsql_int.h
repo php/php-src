@@ -43,14 +43,12 @@ typedef struct {
 	unsigned 	_reserved:31;
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
-#if HAVE_PQPREPARE
 	/* The following two variables have the same purpose. Unfortunately we need
 	   to keep track of two different attributes having the same effect.
 	   It might be worth to deprecate the driver specific one soon. */
 	int		emulate_prepares;
 	int		disable_native_prepares;
-#endif
-	unsigned int stmt_counter;
+	unsigned int	stmt_counter;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -66,14 +64,12 @@ typedef struct {
 	int                     current_row;
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
-#if HAVE_PQPREPARE
 	char *stmt_name;
 	char *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
-#endif
 	zend_bool is_prepared;
 } pdo_pgsql_stmt;
 
