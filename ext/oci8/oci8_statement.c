@@ -713,6 +713,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					outcol->is_descr = 1;
 					outcol->statement->has_descr = 1;
 					outcol->storage_size4 = -1;
+					outcol->chunk_size = 0;
 					dynamic = OCI_DYNAMIC_FETCH;
 					break;
 
