@@ -1258,7 +1258,7 @@ end:
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										  MYSQLND_CONN_DATA * const conn,
-										  zend_bool ps_protocol TSRMLS_DC)
+										  const unsigned int flags TSRMLS_DC)
 {
 	enum_func_status ret;
 
@@ -1271,7 +1271,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, flags & MYSQLND_STORE_PS TSRMLS_CC);
 	if (FAIL == ret) {
 		if (result->stored_data) {
 			COPY_CLIENT_ERROR(*conn->error_info, result->stored_data->error_info);
