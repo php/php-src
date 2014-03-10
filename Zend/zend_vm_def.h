@@ -1069,29 +1069,15 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 				case BP_VAR_RW:
 					zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
 					/* break missing intentionally */
-				case BP_VAR_W:
-					retval = zend_hash_update(target_symbol_table, Z_STR_P(varname), &EG(uninitialized_zval));
+				case BP_VAR_W: {
+					   zval zv;
+					   ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &EG(uninitialized_zval));
+					   ZVAL_INDIRECT(&zv, EX_VAR(opline->result.var));
+					   zend_hash_update(target_symbol_table, Z_STR_P(varname), &zv);
+				   	}
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
-		}
-		switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
-			case ZEND_FETCH_GLOBAL:
-				if (OP1_TYPE != IS_TMP_VAR) {
-					FREE_OP1();
-				}
-				break;
-			case ZEND_FETCH_LOCAL:
-				FREE_OP1();
-				break;
-			case ZEND_FETCH_STATIC:
-				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
-				break;
-			case ZEND_FETCH_GLOBAL_LOCK:
-				if (OP1_TYPE == IS_VAR && !OP1_FREE) {
-					Z_ADDREF_P(EX_VAR(opline->op1.var));
-				}
-				break;
 		}
 	}
 
@@ -1100,11 +1086,35 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 		zval_dtor(&tmp_varname);
 	}
 
-	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+	if (retval && EXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+		retval = Z_INDIRECT_P(retval);
+	}
+
+	switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
+		case ZEND_FETCH_GLOBAL:
+			if (OP1_TYPE != IS_TMP_VAR) {
+				FREE_OP1();
+			}
+			break;
+		case ZEND_FETCH_LOCAL:
+			FREE_OP1();
+			break;
+		case ZEND_FETCH_STATIC:
+			if (retval) {
+				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+			}
+			break;
+		case ZEND_FETCH_GLOBAL_LOCK:
+			if (OP1_TYPE == IS_VAR && !OP1_FREE) {
+				Z_ADDREF_P(EX_VAR(opline->op1.var));
+			}
+			break;
 	}
 
 	if (EXPECTED(retval != NULL)) {
+		if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+		}
 		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
 		switch (type) {
 			case BP_VAR_R:
@@ -3007,9 +3017,10 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
 	if (EG(active_symbol_table)) {
+		zval zv;
 		zend_string *cv = CV_DEF_OF(opline->op2.var);
-		zval *zv = zend_hash_update(EG(active_symbol_table), cv, EX_VAR_NUM(opline->op2.var));
-		ZVAL_INDIRECT(EX_VAR_NUM(opline->op2.var), zv);
+		ZVAL_INDIRECT(&zv, EX_VAR_NUM(opline->op2.var));
+		zend_hash_update(EG(active_symbol_table), cv, &zv);
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
 		EG(exception)->gc.refcount++;
@@ -4619,6 +4630,9 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
+			}
+			if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
+				value = Z_INDIRECT_P(value);
 			}
 		}
 

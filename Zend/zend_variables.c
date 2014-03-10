@@ -287,7 +287,6 @@ ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr)
 	zval_ptr_dtor(zval_ptr);
 }
 
-
 ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zval_ptr)
 {
 	zval_internal_ptr_dtor(zval_ptr);

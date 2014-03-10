@@ -156,7 +156,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	ZVAL_LONG(&tmp, 0);
 	zend_vm_stack_push(&tmp TSRMLS_CC);
 
-	zend_hash_init(&EG(symbol_table).ht, 50, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(symbol_table).ht, 50, NULL, ZVAL_INDIRECT_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table).ht;
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
@@ -424,6 +424,16 @@ ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 	TSRMLS_FETCH();
 	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
+/* }}} */
+
+ZEND_API void zval_indirect_ptr_dtor(zval *zval_ptr) /* {{{ */
+{
+	if (Z_TYPE_P(zval_ptr) == IS_INDIRECT) {
+		zval_ptr = Z_INDIRECT_P(zval_ptr);
+	}
+	zval_ptr_dtor(zval_ptr);
+}
+
 /* }}} */
 
 ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
@@ -1716,7 +1726,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
 			} else {
 				ALLOC_HASHTABLE(EG(active_symbol_table));
-				zend_hash_init(EG(active_symbol_table), ex->op_array->last_var, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_init(EG(active_symbol_table), ex->op_array->last_var, NULL, ZVAL_INDIRECT_PTR_DTOR, 0);
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}
 			ex->symbol_table = EG(active_symbol_table);
@@ -1728,10 +1738,9 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				if (Z_TYPE_P(EX_VAR_NUM_2(ex, i)) != IS_UNDEF) {
-					zval *zv = zend_hash_update(EG(active_symbol_table),
-						ex->op_array->vars[i],
-						EX_VAR_NUM_2(ex, i));
-					ZVAL_INDIRECT(EX_VAR_NUM_2(ex, i), zv);
+					zval zv;
+					ZVAL_INDIRECT(&zv, EX_VAR_NUM_2(ex, i));
+					zend_hash_update(EG(active_symbol_table), ex->op_array->vars[i], &zv);
 				}
 			}
 		}
