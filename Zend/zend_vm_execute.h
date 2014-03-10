@@ -16462,9 +16462,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -18564,9 +18564,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -21046,9 +21046,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -24350,9 +24350,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -25877,9 +25877,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -27203,9 +27203,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -28529,9 +28529,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -30282,9 +30282,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -33791,9 +33791,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -35754,9 +35754,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -38096,9 +38096,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
@@ -41111,9 +41111,9 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				if (Z_OBJ_HT_P(*container)->has_dimension(*container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(*container)->read_dimension) {
-					zval *retval = Z_OBJ_HT_P(*container)->read_dimension(*container, offset, BP_VAR_R TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
 
 					Z_ADDREF_P(retval);
 					if (opline->extended_value & ZEND_ISSET) {
