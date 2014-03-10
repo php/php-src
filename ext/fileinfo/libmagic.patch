@@ -3000,7 +3000,7 @@ diff -u libmagic.orig/readelf.h libmagic/readelf.h
  typedef uint8_t		Elf64_Char;
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	Thu Mar 21 18:45:14 2013
-+++ libmagic/softmagic.c	Thu Feb 20 18:57:46 2014
++++ libmagic/softmagic.c	Mon Mar 10 14:03:18 2014
 @@ -41,6 +41,11 @@
  #include <stdlib.h>
  #include <time.h>
@@ -3013,7 +3013,16 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  
  private int match(struct magic_set *, struct magic *, uint32_t,
      const unsigned char *, size_t, size_t, int, int, int, int, int *, int *,
-@@ -69,13 +74,13 @@
+@@ -62,6 +67,8 @@
+ private void cvt_32(union VALUETYPE *, const struct magic *);
+ private void cvt_64(union VALUETYPE *, const struct magic *);
+ 
++#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) > ((n) - (o)))
++
+ /*
+  * softmagic - lookup one file in parsed, in-memory copy of database
+  * Passed the name and FILE * of one file to be typed.
+@@ -69,13 +76,13 @@
  /*ARGSUSED1*/		/* nbytes passed for regularity, maybe need later */
  protected int
  file_softmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
@@ -3029,7 +3038,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		    NULL)) != 0)
  			return rv;
  
-@@ -132,7 +137,7 @@
+@@ -132,7 +139,7 @@
  		struct magic *m = &magic[magindex];
  
  		if (m->type != FILE_NAME)
@@ -3038,7 +3047,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  #define FLT (STRING_BINTEST | STRING_TEXTTEST)
  		     ((text && (m->str_flags & FLT) == STRING_BINTEST) ||
  		      (!text && (m->str_flags & FLT) == STRING_TEXTTEST))) ||
-@@ -209,8 +214,8 @@
+@@ -209,8 +216,8 @@
  		if (file_check_mem(ms, ++cont_level) == -1)
  			return -1;
  
@@ -3049,7 +3058,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			m = &magic[magindex];
  			ms->line = m->lineno; /* for messages */
  
-@@ -335,44 +340,22 @@
+@@ -335,44 +342,22 @@
  private int
  check_fmt(struct magic_set *ms, struct magic *m)
  {
@@ -3104,7 +3113,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int32_t
  mprint(struct magic_set *ms, struct magic *m)
  {
-@@ -583,13 +566,13 @@
+@@ -583,13 +568,13 @@
  		char *cp;
  		int rval;
  
@@ -3120,7 +3129,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  
  		if (rval == -1)
  			return -1;
-@@ -835,16 +818,16 @@
+@@ -835,16 +820,16 @@
  	if (m->num_mask) \
  		switch (m->mask_op & FILE_OPS_MASK) { \
  		case FILE_OPADD: \
@@ -3141,7 +3150,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			break; \
  		} \
  
-@@ -1145,9 +1128,6 @@
+@@ -1145,9 +1130,6 @@
  		    "nbytes=%zu, count=%u)\n", m->type, m->flag, offset, o,
  		    nbytes, count);
  		mdebug(offset, (char *)(void *)p, sizeof(union VALUETYPE));
@@ -3151,7 +3160,79 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	}
  
  	if (m->flag & INDIR) {
-@@ -1644,16 +1624,13 @@
+@@ -1191,7 +1173,7 @@
+ 		}
+ 		switch (cvt_flip(m->in_type, flip)) {
+ 		case FILE_BYTE:
+-			if (nbytes < (offset + 1))
++			if (OFFSET_OOB(nbytes, offset, 1))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1226,7 +1208,7 @@
+ 				offset = ~offset;
+ 			break;
+ 		case FILE_BESHORT:
+-			if (nbytes < (offset + 2))
++			if (OFFSET_OOB(nbytes, offset, 2))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1278,7 +1260,7 @@
+ 				offset = ~offset;
+ 			break;
+ 		case FILE_LESHORT:
+-			if (nbytes < (offset + 2))
++			if (OFFSET_OOB(nbytes, offset, 2))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1330,7 +1312,7 @@
+ 				offset = ~offset;
+ 			break;
+ 		case FILE_SHORT:
+-			if (nbytes < (offset + 2))
++			if (OFFSET_OOB(nbytes, offset, 2))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1367,7 +1349,7 @@
+ 			break;
+ 		case FILE_BELONG:
+ 		case FILE_BEID3:
+-			if (nbytes < (offset + 4))
++			if (OFFSET_OOB(nbytes, offset, 4))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1438,7 +1420,7 @@
+ 			break;
+ 		case FILE_LELONG:
+ 		case FILE_LEID3:
+-			if (nbytes < (offset + 4))
++			if (OFFSET_OOB(nbytes, offset, 4))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1508,7 +1490,7 @@
+ 				offset = ~offset;
+ 			break;
+ 		case FILE_MELONG:
+-			if (nbytes < (offset + 4))
++			if (OFFSET_OOB(nbytes, offset, 4))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1578,7 +1560,7 @@
+ 				offset = ~offset;
+ 			break;
+ 		case FILE_LONG:
+-			if (nbytes < (offset + 4))
++			if (OFFSET_OOB(nbytes, offset, 4))
+ 				return 0;
+ 			if (off) {
+ 				switch (m->in_op & FILE_OPS_MASK) {
+@@ -1644,23 +1626,20 @@
  		if ((ms->flags & MAGIC_DEBUG) != 0) {
  			mdebug(offset, (char *)(void *)p,
  			    sizeof(union VALUETYPE));
@@ -3165,20 +3246,57 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	switch (m->type) {
  	case FILE_BYTE:
 -		if (nbytes < (offset + 1)) /* should alway be true */
-+		if (nbytes < (offset + 1)) /* should always be true */
++		if (OFFSET_OOB(nbytes, offset, 1))
  			return 0;
  		break;
  
-@@ -1703,6 +1680,8 @@
+ 	case FILE_SHORT:
+ 	case FILE_BESHORT:
+ 	case FILE_LESHORT:
+-		if (nbytes < (offset + 2))
++		if (OFFSET_OOB(nbytes, offset, 2))
+ 			return 0;
+ 		break;
+ 
+@@ -1679,38 +1658,40 @@
+ 	case FILE_FLOAT:
+ 	case FILE_BEFLOAT:
+ 	case FILE_LEFLOAT:
+-		if (nbytes < (offset + 4))
++		if (OFFSET_OOB(nbytes, offset, 4))
+ 			return 0;
+ 		break;
+ 
+ 	case FILE_DOUBLE:
+ 	case FILE_BEDOUBLE:
+ 	case FILE_LEDOUBLE:
+-		if (nbytes < (offset + 8))
++		if (OFFSET_OOB(nbytes, offset, 8))
+ 			return 0;
+ 		break;
+ 
+ 	case FILE_STRING:
+ 	case FILE_PSTRING:
+ 	case FILE_SEARCH:
+-		if (nbytes < (offset + m->vallen))
++		if (OFFSET_OOB(nbytes, offset, m->vallen))
+ 			return 0;
+ 		break;
+ 
+ 	case FILE_REGEX:
+-		if (nbytes < offset)
++		if (OFFSET_OOB(nbytes, offset, 0))
+ 			return 0;
  		break;
  
  	case FILE_INDIRECT:
+-		if (nbytes < offset)
 +		if (offset == 0)
 +			return 0;
- 		if (nbytes < offset)
++		if (OFFSET_OOB(nbytes, offset, 0))
  			return 0;
  		sbuf = ms->o.buf;
-@@ -1710,19 +1689,21 @@
+ 		soffset = ms->offset;
  		ms->o.buf = NULL;
  		ms->offset = 0;
  		rv = file_softmagic(ms, s + offset, nbytes - offset,
@@ -3187,24 +3305,38 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		if ((ms->flags & MAGIC_DEBUG) != 0)
  			fprintf(stderr, "indirect @offs=%u[%d]\n", offset, rv);
  		rbuf = ms->o.buf;
- 		ms->o.buf = sbuf;
+@@ -1718,16 +1699,26 @@
  		ms->offset = soffset;
  		if (rv == 1) {
--			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
-+	  	if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
- 			    file_printf(ms, m->desc, offset) == -1)
--				return -1;
-+			return -1;
- 			if (file_printf(ms, "%s", rbuf) == -1)
+ 			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
+-			    file_printf(ms, m->desc, offset) == -1)
++			    file_printf(ms, m->desc, offset) == -1) {
++				if (rbuf) {
++					efree(rbuf);
++				}
+ 				return -1;
+-			if (file_printf(ms, "%s", rbuf) == -1)
++			}
++			if (file_printf(ms, "%s", rbuf) == -1) {
++				if (rbuf) {
++					efree(rbuf);
++				}
  				return -1;
 -			free(rbuf);
++			}
 +		}
 +		if (rbuf) {
 +			efree(rbuf);
  		}
  		return rv;
  
-@@ -1837,6 +1818,42 @@
+ 	case FILE_USE:
+-		if (nbytes < offset)
++		if (OFFSET_OOB(nbytes, offset, 0))
+ 			return 0;
+ 		sbuf = m->value.s;
+ 		if (*sbuf == '^') {
+@@ -1837,6 +1828,42 @@
  	return file_strncmp(a, b, len, flags);
  }
  
@@ -3247,7 +3379,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  private int
  magiccheck(struct magic_set *ms, struct magic *m)
  {
-@@ -1996,69 +2013,157 @@
+@@ -1996,69 +2023,157 @@
  		break;
  	}
  	case FILE_REGEX: {
