@@ -3008,6 +3008,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  			if (file_printf(ms, "%s", rbuf) == -1)
  				return -1;
 -			free(rbuf);
++			}
 +		}
 +		if (rbuf) {
 +			efree(rbuf);
