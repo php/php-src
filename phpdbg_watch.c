@@ -453,18 +453,27 @@ void phpdbg_setup_watchpoints(TSRMLS_D) {
 	_zend_hash_init(&PHPDBG_G(watchpoints), 8, phpdbg_watch_dtor, 0 ZEND_FILE_LINE_CC);
 }
 
-static int phpdbg_print_changed_zval(void *llist_data) {
-	TSRMLS_FETCH();
-
-	phpdbg_watch_memdump *dump = *(phpdbg_watch_memdump **)llist_data;
+static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 	/* fetch all changes between dump->page and dump->page + dump->size */
 	phpdbg_btree_position pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), (zend_ulong)dump->page, (zend_ulong)dump->page + dump->size);
 	phpdbg_btree_result *result, *htresult;
 	int elementDiff;
+	void *curTest;
 
 	while ((result = phpdbg_btree_next(&pos))) {
 		phpdbg_watchpoint_t *watch = result->ptr, *htwatch;
 		void *oldPtr = (char *)&dump->data + ((size_t)watch->addr.ptr - (size_t)dump->page);
+
+		/* Test if the zval was separated and if necessary move the watchpoint */
+		if (zend_hash_find(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len, &curTest) == SUCCESS) {
+			if (curTest != watch->addr.ptr) {
+				phpdbg_deactivate_watchpoint(watch);
+				watch->addr.ptr = curTest;
+				phpdbg_activate_watchpoint(watch);
+			}
+		}
+
+		/* Show to the user what changed and delete watchpoint upon removal */
 		if (memcmp(oldPtr, watch->addr.ptr, watch->size) != SUCCESS) {
 			PHPDBG_G(watchpoint_hit) = 1;
 
@@ -522,17 +531,25 @@ remove_ht_watch:
 			}
 		}
 	}
-
-	return 1;
 }
 
 int phpdbg_print_changed_zvals(TSRMLS_D) {
+	zend_llist_position pos;
+	phpdbg_watch_memdump **dump;
+
 	if (zend_llist_count(&PHPDBG_G(watchlist_mem)) == 0) {
 		return FAILURE;
 	}
 
 	PHPDBG_G(watchpoint_hit) = 0;
-	zend_llist_apply_with_del(&PHPDBG_G(watchlist_mem), phpdbg_print_changed_zval);
+
+	dump = (phpdbg_watch_memdump **)zend_llist_get_last_ex(&PHPDBG_G(watchlist_mem), &pos);
+
+	do {
+		phpdbg_print_changed_zval(*dump TSRMLS_CC);
+	} while ((dump = (phpdbg_watch_memdump **)zend_llist_get_prev_ex(&PHPDBG_G(watchlist_mem), &pos)));
+
+	zend_llist_clean(&PHPDBG_G(watchlist_mem));
 
 	return PHPDBG_G(watchpoint_hit)?SUCCESS:FAILURE;
 }
