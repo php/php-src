@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+  . Fixed #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
 
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
@@ -26,6 +27,11 @@ PHP                                                                        NEWS
   . Added function opcache_is_script_cached(). (Danack)
   . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
+- GMP
+  . Fixed bug #66872 (invalid argument crashes gmp_testbit) (Pierre)
+
+- SQLite:
+  . Updated bundled libsqlite to 3.8.3.1 (Anatol)
 
 06 Mar 2014, PHP 5.5.10
 

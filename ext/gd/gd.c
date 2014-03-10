@@ -5298,6 +5298,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			double x, y;
 			if (Z_TYPE_P(options) != IS_ARRAY) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
+				RETURN_FALSE;
 			}
 			if (zend_hash_find(HASH_OF(options), "x", sizeof("x"), (void **)&tmp) != FAILURE) {
 				if (Z_TYPE_PP(tmp) != IS_DOUBLE) {
