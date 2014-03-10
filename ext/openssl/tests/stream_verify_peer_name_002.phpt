@@ -29,7 +29,7 @@ $clientCode = <<<'CODE'
     ]]);
 
     phpt_wait();
-    $client = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
+    $client = stream_socket_client($serverUri, $errno, $errstr, 2, $clientFlags, $clientCtx);
 
     var_dump($client);
 CODE;
