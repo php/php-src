@@ -90,6 +90,12 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 	result->type			= MYSQLND_RES_PS_BUF;
 /*	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol; */
 
+	result->stored_data	= mysqlnd_result_buffered_init(result->field_count, TRUE, result->persistent TSRMLS_CC);
+	if (!result->stored_data) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(NULL);
+	}
+
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
 
 	result->stored_data->m.fetch_row = mysqlnd_stmt_fetch_row_buffered;
