@@ -1759,6 +1759,7 @@ ZEND_FUNCTION(gmp_testbit)
 	zval *a_arg;
 	long index;
 	mpz_ptr gmpnum_a;
+	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &index) == FAILURE){
 		return;
@@ -1769,8 +1770,9 @@ ZEND_FUNCTION(gmp_testbit)
 		RETURN_FALSE;
 	}
 
-	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
-	RETURN_BOOL(mpz_tstbit(gmpnum_a, index));
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	RETVAL_BOOL(mpz_tstbit(gmpnum_a, index));
+	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
 
