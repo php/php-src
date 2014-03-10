@@ -626,7 +626,7 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 		if (chain_policy_status.dwError != 0) {
 			/* The chain does not match the policy */
 			if (is_self_signed && chain_policy_status.dwError == CERT_E_UNTRUSTEDROOT
-				&& GET_VER_OPT("allow_self_signed") && zend_is_true(*val)) {
+				&& GET_VER_OPT("allow_self_signed") && zend_is_true(*val TSRMLS_CC)) {
 				/* allow self-signed certs */
 				X509_STORE_CTX_set_error(x509_store_ctx, X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT);
 			} else {
