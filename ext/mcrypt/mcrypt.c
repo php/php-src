@@ -1237,7 +1237,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_le
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
-	unsigned long int data_size;
+	php_size_t data_size;
 	char *data_s;
 	MCRYPT td;
 
@@ -1262,7 +1262,11 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, php_size_t key_le
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(td) == 1) { /* It's a block algorithm */
 		php_size_t block_size = mcrypt_enc_get_block_size(td);
-		data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		if (data_len > 0) {
+			data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		} else {
+			data_size = block_size;
+		}
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
