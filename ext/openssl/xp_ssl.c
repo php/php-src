@@ -1301,7 +1301,7 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 	return SUCCESS;
 }
 
-static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock) /* {{{ */
+static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *sslsock TSRMLS_DC) /* {{{ */
 {
 	zval **val;
 	char *sni_server_name;
@@ -1576,7 +1576,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 #ifdef HAVE_SNI
 		if (sslsock->is_client) {
-			enable_client_sni(stream, sslsock);
+			enable_client_sni(stream, sslsock TSRMLS_CC);
 		}
 #endif
 
