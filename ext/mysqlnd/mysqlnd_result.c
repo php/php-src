@@ -1140,10 +1140,9 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	DBG_ENTER("mysqlnd_res::store_result_fetch_data");
 
-	result->stored_data	= set = mysqlnd_result_buffered_init(result->field_count, binary_protocol, result->persistent TSRMLS_CC);
+	set = result->stored_data;
 
 	if (!set) {
-		SET_OOM_ERROR(*conn->error_info);
 		ret = FAIL;
 		goto end;
 	}
@@ -1270,6 +1269,12 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	result->type = MYSQLND_RES_NORMAL;
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
+
+	result->stored_data	= mysqlnd_result_buffered_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent TSRMLS_CC);
+	if (!result->stored_data) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(NULL);
+	}
 
 	ret = result->m.store_result_fetch_data(conn, result, result->meta, flags & MYSQLND_STORE_PS TSRMLS_CC);
 	if (FAIL == ret) {
