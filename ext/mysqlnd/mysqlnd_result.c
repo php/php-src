@@ -1131,6 +1131,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES * result, void * param, unsig
 enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA * meta,
+													MYSQLND_MEMORY_POOL_CHUNK ***row_buffers,
 													zend_bool binary_protocol TSRMLS_DC)
 {
 	enum_func_status ret;
@@ -1140,16 +1141,15 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	DBG_ENTER("mysqlnd_res::store_result_fetch_data");
 
-	result->stored_data	= set = mysqlnd_result_buffered_init(result->field_count, binary_protocol, result->persistent TSRMLS_CC);
+	set = result->stored_data;
 
-	if (!set) {
-		SET_OOM_ERROR(*conn->error_info);
+	if (!set || !row_buffers) {
 		ret = FAIL;
 		goto end;
 	}
 	if (free_rows) {
-		set->row_buffers = mnd_emalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
-		if (!set->row_buffers) {
+		*row_buffers = mnd_emalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+		if (!*row_buffers) {
 			SET_OOM_ERROR(*conn->error_info);
 			ret = FAIL;
 			goto end;
@@ -1185,16 +1185,16 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				ret = FAIL;
 				goto end;
 			}
-			new_row_buffers = mnd_erealloc(set->row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+			new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				goto end;
 			}
-			set->row_buffers = new_row_buffers;
+			*row_buffers = new_row_buffers;
 		}
 		free_rows--;
-		set->row_buffers[set->row_count] = row_packet->row_buffer;
+		(*row_buffers)[set->row_count] = row_packet->row_buffer;
 
 		set->row_count++;
 
@@ -1229,7 +1229,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 			ret = FAIL;
 			goto end;
 		}
-		set->row_buffers = mnd_erealloc(set->row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+		*row_buffers = mnd_erealloc(*row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 	}
 
 	if (conn->upsert_status->server_status & SERVER_MORE_RESULTS_EXISTS) {
@@ -1258,7 +1258,7 @@ end:
 static MYSQLND_RES *
 MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										  MYSQLND_CONN_DATA * const conn,
-										  zend_bool ps_protocol TSRMLS_DC)
+										  const unsigned int flags TSRMLS_DC)
 {
 	enum_func_status ret;
 
@@ -1271,7 +1271,13 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 
 	CONN_SET_STATE(conn, CONN_FETCHING_DATA);
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, ps_protocol TSRMLS_CC);
+	result->stored_data	= mysqlnd_result_buffered_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent TSRMLS_CC);
+	if (!result->stored_data) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(NULL);
+	}
+
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, &result->stored_data->row_buffers, flags & MYSQLND_STORE_PS TSRMLS_CC);
 	if (FAIL == ret) {
 		if (result->stored_data) {
 			COPY_CLIENT_ERROR(*conn->error_info, result->stored_data->error_info);
