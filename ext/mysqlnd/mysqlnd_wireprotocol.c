@@ -1741,8 +1741,9 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 					zval_dtor(*current_field);
 					ZVAL_STRINGL(*current_field, (char *) start, bit_area - start - 1, 0);
 				}
-			} else
-			ZVAL_STRINGL(*current_field, (char *)p, len, 0);
+			} else {
+				ZVAL_STRINGL(*current_field, (char *)p, len, 0);
+			}
 			p += len;
 			last_field_was_string = TRUE;
 		}
