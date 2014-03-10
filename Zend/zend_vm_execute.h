@@ -16462,23 +16462,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -18564,23 +18563,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (1) {
@@ -21046,23 +21044,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -24350,23 +24347,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -25877,23 +25873,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -27203,23 +27198,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (1) {
@@ -28529,23 +28523,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -30282,23 +30275,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -33791,23 +33783,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -35754,23 +35745,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (1) {
@@ -38096,23 +38086,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
@@ -41111,23 +41100,22 @@ num_index_prop:
 				result = 0;
 			}
 		} else {
+			result = 0;
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				if (Z_OBJ_HT_P(container)->has_dimension(container, offset, 2 TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
+				if (Z_OBJ_HT_P(container)->has_dimension(container, offset TSRMLS_CC) && Z_OBJ_HT_P(container)->read_dimension) {
 					zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, offset, BP_VAR_R TSRMLS_CC);
-
-					Z_ADDREF_P(retval);
-					if (opline->extended_value & ZEND_ISSET) {
-						result = Z_TYPE_P(retval) != IS_NULL;
-					} else {
-						result = i_zend_is_true(retval);
+					if (retval) {
+						Z_ADDREF_P(retval);
+						if (opline->extended_value & ZEND_ISSET) {
+							result = Z_TYPE_P(retval) != IS_NULL;
+						} else {
+							result = i_zend_is_true(retval);
+						}
+						zval_ptr_dtor(&retval);
 					}
-					zval_ptr_dtor(&retval);
-				} else {
-					result = 0;
 				}
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
-				result = 0;
 			}
 		}
 		if (0) {
