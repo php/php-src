@@ -22,7 +22,7 @@
 #ifndef PHP_PHAR_H
 #define PHP_PHAR_H
 
-#define PHP_PHAR_VERSION "2.0.1"
+#define PHP_PHAR_VERSION "2.0.2"
 
 #include "ext/standard/basic_functions.h"
 extern zend_module_entry phar_module_entry;
@@ -31,8 +31,10 @@ extern zend_module_entry phar_module_entry;
 #ifdef PHP_WIN32
 #define PHP_PHAR_API __declspec(dllexport)
 #else
-#define PHP_PHAR_API
+#define PHP_PHAR_API PHPAPI
 #endif
+
+PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC);
 
 #endif /* PHP_PHAR_H */
 

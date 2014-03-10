@@ -140,6 +140,10 @@ SOURCE=.\zend_alloc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ast.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_API.c
 # End Source File
 # Begin Source File
@@ -182,6 +186,10 @@ SOURCE=.\zend_execute_API.c
 # Begin Source File
 
 SOURCE=.\zend_extensions.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_generators.c
 # End Source File
 # Begin Source File
 

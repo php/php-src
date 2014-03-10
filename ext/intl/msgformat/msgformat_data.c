@@ -31,8 +31,10 @@ void msgformat_data_init( msgformat_data* mf_data TSRMLS_DC )
 	if( !mf_data )
 		return;
 
-	mf_data->umsgf = NULL;
-	mf_data->orig_format = NULL;
+	mf_data->umsgf			= NULL;
+	mf_data->orig_format	= NULL;
+	mf_data->arg_types		= NULL;
+	mf_data->tz_set			= 0;
 	intl_error_reset( &mf_data->error TSRMLS_CC );
 }
 /* }}} */
@@ -40,21 +42,27 @@ void msgformat_data_init( msgformat_data* mf_data TSRMLS_DC )
 /* {{{ void msgformat_data_free( msgformat_data* mf_data )
  * Clean up memory allocated for msgformat_data
  */
-void msgformat_data_free( msgformat_data* mf_data TSRMLS_DC )
+void msgformat_data_free(msgformat_data* mf_data TSRMLS_DC)
 {
-	if( !mf_data )
+	if (!mf_data)
 		return;
 
-	if( mf_data->umsgf )
-		umsg_close( mf_data->umsgf );
+	if (mf_data->umsgf)
+		umsg_close(mf_data->umsgf);
 
-	if(mf_data->orig_format) {
+	if (mf_data->orig_format) {
 		efree(mf_data->orig_format);
 		mf_data->orig_format = NULL;
 	}
 
+	if (mf_data->arg_types) {
+		zend_hash_destroy(mf_data->arg_types);
+		efree(mf_data->arg_types);
+		mf_data->arg_types = NULL;
+	}
+
 	mf_data->umsgf = NULL;
-	intl_error_reset( &mf_data->error TSRMLS_CC );
+	intl_error_reset(&mf_data->error TSRMLS_CC);
 }
 /* }}} */
 

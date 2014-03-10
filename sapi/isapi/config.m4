@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(isapi, for Zeus ISAPI support,
-[  --with-isapi[=DIR]      Build PHP as an ISAPI module for use with Zeus], no, no)
+[  --with-isapi[=DIR]        Build PHP as an ISAPI module for use with Zeus], no, no)
 
 if test "$PHP_ISAPI" != "no"; then
   if test "$PHP_ISAPI" = "yes"; then

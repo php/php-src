@@ -50,7 +50,7 @@ typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *
 
 
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, const struct _zend_literal *key TSRMLS_DC);
+typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, int type, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to set object value. Can be used to override assignments and scalar
    write ops (like ++, +=) on the object */
@@ -100,6 +100,7 @@ typedef zend_object_value (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 typedef zend_class_entry *(*zend_object_get_class_entry_t)(const zval *object TSRMLS_DC);
 typedef int (*zend_object_get_class_name_t)(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
+typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2 TSRMLS_DC);
 
 /* Cast an object to some other type
  */
@@ -112,6 +113,8 @@ typedef int (*zend_object_count_elements_t)(zval *object, long *count TSRMLS_DC)
 typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC);
 
 typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval ***table, int *n TSRMLS_DC);
+
+typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
 struct _zend_object_handlers {
 	/* general object functions */
@@ -142,6 +145,8 @@ struct _zend_object_handlers {
 	zend_object_get_debug_info_t			get_debug_info;
 	zend_object_get_closure_t				get_closure;
 	zend_object_get_gc_t					get_gc;
+	zend_object_do_operation_t				do_operation;
+	zend_object_compare_zvals_t				compare;
 };
 
 extern ZEND_API zend_object_handlers std_object_handlers;

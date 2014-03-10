@@ -1,6 +1,6 @@
 <?php
 $pwd = getcwd();
-$f = basename(__FILE__);
+$f = basename(current(get_included_files()), ".php");
 $dir1 = $pwd."/".$f.".dir1";
 $dir2 = $pwd."/".$f.".dir2";
 $dir3 = $pwd."/".$f.".dir3";

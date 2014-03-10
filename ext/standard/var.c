@@ -453,7 +453,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
-		if(myht && myht->nApplyCount > 0){
+		if (myht->nApplyCount > 0){
 			smart_str_appendl(buf, "NULL", 4);
 			zend_error(E_WARNING, "var_export does not handle circular references");
 			return;
@@ -647,7 +647,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
 			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos);
 
-			if (i == HASH_KEY_NON_EXISTANT) {
+			if (i == HASH_KEY_NON_EXISTENT) {
 				break;
 			}
 
@@ -858,7 +858,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
 					i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-					if (i == HASH_KEY_NON_EXISTANT) {
+					if (i == HASH_KEY_NON_EXISTENT) {
 						break;
 					}
 					if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
@@ -943,7 +943,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation)
+/* {{{ proto mixed unserialize(string variable_representation[, int &consumed])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -951,8 +951,9 @@ PHP_FUNCTION(unserialize)
 	int buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
+	zval *consumed = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &buf, &buf_len, &consumed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -971,6 +972,11 @@ PHP_FUNCTION(unserialize)
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+	if (consumed) {
+		zval_dtor(consumed);
+		ZVAL_LONG(consumed, ((char*)p) - buf);
+	}
 }
 /* }}} */
 

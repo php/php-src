@@ -1,3 +1,21 @@
+/*
+  +----------------------------------------------------------------------+
+  | PHP Version 5                                                        |
+  +----------------------------------------------------------------------+
+  | Copyright (c) 1997-2014 The PHP Group                                |
+  +----------------------------------------------------------------------+
+  | This source file is subject to version 3.01 of the PHP license,      |
+  | that is bundled with this package in the file LICENSE, and is        |
+  | available through the world-wide-web at the following url:           |
+  | http://www.php.net/license/3_01.txt.                                 |
+  | If you did not receive a copy of the PHP license and are unable to   |
+  | obtain it through the world-wide-web, please send a note to          |
+  | license@php.net so we can mail you a copy immediately.               |
+  +----------------------------------------------------------------------+
+  | Author: Piere-Alain Joye <pierre@php.net>                            |
+  +----------------------------------------------------------------------+
+*/
+
 /* $Id$ */
 #ifdef HAVE_CONFIG_H
 #   include "config.h"
@@ -5,8 +23,6 @@
 #include "php.h"
 #if HAVE_ZIP
 #ifdef ZEND_ENGINE_2
-
-#include "lib/zip.h"
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -185,7 +201,7 @@ php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	struct zip_file *zf = NULL;
 	int err = 0;
@@ -235,8 +251,8 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 
 /* {{{ php_stream_zip_opener */
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
-											char *path,
-											char *mode,
+											const char *path,
+											const char *mode,
 											int options,
 											char **opened_path,
 											php_stream_context *context STREAMS_DC TSRMLS_DC)

@@ -18,6 +18,7 @@ pg_query('CREATE TABLE foo (id INT, id3 INT)');
 
 var_dump(pg_meta_data($conn, 'foo'));
 var_dump(pg_meta_data($conn, 'phptests.foo'));
+var_dump(pg_meta_data($conn, 'phptests.foo', TRUE));
 
 
 pg_query('DROP TABLE foo');
@@ -28,7 +29,7 @@ pg_query('DROP SCHEMA phptests');
 --EXPECT--
 array(2) {
   ["id"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(1)
     ["type"]=>
@@ -41,9 +42,11 @@ array(2) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
   ["id3"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(2)
     ["type"]=>
@@ -56,11 +59,13 @@ array(2) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
 }
 array(2) {
   ["id"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(1)
     ["type"]=>
@@ -73,9 +78,11 @@ array(2) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
   ["id2"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(2)
     ["type"]=>
@@ -88,5 +95,59 @@ array(2) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
+  }
+}
+array(2) {
+  ["id"]=>
+  array(11) {
+    ["num"]=>
+    int(1)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+    ["is enum"]=>
+    bool(false)
+    ["is base"]=>
+    bool(true)
+    ["is composite"]=>
+    bool(false)
+    ["is pesudo"]=>
+    bool(false)
+    ["description"]=>
+    string(0) ""
+  }
+  ["id2"]=>
+  array(11) {
+    ["num"]=>
+    int(2)
+    ["type"]=>
+    string(4) "int4"
+    ["len"]=>
+    int(4)
+    ["not null"]=>
+    bool(false)
+    ["has default"]=>
+    bool(false)
+    ["array dims"]=>
+    int(0)
+    ["is enum"]=>
+    bool(false)
+    ["is base"]=>
+    bool(true)
+    ["is composite"]=>
+    bool(false)
+    ["is pesudo"]=>
+    bool(false)
+    ["description"]=>
+    string(0) ""
   }
 }

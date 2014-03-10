@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE books SYSTEM "books.dtd">
+<books>
+    <book>
+    <title>The Grapes of Wrath</title>
+    <author>John Steinbeck</author>
+    </book>
+    <book>
+    <title>The Pearl</title>
+    <author>John Steinbeck</author>
+    </book>
+    <book>
+    <title>&entitest;</title>
+    <author><![CDATA[data for test]]></author>
+    </book>
+</books>

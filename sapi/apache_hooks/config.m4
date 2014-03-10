@@ -239,7 +239,7 @@ if test -z "$enable_mod_charset" && test "$with_mod_charset"; then
 fi
 
 PHP_ARG_ENABLE(mod-charset, whether to enable Apache charset compatibility option,
-[  --enable-mod-charset      APACHE (hooks): Enable transfer tables for mod_charset (Rus Apache)], no, no)
+[  --enable-mod-charset    APACHE (hooks): Enable transfer tables for mod_charset (Rus Apache)], no, no)
 
 if test "$PHP_MOD_CHARSET" = "yes"; then
   AC_DEFINE(USE_TRANSFER_TABLES, 1, [ ])

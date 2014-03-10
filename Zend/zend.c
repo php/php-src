@@ -30,6 +30,7 @@
 #include "zend_ini.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
+#include "zend_virtual_cwd.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -154,9 +155,10 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
 					const char *prop_name, *class_name;
-					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
+					int prop_len;
+					int mangled = zend_unmangle_property_name_ex(string_key, str_len - 1, &class_name, &prop_name, &prop_len);
 
-					ZEND_PUTS_EX(prop_name);
+					ZEND_WRITE_EX(prop_name, prop_len);
 					if (class_name && mangled == SUCCESS) {
 						if (class_name[0]=='*') {
 							ZEND_PUTS_EX(":protected");
@@ -647,6 +649,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 
 	start_memory_manager(TSRMLS_C);
 
+	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
+
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 	/* FreeBSD and DragonFly floating point precision fix */
 	fpsetmask(0);
@@ -679,11 +683,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #if HAVE_DTRACE
 /* build with dtrace support */
 	zend_compile_file = dtrace_compile_file;
-	zend_execute = dtrace_execute;
+	zend_execute_ex = dtrace_execute_ex;
 	zend_execute_internal = dtrace_execute_internal;
 #else
 	zend_compile_file = compile_file;
-	zend_execute = execute;
+	zend_execute_ex = execute_ex;
 	zend_execute_internal = NULL;
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
@@ -797,9 +801,14 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 		compiler_globals_ctor(compiler_globals, tsrm_ls);
 	}
 	free(EG(zend_constants));
+
+	virtual_cwd_deactivate(TSRMLS_C);
+
 	executor_globals_ctor(executor_globals, tsrm_ls);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives(TSRMLS_C);
+#else
+	virtual_cwd_deactivate(TSRMLS_C);
 #endif
 }
 /* }}} */
@@ -814,6 +823,9 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_destroy_modules();
+
+ 	virtual_cwd_deactivate(TSRMLS_C);
+ 	virtual_cwd_shutdown();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -903,8 +915,11 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 }
 /* }}} */
 
-void zend_activate(TSRMLS_D) /* {{{ */
+ZEND_API void zend_activate(TSRMLS_D) /* {{{ */
 {
+#ifdef ZTS
+	virtual_cwd_activate(TSRMLS_C);
+#endif
 	gc_reset(TSRMLS_C);
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
@@ -920,7 +935,7 @@ void zend_call_destructors(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_deactivate(TSRMLS_D) /* {{{ */
+ZEND_API void zend_deactivate(TSRMLS_D) /* {{{ */
 {
 	/* we're no longer executing anything */
 	EG(opline_ptr) = NULL;

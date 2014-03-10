@@ -124,11 +124,11 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		cwd[0] = '\0';
 	}
 
-	new_state.cwd = strdup(cwd);
+	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return -1;
 	}
 
@@ -140,7 +140,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 
 	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(opened_path);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return -1;
 	}
 
@@ -151,7 +151,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		 * which means that opening it will fail... */
 		if (VCWD_CHMOD(opened_path, 0600)) {
 			efree(opened_path);
-			free(new_state.cwd);
+			efree(new_state.cwd);
 			return -1;
 		}
 		fd = VCWD_OPEN_MODE(opened_path, open_flags, 0600);
@@ -170,7 +170,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	} else {
 		*opened_path_p = opened_path;
 	}
-	free(new_state.cwd);
+	efree(new_state.cwd);
 	return fd;
 }
 /* }}} */
@@ -189,11 +189,26 @@ PHPAPI void php_shutdown_temporary_directory(void)
 /*
  *  Determine where to place temporary files.
  */
-PHPAPI const char* php_get_temporary_directory(void)
+PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 {
 	/* Did we determine the temporary directory already? */
 	if (temporary_directory) {
 		return temporary_directory;
+	}
+
+	/* Is there a temporary directory "sys_temp_dir" in .ini defined? */
+	{
+		char *sys_temp_dir = PG(sys_temp_dir);
+		if (sys_temp_dir) {
+			int len = strlen(sys_temp_dir);
+			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len - 1);
+				return temporary_directory;
+			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len);
+				return temporary_directory;
+			}
+		}
 	}
 
 #ifdef PHP_WIN32
@@ -263,7 +278,7 @@ PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, char **ope
 
 	if (!dir || *dir == '\0') {
 def_tmp:
-		temp_dir = php_get_temporary_directory();
+		temp_dir = php_get_temporary_directory(TSRMLS_C);
 
 		if (temp_dir && *temp_dir != '\0' && (!open_basedir_check || !php_check_open_basedir(temp_dir TSRMLS_CC))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
@@ -294,12 +309,12 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 	if (fd == -1) {
 		return NULL;
 	}
-	
+
 	fp = fdopen(fd, "r+b");
 	if (fp == NULL) {
 		close(fd);
 	}
-	
+
 	return fp;
 }
 /* }}} */

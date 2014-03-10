@@ -30,11 +30,19 @@ var_dump($d2_clone);
 *** Testing clone on DateTime objects ***
 
 -- Create a DateTimeZone object --
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- Add some properties --
-object(DateTimeZone)#%d (2) {
+object(DateTimeZone)#%d (4) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -42,7 +50,11 @@ object(DateTimeZone)#%d (2) {
 }
 
 -- clone it --
-object(DateTimeZone)#%d (2) {
+object(DateTimeZone)#%d (4) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -50,7 +62,11 @@ object(DateTimeZone)#%d (2) {
 }
 
 -- Add some more properties --
-object(DateTimeZone)#%d (4) {
+object(DateTimeZone)#%d (6) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -62,7 +78,11 @@ object(DateTimeZone)#%d (4) {
 }
 
 -- clone it --
-object(DateTimeZone)#%d (4) {
+object(DateTimeZone)#%d (6) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>

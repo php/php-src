@@ -53,9 +53,9 @@ struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 #define MYSQLND_PS_SKIP_RESULT_STR		-2
 
 /* {{{ ps_fetch_from_1_to_8_bytes */
-void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
-								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
-								unsigned int byte_count TSRMLS_DC)
+void
+ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len,
+						   zend_uchar ** row, unsigned int byte_count TSRMLS_DC)
 {
 	char tmp[22];
 	size_t tmp_len = 0;
@@ -117,16 +117,7 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 	}
 
 	if (tmp_len) {
-#if MYSQLND_UNICODE
-		if (as_unicode) {
-			DBG_INF("stringify");
-			ZVAL_UTF8_STRINGL(zv, tmp, tmp_len, ZSTR_DUPLICATE);
-		} else
-#endif
-		{
-			DBG_INF("stringify");
-			ZVAL_STRINGL(zv, tmp, tmp_len, 1);
-		}
+		ZVAL_STRINGL(zv, tmp, tmp_len, 1);
 	}
 	(*row)+= byte_count;
 	DBG_VOID_RETURN;
@@ -135,10 +126,8 @@ void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
 
 
 /* {{{ ps_fetch_null */
-static
-void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
-				   zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	ZVAL_NULL(zv);
 }
@@ -146,54 +135,44 @@ void ps_fetch_null(zval *zv, const MYSQLND_FIELD * const field,
 
 
 /* {{{ ps_fetch_int8 */
-static
-void ps_fetch_int8(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
-				   zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_int8(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 1 TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 1 TSRMLS_CC);
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_int16 */
-static
-void ps_fetch_int16(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
-					zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_int16(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 2 TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 2 TSRMLS_CC);
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_int32 */
-static
-void ps_fetch_int32(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
-					zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_int32(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 4 TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 4 TSRMLS_CC);
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_int64 */
-static
-void ps_fetch_int64(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
-					zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_int64(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, 8 TSRMLS_CC);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, 8 TSRMLS_CC);
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_float */
-static
-void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
-					zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	float value;
 	DBG_ENTER("ps_fetch_float");
@@ -207,10 +186,8 @@ void ps_fetch_float(zval *zv, const MYSQLND_FIELD * const field,
 
 
 /* {{{ ps_fetch_double */
-static
-void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
-					unsigned int pack_len, zend_uchar **row,
-					zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_double(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	double value;
 	DBG_ENTER("ps_fetch_double");
@@ -224,18 +201,16 @@ void ps_fetch_double(zval *zv, const MYSQLND_FIELD * const field,
 
 
 /* {{{ ps_fetch_time */
-static
-void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
-				   zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
-	unsigned int length; /* First byte encodes the length*/
+	unsigned long length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_time");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
-		zend_uchar *to= *row;
+		zend_uchar * to= *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 		t.neg			= (zend_bool) to[0];
@@ -261,29 +236,19 @@ void ps_fetch_time(zval *zv, const MYSQLND_FIELD * const field,
 	length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", value);
-#if MYSQLND_UNICODE
-	if (!as_unicode) {
-#endif
-		ZVAL_STRINGL(zv, value, length, 1);
-		mnd_sprintf_free(value);
-#if MYSQLND_UNICODE
-	} else {
-		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
-	}
-#endif
+	ZVAL_STRINGL(zv, value, length, 1);
+	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_date */
-static
-void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
-				   unsigned int pack_len, zend_uchar **row,
-				   zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_date(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t = {0};
-	unsigned int length; /* First byte encodes the length*/
+	unsigned long length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_date");
 
@@ -308,34 +273,24 @@ void ps_fetch_date(zval *zv, const MYSQLND_FIELD * const field,
 	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u", t.year, t.month, t.day);
 
 	DBG_INF_FMT("%s", value);
-#if MYSQLND_UNICODE
-	if (!as_unicode) {
-#endif
-		ZVAL_STRINGL(zv, value, length, 1);
-		mnd_sprintf_free(value);
-#if MYSQLND_UNICODE
-	} else {
-		ZVAL_UTF8_STRINGL(zv, value, length, ZSTR_AUTOFREE);
-	}
-#endif
+	ZVAL_STRINGL(zv, value, length, 1);
+	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_datetime */
-static
-void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
-					   unsigned int pack_len, zend_uchar **row,
-					   zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	struct st_mysqlnd_time t;
-	unsigned int length; /* First byte encodes the length*/
+	unsigned long length; /* First byte encodes the length*/
 	char * value;
 	DBG_ENTER("ps_fetch_datetime");
 
 	if ((length = php_mysqlnd_net_field_length(row))) {
-		zend_uchar *to= *row;
+		zend_uchar * to = *row;
 
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 		t.neg	 = 0;
@@ -362,46 +317,26 @@ void ps_fetch_datetime(zval *zv, const MYSQLND_FIELD * const field,
 	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
 
 	DBG_INF_FMT("%s", value);
-#if MYSQLND_UNICODE
-	if (!as_unicode) {
-#endif
-		ZVAL_STRINGL(zv, value, length, 1);
-		mnd_sprintf_free(value);
-#if MYSQLND_UNICODE
-	} else {
-		ZVAL_UTF8_STRINGL(zv, to, length, ZSTR_AUTOFREE);
-	}
-#endif
+	ZVAL_STRINGL(zv, value, length, 1);
+	mnd_sprintf_free(value);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ ps_fetch_string */
-static
-void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
-					 unsigned int pack_len, zend_uchar **row,
-					 zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_string(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
 	/*
 	  For now just copy, before we make it possible
 	  to write \0 to the row buffer
 	*/
-	unsigned long length = php_mysqlnd_net_field_length(row);
+	const unsigned long length = php_mysqlnd_net_field_length(row);
 	DBG_ENTER("ps_fetch_string");
 	DBG_INF_FMT("len = %lu", length);
-#if MYSQLND_UNICODE
-	if (field->charsetnr == MYSQLND_BINARY_CHARSET_NR) {
-		DBG_INF("Binary charset");
-		ZVAL_STRINGL(zv, (char *)*row, length, 1);
-	} else {
-		DBG_INF_FMT("copying from the row buffer");
-		ZVAL_UTF8_STRINGL(zv, (char*)*row, length, ZSTR_DUPLICATE);
-	}
-#else
 	DBG_INF("copying from the row buffer");
 	ZVAL_STRINGL(zv, (char *)*row, length, 1);
-#endif
 
 	(*row) += length;
 	DBG_VOID_RETURN;
@@ -410,13 +345,11 @@ void ps_fetch_string(zval *zv, const MYSQLND_FIELD * const field,
 
 
 /* {{{ ps_fetch_bit */
-static
-void ps_fetch_bit(zval *zv, const MYSQLND_FIELD * const field,
-				  unsigned int pack_len, zend_uchar **row,
-				  zend_bool as_unicode TSRMLS_DC)
+static void
+ps_fetch_bit(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC)
 {
-	unsigned long length= php_mysqlnd_net_field_length(row);
-	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, as_unicode, length TSRMLS_CC);
+	unsigned long length = php_mysqlnd_net_field_length(row);
+	ps_fetch_from_1_to_8_bytes(zv, field, pack_len, row, length TSRMLS_CC);
 }
 /* }}} */
 
@@ -566,7 +499,7 @@ void _mysqlnd_init_ps_fetch_subsystem()
 
 /* {{{ mysqlnd_stmt_copy_it */
 static enum_func_status
-mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, unsigned int current TSRMLS_DC)
+mysqlnd_stmt_copy_it(zval *** copies, zval * original, unsigned int param_count, unsigned int current TSRMLS_DC)
 {
 	if (!*copies) {
 		*copies = mnd_ecalloc(param_count, sizeof(zval *));
@@ -583,68 +516,70 @@ mysqlnd_stmt_copy_it(zval *** copies, zval *original, unsigned int param_count, 
 /* }}} */
 
 
-/* {{{ mysqlnd_stmt_execute_store_params */
-static enum_func_status
-mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t *buf_len  TSRMLS_DC)
+/* {{{ mysqlnd_stmt_free_copies */
+static void
+mysqlnd_stmt_free_copies(MYSQLND_STMT_DATA * stmt, zval ** copies TSRMLS_DC)
 {
-	MYSQLND_STMT_DATA * stmt = s->data;
-	unsigned int i = 0;
-	zend_uchar * provided_buffer = *buf;
-	size_t left = (*buf_len - (*p - *buf));
-	size_t data_size = 0;
-	zval **copies = NULL;/* if there are different types */
-	enum_func_status ret = FAIL;
-	int resend_types_next_time = 0;
-	size_t null_byte_offset;
-
-	DBG_ENTER("mysqlnd_stmt_execute_store_params");
-
-	{
-		unsigned int null_count = (stmt->param_count + 7) / 8;
-		/* give it some reserved space - 20 bytes */
-		if (left < (null_count + 20)) {
-			unsigned int offset = *p - *buf;
-			zend_uchar *tmp_buf;
-			*buf_len = offset + null_count + 20;
-			tmp_buf = mnd_emalloc(*buf_len);
-			if (!tmp_buf) {
-				SET_OOM_ERROR(*stmt->error_info);
-				goto end;
+	if (copies) {
+		unsigned int i;
+		for (i = 0; i < stmt->param_count; i++) {
+			if (copies[i]) {
+				zval_ptr_dtor(&copies[i]);
 			}
-			memcpy(tmp_buf, *buf, offset);
-			if (*buf != provided_buffer) {
-				mnd_efree(*buf);
-			}
-			*buf = tmp_buf;
-
-			/* Update our pos pointer */
-			*p = *buf + offset;
 		}
-		/* put `null` bytes */
-		null_byte_offset = *p - *buf;
-		memset(*p, 0, null_count);
-		*p += null_count;
+		mnd_efree(copies);
 	}
+}
+/* }}} */
 
-	left = (*buf_len - (*p - *buf));
-/* 1. Store type information */
-	/*
-	  check if need to send the types even if stmt->send_types_to_server is 0. This is because
-	  if we send "i" (42) then the type will be int and the server will expect int. However, if next
-	  time we try to send > LONG_MAX, the conversion to string will send a string and the server
-	  won't expect it and interpret the value as 0. Thus we need to resend the types, if any such values
-	  occur, and force resend for the next execution.
-	*/
+
+/* {{{ mysqlnd_stmt_execute_check_n_enlarge_buffer */
+static enum_func_status
+mysqlnd_stmt_execute_check_n_enlarge_buffer(zend_uchar **buf, zend_uchar **p, size_t * buf_len, zend_uchar * const provided_buffer, size_t needed_bytes TSRMLS_DC)
+{
+	const size_t overalloc = 5;
+	size_t left = (*buf_len - (*p - *buf));
+
+	if (left < (needed_bytes + overalloc)) {
+		size_t offset = *p - *buf;
+		zend_uchar *tmp_buf;
+		*buf_len = offset + needed_bytes + overalloc;
+		tmp_buf = mnd_emalloc(*buf_len);
+		if (!tmp_buf) {
+			return FAIL;
+		}
+		memcpy(tmp_buf, *buf, offset);
+		if (*buf != provided_buffer) {
+			mnd_efree(*buf);
+		}
+		*buf = tmp_buf;
+		/* Update our pos pointer */
+		*p = *buf + offset;
+	}
+	return PASS;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stmt_execute_prepare_param_types */
+static enum_func_status
+mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval *** copies_param, int * resend_types_next_time TSRMLS_DC)
+{
+	unsigned int i;
+	DBG_ENTER("mysqlnd_stmt_execute_prepare_param_types");
 	for (i = 0; i < stmt->param_count; i++) {
 		short current_type = stmt->param_bind[i].type;
+
 		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+			zval ** copies;
 			/* always copy the var, because we do many conversions */
 			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG &&
-				PASS != mysqlnd_stmt_copy_it(&copies, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
+				PASS != mysqlnd_stmt_copy_it(copies_param, stmt->param_bind[i].zv, stmt->param_count, i TSRMLS_CC))
 			{
 				SET_OOM_ERROR(*stmt->error_info);
 				goto end;
 			}
+			copies = *copies_param;
 			/*
 			  if it doesn't fit in a long send it as a string.
 			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
@@ -669,7 +604,7 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
 				if (Z_DVAL_P(tmp_data_copy) > LONG_MAX || Z_DVAL_P(tmp_data_copy) < LONG_MIN) {
-					stmt->send_types_to_server = resend_types_next_time = 1;
+					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(&tmp_data);
 				} else {
 					convert_to_long_ex(&tmp_data);
@@ -679,69 +614,63 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 			}
 		}
 	}
+	DBG_RETURN(PASS);
+end:
+	DBG_RETURN(FAIL);
+}
+/* }}} */
 
-	int1store(*p, stmt->send_types_to_server); 
-	(*p)++;
 
-	if (stmt->send_types_to_server) {
-		/* 2 bytes per type, and leave 20 bytes for future use */
-		if (left < ((stmt->param_count * 2) + 20)) {
-			unsigned int offset = *p - *buf;
-			zend_uchar *tmp_buf;
-			*buf_len = offset + stmt->param_count * 2 + 20;
-			tmp_buf = mnd_emalloc(*buf_len);
-			if (!tmp_buf) {
-				SET_OOM_ERROR(*stmt->error_info);
-				goto end;
-			}
-			memcpy(tmp_buf, *buf, offset);
-			if (*buf != provided_buffer) {
-				mnd_efree(*buf);
-			}
-			*buf = tmp_buf;
-
-			/* Update our pos pointer */
-			*p = *buf + offset;
-		}
-		for (i = 0; i < stmt->param_count; i++) {
-			short current_type = stmt->param_bind[i].type;
-			/* our types are not unsigned */
+/* {{{ mysqlnd_stmt_execute_store_types */
+static void
+mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval ** copies, zend_uchar ** p)
+{
+	unsigned int i;
+	for (i = 0; i < stmt->param_count; i++) {
+		short current_type = stmt->param_bind[i].type;
+		/* our types are not unsigned */
 #if SIZEOF_LONG==8  
-			if (current_type == MYSQL_TYPE_LONG) {
-				current_type = MYSQL_TYPE_LONGLONG;
-			}
+		if (current_type == MYSQL_TYPE_LONG) {
+			current_type = MYSQL_TYPE_LONGLONG;
+		}
 #endif
-			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+		if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_NULL && (current_type == MYSQL_TYPE_LONG || current_type == MYSQL_TYPE_LONGLONG)) {
+			/*
+			  if it doesn't fit in a long send it as a string.
+			  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
+			*/
+			if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
+				const zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 				/*
-				  if it doesn't fit in a long send it as a string.
-				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
+				  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
+				  The actual transformation has been performed several dozens line above.
 				*/
-				if (Z_TYPE_P(stmt->param_bind[i].zv) != IS_LONG) {
-					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+				if (Z_TYPE_P(tmp_data) == IS_STRING) {
+					current_type = MYSQL_TYPE_VAR_STRING;
 					/*
-					  In case of IS_LONG we do nothing, it is ok, in case of string, we just need to set current_type.
-					  The actual transformation has been performed several dozens line above.
+					  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
+					  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
+					  if the type is however not long, then we will do a goto in the next switch.
+					  We want to preserve the original bind type given by the user. Thus, we do these hacks.
 					*/
-					if (Z_TYPE_P(tmp_data) == IS_STRING) {
-						current_type = MYSQL_TYPE_VAR_STRING;
-						/*
-						  don't change stmt->param_bind[i].type to MYSQL_TYPE_VAR_STRING
-						  we force convert_to_long_ex in all cases, thus the type will be right in the next switch.
-						  if the type is however not long, then we will do a goto in the next switch.
-						  We want to preserve the original bind type given by the user. Thus, we do these hacks.
-						*/
-					}
 				}
 			}
-			int2store(*p, current_type);
-			*p+= 2;
 		}
+		int2store(*p, current_type);
+		*p+= 2;
 	}
-	stmt->send_types_to_server = resend_types_next_time;
+}
+/* }}} */
 
-/* 2. Store data */
-	/* 2.1 Calculate how much space we need */
+
+/* {{{ mysqlnd_stmt_execute_calculate_param_values_size */
+static enum_func_status
+mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval *** copies_param, size_t * data_size TSRMLS_DC)
+{
+	unsigned int i;
+	DBG_ENTER("mysqlnd_stmt_execute_calculate_param_values_size");
 	for (i = 0; i < stmt->param_count; i++) {
+		unsigned short is_longlong = 0;
 		unsigned int j;
 		zval *the_var = stmt->param_bind[i].zv;
 
@@ -751,22 +680,22 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 		for (j = i + 1; j < stmt->param_count; j++) {
 			if (stmt->param_bind[j].zv == the_var) {
 				/* Double binding of the same zval, make a copy */
-				if (!copies || !copies[i]) {
-					if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+				if (!*copies_param || !(*copies_param)[i]) {
+					if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i TSRMLS_CC)) {
 						SET_OOM_ERROR(*stmt->error_info);
 						goto end;
 					}
 				}
-				break; 
+				break;
 			}
 		}
 
 		switch (stmt->param_bind[i].type) {
 			case MYSQL_TYPE_DOUBLE:
-				data_size += 8;
+				*data_size += 8;
 				if (Z_TYPE_P(the_var) != IS_DOUBLE) {
-					if (!copies || !copies[i]) {
-						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+					if (!*copies_param || !(*copies_param)[i]) {
+						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i TSRMLS_CC)) {
 							SET_OOM_ERROR(*stmt->error_info);
 							goto end;
 						}
@@ -774,24 +703,17 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 				}
 				break;
 			case MYSQL_TYPE_LONGLONG:
-				{
-					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
-					if (Z_TYPE_P(tmp_data) == IS_STRING) {
-						goto use_string;
-					}
-					convert_to_long_ex(&tmp_data);
-				}
-				data_size += 8;
-				break;
+				is_longlong = 4;
+				/* fall-through */
 			case MYSQL_TYPE_LONG:
 				{
-					zval *tmp_data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+					zval *tmp_data = (*copies_param && (*copies_param)[i])? (*copies_param)[i]: stmt->param_bind[i].zv;
 					if (Z_TYPE_P(tmp_data) == IS_STRING) {
 						goto use_string;
 					}
 					convert_to_long_ex(&tmp_data);
 				}
-				data_size += 4;
+				*data_size += 4 + is_longlong;
 				break;
 			case MYSQL_TYPE_LONG_BLOB:
 				if (!(stmt->param_bind[i].flags & MYSQLND_PARAM_BIND_BLOB_USED)) {
@@ -800,68 +722,43 @@ mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar
 					  Empty string has length of 0, encoded in 1 byte. No real
 					  data will follows after it.
 					*/
-					data_size++;
+					(*data_size)++;
 				}
 				break;
 			case MYSQL_TYPE_VAR_STRING:
 use_string:
-				data_size += 8; /* max 8 bytes for size */
-#if MYSQLND_UNICODE
-				if (Z_TYPE_P(the_var) != IS_STRING || Z_TYPE_P(the_var) == IS_UNICODE)
-#else
-				if (Z_TYPE_P(the_var) != IS_STRING)
-#endif
-				{
-					if (!copies || !copies[i]) {
-						if (PASS != mysqlnd_stmt_copy_it(&copies, the_var, stmt->param_count, i TSRMLS_CC)) {
+				*data_size += 8; /* max 8 bytes for size */
+				if (Z_TYPE_P(the_var) != IS_STRING) {
+					if (!*copies_param || !(*copies_param)[i]) {
+						if (PASS != mysqlnd_stmt_copy_it(copies_param, the_var, stmt->param_count, i TSRMLS_CC)) {
 							SET_OOM_ERROR(*stmt->error_info);
 							goto end;
 						}
 					}
-					the_var = copies[i];
-#if MYSQLND_UNICODE
-					if (Z_TYPE_P(the_var) == IS_UNICODE) {
-						zval_unicode_to_string_ex(the_var, UG(utf8_conv) TSRMLS_CC);
-					}
-#endif
+					the_var = (*copies_param)[i];
 				}
 				convert_to_string_ex(&the_var);
-				data_size += Z_STRLEN_P(the_var);
+				*data_size += Z_STRLEN_P(the_var);
 				break;
 		}
 	}
+	DBG_RETURN(PASS);
+end:
+	DBG_RETURN(FAIL);
+}
+/* }}} */
 
-	/* 2.2 Enlarge the buffer, if needed */
-	left = (*buf_len - (*p - *buf));
-	if (left < data_size) {
-		unsigned int offset = *p - *buf;
-		zend_uchar *tmp_buf;
-		*buf_len = offset + data_size + 10; /* Allocate + 10 for safety */
-		tmp_buf = mnd_emalloc(*buf_len);
-		if (!tmp_buf) {
-			SET_OOM_ERROR(*stmt->error_info);
-			goto end;
-		}
-		memcpy(tmp_buf, *buf, offset);
-		/*
-		  When too many columns the buffer provided to the function might not be sufficient.
-		  In this case new buffer has been allocated above. When we allocate a buffer and then
-		  allocate a bigger one here, we should free the first one.
-		*/
-		if (*buf != provided_buffer) {
-			mnd_efree(*buf);
-		}
-		*buf = tmp_buf;
-		/* Update our pos pointer */
-		*p = *buf + offset;
-	}
 
-	/* 2.3 Store the actual data */
+/* {{{ mysqlnd_stmt_execute_store_param_values */
+static void
+mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval ** copies, zend_uchar * buf, zend_uchar ** p, size_t null_byte_offset)
+{
+	unsigned int i;
 	for (i = 0; i < stmt->param_count; i++) {
-		zval *data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
+		zval * data = (copies && copies[i])? copies[i]: stmt->param_bind[i].zv;
 		/* Handle long data */
 		if (stmt->param_bind[i].zv && Z_TYPE_P(data) == IS_NULL) {
-			(*buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
+			(buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
 		} else {
 			switch (stmt->param_bind[i].type) {
 				case MYSQL_TYPE_DOUBLE:
@@ -896,7 +793,7 @@ use_string:
 				case MYSQL_TYPE_VAR_STRING:
 send_string:
 					{
-						unsigned int len = Z_STRLEN_P(data);
+						size_t len = Z_STRLEN_P(data);
 						/* to is after p. The latter hasn't been moved */
 						*p = php_mysqlnd_net_store_length(*p, len);
 						memcpy(*p, Z_STRVAL_P(data), len);
@@ -905,21 +802,85 @@ send_string:
 					break;
 				default:
 					/* Won't happen, but set to NULL */
-					(*buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
+					(buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
 					break;
 			}
 		}
 	}
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_stmt_execute_store_params */
+static enum_func_status
+mysqlnd_stmt_execute_store_params(MYSQLND_STMT * s, zend_uchar **buf, zend_uchar **p, size_t *buf_len  TSRMLS_DC)
+{
+	MYSQLND_STMT_DATA * stmt = s->data;
+	unsigned int i = 0;
+	zend_uchar * provided_buffer = *buf;
+	size_t data_size = 0;
+	zval **copies = NULL;/* if there are different types */
+	enum_func_status ret = FAIL;
+	int resend_types_next_time = 0;
+	size_t null_byte_offset;
+
+	DBG_ENTER("mysqlnd_stmt_execute_store_params");
+
+	{
+		unsigned int null_count = (stmt->param_count + 7) / 8;
+		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, null_count TSRMLS_CC)) {
+			SET_OOM_ERROR(*stmt->error_info);
+			goto end;
+		}
+		/* put `null` bytes */
+		null_byte_offset = *p - *buf;
+		memset(*p, 0, null_count);
+		*p += null_count;
+	}
+
+/* 1. Store type information */
+	/*
+	  check if need to send the types even if stmt->send_types_to_server is 0. This is because
+	  if we send "i" (42) then the type will be int and the server will expect int. However, if next
+	  time we try to send > LONG_MAX, the conversion to string will send a string and the server
+	  won't expect it and interpret the value as 0. Thus we need to resend the types, if any such values
+	  occur, and force resend for the next execution.
+	*/
+	if (FAIL == mysqlnd_stmt_execute_prepare_param_types(stmt, &copies, &resend_types_next_time TSRMLS_CC)) {
+		goto end;
+	}
+
+	int1store(*p, stmt->send_types_to_server);
+	(*p)++;
+
+	if (stmt->send_types_to_server) {
+		if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, stmt->param_count * 2 TSRMLS_CC)) {
+			SET_OOM_ERROR(*stmt->error_info);
+			goto end;
+		}
+		mysqlnd_stmt_execute_store_types(stmt, copies, p);
+	}
+
+	stmt->send_types_to_server = resend_types_next_time;
+
+/* 2. Store data */
+	/* 2.1 Calculate how much space we need */
+	if (FAIL == mysqlnd_stmt_execute_calculate_param_values_size(stmt, &copies, &data_size TSRMLS_CC)) {
+		goto end;
+	}
+
+	/* 2.2 Enlarge the buffer, if needed */
+	if (FAIL == mysqlnd_stmt_execute_check_n_enlarge_buffer(buf, p, buf_len, provided_buffer, data_size TSRMLS_CC)) {
+		SET_OOM_ERROR(*stmt->error_info);
+		goto end;
+	}
+
+	/* 2.3 Store the actual data */
+	mysqlnd_stmt_execute_store_param_values(stmt, copies, *buf, p, null_byte_offset);
+
 	ret = PASS;
 end:
-	if (copies) {
-		for (i = 0; i < stmt->param_count; i++) {
-			if (copies[i]) {
-				zval_ptr_dtor(&copies[i]);
-			}
-		}
-		mnd_efree(copies);
-	}
+	mysqlnd_stmt_free_copies(stmt, copies TSRMLS_CC);
 
 	DBG_INF_FMT("ret=%s", ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);

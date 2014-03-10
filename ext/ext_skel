@@ -12,7 +12,7 @@ echo ""
 echo "  --extname=module   module is the name of your extension"
 echo "  --proto=file       file contains prototypes of functions to create"
 echo "  --stubs=file       generate only function stubs in file"
-echo "  --xml              generate xml documentation to be added to phpdoc-cvs"
+echo "  --xml              generate xml documentation to be added to phpdoc-svn"
 echo "  --skel=dir         path to the skeleton directory"
 echo "  --full-xml         generate xml documentation for a self-contained extension"
 echo "                     (not yet implemented)"
@@ -187,11 +187,43 @@ if (PHP_$EXTNAME != "no") {
 
 eof
 
-$ECHO_N " .svnignore$ECHO_C"
-cat >.svnignore <<eof
+$ECHO_N " .gitignore$ECHO_C"
+cat >.gitignore <<eof
 .deps
 *.lo
 *.la
+.libs
+acinclude.m4
+aclocal.m4
+autom4te.cache
+build
+config.guess
+config.h
+config.h.in
+config.log
+config.nice
+config.status
+config.sub
+configure
+configure.in
+include
+install-sh
+libtool
+ltmain.sh
+Makefile
+Makefile.fragments
+Makefile.global
+Makefile.objects
+missing
+mkinstalldirs
+modules
+run-tests.php
+tests/*/*.diff
+tests/*/*.out
+tests/*/*.php
+tests/*/*.exp
+tests/*/*.log
+tests/*/*.sh
 eof
 
 $ECHO_N " $extname.c$ECHO_C"

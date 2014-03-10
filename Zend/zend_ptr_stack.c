@@ -110,7 +110,6 @@ ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
 {
 	return stack->top;
 }
-
 /*
  * Local variables:
  * tab-width: 4

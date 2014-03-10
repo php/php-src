@@ -37,10 +37,10 @@
 
 
 
-ZIP_EXTERN(int)
-zip_get_archive_flag(struct zip *za, int flag, int flags)
+ZIP_EXTERN int
+zip_get_archive_flag(struct zip *za, zip_flags_t flag, zip_flags_t flags)
 {
-    int fl;
+    unsigned int fl;
 
     fl = (flags & ZIP_FL_UNCHANGED) ? za->flags : za->ch_flags;
 

@@ -41,12 +41,11 @@
  */
 #ifdef PHP_OCI8_VERSION
 /* The definition of PHP_OCI8_VERSION changed in PHP 5.3 and building
- * this code with PHP 5.2 and earlier (e.g. when using OCI8 from PECL)
- * will conflict.
+ * this code with PHP 5.2 (e.g. when using OCI8 from PECL) will conflict.
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "1.4.9"
+#define PHP_OCI8_VERSION "2.0.7"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry

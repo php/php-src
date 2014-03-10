@@ -139,7 +139,7 @@ void collator_convert_hash_from_utf8_to_utf16( HashTable* hash, UErrorCode* stat
 
 	zend_hash_internal_pointer_reset( hash );
 	while( ( hashKeyType = zend_hash_get_current_key( hash, &hashKey, &hashIndex, 0 ) )
-			!= HASH_KEY_NON_EXISTANT )
+			!= HASH_KEY_NON_EXISTENT )
 	{
 		/* Convert current hash item from UTF-8 to UTF-16LE. */
 		collator_convert_hash_item_from_utf8_to_utf16(
@@ -164,7 +164,7 @@ void collator_convert_hash_from_utf16_to_utf8( HashTable* hash, UErrorCode* stat
 
 	zend_hash_internal_pointer_reset( hash );
 	while( ( hashKeyType = zend_hash_get_current_key( hash, &hashKey, &hashIndex, 0 ) )
-			!= HASH_KEY_NON_EXISTANT )
+			!= HASH_KEY_NON_EXISTENT )
 	{
 		/* Convert current hash item from UTF-16LE to UTF-8. */
 		collator_convert_hash_item_from_utf16_to_utf8(

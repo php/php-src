@@ -44,6 +44,7 @@
 #include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
+#include <libxml/xmlschemas.h>
 #endif
 
 #include "php_libxml.h"
@@ -292,7 +293,8 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
 	php_stream_wrapper *wrapper = NULL;
-	char *resolved_path, *path_to_open = NULL;
+	char *resolved_path;
+	const char *path_to_open = NULL;
 	void *ret_val = NULL;
 	int isescaped=0;
 	xmlURI *uri;
@@ -797,6 +799,11 @@ static PHP_MINIT_FUNCTION(libxml)
 	REGISTER_LONG_CONSTANT("LIBXML_PARSEHUGE",	XML_PARSE_HUGE,			CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
+
+	/* Schema validation options */
+#if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION >= 20614
+	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
+#endif
 
 	/* Additional constants for use with loading html */
 #if LIBXML_VERSION >= 20707

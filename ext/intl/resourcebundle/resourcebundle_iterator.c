@@ -101,21 +101,18 @@ static void resourcebundle_iterator_current( zend_object_iterator *iter, zval **
 /* }}} */
 
 /* {{{ resourcebundle_iterator_key */
-static int resourcebundle_iterator_key( zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC )
+static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key TSRMLS_DC )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 
 	if (!iterator->current) {
 		resourcebundle_iterator_read( iterator TSRMLS_CC);
 	}
+
 	if (iterator->is_table) {
-		*str_key = estrdup( iterator->currentkey );
-		*str_key_len = strlen( iterator->currentkey ) + 1;
-		return HASH_KEY_IS_STRING;
-	}
-	else {
-		*int_key = iterator->i;
-		return HASH_KEY_IS_LONG;
+		ZVAL_STRING(key, iterator->currentkey, 1);
+	} else {
+		ZVAL_LONG(key, iterator->i);
 	}
 }
 /* }}} */

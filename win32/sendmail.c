@@ -25,6 +25,7 @@
 #ifndef NETWARE
 #include <winsock2.h>
 #include "time.h"
+# include <Ws2tcpip.h>
 #else	/* NETWARE */
 #include <netware/sendmail_nw.h>
 #endif	/* NETWARE */

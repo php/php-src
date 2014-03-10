@@ -1,5 +1,7 @@
 --TEST--
 ob_start() chunk_size: confirm buffer is flushed after any output call that causes its length to equal or exceed chunk_size. 
+--INI--
+opcache.optimization_level=0
 --FILE--
 <?php
 /* 

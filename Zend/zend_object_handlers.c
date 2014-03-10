@@ -137,8 +137,38 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval ***table, int *n TSRMLS_D
 
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	*is_temp = 0;
-	return zend_std_get_properties(object TSRMLS_CC);
+	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval *retval = NULL;
+
+	if (!ce->__debugInfo) {
+		*is_temp = 0;
+		return Z_OBJ_HANDLER_P(object, get_properties)
+			? Z_OBJ_HANDLER_P(object, get_properties)(object TSRMLS_CC)
+			: NULL;
+	}
+
+	zend_call_method_with_0_params(&object, ce, &ce->__debugInfo, ZEND_DEBUGINFO_FUNC_NAME, &retval);
+	if (retval && Z_TYPE_P(retval) == IS_ARRAY) {
+		HashTable *ht = Z_ARRVAL_P(retval);
+		if (Z_REFCOUNT_P(retval) <= 1) {
+			*is_temp = 1;
+			efree(retval);
+			return ht;
+		} else {
+			*is_temp = 0;
+			zval_ptr_dtor(&retval);
+		}
+		return ht;
+	}
+	if (retval && Z_TYPE_P(retval) == IS_NULL) {
+		zval ret;
+		array_init(&ret);
+		*is_temp = 1;
+		zval_ptr_dtor(&retval);
+		return Z_ARRVAL(ret);
+	}
+
+	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
 }
 /* }}} */
 
@@ -363,9 +393,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
+	int prop_name_len;
 
-	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
-	ZVAL_STRING(&member, prop_name, 0);
+	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
+	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
 	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
 	if (!property_info) {
 		return FAILURE;
@@ -713,7 +744,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 }
 /* }}} */
 
-static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -753,7 +784,9 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 			/* we don't have access controls - will just add it */
 			new_zval = &EG(uninitialized_zval);
 
-/* 			zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member)); */
+			if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+				zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
+			}
 			Z_ADDREF_P(new_zval);
 			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 			    property_info->offset >= 0) {
@@ -893,11 +926,8 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1110,11 +1140,8 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1641,9 +1668,11 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
-	NULL,									/* get_debug_info */
+	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*

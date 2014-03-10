@@ -8,6 +8,8 @@ if (!extension_loaded("mcrypt")) {
 ?>
 --FILE--
 <?php
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 /* Prototype  : string mcrypt_ecb(int cipher, string key, string data, int mode, string iv)
  * Description: ECB crypt/decrypt data using key key with cipher cipher starting with iv 
  * Source code: ext/mcrypt/mcrypt.c

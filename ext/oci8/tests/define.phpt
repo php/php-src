@@ -44,5 +44,5 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-%unicode|string%(%d) "some"
+string(%d) "some"
 Done

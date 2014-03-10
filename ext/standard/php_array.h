@@ -71,6 +71,7 @@ PHP_FUNCTION(array_replace_recursive);
 PHP_FUNCTION(array_keys);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
+PHP_FUNCTION(array_column);
 PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_reduce);
 PHP_FUNCTION(array_pad);
@@ -115,6 +116,9 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
 #define PHP_SORT_LOCALE_STRING      5
 #define PHP_SORT_NATURAL            6
 #define PHP_SORT_FLAG_CASE          8
+
+#define ARRAY_FILTER_USE_BOTH	1
+#define ARRAY_FILTER_USE_KEY	2
 
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];

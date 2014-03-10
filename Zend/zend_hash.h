@@ -27,7 +27,8 @@
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTANT 3
+#define HASH_KEY_NON_EXISTENT 3
+#define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
 #define HASH_UPDATE 		(1<<0)
 #define HASH_ADD			(1<<1)
@@ -96,12 +97,12 @@ typedef Bucket* HashPosition;
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
-ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
-ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
 ZEND_API void zend_hash_destroy(HashTable *ht);
 ZEND_API void zend_hash_clean(HashTable *ht);
-#define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)						_zend_hash_init((ht), (nSize), (pHashFunction), (pDestructor), (persistent) ZEND_FILE_LINE_CC)
-#define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)		_zend_hash_init_ex((ht), (nSize), (pHashFunction), (pDestructor), (persistent), (bApplyProtection) ZEND_FILE_LINE_CC)
+#define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)						_zend_hash_init((ht), (nSize), (pDestructor), (persistent) ZEND_FILE_LINE_CC)
+#define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)		_zend_hash_init_ex((ht), (nSize), (pDestructor), (persistent), (bApplyProtection) ZEND_FILE_LINE_CC)
 
 /* additions/updates/changes */
 ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
@@ -156,8 +157,8 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, h, HASH_DEL_KEY_QUICK)
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
-
-ZEND_API ulong zend_get_hash_value(const char *arKey, uint nKeyLength);
+#define zend_get_hash_value \
+		zend_hash_func
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLength, void **pData);
@@ -170,13 +171,13 @@ ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint
 ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
 ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
-
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
-	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTANT ? FAILURE : SUCCESS)
+	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
@@ -199,6 +200,8 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 	zend_hash_move_backwards_ex(ht, NULL)
 #define zend_hash_get_current_key(ht, str_index, num_index, duplicate) \
 	zend_hash_get_current_key_ex(ht, str_index, NULL, num_index, duplicate, NULL)
+#define zend_hash_get_current_key_zval(ht, key) \
+	zend_hash_get_current_key_zval_ex(ht, key, NULL)
 #define zend_hash_get_current_key_type(ht) \
 	zend_hash_get_current_key_type_ex(ht, NULL)
 #define zend_hash_get_current_data(ht, pData) \

@@ -10,7 +10,11 @@ $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov != 1) {
 	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
-if (preg_match('/^11\.2|12\./', oci_client_version()) != 1) {
+preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
+if (!(isset($matches[0]) &&
+    (($matches[1] == 11 && $matches[2] >= 2) ||
+     ($matches[1] >= 12)
+     ))) {
     die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 ?>

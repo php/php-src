@@ -705,3 +705,41 @@ RC=0
 ./testdata/grepinput:[1;31mzero[00m|[1;31ma[00m
 ./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
 RC=0
+---------------------------- Test 102 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 103 -----------------------------
+RC=0
+---------------------------- Test 104 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 105 -----------------------------
+[1;31m[00mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t2_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mLorem [1;31mipsum[00m dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+[1;31m[00m
+[1;31m[00mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t5_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mo_txt
+[1;31m[00m
+[1;31m[00mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+RC=0
+---------------------------- Test 106 -----------------------------
+a
+RC=0

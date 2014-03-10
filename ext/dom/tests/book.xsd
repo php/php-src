@@ -9,6 +9,7 @@
        <xs:element name="title" type="xs:string"/>
        <xs:element name="author" type="xs:string"/>
       </xs:sequence>
+      <xs:attribute name="is-hardback" type="xs:boolean" default="false" use="optional" />
      </xs:complexType>
     </xs:element>
    </xs:sequence>

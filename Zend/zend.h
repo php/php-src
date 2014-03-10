@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.4.0"
+#define ZEND_VERSION "2.6.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -133,6 +133,11 @@ char *alloca ();
 # endif
 #endif
 
+/* Compatibility with non-clang compilers */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
@@ -144,6 +149,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
+#endif
+
+#if ZEND_GCC_VERSION >= 4003 || __has_attribute(alloc_size)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((alloc_size(X)))
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((alloc_size(X,Y)))
+#else
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
 #if ZEND_GCC_VERSION >= 2007
@@ -180,7 +193,7 @@ char *alloca ();
 #endif
 #define restrict __restrict__
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(NETWARE)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	zend_bool name;
@@ -212,6 +225,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)					assert(c)
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
@@ -225,6 +239,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
+#define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #ifdef ZTS
@@ -263,10 +278,10 @@ static const char long_min_digits[] = "9223372036854775808";
 
 #define MAX_LENGTH_OF_DOUBLE 32
 
-#undef SUCCESS
-#undef FAILURE
-#define SUCCESS 0
-#define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
 #include "zend_ts_hash.h"
@@ -284,7 +299,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
 typedef struct _zend_guard {
@@ -303,6 +317,7 @@ typedef struct _zend_object {
 } zend_object;
 
 #include "zend_object_handlers.h"
+#include "zend_ast.h"
 
 typedef union _zvalue_value {
 	long lval;					/* long value */
@@ -313,6 +328,7 @@ typedef union _zvalue_value {
 	} str;
 	HashTable *ht;				/* hash table value */
 	zend_object_value obj;
+	zend_ast *ast;
 } zvalue_value;
 
 struct _zval_struct {
@@ -440,8 +456,6 @@ struct _zend_trait_precedence {
 	zend_trait_method_reference *trait_method;
 	
 	zend_class_entry** exclude_from_classes;
-	
-	union _zend_function* function; /* FIXME: kept in 5.4 for BC, not used */
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -458,8 +472,6 @@ struct _zend_trait_alias {
 	* modifiers to be set on trait method
 	*/
 	zend_uint modifiers;
-	
-	union _zend_function* function; /* FIXME: kept in 5.4 for BC, not used */
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 
@@ -490,6 +502,7 @@ struct _zend_class_entry {
 	union _zend_function *__call;
 	union _zend_function *__callstatic;
 	union _zend_function *__tostring;
+	union _zend_function *__debugInfo;
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
@@ -577,7 +590,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
-#define IS_CALLABLE	10
+#define IS_CONSTANT_AST		10
+#define IS_CALLABLE	11
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f
@@ -586,6 +600,8 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100
+
+#define IS_CONSTANT_TYPE(type) (((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
@@ -641,12 +657,14 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 END_EXTERN_C()
 
-void zend_activate(TSRMLS_D);
-void zend_deactivate(TSRMLS_D);
-void zend_call_destructors(TSRMLS_D);
-void zend_activate_modules(TSRMLS_D);
-void zend_deactivate_modules(TSRMLS_D);
-void zend_post_deactivate_modules(TSRMLS_D);
+BEGIN_EXTERN_C()
+ZEND_API void zend_activate(TSRMLS_D);
+ZEND_API void zend_deactivate(TSRMLS_D);
+ZEND_API void zend_call_destructors(TSRMLS_D);
+ZEND_API void zend_activate_modules(TSRMLS_D);
+ZEND_API void zend_deactivate_modules(TSRMLS_D);
+ZEND_API void zend_post_deactivate_modules(TSRMLS_D);
+END_EXTERN_C()
 
 #if ZEND_DEBUG
 #define Z_DBG(expr)		(expr)
@@ -660,10 +678,14 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
 
+#ifndef ZTS
+#define STR_EMPTY_ALLOC() CG(interned_empty_string)? CG(interned_empty_string) : estrndup("", sizeof("")-1)
+#else
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
+#endif
 
 #define STR_REALLOC(ptr, size) \
 			ptr = (char *) erealloc(ptr, size);
@@ -673,7 +695,7 @@ END_EXTERN_C()
 #define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
-#define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
+#define ZEND_PUTC(c)					zend_write(&(c), 1)
 
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);

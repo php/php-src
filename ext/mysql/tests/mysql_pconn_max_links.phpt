@@ -191,12 +191,17 @@ $host = substr($row['_user'], strrpos($row['_user'], "@") + 1, strlen($row['_use
 mysql_close($link);
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 array(2) {
   [%u|b%"id"]=>
   %unicode|string%(1) "1"
   [%u|b%"label"]=>
   %unicode|string%(1) "a"
 }
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 array(2) {
   [%u|b%"id"]=>
   %unicode|string%(1) "1"

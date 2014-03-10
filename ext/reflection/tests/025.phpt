@@ -2,6 +2,9 @@
 ReflectionFunction basic tests
 --SKIPIF--
 <?php extension_loaded('reflection') or die('skip'); ?>
+--INI--
+opcache.save_comments=1
+opcache.load_comments=1
 --FILE--
 <?php
 

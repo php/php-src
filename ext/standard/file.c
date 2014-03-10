@@ -159,6 +159,7 @@ static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
 	FG(pclose_ret) = 0;
+	FG(pclose_wait) = 0;
 	FG(user_stream_current_filename) = NULL;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
 	FG(wrapper_errors) = NULL;
@@ -218,14 +219,22 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_CLIENT_ASYNC_CONNECT",	PHP_STREAM_CLIENT_ASYNC_CONNECT,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CLIENT_CONNECT",			PHP_STREAM_CLIENT_CONNECT,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_CLIENT",		STREAM_CRYPTO_METHOD_SSLv2_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",		STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_ANY_CLIENT",	STREAM_CRYPTO_METHOD_ANY_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_CLIENT",	STREAM_CRYPTO_METHOD_SSLv2_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",	STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_CLIENT",	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",		STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",		STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",		STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",	STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",	STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_ANY_SERVER",	STREAM_CRYPTO_METHOD_ANY_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",	STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",	STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_SERVER",	STREAM_CRYPTO_METHOD_SSLv23_SERVER,	CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",		STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",	STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_0_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_0_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",	STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,	CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
@@ -817,7 +826,7 @@ PHP_FUNCTION(tempnam)
 	if (p_len > 64) {
 		p[63] = '\0';
 	}
-	
+
 	RETVAL_FALSE;
 
 	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
@@ -960,7 +969,9 @@ PHP_FUNCTION(pclose)
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
+	FG(pclose_wait) = 1;
 	zend_list_delete(stream->rsrc_id);
+	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
@@ -1281,7 +1292,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1296,7 +1307,7 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1377,13 +1388,13 @@ PHP_FUNCTION(umask)
 {
 	long arg1 = 0;
 	int oldumask;
-	
+
 	oldumask = umask(077);
 
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1620,7 +1631,7 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1628,7 +1639,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 /* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1636,7 +1647,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 
 /* {{{ php_copy_file_ctx
  */
-PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -1796,22 +1807,23 @@ quit_loop:
 
 #define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL(field), c, Z_STRLEN(field))
 
-/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
+/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
    Format line as CSV and write to file pointer */
 PHP_FUNCTION(fputcsv)
 {
-	char delimiter = ',';	/* allow this to be set as parameter */
-	char enclosure = '"';	/* allow this to be set as parameter */
-	const char escape_char = '\\';
+	char delimiter = ',';	 /* allow this to be set as parameter */
+	char enclosure = '"';	 /* allow this to be set as parameter */
+	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
 	int ret;
-	char *delimiter_str = NULL, *enclosure_str = NULL;
-	int delimiter_str_len = 0, enclosure_str_len = 0;
+	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
+	int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|ss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|sss",
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
-			&enclosure_str, &enclosure_str_len) == FAILURE) {
+			&enclosure_str, &enclosure_str_len,
+			&escape_str, &escape_str_len) == FAILURE) {
 		return;
 	}
 
@@ -1837,6 +1849,17 @@ PHP_FUNCTION(fputcsv)
 		}
 		/* use first character from string */
 		enclosure = *enclosure_str;
+	}
+
+	if (escape_str != NULL) {
+		if (escape_str_len < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+			RETURN_FALSE;
+		} else if (escape_str_len > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
+		}
+		/* use first character from string */
+		escape_char = *escape_str;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &fp);
@@ -2054,11 +2077,11 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 			char *tmp = bptr;
 			while ((*tmp != delimiter) && isspace((int)*(unsigned char *)tmp)) {
 				tmp++;
-			}
+  			}
 			if (*tmp == enclosure) {
 				bptr = tmp;
 			}
-		}
+  		}
 
 		if (first_field && bptr == line_end) {
 			add_next_index_null(return_value);
@@ -2445,7 +2468,7 @@ PHP_FUNCTION(sys_get_temp_dir)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_STRING((char *)php_get_temporary_directory(), 1);
+	RETURN_STRING((char *)php_get_temporary_directory(TSRMLS_C), 1);
 }
 /* }}} */
 

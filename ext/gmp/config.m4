@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(gmp, for GNU MP support,
-[  --with-gmp[=DIR]        Include GNU MP support])
+[  --with-gmp[=DIR]          Include GNU MP support])
 
 if test "$PHP_GMP" != "no"; then
 

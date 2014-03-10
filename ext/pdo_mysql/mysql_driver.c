@@ -709,6 +709,20 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 				efree(ssl_cipher);
 			}
 		}
+
+#if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
+		{
+			char *public_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY, NULL TSRMLS_CC);
+			if (public_key) {
+				if (mysql_options(H->server, MYSQL_SERVER_PUBLIC_KEY, public_key)) {
+					pdo_mysql_error(dbh);
+					efree(public_key);
+					goto cleanup;
+				}
+				efree(public_key);
+			}
+		}
+#endif
 	}
 
 #ifdef PDO_MYSQL_HAS_CHARSET

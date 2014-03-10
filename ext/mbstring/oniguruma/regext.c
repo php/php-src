@@ -2,7 +2,7 @@
   regext.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
   if (to == ONIG_ENCODING_UTF16_BE) {
     if (from == ONIG_ENCODING_ASCII || from == ONIG_ENCODING_ISO_8859_1) {
       *conv = (UChar* )xmalloc(len * 2);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + (len * 2);
       conv_ext0be(s, end, *conv);
       return 0;
@@ -108,7 +108,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
     else if (from == ONIG_ENCODING_UTF16_LE) {
     swap16:
       *conv = (UChar* )xmalloc(len);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + len;
       conv_swap2bytes(s, end, *conv);
       return 0;
@@ -117,7 +117,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
   else if (to == ONIG_ENCODING_UTF16_LE) {
     if (from == ONIG_ENCODING_ASCII || from == ONIG_ENCODING_ISO_8859_1) {
       *conv = (UChar* )xmalloc(len * 2);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + (len * 2);
       conv_ext0le(s, end, *conv);
       return 0;
@@ -129,7 +129,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
   if (to == ONIG_ENCODING_UTF32_BE) {
     if (from == ONIG_ENCODING_ASCII || from == ONIG_ENCODING_ISO_8859_1) {
       *conv = (UChar* )xmalloc(len * 4);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + (len * 4);
       conv_ext0be32(s, end, *conv);
       return 0;
@@ -137,7 +137,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
     else if (from == ONIG_ENCODING_UTF32_LE) {
     swap32:
       *conv = (UChar* )xmalloc(len);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + len;
       conv_swap4bytes(s, end, *conv);
       return 0;
@@ -146,7 +146,7 @@ conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* e
   else if (to == ONIG_ENCODING_UTF32_LE) {
     if (from == ONIG_ENCODING_ASCII || from == ONIG_ENCODING_ISO_8859_1) {
       *conv = (UChar* )xmalloc(len * 4);
-      CHECK_NULL_RETURN_VAL(*conv, ONIGERR_MEMORY);
+      CHECK_NULL_RETURN_MEMERR(*conv);
       *conv_end = *conv + (len * 4);
       conv_ext0le32(s, end, *conv);
       return 0;
@@ -178,17 +178,24 @@ onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
     cpat_end = (UChar* )pattern_end;
   }
 
-  r = onig_alloc_init(reg, ci->option, ci->ambig_flag, ci->target_enc,
-                      ci->syntax);
+  *reg = (regex_t* )xmalloc(sizeof(regex_t));
+  if (IS_NULL(*reg)) {
+    r = ONIGERR_MEMORY;
+    goto err2;
+  }
+
+  r = onig_reg_init(*reg, ci->option, ci->case_fold_flag, ci->target_enc,
+		    ci->syntax);
   if (r) goto err;
 
   r = onig_compile(*reg, cpat, cpat_end, einfo);
   if (r) {
+  err:
     onig_free(*reg);
     *reg = NULL;
   }
 
- err:
+ err2:
   if (cpat != pattern) xfree(cpat);
 
   return r;

@@ -33,6 +33,7 @@ assert($tmp === mysql_real_escape_string("foo" . chr(0) . "bar"));
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 %unicode|string%(31) "Am I a unicode string in PHP 6?"
 %unicode|string%(2) "\\"
 %unicode|string%(2) "\""

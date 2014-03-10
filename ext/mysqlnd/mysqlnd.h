@@ -22,10 +22,10 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.10 - 20111026 - $Id$"
-#define MYSQLND_VERSION_ID 50010
+#define MYSQLND_VERSION "mysqlnd 5.0.11-dev - 20120503 - $Id$"
+#define MYSQLND_VERSION_ID 50011
 
-#define MYSQLND_PLUGIN_API_VERSION 1
+#define MYSQLND_PLUGIN_API_VERSION 2
 
 #define MYSQLND_STRING_TO_INT_CONVERSION
 /*
@@ -150,8 +150,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
-#define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+#define mysqlnd_fetch_lengths(result)	(result)->m.fetch_lengths((result) TSRMLS_CC)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)
@@ -192,8 +191,11 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode) TSRMLS_CC)
-#define mysqlnd_commit(conn)				((conn)->data)->m->tx_commit((conn)->data TSRMLS_CC)
-#define mysqlnd_rollback(conn)				((conn)->data)->m->tx_rollback((conn)->data TSRMLS_CC)
+#define mysqlnd_begin_transaction(conn,flags,name) ((conn)->data)->m->tx_begin((conn)->data, (flags), (name) TSRMLS_CC)
+#define mysqlnd_commit(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, TRUE, (flags), (name) TSRMLS_CC)
+#define mysqlnd_rollback(conn, flags, name)	((conn)->data)->m->tx_commit_or_rollback((conn)->data, FALSE, (flags), (name) TSRMLS_CC)
+#define mysqlnd_savepoint(conn, name)		((conn)->data)->m->tx_savepoint((conn)->data, (name) TSRMLS_CC)
+#define mysqlnd_release_savepoint(conn, name) ((conn)->data)->m->tx_savepoint_release((conn)->data, (name) TSRMLS_CC)
 #define mysqlnd_list_dbs(conn, wild)		((conn)->data)->m->list_method((conn)->data, wild? "SHOW DATABASES LIKE %s":"SHOW DATABASES", (wild), NULL TSRMLS_CC)
 #define mysqlnd_list_fields(conn, tab,wild)	((conn)->data)->m->list_fields((conn)->data, (tab), (wild) TSRMLS_CC)
 #define mysqlnd_list_processes(conn)		((conn)->data)->m->list_method((conn)->data, "SHOW PROCESSLIST", NULL, NULL TSRMLS_CC)
@@ -207,6 +209,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs) TSRMLS_CC)
 #define mysqlnd_stat(conn, msg, msg_len)	((conn)->data)->m->get_server_statistics(((conn)->data), (msg), (msg_len) TSRMLS_CC)
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value) TSRMLS_CC)
+#define mysqlnd_options4(conn, opt, k, v)	((conn)->data)->m->set_client_option_2d((conn)->data, (opt), (k), (v) TSRMLS_CC)
 #define mysqlnd_set_server_option(conn, op)	((conn)->data)->m->set_server_option((conn)->data, (op) TSRMLS_CC)
 
 /* Escaping */
@@ -262,8 +265,10 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
-	char*			debug;	/* The actual string */
-	MYSQLND_DEBUG	*dbg;	/* The DBG object */
+	char *			debug;	/* The actual string */
+	char *			trace_alloc_settings;	/* The actual string */
+	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
+	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
 	long			log_mask;
@@ -275,6 +280,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_malloc_fail_threshold;
 	long			debug_calloc_fail_threshold;
 	long			debug_realloc_fail_threshold;
+	char *			sha256_server_public_key;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

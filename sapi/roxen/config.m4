@@ -7,7 +7,7 @@ PHP_ARG_WITH(roxen,,
                           directory, normally /usr/local/roxen/server], no, no)
 
 PHP_ARG_ENABLE(roxen-zts, whether Roxen module is build using ZTS,
-[  --enable-roxen-zts        ROXEN: Build the Roxen module using Zend Thread Safety], no, no)
+[  --enable-roxen-zts      ROXEN: Build the Roxen module using Zend Thread Safety], no, no)
 
 RESULT=
 AC_MSG_CHECKING([for Roxen/Pike support])

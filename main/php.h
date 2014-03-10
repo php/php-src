@@ -26,9 +26,10 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20100412
+#define PHP_API_VERSION 20131106
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
+#define PHP_DEFAULT_CHARSET "UTF-8"
 
 #include "php_version.h"
 #include "zend.h"
@@ -60,7 +61,6 @@
 #	else
 #		define PHPAPI
 #	endif
-
 #	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
@@ -180,6 +180,8 @@ typedef unsigned int socklen_t;
 #  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
+
+#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"
@@ -399,7 +401,7 @@ END_EXTERN_C()
 
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include "zend_constants.h"
 

@@ -170,7 +170,10 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-    	using_history();
+#if HAVE_LIBREADLINE
+		/* libedit don't need this call which set the tty in cooked mode */
+		using_history();
+#endif
     	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
 }
 
@@ -351,6 +354,11 @@ PHP_FUNCTION(readline_clear_history)
 		return;
 	}
 
+#if HAVE_LIBEDIT
+	/* clear_history is the only function where rl_initialize
+	   is not call to ensure correct allocation */
+	using_history();
+#endif
 	clear_history();
 
 	RETURN_TRUE;

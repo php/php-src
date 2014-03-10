@@ -121,7 +121,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 }
 /*}}}*/
 
-static char* getPreferredTag(char* gf_tag)
+static char* getPreferredTag(const char* gf_tag)
 { 
 	char* result = NULL;
 	int grOffset = 0;
@@ -175,7 +175,7 @@ static int getStrrtokenPos(char* str, int savedPos)
 * returns -1 if no singleton
 * strtok equivalent search for singleton
 */
-static int getSingletonPos(char* str)
+static int getSingletonPos(const char* str)
 {
 	int result =-1;
 	int i=0;
@@ -211,10 +211,7 @@ static int getSingletonPos(char* str)
    Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
-	if( INTL_G(default_locale) == NULL ) {
-		INTL_G(default_locale) = pestrdup( uloc_getDefault(), 1);
- 	}
-	RETURN_STRING( INTL_G(default_locale), TRUE );
+	RETURN_STRING( intl_locale_get_default( TSRMLS_C ), TRUE );
 }
 
 /* }}} */
@@ -254,7 +251,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 * common code shared by get_primary_language,get_script or get_region or get_variant
 * result = 0 if error, 1 if successful , -1 if no value
 */
-static char* get_icu_value_internal( char* loc_name , char* tag_name, int* result , int fromParseLocale)
+static char* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
 {
 	char*		tag_value	= NULL;
 	int32_t     	tag_value_len   = 512;
@@ -284,7 +281,7 @@ static char* get_icu_value_internal( char* loc_name , char* tag_name, int* resul
 		/* Handle singletons */
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
 			if( strlen(loc_name)>1 && (isIDPrefix(loc_name) ==1 ) ){
-				return loc_name;
+				return (char *)loc_name;
 			}
 		}
 
@@ -373,7 +370,7 @@ static char* get_icu_value_internal( char* loc_name , char* tag_name, int* resul
 static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS) 
 {
 
-	char*       loc_name        	= NULL;
+	const char* loc_name        	= NULL;
 	int         loc_name_len    	= 0;
 
 	char*       tag_value		= NULL;
@@ -396,7 +393,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
     }
 
 	if(loc_name_len == 0) {
-		loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 	/* Call ICU get */
@@ -468,10 +465,10 @@ PHP_FUNCTION(locale_get_primary_language )
  }}} */
 static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS) 
 {
-	char*       loc_name        	= NULL;
+	const char* loc_name        	= NULL;
 	int         loc_name_len    	= 0;
 
-	char*       disp_loc_name       = NULL;
+	const char* disp_loc_name       = NULL;
 	int         disp_loc_name_len   = 0;
 	int         free_loc_name       = 0;
 
@@ -502,7 +499,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	}
 
 	if(loc_name_len == 0) {
-	loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 	if( strcmp(tag_name, DISP_NAME) != 0 ){
@@ -524,7 +521,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	
 	/* Check if disp_loc_name passed , if not use default locale */
 	if( !disp_loc_name){
-		disp_loc_name = estrdup(INTL_G(default_locale));
+		disp_loc_name = estrdup(intl_locale_get_default(TSRMLS_C));
 		free_loc_name = 1;
 	}
 
@@ -564,7 +561,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 				efree( mod_loc_name );
 			}
 			if (free_loc_name) {
-				efree(disp_loc_name);
+				efree((void *)disp_loc_name);
 				disp_loc_name = NULL;
 			}
 			RETURN_FALSE;
@@ -575,7 +572,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		efree( mod_loc_name );
 	}
 	if (free_loc_name) {
-		efree(disp_loc_name);
+		efree((void *)disp_loc_name);
 		disp_loc_name = NULL;
 	}
 	/* Convert display locale name from UTF-16 to UTF-8. */
@@ -669,10 +666,10 @@ PHP_FUNCTION( locale_get_keywords )
     UEnumeration*   e        = NULL;
     UErrorCode      status   = U_ZERO_ERROR;
 
-	const char*	 	kw_key        = NULL;
+    const char*	 	kw_key        = NULL;
     int32_t         kw_key_len    = 0;
 
-    char*       	loc_name        = NULL;
+    const char*       	loc_name        = NULL;
     int        	 	loc_name_len    = 0;
 
 /* 
@@ -696,7 +693,7 @@ PHP_FUNCTION( locale_get_keywords )
     }
 
     if(loc_name_len == 0) {
-        loc_name = INTL_G(default_locale);
+        loc_name = intl_locale_get_default(TSRMLS_C);
     }
 
 	/* Get the keywords */
@@ -719,7 +716,7 @@ PHP_FUNCTION( locale_get_keywords )
 				kw_value = erealloc( kw_value , kw_value_len+1);
 			} 
 			if (U_FAILURE(status)) {
-        		intl_error_set( NULL, FAILURE, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 TSRMLS_CC );
+	        		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 TSRMLS_CC );
 				if( kw_value){
 					efree( kw_value );
 				}
@@ -977,12 +974,12 @@ PHP_FUNCTION(locale_compose)
 * e.g. for locale='en_US-x-prv1-prv2-prv3'
 * returns a pointer to the string 'prv1-prv2-prv3'
 */
-static char* get_private_subtags(char* loc_name)
+static char* get_private_subtags(const char* loc_name)
 {
 	char* 	result =NULL;
 	int 	singletonPos = 0;
 	int 	len =0; 
-	char* 	mod_loc_name =NULL;
+	const char* 	mod_loc_name =NULL;
 
 	if( loc_name && (len = strlen(loc_name)>0 ) ){
 		mod_loc_name = loc_name ; 
@@ -1022,7 +1019,7 @@ static char* get_private_subtags(char* loc_name)
 
 /* {{{ code used by locale_parse
 */
-static int add_array_entry(char* loc_name, zval* hash_arr, char* key_name TSRMLS_DC)
+static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name TSRMLS_DC)
 {
 	char*   key_value 	= NULL;
 	char*   cur_key_name	= NULL;
@@ -1087,7 +1084,7 @@ static int add_array_entry(char* loc_name, zval* hash_arr, char* key_name TSRMLS
 */
 PHP_FUNCTION(locale_parse)
 {
-    char*       loc_name        = NULL;
+    const char* loc_name        = NULL;
     int         loc_name_len    = 0;
     int         grOffset    	= 0;
 
@@ -1103,7 +1100,7 @@ PHP_FUNCTION(locale_parse)
     }
 
     if(loc_name_len == 0) {
-        loc_name = INTL_G(default_locale);
+        loc_name = intl_locale_get_default(TSRMLS_C);
     }
 
 	array_init( return_value );
@@ -1131,8 +1128,8 @@ PHP_FUNCTION(locale_parse)
 */
 PHP_FUNCTION(locale_get_all_variants)
 {
-	char*  	loc_name        = NULL;
-	int    	loc_name_len    = 0;
+	const char*  	loc_name        = NULL;
+	int    		loc_name_len    = 0;
 
 	int	result		= 0;
 	char*	token		= NULL;
@@ -1151,7 +1148,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	}
 
 	if(loc_name_len == 0) {
-		loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 
@@ -1185,10 +1182,10 @@ PHP_FUNCTION(locale_get_all_variants)
 /*{{{
 * Converts to lower case and also replaces all hyphens with the underscore
 */
-static int strToMatch(char* str ,char *retstr)
+static int strToMatch(const char* str ,char *retstr)
 {
 	char* 	anchor 	= NULL;
-	char* 	anchor1 = NULL;
+	const char* 	anchor1 = NULL;
 	int 	result 	= 0;
 	int 	len 	= 0;
 
@@ -1228,7 +1225,7 @@ PHP_FUNCTION(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
 	int         	lang_tag_len    = 0;
-	char*       	loc_range       = NULL;
+	const char*     loc_range       = NULL;
 	int         	loc_range_len   = 0;
 
 	int		result		= 0;
@@ -1257,7 +1254,7 @@ PHP_FUNCTION(locale_filter_matches)
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = INTL_G(default_locale);
+		loc_range = intl_locale_get_default(TSRMLS_C);
 	}
 
 	if( strcmp(loc_range,"*")==0){
@@ -1404,7 +1401,7 @@ static void array_cleanup( char* arr[] , int arr_size)
 * returns the lookup result to lookup_loc_range_src_php 
 * internal function
 */
-static char* lookup_loc_range(char* loc_range, HashTable* hash_arr, int canonicalize  TSRMLS_DC)
+static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int canonicalize  TSRMLS_DC)
 {
 	int	i = 0;
 	int	cur_arr_len = 0;
@@ -1526,7 +1523,7 @@ PHP_FUNCTION(locale_lookup)
 {
 	char*      	fallback_loc  		= NULL;
 	int        	fallback_loc_len	= 0;
-	char*      	loc_range      		= NULL;
+	const char*    	loc_range      		= NULL;
 	int        	loc_range_len  		= 0;
 
 	zval*		arr				= NULL;
@@ -1543,7 +1540,7 @@ PHP_FUNCTION(locale_lookup)
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = INTL_G(default_locale);
+		loc_range = intl_locale_get_default(TSRMLS_C);
 	}
 
 	hash_arr = HASH_OF(arr);

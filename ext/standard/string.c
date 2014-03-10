@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -23,11 +23,6 @@
 /* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
 
 #include <stdio.h>
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#else
-# include <stdint.h>
-#endif
 #include "php.h"
 #include "php_rand.h"
 #include "php_string.h"
@@ -280,6 +275,7 @@ PHP_FUNCTION(hex2bin)
 	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 
 	if (!result) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 
@@ -2864,7 +2860,7 @@ static inline void php_strtr_populate_shift(PATNREPL *patterns, int patnum, int 
 }
 /* }}} */
 /* {{{ php_strtr_compare_hash_suffix */
-static int php_strtr_compare_hash_suffix(const void *a, const void *b, void *ctx_g)
+static int php_strtr_compare_hash_suffix(const void *a, const void *b TSRMLS_DC, void *ctx_g)
 {
 	const PPRES		*res = ctx_g;
 	const PATNREPL	*pnr_a = a,
@@ -2887,62 +2883,6 @@ static int php_strtr_compare_hash_suffix(const void *a, const void *b, void *ctx
 		} else {
 			return 0;
 		}
-	}
-}
-/* }}} */
-/* {{{ Sorting (no zend_qsort_r in this PHP version) */
-#define HS_LEFT(i)		((i) * 2 + 1)
-#define HS_RIGHT(i) 	((i) * 2 + 2)
-#define HS_PARENT(i)	(((i) - 1) / 2);
-#define HS_OFF(data, i)	((void *)(&((data)->arr)[i]))
-#define HS_CMP_CALL(data, i1, i2) \
-		(php_strtr_compare_hash_suffix(HS_OFF((data), (i1)), HS_OFF((data), (i2)), (data)->res))
-struct hs_data {
-	PATNREPL	*arr;
-	size_t		nel;
-	size_t		heapel;
-	PPRES		*res;
-};
-static inline void php_strtr_swap(PATNREPL *a, PATNREPL *b)
-{
-	PATNREPL tmp = *a;
-	*a = *b;
-	*b = tmp;
-}
-static inline void php_strtr_fix_heap(struct hs_data *data, size_t i)
-{
-	size_t	li =	HS_LEFT(i),
-			ri =	HS_RIGHT(i),
-			largei;
-	if (li < data->heapel && HS_CMP_CALL(data, li, i) > 0) {
-		largei = li;
-	} else {
-		largei = i;
-	}
-	if (ri < data->heapel && HS_CMP_CALL(data, ri, largei) > 0) {
-		largei = ri;
-	}
-	if (largei != i) {
-		php_strtr_swap(HS_OFF(data, i), HS_OFF(data, largei));
-		php_strtr_fix_heap(data, largei);
-	}
-}
-static inline void php_strtr_build_heap(struct hs_data *data)
-{
-	size_t i;
-	for (i = data->nel / 2; i > 0; i--) {
-		php_strtr_fix_heap(data, i - 1);
-	}
-}
-static inline void php_strtr_heapsort(PATNREPL *arr, size_t nel, PPRES *res)
-{
-	struct hs_data data = { arr, nel, nel, res };
-	size_t i;
-	php_strtr_build_heap(&data);
-	for (i = nel; i > 1; i--) {
-		php_strtr_swap(arr, HS_OFF(&data, i - 1));
-		data.heapel--;
-		php_strtr_fix_heap(&data, 0);
 	}
 }
 /* }}} */
@@ -3043,7 +2983,13 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 
 	res->patterns = safe_emalloc(patnum, sizeof(*res->patterns), 0);
 	memcpy(res->patterns, patterns, sizeof(*patterns) * patnum);
-	php_strtr_heapsort(res->patterns, patnum, res);
+#ifdef ZTS
+	zend_qsort_r(res->patterns, patnum, sizeof(*res->patterns),
+			php_strtr_compare_hash_suffix, res, NULL); /* tsrmls not needed */
+#else
+	zend_qsort_r(res->patterns, patnum, sizeof(*res->patterns),
+			php_strtr_compare_hash_suffix, res);
+#endif
 
 	res->prefix = safe_emalloc(patnum, sizeof(*res->prefix), 0);
 	for (i = 0; i < patnum; i++) {
@@ -5639,14 +5585,13 @@ PHP_FUNCTION(substr_compare)
 	int s1_len, s2_len;
 	long offset, len=0;
 	zend_bool cs=0;
-	uint cmp_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() >= 4 && len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than zero");
+	if (ZEND_NUM_ARGS() >= 4 && len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 
@@ -5660,12 +5605,10 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));
-
 	if (!cs) {
-		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, (uint)len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, (uint)len));
 	}
 }
 /* }}} */

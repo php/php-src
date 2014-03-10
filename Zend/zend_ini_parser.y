@@ -67,6 +67,9 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 		case '&':
 			i_result = i_op1 & i_op2;
 			break;
+		case '^':
+			i_result = i_op1 ^ i_op2;
+			break;
 		case '~':
 			i_result = ~i_op1;
 			break;
@@ -264,7 +267,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %token BOOL_FALSE
 %token END_OF_LINE
 %token '=' ':' ',' '.' '"' '\'' '^' '+' '-' '/' '*' '%' '$' '~' '<' '>' '?' '@' '{' '}'
-%left '|' '&'
+%left '|' '&' '^'
 %right '~' '!'
 
 %%
@@ -348,6 +351,7 @@ expr:
 		var_string_list					{ $$ = $1; }
 	|	expr '|' expr					{ zend_ini_do_op('|', &$$, &$1, &$3); }
 	|	expr '&' expr					{ zend_ini_do_op('&', &$$, &$1, &$3); }
+	|	expr '^' expr					{ zend_ini_do_op('^', &$$, &$1, &$3); }
 	|	'~' expr						{ zend_ini_do_op('~', &$$, &$2, NULL); }
 	|	'!'	expr						{ zend_ini_do_op('!', &$$, &$2, NULL); }
 	|	'(' expr ')'					{ $$ = $2; }

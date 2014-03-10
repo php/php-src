@@ -5,7 +5,7 @@ dnl
 dnl Check for regex library type
 dnl
 PHP_ARG_WITH(regex,,
-[  --with-regex=TYPE       regex library type: system, php. [TYPE=php]
+[  --with-regex=TYPE       Regex library type: system, php. [TYPE=php]
                           WARNING: Do NOT use unless you know what you are doing!], php, no)
 
 case $PHP_REGEX in

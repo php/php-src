@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(sybase-ct, for Sybase-CT support,
-[  --with-sybase-ct[=DIR]  Include Sybase-CT support.  DIR is the Sybase home
+[  --with-sybase-ct[=DIR]    Include Sybase-CT support.  DIR is the Sybase home
                           directory [/home/sybase]])
 
 if test "$PHP_SYBASE_CT" != "no"; then

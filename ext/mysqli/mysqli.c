@@ -561,6 +561,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mysqli.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_mysqli_globals,		mysqli_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mysqli.max_persistent",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_mysqli_globals,		mysqli_globals,	display_link_numbers)
 	STD_PHP_INI_BOOLEAN("mysqli.allow_persistent",		"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_mysqli_globals,		mysqli_globals)
+	STD_PHP_INI_BOOLEAN("mysqli.rollback_on_cached_plink",	"0",PHP_INI_SYSTEM,		OnUpdateBool,		rollback_on_cached_plink,	zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysqli_globals,		mysqli_globals)
 	STD_PHP_INI_ENTRY("mysqli.default_pw",				NULL,	PHP_INI_ALL,		OnUpdateString,		default_pw,			zend_mysqli_globals,		mysqli_globals)
@@ -600,6 +601,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 #else
 	mysqli_globals->embedded = 0;
 #endif
+	mysqli_globals->rollback_on_cached_plink = FALSE;
 }
 /* }}} */
 
@@ -700,6 +702,10 @@ PHP_MINIT_FUNCTION(mysqli)
 #endif
 #if MYSQL_VERSION_ID > 50110 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
+#endif
+
+#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PUBLIC_KEY", MYSQL_SERVER_PUBLIC_KEY, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* mysqli_real_connect flags */
@@ -841,9 +847,19 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_BACKUP_LOG", REFRESH_BACKUP_LOG, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#if MYSQL_VERSION_ID >= 50611 || defined(MYSQLI_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS", MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
 #endif
+
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT", TRANS_START_WITH_CONSISTENT_SNAPSHOT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_START_READ_WRITE", TRANS_START_READ_WRITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_START_READ_ONLY", TRANS_START_READ_ONLY, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_AND_CHAIN", TRANS_COR_AND_CHAIN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_AND_NO_CHAIN", TRANS_COR_AND_NO_CHAIN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_RELEASE", TRANS_COR_RELEASE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_TRANS_COR_NO_RELEASE", TRANS_COR_NO_RELEASE, CONST_CS | CONST_PERSISTENT);
+
 
 #ifdef MYSQLI_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&mysqli_reverse_api TSRMLS_CC);
@@ -1330,218 +1346,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	}
 }
 /* }}} */
-
-
-#if !defined(MYSQLI_USE_MYSQLND)
-
-#define ALLOC_CALLBACK_ARGS(a, b, c)\
-if (c) {\
-	a = (zval ***)safe_emalloc(c, sizeof(zval **), 0);\
-	for (i = b; i < c; i++) {\
-		a[i] = emalloc(sizeof(zval *));\
-		MAKE_STD_ZVAL(*a[i]);\
-	}\
-}
-
-#define FREE_CALLBACK_ARGS(a, b, c)\
-if (a) {\
-	for (i=b; i < c; i++) {\
-		zval_ptr_dtor(a[i]);\
-		efree(a[i]);\
-	}\
-	efree(a);\
-}
-
-#define LOCAL_INFILE_ERROR_MSG(source,dest)\
-	memset(source, 0, LOCAL_INFILE_ERROR_LEN);\
-	memcpy(source, dest, MIN(strlen(dest), LOCAL_INFILE_ERROR_LEN-1));\
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", dest);
-
-
-/* {{{ php_local_infile_init
- */
-static int php_local_infile_init(void **ptr, const char *filename, void *userdata)
-{
-	mysqli_local_infile			*data;
-	MY_MYSQL					*mysql;
-	php_stream_context			*context = NULL;
-
-	TSRMLS_FETCH();
-
-	/* save pointer to MY_MYSQL structure (userdata) */
-	if (!(*ptr= data= ((mysqli_local_infile *)calloc(1, sizeof(mysqli_local_infile))))) {
-		return 1;
-	}
-
-	if (!(mysql = (MY_MYSQL *)userdata)) {
-		LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(CR_UNKNOWN_ERROR));
-		return 1;
-	}
-
-	/* check open_basedir */
-	if (PG(open_basedir)) {
-		if (php_check_open_basedir_ex(filename, 0 TSRMLS_CC) == -1) {
-			LOCAL_INFILE_ERROR_MSG(data->error_msg, "open_basedir restriction in effect. Unable to open file");
-			return 1;
-		}
-	}
-
-	mysql->li_stream = php_stream_open_wrapper_ex((char *)filename, "r", 0, NULL, context);
-
-	if (mysql->li_stream == NULL) {
-		snprintf((char *)data->error_msg, sizeof(data->error_msg), "Can't find file '%-.64s'.", filename);
-		return 1;
-	}
-
-	data->userdata = mysql;
-
-	return 0;
-}
-/* }}} */
-
-/* {{{ int php_local_infile_read */
-static int php_local_infile_read(void *ptr, char *buf, uint buf_len)
-{
-	mysqli_local_infile			*data;
-	MY_MYSQL					*mysql;
-	zval						***callback_args;
-	zval						*retval;
-	zval						*fp;
-	int							argc = 4;
-	int							i;
-	long						rc;
-
-	TSRMLS_FETCH();
-
-	data= (mysqli_local_infile *)ptr;
-	mysql = data->userdata;
-
-	/* default processing */
-	if (!mysql->li_read) {
-		int count = (int)php_stream_read(mysql->li_stream, buf, buf_len);
-
-		if (count < 0) {
-			LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(2));
-		}
-
-		return count;
-	}
-
-	ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
-
-	/* set parameters: filepointer, buffer, buffer_len, errormsg */
-
-	MAKE_STD_ZVAL(fp);
-	php_stream_to_zval(mysql->li_stream, fp);
-	callback_args[0] = &fp;
-	ZVAL_STRING(*callback_args[1], "", 1);
-	ZVAL_LONG(*callback_args[2], buf_len);
-	ZVAL_STRING(*callback_args[3], "", 1);
-
-	if (call_user_function_ex(EG(function_table),
-						NULL,
-						mysql->li_read,
-						&retval,
-						argc,
-						callback_args,
-						0,
-						NULL TSRMLS_CC) == SUCCESS) {
-
-		rc = Z_LVAL_P(retval);
-		zval_ptr_dtor(&retval);
-
-		if (rc > 0) {
-			if (rc >= 0 && rc != Z_STRLEN_P(*callback_args[1])) {
-				LOCAL_INFILE_ERROR_MSG(data->error_msg,
-							"Mismatch between the return value of the callback and the content "
-							"length of the buffer.");
-				rc = -1;
-			} else if (rc > buf_len) {
-				/* check buffer overflow */
-				LOCAL_INFILE_ERROR_MSG(data->error_msg, "Too much data returned");
-				rc = -1;
-			} else {
-				memcpy(buf, Z_STRVAL_P(*callback_args[1]), MIN(rc, Z_STRLEN_P(*callback_args[1])));
-			}
-		} else if (rc < 0) {
-			LOCAL_INFILE_ERROR_MSG(data->error_msg, Z_STRVAL_P(*callback_args[3]));
-		}
-	} else {
-		LOCAL_INFILE_ERROR_MSG(data->error_msg, "Can't execute load data local init callback function");
-		rc = -1;
-	}
-	/*
-	  If the (ab)user has closed the file handle we should
-	  not try to use it anymore or even close it
-	*/
-	if (!zend_rsrc_list_get_rsrc_type(Z_LVAL_P(fp) TSRMLS_CC)) {
-		LOCAL_INFILE_ERROR_MSG(data->error_msg, "File handle closed");
-		rc = -1;
-		/* Thus the end handler won't try to free already freed memory */
-		mysql->li_stream = NULL;
-	}
-
-	FREE_CALLBACK_ARGS(callback_args, 1, argc);
-	efree(fp);
-	return rc;
-}
-/* }}} */
-
-/* {{{ php_local_infile_error
- */
-static int php_local_infile_error(void *ptr, char *error_msg, uint error_msg_len)
-{
-	mysqli_local_infile *data = (mysqli_local_infile *) ptr;
-
-	if (data) {
-		strlcpy(error_msg, data->error_msg, error_msg_len);
-		return 2000;
-	}
-	strlcpy(error_msg, ER(CR_OUT_OF_MEMORY), error_msg_len);
-	return CR_OUT_OF_MEMORY;
-}
-/* }}} */
-
-/* {{{ php_local_infile_end
- */
-static void php_local_infile_end(void *ptr)
-{
-	mysqli_local_infile		*data;
-	MY_MYSQL				*mysql;
-
-	TSRMLS_FETCH();
-
-	data= (mysqli_local_infile *)ptr;
-
-	if (!data || !(mysql = data->userdata)) {
-		if (data) {
-			free(data);
-		}
-		return;
-	}
-
-	if (mysql->li_stream) {
-		php_stream_close(mysql->li_stream);
-	}
-	free(data);
-	return;
-}
-/* }}} */
-
-
-/* {{{ void php_set_local_infile_handler_default
-*/
-void php_set_local_infile_handler_default(MY_MYSQL *mysql) {
-	/* register internal callback functions */
-	mysql_set_local_infile_handler(mysql->mysql, &php_local_infile_init, &php_local_infile_read,
-				&php_local_infile_end, &php_local_infile_error, (void *)mysql);
-	if (mysql->li_read) {
-		zval_ptr_dtor(&mysql->li_read);
-		mysql->li_read = NULL;
-	}
-}
-/* }}} */
-#endif
 
 /*
  * Local variables:

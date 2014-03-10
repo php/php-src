@@ -253,8 +253,8 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_thread_id_read, mysql_thread_id, MYSQLI_GET_M
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
 
 /* {{{ property link_stat_read */
-static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)\
-{\
+static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	MY_MYSQL *mysql;
 
 	MAKE_STD_ZVAL(*retval);
@@ -311,19 +311,21 @@ static int result_lengths_read(mysqli_object *obj, zval **retval TSRMLS_DC)
 {
 	MYSQL_RES *p;
 	ulong *ret;
+	uint field_count;
 
 	MAKE_STD_ZVAL(*retval);
 
 	CHECK_STATUS(MYSQLI_STATUS_VALID);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	if (!p || !p->field_count || !(ret = mysql_fetch_lengths(p))) {
+	field_count = mysql_num_fields(p);
+	if (!p || !field_count || !(ret = mysql_fetch_lengths(p))) {
 		ZVAL_NULL(*retval);
 	} else {
 		ulong i;
 
 		array_init(*retval);
 
-		for (i = 0; i < p->field_count; i++) {
+		for (i = 0; i < field_count; i++) {
 			add_index_long(*retval, i, ret[i]);
 		}
 	}

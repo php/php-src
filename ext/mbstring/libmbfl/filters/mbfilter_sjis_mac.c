@@ -424,7 +424,7 @@ mbfl_filt_conv_wchar_sjis_mac(int c, mbfl_convert_filter *filter)
 			} else if (c == 0xa0) {
 				s1 = 0x00a0;
 			} else if (c == 0xa5) {		/* YEN SIGN */
-				s1 = 0x216f; /* FULLWIDTH YEN SIGN */
+				s1 = 0x216f;	/* FULLWIDTH YEN SIGN */
 			} else if (c == 0xff3c) {	/* FULLWIDTH REVERSE SOLIDUS */
 				s1 = 0x2140;
 			}

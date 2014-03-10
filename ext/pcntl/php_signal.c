@@ -32,7 +32,6 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	TSRMLS_FETCH();
 #endif
 	act.sa_handler = func;
-
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
 	} else {
@@ -56,7 +55,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	{
 		return SIG_ERR;
 	}
-
+ 
 	return oact.sa_handler;
 }
 

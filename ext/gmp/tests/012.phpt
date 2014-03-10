@@ -28,6 +28,8 @@ int(0)
 int(-1)
 int(1)
 int(1)
+
+Warning: gmp_neg(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 int(0)
 int(0)
 int(0)

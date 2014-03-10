@@ -2,7 +2,7 @@
   euc_kr.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,18 +67,21 @@ euckr_code_to_mbc(OnigCodePoint code, UChar *buf)
 }
 
 static int
-euckr_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
-                       UChar* lower)
+euckr_mbc_case_fold(OnigCaseFoldType flag, const UChar** pp, const UChar* end,
+                    UChar* lower)
 {
-  return onigenc_mbn_mbc_to_normalize(ONIG_ENCODING_EUC_KR, flag,
-                                      pp, end, lower);
+  return onigenc_mbn_mbc_case_fold(ONIG_ENCODING_EUC_KR, flag,
+                                   pp, end, lower);
 }
 
+#if 0
 static int
-euckr_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
+euckr_is_mbc_ambiguous(OnigCaseFoldType flag,
+		       const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_EUC_KR, flag, pp, end);
 }
+#endif
 
 static int
 euckr_is_code_ctype(OnigCodePoint code, unsigned int ctype)
@@ -101,14 +104,14 @@ euckr_left_adjust_char_head(const UChar* start, const UChar* s)
   p = s;
 
   while (!euckr_islead(*p) && p > start) p--;
-  len = enc_len(ONIG_ENCODING_EUC_KR, p);
+  len = enclen(ONIG_ENCODING_EUC_KR, p);
   if (p + len > s) return (UChar* )p;
   p += len;
   return (UChar* )(p + ((s - p) & ~1));
 }
 
 static int
-euckr_is_allowed_reverse_match(const UChar* s, const UChar* end)
+euckr_is_allowed_reverse_match(const UChar* s, const UChar* end ARG_UNUSED)
 {
   const UChar c = *s;
   if (c <= 0x7e) return TRUE;
@@ -120,23 +123,14 @@ OnigEncodingType OnigEncodingEUC_KR = {
   "EUC-KR",   /* name */
   2,          /* max enc length */
   1,          /* min enc length */
-  ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE,
-  {
-      (OnigCodePoint )'\\'                       /* esc */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
-  },
   onigenc_is_mbc_newline_0x0a,
   euckr_mbc_to_code,
   onigenc_mb2_code_to_mbclen,
   euckr_code_to_mbc,
-  euckr_mbc_to_normalize,
-  euckr_is_mbc_ambiguous,
-  onigenc_ascii_get_all_pair_ambig_codes,
-  onigenc_nothing_get_all_comp_ambig_codes,
+  euckr_mbc_case_fold,
+  onigenc_ascii_apply_all_case_fold,
+  onigenc_ascii_get_case_fold_codes_by_str,
+  onigenc_minimum_property_name_to_ctype,
   euckr_is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   euckr_left_adjust_char_head,
@@ -149,23 +143,14 @@ OnigEncodingType OnigEncodingEUC_CN = {
   "EUC-CN",   /* name */
   2,          /* max enc length */
   1,          /* min enc length */
-  ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE,
-  {
-      (OnigCodePoint )'\\'                       /* esc */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
-  },
   onigenc_is_mbc_newline_0x0a,
   euckr_mbc_to_code,
   onigenc_mb2_code_to_mbclen,
   euckr_code_to_mbc,
-  euckr_mbc_to_normalize,
-  euckr_is_mbc_ambiguous,
-  onigenc_ascii_get_all_pair_ambig_codes,
-  onigenc_nothing_get_all_comp_ambig_codes,
+  euckr_mbc_case_fold,
+  onigenc_ascii_apply_all_case_fold,
+  onigenc_ascii_get_case_fold_codes_by_str,
+  onigenc_minimum_property_name_to_ctype,
   euckr_is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   euckr_left_adjust_char_head,

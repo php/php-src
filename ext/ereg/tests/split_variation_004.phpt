@@ -18,7 +18,6 @@ $pattern = '[[:space:]]';
 $string = '1 2 3 4 5';
 var_dump(split($pattern, $string, 0));
 var_dump(split($pattern, $string, -10));
-var_dump(split($pattern, $string, 10E20));
 
 
 echo "Done";
@@ -31,11 +30,6 @@ array(1) {
   string(9) "1 2 3 4 5"
 }
 Error: 8192 - Function split() is deprecated, %s(17)
-array(1) {
-  [0]=>
-  string(9) "1 2 3 4 5"
-}
-Error: 8192 - Function split() is deprecated, %s(18)
 array(1) {
   [0]=>
   string(9) "1 2 3 4 5"

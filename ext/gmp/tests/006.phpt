@@ -28,6 +28,8 @@ NULL
 
 Warning: gmp_sub() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
+
+Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
 
 Warning: gmp_sub() expects exactly 2 parameters, 3 given in %s on line %d
@@ -35,9 +37,15 @@ NULL
 
 Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-resource(%d) of type (GMP integer)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(2) "-1"
+}
 string(2) "-1"
-resource(%d) of type (GMP integer)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(5) "10001"
+}
 string(5) "10001"
 
 Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d

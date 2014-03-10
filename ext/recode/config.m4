@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(recode,for recode support,
-[  --with-recode[=DIR]     Include recode support])
+[  --with-recode[=DIR]       Include recode support])
 
 if test "$PHP_RECODE" != "no"; then
   RECODE_LIST="$PHP_RECODE /usr/local /usr /opt"

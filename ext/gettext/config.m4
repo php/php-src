@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(gettext,for GNU gettext support,
-[  --with-gettext[=DIR]    Include GNU gettext support])
+[  --with-gettext[=DIR]      Include GNU gettext support])
 
 if test "$PHP_GETTEXT" != "no"; then
   for i in $PHP_GETTEXT /usr/local /usr; do

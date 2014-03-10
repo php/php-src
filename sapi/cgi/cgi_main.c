@@ -508,7 +508,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -524,8 +524,11 @@ static int sapi_fcgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
+	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	if (remaining < count_bytes) {
+		count_bytes = remaining;
+	}
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -815,7 +818,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		}
 
 		if (real_path) {
-			free(real_path);
+			efree(real_path);
 		}
 		entry->expires = request_time + PG(user_ini_cache_ttl);
 	}
@@ -884,7 +887,6 @@ static int sapi_cgi_activate(TSRMLS_D)
 			} else {
 				doc_root = getenv("DOCUMENT_ROOT");
 			}
-
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);
@@ -1397,7 +1399,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1689,8 +1691,8 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	if (!&SG(sapi_headers).headers) {
@@ -1956,7 +1958,11 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 
 	if (bindpath) {
-		fcgi_fd = fcgi_listen(bindpath, 128);
+		int backlog = 128;
+		if (getenv("PHP_FCGI_BACKLOG")) {
+			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS

@@ -1,10 +1,5 @@
 --TEST--
-Test ip2long() function : usage variation 
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip. Windows is more compliant (like 0 for localhost, etc.)");
-?>
+Test ip2long() function : usage variation 1
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)

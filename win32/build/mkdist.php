@@ -238,8 +238,6 @@ $text_files = array(
 	"php.ini-development" => "php.ini-development",
 	"php.ini-production" => "php.ini-production",
 	"win32/install.txt" => "install.txt",
-	"win32/pws-php5cgi.reg" => "pws-php5cgi.reg",
-	"win32/pws-php5isapi.reg" => "pws-php5isapi.reg",
 );
 
 foreach ($text_files as $src => $dest) {
@@ -443,7 +441,7 @@ function make_phar_dot_phar($dist_dir)
 	$phar->setStub(implode('', $stub));
 
 	echo "Creating phar.phar.bat\n";
-	file_put_contents($dist_dir . '/phar.phar.bat', "%~dp0php.exe %~dp0pharcommand.phar %*\r\n");
+	file_put_contents($dist_dir . '/phar.phar.bat', "\"%~dp0php.exe\" \"%~dp0pharcommand.phar\" %*\r\n");
 }
 
 if (!is_dir($test_dir)) {

@@ -2,7 +2,7 @@
   regerror.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,9 +85,9 @@ onig_error_code_to_format(int code)
   case ONIGERR_END_PATTERN_AT_CONTROL:
     p = "end pattern at control"; break;
   case ONIGERR_META_CODE_SYNTAX:
-    p = "illegal meta-code syntax"; break;
+    p = "invalid meta-code syntax"; break;
   case ONIGERR_CONTROL_CODE_SYNTAX:
-    p = "illegal control-code syntax"; break;
+    p = "invalid control-code syntax"; break;
   case ONIGERR_CHAR_CLASS_VALUE_AT_END_OF_RANGE:
     p = "char-class value at end of range"; break;
   case ONIGERR_CHAR_CLASS_VALUE_AT_START_OF_RANGE:
@@ -142,8 +142,8 @@ onig_error_code_to_format(int code)
     p = "too big wide-char value"; break;
   case ONIGERR_TOO_LONG_WIDE_CHAR_VALUE:
     p = "too long wide-char value"; break;
-  case ONIGERR_INVALID_WIDE_CHAR_VALUE:
-    p = "invalid wide-char value"; break;
+  case ONIGERR_INVALID_CODE_POINT_VALUE:
+    p = "invalid code point value"; break;
   case ONIGERR_EMPTY_GROUP_NAME:
     p = "group name is empty"; break;
   case ONIGERR_INVALID_GROUP_NAME:
@@ -182,6 +182,15 @@ onig_error_code_to_format(int code)
   return (UChar* )p;
 }
 
+static void sprint_byte(char* s, unsigned int v)
+{
+  sprintf(s, "%02x", (v & 0377));
+}
+
+static void sprint_byte_with_x(char* s, unsigned int v)
+{
+  sprintf(s, "\\x%02x", (v & 0377));
+}
 
 static int to_ascii(OnigEncoding enc, UChar *s, UChar *end,
 		    UChar buf[], int buf_size, int *is_over)
@@ -196,10 +205,17 @@ static int to_ascii(OnigEncoding enc, UChar *s, UChar *end,
     while (p < end) {
       code = ONIGENC_MBC_TO_CODE(enc, p, end);
       if (code >= 0x80) {
-	if (len + 5 <= buf_size) {
-	  sprintf((char* )(&(buf[len])), "\\%03o",
-		  (unsigned int)(code & 0377));
-	  len += 5;
+	if (code > 0xffff && len + 10 <= buf_size) {
+	  sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 24));
+	  sprint_byte((char*)(&(buf[len+4])),      (unsigned int)(code >> 16));
+	  sprint_byte((char*)(&(buf[len+6])),      (unsigned int)(code >>  8));
+	  sprint_byte((char*)(&(buf[len+8])),      (unsigned int)code);
+	  len += 10;
+	}
+	else if (len + 6 <= buf_size) {
+	  sprint_byte_with_x((char*)(&(buf[len])), (unsigned int)(code >> 8));
+	  sprint_byte((char*)(&(buf[len+4])),      (unsigned int)code);
+	  len += 6;
 	}
 	else {
 	  break;
@@ -209,7 +225,7 @@ static int to_ascii(OnigEncoding enc, UChar *s, UChar *end,
 	buf[len++] = (UChar )code;
       }
 
-      p += enc_len(enc, p);
+      p += enclen(enc, p);
       if (len >= buf_size) break;
     }
 
@@ -317,7 +333,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
   va_list args;
 
   va_init_list(args, fmt);
-  n = vsnprintf((char* )buf, bufsize, (const char* )fmt, args);
+  n = xvsnprintf((char* )buf, bufsize, (const char* )fmt, args);
   va_end(args);
 
   need = (pat_end - pat) * 4 + 4;
@@ -328,17 +344,17 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
 
     p = pat;
     while (p < pat_end) {
-      if (*p == MC_ESC(enc)) {
+      if (*p == '\\') {
 	*s++ = *p++;
-	len = enc_len(enc, p);
+	len = enclen(enc, p);
 	while (len-- > 0) *s++ = *p++;
       }
       else if (*p == '/') {
-	*s++ = (unsigned char )MC_ESC(enc);
+	*s++ = (unsigned char )'\\';
 	*s++ = *p++;
       }
       else if (ONIGENC_IS_MBC_HEAD(enc, p)) {
-        len = enc_len(enc, p);
+        len = enclen(enc, p);
         if (ONIGENC_MBC_MINLEN(enc) == 1) {
           while (len-- > 0) *s++ = *p++;
         }
@@ -346,7 +362,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
           int blen;
 
           while (len-- > 0) {
-            sprintf((char* )bs, "\\%03o", *p++ & 0377);
+	    sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
             blen = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
             bp = bs;
             while (blen-- > 0) *s++ = *bp++;
@@ -355,7 +371,7 @@ onig_snprintf_with_pattern(buf, bufsize, enc, pat, pat_end, fmt, va_alist)
       }
       else if (!ONIGENC_IS_CODE_PRINT(enc, *p) &&
 	       !ONIGENC_IS_CODE_SPACE(enc, *p)) {
-	sprintf((char* )bs, "\\%03o", *p++ & 0377);
+	sprint_byte_with_x((char* )bs, (unsigned int )(*p++));
 	len = onigenc_str_bytelen_null(ONIG_ENCODING_ASCII, bs);
         bp = bs;
 	while (len-- > 0) *s++ = *bp++;

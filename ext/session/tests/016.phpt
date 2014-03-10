@@ -16,10 +16,11 @@ session.serialize_handler=php
 <?php
 error_reporting(E_ALL);
 
-@session_start();
+session_start();
 $HTTP_SESSION_VARS["test"] = 1;
-@session_write_close();
+session_write_close();
 print "I live\n";
 ?>
---EXPECT--
+--EXPECTF--
+Warning: session_write_close(): Failed to write session data (files). Please verify that the current setting of session.save_path is correct (123;:/really%scompletely:::/invalid;;,23123;213) in %s on line %d
 I live

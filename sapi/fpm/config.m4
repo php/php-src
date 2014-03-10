@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm              Enable building of the fpm SAPI executable], no, no)
+[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
 
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
@@ -536,6 +536,22 @@ AC_DEFUN([AC_FPM_SELECT],
 ])
 dnl }}}
 
+AC_DEFUN([AC_FPM_APPARMOR],
+[
+	AC_MSG_CHECKING([for apparmor])
+
+	SAVED_LIBS="$LIBS"
+	LIBS="$LIBS -lapparmor"
+
+	AC_TRY_LINK([ #include <sys/apparmor.h> ], [change_hat("test", 0);], [
+		AC_DEFINE([HAVE_APPARMOR], 1, [do we have apparmor support?])
+		AC_MSG_RESULT([yes])
+	], [
+		LIBS="$SAVED_LIBS"
+		AC_MSG_RESULT([no])
+	])
+])
+
 
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
@@ -547,21 +563,22 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-	AC_FPM_SYSCONF
-	AC_FPM_TIMES
-	AC_FPM_KQUEUE
-	AC_FPM_PORT
-	AC_FPM_DEVPOLL
-	AC_FPM_EPOLL
-	AC_FPM_POLL
-	AC_FPM_SELECT
+  AC_FPM_SYSCONF
+  AC_FPM_TIMES
+  AC_FPM_KQUEUE
+  AC_FPM_PORT
+  AC_FPM_DEVPOLL
+  AC_FPM_EPOLL
+  AC_FPM_POLL
+  AC_FPM_SELECT
+  AC_FPM_APPARMOR
 
   PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
-                  should usually be set to match the fpm username (default: nobody)], nobody, no)
+  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this 
+                          should usually be set to match the fpm username (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-systemd,,
   [  --with-fpm-systemd      Activate systemd integration], no, no)
@@ -607,16 +624,12 @@ if test "$PHP_FPM" != "no"; then
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
   AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
 
-  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
-  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
-
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
   PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
-
   
   if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
     PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"

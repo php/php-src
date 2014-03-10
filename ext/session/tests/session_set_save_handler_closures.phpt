@@ -42,6 +42,7 @@ echo "Starting session again..!\n";
 session_id($session_id);
 session_set_save_handler($open_closure, $close_closure, $read_closure, $write_closure, $destroy_closure, $gc_closure);
 session_start();
+$_SESSION['Bar'] = 'Foo';
 var_dump($_SESSION);
 session_write_close();
 
@@ -83,13 +84,15 @@ array(3) {
 Starting session again..!
 Open [%s,PHPSESSID]
 Read [%s,%s]
-array(3) {
+array(4) {
   ["Blah"]=>
   string(12) "Hello World!"
   ["Foo"]=>
   bool(false)
   ["Guff"]=>
   int(1234567890)
+  ["Bar"]=>
+  string(3) "Foo"
 }
-Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
+Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
 Close [%s,PHPSESSID]

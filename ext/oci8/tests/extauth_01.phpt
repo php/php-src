@@ -143,56 +143,56 @@ Test 7
 
 Warning: oci_connect(): ORA-12154: %s in %s on line %d
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(12154)
-  [%u|b%"message"]=>
-  %unicode|string%(%d) "ORA-12154: %s"
-  [%u|b%"offset"]=>
+  ["message"]=>
+  string(%d) "ORA-12154: %s"
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(0) ""
+  ["sqltext"]=>
+  string(0) ""
 }
 bool(false)
 Test 8
 
 Warning: oci_connect(): ORA-12154: %s in %s on line %d
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(12154)
-  [%u|b%"message"]=>
-  %unicode|string%(%d) "ORA-12154: %s"
-  [%u|b%"offset"]=>
+  ["message"]=>
+  string(%d) "ORA-12154: %s"
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(0) ""
+  ["sqltext"]=>
+  string(0) ""
 }
 bool(false)
 Test 9
 
 Warning: oci_connect(): ORA-%d: TNS:%s in %s on line %d
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(%d)
-  [%u|b%"message"]=>
-  %unicode|string%(%d) "ORA-%d: %s"
-  [%u|b%"offset"]=>
+  ["message"]=>
+  string(%d) "ORA-%d: %s"
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(0) ""
+  ["sqltext"]=>
+  string(0) ""
 }
 bool(false)
 Test 10
 
 Warning: oci_connect(): ORA-%d: TNS:%s in %s on line %d
 array(4) {
-  [%u|b%"code"]=>
+  ["code"]=>
   int(%d)
-  [%u|b%"message"]=>
-  %unicode|string%(%d) "ORA-%d: %s"
-  [%u|b%"offset"]=>
+  ["message"]=>
+  string(%d) "ORA-%d: %s"
+  ["offset"]=>
   int(0)
-  [%u|b%"sqltext"]=>
-  %unicode|string%(0) ""
+  ["sqltext"]=>
+  string(0) ""
 }
 bool(false)
 ===DONE===

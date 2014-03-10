@@ -109,8 +109,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
@@ -123,8 +122,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
 	ZEND_ARG_INFO(0, packet_id)
-	ZEND_ARG_INFO(0, var_name)
-	ZEND_ARG_INFO(0, ...)
+	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_deserialize, 0, 0, 1)
@@ -405,7 +403,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 
 	if (Z_STRLEN_P(var) > 0) {
 		char *buf;
-		int buf_len;
+		size_t buf_len;
 
 		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), &buf_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
@@ -626,12 +624,12 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
  */
 void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name_len TSRMLS_DC)
 {
-	char *tmp_buf;
-	char *name_esc;
-	int name_esc_len;
 	HashTable *ht;
 
 	if (name) {
+		size_t name_esc_len;
+		char *tmp_buf, *name_esc;
+
 		name_esc = php_escape_html_entities(name, name_len, &name_esc_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 		tmp_buf = emalloc(name_esc_len + sizeof(WDDX_VAR_S));
 		snprintf(tmp_buf, name_esc_len + sizeof(WDDX_VAR_S), WDDX_VAR_S, name_esc);

@@ -85,6 +85,7 @@ struct _php_core_globals {
 	char *open_basedir;
 	char *extension_dir;
 	char *php_binary;
+	char *sys_temp_dir;
 
 	char *upload_tmp_dir;
 	long upload_max_filesize;
@@ -94,6 +95,10 @@ struct _php_core_globals {
 
 	char *auto_prepend_file;
 	char *auto_append_file;
+
+	char *input_encoding;
+	char *internal_encoding;
+	char *output_encoding;
 
 	arg_separators arg_separator;
 
@@ -130,7 +135,7 @@ struct _php_core_globals {
 	zend_bool during_request_startup;
 	zend_bool allow_url_fopen;
 	zend_bool enable_post_data_reading;
-	zend_bool always_populate_raw_post_data;
+	signed char always_populate_raw_post_data;
 	zend_bool report_zend_debug;
 
 	int last_error_type;

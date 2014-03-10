@@ -24,13 +24,22 @@
 
 /* $Id$ */
 
+#if HAVE_CONFIG_H
+# include "config.h"
+#endif
+
 #if HAVE_SOCKETS
+
+#include <php.h>
+#ifdef PHP_WIN32
+# include "windows_common.h"
+#endif
 
 extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <Winsock2.h>
 #else
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -64,6 +73,16 @@ PHP_SOCKETS_API int php_sockets_le_socket(void);
 
 #define php_sockets_le_socket_name "Socket"
 
+#define PHP_SOCKET_ERROR(socket, msg, errn) \
+		do { \
+			int _err = (errn); /* save value to avoid repeated calls to WSAGetLastError() on Windows */ \
+			(socket)->error = _err; \
+			SOCKETS_G(last_error) = _err; \
+			if (_err != EAGAIN && _err != EWOULDBLOCK && _err != EINPROGRESS) { \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, sockets_strerror(_err TSRMLS_CC)); \
+			} \
+		} while (0)
+
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
 	char *strerror_buf;
@@ -75,8 +94,23 @@ ZEND_END_MODULE_GLOBALS(sockets)
 #define SOCKETS_G(v) (sockets_globals.v)
 #endif
 
+ZEND_EXTERN_MODULE_GLOBALS(sockets);
+
+enum sockopt_return {
+	SOCKOPT_ERROR,
+	SOCKOPT_CONTINUE,
+	SOCKOPT_SUCCESS
+};
+
+char *sockets_strerror(int error TSRMLS_DC);
+php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
+
 #else
 #define phpext_sockets_ptr NULL
+#endif
+
+#if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+# define ss_family __ss_family
 #endif
 
 #endif

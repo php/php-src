@@ -24,8 +24,6 @@
 
 BEGIN_EXTERN_C()
 
-#define ZEND_INVOKE_FUNC_NAME "__invoke"
-
 void zend_register_closure_ce(TSRMLS_D);
 
 extern ZEND_API zend_class_entry *zend_ce_closure;

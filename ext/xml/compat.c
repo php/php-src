@@ -39,7 +39,7 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 	if (URI) {
 			/* Use libxml functions otherwise its memory deallocation is screwed up */
 			*qualified = xmlStrdup(URI);
-			*qualified = xmlStrncat(*qualified, parser->_ns_seperator, 1);
+			*qualified = xmlStrncat(*qualified, parser->_ns_separator, 1);
 			*qualified = xmlStrncat(*qualified, name, xmlStrlen(name));
 	} else {
 		*qualified = xmlStrdup(name);
@@ -469,7 +469,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser = (XML_Parser) emalloc(sizeof(struct _XML_Parser));
 	memset(parser, 0, sizeof(struct _XML_Parser));
 	parser->use_namespace = 0;
-	parser->_ns_seperator = NULL;
+	parser->_ns_separator = NULL;
 
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
@@ -491,7 +491,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	if (sep != NULL) {
 		parser->use_namespace = 1;
 		parser->parser->sax2 = 1;
-		parser->_ns_seperator = xmlStrdup(sep);
+		parser->_ns_separator = xmlStrdup(sep);
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt 
 		so must be set in the handlers */
@@ -707,21 +707,21 @@ static const XML_Char *const error_mapping[] = {
 	(const XML_Char *)"Entity value required",
 	(const XML_Char *)"chunk is not well balanced",
 	(const XML_Char *)"extra content at the end of well balanced chunk",
-    (const XML_Char *)"XML_ERR_ENTITY_CHAR_ERROR",
-    (const XML_Char *)"PEReferences forbidden in internal subset",
-    (const XML_Char *)"Detected an entity reference loop",
-    (const XML_Char *)"XML_ERR_ENTITY_BOUNDARY",
-    (const XML_Char *)"Invalid URI",
-    (const XML_Char *)"Fragment not allowed",
-    (const XML_Char *)"XML_WAR_CATALOG_PI",
-    (const XML_Char *)"XML_ERR_NO_DTD",
-    (const XML_Char *)"conditional section INCLUDE or IGNORE keyword expected", /* 95 */
-    (const XML_Char *)"Version in XML Declaration missing", /* 96 */
-    (const XML_Char *)"XML_WAR_UNKNOWN_VERSION", /* 97 */
-    (const XML_Char *)"XML_WAR_LANG_VALUE", /* 98 */
-    (const XML_Char *)"XML_WAR_NS_URI", /* 99 */
-    (const XML_Char *)"XML_WAR_NS_URI_RELATIVE", /* 100 */
-    (const XML_Char *)"Missing encoding in text declaration" /* 101 */
+	(const XML_Char *)"XML_ERR_ENTITY_CHAR_ERROR",
+	(const XML_Char *)"PEReferences forbidden in internal subset",
+	(const XML_Char *)"Detected an entity reference loop",
+	(const XML_Char *)"XML_ERR_ENTITY_BOUNDARY",
+	(const XML_Char *)"Invalid URI",
+	(const XML_Char *)"Fragment not allowed",
+	(const XML_Char *)"XML_WAR_CATALOG_PI",
+	(const XML_Char *)"XML_ERR_NO_DTD",
+	(const XML_Char *)"conditional section INCLUDE or IGNORE keyword expected", /* 95 */
+	(const XML_Char *)"Version in XML Declaration missing", /* 96 */
+	(const XML_Char *)"XML_WAR_UNKNOWN_VERSION", /* 97 */
+	(const XML_Char *)"XML_WAR_LANG_VALUE", /* 98 */
+	(const XML_Char *)"XML_WAR_NS_URI", /* 99 */
+	(const XML_Char *)"XML_WAR_NS_URI_RELATIVE", /* 100 */
+	(const XML_Char *)"Missing encoding in text declaration" /* 101 */
 };
 
 PHPAPI const XML_Char *
@@ -770,8 +770,8 @@ PHPAPI void
 XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
-		if (parser->_ns_seperator) {
-			xmlFree(parser->_ns_seperator);
+		if (parser->_ns_separator) {
+			xmlFree(parser->_ns_separator);
 		}
 	}
 	if (parser->parser->myDoc) {

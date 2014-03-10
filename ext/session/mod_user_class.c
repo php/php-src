@@ -86,7 +86,7 @@ PHP_METHOD(SessionHandler, read)
 	}
 
 	RETVAL_STRINGL(val, val_len, 1);
-	efree(val);
+	str_efree(val);
 	return;
 }
 /* }}} */
@@ -139,5 +139,21 @@ PHP_METHOD(SessionHandler, gc)
 	}
 	
 	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto char SessionHandler::create_sid()
+   Wraps the old create_sid handler */
+PHP_METHOD(SessionHandler, create_sid)
+{
+	char *id;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
+	}
+
+	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+
+	RETURN_STRING(id, 0);
 }
 /* }}} */

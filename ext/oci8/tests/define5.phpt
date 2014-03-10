@@ -61,12 +61,12 @@ echo "Done\n";
 Test 1 - must do define before execute
 bool(true)
 NULL
-%unicode|string%(4) "some"
+string(4) "some"
 Test 2 - normal define order
 bool(true)
-%unicode|string%(4) "some"
+string(4) "some"
 Test 3 - no new define done
-%unicode|string%(4) "some"
-%unicode|string%(5) "thing"
+string(4) "some"
+string(5) "thing"
 Done
 

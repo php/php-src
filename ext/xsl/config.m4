@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(xsl, for XSL support,
-[  --with-xsl[=DIR]        Include XSL support.  DIR is the libxslt base
+[  --with-xsl[=DIR]          Include XSL support.  DIR is the libxslt base
                           install directory (libxslt >= 1.1.0 required)])
 
 if test "$PHP_XSL" != "no"; then

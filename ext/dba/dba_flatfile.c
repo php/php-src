@@ -88,15 +88,16 @@ DBA_UPDATE_FUNC(flatfile)
 	gval.dsize = vallen;
 	
 	switch(flatfile_store(dba, gkey, gval, mode==1 ? FLATFILE_INSERT : FLATFILE_REPLACE TSRMLS_CC)) {
-	case -1:
-		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Operation not possible");
-		return FAILURE;
-	default:
-	case 0:
-		return SUCCESS;
-	case 1:
-		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Key already exists");
-		return FAILURE;
+		case 0:
+			return SUCCESS;
+		case 1:
+			return FAILURE;
+		case -1:
+			php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Operation not possible");
+			return FAILURE;
+		default:
+			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			return FAILURE;
 	}
 }
 

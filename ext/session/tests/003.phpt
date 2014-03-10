@@ -4,6 +4,7 @@ session object deserialization
 <?php include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
+session.use_strict_mode=0
 session.cache_limiter=
 session.serialize_handler=php
 session.save_handler=files

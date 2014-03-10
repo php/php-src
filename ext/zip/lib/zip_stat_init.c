@@ -37,7 +37,7 @@
 
 
 
-ZIP_EXTERN(void)
+ZIP_EXTERN void
 zip_stat_init(struct zip_stat *st)
 {
     st->valid = 0;
