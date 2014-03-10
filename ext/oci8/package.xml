@@ -45,12 +45,12 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2014-02-10</date>
+ <date>2014-03-11</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.7</release>
-   <api>2.0.7</api>
+   <release>2.0.8</release>
+   <api>2.0.8</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,8 +58,7 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
-Build change: Fix source variable definition for C89 compatibility
+Enhancement - Improve performance of multi-row OCI_RETURN_LOB queries (Bug #66875)
   </notes>
  <contents>
   <dir name="/">
@@ -461,6 +460,22 @@ Build change: Fix source variable definition for C89 compatibility
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.7</release>
+   <api>2.0.7</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
+Build change: Fix source variable definition for C89 compatibility
+  </notes>
+</release>
 
 <release>
  <version>

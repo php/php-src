@@ -2578,7 +2578,11 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSR
 		if (column->data_type != SQLT_RDD && (mode & PHP_OCI_RETURN_LOBS)) {
 			/* PHP_OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 
+			if (column->chunk_size)
+				descriptor->chunk_size = column->chunk_size;			
 			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length TSRMLS_CC);
+			if (descriptor->chunk_size)  /* Cache the chunk_size to avoid recalling OCILobGetChunkSize */
+				column->chunk_size = descriptor->chunk_size;
 			php_oci_temp_lob_close(descriptor TSRMLS_CC);
 			if (lob_fetch_status) {
 				ZVAL_FALSE(value);
