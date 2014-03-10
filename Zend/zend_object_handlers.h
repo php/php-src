@@ -70,7 +70,7 @@ typedef zval* (*zend_object_get_t)(zval *object TSRMLS_DC);
 typedef int (*zend_object_has_property_t)(zval *object, zval *member, int has_set_exists, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to check if a dimension of the object exists */
-typedef int (*zend_object_has_dimension_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
+typedef int (*zend_object_has_dimension_t)(zval *object, zval *member TSRMLS_DC);
 
 /* Used to remove a property of the object */
 typedef void (*zend_object_unset_property_t)(zval *object, zval *member, const struct _zend_literal *key TSRMLS_DC);
