@@ -2,16 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.4.27
 
-- MySQLi:
-  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
-  (Remi)
+- Core:
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+
+- GMP
+  . fixed bug#66872 (invalid argument crashes gmp_testbit) (Pierre)
 
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
-- Core:
-  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
-
+- MySQLi:
+  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  (Remi)
+  
 ?? ??? 2014, PHP 5.4.26
 
 - JSON:
