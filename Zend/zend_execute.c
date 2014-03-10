@@ -214,8 +214,9 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
 		}
 	}
 
@@ -231,12 +232,14 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int
 			/* break missing intentionally */
 		case BP_VAR_W:
 			if (EG(active_symbol_table)) {
-				ret = zend_hash_update(EG(active_symbol_table), cv, ret);
-				ZVAL_INDIRECT(ptr, ret);
+				zval zv;
+				ZVAL_COPY_VALUE(ptr, &EG(uninitialized_zval));
+				ZVAL_INDIRECT(&zv, ptr);
+				zend_hash_update(EG(active_symbol_table), cv, &zv);
 			} else {
 				ZVAL_NULL(ptr);
-				ret = ptr;
 			}
+			ret = ptr;
 			break;
 	}
 	return ret;
@@ -250,8 +253,9 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
 		}
 	}
 
@@ -267,8 +271,9 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
 		}
 	}
 
@@ -284,8 +289,9 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zval *ptr, zend_uin
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
 		}
 	}
 
@@ -300,13 +306,17 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uin
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
+		} else {
+			zval zv;
+			ZVAL_COPY_VALUE(ptr, &EG(uninitialized_zval));
+			ZVAL_INDIRECT(&zv, ptr);
+			zend_hash_update(EG(active_symbol_table), cv, &zv);
+			zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
+			return ptr;
 		}
-		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
-		ZVAL_INDIRECT(ptr, ret);
-		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
-		return ret;
 	} else {
 		ZVAL_NULL(ptr);
 		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
@@ -322,12 +332,16 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, zend_uint
 	if (EG(active_symbol_table)) {
 		ret = zend_hash_find(EG(active_symbol_table), cv);
 		if (ret) {
-			ZVAL_INDIRECT(ptr, ret);
-			return ret;
+			ZEND_ASSERT(Z_TYPE_P(ret) == IS_INDIRECT);
+			ZVAL_INDIRECT(ptr, Z_INDIRECT_P(ret));
+			return Z_INDIRECT_P(ptr);
+		} else {
+			zval zv;
+			ZVAL_COPY_VALUE(ptr, &EG(uninitialized_zval));
+			ZVAL_INDIRECT(&zv, ptr);
+			zend_hash_update(EG(active_symbol_table), cv, &zv);
+			return ptr;
 		}
-		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
-		ZVAL_INDIRECT(ptr, ret);
-		return ret;
 	} else {
 		ZVAL_NULL(ptr);
 		return ptr;
@@ -1525,20 +1539,20 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 		zend_hash_apply(EG(active_symbol_table), (apply_func_t) zend_check_symbol TSRMLS_CC);	\
 	}
 
-static int zend_check_symbol(zval **pz TSRMLS_DC)
+static int zend_check_symbol(zval *zv TSRMLS_DC)
 {
-	if (Z_TYPE_PP(pz) > 9) {
-		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
+	if (Z_TYPE_P(zv) > 17) {
+		fprintf(stderr, "Warning!  %x has invalid type!\n", *zv);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef PHP_WIN32
 		fflush(stderr);
 #endif
-	} else if (Z_TYPE_PP(pz) == IS_ARRAY) {
-		zend_hash_apply(Z_ARRVAL_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
-	} else if (Z_TYPE_PP(pz) == IS_OBJECT) {
+	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
+		zend_hash_apply(Z_ARRVAL_P(zv), (apply_func_t) zend_check_symbol TSRMLS_CC);
+	} else if (Z_TYPE_P(zv) == IS_OBJECT) {
 
 		/* OBJ-TBI - doesn't support new object model! */
-		zend_hash_apply(Z_OBJPROP_PP(pz), (apply_func_t) zend_check_symbol TSRMLS_CC);
+		zend_hash_apply(Z_OBJPROP_P(zv), (apply_func_t) zend_check_symbol TSRMLS_CC);
 	}
 
 	return 0;
@@ -1728,11 +1742,10 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		if (!EG(active_symbol_table)) {
 			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
 		} else {
+			zval zv;
 			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
-			zval *zv = zend_hash_str_add(EG(active_symbol_table), "this", sizeof("this")-1, EX_VAR(op_array->this_var));
-			if (zv) {
-				ZVAL_INDIRECT(EX_VAR_NUM(op_array->this_var), zv);
-			}
+			ZVAL_INDIRECT(&zv, EX_VAR_NUM(op_array->this_var));
+			zend_hash_str_add(EG(active_symbol_table), "this", sizeof("this")-1, &zv);
 		}
 	}
 
