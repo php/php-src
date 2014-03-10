@@ -323,7 +323,11 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							(Z_STRLEN_P(param->parameter) < 4000 ||
 								Z_TYPE_P(param->parameter) != IS_STRING)) {
 						sqltype = SQL_VARCHAR;
-						precision = sizeof(param->parameter);
+						if(Z_TYPE_P(param->parameter) == IS_STRING) {
+							precision = Z_STRLEN_P(param->parameter);
+						} else {
+							precision = 10;
+						}
 						scale = 0;
 					} else {
 						/* MS Access, for instance, doesn't support SQLDescribeParam,
