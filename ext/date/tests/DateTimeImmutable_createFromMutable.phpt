@@ -22,5 +22,5 @@ object(DateTimeImmutable)#%d (3) {
   string(13) "Europe/London"
 }
 
-Warning: DateTimeImmutable::createFromMutable() expects parameter 1 to be DateTime, object given in %stests/DateTimeImmutable_createFromMutable.php on line %d
+Warning: DateTimeImmutable::createFromMutable() expects parameter 1 to be DateTime, object given in %stests%eDateTimeImmutable_createFromMutable.php on line %d
 NULL
