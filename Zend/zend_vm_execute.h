@@ -12962,7 +12962,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-	Z_ADDREF_P(varptr);
+//??? don't increment refcount of overloaded element
+	if (IS_VAR != IS_VAR || EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+		Z_ADDREF_P(varptr);
+	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
@@ -19757,7 +19760,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_P(variable_ptr);
+//???		Z_DELREF_P(variable_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -23167,7 +23170,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_P(variable_ptr);
+//???		Z_DELREF_P(variable_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -30341,7 +30344,10 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-	Z_ADDREF_P(varptr);
+//??? don't increment refcount of overloaded element
+	if (IS_CV != IS_VAR || EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+		Z_ADDREF_P(varptr);
+	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	CHECK_EXCEPTION();
@@ -36642,7 +36648,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_P(variable_ptr);
+//???		Z_DELREF_P(variable_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -39792,7 +39798,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		Z_DELREF_P(variable_ptr);
+//???		Z_DELREF_P(variable_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
