@@ -1511,23 +1511,26 @@ ZEND_FUNCTION(gmp_clrbit)
    Tests if bit is set in a */
 ZEND_FUNCTION(gmp_testbit)
 {
-	zval *a_arg;
+	zval **a_arg;
 	long index;
-	mpz_ptr gmpnum_a;
-	gmp_temp_t temp_a;
+	mpz_t *gmpnum_a;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &a_arg, &index) == FAILURE){
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &a_arg, &index) == FAILURE){
 		return;
 	}
+
+	ZEND_FETCH_RESOURCE(gmpnum_a, mpz_t *, a_arg, -1, GMP_RESOURCE_NAME, le_gmp);
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	RETVAL_BOOL(mpz_tstbit(gmpnum_a, index));
-	FREE_GMP_TEMP(temp_a);
+	if (mpz_tstbit(*gmpnum_a, index)) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
