@@ -232,7 +232,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 1)
 	ZEND_ARG_INFO(0, size)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()
@@ -313,6 +313,12 @@ ZEND_GET_MODULE(mcrypt)
 #define MCRYPT_ENCRYPT 0
 #define MCRYPT_DECRYPT 1
 
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND
+} iv_source;
+
 #define MCRYPT_GET_INI											\
 	cipher_dir_string = MCG(algorithms_dir); 					\
 	module_dir_string = MCG(modes_dir);
@@ -384,9 +390,9 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	REGISTER_INT_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
 
 	/* sources for mcrypt_create_iv */
-	REGISTER_INT_CONSTANT("MCRYPT_DEV_RANDOM", 0, CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("MCRYPT_DEV_URANDOM", 1, CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("MCRYPT_RAND", 2, CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MCRYPT_DEV_RANDOM", RANDOM, CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MCRYPT_DEV_URANDOM", URANDOM, CONST_PERSISTENT);
+	REGISTER_INT_CONSTANT("MCRYPT_RAND", RAND, CONST_PERSISTENT);
 
 	/* ciphers */
 	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
@@ -494,12 +500,6 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 	DISPLAY_INI_ENTRIES();
 }
 /* }}} */
-
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND
-} iv_source;
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory)
    Opens the module of the algorithm and the mode to be used */
@@ -1397,7 +1397,7 @@ PHP_FUNCTION(mcrypt_ofb)
 PHP_FUNCTION(mcrypt_create_iv)
 {
 	char *iv;
-	php_int_t source = RANDOM;
+	php_int_t source = URANDOM;
 	php_int_t size;
 	php_int_t n = 0;
 
