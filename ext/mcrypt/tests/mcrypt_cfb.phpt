@@ -18,6 +18,7 @@ echo trim(mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 var_dump(mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT));
 
 --EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 
 Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 

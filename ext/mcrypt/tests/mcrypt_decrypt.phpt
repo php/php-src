@@ -20,6 +20,7 @@ var_dump(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_CBC));
 
 var_dump(mcrypt_decrypt(MCRYPT_BLOWFISH, "FooBar", $enc_data, MCRYPT_MODE_CBC, $iv));
 --EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 PHP Testfest 2008
 
 Warning: mcrypt_decrypt(): Encryption mode requires an initialization vector of size 16 in %s on line %d

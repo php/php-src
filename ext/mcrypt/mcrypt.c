@@ -50,6 +50,13 @@ typedef struct _php_mcrypt {
 	zend_bool init;
 } php_mcrypt;
 
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND,
+	ARANDOM
+} iv_source;
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_module_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, cipher)
@@ -384,9 +391,10 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	REGISTER_LONG_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
 
 	/* sources for mcrypt_create_iv */
-	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", 0, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MCRYPT_DEV_URANDOM", 1, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MCRYPT_RAND", 2, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", RANDOM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_URANDOM", URANDOM, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_RAND", RAND, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MCRYPT_DEV_ARANDOM", ARANDOM, CONST_PERSISTENT);
 
 	/* ciphers */
 	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
@@ -495,11 +503,6 @@ PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 }
 /* }}} */
 
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND
-} iv_source;
 
 /* {{{ proto resource mcrypt_module_open(string cipher, string cipher_directory, string mode, string mode_directory)
    Opens the module of the algorithm and the mode to be used */
@@ -1392,7 +1395,7 @@ PHP_FUNCTION(mcrypt_ofb)
    Create an initialization vector (IV) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
-	char *iv;
+	char *iv, *random_source;
 	long source = RANDOM;
 	long size;
 	int n = 0;
@@ -1407,8 +1410,26 @@ PHP_FUNCTION(mcrypt_create_iv)
 	}
 	
 	iv = ecalloc(size + 1, 1);
-	
-	if (source == RANDOM || source == URANDOM) {
+
+	switch(source) {
+	case RAND:
+		random_source = NULL;
+		break;
+	case URANDOM:
+		random_source = "/dev/urandom";
+		break;
+	case ARANDOM:
+		random_source = "/dev/arandom";
+		break;
+	case RANDOM:
+		random_source = "/dev/random";
+		break;
+	default:
+		random_source = "/dev/random";
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid random source specified(%dl)", source);
+	}
+
+	if (random_source) {
 #if PHP_WIN32
 		/* random/urandom equivalent on Windows */
 		BYTE *iv_b = (BYTE *) iv;
@@ -1422,10 +1443,10 @@ PHP_FUNCTION(mcrypt_create_iv)
 		int    fd;
 		size_t read_bytes = 0;
 
-		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
+		fd = open(random_source, O_RDONLY);
 		if (fd < 0) {
 			efree(iv);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot open source device(%s)", random_source);
 			RETURN_FALSE;
 		}
 		while (read_bytes < size) {
@@ -1448,6 +1469,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		while (size) {
 			iv[--size] = (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
 		}
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "RAND is not safe");
 	}
 	RETURN_STRINGL(iv, n, 0);
 }

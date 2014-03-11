@@ -18,6 +18,7 @@ echo trim(mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv);
 
 --EXPECTF--
+Notice: mcrypt_create_iv(): RAND is not safe in %s on line %d
 
 Deprecated: Function mcrypt_ofb() is deprecated in %s on line %d
 
