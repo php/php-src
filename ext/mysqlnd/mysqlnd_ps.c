@@ -96,7 +96,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s TSRMLS_DC)
 		DBG_RETURN(NULL);
 	}
 
-	ret = result->m.store_result_fetch_data(conn, result, result->meta, TRUE TSRMLS_CC);
+	ret = result->m.store_result_fetch_data(conn, result, result->meta, &result->stored_data->row_buffers, TRUE TSRMLS_CC);
 
 	result->stored_data->m.fetch_row = mysqlnd_stmt_fetch_row_buffered;
 
