@@ -3142,6 +3142,7 @@ PHP_FUNCTION(curl_getinfo)
 						}
 						break;
 					}
+#if LIBCURL_VERSION_NUM >= 0x070c03 /* Available since 7.12.3 */
 					case CURLINFO_SLIST:
 					{
 						struct curl_slist *slist;
@@ -3157,6 +3158,7 @@ PHP_FUNCTION(curl_getinfo)
 						}
 						break;
 					}
+#endif
 					default:
 						RETURN_FALSE;
 				}

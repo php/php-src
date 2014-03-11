@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
+  . Fix compilation on libcurl versions between 7.10.5 and 7.12.2, inclusive.
+    (Adam)
 
 - GD:
   . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
