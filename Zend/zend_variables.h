@@ -54,7 +54,6 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_dtor_wrapper(zval *zvalue);
-ZEND_API void zval_indirect_ptr_dtor(zval *zval_ptr);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
@@ -71,13 +70,11 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zvalue);
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor_wrapper
 #define zval_internal_dtor_wrapper _zval_internal_dtor_wrapper
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor_wrapper
-#define zval_indirect_ptr_dtor_wrapper _zval_indirect_ptr_wrapper
 #else
 #define zval_copy_ctor_wrapper _zval_copy_ctor_func
 #define zval_ptr_dtor_wrapper _zval_ptr_dtor
 #define zval_internal_dtor_wrapper _zval_internal_dtor
 #define zval_internal_ptr_dtor_wrapper _zval_internal_ptr_dtor
-#define zval_indirect_ptr_dtor_wrapper _zval_indirect_ptr_dtor
 #endif
 
 ZEND_API void zval_add_ref(zval *p);
@@ -91,7 +88,6 @@ END_EXTERN_C()
 #define ZVAL_INTERNAL_DTOR zval_internal_dtor_wrapper
 #define ZVAL_INTERNAL_PTR_DTOR zval_internal_ptr_dtor_wrapper
 #define ZVAL_COPY_CTOR zval_copy_ctor_wrapper
-#define ZVAL_INDIRECT_PTR_DTOR zval_indirect_ptr_dtor
 
 #endif
 
