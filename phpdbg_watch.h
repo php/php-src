@@ -51,6 +51,9 @@ typedef enum {
 	WATCH_ON_PTR
 } phpdbg_watchtype;
 
+
+#define PHPDBG_WATCH_RECURSIVE	1
+
 typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
 
 struct _phpdbg_watchpoint_t {
@@ -67,6 +70,7 @@ struct _phpdbg_watchpoint_t {
 	} addr;
 	size_t size;
 	phpdbg_watchtype type;
+	char flags;
 };
 
 void phpdbg_setup_watchpoints(TSRMLS_D);

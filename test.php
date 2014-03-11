@@ -57,9 +57,18 @@ $array = [
 	[5, 6],
 ];
 
+$array[] = 7;
+
 array_walk($array, function (&$item) {
 	if (is_array($item))
 		$item[0] += 2;
 	else
 		$item -= 1;
 });
+
+$obj = (object)["a" => 2, "b" => 5, "c" => 7];
+
+$test = $obj->a;
+
+$obj->a += 2;
+$test -= 2;
