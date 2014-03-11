@@ -737,8 +737,6 @@ END_EXTERN_C()
 			if (!Z_REFCOUNTED_P(__zv) || 				\
 			    Z_REFCOUNT_P(__zv) == 1) {				\
 				ZVAL_NEW_REF(__zv, __zv);				\
-			} else if (Z_TYPE_P(__zv) == IS_OBJECT ||	\
-			    Z_TYPE_P(__zv) == IS_RESOURCE) {		\
 			} else {									\
 				zval ref;								\
 				ZVAL_COPY_VALUE(&ref, __zv);			\
