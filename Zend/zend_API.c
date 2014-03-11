@@ -3344,6 +3344,11 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
+		int i;
+
+		for (i = 0; i < fci->param_count; i++) {
+			zval_ptr_dtor(&fci->params[i]);
+		}
 		if (free_mem) {
 			efree(fci->params);
 			fci->params = NULL;
@@ -3390,7 +3395,7 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
 	while ((arg = zend_hash_get_current_data_ex(Z_ARRVAL_P(args), &pos)) != NULL) {
-		ZVAL_COPY_VALUE(params, arg);
+		ZVAL_COPY(params, arg);
 		params++;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
 	}

@@ -587,8 +587,8 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	f = (Bucket *) a;
 	s = (Bucket *) b;
 
-	ZVAL_COPY_VALUE(&args[0], &f->val);
-	ZVAL_COPY_VALUE(&args[1], &s->val);
+	ZVAL_COPY(&args[0], &f->val);
+	ZVAL_COPY(&args[1], &s->val);
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
@@ -600,8 +600,12 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 		convert_to_long_ex(&retval);
 		ret = Z_LVAL(retval);
 		zval_ptr_dtor(&retval);
+		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
 		return ret < 0 ? -1 : ret > 0 ? 1 : 0;
 	} else {
+		zval_ptr_dtor(&args[1]);
+		zval_ptr_dtor(&args[0]);
 		return 0;
 	}
 }
@@ -1049,7 +1053,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	/* Iterate through hash */
 	zend_hash_internal_pointer_reset(target_hash);
 	while (!EG(exception) && (zv = zend_hash_get_current_data(target_hash)) != NULL) {
-		ZVAL_COPY_VALUE(&args[0], zv);
+		ZVAL_COPY(&args[0], zv);
 		if (recursive && Z_TYPE(args[0]) == IS_ARRAY) {
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
@@ -1059,8 +1063,9 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			thash = Z_ARRVAL(args[0]);
 			if (thash->nApplyCount > 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+				zval_ptr_dtor(&args[0]);
 				if (userdata) {
-					zval_ptr_dtor(userdata);
+					zval_ptr_dtor(&args[2]);
 				}
 				return 0;
 			}
@@ -1084,6 +1089,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			if (zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
 				zval_ptr_dtor(&retval);
 			} else {
+				zval_ptr_dtor(&args[0]);
 				if (Z_TYPE(args[1]) != IS_UNDEF) {
 					zval_ptr_dtor(&args[1]);
 					ZVAL_UNDEF(&args[1]);
@@ -1092,6 +1098,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			}
 		}
 
+		zval_ptr_dtor(&args[0]);
 		if (Z_TYPE(args[1]) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			ZVAL_UNDEF(&args[1]);
@@ -1100,7 +1107,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	}
 
 	if (userdata) {
-		zval_ptr_dtor(userdata);
+		zval_ptr_dtor(&args[2]);
 	}
 	return 0;
 }
@@ -4253,18 +4260,19 @@ PHP_FUNCTION(array_filter)
 				}
 			}
 			if (use_type != ARRAY_FILTER_USE_KEY) {
-				ZVAL_COPY_VALUE(&args[0], operand);
+				ZVAL_COPY(&args[0], operand);
 			}
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS) {
+				zval_ptr_dtor(&args[0]);
+				if (use_type == ARRAY_FILTER_USE_BOTH) {
+					zval_ptr_dtor(&args[1]);						
+				}
 				if (!ZVAL_IS_UNDEF(&retval)) {
 					int retval_true = zend_is_true(&retval TSRMLS_CC);
 
 					zval_ptr_dtor(&retval);
-					if (use_type) {
-						zval_ptr_dtor(&args[0]);
-					}
 					if (!retval_true) {
 						continue;
 					}
@@ -4272,6 +4280,10 @@ PHP_FUNCTION(array_filter)
 					continue;
 				}
 			} else {
+				zval_ptr_dtor(&args[0]);
+				if (use_type == ARRAY_FILTER_USE_BOTH) {
+					zval_ptr_dtor(&args[1]);						
+				}
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
@@ -4366,7 +4378,7 @@ PHP_FUNCTION(array_map)
 			if (k < array_len[i]) {
 				zval *zv = zend_hash_get_current_data_ex(Z_ARRVAL_P(args[i]), &array_pos[i]);
 
-				ZVAL_COPY_VALUE(&params[i], zv);
+				ZVAL_COPY(&params[i], zv);
 
 				/* It is safe to store only last value of key type, because
 				 * this loop will run just once if there is only 1 array. */
@@ -4396,8 +4408,15 @@ PHP_FUNCTION(array_map)
 				efree(args);
 				efree(array_pos);
 				zval_dtor(return_value);
+				for (i = 0; i < n_arrays; i++) {
+					zval_ptr_dtor(&params[i]);
+				}
 				efree(params);
 				RETURN_NULL();
+			} else {
+				for (i = 0; i < n_arrays; i++) {
+					zval_ptr_dtor(&params[i]);
+				}
 			}
 		}
 
