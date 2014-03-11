@@ -28,6 +28,7 @@
 void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth) {
 	tree->depth = depth;
 	tree->branch = NULL;
+	tree->count = 0;
 }
 
 phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx) {
@@ -154,6 +155,7 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 				branch = &(*branch)->branches[(idx >> i) % 2];
 				*branch = ++memory;
 			} while (i--);
+			tree->count++;
 		}
 	} else if (!(flags & PHPDBG_BTREE_UPDATE)) {
 		return FAILURE;
@@ -185,6 +187,8 @@ check_branch_existence:
 			return FAILURE;
 		}
 	} while (i--);
+
+	tree->count--;
 
 	if (i_last_dual_branch == -1) {
 		efree(tree->branch);

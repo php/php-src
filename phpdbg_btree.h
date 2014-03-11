@@ -35,6 +35,7 @@ union _phpdbg_btree_branch {
 };
 
 typedef struct {
+	zend_ulong count;
 	zend_ulong depth;
 	phpdbg_btree_branch *branch;
 } phpdbg_btree;
