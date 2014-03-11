@@ -133,7 +133,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql TSRMLS_CC);
+	result = mysql->m->use_result(mysql, 0 TSRMLS_CC);
 
 	for (;;) {
 		zval **entry;
