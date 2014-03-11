@@ -53,6 +53,17 @@ PHP                                                                        NEWS
   . Encrypted TLS servers now support the server name indication TLS extension
     via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
 
+- PDO_pgsql:
+  . Cleaned up code by increasing the requirements to libpq versions providing
+    PQexecParams, PQprepare, PQescapeStringConn, PQescapeByteaConn. According
+    to the release notes that means 8.0.8+ or 8.1.4+. (Matteo)
+  . Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
+    undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
+    (Matteo)
+  . Added PDO::PGSQL_ATTR_DISABLE_PREPARES constant to execute the queries
+    without preparing them, while still passing parameters separately from
+    the command text using PQexecParams. (Matteo)
+
 - SQLite:
   . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
 
