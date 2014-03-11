@@ -23,7 +23,7 @@ PHP                                                                        NEWS
     CVE-2013-7327). (Tomas Hoger, Remi).
 
 - Hash:
-  . Fixed buf #66698 (Missing FNV1a32 and FNV1a64 hash functions).
+  . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
     (Michael M Slusarz).
 
 - Mail:
@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . No longer allow invalid key sizes, invalid IV sizes or missing required IV
     in mcrypt_encrypt, mcrypt_decrypt and the deprecated mode functions.
     (Nikita)
+  . Use /dev/urandom as the default source for mcrypt_create_iv(). (Nikita)
 
 - MySQLi:
   . Fixed bug #66762 (Segfault in mysqli_stmt::bind_result() when link closed)

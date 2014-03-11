@@ -41,6 +41,11 @@ PHP 5.6 UPGRADE NOTES
   context options, so most users should be unaffected by this transparent
   security enhancement. (https://wiki.php.net/rfc/tls-peer-verification)
 
+- Mcrypt:
+  The mcrypt_encrypt(), mcrypt_decrypt() and mcrypt_{MODE}() functions no
+  longer accept keys or IVs with incorrect sizes. Furthermore an IV is now
+  required if the used block cipher mode requires it.
+
 ========================================
 2. New Features
 ========================================
@@ -158,6 +163,10 @@ PHP 5.6 UPGRADE NOTES
 - Crypt:
   crypt() will now raise an E_NOTICE error if the salt parameter is omitted.
   See: https://wiki.php.net/rfc/crypt_function_salt
+
+- Mcrypt:
+  The $source parameter of mcrypt_create_iv() now defaults to
+  MCRYPT_DEV_URANDOM instead of MCRYPT_DEV_RANDOM.
 
 - XMLReader:
   XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
