@@ -225,6 +225,7 @@ PHP 5.6 UPGRADE NOTES
   - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
     unnecessarily initiates an internal ROLLBACK during connection
     close.
+  - Multi-row OCI_RETURN_LOB queries require fewer "round trips" to the database.
   - Added DTrace probes enabled with PHP's generic --enable-dtrace
   - The oci_internal_debug() function is now a no-op.
   - The phpinfo() output format for OCI8 has changed.

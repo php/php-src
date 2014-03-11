@@ -35,8 +35,12 @@ PHP                                                                        NEWS
     (Nikita)
 
 - MySQLi:
-  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  . Fixed bug #66762 (Segfault in mysqli_stmt::bind_result() when link closed)
     (Remi)
+
+- OCI8
+  . Fixed Bug #66875 (Improve performance of multi-row OCI_RETURN_LOB queries)
+   (Perrier, Chris Jones)
 
 - OpenSSL:
   . Fixed memory leak in windows cert verification on verify failure.

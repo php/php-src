@@ -306,6 +306,7 @@ typedef struct {
 	sb2					 precision;				/* column precision */
 	ub1					 charset_form;			/* charset form, required for NCLOBs */
 	ub2					 charset_id;			/* charset ID */
+	ub4					 chunk_size;			/* LOB chunk size */
 } php_oci_out_column;
 /* }}} */
 
