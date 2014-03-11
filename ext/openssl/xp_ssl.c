@@ -1306,8 +1306,6 @@ static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *
 	zval **val;
 	char *sni_server_name;
 
-	TSRMLS_FETCH();
-
 	/* If SNI is explicitly disabled we're finished here */
 	if (GET_VER_OPT("SNI_enabled") && !zend_is_true(*val TSRMLS_CC)) {
 		return;
