@@ -64,6 +64,7 @@ PHP 5.6 UPGRADE NOTES
 
 - Added unified default encoding. default_charset=UTF-8 and functions/extensions
   use encoding settings honor default_charset.
+  (https://wiki.php.net/rfc/default_encoding)
 
 - The php://input stream is now re-usable and can be used concurrently with
   enable_post_data_reading=0.
@@ -281,9 +282,20 @@ PHP 5.6 UPGRADE NOTES
   enabled and to recognize the value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
 
+- Iconv:
+  Use of iconv.input_encoding, iconv.output_encoding, iconv.internal_encoding
+  raises E_DEPRECATE. Use empty value to use default_charset setting and/or
+  use input_encoding, output_encoding, internal_encoding.
+
 - OpenSSL:
   openssl.cafile and openssl.capath ini directives have been added to allow
   global CA default specification as necessary.
+
+- Mbstring:
+  Use of mbstring.http_input, mbstring.http_output, mbstring.internal_encoding
+  raises E_DEPRECATE. Use empty value to use default_charset setting and/or
+  use input_encoding, output_encoding, internal_encoding.
+
 
 ========================================
 11. Other Changes
