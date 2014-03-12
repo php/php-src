@@ -5102,12 +5102,16 @@ PHP_FUNCTION(imagescale)
 	zval *IM;
 	gdImagePtr im;
 	gdImagePtr im_scaled;
-	int new_width, new_height = -1;
-	gdInterpolationMethod method = GD_BILINEAR_FIXED;
+	int new_width, new_height;
+	long tmp_w, tmp_h=-1, tmp_m = GD_BILINEAR_FIXED;
+	gdInterpolationMethod method;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &new_width, &new_height, &method) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|ll", &IM, &tmp_w, &tmp_h, &tmp_m) == FAILURE)  {
 		return;
 	}
+	method = tmp_m;
+	new_width = tmp_w;
+	new_height = tmp_h;
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 	im_scaled = gdImageScale(im, new_width, new_height);
