@@ -23,7 +23,8 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
     CVE-2013-7327). (Tomas Hoger, Remi).
-  . Fixed #66890 (imagescale segfault). (Remi)
+  . Fixed bug #66890 (imagescale segfault). (Remi)
+  . Fixed bug #66893 (imagescale ignore method argument). (Remi)
 
 - Hash:
   . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
