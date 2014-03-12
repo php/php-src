@@ -152,6 +152,9 @@ PHP 5.6 UPGRADE NOTES
   are specified "CN_match" takes precedence. Otherwise, the two options are
   interchangeable.
 
+- Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
+  undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
+
 ========================================
 4. Changed Functions
 ========================================
@@ -194,6 +197,10 @@ PHP 5.6 UPGRADE NOTES
   Added ldap_escape($value, $ignore = "", $flags = 0).
   Added ldap_modify_batch($link_identifier, $dn, $modifications) described in 
   https://wiki.php.net/rfc/ldap_modify_batch.
+
+- PDO_pgsql
+  Added PDO::pgsqlGetNotify($result_type = PDO::FETCH_USE_DEFAULT, $ms_timeout = 0)
+  Added PDO::pgsqlGetPid()
 
 - Zip:
   Added ZipArchive::setPassword($password)
@@ -250,6 +257,13 @@ PHP 5.6 UPGRADE NOTES
   - Added extended flag parameter for pg_meta_data(). pg_meta_data() always
     returns "is enum" attribute.
 
+- PDO_pgsql:
+  - Added PDO::PGSQL_ATTR_DISABLE_PREPARES constant to execute the queries
+    without preparing them, while still passing parameters separately from
+    the command text using PQexecParams.
+  - Added LISTEN/NOTIFY support via PDO::pgsqlGetNotify / PDO::pgsqlGetPid()
+    as described in https://bugs.php.net/bug.php?id=42614.
+
 ========================================
 9. New Global Constants
 ========================================
@@ -295,6 +309,11 @@ PHP 5.6 UPGRADE NOTES
 - HTTP stream wrapper:
   HTTP 1.1 requests now include a Connection: close header unless explicitly
   overridden by setting a Connection header via the header context option.
+
+- PDO_pgsql
+  A libpq version providing PQexecParams, PQprepare, PQescapeStringConn,
+  PQescapeByteaConn is now required. According to the release notes that means
+  8.0.8+ or 8.1.4+. 
 
 - Zip:
   New --with-libzip option allow to use system libzip. Version > 0.11 required,
