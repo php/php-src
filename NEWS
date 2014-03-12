@@ -278,11 +278,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
     (Yasuo)
-  . Implemented Request #54649 (Create session_serializer_name()). (Yasuo)
   . Implemented Request #17860 (Session write short circuit). (Yasuo)
   . Implemented Request #20421 (session_abort() and session_reset() function).
     (Yasuo)
-  . Implemented Request #11100 (session_gc() function). (Yasuo)
 
 - Standard:
   . Implemented FR #65634 (HTTP wrapper is very slow with protocol_version
