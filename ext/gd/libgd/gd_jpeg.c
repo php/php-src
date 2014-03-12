@@ -122,6 +122,10 @@ const char * gdJpegGetVersionString()
 			return "8";
 			break;
 
+		case 90:
+			return "9 compatible";
+			break;
+
 		default:
 			return "unknown";
 	}
