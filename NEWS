@@ -17,7 +17,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #66714 (imageconvolution breakage). (Brad Daily)
   . Fixed bug #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
+  . Fixed bug #66887 (imagescale - poor quality of scaled image). (Remi)
   . Fixed bug #66890 (imagescale segfault). (Remi)
+  . Fixed bug #66893 (imagescale ignore method argument). (Remi)
 
 - Hash:
   . hash_pbkdf2() now works correctly if the $length argument is not specified.
