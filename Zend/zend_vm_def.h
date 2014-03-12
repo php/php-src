@@ -1206,8 +1206,14 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -1217,6 +1223,9 @@ ZEND_VM_HANDLER(84, ZEND_FETCH_DIM_W, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -1419,10 +1428,11 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -1435,6 +1445,9 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -1808,7 +1821,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+	if (OP1_TYPE == IS_VAR &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -3159,10 +3174,15 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 		}
 	}
 
-	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-	if (OP1_TYPE != IS_VAR || EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else {
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
+//??? don't increment refcount of overloaded element
+		if (OP1_TYPE != IS_VAR ||	
+		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+			Z_ADDREF_P(varptr);
+		}
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 

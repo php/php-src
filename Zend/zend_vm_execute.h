@@ -12985,10 +12985,15 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		}
 	}
 
-	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-	if (IS_VAR != IS_VAR || EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else {
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
+//??? don't increment refcount of overloaded element
+		if (IS_VAR != IS_VAR ||
+		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+			Z_ADDREF_P(varptr);
+		}
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -14669,8 +14674,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -14680,6 +14691,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -14882,10 +14896,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -14898,6 +14913,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -16988,8 +17006,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -16999,6 +17023,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -17201,10 +17228,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -17217,6 +17245,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -19204,8 +19235,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -19215,6 +19252,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -19417,10 +19457,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -19433,6 +19474,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -19784,7 +19828,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+	if (IS_VAR == IS_VAR &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -21158,8 +21204,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -21169,6 +21221,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_H
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -22616,8 +22671,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -22627,6 +22688,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -22829,10 +22893,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -22845,6 +22910,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -23194,7 +23262,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+	if (IS_VAR == IS_VAR &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -24565,10 +24635,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -24581,6 +24652,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -25957,10 +26031,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -25973,6 +26048,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -27265,10 +27343,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -27281,6 +27360,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -28980,10 +29062,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -28996,6 +29079,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -30379,10 +30465,15 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		}
 	}
 
-	SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-	if (IS_CV != IS_VAR || EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else {
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
+//??? don't increment refcount of overloaded element
+		if (IS_CV != IS_VAR ||
+		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
+			Z_ADDREF_P(varptr);
+		}
 	}
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
@@ -31916,8 +32007,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -31927,6 +32024,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -32127,10 +32227,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -32143,6 +32244,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -34017,8 +34121,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -34028,6 +34138,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -34228,10 +34341,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -34244,6 +34358,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -36108,8 +36225,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -36119,6 +36242,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -36319,10 +36445,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -36335,6 +36462,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -36684,7 +36814,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+	if (IS_CV == IS_VAR &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -37936,8 +38068,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -37947,6 +38085,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HA
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -39260,8 +39401,14 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 		zval *retval_ptr = EX_VAR(opline->result.var);
 
 		if (Z_TYPE_P(retval_ptr) != IS_STR_OFFSET) {
+			zval *retval_ind = retval_ptr;
+
 			if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 				retval_ptr = Z_INDIRECT_P(retval_ptr);
+				if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
+					CHECK_EXCEPTION();
+					ZEND_VM_NEXT_OPCODE();
+				}
 			}
 			if (!Z_ISREF_P(retval_ptr)) {
 				if (Z_REFCOUNTED_P(retval_ptr)) {
@@ -39271,6 +39418,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 					ZVAL_NEW_REF(retval_ptr, retval_ptr);
 				}
 				Z_ADDREF_P(retval_ptr);
+				if (retval_ind != retval_ptr) {
+					ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+				}
 			}
 		}
 	}
@@ -39471,10 +39621,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	/* We are going to assign the result by reference */
 	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
 		zval *retval_ptr = EX_VAR(opline->result.var);
+		zval *retval_ind = retval_ptr;
 
 		if (Z_TYPE_P(retval_ptr) == IS_INDIRECT) {
 			retval_ptr = Z_INDIRECT_P(retval_ptr);
-			if (retval_ptr == &EG(uninitialized_zval)) {
+			if (retval_ptr == &EG(uninitialized_zval) || retval_ptr == &EG(error_zval)) {
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
@@ -39487,6 +39638,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 				ZVAL_NEW_REF(retval_ptr, retval_ptr);
 			}
 			Z_ADDREF_P(retval_ptr);
+			if (retval_ind != retval_ptr) {
+				ZVAL_REF(retval_ind, Z_REF_P(retval_ptr));
+			}
 		}
 	}
 
@@ -39834,7 +39988,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	} else if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		PZVAL_LOCK(value_ptr);
 	}
-	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+	if (IS_CV == IS_VAR &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
+	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 

@@ -1270,15 +1270,18 @@ convert_to_array:
 
 				if (overloaded_result && Z_TYPE_P(overloaded_result) != IS_UNDEF) {
 					if (!Z_ISREF_P(overloaded_result)) {
-						if (Z_REFCOUNTED_P(overloaded_result) && Z_REFCOUNT_P(overloaded_result) > 1) {
+						if (Z_REFCOUNTED_P(overloaded_result) &&
+						    Z_REFCOUNT_P(overloaded_result) > 1) {
 //???
 #if 1
-							Z_DELREF_P(overloaded_result);
-                            if (Z_ISREF_P(overloaded_result)) {
-								overloaded_result = Z_REFVAL_P(overloaded_result);
-                            }
-							ZVAL_DUP(result, overloaded_result);
-							overloaded_result = result;
+//							if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
+								Z_DELREF_P(overloaded_result);
+								ZVAL_DUP(result, overloaded_result);
+								overloaded_result = result;
+//							} else {
+								ZVAL_COPY_VALUE(result, overloaded_result);
+								overloaded_result = result;
+//							}
 #else
 //???							zval *tmp = overloaded_result;
 //???
