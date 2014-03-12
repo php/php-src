@@ -15,9 +15,9 @@ PHP                                                                        NEWS
     (Adam)
 
 - GD:
-  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
-  . Fixed #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
-  . Fixed #66890 (Bug #66890 imagescale segfault). (Remi)
+  . Fixed bug #66714 (imageconvolution breakage). (Brad Daily)
+  . Fixed bug #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
+  . Fixed bug #66890 (imagescale segfault). (Remi)
 
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
