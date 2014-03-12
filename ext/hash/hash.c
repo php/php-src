@@ -609,16 +609,15 @@ Generate a PBKDF2 hash of the given password and salt
 Returns lowercase hexits by default */
 PHP_FUNCTION(hash_pbkdf2)
 {
-	char *returnval, *algo, *salt, *pass = NULL;
-	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
-	long loops, i, j, algo_len, pass_len, iterations, length, digest_length = 0;
-	int argc, salt_len = 0;
+	char *returnval, *algo, *salt, *pass;
+	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2;
+	long loops, i, j, iterations, length = 0, digest_length;
+	int algo_len, pass_len, salt_len;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
 
-	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
 		return;
 	}
 
