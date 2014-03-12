@@ -3076,7 +3076,19 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
 			} else if (IS_CONST == IS_CV) {
-				Z_ADDREF_P(array_ref);
+//??? dereference
+				if (Z_ISREF_P(array_ref)) {
+					if (Z_REFCOUNT_P(array_ref) == 1) {
+						zend_reference *ref = Z_REF_P(array_ref);
+						ZVAL_COPY(array_ref, &ref->val);
+						efree(ref);
+						array_ptr = array_ref;
+					} else {
+						Z_ADDREF_P(array_ref);
+					}
+				} else {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -8175,7 +8187,19 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
 			} else if (IS_TMP_VAR == IS_CV) {
-				Z_ADDREF_P(array_ref);
+//??? dereference
+				if (Z_ISREF_P(array_ref)) {
+					if (Z_REFCOUNT_P(array_ref) == 1) {
+						zend_reference *ref = Z_REF_P(array_ref);
+						ZVAL_COPY(array_ref, &ref->val);
+						efree(ref);
+						array_ptr = array_ref;
+					} else {
+						Z_ADDREF_P(array_ref);
+					}
+				} else {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -13347,7 +13371,19 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
 			} else if (IS_VAR == IS_CV) {
-				Z_ADDREF_P(array_ref);
+//??? dereference
+				if (Z_ISREF_P(array_ref)) {
+					if (Z_REFCOUNT_P(array_ref) == 1) {
+						zend_reference *ref = Z_REF_P(array_ref);
+						ZVAL_COPY(array_ref, &ref->val);
+						efree(ref);
+						array_ptr = array_ref;
+					} else {
+						Z_ADDREF_P(array_ref);
+					}
+				} else {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
@@ -30717,7 +30753,19 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
 			} else if (IS_CV == IS_CV) {
-				Z_ADDREF_P(array_ref);
+//??? dereference
+				if (Z_ISREF_P(array_ref)) {
+					if (Z_REFCOUNT_P(array_ref) == 1) {
+						zend_reference *ref = Z_REF_P(array_ref);
+						ZVAL_COPY(array_ref, &ref->val);
+						efree(ref);
+						array_ptr = array_ref;
+					} else {
+						Z_ADDREF_P(array_ref);
+					}
+				} else {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}

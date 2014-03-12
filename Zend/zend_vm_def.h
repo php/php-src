@@ -4338,7 +4338,19 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				ZVAL_DUP(&tmp, array_ref);
 				array_ptr = array_ref = &tmp;
 			} else if (OP1_TYPE == IS_CV) {
-				Z_ADDREF_P(array_ref);
+//??? dereference
+				if (Z_ISREF_P(array_ref)) {
+					if (Z_REFCOUNT_P(array_ref) == 1) {
+						zend_reference *ref = Z_REF_P(array_ref);
+						ZVAL_COPY(array_ref, &ref->val);
+						efree(ref);
+						array_ptr = array_ref;
+					} else {
+						Z_ADDREF_P(array_ref);
+					}
+				} else {
+					Z_ADDREF_P(array_ref);
+				}
 			}
 		}
 	}
