@@ -58,7 +58,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 	tmp = pemalloc(i + 1, persistent);
 	memcpy(tmp, message, i);
 	tmp[i] = '\0';
-	
+
 	return tmp;
 }
 
@@ -220,12 +220,11 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
 	int scrollable;
-#if HAVE_PQPREPARE
 	int ret;
 	char *nsql = NULL;
 	php_size_t nsql_len = 0;
 	int emulate = 0;
-#endif
+	int execute_only = 0;
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -239,19 +238,21 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 			efree(S->cursor_name);
 		}
 		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
-#if HAVE_PQPREPARE
 		emulate = 1;
-#endif
-	}
-
-#if HAVE_PQPREPARE
-	else if (driver_options) {
-		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1 ||
-			pdo_attr_ival(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+	} else if (driver_options) {
+		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
+			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			emulate = 1;
+		}
+		if (pdo_attr_ival(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+			emulate = 1;
+		}
+		if (pdo_attr_ival(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
+			execute_only = 1;
 		}
 	} else {
 		emulate = H->disable_native_prepares || H->emulate_prepares;
+		execute_only = H->disable_prepares;
 	}
 
 	if (!emulate && PQprotocolVersion(H->server) > 2) {
@@ -268,9 +269,12 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 			return 0;
 		}
 
-		spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
-		/* that's all for now; we'll defer the actual prepare until the first execute call */
-	
+		if (!execute_only) {
+			/* prepared query: set the query name and defer the
+			   actual prepare until the first execute call */
+			spprintf(&S->stmt_name, 0, "pdo_stmt_%08x", ++H->stmt_counter);
+		}
+
 		if (nsql) {
 			S->query = nsql;
 		} else {
@@ -279,7 +283,6 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_size_t sql
 
 		return 1;
 	}
-#endif
 
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	return 1;
@@ -291,7 +294,7 @@ static php_int_t pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, php_size_t s
 	PGresult *res;
 	php_int_t ret = 1;
 	ExecStatusType qs;
-	
+
 	if (!(res = PQexec(H->server, sql))) {
 		/* fatal error */
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
@@ -319,15 +322,11 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t 
 	unsigned char *escaped;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	size_t tmp_len;
-	
+
 	switch (paramtype) {
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
-#ifdef HAVE_PQESCAPE_BYTEA_CONN
 			escaped = PQescapeByteaConn(H->server, (unsigned char *)unquoted, (size_t)unquotedlen, &tmp_len);
-#else
-			escaped = PQescapeBytea((unsigned char *)unquoted, (size_t)unquotedlen, &tmp_len);
-#endif
 			*quotedlen = (int)tmp_len + 1;
 			*quoted = emalloc(*quotedlen + 1);
 			memcpy((*quoted)+1, escaped, *quotedlen-2);
@@ -339,11 +338,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, php_size_t 
 		default:
 			*quoted = safe_emalloc(2, unquotedlen, 3);
 			(*quoted)[0] = '\'';
-#ifndef HAVE_PQESCAPE_CONN
-			*quotedlen = PQescapeString(*quoted + 1, unquoted, (size_t)unquotedlen);
-#else
 			*quotedlen = PQescapeStringConn(H->server, *quoted + 1, unquoted, (size_t)unquotedlen, NULL);
-#endif
 			(*quoted)[*quotedlen + 1] = '\'';
 			(*quoted)[*quotedlen + 2] = '\0';
 			*quotedlen += 2;
@@ -445,8 +440,8 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_
 		case PDO_ATTR_SERVER_INFO: {
 			int spid = PQbackendPID(H->server);
 			char *tmp;
-			spprintf(&tmp, 0, 
-				"PID: %d; Client Encoding: %s; Is Superuser: %s; Session Authorization: %s; Date Style: %s", 
+			spprintf(&tmp, 0,
+				"PID: %d; Client Encoding: %s; Is Superuser: %s; Session Authorization: %s; Date Style: %s",
 				spid,
 				(char*)PQparameterStatus(H->server, "client_encoding"),
 				(char*)PQparameterStatus(H->server, "is_superuser"),
@@ -457,7 +452,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_
 			break;
 
 		default:
-			return 0;	
+			return 0;
 	}
 
 	return 1;
@@ -581,7 +576,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
 			php_size_t query_len;
 			convert_to_string_ex(tmp);
-		
+
 			if (buffer_len < Z_STRSIZE_PP(tmp)) {
 				buffer_len = Z_STRSIZE_PP(tmp);
 				query = erealloc(query, buffer_len + 2); /* room for \n\0 */
@@ -877,7 +872,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 			int ret = PQgetCopyData(H->server, &csv, 0);
 			if (ret == -1) {
 				break; /* copy done */
-			} else if (ret > 0) { 
+			} else if (ret > 0) {
 				add_next_index_stringl(return_value, csv, ret, 1);
 				PQfreemem(csv);
 			} else {
@@ -955,7 +950,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	if (strpbrk(modestr, "+w")) {
 		mode = INV_READ|INV_WRITE;
 	}
-	
+
 	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
@@ -1122,15 +1117,16 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_D
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
-#if HAVE_PQPREPARE
 		case PDO_ATTR_EMULATE_PREPARES:
 			H->emulate_prepares = Z_IVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
+			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			H->disable_native_prepares = Z_IVAL_P(val);
 			return 1;
-#endif
-
+		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			H->disable_prepares = Z_IVAL_P(val);
+			return 1;
 		default:
 			return 0;
 	}
@@ -1167,7 +1163,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
-	
+
 	/* PostgreSQL wants params in the connect string to be separated by spaces,
 	 * if the PDO standard semicolons are used, we convert them to spaces
 	 */
@@ -1237,7 +1233,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	dbh->max_escaped_char_length = 2;
 
 	ret = 1;
-	
+
 cleanup:
 	dbh->methods = &pgsql_methods;
 	if (!ret) {
