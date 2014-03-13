@@ -897,6 +897,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	char *c, hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i;
 	php_size_t len[] = { 0, 0, 0, 0, 0 };
+	int ilen[] = { 0, 0, 0, 0, 0 };
 	php_int_t largs[] = { 0, 0, 0 };
 	PHP_MD5_CTX hash_context;
 	zend_rsrc_list_entry new_index_ptr, *le;
@@ -929,7 +930,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		args[CSET] = c;
 		len[CSET] = strlen(c);
 	}
-	
+
 	/* don't want usernames and passwords floating around */
 	PHP_MD5Init(&hash_context);
 	for (i = 0; i < sizeof(args)/sizeof(char*); ++i) {
@@ -988,8 +989,13 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			RETURN_FALSE;
 		}
 	
+		/* need to pass it by ref as int * */
+		for (i = 0; i < sizeof(len)/sizeof(php_size_t); i++) {
+			ilen[i] = (int)len[i];
+		}
+		
 		/* create the ib_link */
-		if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
+		if (FAILURE == _php_ibase_attach_db(args, ilen, largs, &db_handle TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
 	

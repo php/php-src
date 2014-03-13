@@ -93,7 +93,7 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
 	char **events, unsigned short *l, char **event_buf, char **result_buf)
 {
 	ISC_STATUS dummy_result[20];
-	php_uint_t dummy_count[15];
+	ISC_ULONG dummy_count[15];
 
 	/**
 	 * Unfortunately, there's no clean and portable way in C to pass arguments to
@@ -131,7 +131,7 @@ PHP_FUNCTION(ibase_wait_event)
 	int num_args;
 	char *event_buffer, *result_buffer, *events[15];
 	unsigned short i = 0, event_count = 0, buffer_size;
-	php_uint_t occurred_event[15];
+	ISC_ULONG occurred_event[15];
 
 	RESET_ERRMSG;
 
@@ -209,7 +209,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 	 */
 	switch (event->state) {
 		unsigned short i;
-		php_uint_t occurred_event[15];
+		ISC_ULONG occurred_event[15];
 		zval event_name, link_id, return_value, *args[2];
 
 		default: /* == DEAD */
