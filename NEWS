@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fix compilation on libcurl versions between 7.10.5 and 7.12.2, inclusive.
     (Adam)
 
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
 - GD:
   . Fixed bug #66714 (imageconvolution breakage). (Brad Daily)
   . Fixed bug #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
@@ -55,10 +59,6 @@ PHP                                                                        NEWS
   . Bug #66731 (file: infinite recursion) (CVE-2014-1943). (Remi)
   . Fixed bug #66820 (out-of-bounds memory access in fileinfo)
     (CVE-2014-2270). (Remi)
-
-- FPM:
-  . Added clear_env configuration directive to disable clearenv() call.
-  (Github PR# 598, Paul Annesley)
 
 - GD
   . Fixed Bug #66815 (imagecrop(): insufficient fix for NULL defer
