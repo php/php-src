@@ -1217,7 +1217,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, php_size_t na
 				return 1;
 			}
 			convert_to_boolean(var);
-			bind_data = (int *)&Z_LVAL_P(var);
+			bind_data = (int *)&Z_IVAL_P(var);
 			value_sz = sizeof(int);
 
 			mode = OCI_DEFAULT;
