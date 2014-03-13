@@ -574,7 +574,12 @@ END_EXTERN_C()
 #define ZVAL_ZVAL(z, zv, copy, dtor) do {		\
 		zval *__z = (z);						\
 		zval *__zv = (zv);						\
-		ZVAL_COPY_VALUE(__z, __zv);				\
+		if (EXPECTED(!Z_ISREF_P(__zv))) {		\
+			ZVAL_COPY_VALUE(__z, __zv);			\
+		} else {                                \
+			ZVAL_COPY_VALUE(__z,                \
+				Z_REFVAL_P(__zv));				\
+		}										\
 		if (copy) {								\
 			zval_copy_ctor(__z);				\
 	    }										\
