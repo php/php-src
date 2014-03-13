@@ -340,11 +340,20 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (OP1_TYPE == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);

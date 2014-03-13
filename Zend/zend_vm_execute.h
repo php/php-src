@@ -14014,11 +14014,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -16503,11 +16512,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -18570,11 +18588,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -20751,11 +20778,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -22163,11 +22199,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_VAR == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -24085,11 +24130,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -25480,11 +25534,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -26792,11 +26855,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -28105,11 +28177,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -28512,11 +28593,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_UNUSED == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -31340,11 +31430,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -33611,11 +33710,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -35553,11 +35661,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -37608,11 +37725,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -38886,11 +39012,20 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	make_real_object(object TSRMLS_CC);
-
 //???: object may become INDIRECT
 	if (IS_CV == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
 		object = Z_INDIRECT_P(object);
+	}
+
+	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		make_real_object(object TSRMLS_CC);
+//???
+		if (Z_TYPE_P(object) == IS_INDIRECT) {
+			object = Z_INDIRECT_P(object);
+		}
+	}
+	if (UNEXPECTED(Z_ISREF_P(object))) {
+		object = Z_REFVAL_P(object);
 	}
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
