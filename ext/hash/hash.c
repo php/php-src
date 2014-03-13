@@ -613,16 +613,13 @@ PHP_FUNCTION(hash_pbkdf2)
 {
 	char *returnval, *algo, *salt, *pass = NULL;
 	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
-	php_int_t loops, i, j, iterations, length;
-	php_size_t algo_len, pass_len, digest_length = 0;
-	int argc;
-	php_size_t salt_len = 0;
+	php_int_t loops, i, j, iterations, length = 0, digest_length = 0;
+	php_size_t algo_len, pass_len, salt_len = 0;
 	zend_bool raw_output = 0;
 	const php_hash_ops *ops;
 	void *context;
 
-	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "SSSi|ib", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSSi|ib", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
 		return;
 	}
 
