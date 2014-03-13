@@ -183,7 +183,18 @@ ZEND_API double zend_string_to_double(const char *number, zend_uint length) /* {
 
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_REFERENCE:
+			if (Z_REFCOUNT_P(op) == 1) {
+				zend_reference *ref = Z_REF_P(op);
+				ZVAL_COPY_VALUE(op, Z_REFVAL_P(op));
+				efree(ref);
+			} else {
+				Z_DELREF_P(op);
+				ZVAL_COPY_VALUE(op, Z_REFVAL_P(op));
+			}
+			goto try_again;
 		case IS_STRING:
 			{
 				zend_string *str;
