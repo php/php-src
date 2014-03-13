@@ -6400,7 +6400,13 @@ void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, zno
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_OP_DATA;
-	SET_UNUSED(opline->op1);
+	/* Allocate enough space to keep HashPointer on VM stack */
+	opline->op1_type = IS_TMP_VAR;
+	opline->op1.var = get_temporary_variable(CG(active_op_array));
+	if (sizeof(HashPointer) > sizeof(zval)) {
+		/* Make shure 1 zval is enough for HashPointer (2 must be enough) */
+		get_temporary_variable(CG(active_op_array));
+	}
 	SET_UNUSED(opline->op2);
 	SET_UNUSED(opline->result);
 }
