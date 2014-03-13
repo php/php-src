@@ -19,27 +19,27 @@ var_dump($b[$i]);
 --EXPECT--
 array(2) refcount(2){
   [1]=>
-  long(18) refcount(1)
+  long(18)
   [2]=>
-  long(52) refcount(1)
+  long(52)
 }
 array(2) refcount(2){
   [1]=>
-  long(18) refcount(1)
+  long(18)
   [2]=>
-  long(52) refcount(1)
+  long(52)
 }
 array(2) refcount(2){
   [0]=>
-  long(1) refcount(1)
+  long(1)
   [1]=>
-  long(2) refcount(1)
+  long(2)
 }
 array(2) refcount(2){
   [0]=>
-  long(1) refcount(1)
+  long(1)
   [1]=>
-  long(2) refcount(1)
+  long(2)
 }
 int(18)
 int(18)
