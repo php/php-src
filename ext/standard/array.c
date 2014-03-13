@@ -1054,13 +1054,19 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	zend_hash_internal_pointer_reset(target_hash);
 	while (!EG(exception) && (zv = zend_hash_get_current_data(target_hash)) != NULL) {
 		ZVAL_COPY(&args[0], zv);
-		if (recursive && Z_TYPE(args[0]) == IS_ARRAY) {
+		if (recursive &&
+		    (Z_TYPE(args[0]) == IS_ARRAY ||
+		     (Z_ISREF(args[0]) && Z_TYPE_P(Z_REFVAL(args[0])) == IS_ARRAY))) {
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
 			zend_fcall_info_cache orig_array_walk_fci_cache;
 
-			SEPARATE_ZVAL_IF_NOT_REF(&args[0]);
-			thash = Z_ARRVAL(args[0]);
+			if (Z_ISREF(args[0])) {
+				thash = Z_ARRVAL_P(Z_REFVAL(args[0]));
+			} else {
+				SEPARATE_ZVAL(&args[0]);
+				thash = Z_ARRVAL(args[0]);
+			}
 			if (thash->nApplyCount > 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 				zval_ptr_dtor(&args[0]);
