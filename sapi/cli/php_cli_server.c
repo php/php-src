@@ -450,7 +450,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	{
 		char *val;
-		if (SUCCESS == (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
+		if (NULL != (val = zend_hash_str_find_ptr(&client->request.headers, "host", sizeof("host")-1))) {
 			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
 			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
 			smart_str_appends_ex(buffer, val, persistent);
@@ -519,7 +519,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, len+1, p, h->header_len - (p - h->header), 1);
+				add_assoc_stringl_ex(return_value, s, len, p, h->header_len - (p - h->header), 1);
 				free_alloca(s, use_heap);
 			}
 		}

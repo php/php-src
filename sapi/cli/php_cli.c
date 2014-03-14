@@ -195,8 +195,7 @@ static void print_modules(TSRMLS_D) /* {{{ */
 {
 	HashTable sorted_registry;
 
-	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
-//???	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
+	zend_hash_init(&sorted_registry, 50, NULL, NULL, 0);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
 	zend_hash_apply(&sorted_registry, (apply_func_t) print_module_info TSRMLS_CC);
@@ -1038,7 +1037,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				zend_hash_str_update(&EG(symbol_table).ht, "argi", sizeof("argi")-1, &argi);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
-					while (len-- && (input[len]=='\n' || input[len]=='\r')) {
+					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
 					}
 					ZVAL_STRINGL(&argn, input, len);
@@ -1067,15 +1066,14 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 				break;
 			}
-//???
-#if 0
+
 			case PHP_MODE_REFLECTION_FUNCTION:
 			case PHP_MODE_REFLECTION_CLASS:
 			case PHP_MODE_REFLECTION_EXTENSION:
 			case PHP_MODE_REFLECTION_ZEND_EXTENSION:
 				{
 					zend_class_entry *pce = NULL;
-					zval *arg, *ref;
+					zval arg, ref;
 					zend_execute_data execute_data;
 
 					switch (behavior) {
@@ -1099,24 +1097,24 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 							break;
 					}
 					
-					MAKE_STD_ZVAL(arg);
-					ZVAL_STRING(arg, reflection_what, 1);
-					ALLOC_ZVAL(ref);
-					object_init_ex(ref, pce);
-					INIT_PZVAL(ref);
+					ZVAL_STRING(&arg, reflection_what);
+					object_init_ex(&ref, pce);
 
 					memset(&execute_data, 0, sizeof(zend_execute_data));
 					EG(current_execute_data) = &execute_data;
 					EX(function_state).function = pce->constructor;
-					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, arg);
+					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {
-						zval *msg = zend_read_property(zend_exception_get_default(TSRMLS_C), EG(exception), "message", sizeof("message")-1, 0 TSRMLS_CC);
+						zval tmp, *msg;
+
+						ZVAL_OBJ(&tmp, EG(exception));
+						msg = zend_read_property(zend_exception_get_default(TSRMLS_C), &tmp, "message", sizeof("message")-1, 0 TSRMLS_CC);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
-						zval_ptr_dtor(&EG(exception));
+						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;
 					} else {
-						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, ref);
+						zend_call_method_with_1_params(NULL, reflection_ptr, NULL, "export", NULL, &ref);
 					}
 					zval_ptr_dtor(&ref);
 					zval_ptr_dtor(&arg);
@@ -1129,7 +1127,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
 					zend_module_entry *module;
 
-					if (zend_hash_find(&module_registry, lcname, len+1, (void**)&module) == FAILURE) {
+					if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
 						if (!strcmp(reflection_what, "main")) {
 							display_ini_entries(NULL);
 						} else {
@@ -1143,7 +1141,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					efree(lcname);
 					break;
 				}
-#endif
+
 			case PHP_MODE_SHOW_INI_CONFIG:
 				{
 					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
