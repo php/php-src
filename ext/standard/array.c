@@ -2233,35 +2233,54 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 		switch (zend_hash_get_current_key_ex(src, &string_key, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (recursive && (dest_entry = zend_hash_find(dest, string_key)) != NULL) {
-					HashTable *thash = Z_TYPE_P(dest_entry) == IS_ARRAY ? Z_ARRVAL_P(dest_entry) : NULL;
-					zval src_zval;
-					zval *tmp = NULL;
-
+					zval *src_zval = src_entry;
+					zval *dest_zval = dest_entry;
+					HashTable *thash;
+					zval tmp;
+					
+					if (Z_ISREF_P(src_zval)) {
+						src_zval = Z_REFVAL_P(src_zval);
+					}
+					if (Z_ISREF_P(dest_zval)) {
+						dest_zval = Z_REFVAL_P(dest_zval);
+					}
+					thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
 					if ((thash && thash->nApplyCount > 1) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
 					}
-					SEPARATE_ZVAL(dest_entry);
+					
+					if (Z_ISREF_P(dest_entry)) {
+						if (Z_REFCOUNT_P(dest_entry) == 1) {
+							zend_reference *ref = Z_REF_P(dest_entry);
+							ZVAL_COPY_VALUE(dest_entry, dest_zval);
+							efree(ref);
+						} else {
+							Z_DELREF_P(dest_entry);
+							ZVAL_DUP(dest_entry, dest_zval);
+						}
+						dest_zval = dest_entry;
+					} else {
+						SEPARATE_ZVAL(dest_zval);
+					}
 
-					if (Z_TYPE_P(dest_entry) == IS_NULL) {
-						convert_to_array_ex(dest_entry);
-						add_next_index_null(dest_entry);
+					if (Z_TYPE_P(dest_zval) == IS_NULL) {
+						convert_to_array_ex(dest_zval);
+						add_next_index_null(dest_zval);
 					} else {
-						convert_to_array_ex(dest_entry);
+						convert_to_array_ex(dest_zval);
 					}
-					if (Z_TYPE_P(src_entry) == IS_OBJECT) {
-						ZVAL_DUP(&src_zval, src_entry);
-						zval_copy_ctor(&src_zval);
-						convert_to_array(&src_zval);
-						tmp = &src_zval;
-					} else {
-						ZVAL_COPY_VALUE(&src_zval, src_entry);
+					ZVAL_UNDEF(&tmp);
+					if (Z_TYPE_P(src_zval) == IS_OBJECT) {
+						ZVAL_DUP(&tmp, src_zval);
+						convert_to_array(&tmp);
+						src_zval = &tmp;
 					}
-					if (Z_TYPE(src_zval) == IS_ARRAY) {
+					if (Z_TYPE_P(src_zval) == IS_ARRAY) {
 						if (thash) {
 							thash->nApplyCount++;
 						}
-						if (!php_array_merge(Z_ARRVAL_P(dest_entry), Z_ARRVAL(src_zval), recursive TSRMLS_CC)) {
+						if (!php_array_merge(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval), recursive TSRMLS_CC)) {
 							if (thash) {
 								thash->nApplyCount--;
 							}
@@ -2274,11 +2293,9 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 						if (Z_REFCOUNTED_P(src_entry)) {
 							Z_ADDREF_P(src_entry);
 						}
-						zend_hash_next_index_insert(Z_ARRVAL_P(dest_entry), &src_zval);
+						zend_hash_next_index_insert(Z_ARRVAL_P(dest_zval), src_zval);
 					}
-					if (tmp) {
-						zval_ptr_dtor(tmp);
-					}
+					zval_ptr_dtor(&tmp);
 				} else {
 					if (Z_REFCOUNTED_P(src_entry)) {
 						Z_ADDREF_P(src_entry);
@@ -2372,11 +2389,16 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (Z_TYPE(args[i]) != IS_ARRAY) {
+		zval *arg = args + i;
+
+		if (Z_ISREF_P(arg)) {
+			arg = Z_REFVAL_P(arg);
+		}
+		if (Z_TYPE_P(arg) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
 			RETURN_NULL();
 		} else {
-			int num = zend_hash_num_elements(Z_ARRVAL(args[i]));
+			int num = zend_hash_num_elements(Z_ARRVAL_P(arg));
 
 			if (num > init_size) {
 				init_size = num;
@@ -2387,12 +2409,17 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	array_init_size(return_value, init_size);
 
 	for (i = 0; i < argc; i++) {
+		zval *arg = args + i;
+
+		if (Z_ISREF_P(arg)) {
+			arg = Z_REFVAL_P(arg);
+		}
 		if (!replace) {
-			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL(args[i]), recursive TSRMLS_CC);
+			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(arg), recursive TSRMLS_CC);
 		} else if (recursive && i > 0) { /* First array will be copied directly instead */
-			php_array_replace_recursive(Z_ARRVAL_P(return_value), Z_ARRVAL(args[i]) TSRMLS_CC);
+			php_array_replace_recursive(Z_ARRVAL_P(return_value), Z_ARRVAL_P(arg) TSRMLS_CC);
 		} else {
-			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL(args[i]), zval_add_ref, 1);
+			zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(arg), zval_add_ref, 1);
 		}
 	}
 }
