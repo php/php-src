@@ -40,6 +40,9 @@ PHP                                                                        NEWS
   . Added function opcache_is_script_cached(). (Danack)
   . Added information about interned strings usage. (Terry, Julien, Dmitry)
 
+- Openssl:
+  . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
+
 - GMP
   . Fixed bug #66872 (invalid argument crashes gmp_testbit) (Pierre)
 
