@@ -952,7 +952,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 		context->notifier = php_stream_notification_alloc();
 		context->notifier->func = user_space_stream_notifier;
 		context->notifier->ptr = tmp;
-		Z_ADDREF_P(tmp);
+		if (Z_REFCOUNTED_P(tmp)) Z_ADDREF_P(tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(params), "options", sizeof("options")-1))) {
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(stream_context_get_params)
 	array_init(return_value);
 	if (context->notifier && context->notifier->ptr && context->notifier->func == user_space_stream_notifier) {
 		add_assoc_zval_ex(return_value, ZEND_STRS("notification"), context->notifier->ptr);
-		Z_ADDREF_P(context->notifier->ptr);
+		if (Z_REFCOUNTED_P((zval*)context->notifier->ptr)) Z_ADDREF_P(context->notifier->ptr);
 	}
 	ZVAL_ZVAL(&options, &context->options, 1, 0);
 	add_assoc_zval_ex(return_value, ZEND_STRS("options"), &options);
