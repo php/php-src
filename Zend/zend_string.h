@@ -59,7 +59,7 @@ END_EXTERN_C()
 static zend_always_inline zend_ulong zend_str_hash_val(zend_string *s)
 {
 	if (!s->h) {
-		s->h = zend_hash_func(s->val, s->len + 1);
+		s->h = zend_hash_func(s->val, s->len);
 	}
 	return s->h;
 }

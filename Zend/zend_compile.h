@@ -137,9 +137,9 @@ typedef struct _zend_try_catch_element {
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8
-#define THIS_HASHVAL 210728972157UL
+#define THIS_HASHVAL 6385726429UL
 #else
-#define THIS_HASHVAL 275574653UL
+#define THIS_HASHVAL 2090759133UL
 #endif
 
 /* method flags (types) */

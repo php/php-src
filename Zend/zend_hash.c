@@ -594,7 +594,7 @@ ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, int len)
 
 	IS_CONSISTENT(ht);
 
-	h = zend_inline_hash_func(str, len + 1);
+	h = zend_inline_hash_func(str, len);
 	nIndex = h & ht->nTableMask;
 
 	idx = ht->arHash[nIndex];
@@ -1045,7 +1045,7 @@ ZEND_API zval *zend_hash_str_find(const HashTable *ht, const char *str, int len)
 		return NULL;
 	}
 
-	h = zend_inline_hash_func(str, len + 1);
+	h = zend_inline_hash_func(str, len);
 	p = zend_hash_str_find_bucket(ht, str, len, h);
 	return p ? &p->val : NULL;
 }
@@ -1075,7 +1075,7 @@ ZEND_API int zend_hash_str_exists(const HashTable *ht, const char *str, int len)
 		return 0;
 	}
 
-	h = zend_inline_hash_func(str, len + 1);
+	h = zend_inline_hash_func(str, len);
 	p = zend_hash_str_find_bucket(ht, str, len, h);
 	return p ? 1 : 0;
 }
