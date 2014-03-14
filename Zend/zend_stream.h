@@ -63,14 +63,14 @@ typedef struct _zend_stream {
 } zend_stream;
 
 typedef struct _zend_file_handle {
-	zend_stream_type  type;
-	const char        *filename;
-	char              *opened_path;
 	union {
 		int           fd;
 		FILE          *fp;
 		zend_stream   stream;
 	} handle;
+	const char        *filename;
+	char              *opened_path;
+	zend_stream_type  type;
 	zend_bool free_filename;
 } zend_file_handle;
 
