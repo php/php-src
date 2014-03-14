@@ -2319,7 +2319,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC) /* {{{ */
 {
-	zval *src_entry, *dest_entry;
+	zval *src_entry, *dest_entry, *src_zval, *dest_zval;
 	zend_string *string_key;
 	ulong num_key;
 	HashPosition pos;
@@ -2327,11 +2327,17 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 	for (zend_hash_internal_pointer_reset_ex(src, &pos);
 	     (src_entry = zend_hash_get_current_data_ex(src, &pos)) != NULL;
 	     zend_hash_move_forward_ex(src, &pos)) {
+
+		src_zval = src_entry;
+		if (Z_ISREF_P(src_zval)) {
+			src_zval = Z_REFVAL_P(src_zval);
+		}
 		switch (zend_hash_get_current_key_ex(src, &string_key, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
-				if (Z_TYPE_P(src_entry) != IS_ARRAY ||
+				if (Z_TYPE_P(src_zval) != IS_ARRAY ||
 					(dest_entry = zend_hash_find(dest, string_key)) == NULL ||
-					Z_TYPE_P(dest_entry) != IS_ARRAY) {
+					(Z_TYPE_P(dest_entry) != IS_ARRAY &&
+					 (!Z_ISREF_P(dest_entry) || Z_TYPE_P(Z_REFVAL_P(dest_entry)) != IS_ARRAY))) {
 
 					if (Z_REFCOUNTED_P(src_entry)) {
 						Z_ADDREF_P(src_entry);
@@ -2343,9 +2349,10 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 				break;
 
 			case HASH_KEY_IS_LONG:
-				if (Z_TYPE_P(src_entry) != IS_ARRAY ||
+				if (Z_TYPE_P(src_zval) != IS_ARRAY ||
 					(dest_entry = zend_hash_index_find(dest, num_key)) == NULL ||
-					Z_TYPE_P(dest_entry) != IS_ARRAY) {
+					(Z_TYPE_P(dest_entry) != IS_ARRAY &&
+					 (!Z_ISREF_P(dest_entry) || Z_TYPE_P(Z_REFVAL_P(dest_entry)) != IS_ARRAY))) {
 
 					if (Z_REFCOUNTED_P(src_entry)) {
 						Z_ADDREF_P(src_entry);
@@ -2357,22 +2364,28 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 				break;
 		}
 
-		if (Z_ARRVAL_P(dest_entry)->nApplyCount > 1 || Z_ARRVAL_P(src_entry)->nApplyCount > 1 || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
+		dest_zval = dest_entry;
+		if (Z_ISREF_P(dest_zval)) {
+			dest_zval = Z_REFVAL_P(dest_zval);
+		}
+		if (Z_ARRVAL_P(dest_zval)->nApplyCount > 1 ||
+		    Z_ARRVAL_P(src_zval)->nApplyCount > 1 ||
+		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 			return 0;
 		}
-		SEPARATE_ZVAL(dest_entry);
-		Z_ARRVAL_P(dest_entry)->nApplyCount++;
-		Z_ARRVAL_P(src_entry)->nApplyCount++;
+		SEPARATE_ZVAL(dest_zval);
+		Z_ARRVAL_P(dest_zval)->nApplyCount++;
+		Z_ARRVAL_P(src_zval)->nApplyCount++;
 		
 
-		if (!php_array_replace_recursive(Z_ARRVAL_P(dest_entry), Z_ARRVAL_P(src_entry) TSRMLS_CC)) {
-			Z_ARRVAL_P(dest_entry)->nApplyCount--;
-			Z_ARRVAL_P(src_entry)->nApplyCount--;
+		if (!php_array_replace_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval) TSRMLS_CC)) {
+			Z_ARRVAL_P(dest_zval)->nApplyCount--;
+			Z_ARRVAL_P(src_zval)->nApplyCount--;
 			return 0;
 		}
-		Z_ARRVAL_P(dest_entry)->nApplyCount--;
-		Z_ARRVAL_P(src_entry)->nApplyCount--;
+		Z_ARRVAL_P(dest_zval)->nApplyCount--;
+		Z_ARRVAL_P(src_zval)->nApplyCount--;
 	}
 
 	return 1;
