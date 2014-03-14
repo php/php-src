@@ -858,7 +858,7 @@ static int php_openssl_parse_config(struct php_x509_request * req, zval * option
 		req->digest = req->md_alg = EVP_get_digestbyname(req->digest_name);
 	}
 	if (req->md_alg == NULL) {
-		req->md_alg = req->digest = EVP_md5();
+		req->md_alg = req->digest = EVP_sha1();
 	}
 
 	PHP_SSL_CONFIG_SYNTAX_CHECK(extensions_section);
