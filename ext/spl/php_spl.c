@@ -585,7 +585,7 @@ PHP_FUNCTION(spl_autoload_register)
 
 		if (!SPL_G(autoload_functions)) {
 			ALLOC_HASHTABLE(SPL_G(autoload_functions));
-			zend_hash_init(SPL_G(autoload_functions), 1, NULL, (dtor_func_t) autoload_func_info_dtor, 0);
+			zend_hash_init(SPL_G(autoload_functions), 1, NULL, autoload_func_info_dtor, 0);
 		}
 
 		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
@@ -666,7 +666,6 @@ PHP_FUNCTION(spl_autoload_unregister)
 		lc_name = STR_ALLOC(func_name->len + sizeof(zend_uint), 0);
 		zend_str_tolower_copy(lc_name->val, func_name->val, func_name->len);
 		memcpy(lc_name->val + func_name->len, &Z_OBJ_HANDLE_P(zcallable), sizeof(zend_uint));
-		lc_name->len += sizeof(zend_uint);
 		lc_name->val[lc_name->len] = '\0';
 	} else {
 		lc_name = STR_ALLOC(func_name->len, 0);
@@ -686,7 +685,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			/* remove specific */
 			success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			if (success != SUCCESS && Z_TYPE_P(obj_ptr) == IS_OBJECT) {
-				STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
+				lc_name = STR_REALLOC(lc_name, lc_name->len + sizeof(zend_uint), 0);
 				memcpy(lc_name->val + lc_name->len - sizeof(zend_uint), &Z_OBJ_HANDLE_P(obj_ptr), sizeof(zend_uint));
 				lc_name->val[lc_name->len] = '\0';
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);
@@ -702,7 +701,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		}
 	}
 
-	STR_FREE(lc_name);
+	STR_RELEASE(lc_name);
 	RETURN_BOOL(success == SUCCESS);
 } /* }}} */
 
