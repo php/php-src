@@ -125,7 +125,6 @@ typedef struct _spl_cbfilter_it_intern {
 } _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {
-	zend_object              std;
 	struct {
 		zval                 zobject;
 		zend_class_entry     *ce;
@@ -165,7 +164,14 @@ typedef struct _spl_dual_it_object {
 #endif
 		_spl_cbfilter_it_intern *cbfilter;
 	} u;
+	zend_object              std;
 } spl_dual_it_object;
+
+static inline spl_dual_it_object *spl_dual_it_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_dual_it_object*)((char*)(obj) - XtOffsetOf(spl_dual_it_object, std));
+} /* }}} */
+
+#define Z_SPLDUAL_IT_P(zv)  spl_dual_it_from_obj(Z_OBJ_P((zv)))
 
 typedef int (*spl_iterator_apply_func_t)(zend_object_iterator *iter, void *puser TSRMLS_DC);
 

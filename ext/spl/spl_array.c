@@ -307,7 +307,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
-	if (ZVAL_IS_UNDEF(offset)) {
+	if (!offset || ZVAL_IS_UNDEF(offset)) {
 		return &EG(uninitialized_zval);
 	}
 
