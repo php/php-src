@@ -74,7 +74,7 @@ static void spl_filesystem_file_free_line(spl_filesystem_object *intern TSRMLS_D
 
 static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)object;
+	spl_filesystem_object *intern = spl_filesystem_from_obj(object);
 
 	if (intern->oth_handler && intern->oth_handler->dtor) {
 		intern->oth_handler->dtor(intern TSRMLS_CC);
@@ -127,7 +127,7 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 	//zend_iterator_dtor(intern->it TSRMLS_CC);
 	//}
 
-	efree(object);
+	efree(intern);
 } /* }}} */
 
 /* {{{ spl_ce_dir_object_new */
@@ -145,8 +145,7 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type TS
 {
 	spl_filesystem_object *intern;
 
-	intern = emalloc(sizeof(spl_filesystem_object));
-	memset(intern, 0, sizeof(spl_filesystem_object));
+	intern = ecalloc(1, sizeof(spl_filesystem_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -170,7 +169,7 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type TSRML
 /* {{{ spl_filesystem_object_new_check */
 static zend_object *spl_filesystem_object_new_check(zend_class_entry *class_type TSRMLS_DC)
 {
-	spl_filesystem_object *ret = (spl_filesystem_object *)spl_filesystem_object_new_ex(class_type TSRMLS_CC);
+	spl_filesystem_object *ret = spl_filesystem_from_obj(spl_filesystem_object_new_ex(class_type TSRMLS_CC));
 	ret->std.handlers = &spl_filesystem_object_check_handlers;
 	return &ret->std;
 }
@@ -334,9 +333,9 @@ static zend_object *spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 	int index, skip_dots;
 
 	old_object = Z_OBJ_P(zobject);
-	source = (spl_filesystem_object*)old_object;
+	source = spl_filesystem_from_obj(old_object);
 	new_object = spl_filesystem_object_new_ex(old_object->ce TSRMLS_CC);
-	intern = (spl_filesystem_object*)new_object;
+	intern = spl_filesystem_from_obj(new_object);
 
 	intern->flags = source->flags;
 
@@ -440,7 +439,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 
 	zend_update_class_constants(ce TSRMLS_CC);
 
-	intern = (spl_filesystem_object*)spl_filesystem_object_new_ex(ce TSRMLS_CC);
+	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
 	return_value->value.obj = &intern->std;
 	Z_TYPE_P(return_value) = IS_OBJECT;
 
@@ -483,7 +482,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 
 			zend_update_class_constants(ce TSRMLS_CC);
 
-			intern = (spl_filesystem_object*)spl_filesystem_object_new_ex(ce TSRMLS_CC);
+			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
 			return_value->value.obj = &intern->std;
 			Z_TYPE_P(return_value) = IS_OBJECT;
 
@@ -504,7 +503,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 
 			zend_update_class_constants(ce TSRMLS_CC);
 
-			intern = (spl_filesystem_object*)spl_filesystem_object_new_ex(ce TSRMLS_CC);
+			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
 
 			return_value->value.obj = &intern->std;
 			Z_TYPE_P(return_value) = IS_OBJECT;
@@ -580,7 +579,7 @@ static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, i
 
 static HashTable *spl_filesystem_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(obj);
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(obj);
 	zval tmp;
 	HashTable *rv;
 	zend_string *pnstr;
@@ -661,7 +660,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 
 zend_function *spl_filesystem_object_get_method_check(zval *object_ptr, zend_string *method, const struct _zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	spl_filesystem_object *fsobj = (spl_filesystem_object*)Z_OBJ_P(object_ptr);
+	spl_filesystem_object *fsobj = Z_SPLFILESYSTEM_P(object_ptr);
 	
 	if (fsobj->u.dir.entry.d_name[0] == '\0' && fsobj->orig_path == NULL) {
 		zend_function *func;
@@ -711,7 +710,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 		return;
 	}
 
-	intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFILESYSTEM_P(getThis());
 	if (intern->_path) {
 		/* object is alreay initialized */
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
@@ -749,7 +748,7 @@ SPL_METHOD(DirectoryIterator, __construct)
    Rewind dir back to the start */
 SPL_METHOD(DirectoryIterator, rewind)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -767,7 +766,7 @@ SPL_METHOD(DirectoryIterator, rewind)
    Return current dir entry */
 SPL_METHOD(DirectoryIterator, key)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -796,7 +795,7 @@ SPL_METHOD(DirectoryIterator, current)
    Move to next entry */
 SPL_METHOD(DirectoryIterator, next)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 	
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -818,7 +817,7 @@ SPL_METHOD(DirectoryIterator, next)
    Seek to the given position */
 SPL_METHOD(DirectoryIterator, seek)
 {
-	spl_filesystem_object *intern    = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern    = Z_SPLFILESYSTEM_P(getThis());
 	zval retval;
 	long pos;
 
@@ -849,7 +848,7 @@ SPL_METHOD(DirectoryIterator, seek)
    Check whether dir contains more entries */
 SPL_METHOD(DirectoryIterator, valid)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -863,7 +862,7 @@ SPL_METHOD(DirectoryIterator, valid)
    Return the path */
 SPL_METHOD(SplFileInfo, getPath)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *path;
 	int path_len;
 	
@@ -880,7 +879,7 @@ SPL_METHOD(SplFileInfo, getPath)
    Return filename only */
 SPL_METHOD(SplFileInfo, getFilename)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int path_len;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -901,7 +900,7 @@ SPL_METHOD(SplFileInfo, getFilename)
    Return filename of current dir entry */
 SPL_METHOD(DirectoryIterator, getFilename)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -915,7 +914,7 @@ SPL_METHOD(DirectoryIterator, getFilename)
    Returns file extension component of path */
 SPL_METHOD(SplFileInfo, getExtension)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *fname = NULL;
 	const char *p;
 	size_t flen;
@@ -955,7 +954,7 @@ SPL_METHOD(SplFileInfo, getExtension)
    Returns the file extension component of path */
 SPL_METHOD(DirectoryIterator, getExtension)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	const char *p;
 	int idx;
 	zend_string *fname;
@@ -982,7 +981,7 @@ SPL_METHOD(DirectoryIterator, getExtension)
    Returns filename component of path */
 SPL_METHOD(SplFileInfo, getBasename)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *fname, *suffix = 0;
 	size_t flen;
 	int slen = 0, path_len;
@@ -1009,7 +1008,7 @@ SPL_METHOD(SplFileInfo, getBasename)
    Returns filename component of current dir entry */
 SPL_METHOD(DirectoryIterator, getBasename)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *suffix = 0;
 	int slen = 0;
 	zend_string *fname;
@@ -1028,7 +1027,7 @@ SPL_METHOD(DirectoryIterator, getBasename)
    Return path and filename */
 SPL_METHOD(SplFileInfo, getPathname)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *path;
 	int path_len;
 
@@ -1048,7 +1047,7 @@ SPL_METHOD(SplFileInfo, getPathname)
    Return getPathname() or getFilename() depending on flags */
 SPL_METHOD(FilesystemIterator, key)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1067,7 +1066,7 @@ SPL_METHOD(FilesystemIterator, key)
    Return getFilename(), getFileInfo() or $this depending on flags */
 SPL_METHOD(FilesystemIterator, current)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1090,7 +1089,7 @@ SPL_METHOD(FilesystemIterator, current)
    Returns true if current entry is '.' or  '..' */
 SPL_METHOD(DirectoryIterator, isDot)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1123,7 +1122,7 @@ SPL_METHOD(SplFileInfo, __construct)
 		return;
 	}
 
-	intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	spl_filesystem_info_set_filename(intern, path, len, 1 TSRMLS_CC);
 
@@ -1137,7 +1136,7 @@ SPL_METHOD(SplFileInfo, __construct)
 #define FileInfoFunction(func_name, func_num) \
 SPL_METHOD(SplFileInfo, func_name) \
 { \
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis()); \
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis()); \
 	zend_error_handling error_handling; \
 	if (zend_parse_parameters_none() == FAILURE) { \
 		return; \
@@ -1229,7 +1228,7 @@ FileInfoFunction(isLink, FS_IS_LINK)
    Return the target of a symbolic link */
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int ret;
 	char buff[MAXPATHLEN];
 	zend_error_handling error_handling;
@@ -1277,7 +1276,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
    Return the resolved path */
 SPL_METHOD(SplFileInfo, getRealPath)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char buff[MAXPATHLEN];
 	char *filename;
 	zend_error_handling error_handling;
@@ -1319,7 +1318,7 @@ SPL_METHOD(SplFileInfo, getRealPath)
    Open the current file */
 SPL_METHOD(SplFileInfo, openFile)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	spl_filesystem_object_create_type(ZEND_NUM_ARGS(), intern, SPL_FS_FILE, NULL, return_value TSRMLS_CC);
 }
@@ -1329,7 +1328,7 @@ SPL_METHOD(SplFileInfo, openFile)
    Class to use in openFile() */
 SPL_METHOD(SplFileInfo, setFileClass)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_class_entry *ce = spl_ce_SplFileObject;
 	zend_error_handling error_handling;
 	
@@ -1347,7 +1346,7 @@ SPL_METHOD(SplFileInfo, setFileClass)
    Class to use in getFileInfo(), getPathInfo() */
 SPL_METHOD(SplFileInfo, setInfoClass)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_class_entry *ce = spl_ce_SplFileInfo;
 	zend_error_handling error_handling;
 	
@@ -1365,7 +1364,7 @@ SPL_METHOD(SplFileInfo, setInfoClass)
    Get/copy file info */
 SPL_METHOD(SplFileInfo, getFileInfo)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_class_entry *ce = intern->info_class;
 	zend_error_handling error_handling;
 	
@@ -1383,7 +1382,7 @@ SPL_METHOD(SplFileInfo, getFileInfo)
    Get/copy file info */
 SPL_METHOD(SplFileInfo, getPathInfo)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_class_entry *ce = intern->info_class;
 	zend_error_handling error_handling;
 	
@@ -1425,7 +1424,7 @@ SPL_METHOD(FilesystemIterator, __construct)
    Rewind dir back to the start */
 SPL_METHOD(FilesystemIterator, rewind)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1446,7 +1445,7 @@ SPL_METHOD(FilesystemIterator, rewind)
    Get handling flags */
 SPL_METHOD(FilesystemIterator, getFlags)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1459,7 +1458,7 @@ SPL_METHOD(FilesystemIterator, getFlags)
    Set handling flags */
 SPL_METHOD(FilesystemIterator, setFlags)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
@@ -1475,7 +1474,7 @@ SPL_METHOD(FilesystemIterator, setFlags)
 SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
 	zend_bool allow_links = 0;
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &allow_links) == FAILURE) {
 		return;
@@ -1500,7 +1499,7 @@ SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	zval zpath, zflags;
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	spl_filesystem_object *subdir;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 	
@@ -1519,7 +1518,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 		zval_ptr_dtor(&zpath);
 		zval_ptr_dtor(&zflags);
 		
-		subdir = (spl_filesystem_object*)Z_OBJ_P(return_value);
+		subdir = Z_SPLFILESYSTEM_P(return_value);
 		if (subdir) {
 			if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
 				subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
@@ -1539,7 +1538,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
    Get sub path */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1557,7 +1556,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
    Get sub path and file name */
 SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *sub_name;
 	int len;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
@@ -1597,7 +1596,7 @@ SPL_METHOD(GlobIterator, __construct)
    Return the number of directories and files found by globbing */
 SPL_METHOD(GlobIterator, count)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1636,12 +1635,12 @@ zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator;
-	spl_filesystem_object   *dir_object;
+	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
+	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
@@ -1841,7 +1840,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
-	dir_object = (spl_filesystem_object*)Z_OBJ_P(object);
+	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
 
 	ZVAL_COPY(&iterator->intern.data, object);
@@ -1854,7 +1853,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 /* {{{ spl_filesystem_object_cast */
 static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(readobj);
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(readobj);
 
 	if (type == IS_STRING) {
 		if (Z_OBJCE_P(readobj)->__tostring) {
@@ -2257,7 +2256,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
    Construct a new file object */
 SPL_METHOD(SplFileObject, __construct)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_bool use_include_path = 0;
 	char *p1, *p2;
 	char *tmp_path;
@@ -2320,7 +2319,7 @@ SPL_METHOD(SplTempFileObject, __construct)
 {
 	long max_memory = PHP_STREAM_MAX_MEM;
 	char tmp_fname[48];
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
@@ -2354,7 +2353,7 @@ SPL_METHOD(SplTempFileObject, __construct)
    Rewind the file and read the first line */
 SPL_METHOD(SplFileObject, rewind)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2367,7 +2366,7 @@ SPL_METHOD(SplFileObject, rewind)
    Return whether end of file is reached */
 SPL_METHOD(SplFileObject, eof)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2380,7 +2379,7 @@ SPL_METHOD(SplFileObject, eof)
    Return !eof() */
 SPL_METHOD(SplFileObject, valid)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2397,7 +2396,7 @@ SPL_METHOD(SplFileObject, valid)
    Rturn next line from file */
 SPL_METHOD(SplFileObject, fgets)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2413,7 +2412,7 @@ SPL_METHOD(SplFileObject, fgets)
    Return current line from file */
 SPL_METHOD(SplFileObject, current)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2434,7 +2433,7 @@ SPL_METHOD(SplFileObject, current)
    Return line number */
 SPL_METHOD(SplFileObject, key)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2451,7 +2450,7 @@ SPL_METHOD(SplFileObject, key)
    Read next line */
 SPL_METHOD(SplFileObject, next)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2468,7 +2467,7 @@ SPL_METHOD(SplFileObject, next)
    Set file handling flags */
 SPL_METHOD(SplFileObject, setFlags)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
 		return;
@@ -2479,7 +2478,7 @@ SPL_METHOD(SplFileObject, setFlags)
    Get file handling flags */
 SPL_METHOD(SplFileObject, getFlags)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2494,7 +2493,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 {
 	long max_len;
 
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &max_len) == FAILURE) {
 		return;
@@ -2512,7 +2511,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
    Get maximum line length */
 SPL_METHOD(SplFileObject, getMaxLineLen)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2546,7 +2545,7 @@ SPL_METHOD(SplFileObject, getChildren)
 #define FileFunction(func_name) \
 SPL_METHOD(SplFileObject, func_name) \
 { \
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis()); \
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis()); \
 	FileFunctionCall(func_name, ZEND_NUM_ARGS(), NULL); \
 }
 /* }}} */
@@ -2555,7 +2554,7 @@ SPL_METHOD(SplFileObject, func_name) \
    Return current line as csv */
 SPL_METHOD(SplFileObject, fgetcsv)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	int d_len = 0, e_len = 0, esc_len = 0;
@@ -2596,7 +2595,7 @@ SPL_METHOD(SplFileObject, fgetcsv)
    Output a field array as a CSV line */
 SPL_METHOD(SplFileObject, fputcsv)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL;
 	int d_len = 0, e_len = 0, ret;
@@ -2633,7 +2632,7 @@ SPL_METHOD(SplFileObject, fputcsv)
    Set the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, setCsvControl)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter = ',', enclosure = '"', escape='\\';
 	char *delim = NULL, *enclo = NULL, *esc = NULL;
 	int d_len = 0, e_len = 0, esc_len = 0;
@@ -2676,7 +2675,7 @@ SPL_METHOD(SplFileObject, setCsvControl)
    Get the delimiter and enclosure character used in fgetcsv */
 SPL_METHOD(SplFileObject, getCsvControl)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter[2], enclosure[2];
 
 	array_init(return_value);
@@ -2700,7 +2699,7 @@ FileFunction(flock)
    Flush the file */
 SPL_METHOD(SplFileObject, fflush)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
 } /* }}} */
@@ -2709,7 +2708,7 @@ SPL_METHOD(SplFileObject, fflush)
    Return current file position */
 SPL_METHOD(SplFileObject, ftell)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());	
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());	
 	long ret = php_stream_tell(intern->u.file.stream);
 
 	if (ret == -1) {
@@ -2723,7 +2722,7 @@ SPL_METHOD(SplFileObject, ftell)
    Return current file position */
 SPL_METHOD(SplFileObject, fseek)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	long pos, whence = SEEK_SET;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &pos, &whence) == FAILURE) {
@@ -2738,7 +2737,7 @@ SPL_METHOD(SplFileObject, fseek)
    Get a character form the file */
 SPL_METHOD(SplFileObject, fgetc)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char buf[2];
 	int result;
 
@@ -2763,7 +2762,7 @@ SPL_METHOD(SplFileObject, fgetc)
    Get a line from file pointer and strip HTML tags */
 SPL_METHOD(SplFileObject, fgetss)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	zval arg2;
 
 	if (intern->u.file.max_line_len > 0) {
@@ -2782,7 +2781,7 @@ SPL_METHOD(SplFileObject, fgetss)
    Output all remaining data from a file pointer */
 SPL_METHOD(SplFileObject, fpassthru)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
 } /* }}} */
@@ -2791,7 +2790,7 @@ SPL_METHOD(SplFileObject, fpassthru)
    Implements a mostly ANSI compatible fscanf() */
 SPL_METHOD(SplFileObject, fscanf)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
 	intern->u.file.current_line_num++;
@@ -2804,7 +2803,7 @@ SPL_METHOD(SplFileObject, fscanf)
    Binary-safe file write */
 SPL_METHOD(SplFileObject, fwrite)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *str;
 	int str_len;
 	long length = 0;
@@ -2832,7 +2831,7 @@ FileFunction(fstat)
    Truncate file to 'size' length */
 SPL_METHOD(SplFileObject, ftruncate)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	long size;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size) == FAILURE) {
@@ -2851,7 +2850,7 @@ SPL_METHOD(SplFileObject, ftruncate)
    Seek to specified line */
 SPL_METHOD(SplFileObject, seek)
 {
-	spl_filesystem_object *intern = (spl_filesystem_object*)Z_OBJ_P(getThis());
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	long line_pos;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &line_pos) == FAILURE) {

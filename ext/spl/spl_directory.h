@@ -60,7 +60,6 @@ typedef struct {
 } spl_filesystem_iterator;
 
 struct _spl_filesystem_object {
-	zend_object        std;
 	void               *oth;
 	spl_other_handler  *oth_handler;
 	char               *_path;
@@ -103,7 +102,15 @@ struct _spl_filesystem_object {
 		} file;
 	} u;
 	spl_filesystem_iterator    *it;
+	zend_object        std;
 };
+
+static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /* {{{ */ {
+	return (spl_filesystem_object*)((char*)(obj) - XtOffsetOf(spl_filesystem_object, std));
+}
+/* }}} */
+
+#define Z_SPLFILESYSTEM_P(zv)  spl_filesystem_from_obj(Z_OBJ_P((zv)))
 
 static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj TSRMLS_DC)
 {
