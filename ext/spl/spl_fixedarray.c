@@ -146,7 +146,7 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from TSRMLS_
 
 static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval **table, int *n TSRMLS_DC) /* {{{{ */
 {
-	spl_fixedarray_object *intern  = (spl_fixedarray_object*)Z_OBJ_P(obj);
+	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(obj);
 	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
 
 	if (intern->array) {
@@ -163,7 +163,7 @@ static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval **table, int *n T
 
 static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {{{{ */
 {
-	spl_fixedarray_object *intern  = (spl_fixedarray_object*)Z_OBJ_P(obj);
+	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(obj);
 	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
 	int  i = 0;
 
