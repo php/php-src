@@ -939,7 +939,7 @@ SPL_METHOD(SplFileInfo, getExtension)
 
 	p = zend_memrchr(ret->val, '.', ret->len);
 	if (p) {
-		idx = p - fname;
+		idx = p - ret->val;
 		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
 		STR_RELEASE(ret);
 		return;
