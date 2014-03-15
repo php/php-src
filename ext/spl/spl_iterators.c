@@ -1509,7 +1509,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				efree(cfi);
 				return NULL;
 			}
-			Z_ADDREF(cfi->fci.function_name);
+			if (Z_REFCOUNTED_P(&cfi->fci.function_name)) {
+				Z_ADDREF(cfi->fci.function_name);
+			}
 			if (Z_TYPE(cfi->fcc.object) == IS_OBJECT) {
 				ZVAL_COPY(&cfi->object, &cfi->fcc.object);
 			}
