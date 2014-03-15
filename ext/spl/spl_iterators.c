@@ -2628,7 +2628,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 //???			INIT_PZVAL(intern->u.caching.zstr);
 				//zval_copy_ctor(&intern->u.caching.zstr);
 				zval_dtor(&expr_copy);
-			} else if (Z_REFCOUNT(intern->u.caching.zstr)) {
+			} else if (Z_REFCOUNTED(intern->u.caching.zstr)) {
 //???			INIT_PZVAL(intern->u.caching.zstr);
 				//zval_copy_ctor(&intern->u.caching.zstr);
 				Z_ADDREF(intern->u.caching.zstr);
