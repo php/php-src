@@ -745,7 +745,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 	object_init_ex(return_value, spl_ce_SplFixedArray);
 	Z_TYPE_P(return_value) = IS_OBJECT;
 
-	intern = (spl_fixedarray_object *)Z_OBJ_P(return_value);
+	intern = Z_SPLFIXEDARRAY_P(return_value);
 	intern->array = array;
 }
 /* }}} */
