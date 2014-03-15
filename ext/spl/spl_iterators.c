@@ -3487,7 +3487,9 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser 
 	if (data == NULL) {
 		return ZEND_HASH_APPLY_STOP;
 	}
-	Z_ADDREF_P(data);
+	if (Z_REFCOUNTED_P(data)) {
+		Z_ADDREF_P(data);
+	}
 	add_next_index_zval(return_value, data);
 	return ZEND_HASH_APPLY_KEEP;
 }
