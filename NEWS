@@ -34,6 +34,9 @@ PHP                                                                        NEWS
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
+- Mbstring:
+  . Upgraded to oniguruma 5.9.5 (Anatol)
+
 - Mcrypt:
   . No longer allow invalid key sizes, invalid IV sizes or missing required IV
     in mcrypt_encrypt, mcrypt_decrypt and the deprecated mode functions.
