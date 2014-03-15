@@ -422,7 +422,7 @@ static void spl_fixedarray_object_write_dimension(zval *object, zval *offset, zv
 	if (intern->fptr_offset_set) {
 		zval tmp;
 		if (!offset) {
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);

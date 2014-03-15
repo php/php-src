@@ -430,7 +430,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	if (check_inherited && intern->fptr_offset_set) {
 		zval tmp;
 		if (!offset) {
-			ZVAL_UNDEF(&tmp);
+			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
 			SEPARATE_ARG_IF_REF(offset);
