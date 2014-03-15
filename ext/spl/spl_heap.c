@@ -128,7 +128,6 @@ static zval *spl_pqueue_extract_helper(zval *value, int flags) /* {{{ */
 	if ((flags & SPL_PQUEUE_EXTR_BOTH) == SPL_PQUEUE_EXTR_BOTH) {
 		return value;
 	} else if ((flags & SPL_PQUEUE_EXTR_BOTH) > 0) {
-
 		if ((flags & SPL_PQUEUE_EXTR_DATA) == SPL_PQUEUE_EXTR_DATA) {
 			zval *data;
 			if ((data = zend_hash_str_find(Z_ARRVAL_P(value), "data", sizeof("data") - 1)) != NULL) {
@@ -722,9 +721,9 @@ SPL_METHOD(SplPriorityQueue, extract)
 	if (Z_REFCOUNTED_P(value_out)) {
 		Z_ADDREF_P(value_out);
 	}
-	zval_ptr_dtor(&value);
 
-	RETURN_ZVAL(value_out, 1, 1);
+	RETVAL_ZVAL(value_out, 1, 0);
+	zval_ptr_dtor(&value);
 } 
 /* }}} */
 
