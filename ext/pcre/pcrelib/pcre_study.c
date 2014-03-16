@@ -66,8 +66,9 @@ string of that length that matches. In UTF8 mode, the result is in characters
 rather than bytes.
 
 Arguments:
+  re              compiled pattern block
   code            pointer to start of group (the bracket)
-  startcode       pointer to start of the whole pattern
+  startcode       pointer to start of the whole pattern's code
   options         the compiling options
   int             RECURSE depth
 
@@ -78,8 +79,8 @@ Returns:   the minimum length
 */
 
 static int
-find_minlength(const pcre_uchar *code, const pcre_uchar *startcode, int options,
-  int recurse_depth)
+find_minlength(const REAL_PCRE *re, const pcre_uchar *code,
+  const pcre_uchar *startcode, int options, int recurse_depth)
 {
 int length = -1;
 /* PCRE_UTF16 has the same value as PCRE_UTF8. */
@@ -129,7 +130,7 @@ for (;;)
     case OP_SBRAPOS:
     case OP_ONCE:
     case OP_ONCE_NC:
-    d = find_minlength(cc, startcode, options, recurse_depth);
+    d = find_minlength(re, cc, startcode, options, recurse_depth);
     if (d < 0) return d;
     branchlength += d;
     do cc += GET(cc, 1); while (*cc == OP_ALT);
@@ -175,9 +176,9 @@ for (;;)
 
     case OP_REVERSE:
     case OP_CREF:
-    case OP_NCREF:
+    case OP_DNCREF:
     case OP_RREF:
-    case OP_NRREF:
+    case OP_DNRREF:
     case OP_DEF:
     case OP_CALLOUT:
     case OP_SOD:
@@ -341,6 +342,7 @@ for (;;)
       {
       case OP_CRPLUS:
       case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
       branchlength++;
       /* Fall through */
 
@@ -348,11 +350,14 @@ for (;;)
       case OP_CRMINSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSQUERY:
       cc++;
       break;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       branchlength += GET2(cc,1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -375,7 +380,38 @@ for (;;)
     matches an empty string (by default it causes a matching failure), so in
     that case we must set the minimum length to zero. */
 
-    case OP_REF:
+    case OP_DNREF:     /* Duplicate named pattern back reference */
+    case OP_DNREFI:
+    if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
+      {
+      int count = GET2(cc, 1+IMM2_SIZE);
+      pcre_uchar *slot = (pcre_uchar *)re +
+        re->name_table_offset + GET2(cc, 1) * re->name_entry_size;
+      d = INT_MAX;
+      while (count-- > 0)
+        {
+        ce = cs = (pcre_uchar *)PRIV(find_bracket)(startcode, utf, GET2(slot, 0));
+        if (cs == NULL) return -2;
+        do ce += GET(ce, 1); while (*ce == OP_ALT);
+        if (cc > cs && cc < ce)
+          {
+          d = 0;
+          had_recurse = TRUE;
+          break;
+          }
+        else
+          {
+          int dd = find_minlength(re, cs, startcode, options, recurse_depth);
+          if (dd < d) d = dd;
+          }
+        slot += re->name_entry_size;
+        }
+      }
+    else d = 0;
+    cc += 1 + 2*IMM2_SIZE;
+    goto REPEAT_BACK_REFERENCE;
+
+    case OP_REF:      /* Single back reference */
     case OP_REFI:
     if ((options & PCRE_JAVASCRIPT_COMPAT) == 0)
       {
@@ -389,7 +425,7 @@ for (;;)
         }
       else
         {
-        d = find_minlength(cs, startcode, options, recurse_depth);
+        d = find_minlength(re, cs, startcode, options, recurse_depth);
         }
       }
     else d = 0;
@@ -397,24 +433,29 @@ for (;;)
 
     /* Handle repeated back references */
 
+    REPEAT_BACK_REFERENCE:
     switch (*cc)
       {
       case OP_CRSTAR:
       case OP_CRMINSTAR:
       case OP_CRQUERY:
       case OP_CRMINQUERY:
+      case OP_CRPOSSTAR:
+      case OP_CRPOSQUERY:
       min = 0;
       cc++;
       break;
 
       case OP_CRPLUS:
       case OP_CRMINPLUS:
+      case OP_CRPOSPLUS:
       min = 1;
       cc++;
       break;
 
       case OP_CRRANGE:
       case OP_CRMINRANGE:
+      case OP_CRPOSRANGE:
       min = GET2(cc, 1);
       cc += 1 + 2 * IMM2_SIZE;
       break;
@@ -437,7 +478,8 @@ for (;;)
       had_recurse = TRUE;
     else
       {
-      branchlength += find_minlength(cs, startcode, options, recurse_depth + 1);
+      branchlength += find_minlength(re, cs, startcode, options,
+        recurse_depth + 1);
       }
     cc += 1 + LINK_SIZE;
     break;
@@ -778,6 +820,10 @@ do
       case OP_COND:
       case OP_CREF:
       case OP_DEF:
+      case OP_DNCREF:
+      case OP_DNREF:
+      case OP_DNREFI:
+      case OP_DNRREF:
       case OP_DOLL:
       case OP_DOLLM:
       case OP_END:
@@ -786,7 +832,6 @@ do
       case OP_EXTUNI:
       case OP_FAIL:
       case OP_MARK:
-      case OP_NCREF:
       case OP_NOT:
       case OP_NOTEXACT:
       case OP_NOTEXACTI:
@@ -818,7 +863,6 @@ do
       case OP_NOTUPTOI:
       case OP_NOT_HSPACE:
       case OP_NOT_VSPACE:
-      case OP_NRREF:
       case OP_PROP:
       case OP_PRUNE:
       case OP_PRUNE_ARG:
@@ -1183,24 +1227,16 @@ do
         set_type_bits(start_bits, cbit_digit, table_limit, cd);
         break;
 
-        /* The cbit_space table has vertical tab as whitespace; we have to
-        ensure it gets set as not whitespace. Luckily, the code value is the
-        same (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate
-        bit. */
+        /* The cbit_space table has vertical tab as whitespace; we no longer
+        have to play fancy tricks because Perl added VT to its whitespace at
+        release 5.18. PCRE added it at release 8.34. */
 
         case OP_NOT_WHITESPACE:
         set_nottype_bits(start_bits, cbit_space, table_limit, cd);
-        start_bits[1] |= 0x08;
         break;
 
-        /* The cbit_space table has vertical tab as whitespace; we have to
-        avoid setting it. Luckily, the code value is the same (0x0b) in ASCII
-        and EBCDIC, so we can just adjust the appropriate bit. */
-
         case OP_WHITESPACE:
-        c = start_bits[1];    /* Save in case it was already set */
         set_type_bits(start_bits, cbit_space, table_limit, cd);
-        start_bits[1] = (start_bits[1] & ~0x08) | c;
         break;
 
         case OP_NOT_WORDCHAR:
@@ -1277,11 +1313,14 @@ do
           case OP_CRMINSTAR:
           case OP_CRQUERY:
           case OP_CRMINQUERY:
+          case OP_CRPOSSTAR:
+          case OP_CRPOSQUERY:
           tcode++;
           break;
 
           case OP_CRRANGE:
           case OP_CRMINRANGE:
+          case OP_CRPOSRANGE:
           if (GET2(tcode, 1) == 0) tcode += 1 + 2 * IMM2_SIZE;
             else try_next = FALSE;
           break;
@@ -1345,6 +1384,7 @@ const pcre_uint8 *tables;
 pcre_uchar *code;
 compile_data compile_block;
 const REAL_PCRE *re = (const REAL_PCRE *)external_re;
+
 
 *errorptr = NULL;
 
@@ -1422,7 +1462,7 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
 /* Find the minimum length of subject string. */
 
-switch(min = find_minlength(code, code, re->options, 0))
+switch(min = find_minlength(re, code, code, re->options, 0))
   {
   case -2: *errorptr = "internal error: missing capturing bracket"; return NULL;
   case -3: *errorptr = "internal error: opcode not recognized"; return NULL;

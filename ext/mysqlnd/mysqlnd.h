@@ -119,8 +119,9 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 
 PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num TSRMLS_DC);
 
-#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data TSRMLS_CC)
-#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data TSRMLS_CC)
+#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0 TSRMLS_CC)
+#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY TSRMLS_CC)
+#define mysqlnd_store_result_ofs(conn)	((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_COPY TSRMLS_CC)
 #define mysqlnd_next_result(conn)		((conn)->data)->m->next_result((conn)->data TSRMLS_CC)
 #define mysqlnd_more_results(conn)		((conn)->data)->m->more_results((conn)->data TSRMLS_CC)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
@@ -150,8 +151,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
-#define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+#define mysqlnd_fetch_lengths(result)	(result)->m.fetch_lengths((result) TSRMLS_CC)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)

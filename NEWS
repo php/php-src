@@ -1,10 +1,188 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Alpha 2
+?? ??? 2014, PHP 5.6.0 Beta 1
+
+- Core:
+  . Allow zero length comparison in substr_compare() (Tjerk)
+  . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+  . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
+
+- SPL:
+  . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+
+- cURL:
+  . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
+    (Tjerk)
+  . Fix compilation on libcurl versions between 7.10.5 and 7.12.2, inclusive.
+    (Adam)
+
+- Date:
+  . Added DateTimeImmutable::createFromMutable to create a DateTimeImmutable
+    object from an existing DateTime (mutable) object (Derick)
+
+- GD:
+  . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
+    CVE-2013-7327). (Tomas Hoger, Remi).
+
+- Hash:
+  . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
+    (Michael M Slusarz).
+
+- Mail:
+  . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
+
+- Mcrypt:
+  . No longer allow invalid key sizes, invalid IV sizes or missing required IV
+    in mcrypt_encrypt, mcrypt_decrypt and the deprecated mode functions.
+    (Nikita)
+  . Use /dev/urandom as the default source for mcrypt_create_iv(). (Nikita)
+
+- MySQLi:
+  . Fixed bug #66762 (Segfault in mysqli_stmt::bind_result() when link closed)
+    (Remi)
+
+- OCI8
+  . Fixed Bug #66875 (Improve performance of multi-row OCI_RETURN_LOB queries)
+   (Perrier, Chris Jones)
+
+- OpenSSL:
+  . Fixed memory leak in windows cert verification on verify failure.
+    (Chris Wright)
+  . Peer certificate capturing via SSL context options now functions even if
+    peer verification fails. (Daniel Lowrey)
+  . Encrypted TLS servers now support the server name indication TLS extension
+    via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
+
+- PDO_pgsql:
+  . Cleaned up code by increasing the requirements to libpq versions providing
+    PQexecParams, PQprepare, PQescapeStringConn, PQescapeByteaConn. According
+    to the release notes that means 8.0.8+ or 8.1.4+. (Matteo)
+  . Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
+    undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
+    (Matteo)
+  . Added PDO::PGSQL_ATTR_DISABLE_PREPARES constant to execute the queries
+    without preparing them, while still passing parameters separately from
+    the command text using PQexecParams. (Matteo)
+
+- SQLite:
+  . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+27 Feb 2014, PHP 5.6.0 Alpha 3
+
+- Core
+  . Expose get_debug_info class hook as __debugInfo() magic method. (Sara)
+  . Implemented unified default encoding
+    (RFC: https://wiki.php.net/rfc/default_encoding). (Yasuo Ohgaki)
+
+- Curl
+  . Check for openssl.cafile ini directive when loading CA certs. (Daniel Lowrey)
+  . Remove cURL close policy related constants as these have no effect and are
+    no longer used in libcurl. (Chris Wright)
+
+- Fileinfo
+  . Upgraded to libmagic-5.17 (Anatol)
+  . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
+
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
+
+- GD:
+  . Fixed imagettftext to load the correct character map rather than the last one.
+    (Scott)
+  . Fixed bug #66714 ( imageconvolution breakage). (Brad Daily)
+
+- JSON:
+  . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
+  (chobieeee@php.net)
+
+- OPCache
+  . Added function opcache_is_script_cached(). (Danack)
+  . Added information about interned strings usage. (Terry, Julien, Dmitry)
+
+- OpenSSL
+  . Fallback to Windows CA cert store for peer verification if no openssl.cafile
+    ini directive or "cafile" SSL context option specified in Windows.
+    (Chris Wright)
+  . The openssl.cafile and openssl.capath ini directives introduced in alpha2
+    now have PHP_INI_PERDIR accessibility (was PHP_INI_ALL). (Daniel Lowrey)
+  . New "peer_name" SSL context option replaces "CN_match" (which still works
+    as before but triggers E_DEPRECATED). (Daniel Lowrey)
+  . Fixed segfault when accessing non-existent context for client SNI use
+    (Daniel Lowrey)
+  . Fixed bug #66501 (Add EC key support to php_openssl_is_private_key).
+    (Mark Zedwood)
+  . Fixed Bug #47030 (add new boolean "verify_peer_name" SSL context option
+    allowing clients to verify cert names separately from the cert itself).
+    "verify_peer_name" is enabled by default for client streams.
+    (Daniel Lowrey)
+  . Fixed Bug #65538 ("cafile" SSL context option now supports stream
+    wrappers). (Daniel Lowrey)
+  . New openssl_get_cert_locations() function to aid CA file and peer
+    verification debugging. (Daniel Lowrey)
+  . Encrypted stream wrappers now disable TLS compression by default.
+    (Daniel Lowrey)
+  . New "capture_session_meta" SSL context option allows encrypted client and
+    server streams access to negotiated protocol/cipher information.
+    (Daniel Lowrey)
+  . New "honor_cipher_order" SSL context option allows servers to prioritize
+    cipher suites of their choosing when negotiating SSL/TLS handshakes.
+    (Daniel Lowrey)
+  . New "single_ecdh_use" and "single_dh_use" SSL context options allow for
+    improved forward secrecy in encrypted stream servers. (Daniel Lowrey)
+  . New "dh_param" SSL context option allows stream servers control over
+    the parameters when negotiating DHE cipher suites. (Daniel Lowrey)
+  . New "ecdh_curve" SSL context option allowing stream servers to specify
+    the curve to use when negotiating ephemeral ECDHE ciphers (defaults to
+    NIST P-256). (Daniel Lowrey)
+  . New "rsa_key_size" SSL context option gives stream servers control
+    over the key size (in bits) used for RSA key agreements. (Daniel Lowrey)
+  . Crypto methods for encrypted client and server streams now use
+    bitwise flags for fine-grained protocol support. (Daniel Lowrey)
+  . Added new tlsv1.0 stream wrapper to specify TLSv1 client/server method.
+    tls wrapper now negotiates TLSv1, TLSv1.1 or TLSv1.2. (Daniel Lowrey)
+  . Encrypted client streams now enable SNI by default. (Daniel Lowrey)
+  . Encrypted streams now prioritize ephemeral key agreement and high strength
+    ciphers by default. (Daniel Lowrey)
+  . New OPENSSL_DEFAULT_STREAM_CIPHERS constant exposes default cipher
+    list. (Daniel Lowrey)
+  . New STREAM_CRYPTO_METHOD_* constants for enhanced control over the crypto
+    methods negotiated encrypted server/client sessions. (Daniel Lowrey)
+  . Encrypted stream servers now automatically mitigate potential DoS vector
+    arising from client-initiated TLS renegotiation. New "reneg_limit",
+    "reneg_window" and "reneg_limit_callback" SSL context options for custom
+    renegotiation limiting control. (Daniel Lowrey)
+
+- Pgsql:
+  . pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
+    (Yasuo)
+  . Impremented FR #25854 Return value for pg_insert should be resource instead of bool.
+    (Yasuo)
+  . Implemented FR #41146 - Add "description" with exteneded flag pg_meta_data().
+    pg_meta_data(resource $conn, string $table [, bool extended])
+    It also made pg_meta_data() return "is enum" always.
+    (Yasuo)
+
+13 Feb 2014, PHP 5.6.0 Alpha 2
+- Core:
+  . Added T_POW (**) operator
+    (RFC: https://wiki.php.net/rfc/pow-operator). (Tjerk Meesters)
+
 - mysqli
   . Added new function mysqli_get_links_stats() as well as new INI variable
     mysqli.rollback_on_cached_plink of type bool (Andrey)
 
+- PCRE:
+  . Upgraded to PCRE 8.34. (Anatol)
+
+- ldap
+  . Added new function ldap_modify_batch(). (Ondrej Hosek)
+
+- OpenSSL
+  . Peer certificates now verified by default in client socket operations
+    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+  . New openssl.cafile and openssl.capath ini directives. (Daniel Lowrey)
 
 23 Jan 2014, PHP 5.6.0 Alpha 1
 - CLI server:
@@ -38,6 +216,10 @@ PHP                                                                        NEWS
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
     or safe_mode). (Adam)
 
+- FPM
+  . Included apparmor support in fpm
+    (RFC: https://wiki.php.net/rfc/fpm_change_hat). (Gernot Vormayr)
+
 - GMP:
   . Moved GMP to use object as the underlying structure and implemented various
     improvements based on this.
@@ -65,7 +247,7 @@ PHP                                                                        NEWS
     cache_slots) in op_array->literals table. (Laruence, Dmitry)
   . Added script level constant replacement optimization pass. (Dmitry)
 
-- Openssl:
+- OpenSSL:
   . Added crypto_method option for the ssl stream context. (Martin Jansen)
   . Added certificate fingerprint support. (Tjerk Meesters)
   . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
@@ -73,8 +255,7 @@ PHP                                                                        NEWS
   . Peer name verification matches SAN DNS names for certs using
     the Subject Alternative Name x509 extension. (Daniel Lowrey)
   . Fixed segfault when built against OpenSSL>=1.0.1 (Daniel Lowrey)
-  . Peer certificates now verified by default in client socket operations
-    (RFC: https://wiki.php.net/rfc/tls-peer-verification). (Daniel Lowrey)
+  . Added SPKAC support. (Jason Gerfen)
 
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)

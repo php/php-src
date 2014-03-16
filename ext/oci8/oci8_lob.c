@@ -92,6 +92,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	descriptor->charset_form = SQLCS_IMPLICIT;	/* default value */
 	descriptor->charset_id = connection->charset;
 	descriptor->is_open = 0;
+	descriptor->chunk_size = 0;
 
 	if (descriptor->type == OCI_DTYPE_LOB || descriptor->type == OCI_DTYPE_FILE) {
 		/* add Lobs & Files to hash. we'll flush them at the end */

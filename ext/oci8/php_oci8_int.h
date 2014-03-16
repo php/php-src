@@ -219,7 +219,7 @@ typedef struct {
 	sb4					 errcode;				/* last ORA- error number */
 	OCIError			*err;					/* private error handle */
 	OCIStmt				*stmt;					/* statement handle */
-	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor recieved from Oracle */
+	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor received from Oracle */
 	char                 impres_flag;           /* PHP_OCI_IMPRES_*_ */
 	long				 last_query_len;		/* last query length */
 	HashTable			*columns;				/* hash containing all the result columns */
@@ -283,6 +283,7 @@ typedef struct {
 	sb2					 precision;				/* column precision */
 	ub1					 charset_form;			/* charset form, required for NCLOBs */
 	ub2					 charset_id;			/* charset ID */
+	ub4					 chunk_size;			/* LOB chunk size */
 } php_oci_out_column;
 /* }}} */
 

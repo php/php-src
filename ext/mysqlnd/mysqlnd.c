@@ -689,7 +689,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * con
 					break;
 				}
 				if (conn->last_query_type == QUERY_SELECT) {
-					MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
+					MYSQLND_RES * result = conn->m->use_result(conn, 0 TSRMLS_CC);
 					if (result) {
 						result->m.free_result(result, TRUE TSRMLS_CC);
 					}
@@ -1476,8 +1476,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 			}
 
 			result->type = MYSQLND_RES_NORMAL;
-			result->m.fetch_row = result->m.fetch_row_normal_unbuffered;
-			result->unbuf = mnd_ecalloc(1, sizeof(MYSQLND_RES_UNBUFFERED));
+			result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, FALSE, result->persistent TSRMLS_CC);
 			if (!result->unbuf) {
 				/* OOM */
 				SET_OOM_ERROR(*conn->error_info);
@@ -1523,7 +1522,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_method)(MYSQLND_CONN_DATA * conn, const c
 		}
 
 		if (PASS == conn->m->query(conn, show_query, show_query_len TSRMLS_CC)) {
-			result = conn->m->store_result(conn TSRMLS_CC);
+			result = conn->m->store_result(conn, MYSQLND_STORE_NO_COPY TSRMLS_CC);
 		}
 		if (show_query != query) {
 			mnd_sprintf_free(show_query);
@@ -2519,7 +2518,7 @@ end:
 
 /* {{{ mysqlnd_conn_data::use_result */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, use_result);
 	MYSQLND_RES * result = NULL;
@@ -2561,7 +2560,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn TSR
 
 /* {{{ mysqlnd_conn_data::store_result */
 static MYSQLND_RES *
-MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, const unsigned int flags TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, store_result);
 	MYSQLND_RES * result = NULL;
@@ -2584,7 +2583,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn T
 
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
-			result = conn->current_result->m.store_result(conn->current_result, conn, FALSE TSRMLS_CC);
+			result = conn->current_result->m.store_result(conn->current_result, conn, 0 TSRMLS_CC);
 			if (!result) {
 				conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 			}

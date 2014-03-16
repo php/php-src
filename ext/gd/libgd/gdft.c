@@ -126,6 +126,7 @@ typedef struct
 typedef struct
 {
 	char *fontlist;		/* key */
+	int preferred_map;
 	FT_Library *library;
 } fontkey_t;
 
@@ -337,8 +338,27 @@ static int fontTest (void *element, void *key)
 {
 	font_t *a = (font_t *) element;
 	fontkey_t *b = (fontkey_t *) key;
-
-	return (strcmp (a->fontlist, b->fontlist) == 0);
+	
+	if (strcmp (a->fontlist, b->fontlist) == 0) {
+		switch (b->preferred_map) {
+			case gdFTEX_Unicode:
+				if (a->have_char_map_unicode) {
+					return 1;
+				}
+				break;
+			case gdFTEX_Shift_JIS:
+				if (a->have_char_map_sjis) {
+					return 1;
+				}
+				break;
+			case gdFTEX_Big5:
+				if (a->have_char_map_sjis) {
+					return 1;
+				}
+				break;
+		}
+	}
+	return 0;
 }
 
 static void *fontFetch (char **error, void *key)
@@ -454,14 +474,16 @@ static void *fontFetch (char **error, void *key)
 	 *         just use the map in a->face->charmaps[num_charmaps] and be done with it.
 	 */
 
-	a->have_char_map_unicode = 0;
-	a->have_char_map_big5 = 0;
-	a->have_char_map_sjis = 0;
-	a->have_char_map_apple_roman = 0;
 	for (n = 0; n < a->face->num_charmaps; n++) {
 		charmap = a->face->charmaps[n];
 		platform = charmap->platform_id;
 		encoding = charmap->encoding_id;
+
+		/* Whatever is the last value is what should be set */
+		a->have_char_map_unicode = 0;
+		a->have_char_map_big5 = 0;
+		a->have_char_map_sjis = 0;
+		a->have_char_map_apple_roman = 0;
 
 /* EAM DEBUG - Newer versions of libfree2 make it easier by defining encodings */
 #if (defined(FREETYPE_MAJOR) && ((FREETYPE_MAJOR == 2 && ((FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 3) || FREETYPE_MINOR > 1) || FREETYPE_MAJOR > 2)))
@@ -483,17 +505,29 @@ static void *fontFetch (char **error, void *key)
 		{						/* Apple Unicode */
 			a->have_char_map_unicode = 1;
 			found = charmap;
+			if (b->preferred_map == gdFTEX_Unicode) {
+				break;
+			}
 		} else if (platform == 3 && encoding == 4) {	/* Windows Big5 */
 			a->have_char_map_big5 = 1;
 			found = charmap;
+			if (b->preferred_map == gdFTEX_Big5) {
+				break;
+			}
 		} else if (platform == 3 && encoding == 2) {	/* Windows Sjis */
 			a->have_char_map_sjis = 1;
 			found = charmap;
+			if (b->preferred_map == gdFTEX_Shift_JIS) {
+				break;
+			}
 		} else if ((platform == 1 && encoding == 0)	/* Apple Roman */
 			|| (platform == 2 && encoding == 0))
 		{						/* ISO ASCII */
 			a->have_char_map_apple_roman = 1;
 			found = charmap;
+			if (b->preferred_map == gdFTEX_MacRoman) {
+				break;
+			}
 		}
 	}
 	if (!found) {
@@ -826,9 +860,18 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	}
 	/*****/
 
+	/* 2.0.12: allow explicit specification of the preferred map;
+	 * but we still fall back if it is not available.
+	 */
+	m = gdFTEX_Unicode;
+	if (strex && (strex->flags & gdFTEX_CHARMAP)) {
+		m = strex->charmap;
+	}
+
 	/* get the font (via font cache) */
 	fontkey.fontlist = fontlist;
 	fontkey.library = &library;
+	fontkey.preferred_map = m;
 	font = (font_t *) gdCacheGet (fontCache, &fontkey);
 	if (!font) {
 		gdCacheDelete(tc_cache);
@@ -870,13 +913,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	if (fg < 0) {
 		render_mode |= FT_LOAD_MONOCHROME;
 	}
-	/* 2.0.12: allow explicit specification of the preferred map;
-	 * but we still fall back if it is not available.
-	 */
-	m = gdFTEX_Unicode;
-	if (strex && (strex->flags & gdFTEX_CHARMAP)) {
-		m = strex->charmap;
-	}
+
 	/* Try all three types of maps, but start with the specified one */
 	mfound = 0;
 	for (i = 0; i < 3; i++) {

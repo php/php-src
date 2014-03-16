@@ -713,6 +713,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 					outcol->is_descr = 1;
 					outcol->statement->has_descr = 1;
 					outcol->storage_size4 = -1;
+					outcol->chunk_size = 0;
 					dynamic = OCI_DYNAMIC_FETCH;
 					break;
 
@@ -928,19 +929,16 @@ int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 			}
 			break;
 			
+		case SQLT_CHR:
+		case SQLT_AFC:
 		case SQLT_INT:
 		case SQLT_NUM:
-			if (Z_TYPE_P(bind->zval) == IS_RESOURCE || Z_TYPE_P(bind->zval) == IS_OBJECT) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
-				*(int *)result = 1;
-			}
-			break;
-			
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+		case SQLT_BOL:
+#endif
 		case SQLT_LBI:
 		case SQLT_BIN:
 		case SQLT_LNG:
-		case SQLT_AFC:
-		case SQLT_CHR:
 			if (Z_TYPE_P(bind->zval) == IS_RESOURCE || Z_TYPE_P(bind->zval) == IS_OBJECT) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
 				*(int *)result = 1;
@@ -955,7 +953,7 @@ int php_oci_bind_pre_exec(void *data, void *result TSRMLS_DC)
 			break;
 	}
 
-	/* reset all bind stuff to a normal state..-. */
+	/* reset all bind stuff to a normal state... */
 	bind->indicator = 0;
 
 	return 0;
@@ -1184,6 +1182,20 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, int name_len,
 				return 1;
 			}
 			break;
+
+#if defined(OCI_MAJOR_VERSION) && OCI_MAJOR_VERSION >= 12
+		case SQLT_BOL:
+			if (Z_TYPE_P(var) == IS_RESOURCE || Z_TYPE_P(var) == IS_OBJECT) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid variable used for bind");
+				return 1;
+			}
+			convert_to_boolean(var);
+			bind_data = (int *)&Z_LVAL_P(var);
+			value_sz = sizeof(int);
+
+			mode = OCI_DEFAULT;
+			break;
+#endif
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown or unsupported datatype given: %d", (int)type);

@@ -615,6 +615,11 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_MASTER		128	/* Remove all bin logs in the index */
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
 
+
+#define MYSQLND_STORE_PS		1
+#define MYSQLND_STORE_NO_COPY	2
+#define MYSQLND_STORE_COPY		4
+
 #endif	/* MYSQLND_ENUM_N_DEF_H */
 
 

@@ -7,6 +7,7 @@ UPGRADE NOTES - PHP X.Y
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
   c. POST data handling
   d. Arginfo changes
+  e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
 
 2. Build system changes
   a. Unix build system changes
@@ -109,6 +110,10 @@ UPGRADE NOTES - PHP X.Y
   The CHECK_ARG_SEND_TYPE(), ARG_MUST_BE_SENT_BY_REF(),
   ARG_SHOULD_BE_SENT_BY_REF() and ARG_MAY_BE_SENT_BY_REF() macros now assume
   that the argument passed to them is a zend_function* and that it is non-NULL.
+
+  e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
+
+  Memory allocation is now managed by emalloc/efree instead of malloc/free.
 
 ========================
 2. Build system changes

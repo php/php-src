@@ -3063,9 +3063,8 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 
 	SAVE_OPLINE();
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
-			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", arg_num);
+		if (ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.num)) {
+			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
 		}
 	}
 
@@ -3126,7 +3125,6 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *varptr;
-	int arg_num;
 
 	SAVE_OPLINE();
 	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
@@ -3134,8 +3132,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 		}
 	} else {
-		arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.num)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 		}
 	}
@@ -3155,7 +3152,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
-			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+			!ARG_MAY_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
 		ALLOC_ZVAL(valptr);
@@ -3193,8 +3190,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
 	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) { 
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.num)) {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_send_by_var_helper);
 		}
 	}
@@ -3214,8 +3210,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR, VAR|CV, ANY)
 	USE_OPLINE
 
 	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
+		if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.num)) {
 			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
 		}
 	}
@@ -5657,6 +5652,26 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 			}
 		}
 	}
+}
+
+ZEND_VM_HANDLER(166, ZEND_POW, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+	pow_function(&EX_T(opline->result.var).tmp_var,
+		GET_OP1_ZVAL_PTR(BP_VAR_R),
+		GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
+	FREE_OP1();
+	FREE_OP2();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(167, ZEND_ASSIGN_POW, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
+{
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_helper, binary_op,pow_function);
 }
 
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

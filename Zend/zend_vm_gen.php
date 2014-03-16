@@ -1264,7 +1264,7 @@ function gen_vm($def, $skel) {
 		out($f, "# pragma warning(once : 6285)\n");
 		// Suppress (<non-zero constant> || <expression>) warnings on windows
 		out($f, "# pragma warning(once : 6286)\n");
-		// Suppress constant with constant comparsion warnings on windows
+		// Suppress constant with constant comparison warnings on windows
 		out($f, "# pragma warning(once : 6326)\n");
 	}
 	out($f, "#endif\n");
