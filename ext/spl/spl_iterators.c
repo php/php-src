@@ -1121,8 +1121,8 @@ SPL_METHOD(RecursiveTreeIterator, current)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	zval                       prefix, entry, postfix;
-	char                      *str, *ptr;
-	size_t                     str_len;
+	char                      *ptr;
+	zend_string               *str;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1145,15 +1145,14 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	spl_recursive_tree_iterator_get_prefix(object, &prefix TSRMLS_CC);
 	spl_recursive_tree_iterator_get_entry(object, &entry TSRMLS_CC);
 	if (Z_TYPE(entry) != IS_STRING) {
-		zval_dtor(&prefix);
-		zval_dtor(&entry);
+		zval_ptr_dtor(&prefix);
+		zval_ptr_dtor(&entry);
 		RETURN_NULL();
 	}
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix);
-	str = (char *) emalloc(str_len + 1U);
-	ptr = str;
+	str = STR_ALLOC(Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix), 0);
+	ptr = str->val;
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
 	ptr += Z_STRLEN(prefix);
@@ -1163,12 +1162,11 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	ptr += Z_STRLEN(postfix);
 	*ptr = 0;
 
-	zval_dtor(&prefix);
-	zval_dtor(&entry);
-	zval_dtor(&postfix);
+	zval_ptr_dtor(&prefix);
+	zval_ptr_dtor(&entry);
+	zval_ptr_dtor(&postfix);
 
-	RETVAL_STRINGL(str, str_len);
-	efree(str);
+	RETURN_STR(str);
 } /* }}} */
 
 /* {{{ proto mixed RecursiveTreeIterator::key()
@@ -1178,8 +1176,8 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	zend_object_iterator      *iterator = object->iterators[object->level].iterator;
 	zval                       prefix, key, postfix, key_copy;
-	char                      *str, *ptr;
-	size_t                     str_len;
+	char                      *ptr;
+	zend_string               *str;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1209,9 +1207,8 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_tree_iterator_get_prefix(object, &prefix TSRMLS_CC);
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix);
-	str = (char *) emalloc(str_len + 1U);
-	ptr = str;
+	str = STR_ALLOC(Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix), 0);
+	ptr = str->val;
 
 	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
 	ptr += Z_STRLEN(prefix);
@@ -1221,12 +1218,11 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	ptr += Z_STRLEN(postfix);
 	*ptr = 0;
 
-	zval_dtor(&prefix);
-	zval_dtor(&key);
-	zval_dtor(&postfix);
+	zval_ptr_dtor(&prefix);
+	zval_ptr_dtor(&key);
+	zval_ptr_dtor(&postfix);
 
-	RETVAL_STRINGL(str, str_len);
-	efree(str);
+	RETURN_STR(str);
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_tree_it___construct, 0, 0, 1) 
