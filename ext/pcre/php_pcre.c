@@ -1392,6 +1392,9 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		}
 	}
 	if (ZEND_NUM_ARGS() > 4) {
+		if (Z_ISREF_P(zcount)) {
+			zcount = Z_REFVAL_P(zcount);
+		}
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
