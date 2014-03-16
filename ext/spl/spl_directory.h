@@ -114,10 +114,6 @@ static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /
 
 static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj TSRMLS_DC)
 {
-	if (obj->it) {
-		zend_iterator_dtor(&obj->it->intern TSRMLS_CC);
-	}
-
 	obj->it = ecalloc(1, sizeof(spl_filesystem_iterator));
 	obj->it->object = (void *)obj;
 	zend_iterator_init(&obj->it->intern TSRMLS_CC);

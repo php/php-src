@@ -123,9 +123,9 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 		break;
 	}
 
-	//???if (intern->it) {
-	//zend_iterator_dtor(intern->it TSRMLS_CC);
-	//}
+	if (intern->it) {
+		//????zend_iterator_dtor(&intern->it->intern);
+	}
 
 	efree(intern);
 } /* }}} */
@@ -1661,7 +1661,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 		zval *object = &iterator->intern.data;
 		zval_ptr_dtor(object);
 	}
-	efree(iter);
+	efree(iterator);
 	/* Otherwise we were called from the owning object free storage handler as
 	 * it sets
 	 * iterator->intern.data to NULL.
@@ -1738,6 +1738,7 @@ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 			ZVAL_UNDEF(&iterator->current);
 		}
 	}
+	efree(iter);
 }
 /* }}} */
 
@@ -2983,8 +2984,8 @@ PHP_MINIT_FUNCTION(spl_directory)
 {
 	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, spl_SplFileInfo_functions);
 	memcpy(&spl_filesystem_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	spl_filesystem_object_handlers.clone_obj       = spl_filesystem_object_clone;
-	spl_filesystem_object_handlers.cast_object     = spl_filesystem_object_cast;
+	spl_filesystem_object_handlers.clone_obj  = spl_filesystem_object_clone;
+	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
 	spl_filesystem_object_handlers.get_debug_info  = spl_filesystem_object_get_debug_info;
 	spl_filesystem_object_handlers.dtor_obj = zend_objects_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
