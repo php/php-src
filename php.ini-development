@@ -1551,7 +1551,7 @@ session.use_trans_sid = 0
 ; the hash extension. A list of available hashes is returned by the hash_algos()
 ; function.
 ; http://php.net/session.hash-function
-session.hash_function = 1
+session.hash_function = 0
 
 ; Define how many bits are stored in each character when converting
 ; the binary hash data to something readable.
