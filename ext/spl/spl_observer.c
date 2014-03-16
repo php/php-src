@@ -343,7 +343,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 				Z_ARRVAL_P(&tmp)->pDestructor = NULL;
 				add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
 				add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
-				add_assoc_zval_ex(&storage, md5str, 33, &tmp);
+				add_assoc_zval_ex(&storage, md5str, 32, &tmp);
 				zend_hash_move_forward_ex(&intern->storage, &pos);
 		}
 
