@@ -1336,6 +1336,11 @@ phpdbg_out:
 		}
 #endif
 
+#ifdef _WIN32
+	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
+		phpdbg_error("Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
+	}
+#endif
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
 		zend_hash_clean(CG(auto_globals));
@@ -1373,11 +1378,7 @@ phpdbg_out:
 		} zend_end_try();
 
 		sapi_shutdown();
-#ifdef _WIN32
-	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
-		// if !EXCEPTION_CONTINUE_EXECUTION
-	}
-	#endif
+
 	}
 
 	if (cleaning || remote) {

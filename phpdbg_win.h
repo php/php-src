@@ -34,6 +34,4 @@ void phpdbg_win_set_mm_heap(zend_mm_heap *heap);
 
 int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp);
 
-int __stdcall phpdbg_watch_set_segv_handler_asm();
-
 #endif
