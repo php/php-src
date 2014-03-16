@@ -1573,6 +1573,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+
 PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 {
 	zval **ppid;
@@ -2268,7 +2269,7 @@ static PHP_FUNCTION(session_decode)
 /* }}} */
 
 
-#define php_session_set_opt_bool(hash, target, key) do {	\
+#define php_session_start_set_opt_bool(hash, target, key) do {	\
 	zval **entry; \
 	if (zend_hash_find(Z_ARRVAL_P(hash), key, sizeof(key), (void **)&entry) == SUCCESS) { \
 		convert_to_boolean(*entry); \
@@ -2276,11 +2277,21 @@ static PHP_FUNCTION(session_decode)
 	} \
 } while(0);
 
+
+static int php_session_start_set_ini(char *varname, uint varname_len, char *new_value, uint new_value_len TSRMLS_DC) {
+	char buf[128];
+	snprintf(buf, 127, "%s.%s", "session", varname);
+	return zend_alter_ini_entry_ex(buf, strlen(buf)+1, new_value, new_value_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+}
+
+
 /* {{{ proto bool session_start(void)
    Begin session - reinitializes freezed variables, registers browsers etc */
 static PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
+	zval **value;
+	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &options) == FAILURE) {
 		RETURN_FALSE;
@@ -2288,12 +2299,40 @@ static PHP_FUNCTION(session_start)
 
 	/* set options */
 	if (options) {
-		/* I'll refactor option handling later. It's not smart. */
-		PS(read_only) = 0;
-		php_session_set_opt_bool(options, PS(read_only),       "read_only"); /* this does not have to be PS() */
-		php_session_set_opt_bool(options, PS(lazy_write),      "lazy_write");
+		/* Iterate through hash */
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void **)&value, &pos) == SUCCESS) {
+			char *key;
+			zend_uint key_len;
+			ulong index;
+
+			zend_hash_get_current_key_ex(Z_ARRVAL_P(options), &key, &key_len, &index, 0, &pos);
+			switch(Z_TYPE_PP(value)) {
+				case IS_ARRAY:
+				case IS_DOUBLE:
+				case IS_OBJECT:
+				case IS_NULL:
+				case IS_RESOURCE:
+				case IS_CALLABLE:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Option(%s) value must be string, boolean or long", key);
+					break;
+				default:
+					if (!strncmp(key, "read_only", sizeof("read_only")-1)) {
+						PS(read_only) = 0;
+						php_session_start_set_opt_bool(options, PS(read_only),       "read_only"); /* this does not have to be PS() */
+					} else if (!strncmp(key, "lazy_write", sizeof("lazy_write")-1)) {
+						php_session_start_set_opt_bool(options, PS(lazy_write),      "lazy_write");
+					} else {
+						convert_to_string(*value);
+						if (php_session_start_set_ini(key, key_len, Z_STRVAL_PP(value), Z_STRLEN_PP(value) TSRMLS_CC) == FAILURE) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Setting option '%s' failed", key);
+						}
+					}
+					break;
+			}
+			zend_hash_move_forward_ex(Z_ARRVAL_P(options), &pos);
+		}
 	}
-	/* allow to set INI options? */
 
 	php_session_start(TSRMLS_C);
 
@@ -2302,8 +2341,10 @@ static PHP_FUNCTION(session_start)
 	}
 
 	if (PS(read_only)) {
-		/* XXX: This should be replace to access time updata funciton */
+		zend_bool old = PS(lazy_write);
+		PS(lazy_write) = 1;
 		php_session_flush(TSRMLS_C);
+		PS(lazy_write) = old;
 	}
 	RETURN_TRUE;
 }
