@@ -25,7 +25,7 @@ session_write_close();
 
 session_start();
 $_SESSION = "kk";
-session_destroy(TRUE);
+session_destroy();
 
 print "I live\n";
 ?>

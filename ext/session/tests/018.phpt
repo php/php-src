@@ -21,7 +21,7 @@ session_start();
 ?>
 <form accept-charset="ISO-8859-15, ISO-8859-1" action=url.php>
 <?php
-session_destroy(TRUE);
+session_destroy();
 ?>
 --EXPECT--
 <form accept-charset="ISO-8859-15, ISO-8859-1" action=url.php><input type="hidden" name="PHPSESSID" value="abtest" />

@@ -43,7 +43,7 @@ session_set_save_handler("open", "close", "read", "write", "destroy", "noisy_gc"
 session_id($session_id);
 session_start();
 var_dump($_SESSION);
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 
 ob_end_flush();
 ?>

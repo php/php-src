@@ -20,7 +20,7 @@ $path = dirname(__FILE__);
 session_save_path($path);
 var_dump(session_start());
 var_dump(session_set_save_handler("open", "close", "read", "write", "destroy", "gc"));
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 
 ob_end_flush();
 ?>

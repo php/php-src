@@ -18,7 +18,7 @@ var_dump(session_module_name("files"));
 var_dump(session_module_name());
 var_dump(session_start());
 var_dump(session_module_name());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(session_module_name());
 
 echo "Done";

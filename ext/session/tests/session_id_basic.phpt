@@ -24,7 +24,7 @@ var_dump(session_id());
 ini_set('session.use_strict_mode',false);
 var_dump(session_start());
 var_dump(session_id());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(session_id());
 
 echo "Done";

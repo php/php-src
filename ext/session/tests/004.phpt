@@ -70,7 +70,7 @@ session_start();
 var_dump($_SESSION["baz"]);
 var_dump($_SESSION["arr"]);
 
-session_destroy(TRUE);
+session_destroy();
 ?>
 --EXPECT--
 OPEN: PHPSESSID

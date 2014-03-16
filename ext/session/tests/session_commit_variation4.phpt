@@ -33,7 +33,7 @@ var_dump(session_id());
 var_dump(session_commit());
 var_dump(session_id());
 var_dump(session_start());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(ini_get('session.use_strict_mode'));
 
 echo "Done";

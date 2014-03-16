@@ -67,11 +67,7 @@ bool(true)
 Destroyed session must be aviable by lazy_destroy
 string(0) ""
 bool(true)
-array(2) {
-  ["foo"]=>
-  int(123)
-  ["__PHP_SESSION_DESTROY__"]=>
-  int(%d)
+array(0) {
 }
 NULL
 Destroyed session must be gone now
@@ -82,7 +78,7 @@ array(0) {
 }
 NULL
 New session ID must be here
-bool(true)
+bool(false)
 Done
 
 

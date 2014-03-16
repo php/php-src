@@ -169,7 +169,7 @@ PHP_METHOD(SessionHandler, validateSid)
 		return;
 	}
 
-	RETVAL_BOOL(1);
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_validate_sid(&PS(mod_data), key TSRMLS_CC));
 }
 /* }}} */
 

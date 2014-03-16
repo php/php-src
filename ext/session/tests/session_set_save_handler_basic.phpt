@@ -49,7 +49,7 @@ session_write_close();
 echo "Cleanup..\n";
 session_id($session_id);
 session_start();
-session_destroy(TRUE);
+session_destroy();
 
 ob_end_flush();
 ?>

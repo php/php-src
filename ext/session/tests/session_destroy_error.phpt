@@ -97,122 +97,122 @@ ob_end_flush();
 
 -- Iteration 1 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 2 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 3 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 4 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 5 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 6 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 7 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 8 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 9 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 10 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 11 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 12 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 13 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 14 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 15 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 16 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 17 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 18 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 19 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 20 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 21 --
 
-Warning: session_destroy() expects parameter 1 to be boolean, object given in %s on line %d
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 23 --
 
-Warning: session_destroy(): Trying to destroy uninitialized session in %s on line %d
-bool(false)
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
+NULL
 
 -- Iteration 24 --
 
-Warning: session_destroy() expects parameter 1 to be boolean, resource given in %S on line %d
+Warning: session_destroy() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
 Done
 

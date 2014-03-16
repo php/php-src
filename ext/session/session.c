@@ -77,10 +77,6 @@ zend_class_entry *php_session_id_iface_entry;
 /* SessionIdInterface */
 zend_class_entry *php_session_5_6_iface_entry;
 
-/* key name in $_SESSION[] for lazy_destroy that stores time stamp */
-#define PS_LAZY_DESTORY_KEY "__PHP_SESSION_DESTROY__"
-#define PS_LAZY_DESTROY_DEFAULT 60
-
 /* ***********
    * Helpers *
    *********** */
@@ -105,9 +101,7 @@ static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
 	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
-	PS(minimize_lock) = 0;
 	PS(lazy_write) = 0;
-	PS(lazy_destroy) = PS_LAZY_DESTROY_DEFAULT;
 	/* Do NOT init PS(mod_user_names) here! */
 	PS(http_session_vars) = NULL;
 	PS(session_vars) = NULL;
@@ -137,7 +131,7 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static int php_session_destroy(int force, int shutdown TSRMLS_DC) /* {{{ */
+static int php_session_destroy(int shutdown TSRMLS_DC) /* {{{ */
 {
 	int retval = SUCCESS;
 
@@ -147,17 +141,7 @@ static int php_session_destroy(int force, int shutdown TSRMLS_DC) /* {{{ */
 	}
 
 	if (PS(id)) {
-		if (!force && PS(lazy_destroy) > 0) {
-			zval *destroy;
-			IF_SESSION_VARS() {
-				/* Add lazy_destroy time stamp and save */
-				MAKE_STD_ZVAL(destroy);
-				Z_TYPE_P(destroy) = IS_LONG;
-				Z_LVAL_P(destroy) = time(NULL) + PS(lazy_destroy);
-				ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), PS_LAZY_DESTORY_KEY, sizeof(PS_LAZY_DESTORY_KEY), destroy, 1, 0);
-				php_session_save_current_state(TSRMLS_C);
-			}
-		} else if (PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
+		if (PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 			retval = FAILURE;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
 		}
@@ -249,7 +233,6 @@ static char *php_session_encode(int *newlen TSRMLS_DC) /* {{{ */
 
 static int php_session_decode(const char *val, int vallen TSRMLS_DC) /* {{{ */
 {
-	zval **destory;
 	int session_reset_id = 0;
 
 	if (!PS(serializer)) {
@@ -257,22 +240,9 @@ static int php_session_decode(const char *val, int vallen TSRMLS_DC) /* {{{ */
 		return 0;
 	}
 	if (PS(serializer)->decode(val, vallen TSRMLS_CC) == FAILURE) {
-		php_session_destroy(1, 0 TSRMLS_CC);
+		php_session_destroy(0 TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to decode session object. Session has been destroyed");
 		session_reset_id = 1;
-	} else if (zend_symtable_find(Z_ARRVAL_P(PS(http_session_vars)), PS_LAZY_DESTORY_KEY, sizeof(PS_LAZY_DESTORY_KEY), (void **)&destory) == SUCCESS) {
-		if (Z_TYPE_PP(destory) == IS_LONG) {
-			if (Z_LVAL_PP(destory) < time(NULL)) {
-				/* Exceeded lazy_destory period. Session data should not be accessible anymore */
-				php_session_destroy(1, 0 TSRMLS_CC);
-				session_reset_id = 1;
-			}
-		} else {
-			/* Delete malformed data. Should not happen */
-			php_session_destroy(1, 0 TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Detected malformed session data. $_SESSION cannot contain reserved %s as key.  Session data is destroyed", PS_LAZY_DESTORY_KEY);
-			session_reset_id = 1;
-		}
 	}
 
 	if (session_reset_id) {
@@ -534,6 +504,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 static void php_session_read_data(char **val, int *vallen TSRMLS_DC) { /* {{{ */
 	*val = NULL;
 
+	/* ToDo: strict mode should be used always when there is validate_sid */
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
 		PS(mod)->s_validate_sid(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 		if (PS(id)) {
@@ -610,15 +581,15 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	php_session_read_data(&val, &vallen TSRMLS_DC);
+	php_session_read_data(&val, &vallen TSRMLS_CC);
 
 	if (val) {
 		if (php_session_decode(val, vallen TSRMLS_CC)) {
-			/* Decode may fail due to lazy_destroy. Read with new PS(id) once more. */
+			/* When decode failed, read with new PS(id) once more. */
 			str_efree(val);
 			efree(PS(id));
 			PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
-			PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name));
+			PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name) TSRMLS_CC);
 			php_session_read_data(&val, &vallen TSRMLS_CC);
 			if (val) {
 				php_session_decode(val, vallen TSRMLS_CC);
@@ -649,7 +620,7 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val && PS(lazy_write)) {
-				if (PS(mod)->s_update) {
+				if (PS(mod)->s_update && PS(mod)->s_update != php_session_update) {
 					if (vallen != PS(session_vars_len) || memcmp(val, PS(session_vars), vallen)) {
 						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 					} else {
@@ -922,10 +893,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cookie_path",        "/",         PHP_INI_ALL, OnUpdateString, cookie_path,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.cookie_domain",      "",          PHP_INI_ALL, OnUpdateString, cookie_domain,      php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.cookie_secure",    "",          PHP_INI_ALL, OnUpdateBool,   cookie_secure,      php_ps_globals,    ps_globals)
-	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "1",          PHP_INI_ALL, OnUpdateBool,   cookie_httponly,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "0",          PHP_INI_ALL, OnUpdateBool,   cookie_httponly,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
-	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "1",         PHP_INI_ALL, OnUpdateBool,   use_strict_mode,    php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateBool,   use_strict_mode,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
 #if HAVE_DEV_URANDOM
 	STD_PHP_INI_ENTRY("session.entropy_file",       "/dev/urandom",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
@@ -941,7 +912,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.cache_expire",       "180",       PHP_INI_ALL, OnUpdateLong,   cache_expire,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
 	PHP_INI_ENTRY("session.hash_function",          "1",         PHP_INI_ALL, OnUpdateHashFunc)
-	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "5",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
+	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "4",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
 
 	/* Upload progress */
 	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",
@@ -2144,7 +2115,7 @@ static PHP_FUNCTION(session_id)
    Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 static PHP_FUNCTION(session_regenerate_id)
 {
-	zend_bool del_ses = 1;
+	zend_bool del_ses = 0;
 	int ret = SUCCESS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &del_ses) == FAILURE) {
@@ -2160,11 +2131,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		RETURN_FALSE;
 	}
 
-	if (PS(lazy_destroy) > 0) {
-		ret = php_session_destroy(1, 0 TSRMLS_CC);
-	} else {
-		ret = php_session_destroy(0, 0 TSRMLS_CC);
-	}
+	ret = php_session_destroy(0 TSRMLS_CC);
 
 	if (PS(id)) {
 		efree(PS(id));
@@ -2209,7 +2176,7 @@ static PHP_FUNCTION(session_create_id)
 	}
 
 	/* php_session_create_id() raises E_ERROR when it cannot create ID. */
-	new_id = php_session_create_id(NULL, &new_id_len);
+	new_id = php_session_create_id(NULL, &new_id_len TSRMLS_CC);
 	if (new_id) {
 		smart_str_appendl(&id, new_id, new_id_len);
 		efree(new_id);
@@ -2314,7 +2281,6 @@ static PHP_FUNCTION(session_decode)
 static PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
-	zval **entry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &options) == FAILURE) {
 		RETURN_FALSE;
@@ -2326,15 +2292,6 @@ static PHP_FUNCTION(session_start)
 		PS(read_only) = 0;
 		php_session_set_opt_bool(options, PS(read_only),       "read_only"); /* this does not have to be PS() */
 		php_session_set_opt_bool(options, PS(lazy_write),      "lazy_write");
-		php_session_set_opt_bool(options, PS(minimize_lock),   "unsafe_lock");
-		if (zend_hash_find(Z_ARRVAL_P(options), "lazy_destroy", sizeof("lazy_destroy"), (void **)&entry) == SUCCESS) {
-			convert_to_long(*entry);
-			if (Z_LVAL_PP(entry) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "lazy_destroy must be positive number");
-			} else {
-				PS(lazy_destroy) = Z_LVAL_PP(entry);
-			}
-		}
 	}
 	/* allow to set INI options? */
 
@@ -2345,24 +2302,23 @@ static PHP_FUNCTION(session_start)
 	}
 
 	if (PS(read_only)) {
+		/* XXX: This should be replace to access time updata funciton */
 		php_session_flush(TSRMLS_C);
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool session_destroy([bool force])
+/* {{{ proto bool session_destroy()
    Destroy the current session and all data associated with it.
    When force is false data is destroyed lazy manner. */
 static PHP_FUNCTION(session_destroy)
 {
-	zend_bool force = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &force) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(php_session_destroy(force, 1 TSRMLS_CC) == SUCCESS);
+	RETURN_BOOL(php_session_destroy(1 TSRMLS_CC) == SUCCESS);
 }
 /* }}} */
 

@@ -3,6 +3,7 @@ Test session_set_save_handler() function : variation
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --INI--
+session.use_strict_mode=1
 session.gc_probability=1
 session.gc_divisor=1
 session.gc_maxlifetime=0
@@ -43,7 +44,7 @@ session_commit();
 // Cleanup
 session_id($session_id);
 session_start();
-session_destroy(TRUE);
+session_destroy();
 
 ob_end_flush();
 ?>

@@ -22,7 +22,7 @@ var_dump(session_name());
 var_dump(session_name("blah"));
 var_dump(session_start());
 var_dump(session_name());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(session_name());
 
 echo "Done";

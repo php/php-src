@@ -1420,7 +1420,7 @@ session.save_handler = files
 ; applications from session fixation via session adoption vulnerability. It is
 ; disabled by default for maximum compatibility, but enabling it is encouraged.
 ; https://wiki.php.net/rfc/strict_sessions
-session.use_strict_mode = 1
+session.use_strict_mode = 0
 
 ; Whether to use cookies.
 ; http://php.net/session.use-cookies

@@ -19,12 +19,12 @@ echo "*** Testing session_start() : variation ***\n";
 
 var_dump(session_start(['lazy_write'=>TRUE]));
 var_dump(session_id());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(session_id());
 
 var_dump(session_start(['minimize_lock'=>TRUE]));
 var_dump(session_id());
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 var_dump(session_id());
 
 var_dump(session_start(['lazy_destroy'=>0]));
@@ -35,7 +35,7 @@ var_dump(session_destroy());
 var_dump(session_id($id));
 var_dump(session_start());
 var_dump($_SESSION);
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 
 echo "Done";
 ob_end_flush();

@@ -32,7 +32,7 @@ var_dump(session_commit());
 var_dump(session_start(['read_only'=>FALSE]));
 var_dump(session_status());
 var_dump($_SESSION);
-var_dump(session_destroy(TRUE));
+var_dump(session_destroy());
 
 echo "Done";
 ob_end_flush();
