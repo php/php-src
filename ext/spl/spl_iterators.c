@@ -1960,9 +1960,10 @@ SPL_METHOD(CallbackFilterIterator, accept)
 SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern;
-	char       *subject, *result;
-	int        subject_len, use_copy, count = 0, result_len;
-	zval       *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement;
+	char *subject;
+	zend_string *result;
+	int subject_len, use_copy, count = 0;
+	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2033,16 +2034,14 @@ SPL_METHOD(RegexIterator, accept)
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, &result_len, -1, &count TSRMLS_CC);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, -1, &count TSRMLS_CC);
 			
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
-	//???			ZVAL_STRINGL(intern->current.key, result, result_len, 0);
-				ZVAL_STRINGL(&intern->current.key, result, result_len);
+				ZVAL_STR(&intern->current.key, result);
 			} else {
 				zval_ptr_dtor(&intern->current.data);
-	//???			ZVAL_STRINGL(intern->current.data, result, result_len, 0);
-				ZVAL_STRINGL(&intern->current.data, result, result_len);
+				ZVAL_STR(&intern->current.data, result);
 			}
 
 			if (replacement == &tmp_replacement) {

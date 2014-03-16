@@ -963,10 +963,10 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 
 /* {{{ php_pcre_replace
  */
-PHPAPI char *php_pcre_replace(zend_string *regex,
+PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 							  char *subject, int subject_len,
 							  zval *replace_val, int is_callable_replace,
-							  int *result_len, int limit, int *replace_count TSRMLS_DC)
+							  int limit, int *replace_count TSRMLS_DC)
 {
 	pcre_cache_entry	*pce;			    /* Compiled regular expression */
 
@@ -976,13 +976,13 @@ PHPAPI char *php_pcre_replace(zend_string *regex,
 	}
 
 	return php_pcre_replace_impl(pce, subject, subject_len, replace_val, 
-		is_callable_replace, result_len, limit, replace_count TSRMLS_CC);
+		is_callable_replace, limit, replace_count TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_pcre_replace_impl() */
-PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *replace_val, 
-	int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC)
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *replace_val, 
+	int is_callable_replace, int limit, int *replace_count TSRMLS_DC)
 {
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
@@ -1002,9 +1002,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 	int				 start_offset;		/* Where the new search starts */
 	int				 g_notempty=0;		/* If the match should not be empty */
 	int				 replace_len=0;		/* Length of replacement string */
-	char			*result,			/* Result of replacement */
-					*replace=NULL,		/* Replacement string */
-					*new_buf,			/* Temporary buffer for re-allocation */
+	char			*replace=NULL,		/* Replacement string */
 					*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
@@ -1012,7 +1010,9 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 					*replace_end=NULL,	/* End of replacement string */
 					*eval_result,		/* Result of eval or custom function */
 					 walk_last;			/* Last walked character */
-	int				 rc;
+	int				 rc,
+					 result_len; 		/* Length of result */
+	zend_string		*result;			/* Result of replacement */
 
 	if (extra == NULL) {
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
@@ -1058,13 +1058,13 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 
 	offsets = (int *)safe_emalloc(size_offsets, sizeof(int), 0);
 	
-	alloc_len = 2 * subject_len + 1;
-	result = safe_emalloc(alloc_len, sizeof(char), 0);
+	alloc_len = 2 * subject_len;
+	result = STR_ALLOC(alloc_len * sizeof(char), 0);
 
 	/* Initialize */
 	match = NULL;
-	*result_len = 0;
 	start_offset = 0;
+	result_len = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 	
 	while (1) {
@@ -1090,7 +1090,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 			/* Set the match location in subject */
 			match = subject + offsets[0];
 
-			new_len = *result_len + offsets[0] - start_offset; /* part before the match */
+			new_len = result_len + offsets[0] - start_offset; /* part before the match */
 			
 			/* If evaluating, do it and add the return string's length */
 			if (eval) {
@@ -1123,25 +1123,22 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 				}
 			}
 
-			if (new_len + 1 > alloc_len) {
-				alloc_len = 1 + alloc_len + 2 * new_len;
-				new_buf = emalloc(alloc_len);
-				memcpy(new_buf, result, *result_len);
-				efree(result);
-				result = new_buf;
+			if (new_len > alloc_len) {
+				alloc_len = alloc_len + 2 * new_len;
+				result = STR_REALLOC(result, alloc_len, 0);
 			}
 			/* copy the part of the string before the match */
-			memcpy(&result[*result_len], piece, match-piece);
-			*result_len += match-piece;
+			memcpy(&result->val[result_len], piece, match-piece);
+			result_len += match-piece;
 
 			/* copy replacement and backrefs */
-			walkbuf = result + *result_len;
+			walkbuf = result->val + result_len;
 			
 			/* If evaluating or using custom function, copy result to the buffer
 			 * and clean up. */
 			if (eval || is_callable_replace) {
 				memcpy(walkbuf, eval_result, eval_result_len);
-				*result_len += eval_result_len;
+				result_len += eval_result_len;
 				if (eval_result) efree(eval_result);
 			} else { /* do regular backreference copying */
 				walk = replace;
@@ -1167,7 +1164,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 				}
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
-				*result_len += walkbuf - (result + *result_len);
+				result_len += walkbuf - (result->val + result_len);
 			}
 
 			if (limit != -1)
@@ -1181,26 +1178,23 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 			if (g_notempty != 0 && start_offset < subject_len) {
 				offsets[0] = start_offset;
 				offsets[1] = start_offset + 1;
-				memcpy(&result[*result_len], piece, 1);
-				(*result_len)++;
+				memcpy(&result->val[result_len], piece, 1);
+				result_len++;
 			} else {
-				new_len = *result_len + subject_len - start_offset;
-				if (new_len + 1 > alloc_len) {
-					alloc_len = new_len + 1; /* now we know exactly how long it is */
-					new_buf = safe_emalloc(alloc_len, sizeof(char), 0);
-					memcpy(new_buf, result, *result_len);
-					efree(result);
-					result = new_buf;
+				new_len = result_len + subject_len - start_offset;
+				if (new_len > alloc_len) {
+					alloc_len = new_len; /* now we know exactly how long it is */
+					result = STR_REALLOC(result, alloc_len, 0);
 				}
 				/* stick that last bit of string on our output */
-				memcpy(&result[*result_len], piece, subject_len - start_offset);
-				*result_len += subject_len - start_offset;
-				result[*result_len] = '\0';
+				memcpy(&result->val[result_len], piece, subject_len - start_offset);
+				result_len += subject_len - start_offset;
+				result->val[result_len] = '\0';
 				break;
 			}
 		} else {
 			pcre_handle_exec_error(count TSRMLS_CC);
-			efree(result);
+			STR_FREE(result);
 			result = NULL;
 			break;
 		}
@@ -1215,6 +1209,9 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		start_offset = offsets[1];
 	}
 
+	if (result) {
+		result->len = result_len;
+	}
 	efree(offsets);
 	efree(subpat_names);
 
@@ -1224,15 +1221,14 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 
 /* {{{ php_replace_in_subject
  */
-static char *php_replace_in_subject(zval *regex, zval *replace, zval *subject, int *result_len, int limit, int is_callable_replace, int *replace_count TSRMLS_DC)
+static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *subject, int limit, int is_callable_replace, int *replace_count TSRMLS_DC)
 {
 	zval		*regex_entry,
 				*replace_entry = NULL,
 				*replace_value,
 				 empty_replace;
-	char		*subject_value,
-				*result;
-	int			 subject_len;
+	zend_string	*subject_value;
+	zend_string *result;
 
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
@@ -1243,9 +1239,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval *subject, i
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
 		/* Duplicate subject string for repeated replacement */
-		subject_value = estrndup(Z_STRVAL_P(subject), Z_STRLEN_P(subject));
-		subject_len = Z_STRLEN_P(subject);
-		*result_len = subject_len;
+		subject_value = STR_INIT(Z_STRVAL_P(subject), Z_STRLEN_P(subject), 0);
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(regex));
 
@@ -1276,18 +1270,16 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval *subject, i
 			/* Do the actual replacement and put the result back into subject_value
 			   for further replacements. */
 			if ((result = php_pcre_replace(Z_STR_P(regex_entry),
-										   subject_value,
-										   subject_len,
+										   subject_value->val,
+										   subject_value->len,
 										   replace_value,
 										   is_callable_replace,
-										   result_len,
 										   limit,
 										   replace_count TSRMLS_CC)) != NULL) {
-				efree(subject_value);
+				STR_RELEASE(subject_value);
 				subject_value = result;
-				subject_len = *result_len;
 			} else {
-				efree(subject_value);
+				STR_RELEASE(subject_value);
 				return NULL;
 			}
 
@@ -1301,7 +1293,6 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval *subject, i
 								  Z_STRLEN_P(subject),
 								  replace,
 								  is_callable_replace,
-								  result_len,
 								  limit,
 								  replace_count TSRMLS_CC);
 		return result;
@@ -1318,10 +1309,9 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 				    *subject,
 				    *subject_entry,
 				    *zcount = NULL;
-	char			*result;
-	int				 result_len;
 	int				 limit_val = -1;
-	long			limit = -1;
+	long			 limit = -1;
+	zend_string		*result;
 	zend_string		*string_key;
 	ulong			 num_key;
 	zend_string		*callback_name;
@@ -1371,24 +1361,21 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
 			SEPARATE_ZVAL(subject_entry);
 			old_replace_count = replace_count;
-			if ((result = php_replace_in_subject(regex, replace, subject_entry, &result_len, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
+			if ((result = php_replace_in_subject(regex, replace, subject_entry, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
 					switch(zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key, &num_key, 0, NULL))
 					{
 					case HASH_KEY_IS_STRING:
-//???
-						add_assoc_stringl_ex(return_value, string_key->val, string_key->len, result, result_len, 0);
-						efree(result);
+						add_assoc_str_ex(return_value, string_key->val, string_key->len, result);
 						break;
 
 					case HASH_KEY_IS_LONG:
-						add_index_stringl(return_value, num_key, result, result_len, 0);
-						efree(result);
+						add_index_str(return_value, num_key, result);
 						break;
 					}
 				} else {
-					efree(result);
+					STR_FREE(result);
 				}
 			}
 		
@@ -1396,14 +1383,11 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		}
 	} else {	/* if subject is not an array */
 		old_replace_count = replace_count;
-		if ((result = php_replace_in_subject(regex, replace, subject, &result_len, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
+		if ((result = php_replace_in_subject(regex, replace, subject, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 			if (!is_filter || replace_count > old_replace_count) {
-//??? TODO: reimpplement to avoid double reallocation
-//???				RETVAL_STRINGL(result, result_len, 0);
-				RETVAL_STRINGL(result, result_len);
-				efree(result);
+				RETVAL_STR(result);
 			} else {
-				efree(result);
+				STR_FREE(result);
 			}
 		}
 	}
@@ -1791,7 +1775,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(input))) != NULL) {
 		zval subject;
 		
-		 ZVAL_COPY_VALUE(&subject, entry);
+		if (Z_TYPE_P(entry) == IS_REFERENCE) {
+			entry = Z_REFVAL_P(entry);
+		}
+
+		ZVAL_COPY_VALUE(&subject, entry);
 
 		if (Z_TYPE_P(entry) != IS_STRING) {
 			zval_copy_ctor(&subject);

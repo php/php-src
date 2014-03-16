@@ -33,7 +33,7 @@
 #include <locale.h>
 #endif
 
-PHPAPI char *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC);
+PHPAPI zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
 PHPAPI pcre* pcre_get_compiled_regex(zend_string *regex, pcre_extra **extra, int *options TSRMLS_DC);
 PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, int *preg_options, int *coptions TSRMLS_DC);
 
@@ -57,8 +57,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 PHPAPI void  php_pcre_match_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC);
 
-PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value, 
-	int is_callable_replace, int *result_len, int limit, int *replace_count TSRMLS_DC);
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value, 
+	int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
 
 PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	long limit_val, long flags TSRMLS_DC);
