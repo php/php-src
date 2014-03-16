@@ -845,7 +845,7 @@ static union _zend_function *spl_recursive_it_get_method(zval *object_ptr, zend_
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
 			if (Z_OBJ_HT_P(zobj)->get_method) {
-				*object_ptr = *zobj;
+				ZVAL_COPY_VALUE(object_ptr, zobj);
 				function_handler = Z_OBJ_HT_P(object_ptr)->get_method(object_ptr, method, key TSRMLS_CC);
 			}
 		}
