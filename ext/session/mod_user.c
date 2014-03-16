@@ -228,7 +228,7 @@ PS_VALIDATE_SID_FUNC(user)
 		FINISH;
 	}
 
-	/* dummy function as defined by PS_MOD */
+	/* dummy function defined by PS_MOD */
 	return php_session_validate_sid(mod_data, key TSRMLS_CC);
 }
 

@@ -159,7 +159,6 @@ typedef struct _php_ps_globals {
 	int       mod_user_is_open;
 	int       send_cookie;
 	int       define_sid;            /* define SID constant or not */
-
 	zend_bool lazy_write;            /* supress session data write if data is unchanged */
 	zend_bool read_only;             /* read session and close immediately */
 	zend_bool invalid_session_id;    /* OBSOLETE: allow save handler to report about an invalid session id and request id regeneration. */
