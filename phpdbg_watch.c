@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,13 @@
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
 #include "phpdbg_utils.h"
-#include <unistd.h>
-#include <sys/mman.h>
+#ifndef _WIN32
+# include <unistd.h>
+# include <sys/mman.h>
+#endif
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-long phpdbg_pagesize;
 
 typedef struct {
 	void *page;
@@ -40,13 +41,6 @@ typedef struct {
 
 #define MEMDUMP_SIZE(size) (sizeof(phpdbg_watch_memdump) - sizeof(void *) + (size))
 
-static zend_always_inline void *phpdbg_get_page_boundary(void *addr) {
-	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
-}
-
-static zend_always_inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
-	return (size_t)phpdbg_get_page_boundary(addr + size - 1) - (size_t)phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
-}
 
 static phpdbg_watchpoint_t *phpdbg_check_for_watchpoint(void *addr TSRMLS_DC) {
 	phpdbg_watchpoint_t *watch;
@@ -285,7 +279,7 @@ static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch TSRMLS_DC) {
 	return ret;
 }
 
-static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, int i, int (*callback)(phpdbg_watchpoint_t * TSRMLS_DC) TSRMLS_DC) {
+static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, size_t i, int (*callback)(phpdbg_watchpoint_t * TSRMLS_DC) TSRMLS_DC) {
 	int ret = FAILURE;
 	zend_bool new_index = 1;
 	char *last_index;
@@ -456,13 +450,23 @@ int phpdbg_delete_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, phpdbg_delete_watchpoint TSRMLS_CC);
 }
 
+#ifdef _WIN32
+int phpdbg_watchpoint_segfault_handler(void *addr TSRMLS_DC) {
+#else
 int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context TSRMLS_DC) {
+#endif
 	void *page;
 	phpdbg_watch_memdump *dump;
 	phpdbg_watchpoint_t *watch;
 	size_t size;
 
-	watch = phpdbg_check_for_watchpoint(info->si_addr TSRMLS_CC);
+	watch = phpdbg_check_for_watchpoint(
+#ifdef _WIN32
+		addr
+#else
+		info->si_addr
+#endif
+		TSRMLS_CC);
 
 	if (watch == NULL) {
 		return FAILURE;
@@ -506,12 +510,12 @@ static void phpdbg_watch_dtor(void *pDest) {
 static void phpdbg_watch_mem_dtor(void *llist_data) {
 	phpdbg_watch_memdump *dump = *(phpdbg_watch_memdump **)llist_data;
 
-	free(*(void **)llist_data);
-
 	/* Disble writing again */
 	if (dump->reenable_writing) {
-		mprotect(dump->page, dump->size, PROT_NONE | PROT_READ);
+		mprotect(dump->page, dump->size, PROT_READ);
 	}
+
+	free(*(void **)llist_data);
 }
 
 void phpdbg_setup_watchpoints(TSRMLS_D) {
@@ -668,7 +672,7 @@ void phpdbg_watch_efree(void *ptr) {
 	if (result) {
 		phpdbg_watchpoint_t *watch = result->ptr;
 
-		if (watch->addr.ptr + watch->size > ptr) {
+		if ((size_t)watch->addr.ptr + watch->size > (size_t)ptr) {
 			zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 		}
 	}

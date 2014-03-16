@@ -24,6 +24,11 @@
 #define CHOOSE_BRANCH(n) \
 	branch = branch->branches[!!(n)];
 
+#ifdef _Win32
+# define emalloc malloc
+# define efree free
+#endif
+
 /* depth in bits */
 void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth) {
 	tree->depth = depth;

@@ -39,7 +39,9 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
-#include "zend_signal.h"
+#ifndef _WIN32
+# include "zend_signal.h"
+#endif
 #include "SAPI.h"
 #include <fcntl.h>
 #include <sys/types.h>
@@ -169,8 +171,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
 
+#ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */
-
+#endif
+	
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	HashTable watchpoints;                       /* watchpoints */
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
@@ -195,5 +199,14 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+
+/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c
+   Needed for realizing watchpoints */
+struct _zend_mm_heap {
+	int   use_zend_alloc;
+	void *(*_malloc)(size_t);
+	void  (*_free)(void *);
+	void *(*_realloc)(void *, size_t);
+};
 
 #endif /* PHPDBG_H */

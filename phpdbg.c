@@ -18,7 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_SIGNALS
+#if !defined(ZEND_SIGNALS) || defined(_WIN32)
 # include <signal.h>
 #endif
 #include "phpdbg.h"
@@ -29,14 +29,6 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 #include "zend_alloc.h"
-
-/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c */
-struct _zend_mm_heap {
-	int   use_zend_alloc;
-	void *(*_malloc)(size_t);
-	void  (*_free)(void*);
-	void *(*_realloc)(void*, size_t);
-};
 
 /* {{{ remote console headers */
 #ifndef _WIN32
@@ -818,7 +810,6 @@ int phpdbg_open_sockets(char *address, int port[2], int (*listen)[2], int (*sock
 
 	return SUCCESS;
 } /* }}} */
-#endif
 
 void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
 	int is_handled = FAILURE;
@@ -839,6 +830,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) {
 	}
 
 }
+#endif
 
 int main(int argc, char **argv) /* {{{ */
 {
@@ -877,11 +869,11 @@ int main(int argc, char **argv) /* {{{ */
 	void ***tsrm_ls;
 #endif
 
+#ifndef _WIN32
 	struct sigaction signal_struct;
 	signal_struct.sa_sigaction = phpdbg_signal_handler;
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
 
-#ifndef _WIN32
 	address = strdup("127.0.0.1");
 	socket[0] = -1;
 	socket[1] = -1;
@@ -1154,50 +1146,51 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
-
+#ifdef _WIN32
+    EXCEPTION_POINTERS *xp;
+    __try {
+#endif
 		zend_mm_heap *mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
 		if (!mm_heap->use_zend_alloc) {
 			free(mm_heap);
 			mm_heap = zend_mm_startup();
 		}
 		PHPDBG_G(original_free_function) = mm_heap->_free;
+#ifdef _WIN32
+		phpdbg_win_set_mm_heap(mm_heap);
+#else
 		mm_heap->_free = phpdbg_watch_efree;
+#endif
 		zend_mm_set_heap(mm_heap TSRMLS_CC);
 
 		zend_activate(TSRMLS_C);
 
-#ifdef ZEND_SIGNALS
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		zend_try {
 			zend_signal_activate(TSRMLS_C);
 		} zend_end_try();
 #endif
 
-#ifdef ZEND_SIGNALS
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
 		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
-#else
+#elif !defined(_WIN32)
 		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
-#ifdef ZEND_SIGNALS
-# ifndef _WIN32
+#if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		if (listen[0] < 0) {
-# endif
 			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
-# ifndef _WIN32
 		}
-# endif
-#else
-# ifndef _WIN32
+#elif !defined(_WIN32)
 		if (listen[0] < 0) {
-# endif
+#endif
 			signal(SIGINT, phpdbg_sigint_handler);
 #ifndef _WIN32
 		}
-#endif
 #endif
 
 		PG(modules_activated) = 0;
@@ -1284,7 +1277,10 @@ phpdbg_main:
 			}
 		}
 
+/* #ifndef for making compiler shutting up */
+#ifndef _WIN32
 phpdbg_interact:
+#endif
 		/* phpdbg main() */
 		do {
 			zend_try {
@@ -1377,6 +1373,11 @@ phpdbg_out:
 		} zend_end_try();
 
 		sapi_shutdown();
+#ifdef _WIN32
+	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
+		// if !EXCEPTION_CONTINUE_EXECUTION
+	}
+	#endif
 	}
 
 	if (cleaning || remote) {
