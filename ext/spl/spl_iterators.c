@@ -1286,13 +1286,11 @@ static union _zend_function *spl_dual_it_get_method(zval *object_ptr, zend_strin
 	if (!function_handler && intern->inner.ce) {
 		if ((function_handler = zend_hash_find_ptr(&intern->inner.ce->function_table, method)) == NULL) {
 			if (Z_OBJ_HT(intern->inner.zobject)->get_method) {
-				//!!! maybe we really need a zval ** here?
-				//*object_ptr = &intern->inner.zobject?
-				object_ptr = &intern->inner.zobject;
+				ZVAL_COPY_VALUE(object_ptr, &intern->inner.zobject);
 				function_handler = Z_OBJ_HT_P(object_ptr)->get_method(object_ptr, method, key TSRMLS_CC);
 			}
 		} else {
-			object_ptr = &intern->inner.zobject;
+			ZVAL_COPY_VALUE(object_ptr, &intern->inner.zobject);
 		}
 	}
 	return function_handler;
