@@ -503,7 +503,6 @@ static void phpdbg_watch_dtor(void *pDest) {
 
 	free(watch->str);
 	free(watch->name_in_parent);
-
 	efree(watch);
 }
 
@@ -571,14 +570,19 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 
 			phpdbg_notice("Breaking on watchpoint %s", watch->str);
 			switch (watch->type) {
-				case WATCH_ON_ZVAL:
+				case WATCH_ON_ZVAL: {
+					int removed = ((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1);
 					
 					phpdbg_write("Old value: ");
-					zend_print_flat_zval_r((zval *)oldPtr TSRMLS_CC);
+					if ((Z_TYPE_P((zval *)oldPtr) == IS_ARRAY || Z_TYPE_P((zval *)oldPtr) == IS_OBJECT) && removed) {
+						phpdbg_write("Value inaccessible, HashTable already destroyed");
+					} else {
+						zend_print_flat_zval_r((zval *)oldPtr TSRMLS_CC);
+					}
 					phpdbg_writeln("\nOld refcount: %d; Old is_ref: %d", ((zval *)oldPtr)->refcount__gc, ((zval *)oldPtr)->is_ref__gc);
 
 					/* check if zval was removed */
-					if (((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1)) {
+					if (removed) {
 						phpdbg_notice("Watchpoint %s was unset, removing watchpoint", watch->str);
 						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 
@@ -606,9 +610,20 @@ remove_ht_watch:
 					}
 					
 					break;
-
+				}
 				case WATCH_ON_HASHTABLE:
 
+#ifdef ZEND_DEBUG
+					if (watch->addr.ht->inconsistent) {
+						phpdbg_notice("Watchpoint %s was unset, removing watchpoint", watch->str);
+						zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
+
+						reenable = 0;
+
+						break;
+					}
+#endif
+				
 					elementDiff = zend_hash_num_elements((HashTable *)oldPtr) - zend_hash_num_elements(watch->addr.ht);
 					if (elementDiff) {
 						if (elementDiff > 0) {
@@ -668,7 +683,7 @@ void phpdbg_list_watchpoints(TSRMLS_D) {
 void phpdbg_watch_efree(void *ptr) {
 	TSRMLS_FETCH();
 	phpdbg_btree_result *result = phpdbg_btree_find_closest(&PHPDBG_G(watchpoint_tree), (zend_ulong)ptr);
-
+	
 	if (result) {
 		phpdbg_watchpoint_t *watch = result->ptr;
 

@@ -72,3 +72,5 @@ $test = $obj->a;
 
 $obj->a += 2;
 $test -= 2;
+
+unset($obj);

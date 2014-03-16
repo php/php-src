@@ -1151,15 +1151,17 @@ phpdbg_main:
     __try {
 #endif
 		zend_mm_heap *mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
+#if ZEND_DEBUG
 		if (!mm_heap->use_zend_alloc) {
-			free(mm_heap);
-			mm_heap = zend_mm_startup();
+			mm_heap->_malloc = malloc;
+			mm_heap->_realloc = realloc;
+			mm_heap->_free = free;
+#endif
+			PHPDBG_G(original_free_function) = mm_heap->_free;
+			mm_heap->_free = phpdbg_watch_efree;
+			mm_heap->use_zend_alloc = 0;
+#if ZEND_DEBUG
 		}
-		PHPDBG_G(original_free_function) = mm_heap->_free;
-#ifdef _WIN32
-		phpdbg_win_set_mm_heap(mm_heap);
-#else
-		mm_heap->_free = phpdbg_watch_efree;
 #endif
 		zend_mm_set_heap(mm_heap TSRMLS_CC);
 
@@ -1328,8 +1330,8 @@ phpdbg_interact:
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
 		
-phpdbg_out:
 #ifndef _WIN32
+phpdbg_out:
 		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 			goto phpdbg_interact;
@@ -1340,6 +1342,7 @@ phpdbg_out:
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
 		phpdbg_error("Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
 	}
+phpdbg_out:
 #endif
 #ifndef ZTS
 		/* force cleanup of auto and core globals */

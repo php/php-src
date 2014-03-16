@@ -207,6 +207,12 @@ struct _zend_mm_heap {
 	void *(*_malloc)(size_t);
 	void  (*_free)(void *);
 	void *(*_realloc)(void *, size_t);
+	size_t              free_bitmap;
+	size_t              large_free_bitmap;
+	size_t              block_size;
+	size_t              compact_size;
+	zend_mm_segment    *segments_list;
+	zend_mm_storage    *storage;
 };
 
 #endif /* PHPDBG_H */
