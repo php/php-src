@@ -2341,7 +2341,10 @@ static PHP_FUNCTION(session_start)
 	}
 
 	if (PS(read_only)) {
-		php_session_abort(TSRMLS_C);
+		zend_bool old = PS(lazy_write);
+		PS(lazy_write) = 1;
+		php_session_flush(TSRMLS_C);
+		PS(lazy_write) = old;
 	}
 	RETURN_TRUE;
 }
