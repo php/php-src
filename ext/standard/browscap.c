@@ -81,19 +81,20 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	int i, j=0;
 	char *t;
 	zend_string *res;
+	char *lc_pattern;
 
 	// TODO: overflow check???
 //???	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 5, persistent);
 	res = STR_ALLOC(Z_STRLEN_P(pattern) * 2 + 5, persistent);
 	t = res->val;
 
-	php_strtolower(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
+	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
 
 	t[j++] = '\xA7'; /* section sign */
 	t[j++] = '^';
 
 	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
-		switch (Z_STRVAL_P(pattern)[i]) {
+		switch (lc_pattern[i]) {
 			case '?':
 				t[j] = '.';
 				break;
@@ -122,7 +123,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 				t[j] = '\xA7';
 				break;
 			default:
-				t[j] = Z_STRVAL_P(pattern)[i];
+				t[j] = lc_pattern[i];
 				break;
 		}
 	}
@@ -133,6 +134,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	t[j]=0;
 	res->len = j;
 	Z_STR_P(pattern) = res;
+	efree(lc_pattern);
 }
 /* }}} */
 
