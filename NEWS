@@ -29,11 +29,15 @@ PHP                                                                        NEWS
   . hash_pbkdf2() now works correctly if the $length argument is not specified.
     (Nikita)
 
+- Intl:
+  . Fixed bug #66873 (A reproductible crash in UConverter when given invalid 
+    encoding) (Stas)
+
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
 - MySQLi:
-  . Fixed bug #66762i (Segfault in mysqli_stmt::bind_result() when link closed)
+  . Fixed bug #66762 (Segfault in mysqli_stmt::bind_result() when link closed)
   (Remi)
 
 - OPCache
