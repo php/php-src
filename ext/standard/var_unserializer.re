@@ -27,12 +27,12 @@
 #define VAR_ENTRIES_DBG 0
 
 typedef struct {
-	zval data[VAR_ENTRIES_MAX];
+	zval *data[VAR_ENTRIES_MAX];
 	long used_slots;
 	void *next;
 } var_entries;
 
-static inline zval *var_push(php_unserialize_data_t *var_hashx, zval *rval)
+static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last;
 #if VAR_ENTRIES_DBG
@@ -53,8 +53,7 @@ static inline zval *var_push(php_unserialize_data_t *var_hashx, zval *rval)
 		(*var_hashx)->last = var_hash;
 	}
 
-	ZVAL_COPY_VALUE(&var_hash->data[var_hash->used_slots], rval);
-	return &var_hash->data[var_hash->used_slots++];
+	var_hash->data[var_hash->used_slots++] = rval;
 }
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
@@ -78,8 +77,8 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 		(*var_hashx)->last_dtor = var_hash;
 	}
 
-	ZVAL_COPY(&var_hash->data[var_hash->used_slots], rval);
-	var_hash->used_slots++;
+	Z_ADDREF_P(rval);
+	var_hash->data[var_hash->used_slots++] = rval;
 }
 
 PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval)
@@ -103,8 +102,7 @@ PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rva
 		(*var_hashx)->last_dtor = var_hash;
 	}
 
-	ZVAL_COPY_VALUE(&var_hash->data[var_hash->used_slots], rval);
-	var_hash->used_slots++;
+	var_hash->data[var_hash->used_slots++] = rval;
 }
 
 static int var_access(php_unserialize_data_t *var_hashx, long id, zval **store)
@@ -123,7 +121,7 @@ static int var_access(php_unserialize_data_t *var_hashx, long id, zval **store)
 
 	if (id < 0 || id >= var_hash->used_slots) return !SUCCESS;
 
-	*store = &var_hash->data[id];
+	*store = var_hash->data[id];
 
 	return SUCCESS;
 }
@@ -147,7 +145,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
-			zval_ptr_dtor(&var_hash->data[i]);
+			zval_ptr_dtor(var_hash->data[i]);
 		}
 		next = var_hash->next;
 		efree(var_hash);
@@ -281,7 +279,8 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
 
-		if (!php_var_unserialize_intern(&key, p, max, NULL TSRMLS_CC)) {
+		if (!php_var_unserialize(&key, p, max, NULL TSRMLS_CC)) {
+			zval_dtor(&key);
 			return 0;
 		}
 
@@ -290,17 +289,8 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 			return 0;
 		}
 
-		if (var_hash && (*p)[0] != 'R') {
-			data = var_push(var_hash, data);
-		} else {
-			data = &d;
-		}
-
-		ZVAL_UNDEF(data);
-		if (!php_var_unserialize_intern(data, p, max, var_hash TSRMLS_CC)) {
-			zval_dtor(&key);
-			return 0;
-		}
+		data = NULL;
+		ZVAL_UNDEF(&d);
 
 		if (!objprops) {
 			switch (Z_TYPE(key)) {
@@ -308,22 +298,26 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 				if ((old_data = zend_hash_index_find(ht, Z_LVAL(key))) != NULL) {
 					var_push_dtor(var_hash, old_data);
 				}
-				zend_hash_index_update(ht, Z_LVAL(key), data);
+				data = zend_hash_index_update(ht, Z_LVAL(key), &d);
 				break;
 			case IS_STRING:
 				if ((old_data = zend_symtable_find(ht, Z_STR(key))) != NULL) {
 					var_push_dtor(var_hash, old_data);
 				}
-				zend_symtable_update(ht, Z_STR(key), data);
+				data = zend_symtable_update(ht, Z_STR(key), &d);
 				break;
 			}
 		} else {
 			/* object properties should include no integers */
 			convert_to_string(&key);
-			zend_hash_update(ht, Z_STR(key), data);
+			data = zend_hash_update(ht, Z_STR(key), &d);
 		}
 		
 		zval_dtor(&key);
+
+		if (!php_var_unserialize(data, p, max, var_hash TSRMLS_CC)) {
+			return 0;
+		}
 
 		if (elements && *(*p-1) != ';' && *(*p-1) != '}') {
 			(*p)--;
@@ -394,9 +388,12 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		return 0;
 	}
 
+	if (Z_ISREF_P(rval)) {
+		rval = Z_REFVAL_P(rval);
+	}
+
 	if (Z_OBJCE_P(rval) != PHP_IC_ENTRY &&
 		zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1)) {
-//???		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
 		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1);
 		BG(serialize_lock)++;
 		call_user_function_ex(CG(function_table), rval, &fname, &retval, 0, 0, 1, NULL TSRMLS_CC);
@@ -418,15 +415,6 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 
 PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
-	if (var_hash && (*p)[0] != 'R') {
-		var_push(var_hash, rval);
-	}
-
-	return php_var_unserialize_intern(UNSERIALIZE_PASSTHRU);
-}
-
-PHPAPI int php_var_unserialize_intern(UNSERIALIZE_PARAMETER)
-{
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
 
@@ -437,6 +425,10 @@ PHPAPI int php_var_unserialize_intern(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 	
+	if (var_hash && (*p)[0] != 'R') {
+		var_push(var_hash, rval);
+	}
+
 	start = cursor;
 
 /*!re2c
@@ -455,7 +447,12 @@ PHPAPI int php_var_unserialize_intern(UNSERIALIZE_PARAMETER)
 	if (!ZVAL_IS_UNDEF(rval)) {
 		zval_ptr_dtor(rval);
 	}
-	ZVAL_COPY(rval, rval_ref);
+	if (Z_ISREF_P(rval_ref)) {
+		ZVAL_COPY(rval, rval_ref);
+	} else {
+		ZVAL_NEW_REF(rval_ref, rval_ref);
+		ZVAL_COPY(rval, rval_ref);
+	}
 //???	Z_SET_ISREF_PP(rval);
 	
 	return 1;
@@ -473,7 +470,7 @@ PHPAPI int php_var_unserialize_intern(UNSERIALIZE_PARAMETER)
 	}
 
 //???
-	if (rval == rval_ref) return 0;
+//???	if (rval == rval_ref) return 0;
 
 	if (!ZVAL_IS_UNDEF(rval)) {
 		var_push_dtor_no_addref(var_hash, rval);
@@ -576,6 +573,7 @@ use_double:
 
 "S:" uiv ":" ["] 	{
 	size_t len, maxlen;
+//??? TODO: use zend_string* instead of char*
 	char *str;
 
 	len = parse_uiv(start + 2);
@@ -598,8 +596,8 @@ use_double:
 	YYCURSOR += 2;
 	*p = YYCURSOR;
 
-//???	ZVAL_STRINGL(rval, str, len, 0);
 	ZVAL_STRINGL(rval, str, len);
+	efree(str);
 	return 1;
 }
 
@@ -613,6 +611,9 @@ use_double:
 	}
 
 	array_init_size(rval, elements);
+//??? we can't convert from packed to hash during unserialization, becaue
+//??? reference to some zvals might be keept in var_hash (to support references)
+	zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_ARRVAL_P(rval), elements, 0)) {
 		return 0;

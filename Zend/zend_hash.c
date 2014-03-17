@@ -138,6 +138,13 @@ static void zend_hash_packed_grow(HashTable *ht)
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
 
+ZEND_API void zend_hash_real_init(HashTable *ht, int packed)
+{
+	IS_CONSISTENT(ht);
+
+	CHECK_INIT(ht, packed);
+}
+
 ZEND_API void zend_hash_packed_to_hash(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();

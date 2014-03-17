@@ -735,7 +735,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 	ZVAL_UNDEF(&var_already);
 
-	if (var_hash && 
+	if (var_hash &&
 		php_add_var_hash(var_hash, Z_ISREF_P(struc)? Z_REFVAL_P(struc) : struc, &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
@@ -818,7 +818,6 @@ again:
 				}
 
 				if (ce && ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
-//???					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1, 0);
 					ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL TSRMLS_CC);
@@ -894,7 +893,7 @@ again:
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
 					if ((data = zend_hash_get_current_data_ex(myht, &pos)) == NULL
-						|| Z_ARR_P(data) == Z_ARR_P(struc)
+						|| (Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
 						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->nApplyCount > 1)
 					) {
 						smart_str_appendl(buf, "N;", 2);
