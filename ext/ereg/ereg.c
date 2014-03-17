@@ -350,6 +350,10 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 	match_len = 1;
 
+	if (array && Z_ISREF_P(array)) {
+		array = Z_REFVAL_P(array);
+	}
+
 	if (array && err != REG_NOMATCH) {
 		match_len = (int) (subs[0].rm_eo - subs[0].rm_so);
 		string_len = findin_len + 1;
@@ -669,7 +673,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression");
 			
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
-			efree(Z_ARRVAL_P(return_value));
+			efree(Z_ARR_P(return_value));
 			RETURN_FALSE;
 		} else {
 			/* On a real match */
@@ -696,7 +700,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		php_ereg_eprint(err, &re TSRMLS_CC);
 		regfree(&re);
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		efree(Z_ARRVAL_P(return_value));
+		efree(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
 
