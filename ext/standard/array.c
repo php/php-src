@@ -1338,7 +1338,7 @@ PHP_FUNCTION(extract)
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING) {
-			var_exists = zend_hash_exists(EG(active_symbol_table), var_name);
+			var_exists = zend_hash_exists(&EG(active_symbol_table)->ht, var_name);
 		} else if (key_type == HASH_KEY_IS_LONG && (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID)) {
 			zval num;
 
@@ -1409,15 +1409,15 @@ PHP_FUNCTION(extract)
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
 				Z_ADDREF_P(entry);
 
-				if ((orig_var = zend_hash_find(EG(active_symbol_table), Z_STR(final_name))) != NULL) {
+				if ((orig_var = zend_hash_find(&EG(active_symbol_table)->ht, Z_STR(final_name))) != NULL) {
 					zval_ptr_dtor(orig_var);
 					ZVAL_COPY_VALUE(orig_var, entry);
 				} else {
-					zend_hash_update(EG(active_symbol_table), Z_STR(final_name), entry);
+					zend_hash_update(&EG(active_symbol_table)->ht, Z_STR(final_name), entry);
 				}
 			} else {
 				ZVAL_DUP(&data, entry);
-				ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1, 0);
+				ZEND_SET_SYMBOL_WITH_LENGTH(&EG(active_symbol_table)->ht, Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1, 0);
 			}
 			count++;
 		}
@@ -1489,7 +1489,7 @@ PHP_FUNCTION(compact)
 	}
 
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
-		php_compact_var(EG(active_symbol_table), return_value, &args[i] TSRMLS_CC);
+		php_compact_var(&EG(active_symbol_table)->ht, return_value, &args[i] TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -2043,7 +2043,7 @@ PHP_FUNCTION(array_unshift)
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[0], argc, NULL);
 	old_hash = *Z_ARRVAL_P(stack);
 	if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table).ht TSRMLS_CC);
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(stack) = *new_hash;
 	FREE_HASHTABLE(new_hash);
@@ -2126,7 +2126,7 @@ PHP_FUNCTION(array_splice)
 	/* Replace input array's hashtable with the new one */
 	old_hash = *Z_ARRVAL_P(array);
 	if (Z_ARRVAL_P(array) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table).ht TSRMLS_CC);
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(array) = *new_hash;
 	FREE_HASHTABLE(new_hash);
@@ -2789,7 +2789,7 @@ PHP_FUNCTION(array_pad)
 	/* Copy the result hash into return value */
 	old_hash = *Z_ARRVAL_P(return_value);
 	if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table).ht TSRMLS_CC);
+		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
 	}
 	*Z_ARRVAL_P(return_value) = *new_hash;
 	FREE_HASHTABLE(new_hash);

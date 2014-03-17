@@ -162,13 +162,13 @@ struct _zend_executor_globals {
 	zval error_zval;
 
 	/* symbol table cache */
-	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
-	HashTable **symtable_cache_limit;
-	HashTable **symtable_cache_ptr;
+	zend_array *symtable_cache[SYMTABLE_CACHE_SIZE];
+	zend_array **symtable_cache_limit;
+	zend_array **symtable_cache_ptr;
 
 	zend_op **opline_ptr;
 
-	HashTable *active_symbol_table;
+	zend_array *active_symbol_table;
 	zend_array symbol_table;		/* main symbol table */
 
 	HashTable included_files;	/* files already included */

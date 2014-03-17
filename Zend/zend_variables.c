@@ -306,13 +306,13 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
-		p = zend_hash_find(EG(active_symbol_table), key->key);
+		p = zend_hash_find(&EG(active_symbol_table)->ht, key->key);
 		if (!p) {
 			p = &tmp;
 			ZVAL_NULL(&tmp);
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add(EG(active_symbol_table), key->key, &tmp);
+				zend_hash_add(&EG(active_symbol_table)->ht, key->key, &tmp);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
 			}

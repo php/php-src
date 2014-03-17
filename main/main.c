@@ -863,7 +863,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 		if (EG(active_symbol_table)) {
 			zval tmp;
 			ZVAL_STRINGL(&tmp, buffer, buffer_len);
-			zend_hash_str_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+			zend_hash_str_update(&EG(active_symbol_table)->ht, "php_errormsg", sizeof("php_errormsg")-1, &tmp);
 		}
 	}
 	if (replace_buffer) {
@@ -1195,7 +1195,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (EG(active_symbol_table)) {
 			zval tmp;
 			ZVAL_STRINGL(&tmp, buffer, buffer_len);
-			zend_hash_str_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+			zend_hash_str_update(&EG(active_symbol_table)->ht, "php_errormsg", sizeof("php_errormsg")-1, &tmp);
 		}
 	}
 

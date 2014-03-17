@@ -245,7 +245,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
 	zend_op **opline_ptr;
-	HashTable *current_symbol_table;
+	zend_array *current_symbol_table;
 	zend_execute_data *execute_data;
 	zend_vm_stack current_stack = EG(argument_stack);
 
@@ -335,7 +335,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_op **original_opline_ptr = EG(opline_ptr);
 		zend_op_array *original_active_op_array = EG(active_op_array);
-		HashTable *original_active_symbol_table = EG(active_symbol_table);
+		zend_array *original_active_symbol_table = EG(active_symbol_table);
 		zval original_This;
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);

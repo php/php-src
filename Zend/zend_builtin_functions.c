@@ -1726,9 +1726,9 @@ ZEND_FUNCTION(get_defined_vars)
 		zend_rebuild_symbol_table(TSRMLS_C);
 	}
 
-	array_init_size(return_value, zend_hash_num_elements(EG(active_symbol_table)));
+	array_init_size(return_value, zend_hash_num_elements(&EG(active_symbol_table)->ht));
 
-	zend_hash_copy(Z_ARRVAL_P(return_value), EG(active_symbol_table), zval_add_ref);
+	zend_hash_copy(Z_ARRVAL_P(return_value), &EG(active_symbol_table)->ht, zval_add_ref);
 }
 /* }}} */
 

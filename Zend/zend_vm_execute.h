@@ -4090,7 +4090,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -4176,7 +4176,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -5754,7 +5754,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -5840,7 +5840,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -6429,7 +6429,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -6515,7 +6515,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -7196,7 +7196,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
 	if (EG(active_symbol_table)) {
 		zend_string *cv = CV_DEF_OF(opline->op2.var);
-		zval *zv = zend_hash_update(EG(active_symbol_table), cv, EX_VAR_NUM(opline->op2.var));
+		zval *zv = zend_hash_update(&EG(active_symbol_table)->ht, cv, EX_VAR_NUM(opline->op2.var));
 		ZVAL_INDIRECT(EX_VAR_NUM(opline->op2.var), zv);
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
@@ -9149,7 +9149,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -9235,7 +9235,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -10800,7 +10800,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -10886,7 +10886,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -11364,7 +11364,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -11450,7 +11450,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -15625,7 +15625,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -15859,7 +15859,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -20166,7 +20166,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -20400,7 +20400,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -21592,7 +21592,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -21678,7 +21678,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -32829,7 +32829,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -33061,7 +33061,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -37119,7 +37119,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -37351,7 +37351,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {
@@ -38425,7 +38425,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -38511,7 +38511,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {

@@ -4420,7 +4420,7 @@ PHP_FUNCTION(parse_str)
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
 		}
-//???		Z_ARRVAL(tmp) = EG(active_symbol_table);
+		ZVAL_ARR(&tmp, EG(active_symbol_table));
 		sapi_module.treat_data(PARSE_STRING, res, &tmp TSRMLS_CC);
 	} else 	{
 		zval ret;
@@ -4428,6 +4428,9 @@ PHP_FUNCTION(parse_str)
 		array_init(&ret);
 		sapi_module.treat_data(PARSE_STRING, res, &ret TSRMLS_CC);
 		/* Clear out the array that was passed in. */
+		if (Z_ISREF_P(arrayArg)) {
+			arrayArg = Z_REFVAL_P(arrayArg);
+		}
 		zval_dtor(arrayArg);
 		ZVAL_COPY_VALUE(arrayArg, &ret);
 	}

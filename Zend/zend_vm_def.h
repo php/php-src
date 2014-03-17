@@ -3032,7 +3032,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
 	if (EG(active_symbol_table)) {
 		zend_string *cv = CV_DEF_OF(opline->op2.var);
-		zval *zv = zend_hash_update(EG(active_symbol_table), cv, EX_VAR_NUM(opline->op2.var));
+		zval *zv = zend_hash_update(&EG(active_symbol_table)->ht, cv, EX_VAR_NUM(opline->op2.var));
 		ZVAL_INDIRECT(EX_VAR_NUM(opline->op2.var), zv);
 	}
 	if (UNEXPECTED(EG(exception) != exception)) {
@@ -4066,7 +4066,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			zend_delete_variable(EX(prev_execute_data), EG(active_symbol_table), cv TSRMLS_CC);
+			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
 			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
@@ -4615,7 +4615,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		} else if (EG(active_symbol_table)) {
 			zend_string *cv = CV_DEF_OF(opline->op1.var);
 
-			if ((value = zend_hash_find(EG(active_symbol_table), cv)) == NULL) {
+			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
 				isset = 0;
 			}
 		} else {

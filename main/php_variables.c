@@ -67,7 +67,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 	assert(var_name != NULL);
 
-	if (track_vars_array) {
+	if (track_vars_array && Z_TYPE_P(track_vars_array) == IS_ARRAY) {
 		symtable1 = Z_ARRVAL_P(track_vars_array);
 	}
 
@@ -110,7 +110,8 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	}
 
 	/* GLOBALS hijack attempt, reject parameter */
-	if (symtable1 == EG(active_symbol_table) &&
+	if (symtable1 && EG(active_symbol_table) &&
+		symtable1 == &EG(active_symbol_table)->ht &&
 		var_len == sizeof("GLOBALS")-1 &&
 		!memcmp(var, "GLOBALS", sizeof("GLOBALS")-1)) {
 		zval_dtor(val);
@@ -353,6 +354,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	char *strtok_buf = NULL;
 	long count = 0;
 	
+	ZVAL_UNDEF(&array);
 	switch (arg) {
 		case PARSE_POST:
 		case PARSE_GET:

@@ -92,13 +92,13 @@ PHPDBG_INFO(vars) /* {{{ */
 
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
-	zend_hash_internal_pointer_reset_ex(EG(active_symbol_table), &pos);
-	while (zend_hash_get_current_key_ex(EG(active_symbol_table), &var, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
-		data = zend_hash_get_current_data_ex(EG(active_symbol_table), &pos);
+	zend_hash_internal_pointer_reset_ex(&EG(active_symbol_table)->ht, &pos);
+	while (zend_hash_get_current_key_ex(&EG(active_symbol_table)->ht, &var, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+		data = zend_hash_get_current_data_ex(&EG(active_symbol_table)->ht, &pos);
 		if (*(var->val) != '_') {
 			zend_hash_update(&vars, var, data);
 		}
-		zend_hash_move_forward_ex(EG(active_symbol_table), &pos);
+		zend_hash_move_forward_ex(&EG(active_symbol_table)->ht, &pos);
 	}
 
 	{

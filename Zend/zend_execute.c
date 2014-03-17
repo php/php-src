@@ -212,7 +212,7 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int
 	zval *ret = NULL;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
@@ -231,7 +231,7 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int
 			/* break missing intentionally */
 		case BP_VAR_W:
 			if (EG(active_symbol_table)) {
-				ret = zend_hash_update(EG(active_symbol_table), cv, ret);
+				ret = zend_hash_update(&EG(active_symbol_table)->ht, cv, ret);
 				ZVAL_INDIRECT(ptr, ret);
 			} else {
 				ZVAL_NULL(ptr);
@@ -248,7 +248,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint
 	zval *ret = NULL;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
@@ -265,7 +265,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_
 	zval *ret;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
@@ -282,7 +282,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zval *ptr, zend_uin
 	zval *ret;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
@@ -298,12 +298,12 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uin
 	zval *ret;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
 		}
-		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
+		ret = zend_hash_update(&EG(active_symbol_table)->ht, cv, &EG(uninitialized_zval));
 		ZVAL_INDIRECT(ptr, ret);
 		zend_error(E_NOTICE, "Undefined variable: %s", cv->val);
 		return ret;
@@ -320,12 +320,12 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, zend_uint
 	zval *ret;
 
 	if (EG(active_symbol_table)) {
-		ret = zend_hash_find(EG(active_symbol_table), cv);
+		ret = zend_hash_find(&EG(active_symbol_table)->ht, cv);
 		if (ret) {
 			ZVAL_INDIRECT(ptr, ret);
 			return ret;
 		}
-		ret = zend_hash_update(EG(active_symbol_table), cv, &EG(uninitialized_zval));
+		ret = zend_hash_update(&EG(active_symbol_table)->ht, cv, &EG(uninitialized_zval));
 		ZVAL_INDIRECT(ptr, ret);
 		return ret;
 	} else {
@@ -1060,7 +1060,7 @@ static inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
 			if (!EG(active_symbol_table)) {
 				zend_rebuild_symbol_table(TSRMLS_C);
 			}
-			return EG(active_symbol_table);
+			return &EG(active_symbol_table)->ht;
 			break;
 		case ZEND_FETCH_GLOBAL:
 		case ZEND_FETCH_GLOBAL_LOCK:
@@ -1570,15 +1570,15 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_i
 	}
 }
 
-void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{ */
+void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
-		zend_hash_destroy(symbol_table);
-		FREE_HASHTABLE(symbol_table);
+		zend_hash_destroy(&symbol_table->ht);
+		efree(symbol_table);
 	} else {
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */
-		zend_hash_clean(symbol_table);
+		zend_hash_clean(&symbol_table->ht);
 		*(++EG(symtable_cache_ptr)) = symbol_table;
 	}
 }
@@ -1732,7 +1732,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
 		} else {
 			ZVAL_COPY(EX_VAR_NUM(op_array->this_var), &EG(This));
-			zval *zv = zend_hash_str_add(EG(active_symbol_table), "this", sizeof("this")-1, EX_VAR(op_array->this_var));
+			zval *zv = zend_hash_str_add(&EG(active_symbol_table)->ht, "this", sizeof("this")-1, EX_VAR(op_array->this_var));
 			if (zv) {
 				ZVAL_INDIRECT(EX_VAR_NUM(op_array->this_var), zv);
 			}

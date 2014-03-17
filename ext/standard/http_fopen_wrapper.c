@@ -659,10 +659,10 @@ finish:
 	if (header_init) {
 		zval ztmp;
 		array_init(&ztmp);
-		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", &ztmp);
+		ZEND_SET_SYMBOL(&EG(active_symbol_table)->ht, "http_response_header", &ztmp);
 	}
 
-	response_header = zend_hash_str_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header")-1);
+	response_header = zend_hash_str_find(&EG(active_symbol_table)->ht, "http_response_header", sizeof("http_response_header")-1);
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;

@@ -44,7 +44,7 @@ typedef struct _zend_fcall_info {
 	size_t size;
 	HashTable *function_table;
 	zval function_name;
-	HashTable *symbol_table;
+	zend_array *symbol_table;
 	zval *retval;
 	zend_uint param_count;
 	zval *params;
@@ -452,7 +452,7 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval
 
 
 ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[] TSRMLS_DC);
-ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
+ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, zend_uint param_count, zval params[], int no_separation, zend_array *symbol_table TSRMLS_DC);
 
 ZEND_API extern const zend_fcall_info empty_fcall_info;
 ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
@@ -519,7 +519,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, zend_st
 
 ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC);
 
-ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
+ZEND_API void zend_reset_all_cv(zend_array *symbol_table TSRMLS_DC);
 
 ZEND_API void zend_rebuild_symbol_table(TSRMLS_D);
 

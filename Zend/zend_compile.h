@@ -379,7 +379,7 @@ struct _zend_execute_data {
 	zend_function_state function_state;
 	zend_op_array *op_array;
 	zval object;
-	HashTable *symbol_table;
+	zend_array *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval old_error_reporting;
 	zend_bool nested;
