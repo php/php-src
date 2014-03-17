@@ -941,15 +941,20 @@ cli_server.color = On
 
 [iconv]
 ; Use of this INI entry is deprecated, use global input_encoding instead.
-; If empty, input_encoding is used.
+; If empty, default_charset or input_encoding or iconv.input_encoding is used.
+; The precedence is: default_charset < intput_encoding < iconv.input_encoding
 ;iconv.input_encoding =
 
 ; Use of this INI entry is deprecated, use global internal_encoding instead.
-; If empty, internal_encoding is used.
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
 ;iconv.internal_encoding =
 
 ; Use of this INI entry is deprecated, use global output_encoding instead.
-; If empty, output_encoding is used.
+; If empty, default_charset or output_encoding or iconv.output_encoding is used.
+; The precedence is: default_charset < output_encoding < iconv.output_encoding
+; To use an output encoding conversion, iconv's output handler must be set
+; otherwise output encoding conversion cannot be performed.
 ;iconv.output_encoding =
 
 [intl]
@@ -1720,21 +1725,25 @@ mssql.secure_connection = Off
 ; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
 ; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
-; If empty, default_charset or internal_encoding is used in order.
-; http://php.net/mbstring.internal-encoding
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
 ;mbstring.internal_encoding =
 
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
-; If empty, input_encoding is used.
 ; mbstring.encoding_traslation = On is needed to use this setting.
+; If empty, default_charset or input_encoding or mbstring.input is used.
+; The precedence is: default_charset < intput_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
 ; Use of this INI entry is deprecated, use global output_encoding instead.
 ; http output encoding.
 ; mb_output_handler must be registered as output buffer to function.
-; If empty, output_encoding is used.
+; If empty, default_charset or output_encoding or mbstring.http_output is used.
+; The precedence is: default_charset < output_encoding < mbstring.http_output
+; To use an output encoding conversion, mbstring's output handler must be set
+; otherwise output encoding conversion cannot be performed.
 ; http://php.net/mbstring.http-output
 ;mbstring.http_output =
 
