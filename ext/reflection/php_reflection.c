@@ -99,7 +99,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 	}
 
 #define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
-	intern = (reflection_object *) Z_OBJ_P(getThis());                                                      \
+	intern = Z_REFLECTION_P(getThis());                                                      \
 	if (intern == NULL || intern->ptr == NULL) {                                                            \
 		RETURN_ON_EXCEPTION                                                                                 \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
@@ -205,15 +205,20 @@ typedef enum {
 
 /* Struct for reflection objects */
 typedef struct {
-	zend_object zo;
 	zval dummy; /* holder for the second property */
 	void *ptr;
 	reflection_type_t ref_type;
 	zval obj;
 	zend_class_entry *ce;
 	unsigned int ignore_visibility:1;
+	zend_object zo;
 } reflection_object;
 
+static inline reflection_object *reflection_object_from_obj(zend_object *obj) /* {{{ */ {
+	return (reflection_object*)((char*)(obj) - XtOffsetOf(reflection_object, zo));
+}
+
+#define Z_REFLECTION_P(zv)  reflection_object_from_obj(Z_OBJ_P((zv)))
 /* }}} */
 
 static zend_object_handlers reflection_object_handlers;
@@ -285,7 +290,7 @@ static void _free_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 
 static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	reflection_object *intern = (reflection_object *) object;
+	reflection_object *intern = reflection_object_from_obj(object);
 	parameter_reference *reference;
 	property_reference *prop_reference;
 
@@ -313,7 +318,8 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 	}
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
-	zend_object_free(object TSRMLS_CC);
+	zend_object_std_dtor(object TSRMLS_CC);
+	efree(intern);
 }
 /* }}} */
 
@@ -321,17 +327,17 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type TSRMLS_D
 {
 	reflection_object *intern;
 
-	intern = ecalloc(1, sizeof(reflection_object));
+	intern = ecalloc(1, sizeof(reflection_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 	intern->zo.ce = class_type;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
 	object_properties_init(&intern->zo, class_type);
 	intern->zo.handlers = &reflection_object_handlers;
-	return (zend_object*)intern;
+	return &intern->zo;
 }
 /* }}} */
 
-static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC) /* {{{ */
+static zval *reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC) /* {{{ */
 {
 	object_init_ex(object, pce);
 	return object;
@@ -1184,7 +1190,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 
 	ZVAL_STR(&name, STR_COPY(ce->name));
 	reflection_instantiate(reflection_class_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_STR_P(object);
+	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = ce;
@@ -1210,7 +1216,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 	}
 
 	reflection_instantiate(reflection_extension_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	ZVAL_STRINGL(&name, module->name, name_len);
 	intern->ptr = module;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1232,7 +1238,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 		ZVAL_NULL(&name);
 	}
 	reflection_instantiate(reflection_parameter_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
 	reference->offset = offset;
@@ -1258,7 +1264,7 @@ static void reflection_function_factory(zend_function *function, zval *closure_o
 	ZVAL_STR(&name, STR_COPY(function->common.function_name));
 
 	reflection_instantiate(reflection_function_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	intern->ptr = function;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = NULL;
@@ -1281,7 +1287,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 			zend_resolve_method_name(ce, method) : method->common.function_name));
 	ZVAL_STR(&classname, STR_COPY(method->common.scope->name));
 	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	intern->ptr = method;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
@@ -1326,7 +1332,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	ZVAL_STR(&classname, STR_COPY(prop->ce->name));
 
 	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
 	reference->prop = *prop;
@@ -1443,7 +1449,7 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 	reflection_object *intern;
 	parameter_reference *param;
 
-	intern = (reflection_object *) Z_OBJ_P(getThis());
+	intern = Z_REFLECTION_P(getThis());
 	if (intern == NULL || intern->ptr == NULL) {
 		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
 			return NULL;
@@ -1589,7 +1595,7 @@ ZEND_METHOD(reflection_function, __construct)
 	int name_len;
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -2130,7 +2136,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -2687,7 +2693,7 @@ ZEND_METHOD(reflection_method, __construct)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -3256,7 +3262,7 @@ ZEND_METHOD(reflection_method, setAccessible)
 		return;
 	}
 
-	intern = (reflection_object *) Z_OBJ_P(getThis());
+	intern = Z_REFLECTION_P(getThis());
 
 	if (intern == NULL) {
 		return;
@@ -3294,7 +3300,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -3846,7 +3852,7 @@ ZEND_METHOD(reflection_class, getProperty)
 			property_info_tmp.ce = ce;
 
 			reflection_property_factory(ce, &property_info_tmp, return_value TSRMLS_CC);
-			intern = (reflection_object *) Z_OBJ_P(return_value);
+			intern = Z_REFLECTION_P(return_value);
 			intern->ref_type = REF_TYPE_DYNAMIC_PROPERTY;
 			return;
 		}
@@ -4509,7 +4515,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			break;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr TSRMLS_CC)) {
-				argument = (reflection_object *) Z_OBJ_P(class_name);
+				argument = Z_REFLECTION_P(class_name);
 				if (argument == NULL || argument->ptr == NULL) {
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
@@ -4553,7 +4559,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			break;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr TSRMLS_CC)) {
-				argument = (reflection_object *) Z_OBJ_P(interface);
+				argument = Z_REFLECTION_P(interface);
 				if (argument == NULL || argument->ptr == NULL) {
 					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
@@ -4749,7 +4755,7 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -5112,7 +5118,7 @@ ZEND_METHOD(reflection_property, setAccessible)
 		return;
 	}
 
-	intern = (reflection_object *) Z_OBJ_P(getThis());
+	intern = Z_REFLECTION_P(getThis());
 
 	if (intern == NULL) {
 		return;
@@ -5148,7 +5154,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
@@ -5510,7 +5516,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	}
 
 	object = getThis();
-	intern = (reflection_object *) Z_OBJ_P(object);
+	intern = Z_REFLECTION_P(object);
 	if (intern == NULL) {
 		return;
 	}
