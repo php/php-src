@@ -288,6 +288,9 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 			) {
 				Z_ARRVAL_P(array)->nApplyCount++;
+				if (Z_TYPE_P(element) == IS_REFERENCE) {
+					element = Z_REFVAL_P(element);
+				}
 				cnt += php_count_recursive(element, COUNT_RECURSIVE TSRMLS_CC);
 				Z_ARRVAL_P(array)->nApplyCount--;
 			}
