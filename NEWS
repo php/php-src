@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
     (Michael M Slusarz).
 
+- Intl:
+  . Fixed bug #66873 (A reproductible crash in UConverter when given invalid
+    encoding) (Stas)
+
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
