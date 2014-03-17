@@ -161,12 +161,12 @@ PHP 5.6 UPGRADE NOTES
 - Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
   undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
 
-- Deprecated INIs: Following INIs are deprecated in favor of new
+- Deprecated INIs: Following INIs are deprecated in favour of new
   internal_encoding/input_encoding/output_encoding. Refer to "Changes to
   encodings in PHP 5.6" in "11. Other Changes" section for more details.
 
     iconv.input_encoding
-    iconv.ouput_encoding
+    iconv.output_encoding
     iconv.internal_encoding
     mbstring.http_input
     mbstring.http_output
@@ -397,10 +397,10 @@ PHP 5.6 UPGRADE NOTES
     output_encoding
 
   The values of the following php.ini parameters have become empty in
-  PHP 5.6 (previosuly they were all ISO-8859-1)
+  PHP 5.6 (previously they were all ISO-8859-1)
 
     iconv.input_encoding
-    iconv.ouput_encoding
+    iconv.output_encoding
     iconv.internal_encoding
 
   Changes were made to character set handling in:
@@ -417,7 +417,7 @@ PHP 5.6 UPGRADE NOTES
   empty:
 
     iconv.input_encoding
-    iconv.ouput_encoding
+    iconv.output_encoding
     iconv.internal_encoding
     mbstring.http_input
     mbstring.http_output
