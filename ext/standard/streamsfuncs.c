@@ -873,7 +873,7 @@ PHP_FUNCTION(stream_select)
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
 {
-	zval *callback = (zval*)context->notifier->ptr;
+	zval *callback = &context->notifier->ptr;
 	zval retval;
 	zval zvs[6];
 	int i;
@@ -900,9 +900,9 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 
 static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 {
-	if (notifier && notifier->ptr) {
-		zval_ptr_dtor((zval*)(notifier->ptr));
-		notifier->ptr = NULL;
+	if (notifier && Z_TYPE(notifier->ptr) != IS_UNDEF) {
+		zval_ptr_dtor(&notifier->ptr);
+		ZVAL_UNDEF(&notifier->ptr);
 	}
 }
 
@@ -951,8 +951,7 @@ static int parse_context_params(php_stream_context *context, zval *params TSRMLS
 
 		context->notifier = php_stream_notification_alloc();
 		context->notifier->func = user_space_stream_notifier;
-		context->notifier->ptr = tmp;
-		if (Z_REFCOUNTED_P(tmp)) Z_ADDREF_P(tmp);
+		ZVAL_COPY(&context->notifier->ptr, tmp);
 		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(params), "options", sizeof("options")-1))) {
@@ -1090,12 +1089,12 @@ PHP_FUNCTION(stream_context_get_params)
 	}
 
 	array_init(return_value);
-	if (context->notifier && context->notifier->ptr && context->notifier->func == user_space_stream_notifier) {
-		add_assoc_zval_ex(return_value, ZEND_STRS("notification"), context->notifier->ptr);
-		if (Z_REFCOUNTED_P((zval*)context->notifier->ptr)) Z_ADDREF_P(context->notifier->ptr);
+	if (context->notifier && Z_TYPE(context->notifier->ptr) != IS_UNDEF && context->notifier->func == user_space_stream_notifier) {
+		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
+		if (Z_REFCOUNTED(context->notifier->ptr)) Z_ADDREF(context->notifier->ptr);
 	}
 	ZVAL_ZVAL(&options, &context->options, 1, 0);
-	add_assoc_zval_ex(return_value, ZEND_STRS("options"), &options);
+	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &options);
 }
 /* }}} */
 
