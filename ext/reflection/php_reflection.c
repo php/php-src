@@ -5019,7 +5019,7 @@ ZEND_METHOD(reflection_property, setValue)
 
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
 				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (Z_REFCOUNT_P(value) > 0) {
+				if (Z_REFCOUNTED_P(value) && Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(variable_ptr);
 				}
 				zval_dtor(&garbage);
