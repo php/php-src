@@ -1645,7 +1645,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 				continue;
 			}
 			val++;
-			add_assoc_string_ex(return_value, var, var_len+1, val, 1);
+			add_assoc_string_ex(return_value, var, var_len, val, 1);
 		}
 		if (t != buf && t != NULL) {
 			efree(t);
@@ -1674,7 +1674,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, len+1, p, h->header_len - (p - h->header), 1);
+				add_assoc_stringl_ex(return_value, s, len, p, h->header_len - (p - h->header), 1);
 				free_alloca(s, use_heap);
 			}
 		}
