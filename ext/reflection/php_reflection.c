@@ -608,7 +608,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
 						|| mptr->common.scope == ce
 						|| zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, 0, &pos) != HASH_KEY_IS_STRING
-						|| zend_binary_strcasecmp(key->val, key->len-1, mptr->common.function_name->val, len) == 0)
+						|| zend_binary_strcasecmp(key->val, key->len, mptr->common.function_name->val, len) == 0)
 					{
 						zend_function *closure;
 						/* see if this is a closure */
