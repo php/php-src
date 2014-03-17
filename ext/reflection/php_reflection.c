@@ -2983,7 +2983,11 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	ZVAL_COPY_VALUE(&fcc.object, object);
+	if (object) {
+		ZVAL_COPY_VALUE(&fcc.object, object);
+	} else {
+		ZVAL_UNDEF(&fcc.object);
+	}
 	
 	/* 
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
