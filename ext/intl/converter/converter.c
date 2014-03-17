@@ -74,7 +74,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, php_i
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
-                ZVAL_LONG(error, U_INVALID_STATE_ERROR);
+                ZVAL_INT(error, U_INVALID_STATE_ERROR);
                 RETVAL_STRINGL(chars, chars_len, 1);
                 return;
             }
@@ -92,7 +92,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, php_i
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
-            	ZVAL_LONG(error, uerror);
+            	ZVAL_INT(error, uerror);
 			}
 			RETVAL_STRINGL(chars, chars_len, 1);
 		}
