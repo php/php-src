@@ -83,7 +83,7 @@ phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong id
 			}
 			/* reset state */
 			branch = tree->branch;
-			i = sizeof(void *) * 8 - 1;
+			i = tree->depth - 1;
 			/* follow branch according to bits in idx until the last lower branch before the impossible branch */
 			do {
 				CHOOSE_BRANCH((idx >> i) % 2 == 1 && branch->branches[1]);
@@ -200,14 +200,15 @@ check_branch_existence:
 		tree->branch = NULL;
 	} else {
 		if (last_dual_branch->branches[last_dual_branch_branch] == last_dual_branch + 1) {
+			phpdbg_btree_branch *original_branch = last_dual_branch->branches[!last_dual_branch_branch];
+
 			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], i_last_dual_branch * sizeof(phpdbg_btree_branch));
 			efree(last_dual_branch->branches[!last_dual_branch_branch]);
 			last_dual_branch->branches[!last_dual_branch_branch] = last_dual_branch + 1;
 
 			branch = last_dual_branch->branches[!last_dual_branch_branch];
 			for (i = i_last_dual_branch; i--;) {
-				branch->branches[!!branch->branches[1]] = last_dual_branch + i_last_dual_branch - i + 1;
-				branch = branch->branches[!!branch->branches[1]];
+				branch = (branch->branches[branch->branches[1] == ++original_branch] = last_dual_branch + i_last_dual_branch - i + 1);
 			}
 		} else {
 			efree(last_dual_branch->branches[last_dual_branch_branch]);

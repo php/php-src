@@ -66,11 +66,12 @@ static void phpdbg_change_watchpoint_access(phpdbg_watchpoint_t *watch, int acce
 
 	/* pagesize is assumed to be in the range of 2^x */
 	m = mprotect(phpdbg_get_page_boundary(watch->addr.ptr), phpdbg_get_total_page_size(watch->addr.ptr, watch->size), access);
-
+/*
 	if (m == FAILURE) {
 		phpdbg_error("Unable to (un)set watchpoint (mprotect() failed)");
 		zend_bailout();
 	}
+*/
 }
 
 static inline void phpdbg_activate_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_DC) {
@@ -538,7 +539,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 	phpdbg_btree_position pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), (zend_ulong)dump->page, (zend_ulong)dump->page + dump->size);
 	phpdbg_btree_result *result, *htresult;
 	int elementDiff;
-	void **curTest;
+	void *curTest;
 
 	dump->reenable_writing = 0;
 
@@ -548,15 +549,24 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 		char reenable = 1;
 
 		/* Test if the zval was separated and if necessary move the watchpoint */
-		if (zend_hash_find(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len, (void **) &curTest) == SUCCESS) {
+		if (zend_hash_find(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1, &curTest) == SUCCESS) {
 			if (watch->type == WATCH_ON_HASHTABLE) {
-				curTest = (void **)&Z_ARRVAL_PP((zval **)curTest);
+				switch (Z_TYPE_PP((zval **)curTest)) {
+					case IS_ARRAY:
+						curTest = (void *)Z_ARRVAL_PP((zval **)curTest);
+						break;
+					case IS_OBJECT:
+						curTest = (void *)Z_OBJPROP_PP((zval **)curTest);
+						break;
+				}
+			} else {
+				curTest = *(void **)curTest;
 			}
 
-			if (*curTest != watch->addr.ptr) {
+			if (curTest != watch->addr.ptr) {
 				phpdbg_deactivate_watchpoint(watch TSRMLS_CC);
 				phpdbg_remove_watchpoint(watch TSRMLS_CC);
-				watch->addr.ptr = *curTest;
+				watch->addr.ptr = curTest;
 				phpdbg_store_watchpoint(watch TSRMLS_CC);
 				phpdbg_activate_watchpoint(watch TSRMLS_CC);
 
@@ -588,7 +598,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 
 						reenable = 0;
 
-						if (Z_TYPE_P((zval *)oldPtr) == IS_ARRAY) {
+						if (Z_TYPE_P((zval *)oldPtr) == IS_ARRAY || Z_TYPE_P((zval *)oldPtr) == IS_OBJECT) {
 							goto remove_ht_watch;
 						}
 
@@ -599,7 +609,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 					zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
 					phpdbg_writeln("\nNew refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);
 
-					if (Z_TYPE_P((zval *)oldPtr) != IS_ARRAY || Z_ARRVAL_P(watch->addr.zv) == Z_ARRVAL_P((zval *)oldPtr)) {
+					if ((Z_TYPE_P((zval *)oldPtr) != IS_ARRAY || Z_ARRVAL_P(watch->addr.zv) == Z_ARRVAL_P((zval *)oldPtr)) && (Z_TYPE_P((zval *)oldPtr) != IS_OBJECT || Z_OBJ_HANDLE_P(watch->addr.zv) == Z_OBJ_HANDLE_P((zval *)oldPtr))) {
 						break;
 					}
 
