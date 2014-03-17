@@ -151,12 +151,12 @@ PHP 5.6 UPGRADE NOTES
   Instance calls from an incompatible context are now deprecated and issue
   E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
-- The "CN_match" SSL context option is deprecated in favor of the new
-  "peer_name" option. Name verification now checks certificate SAN names as
-  well as the CN field and "CN_match" is deprecated to avoid confusion. Its
-  use triggers E_DEPRECATED but continues to work as before. If both values
-  are specified "CN_match" takes precedence. Otherwise, the two options are
-  interchangeable.
+- The "CN_match" and "SNI_server_name" SSL context options are deprecated in
+  favor of the new "peer_name" option. Name verification now checks certificate
+  SAN names as well as the CN field and the specific name fields are deprecated
+  to avoid confusion. Their use triggers E_DEPRECATED but continues to work as
+  before. If specified, the specific values take precedence over the general
+  "peer_name" value.
 
 - Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
   undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
@@ -264,6 +264,10 @@ PHP 5.6 UPGRADE NOTES
   - The oci_internal_debug() function is now a no-op.
   - The phpinfo() output format for OCI8 has changed.
 
+- OpenSSL:
+  - The "SNI_enabled" SSL stream context option is now set to TRUE by default
+    if supported by the underlying openssl library.
+
 - Pgsql:
   - pg_insert()/pg_select()/pg_update()/pg_delete()/pg_meta_data()/pg_convert()
     are no longer EXPERIMENTAL
@@ -330,6 +334,10 @@ PHP 5.6 UPGRADE NOTES
   Changed always_populate_raw_post_data to throw a deprecation warning when
   enabled and to recognize the value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
+
+- cURL:
+  If the new openssl.cafile ini directive is specified ext/curl will give the
+  openssl path precedence over its own curl.cainfo directive.
 
 - OpenSSL:
   openssl.cafile and openssl.capath ini directives have been added to allow
