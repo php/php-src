@@ -1438,6 +1438,9 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 {
 	zval *value_ptr, data;
 
+	if (Z_ISREF_P(entry)) {
+		entry = Z_REFVAL_P(entry);
+	}
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
 			ZVAL_DUP(&data, value_ptr);
