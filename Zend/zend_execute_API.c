@@ -103,27 +103,31 @@ static void zend_extension_deactivator(zend_extension *extension TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int clean_non_persistent_function(zend_function *function TSRMLS_DC) /* {{{ */
+static int clean_non_persistent_function(zval *zv TSRMLS_DC) /* {{{ */
 {
+	zend_function *function = Z_PTR_P(zv);
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
+static int clean_non_persistent_function_full(zval *zv TSRMLS_DC) /* {{{ */
 {
+	zend_function *function = Z_PTR_P(zv);
 	return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_class(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+static int clean_non_persistent_class(zval *zv TSRMLS_DC) /* {{{ */
 {
-	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
+	zend_class_entry *ce = Z_PTR_P(zv);
+	return (ce->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
-static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+static int clean_non_persistent_class_full(zval *zv TSRMLS_DC) /* {{{ */
 {
-	return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+	zend_class_entry *ce = Z_PTR_P(zv);
+	return (ce->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
 }
 /* }}} */
 
