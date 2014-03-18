@@ -136,6 +136,7 @@ PHP_FUNCTION(hash_update_file);
 PHP_FUNCTION(hash_final);
 PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
+PHP_FUNCTION(hash_equals);
 
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
