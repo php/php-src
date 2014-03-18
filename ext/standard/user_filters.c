@@ -393,6 +393,7 @@ static php_stream_filter_factory user_filter_factory = {
 static void filter_item_dtor(zval *zv)
 {
 	struct php_user_filter_data *fdat = Z_PTR_P(zv);
+	STR_RELEASE(fdat->classname);
 	efree(fdat);
 }
 
