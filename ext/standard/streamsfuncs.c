@@ -1284,7 +1284,7 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_FALSE;
 	}
 
-	if (zend_list_delete(Z_RES_P(zfilter)) == FAILURE) {
+	if (zend_list_close(Z_RES_P(zfilter)) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not invalidate filter, not removing");
 		RETURN_FALSE;
 	} else {
