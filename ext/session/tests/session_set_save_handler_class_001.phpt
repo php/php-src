@@ -27,14 +27,10 @@ class MySession extends SessionHandler {
 		return parent::open($path, $name);
 	}
 	public function create_sid() {
+		// This method should be removed when 5.5 become unsupported.
 		++$this->i;
-		echo 'Create SID ', session_id(), "\n";
+		echo 'Old Create SID ', session_id(), "\n";
 		return parent::create_sid();
-	}
-	public function validateSid($key) {
-		++$this->i;
-		echo 'Validate SID ', session_id(), "\n";
-		return parent::validateSid($key);
 	}
 	public function read($key) {
 		++$this->i;
@@ -46,15 +42,34 @@ class MySession extends SessionHandler {
 		echo 'Write ', session_id(), "\n";
 		return parent::write($key, $data);
 	}
-	public function updateTimestamp($key, $data) {
-		++$this->i;
-		echo 'Write ', session_id(), "\n";
-		return parent::updateTimestamp($key, $data);
-	}
 	public function close() {
 		++$this->i;
 		echo 'Close ', session_id(), "\n";
 		return parent::close();
+	}
+	public function createSid() {
+		// User should use this rather than create_sid()
+		// If both create_sid() and createSid() exists,
+		// createSid() is used.
+		++$this->i;
+		echo 'New Create SID ', session_id(), "\n";
+		return parent::create_sid();
+	}
+	public function validateSid($key) {
+		++$this->i;
+		echo 'Validate SID ', session_id(), "\n";
+		return TRUE;
+		// User must implement their own method and
+		// cannot call parent as follows.
+		// return parent::validateSid($key);
+	}
+	public function updateTimestamp($key, $data) {
+		++$this->i;
+		echo 'Update Timestamp ', session_id(), "\n";
+		return parent::write($key, $data);
+		// User must implement their own method and
+		// cannot call parent as follows
+		// return parent::updateTimestamp($key, $data);
 	}
 }
 
@@ -80,7 +95,7 @@ var_dump($handler->i);
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 
-Create SID 
+New Create SID 
 Validate SID %s
 Read %s
 string(%d) "%s"
@@ -98,6 +113,6 @@ array(1) {
   ["foo"]=>
   string(5) "hello"
 }
-Write %s
+Update Timestamp %s
 Close %s
 int(11)

@@ -1921,86 +1921,104 @@ static PHP_FUNCTION(session_set_save_handler)
 		ulong func_index;
 		php_shutdown_function_entry shutdown_function_entry;
 		zend_bool register_shutdown = 1;
+		int have_method;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
 			RETURN_FALSE;
 		}
 
-		if (instanceof_function(Z_OBJCE_P(obj), php_session_update_timestamp_iface_entry)) {
-			/* Check parent(previous save handler) functions */
-			if (!PS(default_mod)->s_create_sid || !PS(default_mod)->s_validate_sid || !PS(default_mod)->s_update_timestamp) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Previously used save handler (%s) must implement create_sid(), validate_sid() and update_timestamp() save handler functions", PS(default_mod)->s_name);
+		/* Find implemented methods - SessionHandlerInterface */
+		/* For compatibility reason, implemeted interface is not checked */
+		zend_hash_internal_pointer_reset_ex(&php_session_iface_entry->function_table, &pos);
+		i = 0;
+		while (zend_hash_get_current_data_ex(&php_session_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
+			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+
+			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
+				if (PS(mod_user_names).names[i] != NULL) {
+					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				}
+				MAKE_STD_ZVAL(callback);
+				array_init_size(callback, 2);
+				Z_ADDREF_P(obj);
+				add_next_index_zval(callback, obj);
+				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
+				PS(mod_user_names).names[i] = callback;
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session handler's function table is corrupt");
 				RETURN_FALSE;
 			}
-			/* Find implemented methods - SessionUpdateTimestampInterface */
-			zend_hash_internal_pointer_reset_ex(&php_session_update_timestamp_iface_entry->function_table, &pos);
-			while (zend_hash_get_current_data_ex(&php_session_update_timestamp_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-				zend_hash_get_current_key_ex(&php_session_update_timestamp_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
 
-				if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
-					if (PS(mod_user_names).names[i] != NULL) {
-						zval_ptr_dtor(&PS(mod_user_names).names[i]);
-					}
-					MAKE_STD_ZVAL(callback);
-					array_init_size(callback, 2);
-					Z_ADDREF_P(obj);
-					add_next_index_zval(callback, obj);
-					add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
-					PS(mod_user_names).names[i] = callback;
-				}
-
-				zend_hash_move_forward_ex(&php_session_update_timestamp_iface_entry->function_table, &pos);
-				++i;
-			}
+			zend_hash_move_forward_ex(&php_session_iface_entry->function_table, &pos);
+			++i;
 		}
-		else {
-			/* Find implemented methods - SessionHandlerInterface */
-			/* For compatibility reason, implemeted interface is not checked */
-			zend_hash_internal_pointer_reset_ex(&php_session_iface_entry->function_table, &pos);
-			i = 0;
-			while (zend_hash_get_current_data_ex(&php_session_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-				zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
 
-				if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
+		/* Find implemented methods - SessionIdInterface (optional) */
+		zend_hash_internal_pointer_reset_ex(&php_session_id_iface_entry->function_table, &pos);
+		while (zend_hash_get_current_data_ex(&php_session_id_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
+			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+
+			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
+				if (PS(mod_user_names).names[i] != NULL) {
+					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				}
+
+				MAKE_STD_ZVAL(callback);
+				array_init_size(callback, 2);
+				Z_ADDREF_P(obj);
+				add_next_index_zval(callback, obj);
+				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
+				PS(mod_user_names).names[i] = callback;
+			} else {
+				if (PS(mod_user_names).names[i] != NULL) {
+					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				}
+				PS(mod_user_names).names[i] = NULL;
+			}
+
+			zend_hash_move_forward_ex(&php_session_id_iface_entry->function_table, &pos);
+			++i;
+		}
+
+		/* Since there is both create_sid() and createSid() method, number of API is changed.
+		   Adjust i here. This can be removed when create_sid() method is removed. */
+		i--;
+
+		/* Find implemented methods - SessionUpdateTimestampInterface (optiona) */
+		zend_hash_internal_pointer_reset_ex(&php_session_update_timestamp_iface_entry->function_table, &pos);
+		while (zend_hash_get_current_data_ex(&php_session_update_timestamp_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
+			zend_class_entry *tmp = Z_OBJCE_P(obj);
+			zend_hash_get_current_key_ex(&php_session_update_timestamp_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+			have_method = 1;
+
+			/* When PS(default_mod) does not have needed methods, should not be able to call this.
+			   Use "i" for optimization. 6=create_sid, 7=validate_sid, 8=update_timestamp */
+			if (i == 8) {
+				have_method = (PS(mod) && PS(mod)->s_update_timestamp) ? 1 : 0;
+			}
+			if (have_method && zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
+				if (PS(mod_user_names).names[i] != NULL) {
+					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				}
+				MAKE_STD_ZVAL(callback);
+				array_init_size(callback, 2);
+				Z_ADDREF_P(obj);
+				add_next_index_zval(callback, obj);
+				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
+				PS(mod_user_names).names[i] = callback;
+			} else {
+				/* Special handling for create_sid() method where i == 6. Do not over write it.
+				   This can removed when create_sid method is removed. */
+				if (i != 6) {
 					if (PS(mod_user_names).names[i] != NULL) {
 						zval_ptr_dtor(&PS(mod_user_names).names[i]);
 					}
-					MAKE_STD_ZVAL(callback);
-					array_init_size(callback, 2);
-					Z_ADDREF_P(obj);
-					add_next_index_zval(callback, obj);
-					add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
-					PS(mod_user_names).names[i] = callback;
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session handler's function table is corrupt");
-					RETURN_FALSE;
+					PS(mod_user_names).names[i] = NULL;
 				}
-
-				zend_hash_move_forward_ex(&php_session_iface_entry->function_table, &pos);
-				++i;
 			}
 
-			/* Find implemented methods - SessionIdInterface (optional) */
-			zend_hash_internal_pointer_reset_ex(&php_session_id_iface_entry->function_table, &pos);
-			while (zend_hash_get_current_data_ex(&php_session_id_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-				zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
-
-				if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
-					if (PS(mod_user_names).names[i] != NULL) {
-						zval_ptr_dtor(&PS(mod_user_names).names[i]);
-					}
-
-					MAKE_STD_ZVAL(callback);
-					array_init_size(callback, 2);
-					Z_ADDREF_P(obj);
-					add_next_index_zval(callback, obj);
-					add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
-					PS(mod_user_names).names[i] = callback;
-				}
-
-				zend_hash_move_forward_ex(&php_session_id_iface_entry->function_table, &pos);
-				++i;
-			}
+			zend_hash_move_forward_ex(&php_session_update_timestamp_iface_entry->function_table, &pos);
+			++i;
 		}
 
 		if (register_shutdown) {
@@ -2319,7 +2337,7 @@ static PHP_FUNCTION(session_start)
 				case IS_BOOL:
 				case IS_LONG:
 					if (!strncmp(key, "read_only", sizeof("read_only")-1)) {
-						PS(read_only) = 0;
+						convert_to_boolean(*value);
 						PS(read_only) = Z_BVAL_PP(value); /* this does not have to be PS() */
 					} else {
 						convert_to_string(*value);
@@ -2646,6 +2664,16 @@ static const zend_function_entry php_session_id_iface_functions[] = {
 };
 /* }}} */
 
+/* {{{ SessionUpdateTimestampHandler functions[]
+ */
+static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, createSid, arginfo_session_class_createSid)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateSid, arginfo_session_class_validateSid)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
+	{ NULL, NULL, NULL }
+};
+/* }}} */
+
 /* {{{ SessionHandler functions[]
  */
 static const zend_function_entry php_session_class_functions[] = {
@@ -2656,38 +2684,6 @@ static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, create_sid, arginfo_session_class_createSid, ZEND_ACC_PUBLIC)
-	{ NULL, NULL, NULL }
-};
-/* }}} */
-
-/* {{{ SessionUpdateTimestampHandlerInterface functions[]
-*/
-static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, open, arginfo_session_class_open)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, close, arginfo_session_class_close)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, read, arginfo_session_class_read)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, write, arginfo_session_class_write)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, destroy, arginfo_session_class_destroy)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, gc, arginfo_session_class_gc)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, createSid, arginfo_session_class_createSid)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateSid, arginfo_session_class_validateSid)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
-	{ NULL, NULL, NULL }
-};
-/* }}} */
-
-/* {{{ SessionUpdateTimestampHandler functions[]
- */
-static const zend_function_entry php_session_update_timestamp_class_functions[] = {
-	PHP_ME(SessionUpdateTimestampHandler, open, arginfo_session_class_open, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, close, arginfo_session_class_close, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, read, arginfo_session_class_read, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, write, arginfo_session_class_write, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, create_sid, arginfo_session_class_createSid, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, validateSid, arginfo_session_class_validateSid, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionUpdateTimestampHandler, updateTimestamp, arginfo_session_class_updateTimestamp, ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -2810,15 +2806,11 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_session_update_timestamp_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
-	/* Register classes */
+	/* Register class */
 	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, php_session_class_functions);
 	php_session_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_iface_entry);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_id_iface_entry);
-
-	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_CLASS_NAME, php_session_class_functions);
-	php_session_update_timestamp_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_class_implements(php_session_update_timestamp_class_entry TSRMLS_CC, 1, php_session_update_timestamp_iface_entry);
 
 	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);

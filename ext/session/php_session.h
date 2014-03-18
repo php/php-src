@@ -328,9 +328,6 @@ void php_session_shutdown(void *data);
 #define PS_CLASS_NAME "SessionHandler"
 extern zend_class_entry *php_session_class_entry;
 
-#define PS_UPDATE_TIMESTAMP_CLASS_NAME "SessionUpdateTimestampHandler"
-extern zend_class_entry *php_session_update_timestamp_class_entry;
-
 /* Interface names */
 #define PS_IFACE_NAME "SessionHandlerInterface"
 extern zend_class_entry *php_session_iface_entry;
@@ -348,16 +345,9 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
-
-extern PHP_METHOD(SessionUpdateTimestampHandler, open);
-extern PHP_METHOD(SessionUpdateTimestampHandler, close);
-extern PHP_METHOD(SessionUpdateTimestampHandler, read);
-extern PHP_METHOD(SessionUpdateTimestampHandler, write);
-extern PHP_METHOD(SessionUpdateTimestampHandler, destroy);
-extern PHP_METHOD(SessionUpdateTimestampHandler, gc);
-extern PHP_METHOD(SessionUpdateTimestampHandler, create_sid);
-extern PHP_METHOD(SessionUpdateTimestampHandler, validateSid);
-extern PHP_METHOD(SessionUpdateTimestampHandler, updateTimestamp);
+extern PHP_METHOD(SessionHandler, createSid);
+extern PHP_METHOD(SessionHandler, validateSid);
+extern PHP_METHOD(SessionHandler, updateTimestamp);
 
 
 #endif
