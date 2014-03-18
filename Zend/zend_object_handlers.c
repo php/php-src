@@ -642,7 +642,10 @@ write_std_property:
 		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
-				ZVAL_DUP(value, Z_REFVAL_P(value));
+				zval tmp;
+
+				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
+				value = &tmp;
 			} else {
 				Z_ADDREF_P(value);
 			}
