@@ -34,6 +34,9 @@
 		RETURN_FALSE;						\
 	}							
 
+
+/******** SessionHandler **********/
+
 /* {{{ proto bool SessionHandler::open(string save_path, string session_name)
    Wraps the old open handler */
 PHP_METHOD(SessionHandler, open)
@@ -148,6 +151,8 @@ PHP_METHOD(SessionHandler, create_sid)
 {
 	char *id;
 
+	PS_SANITY_CHECK_IS_OPEN;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 	    return;
 	}
@@ -158,24 +163,70 @@ PHP_METHOD(SessionHandler, create_sid)
 }
 /* }}} */
 
-/* {{{ proto char SessionHandler::validateSid(string id)
-   Simply return TRUE */
-PHP_METHOD(SessionHandler, validateSid)
+
+
+/******** SessionUpdateTimestampHandler ************/
+
+/* {{{ proto bool SessionUpdateTimestampHandler::open(string save_path, string session_name)
+   Wraps the old open handler */
+PHP_METHOD(SessionUpdateTimestampHandler, open)
 {
-	char *key;
-	int key_len;
+	char *save_path = NULL, *session_name = NULL;
+	int save_path_len, session_name_len;
+
+	PS_SANITY_CHECK;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
+		return;
+	}
+
+	PS(mod_user_is_open) = 1;
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_open(&PS(mod_data), save_path, session_name TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::close()
+   Wraps the old close handler */
+PHP_METHOD(SessionUpdateTimestampHandler, close)
+{
+	PS_SANITY_CHECK_IS_OPEN;
+
+	// don't return on failure, since not closing the default handler
+	// could result in memory leaks or other nasties
+	zend_parse_parameters_none();
+	
+	PS(mod_user_is_open) = 0;
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_close(&PS(mod_data) TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::read(string id)
+   Wraps the old read handler */
+PHP_METHOD(SessionUpdateTimestampHandler, read)
+{
+	char *key, *val;
+	int key_len, val_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
 		return;
 	}
 
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_validate_sid(&PS(mod_data), key TSRMLS_CC));
+	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, &val_len TSRMLS_CC) == FAILURE) {
+		RETVAL_FALSE;
+		return;
+	}
+
+	RETVAL_STRINGL(val, val_len, 1);
+	str_efree(val);
+	return;
 }
 /* }}} */
 
-/* {{{ proto bool SessionHandler::update(string id, string data)
-   Simply call write */
-PHP_METHOD(SessionHandler, update)
+/* {{{ proto bool SessionUpdateTimestampHandler::write(string id, string data)
+   Wraps the old write handler */
+PHP_METHOD(SessionUpdateTimestampHandler, write)
 {
 	char *key, *val;
 	int key_len, val_len;
@@ -189,4 +240,95 @@ PHP_METHOD(SessionHandler, update)
 	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, val_len TSRMLS_CC));
 }
 /* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::destroy(string id)
+   Wraps the old destroy handler */
+PHP_METHOD(SessionUpdateTimestampHandler, destroy)
+{
+	char *key;
+	int key_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+	
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::gc(int maxlifetime)
+   Wraps the old gc handler */
+PHP_METHOD(SessionUpdateTimestampHandler, gc)
+{
+	long maxlifetime;
+	int nrdels;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &maxlifetime) == FAILURE) {
+		return;
+	}
+	
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto char SessionUpdateTimestampHandler::create_sid()
+   Wraps the old create_sid handler */
+PHP_METHOD(SessionUpdateTimestampHandler, create_sid)
+{
+	char *id;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
+	}
+
+	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+
+	RETURN_STRING(id, 0);
+}
+/* }}} */
+
+/* {{{ proto char SessionUpdateTimestampHandler::validateSid(string id)
+   Simply return TRUE */
+PHP_METHOD(SessionUpdateTimestampHandler, validateSid)
+{
+	char *key;
+	int key_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+		return;
+	}
+
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_validate_sid(&PS(mod_data), key TSRMLS_CC));
+}
+/* }}} */
+
+/* {{{ proto bool SessionUpdateTimestampHandler::updateTimestamp(string id, string data)
+   Simply call update_timestamp */
+PHP_METHOD(SessionUpdateTimestampHandler, updateTimestamp)
+{
+	char *key, *val;
+	int key_len, val_len;
+
+	PS_SANITY_CHECK_IS_OPEN;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &key, &key_len, &val, &val_len) == FAILURE) {
+		return;
+	}
+
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_update_timestamp(&PS(mod_data), key, val, val_len TSRMLS_CC));
+}
+/* }}} */
+
+
+
+
+
 

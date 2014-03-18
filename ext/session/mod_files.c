@@ -61,7 +61,7 @@ typedef struct {
 } ps_files;
 
 ps_module ps_mod_files = {
-	PS_MOD_5_6(files)
+	PS_MOD_UPDATE_TIMESTAMP(files)
 };
 
 
@@ -431,9 +431,9 @@ PS_WRITE_FUNC(files)
 
 /*
  * Update session data.
- * PS_UPDATE_FUNC() updates time stamp so that active session would not be purged.
+ * PS_UPDATE_TIMESTAMP_FUNC() updates time stamp so that active session would not be purged.
  */
-PS_UPDATE_FUNC(files)
+PS_UPDATE_TIMESTAMP_FUNC(files)
 {
 	char buf[MAXPATHLEN];
 	struct utimbuf newtimebuf;

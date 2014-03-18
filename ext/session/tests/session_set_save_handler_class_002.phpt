@@ -53,18 +53,6 @@ class MySession2 extends SessionHandler {
 		}
 		return true;
 	}
-
-	public function create_sid() {
-		return session_create_id();
-	}
-
-	public function validate_sid($id) {
-		return (strlen($id)>0);
-	}
-
-	public function update($id, $data) {
-		return touch($this->path . $id);
-	}
 }
 
 $handler = new MySession2;

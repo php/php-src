@@ -43,7 +43,7 @@
 #define PS_GC_ARGS       void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
 #define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
 #define PS_VALIDATE_SID_ARGS void **mod_data, const char *key TSRMLS_DC
-#define PS_UPDATE_ARGS   void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
+#define PS_UPDATE_TIMESTAMP_ARGS   void **mod_data, const char *key, const char *val, const int vallen TSRMLS_DC
 
 typedef struct ps_module_struct {
 	const char *s_name;
@@ -55,7 +55,7 @@ typedef struct ps_module_struct {
 	int (*s_gc)(PS_GC_ARGS);
 	char *(*s_create_sid)(PS_CREATE_SID_ARGS);
 	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
-	int (*s_update)(PS_UPDATE_ARGS);
+	int (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
@@ -69,7 +69,7 @@ typedef struct ps_module_struct {
 #define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	char *ps_create_sid_##x(PS_CREATE_SID_ARGS)
 #define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
-#define PS_UPDATE_FUNC(x) 	int ps_update_##x(PS_UPDATE_ARGS)
+#define PS_UPDATE_TIMESTAMP_FUNC(x) 	int ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
 /* legacy save handler module definitions */
 #define PS_FUNCS(x) \
@@ -81,12 +81,12 @@ typedef struct ps_module_struct {
 	PS_GC_FUNC(x); \
 	PS_CREATE_SID_FUNC(x); \
 	PS_VALIDATE_SID_FUNC(x); \
-	PS_UPDATE_FUNC(x);
+	PS_UPDATE_TIMESTAMP_FUNC(x);
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 		ps_delete_##x, ps_gc_##x, php_session_create_id, \
-		php_session_validate_sid, php_session_update
+		php_session_validate_sid, php_session_update_timestamp
 
 /* SID creation enabled save handler module definitions */
 #define PS_FUNCS_SID(x) \
@@ -98,15 +98,15 @@ typedef struct ps_module_struct {
 	PS_GC_FUNC(x); \
 	PS_CREATE_SID_FUNC(x); \
 	PS_VALIDATE_SID_FUNC(x); \
-	PS_UPDATE_FUNC(x);
+	PS_UPDATE_TIMESTAMP_FUNC(x);
 
 #define PS_MOD_SID(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 		ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
-		php_session_validate_sid, php_session_update
+		php_session_validate_sid, php_session_update_timestamp
 
-/* PHP 5.6 save handler module efinitions */
-#define PS_FUNCS_5_6(x) \
+/* Update timestamp save handler module definitions */
+#define PS_FUNCS_UPDATE_TIMESTAMP(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
 	PS_READ_FUNC(x); \
@@ -115,12 +115,12 @@ typedef struct ps_module_struct {
 	PS_GC_FUNC(x); \
 	PS_CREATE_SID_FUNC(x); \
 	PS_VALIDATE_SID_FUNC(x); \
-	PS_UPDATE_FUNC(x);
+	PS_UPDATE_TIMESTAMP_FUNC(x);
 
-#define PS_MOD_5_6(x) \
+#define PS_MOD_UPDATE_TIMESTAMP(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 		ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
-		ps_validate_sid_##x, ps_update_##x
+		ps_validate_sid_##x, ps_update_timestamp_##x
 
 
 typedef enum {
@@ -153,10 +153,10 @@ typedef struct _php_ps_globals {
 	int  module_number;
 	char *id;                        /* session ID */
 	php_session_status session_status;
-	ps_module *default_mod;          /* previous save handler */
+	ps_module *default_mod;          /* previous save handler used by object based user save handler. FIXME: This creates extensiblity issue. */
 	void      *mod_data;             /* save handler data */
 	int       mod_user_implemented;
-	int       mod_user_is_open;
+	int       mod_user_is_open;      /* used by object based user handler */
 	int       send_cookie;
 	int       define_sid;            /* define SID constant or not */
 	zend_bool lazy_write;            /* supress session data write if data is unchanged */
@@ -173,7 +173,7 @@ typedef struct _php_ps_globals {
 			zval *ps_gc;
 			zval *ps_create_sid;
 			zval *ps_validate_sid;
-			zval *ps_update;
+			zval *ps_update_timestamp;
 		} name;
 	} mod_user_names;
 	char *session_vars;
@@ -257,9 +257,9 @@ typedef struct ps_serializer_struct {
 
 /* default create id function */
 PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
-/* Dummuy PS module function */
+/* Dummy PS module function */
 PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
-PHPAPI int php_session_update(PS_UPDATE_ARGS);
+PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
@@ -324,17 +324,22 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
 
+/* Class names */
 #define PS_CLASS_NAME "SessionHandler"
 extern zend_class_entry *php_session_class_entry;
 
+#define PS_UPDATE_TIMESTAMP_CLASS_NAME "SessionUpdateTimestampHandler"
+extern zend_class_entry *php_session_update_timestamp_class_entry;
+
+/* Interface names */
 #define PS_IFACE_NAME "SessionHandlerInterface"
 extern zend_class_entry *php_session_iface_entry;
 
 #define PS_SID_IFACE_NAME "SessionIdInterface"
 extern zend_class_entry *php_session_id_iface_entry;
 
-#define PS_5_6_IFACE_NAME "SessionHandler56Interface"
-extern zend_class_entry *php_session_5_6_iface_entry;
+#define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
+extern zend_class_entry *php_session_update_timestamp_iface_entry;
 
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
@@ -343,7 +348,16 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
-extern PHP_METHOD(SessionHandler, validateSid);
-extern PHP_METHOD(SessionHandler, update);
+
+extern PHP_METHOD(SessionUpdateTimestampHandler, open);
+extern PHP_METHOD(SessionUpdateTimestampHandler, close);
+extern PHP_METHOD(SessionUpdateTimestampHandler, read);
+extern PHP_METHOD(SessionUpdateTimestampHandler, write);
+extern PHP_METHOD(SessionUpdateTimestampHandler, destroy);
+extern PHP_METHOD(SessionUpdateTimestampHandler, gc);
+extern PHP_METHOD(SessionUpdateTimestampHandler, create_sid);
+extern PHP_METHOD(SessionUpdateTimestampHandler, validateSid);
+extern PHP_METHOD(SessionUpdateTimestampHandler, updateTimestamp);
+
 
 #endif

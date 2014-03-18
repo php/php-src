@@ -46,10 +46,10 @@ class MySession extends SessionHandler {
 		echo 'Write ', session_id(), "\n";
 		return parent::write($key, $data);
 	}
-	public function update($key, $data) {
+	public function updateTimestamp($key, $data) {
 		++$this->i;
 		echo 'Write ', session_id(), "\n";
-		return parent::update($key);
+		return parent::updateTimestamp($key, $data);
 	}
 	public function close() {
 		++$this->i;
