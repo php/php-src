@@ -127,6 +127,12 @@ PHP 5.6 UPGRADE NOTES
 - Stream crypto method specification now accepts flags instead of values
   allowing support for multiple discrete protocols in a given stream.
 
+- PostgreSQL database connections may now be established asynchronously using
+  new constants and polling functions in ext/pgsql.
+
+- Non-blocking read/write query behavior now optionally available in database
+  operations using the ext/pgsql extension.
+
 ========================================
 2. Changes in SAPI modules
 ========================================
@@ -145,15 +151,26 @@ PHP 5.6 UPGRADE NOTES
   Instance calls from an incompatible context are now deprecated and issue
   E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
-- The "CN_match" SSL context option is deprecated in favor of the new
-  "peer_name" option. Name verification now checks certificate SAN names as
-  well as the CN field and "CN_match" is deprecated to avoid confusion. Its
-  use triggers E_DEPRECATED but continues to work as before. If both values
-  are specified "CN_match" takes precedence. Otherwise, the two options are
-  interchangeable.
+- The "CN_match" and "SNI_server_name" SSL context options are deprecated in
+  favor of the new "peer_name" option. Name verification now checks certificate
+  SAN names as well as the CN field and the specific name fields are deprecated
+  to avoid confusion. Their use triggers E_DEPRECATED but continues to work as
+  before. If specified, the specific values take precedence over the general
+  "peer_name" value.
 
 - Deprecated PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, an
   undocument constant effectively equivalent to PDO::ATTR_EMULATE_PREPARES.
+
+- Deprecated INIs: Following INIs are deprecated in favour of new
+  internal_encoding/input_encoding/output_encoding. Refer to "Changes to
+  encodings in PHP 5.6" in "11. Other Changes" section for more details.
+
+    iconv.input_encoding
+    iconv.output_encoding
+    iconv.internal_encoding
+    mbstring.http_input
+    mbstring.http_output
+    mbstring.internal_encoding
 
 ========================================
 4. Changed Functions
@@ -177,6 +194,12 @@ PHP 5.6 UPGRADE NOTES
 
 - Pgsql:
   pg_insert()/pg_select()/pg_update()/pg_delete() are no longer EXPERIMENTAL.
+  The following functions no longer block until query write completion if the
+  socket stream underlying a database connection is set to non-blocking mode:
+    . pg_send_execute()
+    . pg_send_prepare()
+    . pg_send_query()
+    . pg_send_query_params()
 
 ========================================
 5. New Functions
@@ -197,6 +220,12 @@ PHP 5.6 UPGRADE NOTES
   Added ldap_escape($value, $ignore = "", $flags = 0).
   Added ldap_modify_batch($link_identifier, $dn, $modifications) described in 
   https://wiki.php.net/rfc/ldap_modify_batch.
+
+- Pgsql:
+  Added pg_socket($connection) to allow async connections and non-blocking IO
+  Added pg_connect_poll($connection) for establishing async connections
+  Added pg_consume_input($connection) for non-blocking query result consumption
+  Added pg_flush($connection) for non-blocking query write completion
 
 - PDO_pgsql
   Added PDO::pgsqlGetNotify($result_type = PDO::FETCH_USE_DEFAULT, $ms_timeout = 0)
@@ -246,6 +275,15 @@ PHP 5.6 UPGRADE NOTES
   - The oci_internal_debug() function is now a no-op.
   - The phpinfo() output format for OCI8 has changed.
 
+- OpenSSL:
+  - The "SNI_enabled" SSL stream context option is now set to TRUE by default
+    if supported by the underlying openssl library.
+
+- PCRE:
+  - The information collected by the (*MARK) backtracking control verb is now
+    collected into the "MARK" index of the $matches array for preg_match(),
+    preg_match_all() and preg_replace_callback().
+
 - Pgsql:
   - pg_insert()/pg_select()/pg_update()/pg_delete()/pg_meta_data()/pg_convert()
     are no longer EXPERIMENTAL
@@ -256,6 +294,12 @@ PHP 5.6 UPGRADE NOTES
   - pg_select() returns PostgreSQL query resource when query is executed.
   - Added extended flag parameter for pg_meta_data(). pg_meta_data() always
     returns "is enum" attribute.
+  - The new pg_socket() function returns a socket stream with no behavior other
+    than to allow IO-readiness polling on a DB connection socket. Calling
+    stream_set_blocking() on its result enables non-blocking behavior.
+  - Passing the new PGSQL_CONNECT_ASYNC flag to pg_connect() allows applications
+    to poll for IO readiness via pg_connect_poll() and establish connections
+    asynchronously.
 
 - PDO_pgsql:
   - Added PDO::PGSQL_ATTR_DISABLE_PREPARES constant to execute the queries
@@ -274,6 +318,18 @@ PHP 5.6 UPGRADE NOTES
 
 - Pgsql:
   PGSQL_DML_ESCAPE   int(4096)
+  PGSQL_CONNECT_ASYNC
+  PGSQL_CONNECTION_STARTED
+  PGSQL_CONNECTION_MADE
+  PGSQL_CONNECTION_AWAITING_RESPONSE
+  PGSQL_CONNECTION_AUTH_OK
+  PGSQL_CONNECTION_SSL_STARTUP
+  PGSQL_CONNECTION_SETENV
+  PGSQL_POLLING_FAILED
+  PGSQL_POLLING_READING
+  PGSQL_POLLING_WRITING
+  PGSQL_POLLING_OK
+  PGSQL_POLLING_ACTIVE
 
 - OpenSSL:
   STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT   int(9)
@@ -294,6 +350,18 @@ PHP 5.6 UPGRADE NOTES
   Changed always_populate_raw_post_data to throw a deprecation warning when
   enabled and to recognize the value -1 for never populating the global 
   $HTTP_RAW_POST_DATA variable, which will be default in future PHP versions.
+
+  default_charset is set to UTF-8. It was empty previously. default_charset
+  is used where it is applicable. Iconv/Mbstring/htmlentities/htmlspecialchars/
+  html_entity_decode use default_charset as default encoding.
+
+  internal_encoding/input_encoding/output_encoding is added for encoding
+  handling modules. Refer to "Changes to encodings in PHP 5.6" in "11. Other Changes"
+  section for more details.
+
+- cURL:
+  If the new openssl.cafile ini directive is specified ext/curl will give the
+  openssl path precedence over its own curl.cainfo directive.
 
 - OpenSSL:
   openssl.cafile and openssl.capath ini directives have been added to allow
@@ -318,3 +386,43 @@ PHP 5.6 UPGRADE NOTES
 - Zip:
   New --with-libzip option allow to use system libzip. Version > 0.11 required,
   Version >= 0.11.2 recommended for all features.
+
+- Changes to encodings in PHP 5.6
+  The default value of default_charset is now UTF-8 when it is not
+  explicitly set in php.ini
+
+  The following php.ini parameters were added:
+    internal_encoding
+    input_encoding
+    output_encoding
+
+  The values of the following php.ini parameters have become empty in
+  PHP 5.6 (previously they were all ISO-8859-1)
+
+    iconv.input_encoding
+    iconv.output_encoding
+    iconv.internal_encoding
+
+  Changes were made to character set handling in:
+   - the iconv and mbstring extensions,
+   - and htmlentities(), htmlspecialchars(), html_entity_decode() functions
+
+  The precedence for these is now:
+
+   default_charset < internal/input/output_encoding < (mbstring.* || iconv.*) < function parameter
+
+  For example, the easiest way to use the UTF-8 encoding is to set
+  default_charset=UTF-8 and leave the following php.ini parameters
+
+  empty:
+
+    iconv.input_encoding
+    iconv.output_encoding
+    iconv.internal_encoding
+    mbstring.http_input
+    mbstring.http_output
+    mbstring.internal_encoding
+    internal_encoding
+    input_encoding
+    output_encoding
+

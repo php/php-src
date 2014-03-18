@@ -64,6 +64,9 @@ PHP                                                                        NEWS
     via the new  "SNI_server_certs" SSL context option. (Daniel Lowrey)
   . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
 
+- PCRE:
+  . Added support for (*MARK) backtracking verbs. (Nikita)
+
 - PDO_pgsql:
   . Cleaned up code by increasing the requirements to libpq versions providing
     PQexecParams, PQprepare, PQescapeStringConn, PQescapeByteaConn. According
@@ -74,6 +77,17 @@ PHP                                                                        NEWS
   . Added PDO::PGSQL_ATTR_DISABLE_PREPARES constant to execute the queries
     without preparing them, while still passing parameters separately from
     the command text using PQexecParams. (Matteo)
+
+- Pgsql:
+  . Read-only access to the socket stream underlying database connections is
+    exposed via a new pg_socket() function to allow read/write polling when
+    establishing asynchronous connections and executing queries in non-blocking
+    applications. (Daniel Lowrey)
+  . Asynchronous connections are now possible using the PGSQL_CONNECT_ASYNC
+    flag in conjunction with a new pg_connect_poll() function and connection
+    polling status constants. (Daniel Lowrey)
+  . New pg_flush() and pg_consume_input() functions added to manually complete
+    non-blocking reads/writes to underlying connection sockets. (Daniel Lowrey)
 
 - SQLite:
   . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
