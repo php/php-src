@@ -1050,7 +1050,7 @@ static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, 
 	return chunk;
 } /* }}} */
 
-static php_cli_server_chunk *php_cli_server_chunk_heap_new(char *block, char *buf, size_t len) /* {{{ */
+static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *buf, size_t len) /* {{{ */
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
 	if (!chunk) {
@@ -1920,7 +1920,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, escaped_request_uri);
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, prologue_template, status, status_string, escaped_request_uri->val);
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
@@ -1944,7 +1944,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		if (!chunk) {
 			goto fail;
 		}
-		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, escaped_request_uri);
+		snprintf(chunk->data.heap.p, chunk->data.heap.len, content_template, status_string, escaped_request_uri->val);
 		chunk->data.heap.len = strlen(chunk->data.heap.p);
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
@@ -1972,7 +1972,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
-		chunk = php_cli_server_chunk_heap_new(buffer.s->val, buffer.s->val, buffer.s->len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
 			smart_str_free_ex(&buffer, 1);
 			goto fail;
@@ -1985,14 +1985,14 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	efree(escaped_request_uri);
+	STR_FREE(escaped_request_uri);
 	return SUCCESS;
 
 fail:
 	if (errstr) {
 		pefree(errstr, 1);
 	}
-	efree(escaped_request_uri);
+	STR_FREE(escaped_request_uri);
 	return FAILURE;
 } /* }}} */
 
@@ -2062,7 +2062,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		smart_str_append_generic_ex(&buffer, client->request.sb.st_size, 1, size_t, _unsigned);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
-		chunk = php_cli_server_chunk_heap_new(buffer.s->val, buffer.s->val, buffer.s->len);
+		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
 			smart_str_free_ex(&buffer, 1);
 			php_cli_server_log_response(client, 500, NULL TSRMLS_CC);
