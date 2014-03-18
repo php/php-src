@@ -256,7 +256,9 @@ static inline void handle_tag(STD_PARA)
 	int ok = 0;
 	unsigned int i;
 
-	ctx->tag.s->len = 0;
+	if (ctx->tag.s) {
+		ctx->tag.s->len = 0;
+	}
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
 	for (i = 0; i < ctx->tag.s->len; i++)
 		ctx->tag.s->val[i] = tolower((int)(unsigned char)ctx->tag.s->val[i]);
@@ -268,7 +270,9 @@ static inline void handle_tag(STD_PARA)
 
 static inline void handle_arg(STD_PARA) 
 {
-	ctx->arg.s->len = 0;
+	if (ctx->arg.s) {
+		ctx->arg.s->len = 0;
+	}
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
 }
 
@@ -398,15 +402,18 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 
 	xx_mainloop(ctx, src, srclen TSRMLS_CC);
 
-	*newlen = ctx->result.s->len;
 	if (!ctx->result.s) {
 		smart_str_appendl(&ctx->result, "", 0);
+		*newlen = 0;
+	} else {
+		*newlen = ctx->result.s->len;
 	}
 	smart_str_0(&ctx->result);
 	if (do_flush) {
 		smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
 		*newlen += ctx->buf.s->len;
 		smart_str_free(&ctx->buf);
+		smart_str_free(&ctx->val);
 	}
 	retval = estrndup(ctx->result.s->val, ctx->result.s->len);
 	smart_str_free(&ctx->result);
@@ -473,7 +480,7 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	smart_str val = {0};
 	zend_string *encoded;
 	
-	if (BG(url_adapt_state_ex).active) {
+	if (!BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_activate(TSRMLS_C);
 		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
 		BG(url_adapt_state_ex).active = 1;
@@ -504,6 +511,7 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	if (urlencode) {
 		STR_FREE(encoded);
 	}
+	smart_str_free(&val);
 
 	return SUCCESS;
 }
