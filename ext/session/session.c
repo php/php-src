@@ -2677,7 +2677,7 @@ static const zend_function_entry php_session_update_timestamp_iface_functions[] 
 /* {{{ SessionHandler functions[]
  */
 /* cerateSid(), validateSid() and updateTimestamp() are not included for compatibility reason.
-   i.e. Adding these enforce users to implment these API of their own.
+   i.e. Adding these enforce users to implement these API of their own.
    These APIs may be added future release. There may be save handlers that do not implement
    these APIs, refer to mod_user_class.c for details. */
 static const zend_function_entry php_session_class_functions[] = {
