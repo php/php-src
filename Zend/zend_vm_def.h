@@ -1841,7 +1841,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-//???		Z_DELREF_P(variable_ptr);
+		if (!OP2_FREE) {
+			Z_DELREF_P(variable_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {

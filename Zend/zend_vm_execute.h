@@ -19821,7 +19821,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-//???		Z_DELREF_P(variable_ptr);
+		if (!(free_op2.var != NULL)) {
+			Z_DELREF_P(variable_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -23265,7 +23267,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-//???		Z_DELREF_P(variable_ptr);
+		if (!0) {
+			Z_DELREF_P(variable_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -36856,7 +36860,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-//???		Z_DELREF_P(variable_ptr);
+		if (!(free_op2.var != NULL)) {
+			Z_DELREF_P(variable_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -40040,7 +40046,9 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-//???		Z_DELREF_P(variable_ptr);
+		if (!0) {
+			Z_DELREF_P(variable_ptr);
+		}
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
