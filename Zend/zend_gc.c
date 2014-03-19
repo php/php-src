@@ -689,6 +689,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 
 					arr->gc.u.v.type = IS_NULL;
 					zend_hash_destroy(&arr->ht);
+					GC_REMOVE_FROM_BUFFER(arr);
 					efree(arr);
 				} else if (p->u.v.type == IS_REFERENCE) {
 					zend_reference *ref = (zend_reference*)p;
@@ -698,6 +699,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					    Z_TYPE(ref->val) != IS_OBJECT) {
 						zval_dtor(&ref->val);
 					}
+					GC_REMOVE_FROM_BUFFER(ref);
 					efree(ref);
 				} else {
 //???					zval_dtor(&p->z);
