@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.12
-- SPL:
+- mysqli:
   . Fixed problem in mysqli_commit()/mysqli_rollback() with second parameter
     (extra comma) and third parameters (lack of escaping). (Andrey)
 
