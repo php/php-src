@@ -4441,7 +4441,6 @@ PHP_FUNCTION(array_map)
 			}
 
 			if (!ZEND_FCI_INITIALIZED(fci)) {
-				zval_add_ref(&params[i]);
 				add_next_index_zval(&result, &params[i]);
 			}
 		}
