@@ -120,6 +120,7 @@ ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	int handle = object->handle;
 
+	EG(objects_store).object_buckets[handle] = SET_INVALID(object);
 	if (object->handlers->free_obj) {
 		object->handlers->free_obj(object TSRMLS_CC);
 	}
@@ -155,6 +156,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 			if (object->gc.refcount == 0) {
 				zend_uint handle = object->handle;
 
+				EG(objects_store).object_buckets[handle] = SET_INVALID(object);
 				if (object->handlers->free_obj) {
 					zend_try {
 						object->handlers->free_obj(object TSRMLS_CC);
