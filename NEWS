@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.4.28
-
-?? ??? 2014, PHP 5.4.27
+20 Mar 2014, PHP 5.4.27 RC1
 
 - Core:
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
