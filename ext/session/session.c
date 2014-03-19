@@ -540,10 +540,13 @@ static void php_session_read_data(char **val, int *vallen TSRMLS_DC) { /* {{{ */
 		*/
 	}
 
-	if (*val) {
-		if (PS(session_vars)) {
-			efree(PS(session_vars));
-		}
+	/* Always clean up */
+	if (PS(session_vars)) {
+		efree(PS(session_vars));
+		PS(session_vars) = NULL;
+		PS(session_vars_len) = 0;
+	}
+	if (*val && PS(lazy_write)) {
 		PS(session_vars) = estrndup(*val, *vallen);
 		PS(session_vars_len) = *vallen;
 	}
@@ -616,8 +619,11 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 			int vallen;
 
 			val = php_session_encode(&vallen TSRMLS_CC);
-			if (val) {
-				if (PS(mod)->s_update_timestamp && PS(mod)->s_update_timestamp != php_session_update_timestamp) {
+			if (val && PS(lazy_write)) {
+				/* PS(session_vars) is checked in case user changed lazy_write INI */
+				if (PS(session_vars)
+					&& PS(mod)->s_update_timestamp
+					&& PS(mod)->s_update_timestamp != php_session_update_timestamp) {
 					if (vallen != PS(session_vars_len) || memcmp(val, PS(session_vars), vallen)) {
 						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 					} else {
@@ -903,6 +909,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session.use_trans_sid",          "0",         PHP_INI_ALL, OnUpdateTransSid)
 	PHP_INI_ENTRY("session.hash_function",          "0",         PHP_INI_ALL, OnUpdateHashFunc)
 	STD_PHP_INI_ENTRY("session.hash_bits_per_character", "4",    PHP_INI_ALL, OnUpdateLong,   hash_bits_per_character, php_ps_globals, ps_globals)
+	STD_PHP_INI_BOOLEAN("session.lazy_write",       "1",         PHP_INI_ALL, OnUpdateBool,   lazy_write,         php_ps_globals,    ps_globals)
 
 	/* Upload progress */
 	STD_PHP_INI_BOOLEAN("session.upload_progress.enabled",
@@ -910,9 +917,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.upload_progress.cleanup",
 	                                                "1",     ZEND_INI_PERDIR, OnUpdateBool,        rfc1867_cleanup, php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.prefix",
-	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateSmartStr,      rfc1867_prefix,  php_ps_globals, ps_globals)
+	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateSmartStr,    rfc1867_prefix,  php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.name",
-	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateSmartStr,      rfc1867_name,    php_ps_globals, ps_globals)
+	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateSmartStr,    rfc1867_name,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
 	                                                   "1",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
@@ -1987,7 +1994,6 @@ static PHP_FUNCTION(session_set_save_handler)
 		/* Find implemented methods - SessionUpdateTimestampInterface (optiona) */
 		zend_hash_internal_pointer_reset_ex(&php_session_update_timestamp_iface_entry->function_table, &pos);
 		while (zend_hash_get_current_data_ex(&php_session_update_timestamp_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-			zend_class_entry *tmp = Z_OBJCE_P(obj);
 			zend_hash_get_current_key_ex(&php_session_update_timestamp_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
 			have_method = 1;
 
