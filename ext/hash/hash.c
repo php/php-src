@@ -754,7 +754,7 @@ PHP_FUNCTION(hash_equals)
 		RETURN_FALSE;
 	}
 
-	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
+	if (Z_STRSIZE_P(known_zval) != Z_STRSIZE_P(user_zval)) {
 		RETURN_FALSE;
 	}
 
@@ -762,7 +762,7 @@ PHP_FUNCTION(hash_equals)
 	user_str = Z_STRVAL_P(user_zval);
 
 	/* This is security sensitive code. Do not optimize this for speed. */
-	for (j = 0; j < Z_STRLEN_P(known_zval); j++) {
+	for (j = 0; j < Z_STRSIZE_P(known_zval); j++) {
 		result |= known_str[j] ^ user_str[j];
 	}
 
