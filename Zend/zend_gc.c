@@ -60,8 +60,6 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 	gc_globals->roots.next = &gc_globals->roots;
 	gc_globals->roots.prev = &gc_globals->roots;
 	gc_globals->unused = NULL;
-//???	gc_globals->zval_to_free = NULL;
-//???	gc_globals->free_list = NULL;
 	gc_globals->next_to_free = NULL;
 
 	gc_globals->to_free.next = &gc_globals->to_free;
@@ -119,8 +117,6 @@ ZEND_API void gc_reset(TSRMLS_D)
 	if (GC_G(buf)) {
 		GC_G(unused) = NULL;
 		GC_G(first_unused) = GC_G(buf) + 1;
-
-//???		GC_G(zval_to_free) = NULL;
 	} else {
 		GC_G(unused) = NULL;
 		GC_G(first_unused) = NULL;
@@ -139,12 +135,6 @@ ZEND_API void gc_init(TSRMLS_D)
 
 ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 {
-	/* don't colect references (collext arrays and objects) */
-//???	if (ref->u.v.type == IS_REFERENCE) {
-//???		ZEND_ASSERT(Z_REFCOUNTED(((zend_reference*)ref)->val));
-//???		ref = Z_COUNTED(((zend_reference*)ref)->val);
-//???	}
-
 	if (UNEXPECTED(GC_ADDRESS(ref->u.v.gc_info) &&
 		           GC_GET_COLOR(ref->u.v.gc_info) == GC_BLACK &&
 		           GC_ADDRESS(ref->u.v.gc_info) >= GC_G(last_unused) - GC_G(buf))) {
@@ -202,20 +192,23 @@ ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
 	gc_root_buffer *root;
 
-	if (UNEXPECTED(GC_GET_COLOR(ref->u.v.gc_info) == GC_BLACK &&
+	if (UNEXPECTED(GC_ADDRESS(ref->u.v.gc_info) &&
+	               GC_GET_COLOR(ref->u.v.gc_info) == GC_BLACK &&
 		           GC_ADDRESS(ref->u.v.gc_info) >= GC_G(last_unused) - GC_G(buf))) {
 		/* The given zval is a garbage that is going to be deleted by
 		 * currently running GC */
 		return;
 	}
-//???
+
 	root = GC_G(buf) + GC_ADDRESS(ref->u.v.gc_info);
-	if (GC_G(next_to_free) == root) {
-		GC_G(next_to_free) = root->next;
-	}
 	GC_BENCH_INC(zval_remove_from_buffer);
 	GC_REMOVE_FROM_ROOTS(root);
 	ref->u.v.gc_info = 0;
+
+	/* updete next root that is going to be freed */
+	if (GC_G(next_to_free) == root) {
+		GC_G(next_to_free) = root->next;
+	}
 }
 
 static void gc_scan_black(zend_refcounted *ref TSRMLS_DC)
@@ -492,20 +485,17 @@ tail_call:
 		ht = NULL;
 		GC_SET_BLACK(ref->u.v.gc_info);
 
-		/* don't count references for compatibilty */
+		/* don't count references for compatibilty ??? */
 		if (ref->u.v.type != IS_REFERENCE) {
 			count++;
 		}
-		/* put into list to free */
-//???
-//		ref->gc_next = GC_G(zval_to_free);
-//		GC_G(zval_to_free) = ref;
+
 		if (ref->u.v.type == IS_OBJECT && EG(objects_store).object_buckets) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
 			/* PURPLE instead of BLACK to prevent buffering in nested gc calls */
-//???		GC_SET_PURPLE(obj->gc.u.v.gc_info);
+//???			GC_SET_PURPLE(obj->gc.u.v.gc_info);
 
 			if (EXPECTED(IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
@@ -613,9 +603,6 @@ static int gc_collect_roots(TSRMLS_D)
 	return count;
 }
 
-//???#define FREE_LIST_END ((zend_refcounted*)(~(zend_uintptr_t)GC_COLOR))
-//???#define FREE_LIST_END NULL
-
 ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
 	int count = 0;
@@ -623,22 +610,17 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 	if (GC_G(roots).next != &GC_G(roots)) {
 		gc_root_buffer *current, *orig_next_to_free;
 		zend_refcounted *p;
-//???		zend_refcounted *p, *q, *orig_free_list, *orig_next_to_free;
 
 		if (GC_G(gc_active)) {
 			return 0;
 		}
 		GC_G(gc_runs)++;
-//???		GC_G(zval_to_free) = FREE_LIST_END;
 		GC_G(gc_active) = 1;
 		gc_mark_roots(TSRMLS_C);
 		gc_scan_roots(TSRMLS_C);
 		count = gc_collect_roots(TSRMLS_C);
 
-//???		orig_free_list = GC_G(free_list);
 		orig_next_to_free = GC_G(next_to_free);
-//???		p = GC_G(free_list) = GC_G(zval_to_free);
-//???		GC_G(zval_to_free) = NULL;
 		GC_G(gc_active) = 0;
 
 		/* First call destructors */
@@ -660,66 +642,44 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					obj->gc.refcount--;
 				}
 			}
-//???
 			current = GC_G(next_to_free);
 		}
 
 		/* Destroy zvals */
-//???		p = GC_G(free_list);
 		current = GC_G(to_free).next;
 		while (current != &GC_G(to_free)) {
 			p = current->ref;
 			GC_G(next_to_free) = current->next;
-//???		while (p != FREE_LIST_END) {
-//???
-//???			GC_G(next_to_free) = p->gc_next;
-			if (1 /*&& p->refcount <= 0 ???*/) {
-				if (p->u.v.type == IS_OBJECT) {
-					zend_object *obj = (zend_object*)p;
+			if (p->u.v.type == IS_OBJECT) {
+				zend_object *obj = (zend_object*)p;
 
-					if (EG(objects_store).object_buckets &&
-						IS_VALID(EG(objects_store).object_buckets[obj->handle])) {
-//???						obj->gc.refcount = 0;
-//???						Z_TYPE(p->z) = IS_NULL;
-						obj->gc.u.v.type = IS_NULL;
-						zend_objects_store_free(obj TSRMLS_CC);
-					}
-				} else if (p->u.v.type == IS_ARRAY) {
-					zend_array *arr = (zend_array*)p;
-
-					arr->gc.u.v.type = IS_NULL;
-					zend_hash_destroy(&arr->ht);
-					GC_REMOVE_FROM_BUFFER(arr);
-					efree(arr);
-				} else if (p->u.v.type == IS_REFERENCE) {
-					zend_reference *ref = (zend_reference*)p;
-
-					ref->gc.u.v.type = IS_NULL;
-					if (EXPECTED(EG(objects_store).object_buckets != NULL) ||
-					    Z_TYPE(ref->val) != IS_OBJECT) {
-						zval_dtor(&ref->val);
-					}
-					GC_REMOVE_FROM_BUFFER(ref);
-					efree(ref);
-				} else {
-//???					zval_dtor(&p->z);
-//???					Z_TYPE(p->z) = IS_NULL;
+				if (EG(objects_store).object_buckets &&
+					IS_VALID(EG(objects_store).object_buckets[obj->handle])) {
+					obj->gc.u.v.type = IS_NULL;
+					zend_objects_store_free(obj TSRMLS_CC);
 				}
+			} else if (p->u.v.type == IS_ARRAY) {
+				zend_array *arr = (zend_array*)p;
+
+				arr->gc.u.v.type = IS_NULL;
+				zend_hash_destroy(&arr->ht);
+				GC_REMOVE_FROM_BUFFER(arr);
+				efree(arr);
+			} else if (p->u.v.type == IS_REFERENCE) {
+				zend_reference *ref = (zend_reference*)p;
+
+				ref->gc.u.v.type = IS_NULL;
+				if (EXPECTED(EG(objects_store).object_buckets != NULL) ||
+				    Z_TYPE(ref->val) != IS_OBJECT) {
+					zval_dtor(&ref->val);
+				}
+				GC_REMOVE_FROM_BUFFER(ref);
+				efree(ref);
 			}
-//???
 			current = GC_G(next_to_free);
 		}
 
-		/* Free zvals */
-//???		p = GC_G(free_list);
-//???		while (p != FREE_LIST_END) {
-//???			q = p->gc_next;
-//???			efree(p);
-//???			p = q;
-//???		}
-
 		GC_G(collected) += count;
-//???		GC_G(free_list) = orig_free_list;
 		GC_G(next_to_free) = orig_next_to_free;
 	}
 
