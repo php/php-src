@@ -1,9 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.4.28
+
 ?? ??? 2014, PHP 5.4.27
 
 - Core:
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+
+- FPM:
+  . Added clear_env configuration directive to disable clearenv() call.
+  (Github PR# 598, Paul Annesley)
 
 - GMP
   . fixed bug#66872 (invalid argument crashes gmp_testbit) (Pierre)
@@ -18,7 +24,7 @@ PHP                                                                        NEWS
 - Openssl:
   . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
   
-?? ??? 2014, PHP 5.4.26
+06 Mar 2014, PHP 5.4.26
 
 - JSON:
   . Fixed bug #65753 (JsonSerializeable couldn't implement on module extension)
@@ -27,10 +33,6 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #66731 (file: infinite recursion). (CVE-2014-1943) (Remi)
   . Fixed bug #66820 (out-of-bounds memory access in fileinfo). (Remi)
-
-- FPM:
-  . Added clear_env configuration directive to disable clearenv() call.
-  (Github PR# 598, Paul Annesley)
 
 - LDAP:
   . Implemented ldap_modify_batch (https://wiki.php.net/rfc/ldap_modify_batch).
