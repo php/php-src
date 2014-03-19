@@ -980,8 +980,8 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 			}
 
 			zend_fcall_info_argn(&handler->func.user->fci TSRMLS_CC, 0);
-			zval_ptr_dtor(&ob_data);
-			zval_ptr_dtor(&ob_mode);
+//???			zval_ptr_dtor(&ob_data);
+//???			zval_ptr_dtor(&ob_mode);
 			zval_ptr_dtor(&retval);
 
 		} else {
