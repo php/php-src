@@ -2310,8 +2310,8 @@ static int php_session_start_set_ini(char *varname, uint varname_len, char *new_
 }
 
 
-/* {{{ proto bool session_start(void)
-   Begin session - reinitializes freezed variables, registers browsers etc */
+/* {{{ proto bool session_start([array options])
+   Begin session */
 static PHP_FUNCTION(session_start)
 {
 	zval *options = NULL;
@@ -2676,6 +2676,10 @@ static const zend_function_entry php_session_update_timestamp_iface_functions[] 
 
 /* {{{ SessionHandler functions[]
  */
+/* cerateSid(), validateSid() and updateTimestamp() are not included for compatibility reason.
+   i.e. Adding these enforce users to implment these API of their own.
+   These APIs may be added future release. There may be save handlers that do not implement
+   these APIs, refer to mod_user_class.c for details. */
 static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, open, arginfo_session_class_open, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, close, arginfo_session_class_close, ZEND_ACC_PUBLIC)
@@ -2811,6 +2815,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_iface_entry);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_id_iface_entry);
+	/* php_session_update_timestamp_iface is not added for compatibility reason */
 
 	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
