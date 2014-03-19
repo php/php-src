@@ -22,7 +22,8 @@
 #include "zend.h"
 #include "zend_API.h"
 
-#define GC_ROOT_BUFFER_MAX_ENTRIES 10000
+/* one (0) is reserved */
+#define GC_ROOT_BUFFER_MAX_ENTRIES 10001
 
 #ifdef ZTS
 ZEND_API int gc_globals_id;
@@ -381,9 +382,9 @@ static void gc_mark_roots(TSRMLS_D)
 	while (current != &GC_G(roots)) {
 		if (GC_GET_COLOR(current->ref->u.v.gc_info) == GC_PURPLE) {
 			gc_mark_grey(current->ref TSRMLS_CC);
-		} else {
-			GC_SET_ADDRESS(current->ref->u.v.gc_info, 0);
-			GC_REMOVE_FROM_ROOTS(current);
+//???		} else {
+//???			GC_SET_ADDRESS(current->ref->u.v.gc_info, 0);
+//???			GC_REMOVE_FROM_ROOTS(current);
 		}
 		current = current->next;
 	}
@@ -506,7 +507,13 @@ tail_call:
 				
 				ZVAL_OBJ(&tmp, obj);
 				props = get_gc(&tmp, &table, &n TSRMLS_CC);
-				while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
+				while (n > 0 && !Z_REFCOUNTED(table[n-1])) {
+					/* count non-refcounted for compatibilty ??? */
+					if (Z_TYPE(table[n-1]) != IS_UNDEF) {
+						count++;
+					}					
+					n--;
+				}
 				for (i = 0; i < n; i++) {
 					if (Z_REFCOUNTED(table[i])) {
 						ref = Z_COUNTED(table[i]);
@@ -518,7 +525,10 @@ tail_call:
 						} else {
 							count += gc_collect_white(ref TSRMLS_CC);
 						}
-					}
+					/* count non-refcounted for compatibilty ??? */
+					} else if (Z_TYPE(table[i]) != IS_UNDEF) {
+						count++;
+					}					
 				}
 				if (!props) {
 					return count;
@@ -545,7 +555,13 @@ tail_call:
 		if (!ht) return count;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
 			p = ht->arData + idx;
-			if (!Z_REFCOUNTED(p->val)) continue;
+			if (!Z_REFCOUNTED(p->val)) {
+				/* count non-refcounted for compatibilty ??? */
+				if (Z_TYPE(p->val) != IS_UNDEF) {
+					count++;
+				}
+				continue;
+			}
 			ref = Z_COUNTED(p->val);
 			if (ref->u.v.type != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
 				ref->refcount++;
