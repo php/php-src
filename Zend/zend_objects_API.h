@@ -67,7 +67,9 @@
 #define OBJ_RELEASE(obj) do { \
 		zend_object *_obj = (obj); \
 		if (--_obj->gc.refcount == 0) { \
-				zend_objects_store_del(_obj TSRMLS_CC); \
+			zend_objects_store_del(_obj TSRMLS_CC); \
+		} else { \
+			gc_possible_root(_obj TSRMLS_CC); \
 		} \
 	} while (0)
 
