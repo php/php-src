@@ -47,17 +47,17 @@ class MySession extends SessionHandler {
 		echo 'Close ', session_id(), "\n";
 		return parent::close();
 	}
-	public function createSid() {
+	public function createId() {
 		// User should use this rather than create_sid()
 		// If both create_sid() and createSid() exists,
 		// createSid() is used.
 		++$this->i;
-		echo 'New Create SID ', session_id(), "\n";
+		echo 'New Create ID ', session_id(), "\n";
 		return parent::create_sid();
 	}
-	public function validateSid($key) {
+	public function validateId($key) {
 		++$this->i;
-		echo 'Validate SID ', session_id(), "\n";
+		echo 'Validate ID ', session_id(), "\n";
 		return TRUE;
 		// User must implement their own method and
 		// cannot call parent as follows.
@@ -95,8 +95,8 @@ var_dump($handler->i);
 --EXPECTF--
 *** Testing session_set_save_handler() : basic class wrapping existing handler ***
 Open 
-New Create SID 
-Validate SID %s
+New Create ID 
+Validate ID %s
 Read %s
 string(%d) "%s"
 string(5) "files"
@@ -107,7 +107,7 @@ array(0) {
 Write %s
 Close %s
 Open %s
-Validate SID %s
+Validate ID %s
 Read %s
 array(1) {
   ["foo"]=>

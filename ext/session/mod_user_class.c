@@ -152,7 +152,7 @@ PHP_METHOD(SessionHandler, gc)
 
 /* {{{ proto char SessionHandler::create_sid()
    Wraps the old create_sid handlers
-   This should be replaced by createSid() when 5.5 becomes unsupported.
+   This should be replaced by createId() when 5.5 becomes unsupported.
 
    Note: Do *NOT* document this method.
  */
@@ -176,19 +176,19 @@ PHP_METHOD(SessionHandler, create_sid)
 /******** No interface ************/
 
 /* Since 5.5.1, create_sid() method is added. However, this name does not
-   confirm naming standard. If create_sid() is defined and createSid() is
+   confirm naming standard. If create_sid() is defined and createId() is
    not defined, use create_sid() for compatibility.
    This method should replaced create_sid() when 5.5 becomes unsupported.
-   This should be a member of SessionHandler. Otherwise createSid() is used
+   This should be a member of SessionHandler. Otherwise createId() is used
    always. (BC for PHP 5.5)
 
    Note: This method is not member of SessionHandler. It is here for documentation
          and future implementation.
 */
 
-/* {{{ proto char SessionUpdateTimestampHandler::createSid()
+/* {{{ proto char SessionUpdateTimestampHandler::createId()
    Wraps the old create_sid handler */
-PHP_METHOD(SessionHandler, createSid)
+PHP_METHOD(SessionHandler, createId)
 {
 	char *id;
 
@@ -215,9 +215,9 @@ PHP_METHOD(SessionHandler, createSid)
 
 */
 
-/* {{{ proto char SessionUpdateTimestampHandler::validateSid(string id)
+/* {{{ proto char SessionUpdateTimestampHandler::validateId(string id)
    Simply return TRUE */
-PHP_METHOD(SessionHandler, validateSid)
+PHP_METHOD(SessionHandler, validateId)
 {
 	char *key;
 	int key_len;

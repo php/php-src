@@ -1987,7 +1987,7 @@ static PHP_FUNCTION(session_set_save_handler)
 			++i;
 		}
 
-		/* Since there is both create_sid() and createSid() method, number of API is changed.
+		/* Since there is both create_sid() and createId() method, number of API is changed.
 		   Adjust i here. This can be removed when create_sid() method is removed. */
 		i--;
 
@@ -2605,10 +2605,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_session_class_gc, 0)
 	ZEND_ARG_INFO(0, maxlifetime)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_createSid, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_session_class_createId, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_validateSid, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_session_class_validateId, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
@@ -2665,7 +2665,7 @@ static const zend_function_entry php_session_iface_functions[] = {
 /* {{{ SessionIdInterface functions[]
 */
 static const zend_function_entry php_session_id_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_session_class_createSid)
+	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_session_class_createId)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -2673,8 +2673,8 @@ static const zend_function_entry php_session_id_iface_functions[] = {
 /* {{{ SessionUpdateTimestampHandler functions[]
  */
 static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, createSid, arginfo_session_class_createSid)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateSid, arginfo_session_class_validateSid)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, createId, arginfo_session_class_createId)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_session_class_validateId)
 	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
 	{ NULL, NULL, NULL }
 };
@@ -2682,7 +2682,7 @@ static const zend_function_entry php_session_update_timestamp_iface_functions[] 
 
 /* {{{ SessionHandler functions[]
  */
-/* cerateSid(), validateSid() and updateTimestamp() are not included for compatibility reason.
+/* cerateSid(), validateId() and updateTimestamp() are not included for compatibility reason.
    i.e. Adding these enforce users to implement these API of their own.
    These APIs may be added future release. There may be save handlers that do not implement
    these APIs, refer to mod_user_class.c for details. */
@@ -2693,7 +2693,7 @@ static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, write, arginfo_session_class_write, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, create_sid, arginfo_session_class_createSid, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, create_sid, arginfo_session_class_createId, ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
