@@ -610,9 +610,6 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
 
-		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
-			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
-			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
 		php_socket_t this_fd;
 
 		php_stream_from_zval_no_verify(stream, elem);
