@@ -31,7 +31,7 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 	object->gc.refcount = 1;
 	object->gc.u.v.type = IS_OBJECT;
 	object->gc.u.v.flags = 0;
-	object->gc.u.v.buffer = 0;
+	object->gc.u.v.gc_info = 0;
 	object->ce = ce;
 	object->properties = NULL;
 	object->guards = NULL;
@@ -125,6 +125,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object TSRMLS_DC)
 ZEND_API void zend_object_free(zend_object *object TSRMLS_DC)
 {
 	zend_object_std_dtor(object TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(object);
 }
 

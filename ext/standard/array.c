@@ -2258,9 +2258,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 					
 					if (Z_ISREF_P(dest_entry)) {
 						if (Z_REFCOUNT_P(dest_entry) == 1) {
-							zend_reference *ref = Z_REF_P(dest_entry);
-							ZVAL_COPY_VALUE(dest_entry, dest_zval);
-							efree(ref);
+							ZVAL_UNREF(dest_entry);
 						} else {
 							Z_DELREF_P(dest_entry);
 							ZVAL_DUP(dest_entry, dest_zval);

@@ -210,6 +210,7 @@ static void spl_fixedarray_object_free_storage(zend_object *object TSRMLS_DC) /*
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	zval_ptr_dtor(&intern->retval);
 
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 }
 /* }}} */

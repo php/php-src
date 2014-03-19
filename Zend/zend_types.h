@@ -103,10 +103,10 @@ struct _zend_refcounted {
 		struct {
 			zend_uchar        type;
 			zend_uchar        flags;    /* used for strings & objects */
-			zend_ushort       buffer;   /* keeps GC root number or 0 */
+			zend_ushort       gc_info;  /* keeps GC root number (or 0) and color */
 		} v;
 		zend_uint long_type;
-	} u;							
+	} u;
 };
 
 struct _zend_string {
@@ -271,8 +271,8 @@ struct _zend_ast_ref {
 #define Z_GC_TYPE(zval)				Z_COUNTED(zval)->type
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
 
-#define Z_GC_BUFFER(zval)			Z_COUNTED(zval)->u.v.buffer
-#define Z_GC_BUFFER_P(zval_p)		Z_GC_BUFFER(*(zval_p))
+#define Z_GC_INFO(zval)				Z_COUNTED(zval)->u.v.gc_info
+#define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
 
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
@@ -395,7 +395,7 @@ struct _zend_ast_ref {
 		zend_array *_arr = emalloc(sizeof(zend_array));			\
 		_arr->gc.refcount = 1;									\
 		_arr->gc.u.v.type = IS_ARRAY;							\
-		_arr->gc.u.v.buffer = 0;								\
+		_arr->gc.u.v.gc_info = 0;								\
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_P(__z) = IS_ARRAY;								\
 	} while (0)
@@ -405,7 +405,7 @@ struct _zend_ast_ref {
 		zend_array *_arr = malloc(sizeof(zend_array));			\
 		_arr->gc.refcount = 1;									\
 		_arr->gc.u.v.type = IS_ARRAY;							\
-		_arr->gc.u.v.buffer = 0;								\
+		_arr->gc.u.v.gc_info = 0;								\
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_P(__z) = IS_ARRAY;								\
 	} while (0)
@@ -426,7 +426,7 @@ struct _zend_ast_ref {
 		zend_resource *_res = emalloc(sizeof(zend_resource));	\
 		_res->gc.refcount = 1;									\
 		_res->gc.u.v.type = IS_RESOURCE;						\
-		_res->gc.u.v.buffer = 0;								\
+		_res->gc.u.v.gc_info = 0;								\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -439,7 +439,7 @@ struct _zend_ast_ref {
 		zend_resource *_res = malloc(sizeof(zend_resource));	\
 		_res->gc.refcount = 1;									\
 		_res->gc.u.v.type = IS_RESOURCE;						\
-		_res->gc.u.v.buffer = 0;								\
+		_res->gc.u.v.gc_info = 0;								\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -458,7 +458,7 @@ struct _zend_ast_ref {
 		zend_reference *_ref = emalloc(sizeof(zend_reference));	\
 		_ref->gc.refcount = 1;									\
 		_ref->gc.u.v.type = IS_REFERENCE;						\
-		_ref->gc.u.v.buffer = 0;								\
+		_ref->gc.u.v.gc_info = 0;								\
 		_ref->val = *(r);										\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_P(z) = IS_REFERENCE;								\
@@ -469,7 +469,7 @@ struct _zend_ast_ref {
 		zend_ast_ref *_ast = emalloc(sizeof(zend_ast_ref));		\
 		_ast->gc.refcount = 1;									\
 		_ast->gc.u.v.type = IS_CONSTANT_AST;					\
-		_ast->gc.u.v.buffer = 0;								\
+		_ast->gc.u.v.gc_info = 0;								\
 		_ast->ast = (a);										\
 		Z_AST_P(__z) = _ast;									\
 		Z_TYPE_P(__z) = IS_CONSTANT_AST;						\
@@ -499,7 +499,7 @@ struct _zend_ast_ref {
 		zend_str_offset *x = emalloc(sizeof(zend_str_offset));	\
 		x->gc.refcount = 1;										\
 		x->gc.u.v.type = IS_STR_OFFSET;							\
-		x->gc.u.v.buffer = 0;									\
+		x->gc.u.v.gc_info = 0;									\
 		x->str = (s);											\
 		x->offset = (o);										\
 		Z_STR_OFFSET_P(z) = x;									\

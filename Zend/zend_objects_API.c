@@ -53,10 +53,6 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 				obj->gc.refcount++;
 				obj->handlers->dtor_obj(obj TSRMLS_CC);
 				obj->gc.refcount--;
-
-				if (obj->gc.refcount == 0) {
-					GC_REMOVE_ZOBJ_FROM_BUFFER(obj TSRMLS_CC);
-				}
 			}
 		}
 	}
@@ -86,7 +82,6 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 		zend_object *obj = objects->object_buckets[i];
 
 		if (IS_VALID(obj)) {
-			GC_REMOVE_ZOBJ_FROM_BUFFER(obj TSRMLS_CC);
 			objects->object_buckets[i] = SET_INVALID(obj);
 			if (obj->handlers->free_obj) {
 				obj->handlers->free_obj(obj TSRMLS_CC);
@@ -121,6 +116,17 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
             SET_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
 			EG(objects_store).free_list_head = handle;
 
+ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
+{
+	int handle = object->handle;
+
+	if (object->handlers->free_obj) {
+		object->handlers->free_obj(object TSRMLS_CC);
+	}
+	ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
+}
+/* }}} */
+
 ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	/*	Make sure we hold a reference count during the destructor call
@@ -149,7 +155,6 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 			if (object->gc.refcount == 0) {
 				zend_uint handle = object->handle;
 
-//???				GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
 				if (object->handlers->free_obj) {
 					zend_try {
 						object->handlers->free_obj(object TSRMLS_CC);
@@ -251,7 +256,7 @@ ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS
 
 	obj->std.gc.refcount = 1;
 	obj->std.gc.u.v.type = IS_OBJECT;
-	obj->std.gc.u.v.buffer = 0;
+	obj->std.gc.u.v.gc_info = 0;
 	obj->std.ce = NULL;
 	obj->std.properties = NULL;
 	obj->std.guards = NULL;

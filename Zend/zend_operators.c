@@ -187,9 +187,7 @@ try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_REFERENCE:
 			if (Z_REFCOUNT_P(op) == 1) {
-				zend_reference *ref = Z_REF_P(op);
-				ZVAL_COPY_VALUE(op, Z_REFVAL_P(op));
-				efree(ref);
+				ZVAL_UNREF(op);
 			} else {
 				Z_DELREF_P(op);
 				ZVAL_COPY_VALUE(op, Z_REFVAL_P(op));
@@ -1531,7 +1529,6 @@ static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
 {
 	if (Z_REFCOUNTED_P(op)) {
 		if (Z_REFCOUNT_P(op) == 0) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(op);
 			zval_dtor(op);
 		} else {
 			zval_ptr_dtor(op);

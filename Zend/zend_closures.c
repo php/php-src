@@ -242,6 +242,7 @@ static void zend_closure_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 		zval_ptr_dtor(&closure->this_ptr);
 	}
 
+	GC_REMOVE_FROM_BUFFER(closure);
 	efree(closure);
 }
 /* }}} */

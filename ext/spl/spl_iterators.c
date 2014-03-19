@@ -889,6 +889,7 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object TSRM
 
 	smart_str_free(&object->postfix[0]);
 
+	GC_REMOVE_FROM_BUFFER(_object);
 	efree(object);
 }
 /* }}} */
@@ -2268,6 +2269,7 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 
 	//zend_object_std_dtor(&object->std TSRMLS_CC);
 
+	GC_REMOVE_FROM_BUFFER(_object);
 	efree(object);
 }
 /* }}} */

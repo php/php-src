@@ -378,6 +378,7 @@ static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ *
 		efree(intern->debug_info);
 	}
 
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 }
 /* }}} */

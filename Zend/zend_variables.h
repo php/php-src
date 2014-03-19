@@ -25,15 +25,15 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC);
-ZEND_API void _zval_dtor_func_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
+ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC);
+ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC);
 
 static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (!Z_REFCOUNTED_P(zvalue)) {
 		return;
 	}
-	_zval_dtor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
+	_zval_dtor_func(Z_COUNTED_P(zvalue) ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);

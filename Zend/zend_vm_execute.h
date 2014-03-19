@@ -3079,16 +3079,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 //??? dereference
 				if (Z_ISREF_P(array_ref)) {
 					if (Z_REFCOUNT_P(array_ref) == 1) {
-						zend_reference *ref = Z_REF_P(array_ref);
-						ZVAL_COPY(array_ref, &ref->val);
-						efree(ref);
+						ZVAL_UNREF(array_ref);
 						array_ptr = array_ref;
-					} else {
-						Z_ADDREF_P(array_ref);
 					}
-				} else {
-					Z_ADDREF_P(array_ref);
 				}
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}
@@ -8180,16 +8175,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 //??? dereference
 				if (Z_ISREF_P(array_ref)) {
 					if (Z_REFCOUNT_P(array_ref) == 1) {
-						zend_reference *ref = Z_REF_P(array_ref);
-						ZVAL_COPY(array_ref, &ref->val);
-						efree(ref);
+						ZVAL_UNREF(array_ref);
 						array_ptr = array_ref;
-					} else {
-						Z_ADDREF_P(array_ref);
 					}
-				} else {
-					Z_ADDREF_P(array_ref);
 				}
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}
@@ -13359,16 +13349,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 //??? dereference
 				if (Z_ISREF_P(array_ref)) {
 					if (Z_REFCOUNT_P(array_ref) == 1) {
-						zend_reference *ref = Z_REF_P(array_ref);
-						ZVAL_COPY(array_ref, &ref->val);
-						efree(ref);
+						ZVAL_UNREF(array_ref);
 						array_ptr = array_ref;
-					} else {
-						Z_ADDREF_P(array_ref);
 					}
-				} else {
-					Z_ADDREF_P(array_ref);
 				}
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}
@@ -14079,7 +14064,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -14325,7 +14309,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -14423,7 +14406,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -16577,7 +16559,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -16824,7 +16805,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -16922,7 +16902,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -18653,7 +18632,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -18900,7 +18878,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -18998,7 +18975,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -20843,7 +20819,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -22264,7 +22239,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -22510,7 +22484,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -22608,7 +22581,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -24195,7 +24167,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -24440,7 +24411,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -24538,7 +24508,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -25599,7 +25568,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -25845,7 +25813,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -25943,7 +25910,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -26920,7 +26886,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -27166,7 +27131,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -27264,7 +27228,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -28242,7 +28205,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -28658,7 +28620,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -28903,7 +28864,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -29001,7 +28961,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -30907,16 +30866,11 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 //??? dereference
 				if (Z_ISREF_P(array_ref)) {
 					if (Z_REFCOUNT_P(array_ref) == 1) {
-						zend_reference *ref = Z_REF_P(array_ref);
-						ZVAL_COPY(array_ref, &ref->val);
-						efree(ref);
+						ZVAL_UNREF(array_ref);
 						array_ptr = array_ref;
-					} else {
-						Z_ADDREF_P(array_ref);
 					}
-				} else {
-					Z_ADDREF_P(array_ref);
 				}
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}
@@ -31495,7 +31449,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -31740,7 +31693,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -31838,7 +31790,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -33775,7 +33726,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -34021,7 +33971,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -34119,7 +34068,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -35726,7 +35674,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -35972,7 +35919,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -36070,7 +36016,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -37790,7 +37735,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -39077,7 +39021,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -39322,7 +39265,6 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -39420,7 +39362,6 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;

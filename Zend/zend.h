@@ -681,6 +681,16 @@ END_EXTERN_C()
 		zval_copy_ctor(__z1);							\
 	} while (0)
 
+#define ZVAL_UNREF(z) do {								\
+		zval *_z = (z);									\
+		zend_reference *ref;							\
+		ZEND_ASSERT(Z_ISREF_P(_z));						\
+		ref = Z_REF_P(_z);								\
+		ZVAL_COPY_VALUE(_z, &ref->val);					\
+		GC_REMOVE_FROM_BUFFER(ref);						\
+		efree(ref);										\
+	} while (0)
+
 // TODO: invalud ???
 #define INIT_PZVAL_COPY(z, v)							\
 	do {												\
@@ -720,9 +730,7 @@ END_EXTERN_C()
 		zval *__zv = (zv);								\
 		if (Z_ISREF_P(__zv)) {							\
 			if (Z_REFCOUNT_P(__zv) == 1) {				\
-				zend_reference *ref = Z_REF_P(__zv);	\
-				ZVAL_COPY_VALUE(__zv, &ref->val);		\
-				efree(ref);								\
+				ZVAL_UNREF(__zv);						\
 			} else {									\
 				zval *ref = Z_REFVAL_P(__zv);			\
 				Z_DELREF_P(__zv);						\

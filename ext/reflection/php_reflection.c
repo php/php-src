@@ -319,6 +319,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
 	zend_object_std_dtor(object TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 }
 /* }}} */

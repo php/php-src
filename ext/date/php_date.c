@@ -2440,6 +2440,7 @@ static void date_object_free_storage_date(zend_object *object TSRMLS_DC) /* {{{ 
 	}
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 } /* }}} */
 
@@ -2451,6 +2452,7 @@ static void date_object_free_storage_timezone(zend_object *object TSRMLS_DC) /* 
 		free(intern->tzi.z.abbr);
 	}
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 } /* }}} */
 
@@ -2460,6 +2462,7 @@ static void date_object_free_storage_interval(zend_object *object TSRMLS_DC) /* 
 
 	timelib_rel_time_dtor(intern->diff);
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 } /* }}} */
 
@@ -2481,6 +2484,7 @@ static void date_object_free_storage_period(zend_object *object TSRMLS_DC) /* {{
 
 	timelib_rel_time_dtor(intern->interval);
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 } /* }}} */
 

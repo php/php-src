@@ -88,6 +88,7 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects);
 /* Store API functions */
 ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC);
 ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC);
+ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC);
 
 /* See comment in zend_objects_API.c before you use this */
 ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TSRMLS_DC);

@@ -61,17 +61,17 @@
 	do {(v) = (v) | GC_COLOR;} while (0)
 
 #define GC_ZVAL_ADDRESS(v) \
-	GC_ADDRESS(Z_GC_BUFFER_P(v))
+	GC_ADDRESS(Z_GC_INFO_P(v))
 #define GC_ZVAL_SET_ADDRESS(v, a) \
-	GC_SET_ADDRESS(Z_GC_BUFFER_P(v), (a))
+	GC_SET_ADDRESS(Z_GC_INFO_P(v), (a))
 #define GC_ZVAL_GET_COLOR(v) \
-	GC_GET_COLOR(Z_GC_BUFFER_P(v))
+	GC_GET_COLOR(Z_GC_INFO_P(v))
 #define GC_ZVAL_SET_COLOR(v, c) \
-	GC_SET_COLOR(Z_GC_BUFFER_P(v), (c))
+	GC_SET_COLOR(Z_GC_INFO_P(v), (c))
 #define GC_ZVAL_SET_BLACK(v) \
-	GC_SET_BLACK(Z_GC_BUFFER_P(v))
+	GC_SET_BLACK(Z_GC_INFO_P(v))
 #define GC_ZVAL_SET_PURPLE(v) \
-	GC_SET_PURPLE(Z_GC_BUFFER_P(v))
+	GC_SET_PURPLE(Z_GC_INFO_P(v))
 
 typedef struct _gc_root_buffer {
 	struct _gc_root_buffer   *prev;		/* double-linked list               */
@@ -89,9 +89,8 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer   *first_unused;		/* pointer to first unused buffer   */
 	gc_root_buffer   *last_unused;		/* pointer to last unused buffer    */
 
-	zend_refcounted  *zval_to_free;		/* temporary list of zvals to free */
-	zend_refcounted  *free_list;
-	zend_refcounted  *next_to_free;
+	gc_root_buffer    to_free;			/* list to free                     */
+	gc_root_buffer   *next_to_free;
 
 	zend_uint gc_runs;
 	zend_uint collected;
@@ -100,13 +99,9 @@ typedef struct _zend_gc_globals {
 	zend_uint root_buf_length;
 	zend_uint root_buf_peak;
 	zend_uint zval_possible_root;
-	zend_uint zobj_possible_root;
 	zend_uint zval_buffered;
-	zend_uint zobj_buffered;
 	zend_uint zval_remove_from_buffer;
-	zend_uint zobj_remove_from_buffer;
 	zend_uint zval_marked_grey;
-	zend_uint zobj_marked_grey;
 #endif
 
 } zend_gc_globals;
@@ -123,8 +118,8 @@ extern ZEND_API zend_gc_globals gc_globals;
 
 BEGIN_EXTERN_C()
 ZEND_API int  gc_collect_cycles(TSRMLS_D);
-ZEND_API void gc_zval_possible_root(zend_refcounted *ref TSRMLS_DC);
-ZEND_API void gc_remove_zval_from_buffer(zend_refcounted *ref TSRMLS_DC);
+ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC);
+ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC);
 ZEND_API void gc_globals_ctor(TSRMLS_D);
 ZEND_API void gc_globals_dtor(TSRMLS_D);
 ZEND_API void gc_init(TSRMLS_D);
@@ -132,24 +127,21 @@ ZEND_API void gc_reset(TSRMLS_D);
 END_EXTERN_C()
 
 #define GC_ZVAL_CHECK_POSSIBLE_ROOT(z) \
-	gc_zval_check_possible_root((z) TSRMLS_CC)
+	gc_check_possible_root((z) TSRMLS_CC)
 
-#define GC_REMOVE_ZVAL_FROM_BUFFER(z) do { \
-		if (GC_ZVAL_ADDRESS(z)) { \
-			gc_remove_zval_from_buffer(Z_COUNTED_P(z) TSRMLS_CC); \
+#define GC_REMOVE_FROM_BUFFER(p) do { \
+		zend_refcounted *_p = (zend_refcounted*)(p); \
+		if (GC_ADDRESS(_p->u.v.gc_info)) { \
+			gc_remove_from_buffer(_p TSRMLS_CC); \
 		} \
 	} while (0)
 
-#define GC_REMOVE_ZOBJ_FROM_BUFFER(z) do { \
-		if (GC_ADDRESS((z)->gc.u.v.buffer)) { \
-			gc_remove_zval_from_buffer(&(z)->gc TSRMLS_CC); \
-		} \
-	} while (0)
-
-static zend_always_inline void gc_zval_check_possible_root(zval *z TSRMLS_DC)
+static zend_always_inline void gc_check_possible_root(zval *z TSRMLS_DC)
 {
-	if (Z_TYPE_P(z) == IS_ARRAY || Z_TYPE_P(z) == IS_OBJECT) {
-		gc_zval_possible_root(Z_COUNTED_P(z) TSRMLS_CC);
+	if (Z_TYPE_P(z) == IS_OBJECT ||
+	    (Z_ISREF_P(z) && 
+	     (Z_TYPE_P(Z_REFVAL_P(z)) == IS_ARRAY || Z_TYPE_P(Z_REFVAL_P(z)) == IS_OBJECT))) {
+		gc_possible_root(Z_COUNTED_P(z) TSRMLS_CC);
 	}
 }
 

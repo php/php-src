@@ -405,7 +405,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						GC_REMOVE_ZVAL_FROM_BUFFER(z);
 						zval_dtor(z);
 					}
 					z = value;
@@ -652,7 +651,6 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -750,7 +748,6 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(z);
 					zval_dtor(z);
 				}
 				z = value;
@@ -4368,16 +4365,11 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 //??? dereference
 				if (Z_ISREF_P(array_ref)) {
 					if (Z_REFCOUNT_P(array_ref) == 1) {
-						zend_reference *ref = Z_REF_P(array_ref);
-						ZVAL_COPY(array_ref, &ref->val);
-						efree(ref);
+						ZVAL_UNREF(array_ref);
 						array_ptr = array_ref;
-					} else {
-						Z_ADDREF_P(array_ref);
 					}
-				} else {
-					Z_ADDREF_P(array_ref);
 				}
+				Z_ADDREF_P(array_ref);
 			}
 		}
 	}

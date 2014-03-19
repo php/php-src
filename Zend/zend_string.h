@@ -100,7 +100,7 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 	ret->gc.refcount = 1;
 	ret->gc.u.v.type = IS_STRING;
 	ret->gc.u.v.flags = (persistent ? IS_STR_PERSISTENT : 0);
-	ret->gc.u.v.buffer = 0;
+	ret->gc.u.v.gc_info = 0;
 	ret->h = 0;
 	ret->len = len;
 	return ret;

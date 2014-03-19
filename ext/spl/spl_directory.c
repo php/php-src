@@ -127,6 +127,7 @@ static void spl_filesystem_object_free_storage(zend_object *object TSRMLS_DC) /*
 		//????zend_iterator_dtor(&intern->it->intern);
 	}
 
+	GC_REMOVE_FROM_BUFFER(object);
 	efree(intern);
 } /* }}} */
 
