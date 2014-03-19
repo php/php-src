@@ -177,7 +177,7 @@ Function [ <internal%s> function oci_field_name ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -193,7 +193,7 @@ Function [ <internal%s> function oci_field_scale ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -201,7 +201,7 @@ Function [ <internal%s> function oci_field_precision ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -209,7 +209,7 @@ Function [ <internal%s> function oci_field_type ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -217,7 +217,7 @@ Function [ <internal%s> function oci_field_type_raw ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -722,7 +722,7 @@ Function [ <internal%s> function ocicolumnname ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -738,7 +738,7 @@ Function [ <internal%s> function ocicolumnscale ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -746,7 +746,7 @@ Function [ <internal%s> function ocicolumnprecision ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -754,7 +754,7 @@ Function [ <internal%s> function ocicolumntype ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
@@ -762,7 +762,7 @@ Function [ <internal%s> function ocicolumntyperaw ] {
 
   - Parameters [2] {
     Parameter #0 [ <required> $statement_resource ]
-    Parameter #1 [ <required> $column_number ]
+    Parameter #1 [ <required> $column_number_or_name ]
   }
 }
 
