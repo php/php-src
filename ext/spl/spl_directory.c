@@ -2232,7 +2232,7 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRML
 		case IS_ARRAY:
 			if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
 			&& zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 1) {
-				zval ** first = Z_ARRVAL_P(intern->u.file.current_zval)->pListHead->pData;
+				zval ** first = zend_bucket_data(Z_ARRVAL_P(intern->u.file.current_zval)->pListHead);
 					
 				return Z_TYPE_PP(first) == IS_STRING && Z_STRLEN_PP(first) == 0;
 			}

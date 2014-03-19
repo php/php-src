@@ -361,17 +361,9 @@ PHP_FUNCTION(count)
  */
 static int php_array_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
 	zval result;
-	zval *first;
-	zval *second;
-
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
-
-	first = *((zval **) f->pData);
-	second = *((zval **) s->pData);
+	zval *first = *(zval **) zend_bucket_data(*(Bucket **) a);
+	zval *second = *(zval **) zend_bucket_data(*(Bucket **) b);
 
 	if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
 		return 0;
@@ -407,16 +399,11 @@ static int php_array_reverse_data_compare(const void *a, const void *b TSRMLS_DC
 
 static int php_array_natural_general_compare(const void *a, const void *b, int fold_case) /* {{{ */
 {
-	Bucket *f, *s;
-	zval *fval, *sval;
+	zval *fval = *(zval **) zend_bucket_data(*(Bucket **) a);
+	zval *sval = *(zval **) zend_bucket_data(*(Bucket **) b);
 	zval first, second;
 	int result;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
-
-	fval = *((zval **) f->pData);
-	sval = *((zval **) s->pData);
 	first = *fval;
 	second = *sval;
 
@@ -576,16 +563,11 @@ PHP_FUNCTION(rsort)
 
 static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
 	zval **args[2];
 	zval *retval_ptr = NULL;
 
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
-
-	args[0] = (zval **) f->pData;
-	args[1] = (zval **) s->pData;
+	args[0] = (zval **) zend_bucket_data(*(Bucket **) a);
+	args[1] = (zval **) zend_bucket_data(*(Bucket **) b);
 
 	BG(user_compare_fci).param_count = 2;
 	BG(user_compare_fci).params = args;
@@ -1853,7 +1835,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval **
 	/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 	for (pos = 0, p = in_hash->pListHead; pos < offset && p ; pos++, p = p->pListNext) {
 		/* Get entry and increase reference count */
-		entry = *((zval **)p->pData);
+		entry = *((zval **) zend_bucket_data(p));
 		Z_ADDREF_P(entry);
 
 		/* Update output hash depending on key type */
@@ -1867,7 +1849,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval **
 	/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 	if (removed != NULL) {
 		for ( ; pos < offset + length && p; pos++, p = p->pListNext) {
-			entry = *((zval **)p->pData);
+			entry = *((zval **) zend_bucket_data(p));
 			Z_ADDREF_P(entry);
 			if (p->nKeyLength == 0) {
 				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
@@ -1891,7 +1873,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval **
 
 	/* Copy the remaining input hash entries to the output hash */
 	for ( ; p ; p = p->pListNext) {
-		entry = *((zval **)p->pData);
+		entry = *((zval **) zend_bucket_data(p));
 		Z_ADDREF_P(entry);
 		if (p->nKeyLength == 0) {
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
@@ -2083,7 +2065,7 @@ PHP_FUNCTION(array_splice)
 		repl_num = zend_hash_num_elements(Z_ARRVAL_P(repl_array));
 		repl = (zval ***)safe_emalloc(repl_num, sizeof(zval **), 0);
 		for (p = Z_ARRVAL_P(repl_array)->pListHead, i = 0; p; p = p->pListNext, i++) {
-			repl[i] = ((zval **)p->pData);
+			repl[i] = ((zval **) zend_bucket_data(p));
 		}
 	}
 
@@ -3007,30 +2989,30 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			for (i = 1; i < argc; i++) {
 				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == FAILURE ||
 					(intersect_data_compare_func &&
-					intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)
+					intersect_data_compare_func((zval**) zend_bucket_data(p), data TSRMLS_CC) != 0)
 				) {
 					ok = 0;
 					break;
 				}
 			}
 			if (ok) {
-				Z_ADDREF_PP((zval**)p->pData);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, p->pData, sizeof(zval*), NULL);
+				Z_ADDREF_PP((zval**) zend_bucket_data(p));
+				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, zend_bucket_data(p), sizeof(zval*), NULL);
 			}
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
 				if (zend_hash_quick_find(Z_ARRVAL_PP(args[i]), p->arKey, p->nKeyLength, p->h, (void**)&data) == FAILURE ||
 					(intersect_data_compare_func &&
-					intersect_data_compare_func((zval**)p->pData, data TSRMLS_CC) != 0)
+					intersect_data_compare_func((zval**) zend_bucket_data(p), data TSRMLS_CC) != 0)
 				) {
 					ok = 0;
 					break;
 				}
 			}
 			if (ok) {
-				Z_ADDREF_PP((zval**)p->pData);
-				zend_hash_quick_update(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength, p->h, p->pData, sizeof(zval*), NULL);
+				Z_ADDREF_PP((zval**) zend_bucket_data(p));
+				zend_hash_quick_update(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength, p->h, zend_bucket_data(p), sizeof(zval*), NULL);
 			}
 		}
 	}
@@ -3425,30 +3407,30 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			for (i = 1; i < argc; i++) {
 				if (zend_hash_index_find(Z_ARRVAL_PP(args[i]), p->h, (void**)&data) == SUCCESS &&
 					(!diff_data_compare_func ||
-					diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)
+					diff_data_compare_func((zval**) zend_bucket_data(p), data TSRMLS_CC) == 0)
 				) {
 					ok = 0;
 					break;
 				}
 			}
 			if (ok) {
-				Z_ADDREF_PP((zval**)p->pData);
-				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, p->pData, sizeof(zval*), NULL);
+				Z_ADDREF_PP((zval**) zend_bucket_data(p));
+				zend_hash_index_update(Z_ARRVAL_P(return_value), p->h, zend_bucket_data(p), sizeof(zval*), NULL);
 			}
 		} else {
 			ok = 1;
 			for (i = 1; i < argc; i++) {
 				if (zend_hash_quick_find(Z_ARRVAL_PP(args[i]), p->arKey, p->nKeyLength, p->h, (void**)&data) == SUCCESS &&
 					(!diff_data_compare_func ||
-					diff_data_compare_func((zval**)p->pData, data TSRMLS_CC) == 0)
+					diff_data_compare_func((zval**) zend_bucket_data(p), data TSRMLS_CC) == 0)
 				) {
 					ok = 0;
 					break;
 				}
 			}
 			if (ok) {
-				Z_ADDREF_PP((zval**)p->pData);
-				zend_hash_quick_update(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength, p->h, p->pData, sizeof(zval*), NULL);
+				Z_ADDREF_PP((zval**) zend_bucket_data(p));
+				zend_hash_quick_update(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength, p->h, zend_bucket_data(p), sizeof(zval*), NULL);
 			}
 		}
 	}
@@ -3805,7 +3787,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	do {
 		php_set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r] TSRMLS_CC);
 
-		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData) TSRMLS_CC);
+		ARRAYG(compare_func)(&temp, *((zval **) zend_bucket_data(ab[r])), *((zval **) zend_bucket_data(bb[r])) TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
 		if (result != 0) {
 			return result;

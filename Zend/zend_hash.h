@@ -55,8 +55,6 @@ struct _hashtable;
 typedef struct bucket {
 	ulong h;						/* Used for numeric indexing */
 	uint nKeyLength;
-	void *pData;
-	void *pDataPtr;
 	struct bucket *pListNext;
 	struct bucket *pListLast;
 	struct bucket *pNext;
@@ -182,7 +180,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos);
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, uint nDataSize, int mode, HashPosition *pos);
 
 typedef struct _HashPointer {
 	HashPosition pos;
@@ -210,8 +208,8 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 	zend_hash_internal_pointer_reset_ex(ht, NULL)
 #define zend_hash_internal_pointer_end(ht) \
 	zend_hash_internal_pointer_end_ex(ht, NULL)
-#define zend_hash_update_current_key(ht, key_type, str_index, str_length, num_index) \
-	zend_hash_update_current_key_ex(ht, key_type, str_index, str_length, num_index, HASH_UPDATE_KEY_ANYWAY, NULL)
+#define zend_hash_update_current_key(ht, key_type, str_index, str_length, num_index, data_size) \
+	zend_hash_update_current_key_ex(ht, key_type, str_index, str_length, num_index, data_size, HASH_UPDATE_KEY_ANYWAY, NULL)
 
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
@@ -227,6 +225,8 @@ ZEND_API int zend_hash_minmax(const HashTable *ht, compare_func_t compar, int fl
 ZEND_API int zend_hash_num_elements(const HashTable *ht);
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
+
+#define zend_bucket_data(bucket) ((void *) ((char *) bucket + sizeof(Bucket)))
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
@@ -375,13 +375,13 @@ static inline int zend_symtable_exists(HashTable *ht, const char *arKey, uint nK
 	return zend_hash_exists(ht, arKey, nKeyLength);
 }
 
-static inline int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, int mode, HashPosition *pos)
+static inline int zend_symtable_update_current_key_ex(HashTable *ht, const char *arKey, uint nKeyLength, uint nDataSize, int mode, HashPosition *pos)
 {
-	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, mode, pos));
-	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, mode, pos);
+	ZEND_HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_update_current_key_ex(ht, HASH_KEY_IS_LONG, NULL, 0, idx, nDataSize, mode, pos));
+	return zend_hash_update_current_key_ex(ht, HASH_KEY_IS_STRING, arKey, nKeyLength, 0, nDataSize, mode, pos);
 }
-#define zend_symtable_update_current_key(ht,arKey,nKeyLength,mode) \
-	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, mode, NULL)
+#define zend_symtable_update_current_key(ht,arKey,nKeyLength,nDataSize,mode) \
+	zend_symtable_update_current_key_ex(ht, arKey, nKeyLength, nDataSize, mode, NULL)
 
 
 #endif							/* ZEND_HASH_H */

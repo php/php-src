@@ -177,7 +177,7 @@ PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, voi
 
 	p = mysqlnd_registered_plugins.pListHead;
 	while (p != NULL) {
-		int result = apply_func(p->pData, argument TSRMLS_CC);
+		int result = apply_func(zend_bucket_data(p), argument TSRMLS_CC);
 
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");

@@ -105,14 +105,12 @@ ZEND_GET_MODULE(ereg)
 /* {{{ ereg_lru_cmp */
 static int ereg_lru_cmp(const void *a, const void *b TSRMLS_DC)
 {
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
+	reg_cache *f = zend_bucket_data(*(Bucket **) a);
+	reg_cache *s = zend_bucket_data(*(Bucket **) b);
 
-	if (((reg_cache *)f->pData)->lastuse <
-				((reg_cache *)s->pData)->lastuse) {
+	if (f->lastuse < s->lastuse) {
 		return -1;
-	} else if (((reg_cache *)f->pData)->lastuse ==
-				((reg_cache *)s->pData)->lastuse) {
+	} else if (f->lastuse == s->lastuse) {
 		return 0;
 	} else {
 		return 1;

@@ -354,8 +354,10 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 	memcpy((char*)p->arKey, arKey, nKeyLength);
 	p->nKeyLength = nKeyLength;
 	p->h = h;
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_X_API_NO
 	p->pData = &p->pDataPtr;
 	p->pDataPtr = p;
+#endif
 
 	p->pNext = ZCSG(interned_strings).arBuckets[nIndex];
 	p->pLast = NULL;
@@ -409,7 +411,7 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 	/* class table hash keys, class names, properties, methods, constants, etc */
 	p = CG(class_table)->pListHead;
 	while (p) {
-		zend_class_entry *ce = (zend_class_entry*)(p->pDataPtr);
+		zend_class_entry *ce = *(zend_class_entry**) zend_bucket_data(p);
 
 		if (p->nKeyLength) {
 			p->arKey = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
@@ -421,7 +423,7 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 
 		q = ce->properties_info.pListHead;
 		while (q) {
-			zend_property_info *info = (zend_property_info*)(q->pData);
+			zend_property_info *info = (zend_property_info*) zend_bucket_data(q);
 
 			if (q->nKeyLength) {
 				q->arKey = accel_new_interned_string(q->arKey, q->nKeyLength, 0 TSRMLS_CC);
@@ -465,7 +467,7 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 	/* auto globals hash keys and names */
 	p = CG(auto_globals)->pListHead;
 	while (p) {
-		zend_auto_global *auto_global = (zend_auto_global*)p->pData;
+		zend_auto_global *auto_global = (zend_auto_global*) zend_bucket_data(p);
 
 		auto_global->name = accel_new_interned_string(auto_global->name, auto_global->name_len + 1, 0 TSRMLS_CC);
 		if (p->nKeyLength) {
@@ -2194,7 +2196,7 @@ static void accel_fast_hash_destroy(HashTable *ht)
 	Bucket *p = ht->pListHead;
 
 	while (p != NULL) {
-		ht->pDestructor(p->pData);
+		ht->pDestructor(zend_bucket_data(p));
 		p = p->pListNext;
 	}
 }

@@ -640,17 +640,17 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
-					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRLEN(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRLEN(const_value) + 1, sizeof(zval *), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, Z_LVAL(const_value), sizeof(zval *), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_DOUBLE:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, 0, zend_dval_to_lval(Z_DVAL(const_value)), sizeof(zval *), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				case IS_NULL:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, "", 1, 0, HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, "", 1, 0, sizeof(zval *), HASH_UPDATE_KEY_IF_BEFORE, NULL);
 					break;
 				default:
 					ret = SUCCESS;

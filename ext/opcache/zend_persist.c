@@ -67,7 +67,11 @@ static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElem
 
 		/* persist bucket and key */
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+# if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		p = zend_accel_memdup(p, sizeof(Bucket) + el_size);
+# else
 		p = zend_accel_memdup(p, sizeof(Bucket));
+# endif
 		if (p->nKeyLength) {
 			p->arKey = zend_accel_memdup_interned_string(p->arKey, p->nKeyLength);
 		}
@@ -75,6 +79,7 @@ static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElem
 		p = zend_accel_memdup(p, sizeof(Bucket) - 1 + p->nKeyLength);
 #endif
 
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_X_API_NO
 		/* persist data pointer in bucket */
 		if (!p->pDataPtr) {
 			zend_accel_store(p->pData, el_size);
@@ -82,11 +87,15 @@ static void zend_hash_persist(HashTable *ht, void (*pPersistElement)(void *pElem
 			/* Update p->pData to point to the new p->pDataPtr address, after the bucket relocation */
 			p->pData = &p->pDataPtr;
 		}
+#else
+		zend_shared_alloc_register_xlat_entry(zend_bucket_data(q), zend_bucket_data(p));
+#endif
 
 		/* persist the data itself */
 		if (pPersistElement) {
-			pPersistElement(p->pData TSRMLS_CC);
+			pPersistElement(zend_bucket_data(p) TSRMLS_CC);
 		}
+
 
 		/* update linked lists */
 		if (p->pLast) {

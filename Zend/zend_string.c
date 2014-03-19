@@ -127,8 +127,6 @@ static const char *zend_new_interned_string_int(const char *arKey, int nKeyLengt
 	}
 	p->nKeyLength = nKeyLength;
 	p->h = h;
-	p->pData = &p->pDataPtr;
-	p->pDataPtr = p;
 	
 	p->pNext = CG(interned_strings).arBuckets[nIndex];
 	p->pLast = NULL;
