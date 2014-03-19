@@ -585,16 +585,10 @@ static int gc_collect_roots(TSRMLS_D)
 			GC_G(to_free).prev->next = &GC_G(to_free);
 		} else {
 			/* add roots into list to free */
-//???
-			gc_root_buffer *p1 = GC_G(to_free).next;
-			gc_root_buffer *p2 = GC_G(to_free).prev;
-			gc_root_buffer *p3 = GC_G(roots).next;
-			gc_root_buffer *p4 = GC_G(roots).prev;
-		
-			p2->next = p3;
-			p3->prev = p2;
-			p4->next = &GC_G(to_free);
-			GC_G(to_free).prev = p4;
+			GC_G(to_free).prev->next = GC_G(roots).next;
+			GC_G(roots).next->prev = GC_G(to_free).prev;
+			GC_G(roots).prev->next = &GC_G(to_free);
+			GC_G(to_free).prev = GC_G(roots).prev;
 		}
 
 		GC_G(roots).next = &GC_G(roots);
