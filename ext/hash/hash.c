@@ -730,6 +730,46 @@ PHP_FUNCTION(hash_pbkdf2)
 }
 /* }}} */
 
+/* {{{ proto bool hash_equals(string known_string, string user_string)
+   Compares two strings using the same time whether they're equal or not.
+   A difference in length will leak */
+PHP_FUNCTION(hash_equals)
+{
+	zval *known_zval, *user_zval;
+	char *known_str, *user_str;
+	int result = 0, j;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &known_zval, &user_zval) == FAILURE) {
+		return;
+	}
+
+	/* We only allow comparing string to prevent unexpected results. */
+	if (Z_TYPE_P(known_zval) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(user_zval) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		RETURN_FALSE;
+	}
+
+	if (Z_STRLEN_P(known_zval) != Z_STRLEN_P(user_zval)) {
+		RETURN_FALSE;
+	}
+
+	known_str = Z_STRVAL_P(known_zval);
+	user_str = Z_STRVAL_P(user_zval);
+
+	/* This is security sensitive code. Do not optimize this for speed. */
+	for (j = 0; j < Z_STRLEN_P(known_zval); j++) {
+		result |= known_str[j] ^ user_str[j];
+	}
+
+	RETURN_BOOL(0 == result);
+}
+/* }}} */
+
 /* Module Housekeeping */
 
 static void php_hash_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
@@ -1152,6 +1192,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_pbkdf2, 0, 0, 4)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_hash_equals, 0)
+	ZEND_ARG_INFO(0, known_string)
+	ZEND_ARG_INFO(0, user_string)
+ZEND_END_ARG_INFO()
+
 /* BC Land */
 #ifdef PHP_MHASH_BC
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
@@ -1199,6 +1244,7 @@ const zend_function_entry hash_functions[] = {
 
 	PHP_FE(hash_algos,								arginfo_hash_algos)
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
+	PHP_FE(hash_equals,								arginfo_hash_equals)
 
 	/* BC Land */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
