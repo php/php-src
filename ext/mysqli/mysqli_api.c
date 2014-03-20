@@ -67,9 +67,50 @@ static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str 
 /* }}} */
 
 
+/* {{{ mysqlnd_escape_string_for_tx_name_in_comment */
+char *
+mysqli_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC)
+{
+	char * ret = NULL;
+	if (name) {
+		zend_bool warned = FALSE;
+		const char * p_orig = name;
+		char * p_copy;
+		p_copy = ret = emalloc(strlen(name) + 1 + 2 + 2 + 1); /* space, open, close, NullS */
+		*p_copy++ = ' ';
+		*p_copy++ = '/';
+		*p_copy++ = '*';
+		while (1) {
+			register char v = *p_orig;
+			if (v == 0) {
+				break;
+			}
+			if ((v >= '0' && v <= '9') ||
+				(v >= 'a' && v <= 'z') ||
+				(v >= 'A' && v <= 'Z') ||
+				v == '-' ||
+				v == '_' ||
+				v == ' ' ||
+				v == '=')
+			{
+				*p_copy++ = v;
+			} else if (warned == FALSE) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Transaction name truncated. Must be only [0-9A-Za-z\\-_=]+");
+				warned = TRUE;
+			}
+			++p_orig;
+		}
+		*p_copy++ = '*';
+		*p_copy++ = '/';
+		*p_copy++ = 0;
+	}
+	return ret;
+}
+/* }}} */
+
 
 /* {{{ proto bool mysqli_commit_or_rollback_libmysql */
-static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name)
+static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name TSRMLS_DC)
 {
 	int ret;
 	smart_str tmp_str = {0, 0, 0};
@@ -78,37 +119,8 @@ static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, co
 
 	{
 		char * query;
-		char * name_esc = NULL;
+		char * name_esc = mysqli_escape_string_for_tx_name_in_comment(name TSRMLS_CC);
 		size_t query_len;
-		
-		if (name) {	
-			const char * p_orig = name;
-			char * p_copy;
-			p_copy = name_esc = emalloc(strlen(name) + 1 + 2 + 2 + 1); /* space, open, close, NullS */
-			*p_copy++ = ' ';
-			*p_copy++ = '/';
-			*p_copy++ = '*';
-			while (1) {
-				register char v = *p_orig;
-				if (v == 0) {
-					break;
-				}
-				if ((v >= '0' && v <= '9') ||
-					(v >= 'a' && v <= 'z') ||
-					(v >= 'A' && v <= 'Z') ||
-					v == '-' ||
-					v == '_' ||
-					v == ' ' ||
-					v == '=')
-				{
-					*p_copy++ = v;
-				}
-				++p_orig;
-			}
-			*p_copy++ = '*';
-			*p_copy++ = '/';
-			*p_copy++ = 0;
-		}
 
 		query_len = spprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
 										  name_esc? name_esc:"", tmp_str.c? tmp_str.c:"");
@@ -748,7 +760,7 @@ PHP_FUNCTION(mysqli_commit)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name TSRMLS_CC)) {
 #else
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 #endif
@@ -1998,7 +2010,7 @@ PHP_FUNCTION(mysqli_rollback)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 #if !defined(MYSQLI_USE_MYSQLND)
-	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, flags, name)) {
+	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, flags, name TSRMLS_CC)) {
 #else
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 #endif
