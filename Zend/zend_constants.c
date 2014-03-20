@@ -36,7 +36,9 @@ void free_zend_constant(zval *zv)
 	} else {
 		zval_internal_dtor(&c->value);
 	}
-	STR_RELEASE(c->name);
+	if (c->name) {
+		STR_RELEASE(c->name);
+	}
 	free(c);
 }
 
