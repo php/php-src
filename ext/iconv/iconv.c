@@ -227,6 +227,9 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 		return FAILURE;
 	}
 	if (new_value_length) {
+		if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+			php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.input_encoding is deprecated");
+		}
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, PG(input_encoding), strlen(PG(input_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
@@ -241,6 +244,9 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 		return FAILURE;
 	}
 	if (new_value_length) {
+		if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+			php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.output_encoding is deprecated");
+		}
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, PG(output_encoding), strlen(PG(output_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
@@ -255,6 +261,9 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 		return FAILURE;
 	}
 	if (new_value_length) {
+		if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+			php_error_docref("ref.iconv" TSRMLS_CC, E_DEPRECATED, "Use of iconv.internal_encoding is deprecated");
+		}
 		OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 		OnUpdateString(entry, PG(internal_encoding), strlen(PG(internal_encoding))+1, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);

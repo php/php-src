@@ -1256,6 +1256,10 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	MBSTRG(http_input_list) = list;
 	MBSTRG(http_input_list_size) = size;
 
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_input is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1282,6 +1286,11 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	}
 	MBSTRG(http_output_encoding) = encoding;
 	MBSTRG(current_http_output_encoding) = encoding;
+
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_output is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1315,11 +1324,15 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
+	}
+
 	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
-	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
-			|| stage == PHP_INI_STAGE_RUNTIME) {
+
+	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
 		if (new_value_length) {
 			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
 		} else {

@@ -1139,7 +1139,7 @@ PHP_FUNCTION(oci_commit)
 }
 /* }}} */
 
-/* {{{ proto string oci_field_name(resource stmt, int col)
+/* {{{ proto string oci_field_name(resource stmt, mixed col)
    Tell the name of a column */
 PHP_FUNCTION(oci_field_name)
 {
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(oci_field_name)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_size(resource stmt, int col)
+/* {{{ proto int oci_field_size(resource stmt, mixed col)
    Tell the maximum data size of a column */
 PHP_FUNCTION(oci_field_size)
 {
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(oci_field_size)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_scale(resource stmt, int col)
+/* {{{ proto int oci_field_scale(resource stmt, mixed col)
    Tell the scale of a column */
 PHP_FUNCTION(oci_field_scale)
 {
@@ -1182,7 +1182,7 @@ PHP_FUNCTION(oci_field_scale)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_precision(resource stmt, int col)
+/* {{{ proto int oci_field_precision(resource stmt, mixed col)
    Tell the precision of a column */
 PHP_FUNCTION(oci_field_precision)
 {
@@ -1195,7 +1195,7 @@ PHP_FUNCTION(oci_field_precision)
 }
 /* }}} */
 
-/* {{{ proto mixed oci_field_type(resource stmt, int col)
+/* {{{ proto mixed oci_field_type(resource stmt, mixed col)
    Tell the data type of a column */
 PHP_FUNCTION(oci_field_type)
 {
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(oci_field_type)
 }
 /* }}} */
 
-/* {{{ proto int oci_field_type_raw(resource stmt, int col)
+/* {{{ proto int oci_field_type_raw(resource stmt, mixed col)
    Tell the raw oracle data type of a column */
 PHP_FUNCTION(oci_field_type_raw)
 {
@@ -1289,8 +1289,8 @@ PHP_FUNCTION(oci_field_type_raw)
 }
 /* }}} */
 
-/* {{{ proto bool oci_field_is_null(resource stmt, int col)
-   Tell whether a column is NULL */
+/* {{{ proto bool oci_field_is_null(resource stmt, mixed col)
+   Tell whether a field in the current row is NULL */
 PHP_FUNCTION(oci_field_is_null)
 {
 	php_oci_out_column *column;
