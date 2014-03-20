@@ -33,9 +33,9 @@
 #include "ext/standard/php_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
+
+
 #if !defined(MYSQLI_USE_MYSQLND)
-
-
 /* {{{ mysqli_tx_cor_options_to_string */
 static void mysqli_tx_cor_options_to_string(const MYSQL * const conn, smart_str * str, const unsigned int mode)
 {
@@ -101,12 +101,9 @@ static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, co
 					v == ' ' ||
 					v == '=')
 				{
-					*p_copy = v;
-				} else {
-					*p_copy = '?';
+					*p_copy++ = v;
 				}
 				++p_orig;
-				++p_copy;
 			}
 			*p_copy++ = '*';
 			*p_copy++ = '/';
