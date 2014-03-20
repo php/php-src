@@ -543,13 +543,10 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 }
 
 /* This function is used by the various apply() functions.
- * It deletes the passed bucket, and returns the address of the
- * next bucket.  The hash *may* be altered during that time, the
- * returned value will still be valid.
+ * It deletes the passed bucket.
  */
-static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
+static void zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 {
-	Bucket *retval;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
@@ -592,23 +589,18 @@ static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 	if (p->pData != &p->pDataPtr) {
 		pefree(p->pData, ht->persistent);
 	}
-	retval = p->pListNext;
 	pefree(p, ht->persistent);
-
-	return retval;
 }
 
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 {
-	Bucket *p;
-
 	IS_CONSISTENT(ht);
 
-	p = ht->pListHead;
-	while (p != NULL) {
-		p = zend_hash_apply_deleter(ht, p);
+	while (ht->pListHead != NULL) {
+		zend_hash_apply_deleter(ht, ht->pListHead);
 	}
+
 	if (ht->nTableMask) {
 		pefree(ht->arBuckets, ht->persistent);
 	}
@@ -618,14 +610,10 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 
 ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht)
 {
-	Bucket *p;
-
 	IS_CONSISTENT(ht);
 
-	p = ht->pListTail;
-	while (p != NULL) {
-		zend_hash_apply_deleter(ht, p);
-		p = ht->pListTail;
+	while (ht->pListTail != NULL) {
+		zend_hash_apply_deleter(ht, ht->pListTail);
 	}
 
 	if (ht->nTableMask) {
@@ -654,12 +642,13 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 	p = ht->pListHead;
 	while (p != NULL) {
 		int result = apply_func(p->pData TSRMLS_CC);
-		
+
+		Bucket *p_next = p->pListNext;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
+			zend_hash_apply_deleter(ht, p);
 		}
+		p = p_next;
+
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
 		}
@@ -679,11 +668,12 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 	while (p != NULL) {
 		int result = apply_func(p->pData, argument TSRMLS_CC);
 		
+		Bucket *p_next = p->pListNext;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
+			zend_hash_apply_deleter(ht, p);
 		}
+		p = p_next;
+
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
 		}
@@ -711,11 +701,12 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
 		hash_key.h = p->h;
 		result = apply_func(p->pData TSRMLS_CC, num_args, args, &hash_key);
 
+		Bucket *p_next = p->pListNext;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			p = zend_hash_apply_deleter(ht, p);
-		} else {
-			p = p->pListNext;
+			zend_hash_apply_deleter(ht, p);
 		}
+		p = p_next;
+
 		if (result & ZEND_HASH_APPLY_STOP) {
 			va_end(args);
 			break;
@@ -729,7 +720,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
 
 ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC)
 {
-	Bucket *p, *q;
+	Bucket *p;
 
 	IS_CONSISTENT(ht);
 
@@ -738,11 +729,12 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 	while (p != NULL) {
 		int result = apply_func(p->pData TSRMLS_CC);
 
-		q = p;
-		p = p->pListLast;
+		Bucket *p_last = p->pListLast;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			zend_hash_apply_deleter(ht, q);
+			zend_hash_apply_deleter(ht, p);
 		}
+		p = p_last;
+
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
 		}
