@@ -76,22 +76,22 @@ if (!have_innodb($link))
 		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 	if (!$mysqli->commit(0 , "*/ nonsense")) {
-		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
+		printf("[013] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
-	if (!$mysqli->commit(0 , "tx_name")) {
-		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
+	if (!$mysqli->commit(0 , "tx_name ulf вендел")) {
+		printf("[014] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
-	if (!$mysqli->commit(0 , "tx_name")) {
-		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
+	if (!$mysqli->commit(0 , "tx_name \t\n\r\b")) {
+		printf("[015] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 	if (!$mysqli->commit(MYSQLI_TRANS_COR_AND_CHAIN | MYSQLI_TRANS_COR_NO_RELEASE , "tx_name")) {
-		printf("[012] [%d] %s\n", $mysqli->errno, $mysqli->error);
+		printf("[016] [%d] %s\n", $mysqli->errno, $mysqli->error);
 	}
 
 	$mysqli->close();
 
 	if (NULL !== ($tmp = @$mysqli->commit())) {
-		printf("[013] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
 	}
 
 	print "done!";
@@ -101,4 +101,9 @@ if (!have_innodb($link))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+
+Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+
+Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
 done!

@@ -134,7 +134,8 @@ NULL
 [017] [1792] %s
 [018] invalid_flag = %d [%d]%A
 
-Warning: mysqli_begin_transaction(): Invalid value for parameter flags (-1) in %s on line %d
+Warning: mysqli_begin_transaction(): Invalid value for parameter flags (-1) in /work/dev/php/php-5.5/ext/mysqli/tests/mysqli_begin_transaction.php on line 98
 [019] [%d]%A
-[020] [%d]%A
+
+Warning: mysqli::begin_transaction(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in /work/dev/php/php-5.5/ext/mysqli/tests/mysqli_begin_transaction.php on line 103
 done!
