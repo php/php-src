@@ -71,6 +71,9 @@ PHP 5.6 UPGRADE NOTES
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
 
+- Added a function for timing attack safe string comparison
+  (https://wiki.php.net/rfc/timing_attack)
+
 - Added gost-crypto (CryptoPro S-box) hash algorithm.
 
 - Stream wrappers verify peer certificates and host names by default in
@@ -180,6 +183,18 @@ PHP 5.6 UPGRADE NOTES
   CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
   do not work unless it is explicitly set to false.
 
+  curl_setopt() now supports the following nullable settings (>= 5.5.11): 
+    . CURLOPT_CUSTOMREQUEST
+    . CURLOPT_FTPPORT
+    . CURLOPT_RANGE
+    . CURLOPT_FTP_ACCOUNT
+    . CURLOPT_RTSP_SESSION_ID
+    . CURLOPT_KRBLEVEL
+    . CURLOPT_KRB4LEVEL
+
+- Strings:
+  substr_compare() now allows $length to be zero.
+
 - Crypt:
   crypt() will now raise an E_NOTICE error if the salt parameter is omitted.
   See: https://wiki.php.net/rfc/crypt_function_salt
@@ -208,6 +223,9 @@ PHP 5.6 UPGRADE NOTES
 - GMP:
   Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.
 
+- Hash
+  Added hash_equals($known_string, $user_string)
+
 - OpenSSL:
   Added string openssl_x509_fingerprint($x509, $type, $binary).
   Added string openssl_spki_new($private_key, $challenge, $algorithm)
@@ -233,6 +251,9 @@ PHP 5.6 UPGRADE NOTES
 
 - Zip:
   Added ZipArchive::setPassword($password)
+
+- SPL
+  Added SplFileObject::fread($length) to complement fwrite() method (>= 5.5.11)
 
 ========================================
 6. New Classes and Interfaces
