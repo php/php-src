@@ -243,15 +243,16 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
-				HashTable *ht = Z_ARRVAL_P(zvalue);
+				zval new_arr;
 				TSRMLS_FETCH();
 
-				if (ht == &EG(symbol_table).ht) {
+				if (Z_ARR_P(zvalue) == &EG(symbol_table)) {
 					return; /* do nothing */
 				}
-				ZVAL_NEW_ARR(zvalue);
-				zend_hash_init(Z_ARRVAL_P(zvalue), zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
-				zend_hash_copy(Z_ARRVAL_P(zvalue), ht, zval_add_ref);
+				ZVAL_NEW_ARR(&new_arr);
+				zend_hash_init(Z_ARRVAL(new_arr), zend_hash_num_elements(Z_ARRVAL_P(zvalue)), NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_copy(Z_ARRVAL(new_arr), Z_ARRVAL_P(zvalue), zval_add_ref);
+				ZVAL_COPY_VALUE(zvalue, &new_arr);
 			}
 			break;
 		case IS_CONSTANT_AST: {
