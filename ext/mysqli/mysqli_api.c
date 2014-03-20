@@ -109,7 +109,7 @@ mysqli_escape_string_for_tx_name_in_comment(const char * const name TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ proto bool mysqli_commit_or_rollback_libmysql */
+/* {{{ mysqli_commit_or_rollback_libmysql */
 static int mysqli_commit_or_rollback_libmysql(MYSQL * conn, zend_bool commit, const unsigned int mode, const char * const name TSRMLS_DC)
 {
 	int ret;
@@ -707,7 +707,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRM
 
 				if (MyG(rollback_on_cached_plink) &&
 #if !defined(MYSQLI_USE_MYSQLND)
-					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL))
+					mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, TRANS_COR_NO_OPT, NULL TSRMLS_CC))
 #else
 					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
 #endif
