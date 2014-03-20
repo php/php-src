@@ -141,6 +141,21 @@ ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
  
 static const Bucket *uninitialized_bucket = NULL;
 
+static inline void zend_hash_bucket_update(
+	const HashTable *ht, Bucket *p, void *pData, uint nDataSize, void **pDest ZEND_FILE_LINE_DC
+) {
+	ZEND_ASSERT(p->pData != pData);
+	HANDLE_BLOCK_INTERRUPTIONS();
+	if (ht->pDestructor) {
+		ht->pDestructor(p->pData);
+	}
+	UPDATE_DATA(ht, p, pData, nDataSize);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+	if (pDest) {
+		*pDest = p->pData;
+	}
+}
+
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	uint i = 3;
@@ -209,21 +224,14 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
 		if (p->arKey == arKey ||
-			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
-				if (flag & HASH_ADD) {
-					return FAILURE;
-				}
-				ZEND_ASSERT(p->pData != pData);
-				HANDLE_BLOCK_INTERRUPTIONS();
-				if (ht->pDestructor) {
-					ht->pDestructor(p->pData);
-				}
-				UPDATE_DATA(ht, p, pData, nDataSize);
-				if (pDest) {
-					*pDest = p->pData;
-				}
-				HANDLE_UNBLOCK_INTERRUPTIONS();
-				return SUCCESS;
+			((p->h == h) && (p->nKeyLength == nKeyLength)
+			 && !memcmp(p->arKey, arKey, nKeyLength))
+		) {
+			if (flag & HASH_ADD) {
+				return FAILURE;
+			}
+			zend_hash_bucket_update(ht, p, pData, nDataSize, pDest ZEND_FILE_LINE_RELAY_CC);
+			return SUCCESS;
 		}
 		p = p->pNext;
 	}
@@ -272,21 +280,14 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
 		if (p->arKey == arKey ||
-			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
-				if (flag & HASH_ADD) {
-					return FAILURE;
-				}
-				ZEND_ASSERT(p->pData != pData);
-				HANDLE_BLOCK_INTERRUPTIONS();
-				if (ht->pDestructor) {
-					ht->pDestructor(p->pData);
-				}
-				UPDATE_DATA(ht, p, pData, nDataSize);
-				if (pDest) {
-					*pDest = p->pData;
-				}
-				HANDLE_UNBLOCK_INTERRUPTIONS();
-				return SUCCESS;
+			((p->h == h) && (p->nKeyLength == nKeyLength)
+			 && !memcmp(p->arKey, arKey, nKeyLength))
+		) {
+			if (flag & HASH_ADD) {
+				return FAILURE;
+			}
+			zend_hash_bucket_update(ht, p, pData, nDataSize, pDest ZEND_FILE_LINE_RELAY_CC);
+			return SUCCESS;
 		}
 		p = p->pNext;
 	}
@@ -351,16 +352,7 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 			if (flag & HASH_NEXT_INSERT || flag & HASH_ADD) {
 				return FAILURE;
 			}
-			ZEND_ASSERT(p->pData != pData);
-			HANDLE_BLOCK_INTERRUPTIONS();
-			if (ht->pDestructor) {
-				ht->pDestructor(p->pData);
-			}
-			UPDATE_DATA(ht, p, pData, nDataSize);
-			HANDLE_UNBLOCK_INTERRUPTIONS();
-			if (pDest) {
-				*pDest = p->pData;
-			}
+			zend_hash_bucket_update(ht, p, pData, nDataSize, pDest ZEND_FILE_LINE_RELAY_CC);
 			return SUCCESS;
 		}
 		p = p->pNext;
