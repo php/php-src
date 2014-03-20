@@ -78,7 +78,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 				if (--ref->gc.refcount == 0) {
-					zval_dtor(&ref->val);
+					zval_ptr_dtor(&ref->val);
 					goto gc_exit;
 				}
 				goto exit;
@@ -142,7 +142,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 
-				zval_dtor(&ref->val);
+				zval_ptr_dtor(&ref->val);
 				goto gc_exit;
 			}
 		default:

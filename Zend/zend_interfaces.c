@@ -113,6 +113,13 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 			zend_error(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
 		}
 	}
+	/* copy arguments back, they might be changed by references */
+	if (param_count > 0) {
+		ZVAL_COPY_VALUE(arg1, &params[0]);
+	}
+	if (param_count > 1) {
+		ZVAL_COPY_VALUE(arg2, &params[1]);
+	}
 	if (!retval_ptr) {
 		zval_ptr_dtor(&retval);
 		return NULL;

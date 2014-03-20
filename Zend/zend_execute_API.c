@@ -867,10 +867,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				ZVAL_NEW_REF(&fci->params[i], &tmp);
 				Z_ADDREF(fci->params[i]);
 			} else if (!Z_ISREF(fci->params[i])) {
-				if (Z_REFCOUNTED(fci->params[i])) {
-					Z_ADDREF(fci->params[i]);
-				}
 				ZVAL_NEW_REF(&fci->params[i], &fci->params[i]);
+				Z_ADDREF(fci->params[i]);
 			} else if (Z_REFCOUNTED(fci->params[i])) {
 				Z_ADDREF(fci->params[i]);
 			}
