@@ -115,6 +115,15 @@ UPGRADE NOTES - PHP X.Y
 
   Memory allocation is now managed by emalloc/efree instead of malloc/free.
 
+  f. Changes to objects that implement ArrayObject
+
+  The zend_object_has_dimension_t definition now has one argument less:
+
+      -typedef int (*zend_object_has_dimension_t)(zval *object, zval *member, int check_empty TSRMLS_DC);
+      +typedef int (*zend_object_has_dimension_t)(zval *object, zval *member TSRMLS_DC);
+
+  The isset() and empty() operator will now call ->read_dimension() if ->has_dimension() returned 1.
+
 ========================
 2. Build system changes
 ========================

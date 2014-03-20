@@ -713,7 +713,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSR
 }
 /* }}} */
 
-static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
+static int zend_std_has_dimension(zval *object, zval *offset TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval *retval;
@@ -725,13 +725,6 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty TS
 		if (EXPECTED(retval != NULL)) {
 			result = i_zend_is_true(retval);
 			zval_ptr_dtor(&retval);
-			if (check_empty && result && EXPECTED(!EG(exception))) {
-				zend_call_method_with_1_params(&object, ce, NULL, "offsetget", &retval, offset);
-				if (retval) {
-					result = i_zend_is_true(retval);
-					zval_ptr_dtor(&retval);
-				}
-			}
 		} else {
 			result = 0;
 		}

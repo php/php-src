@@ -329,6 +329,10 @@ PHP 5.6 UPGRADE NOTES
   - Added LISTEN/NOTIFY support via PDO::pgsqlGetNotify / PDO::pgsqlGetPid()
     as described in https://bugs.php.net/bug.php?id=42614.
 
+- SPL:
+  - offsetGet() will now be called on objects that extend ArrayObject when using
+    isset() or empty() if offsetExists() returns TRUE.
+
 ========================================
 9. New Global Constants
 ========================================

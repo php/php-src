@@ -494,10 +494,9 @@ static void spl_fixedarray_object_unset_dimension(zval *object, zval *offset TSR
 }
 /* }}} */
 
-static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
+static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_object *intern, zval *offset TSRMLS_DC) /* {{{ */
 {
 	long index;
-	int retval;
 	
 	if (Z_TYPE_P(offset) != IS_LONG) {
 		index = spl_offset_convert_to_long(offset TSRMLS_CC);
@@ -505,27 +504,15 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 		index = Z_LVAL_P(offset);
 	}
 	
-	if (index < 0 || intern->array == NULL || index >= intern->array->size) {
-		retval = 0;
+	if (index >= 0 && intern->array != NULL && index < intern->array->size) {
+		return 1;
 	} else {
-		if (!intern->array->elements[index]) {
-			retval = 0;
-		} else if (check_empty) {
-			if (zend_is_true(intern->array->elements[index])) {
-				retval = 1;
-			} else {
-				retval = 0;
-			}
-		} else { /* != NULL and !check_empty */
-			retval = 1;
-		}
+		return 0;
 	}
-
-	return retval;
 }
 /* }}} */
 
-static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int check_empty TSRMLS_DC) /* {{{ */
+static int spl_fixedarray_object_has_dimension(zval *object, zval *offset TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
@@ -545,7 +532,7 @@ static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int c
 		return 0;
 	}
 
-	return spl_fixedarray_object_has_dimension_helper(intern, offset, check_empty TSRMLS_CC);
+	return spl_fixedarray_object_has_dimension_helper(intern, offset TSRMLS_CC);
 }
 /* }}} */
 
@@ -829,7 +816,7 @@ SPL_METHOD(SplFixedArray, offsetExists)
 
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex, 0 TSRMLS_CC));
+	RETURN_BOOL(spl_fixedarray_object_has_dimension_helper(intern, zindex TSRMLS_CC));
 } /* }}} */
 
 /* {{{ proto mixed SplFixedArray::offsetGet(mixed $index) U
