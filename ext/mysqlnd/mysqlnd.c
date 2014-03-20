@@ -2717,12 +2717,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 							v == ' ' ||
 							v == '=')
 						{
-							*p_copy = v;
-						} else {
-							*p_copy = '?';
+							*p_copy++ = v;
 						}
 						++p_orig;
-						++p_copy;
 					}
 					*p_copy++ = '*';
 					*p_copy++ = '/';
