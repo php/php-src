@@ -3346,7 +3346,8 @@ again:
 			}
 
 ZEND_VM_C_LABEL(unpack_iter_dtor):
-			iter->funcs->dtor(iter TSRMLS_CC);
+//???			iter->funcs->dtor(iter TSRMLS_CC);
+			zend_iterator_dtor(iter TSRMLS_CC);
 			break;
 		}
 		case IS_REFERENCE:
