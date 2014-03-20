@@ -208,6 +208,10 @@ static void zend_generator_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 	zend_object_std_dtor(&generator->std TSRMLS_CC);
 
+	if (generator->iterator.std.handle) {
+		zend_iterator_dtor(&generator->iterator TSRMLS_CC);
+	}
+
 	GC_REMOVE_FROM_BUFFER(generator);
 	efree(generator);
 }
