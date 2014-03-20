@@ -641,9 +641,9 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 			if (p->u.v.type == IS_OBJECT) {
 				zend_object *obj = (zend_object*)p;
 
-				if (obj->handlers->dtor_obj &&
-				    EG(objects_store).object_buckets &&
-					IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+				if (EG(objects_store).object_buckets &&
+				    obj->handlers->dtor_obj &&
+				    IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 					!(obj->gc.u.v.flags & IS_OBJ_DESTRUCTOR_CALLED)) {
 
 					obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
