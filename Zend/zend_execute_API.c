@@ -640,6 +640,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
+					Z_ADDREF(const_value);
 					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STR(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
@@ -659,7 +660,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			if (ret == SUCCESS) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 			}
-			zval_dtor(&const_value);
+			zval_ptr_dtor(&const_value);
 		}
 		zend_hash_apply_with_argument(Z_ARRVAL_P(p), (apply_func_arg_t) zval_update_constant_inline_change, (void *) scope TSRMLS_CC);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
