@@ -331,39 +331,25 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
 				zend_hash_add(&EG(active_symbol_table)->ht, key->key, &tmp);
+				Z_ADDREF_P(p);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
 			}
 		} else {
 			if (is_ref) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
-/*
-				if (!Z_ISREF_P(p)) {
-					if (Z_REFCOUNTED_P(p) && Z_REFCOUNT_P(p) > 1) {
-						Z_DELREF_P(p);
-						ZVAL_NEW_REF(p, p);
-						zval_copy_ctor(Z_REFVAL_P(p));
-						Z_SET_REFCOUNT_P(Z_REFVAL_P(p), 1);
-					} else {
-						ZVAL_NEW_REF(p, p);
-					}
-				}
-*/
+				Z_ADDREF_P(p);
 			} else if (Z_ISREF_P(p)) {
-				ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(p));
-				if (Z_REFCOUNTED(tmp) && Z_REFCOUNT(tmp) > 1) {
-					zval_copy_ctor(&tmp);
-					Z_SET_REFCOUNT(tmp, 0);
-				}
+				ZVAL_DUP(&tmp, Z_REFVAL_P(p));
 				p = &tmp;
+			} else if (Z_REFCOUNTED_P(p)) {
+				Z_ADDREF_P(p);
 			}
 		}
-	}
-	if (zend_hash_add(target, key->key, p)) {
-		if (Z_REFCOUNTED_P(p)) {
-			Z_ADDREF_P(p);
-		}
-	}
+	} else if (Z_REFCOUNTED_P(p)) {
+		Z_ADDREF_P(p);
+	} 
+	zend_hash_add(target, key->key, p);
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
