@@ -146,7 +146,7 @@ ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 
 	GC_BENCH_INC(zval_possible_root);
 
-	if (GC_GET_COLOR(ref->u.v.gc_info) != GC_PURPLE) {
+	if (GC_GET_COLOR(ref->u.v.gc_info) == GC_BLACK) {
 		GC_SET_PURPLE(ref->u.v.gc_info);
 
 		if (!GC_ADDRESS(ref->u.v.gc_info)) {
