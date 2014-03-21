@@ -2375,10 +2375,6 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = opline->op1.zv;
 
-	if (IS_CONST == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
-		Z_SET_REFCOUNT_P(z, 1);
-	}
-
 	if (UNEXPECTED(Z_ISREF_P(z))) {
 		z = Z_REFVAL_P(z);
 	}
@@ -7483,10 +7479,6 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_TMP_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
-		Z_SET_REFCOUNT_P(z, 1);
-	}
-
 	if (UNEXPECTED(Z_ISREF_P(z))) {
 		z = Z_REFVAL_P(z);
 	}
@@ -12535,10 +12527,6 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	z = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
-	if (IS_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
-		Z_SET_REFCOUNT_P(z, 1);
-	}
 
 	if (UNEXPECTED(Z_ISREF_P(z))) {
 		z = Z_REFVAL_P(z);
@@ -30084,10 +30072,6 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	z = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-
-	if (IS_CV == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
-		Z_SET_REFCOUNT_P(z, 1);
-	}
 
 	if (UNEXPECTED(Z_ISREF_P(z))) {
 		z = Z_REFVAL_P(z);
