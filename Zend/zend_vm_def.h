@@ -1821,7 +1821,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
 	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		PZVAL_LOCK(value_ptr);
+		if (!OP2_FREE) {
+			PZVAL_LOCK(value_ptr);
+		}
 	}
 	if (OP1_TYPE == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
