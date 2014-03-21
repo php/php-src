@@ -478,7 +478,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				if (inc_refcount == 0 && iterator) {
 					zval_ptr_dtor(iterator);
 				}
-				*iterator = caching_it;
+				iterator = &caching_it;
 				inc_refcount = 0;
 			} else {
 				iterator = NULL;
