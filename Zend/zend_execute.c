@@ -1266,24 +1266,14 @@ convert_to_array:
 					if (!Z_ISREF_P(overloaded_result)) {
 						if (Z_REFCOUNTED_P(overloaded_result) &&
 						    Z_REFCOUNT_P(overloaded_result) > 1) {
-//???
-#if 1
-//							if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
+							if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
 								Z_DELREF_P(overloaded_result);
 								ZVAL_DUP(result, overloaded_result);
 								overloaded_result = result;
-//							} else {
-								ZVAL_COPY_VALUE(result, overloaded_result);
+							} else {
+								ZVAL_COPY(result, overloaded_result);
 								overloaded_result = result;
-//							}
-#else
-//???							zval *tmp = overloaded_result;
-//???
-//???							ALLOC_ZVAL(overloaded_result);
-//???							ZVAL_DUP(overloaded_result, tmp);
-//???							Z_UNSET_ISREF_P(overloaded_result);
-//???							Z_SET_REFCOUNT_P(overloaded_result, 0);
-#endif
+							}
 						}
 						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
 							zend_class_entry *ce = Z_OBJCE_P(container);
