@@ -282,11 +282,11 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		 * Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		 * not contain objects and thus are not probelmatic */
 		if (EG(full_tables_cleanup)) {
-			zend_hash_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
-			zend_hash_apply(EG(class_table), (apply_func_t) zend_cleanup_class_data TSRMLS_CC);
+			zend_hash_apply(EG(function_table), zend_cleanup_function_data_full TSRMLS_CC);
+			zend_hash_apply(EG(class_table), zend_cleanup_class_data TSRMLS_CC);
 		} else {
-			zend_hash_reverse_apply(EG(function_table), (apply_func_t) zend_cleanup_function_data TSRMLS_CC);
-			zend_hash_reverse_apply(EG(class_table), (apply_func_t) zend_cleanup_user_class_data TSRMLS_CC);
+			zend_hash_reverse_apply(EG(function_table), zend_cleanup_function_data TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), zend_cleanup_user_class_data TSRMLS_CC);
 			zend_cleanup_internal_classes(TSRMLS_C);
 		}
 	} zend_end_try();
@@ -298,11 +298,11 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
-			zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-			zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function_full TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class_full TSRMLS_CC);
 		} else {
-			zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function TSRMLS_CC);
-			zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class TSRMLS_CC);
+			zend_hash_reverse_apply(EG(function_table), clean_non_persistent_function TSRMLS_CC);
+			zend_hash_reverse_apply(EG(class_table), clean_non_persistent_class TSRMLS_CC);
 		}
 
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {

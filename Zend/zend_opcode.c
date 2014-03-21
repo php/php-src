@@ -136,8 +136,10 @@ static void zend_cleanup_op_array_data(zend_op_array *op_array)
 	}
 }
 
-ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
+ZEND_API int zend_cleanup_function_data(zval *zv TSRMLS_DC)
 {
+	zend_function *function = Z_PTR_P(zv);
+
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 		return ZEND_HASH_APPLY_KEEP;
@@ -146,8 +148,10 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC)
 	}
 }
 
-ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC)
+ZEND_API int zend_cleanup_function_data_full(zval *zv TSRMLS_DC)
 {
+	zend_function *function = Z_PTR_P(zv);
+
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_cleanup_op_array_data((zend_op_array *) function);
 	}
@@ -160,7 +164,7 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 	/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 	   not contain objects and thus are not probelmatic */
 	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-		zend_hash_apply(&ce->function_table, (apply_func_t) zend_cleanup_function_data_full TSRMLS_CC);
+		zend_hash_apply(&ce->function_table, zend_cleanup_function_data_full TSRMLS_CC);
 	}
 	if (ce->static_members_table) {
 		int i;
@@ -200,22 +204,26 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
 	cleanup_internal_class_data(ce TSRMLS_CC);
 }
 
-ZEND_API int zend_cleanup_user_class_data(zend_class_entry **pce TSRMLS_DC)
+ZEND_API int zend_cleanup_user_class_data(zval *zv TSRMLS_DC)
 {
-	if ((*pce)->type == ZEND_USER_CLASS) {
-		cleanup_user_class_data(*pce TSRMLS_CC);
+	zend_class_entry *ce = Z_PTR_P(zv);
+
+	if (ce->type == ZEND_USER_CLASS) {
+		cleanup_user_class_data(ce TSRMLS_CC);
 		return ZEND_HASH_APPLY_KEEP;
 	} else {
 		return ZEND_HASH_APPLY_STOP;
 	}
 }
 
-ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
+ZEND_API int zend_cleanup_class_data(zval *zv TSRMLS_DC)
 {
-	if ((*pce)->type == ZEND_USER_CLASS) {
-		cleanup_user_class_data(*pce TSRMLS_CC);
+	zend_class_entry *ce = Z_PTR_P(zv);
+
+	if (ce->type == ZEND_USER_CLASS) {
+		cleanup_user_class_data(ce TSRMLS_CC);
 	} else {
-		cleanup_internal_class_data(*pce TSRMLS_CC);
+		cleanup_internal_class_data(ce TSRMLS_CC);
 	}
 	return 0;
 }
