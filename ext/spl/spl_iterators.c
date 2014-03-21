@@ -332,7 +332,7 @@ next_step:
 				}
 				object->iterators = erealloc(object->iterators, sizeof(spl_sub_iterator) * (++object->level+1));
 				sub_iter = ce->get_iterator(ce, &child, 0 TSRMLS_CC);
-				ZVAL_COPY(&object->iterators[object->level].zobject, &child);
+				ZVAL_COPY_VALUE(&object->iterators[object->level].zobject, &child);
 				object->iterators[object->level].iterator = sub_iter;
 				object->iterators[object->level].ce = ce;
 				object->iterators[object->level].state = RS_START;
