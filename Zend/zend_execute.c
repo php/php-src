@@ -775,7 +775,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 				Z_ADDREF_P(object);
 				zend_error(E_WARNING, "Creating default object from empty value");
 //???
-				if (Z_TYPE_P(object) == IS_INDIRECT); {
+				if (Z_TYPE_P(object) == IS_INDIRECT) {
 					object = Z_INDIRECT_P(object);
 				}
 				if (Z_REFCOUNT_P(object) == 1) {
@@ -791,7 +791,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 			} else {
 				zend_error(E_WARNING, "Creating default object from empty value");
 //???
-				if (Z_TYPE_P(object) == IS_INDIRECT); {
+				if (Z_TYPE_P(object) == IS_INDIRECT) {
 					object = Z_INDIRECT_P(object);
 				}
 			}
