@@ -1452,9 +1452,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 						zend_restore_error_handling(&error_handling TSRMLS_CC);
 						return NULL;
 					}
-					ZVAL_COPY_VALUE(zobject, &retval);
+					zobject = &retval;
 					ce = Z_OBJCE_P(zobject);
-					//??? inc_refcount = 0;
+					inc_refcount = 0;
 				}
 			}
 			break;
