@@ -359,6 +359,12 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n TSRMLS_DC)
 {
 	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
 
+	if (closure->debug_info != NULL) {
+		zend_hash_destroy(closure->debug_info);
+		efree(closure->debug_info);
+		closure->debug_info = NULL;
+	}
+
 	*table = Z_TYPE(closure->this_ptr) != IS_NULL ? &closure->this_ptr : NULL;
 	*n = Z_TYPE(closure->this_ptr) != IS_NULL ? 1 : 0;
 	return (closure->func.type == ZEND_USER_FUNCTION) ?
