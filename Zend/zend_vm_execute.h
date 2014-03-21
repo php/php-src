@@ -1323,7 +1323,7 @@ static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLE
 {
 	if (EX(delayed_exception) != NULL) {
 		/* discard the previously thrown exception */
-//???		zval_ptr_dtor(EX(delayed_exception));
+		OBJ_RELEASE(EX(delayed_exception));
 		EX(delayed_exception) = NULL;
 	}
 

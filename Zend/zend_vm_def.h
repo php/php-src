@@ -5597,7 +5597,7 @@ ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
 {
 	if (EX(delayed_exception) != NULL) {
 		/* discard the previously thrown exception */
-//???		zval_ptr_dtor(EX(delayed_exception));
+		OBJ_RELEASE(EX(delayed_exception));
 		EX(delayed_exception) = NULL;
 	}
 
