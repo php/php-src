@@ -663,13 +663,15 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
 	p = ht->pListHead;
 	while (p != NULL) {
 		int result;
+		Bucket *p_next;
+
 		va_start(args, num_args);
 		hash_key.arKey = p->arKey;
 		hash_key.nKeyLength = p->nKeyLength;
 		hash_key.h = p->h;
 		result = apply_func(p->pData TSRMLS_CC, num_args, args, &hash_key);
 
-		Bucket *p_next = p->pListNext;
+		p_next = p->pListNext;
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			zend_hash_bucket_delete(ht, p);
 		}
