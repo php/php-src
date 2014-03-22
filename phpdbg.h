@@ -176,6 +176,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 	
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
+	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watchpoints;                       /* watchpoints */
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */

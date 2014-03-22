@@ -52,7 +52,6 @@ static const phpdbg_command_t phpdbg_watch_commands[] = {
 typedef enum {
 	WATCH_ON_ZVAL,
 	WATCH_ON_HASHTABLE,
-	WATCH_ON_PTR
 } phpdbg_watchtype;
 
 
