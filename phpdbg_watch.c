@@ -436,13 +436,15 @@ PHPDBG_WATCH(array) /* {{{ */
 } /* }}} */
 
 void phpdbg_watch_HashTable_dtor(zval **zv) {
+	TSRMLS_FETCH();
+
 	phpdbg_btree_result *result;
 	if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong)*zv))) {
 		phpdbg_watchpoint_t *watch = result->ptr;
 
 		PHPDBG_G(watchpoint_hit) = 1;
 
-		phpdbg_notice("%.*s was removed, removing watchpoint%s", watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_RECURSIVE)?" recursively":"");
+		phpdbg_notice("%.*s was removed, removing watchpoint%s", (int)watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_RECURSIVE)?" recursively":"");
 
 		if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
 			phpdbg_delete_watchpoint_recursive(watch TSRMLS_CC);

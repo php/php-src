@@ -98,7 +98,7 @@ void phpdbg_list_watchpoints(TSRMLS_D);
 void phpdbg_watch_efree(void *ptr);
 
 
-long phpdbg_pagesize;
+static long phpdbg_pagesize;
 
 static zend_always_inline void *phpdbg_get_page_boundary(void *addr) {
 	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
