@@ -1093,6 +1093,8 @@ out:
 
 	PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
 
+	phpdbg_print_changed_zvals(TSRMLS_C);
+
 	return ret;
 } /* }}} */
 
