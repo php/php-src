@@ -898,7 +898,7 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 	return (const zend_encoding *) mbfl_identify_encoding2(&string, (const mbfl_encoding **)list, list_size, 0);
 }
 
-static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC)
+static size_t php_mb_zend_encoding_converter(zend_string **to, zend_string *from, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC)
 {
 	mbfl_string string, result;
 	mbfl_buffer_converter *convd;
@@ -910,8 +910,8 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 	mbfl_string_init(&result);
 	string.no_encoding = ((const mbfl_encoding*)encoding_from)->no_encoding;
 	string.no_language = MBSTRG(language);
-	string.val = (unsigned char*)from;
-	string.len = from_length;
+	string.val = (unsigned char*)from->val;
+	string.len = from->len;
 
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new2((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
@@ -934,8 +934,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 		return (size_t)-1;
 	}	
 
-	*to = result.val;
-	*to_length = result.len;
+	*to = STR_INIT(result.val, result.len, 0);
 
 	mbfl_buffer_converter_delete(convd);
 
@@ -2173,6 +2172,7 @@ PHP_FUNCTION(mb_output_handler)
  	mbfl_buffer_converter_result(MBSTRG(outconv), &result);
 	//????
  	RETVAL_STRINGL((char *)result.val, result.len);		/* the string is already strdup()'ed */
+	efree(result.val);
  
  	/* delete the converter if it is the last feed. */
  	if (last_feed) {
@@ -2476,6 +2476,7 @@ PHP_FUNCTION(mb_strstr)
 			if (ret != NULL) {
 				//???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
+				efree(ret->val);
 			} else {
 				RETVAL_FALSE;
 			}
@@ -2485,6 +2486,7 @@ PHP_FUNCTION(mb_strstr)
 			if (ret != NULL) {
 				//????
 				RETVAL_STRINGL((char *)ret->val, ret->len);
+				efree(ret->val);
 			} else {
 				RETVAL_FALSE;
 			}
@@ -2538,6 +2540,7 @@ PHP_FUNCTION(mb_strrchr)
 			if (ret != NULL) {
 				//????
 				RETVAL_STRINGL((char *)ret->val, ret->len);
+				efree(ret->val);
 			} else {
 				RETVAL_FALSE;
 			}
@@ -2547,6 +2550,7 @@ PHP_FUNCTION(mb_strrchr)
 			if (ret != NULL) {
 				//????
 				RETVAL_STRINGL((char *)ret->val, ret->len);
+				efree(ret->val);
 			} else {
 				RETVAL_FALSE;
 			}
@@ -2602,6 +2606,7 @@ PHP_FUNCTION(mb_stristr)
 		if (ret != NULL) {
 			//????
 			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		} else {
 			RETVAL_FALSE;
 		}
@@ -2611,6 +2616,7 @@ PHP_FUNCTION(mb_stristr)
 		if (ret != NULL) {
 			//????
 			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		} else {
 			RETVAL_FALSE;
 		}
@@ -2657,6 +2663,7 @@ PHP_FUNCTION(mb_strrichr)
 		if (ret != NULL) {
 			//???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		} else {
 			RETVAL_FALSE;
 		}
@@ -2666,6 +2673,7 @@ PHP_FUNCTION(mb_strrichr)
 		if (ret != NULL) {
 			//????
 			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		} else {
 			RETVAL_FALSE;
 		}
@@ -2789,7 +2797,8 @@ PHP_FUNCTION(mb_substr)
 	}
 
 	//????
-	RETURN_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -2857,7 +2866,8 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	//????
-	RETURN_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -2951,6 +2961,7 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 	//????
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -3567,6 +3578,7 @@ PHP_FUNCTION(mb_convert_variables)
 			while (n < argc || stack_level > 0) {
 				if (stack_level <= 0) {
 					var = &args[n++];
+					ZVAL_DEREF(var);
 					if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 						target_hash = HASH_OF(var);
 						if (target_hash != NULL) {
@@ -3648,6 +3660,7 @@ detect_end:
 		while (n < argc || stack_level > 0) {
 			if (stack_level <= 0) {
 				var = &args[n++];
+				ZVAL_DEREF(var);
 				if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 					target_hash = HASH_OF(var);
 					if (target_hash != NULL) {
@@ -3686,6 +3699,7 @@ detect_end:
 								zval_ptr_dtor(hash_entry);
 								//???
 								ZVAL_STRINGL(hash_entry, (char *)ret->val, ret->len);
+								efree(ret->val);
 							}
 						}
 					}
@@ -3698,6 +3712,7 @@ detect_end:
 					zval_ptr_dtor(var);
 					//????
 					ZVAL_STRINGL(var, (char *)ret->val, ret->len);
+					efree(ret->val);
 				}
 			}
 		}
@@ -3788,6 +3803,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	if (ret != NULL) {
 		//???
 		RETVAL_STRINGL((char *)ret->val, ret->len);
+		efree(ret->val);
 	} else {
 		RETVAL_FALSE;
 	}
