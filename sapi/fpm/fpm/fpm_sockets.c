@@ -90,7 +90,6 @@ static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int typ
 	if (key == NULL) {
 		switch (type) {
 			case FPM_AF_INET : {
-				struct sockaddr_in *sa_in = (struct sockaddr_in *) sa;
 				key = alloca(INET6_ADDRSTRLEN);
 				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, sizeof key);
 				break;
@@ -265,10 +264,12 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	}
 
 	// strip brackets from address for getaddrinfo
-	addr_len = strlen(addr);
-	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
-		addr[addr_len - 1] = '\0';
-		addr++;
+	if (addr != NULL) {
+		addr_len = strlen(addr);
+		if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+			addr[addr_len - 1] = '\0';
+			addr++;
+		}
 	}
 
 	memset(&hints, 0, sizeof hints);

@@ -55,7 +55,7 @@
 ; Default Value: 0
 ;emergency_restart_threshold = 0
 
-; Interval of time used by emergency_restart_interval to determine when 
+; Interval of time used by emergency_restart_interval to determine when
 ; a graceful restart will be initiated.  This can be useful to work around
 ; accidental corruptions in an accelerator's shared memory.
 ; Available Units: s(econds), m(inutes), h(ours), or d(ays)
@@ -87,11 +87,11 @@
 ; Send FPM to background. Set to 'no' to keep FPM in foreground for debugging.
 ; Default Value: yes
 ;daemonize = yes
- 
+
 ; Set open file descriptor rlimit for the master process.
 ; Default Value: system defined value
 ;rlimit_files = 1024
- 
+
 ; Set max core size rlimit for the master process.
 ; Possible Values: 'unlimited' or an integer greater or equal to 0
 ; Default Value: system defined value
@@ -116,7 +116,7 @@
 ;systemd_interval = 10
 
 ;;;;;;;;;;;;;;;;;;;;
-; Pool Definitions ; 
+; Pool Definitions ;
 ;;;;;;;;;;;;;;;;;;;;
 
 ; Multiple pools of child processes may be started with different listening
@@ -152,6 +152,8 @@ group = @php_fpm_group@
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
 ;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific ipv6 address on
+;                            a specific port;
 ;   'port'                 - to listen on a TCP socket to all addresses on a
 ;                            specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
@@ -164,13 +166,13 @@ listen = 127.0.0.1:9000
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
-; BSD-derived systems allow connections regardless of permissions. 
+; BSD-derived systems allow connections regardless of permissions.
 ; Default Values: user and group are set as the running user
 ;                 mode is set to 0666
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0666
- 
+
 ; List of ipv4 addresses of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
 ; PHP FCGI (5.2.2+). Makes sense only with a tcp listening socket. Each address
@@ -243,7 +245,7 @@ pm.max_spare_servers = 3
 ; Note: Used only when pm is set to 'ondemand'
 ; Default Value: 10s
 ;pm.process_idle_timeout = 10s;
- 
+
 ; The number of requests each child process should execute before respawning.
 ; This can be useful to work around memory leaks in 3rd party libraries. For
 ; endless request processing specify '0'. Equivalent to PHP_FCGI_MAX_REQUESTS.
@@ -296,7 +298,7 @@ pm.max_spare_servers = 3
 ;
 ; By default the status page only outputs short status. Passing 'full' in the
 ; query string will also return status for each pool process.
-; Example: 
+; Example:
 ;   http://www.foo.bar/status?full
 ;   http://www.foo.bar/status?json&full
 ;   http://www.foo.bar/status?html&full
@@ -346,9 +348,9 @@ pm.max_spare_servers = 3
 ; Note: The value must start with a leading slash (/). The value can be
 ;       anything, but it may not be a good idea to use the .php extension or it
 ;       may conflict with a real PHP file.
-; Default Value: not set 
+; Default Value: not set
 ;pm.status_path = /status
- 
+
 ; The ping URI to call the monitoring page of FPM. If this value is not set, no
 ; URI will be recognized as a ping page. This could be used to test from outside
 ; that FPM is alive and responding, or to
@@ -409,7 +411,7 @@ pm.max_spare_servers = 3
 ;      - ....
 ;  %p: PID of the child that serviced the request
 ;  %P: PID of the parent of the child that serviced the request
-;  %q: the query string 
+;  %q: the query string
 ;  %Q: the '?' character if query string exists
 ;  %r: the request URI (without the query string, see %q and %Q)
 ;  %R: remote IP address
@@ -424,50 +426,50 @@ pm.max_spare_servers = 3
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
- 
+
 ; The log file for slow requests
 ; Default Value: not set
 ; Note: slowlog is mandatory if request_slowlog_timeout is set
 ;slowlog = log/$pool.log.slow
- 
+
 ; The timeout for serving a single request after which a PHP backtrace will be
 ; dumped to the 'slowlog' file. A value of '0s' means 'off'.
 ; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
 ; Default Value: 0
 ;request_slowlog_timeout = 0
- 
+
 ; The timeout for serving a single request after which the worker process will
 ; be killed. This option should be used when the 'max_execution_time' ini option
 ; does not stop script execution for some reason. A value of '0' means 'off'.
 ; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
 ; Default Value: 0
 ;request_terminate_timeout = 0
- 
+
 ; Set open file descriptor rlimit.
 ; Default Value: system defined value
 ;rlimit_files = 1024
- 
+
 ; Set max core size rlimit.
 ; Possible Values: 'unlimited' or an integer greater or equal to 0
 ; Default Value: system defined value
 ;rlimit_core = 0
- 
+
 ; Chroot to this directory at the start. This value must be defined as an
 ; absolute path. When this value is not set, chroot is not used.
 ; Note: you can prefix with '$prefix' to chroot to the pool prefix or one
 ; of its subdirectories. If the pool prefix is not set, the global prefix
 ; will be used instead.
-; Note: chrooting is a great security feature and should be used whenever 
+; Note: chrooting is a great security feature and should be used whenever
 ;       possible. However, all PHP paths will be relative to the chroot
 ;       (error_log, sessions.save_path, ...).
 ; Default Value: not set
-;chroot = 
- 
+;chroot =
+
 ; Chdir to this directory at the start.
 ; Note: relative path can be used.
 ; Default Value: current directory or / when chroot
 ;chdir = /var/www
- 
+
 ; Redirect worker stdout and stderr into main error log. If not set, stdout and
 ; stderr will be redirected to /dev/null according to FastCGI specs.
 ; Note: on highloaded environement, this can cause some delay in the page
@@ -491,7 +493,7 @@ pm.max_spare_servers = 3
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5
- 
+
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.
 ; Default Value: clean env
@@ -505,7 +507,7 @@ pm.max_spare_servers = 3
 ; overwrite the values previously defined in the php.ini. The directives are the
 ; same as the PHP SAPI:
 ;   php_value/php_flag             - you can set classic ini defines which can
-;                                    be overwritten from PHP call 'ini_set'. 
+;                                    be overwritten from PHP call 'ini_set'.
 ;   php_admin_value/php_admin_flag - these directives won't be overwritten by
 ;                                     PHP call 'ini_set'
 ; For php_*flag, valid values are on, off, 1, 0, true, false, yes or no.
