@@ -48,6 +48,6 @@ array(2) {
 }
 bool(false)
 
-Warning: mysql_fetch_lengths(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_lengths(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

@@ -357,5 +357,5 @@ array(11) {
 
 Warning: mysql_fetch_array(): The result type should be either MYSQL_NUM, MYSQL_ASSOC or MYSQL_BOTH in %s on line %d
 
-Warning: mysql_fetch_array(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_array(): supplied resource is not a valid MySQL result resource in %s on line %d
 done!

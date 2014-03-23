@@ -111,7 +111,7 @@ PHP_FUNCTION(mysql_set_charset);
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
-	long default_link;
+	zend_resource *default_link;
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;

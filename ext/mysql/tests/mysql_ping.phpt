@@ -47,5 +47,5 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: mysql_ping(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_ping(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

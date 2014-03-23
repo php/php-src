@@ -124,5 +124,5 @@ array(1) {
 }
 %unicode|string%(1) "a"
 
-Warning: mysql_query(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_query(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

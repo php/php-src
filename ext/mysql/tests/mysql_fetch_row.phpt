@@ -52,6 +52,6 @@ array(2) {
 [005]
 bool(false)
 
-Warning: mysql_fetch_row(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_row(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

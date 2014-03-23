@@ -111,6 +111,6 @@ bool(false)
 Warning: mysql_result(): test.label not found in MySQL result index %d in %s on line %d
 bool(false)
 
-Warning: mysql_result(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_result(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

@@ -118,5 +118,5 @@ int(0)
 
 Notice: mysql_close(): Function called without first fetching all rows from a previous unbuffered query in %s on line %d
 
-Warning: mysql_unbuffered_query(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_unbuffered_query(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

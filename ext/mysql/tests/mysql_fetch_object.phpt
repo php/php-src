@@ -147,7 +147,7 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: mysql_fetch_object(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_object(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

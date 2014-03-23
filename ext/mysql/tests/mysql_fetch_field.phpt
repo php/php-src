@@ -217,7 +217,7 @@ bool(false)
 
 Warning: mysql_fetch_field(): Bad field offset in %s on line %d
 
-Warning: mysql_fetch_field(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_fetch_field(): supplied resource is not a valid MySQL result resource in %s on line %d
 object(stdClass)#%d (13) {
   [%u|b%"name"]=>
   %unicode|string%(2) "id"

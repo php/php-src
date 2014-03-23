@@ -212,7 +212,7 @@ void plist_entry_destructor(zval *zv)
 int zend_init_rsrc_list(TSRMLS_D)
 {
 	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0)==SUCCESS) {
-		EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
+		EG(regular_list).nNextFreeElement = 1;	/* we don't want resource id 0 */
 		return SUCCESS;
 	} else {
 		return FAILURE;

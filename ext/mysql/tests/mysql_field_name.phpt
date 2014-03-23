@@ -55,6 +55,6 @@ Warning: mysql_field_name(): Field -1 is invalid for MySQL result index %d in %s
 
 Warning: mysql_field_name(): Field 2 is invalid for MySQL result index %d in %s on line %d
 
-Warning: mysql_field_name(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_field_name(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!
