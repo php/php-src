@@ -55,9 +55,9 @@ struct _zend_mb_regex_globals {
 #define MBREX(g) (MBSTRG(mb_regex_globals)->g)
 
 /* {{{ static void php_mb_regex_free_cache() */
-static void php_mb_regex_free_cache(php_mb_regex_t **pre) 
+static void php_mb_regex_free_cache(zval *el) 
 {
-	onig_free(*pre);
+	onig_free((php_mb_regex_t *)Z_PTR_P(el));
 }
 /* }}} */
 
@@ -66,7 +66,7 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals TSRMLS_DC)
 {
 	pglobals->default_mbctype = ONIG_ENCODING_EUC_JP;
 	pglobals->current_mbctype = ONIG_ENCODING_EUC_JP;
-	zend_hash_init(&(pglobals->ht_rc), 0, NULL, (void (*)(void *)) php_mb_regex_free_cache, 1);
+	zend_hash_init(&(pglobals->ht_rc), 0, NULL, php_mb_regex_free_cache, 1);
 	pglobals->search_str = (zval*) NULL;
 	pglobals->search_re = (php_mb_regex_t*)NULL;
 	pglobals->search_pos = 0;
@@ -140,8 +140,8 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 	MBREX(current_mbctype) = MBREX(default_mbctype);
 
 	if (MBREX(search_str) != NULL) {
-		zval_ptr_dtor(&MBREX(search_str));
-		MBREX(search_str) = (zval *)NULL;
+		zval_ptr_dtor(MBREX(search_str));
+		MBREX(search_str) = NULL;
 	}
 	MBREX(search_pos) = 0;
 
