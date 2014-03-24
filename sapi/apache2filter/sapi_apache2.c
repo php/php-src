@@ -94,11 +94,9 @@ static int
 php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	php_struct *ctx;
-	ap_filter_t *f;
 	char *val, *ptr;
 
 	ctx = SG(server_context);
-	f = ctx->r->output_filters;
 
 	switch(op) {
 		case SAPI_HEADER_DELETE:
@@ -157,11 +155,9 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
 	apr_size_t len;
 	php_struct *ctx = SG(server_context);
-	request_rec *r;
 	apr_bucket_brigade *brigade;
 	apr_bucket *partition;
 
-	r = ctx->r;
 	brigade = ctx->post_data;
 	len = count_bytes;
 
@@ -552,7 +548,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 	php_execute_script(&zfd TSRMLS_CC);
 
 	apr_table_set(ctx->r->notes, "mod_php_memory_usage",
-		apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
+		apr_psprintf(ctx->r->pool, "%lu", (unsigned long) zend_memory_peak_usage(1 TSRMLS_CC)));
 		
 	php_apache_request_dtor(f TSRMLS_CC);
 		
