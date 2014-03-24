@@ -1739,7 +1739,7 @@ PHP_FUNCTION(mb_internal_encoding)
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (name == NULL) {
 		name = MBSTRG(current_internal_encoding) ? MBSTRG(current_internal_encoding)->name: NULL;
@@ -1773,7 +1773,7 @@ PHP_FUNCTION(mb_http_input)
 
 	retname = 1;
  	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &typ, &typ_len) == FAILURE) {
- 		RETURN_FALSE;
+		return;
  	}
  	if (typ == NULL) {
  		result = MBSTRG(http_input_identify);
@@ -2196,7 +2196,7 @@ PHP_FUNCTION(mb_strlen)
 	mbfl_string_init(&string);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", (char **)&string.val, &string.len, &enc_name, &enc_name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	string.no_language = MBSTRG(language);
@@ -2394,7 +2394,7 @@ PHP_FUNCTION(mb_stripos)
 	offset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (needle.len == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
@@ -2423,7 +2423,7 @@ PHP_FUNCTION(mb_strripos)
 	offset = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ls", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &offset, &from_encoding, &from_encoding_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding TSRMLS_CC);
@@ -2454,7 +2454,7 @@ PHP_FUNCTION(mb_strstr)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, (int *)&haystack.len, (char **)&needle.val, (int *)&needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (enc_name != NULL) {
@@ -2516,7 +2516,7 @@ PHP_FUNCTION(mb_strrchr)
 	needle.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name, &enc_name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (enc_name != NULL) {
@@ -2580,7 +2580,7 @@ PHP_FUNCTION(mb_stristr)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!needle.len) {
@@ -2642,7 +2642,7 @@ PHP_FUNCTION(mb_strrichr)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|bs", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding, &from_encoding_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	haystack.no_encoding = needle.no_encoding = mbfl_name2no_encoding(from_encoding);
@@ -3142,8 +3142,9 @@ PHP_FUNCTION(mb_convert_case)
 
 	RETVAL_FALSE;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &str, &str_len,
-				&case_mode, &from_encoding, &from_encoding_len) == FAILURE)
-		RETURN_FALSE;
+				&case_mode, &from_encoding, &from_encoding_len) == FAILURE) {
+		return;
+	}
 
 	newstr = php_unicode_convert_case(case_mode, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
@@ -3312,7 +3313,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 	int name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	encoding = mbfl_name2encoding(name);
@@ -4537,7 +4538,7 @@ PHP_FUNCTION(mb_check_encoding)
 	long illegalchars = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ss", &var, &var_len, &enc, &enc_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (var == NULL) {

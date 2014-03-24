@@ -106,13 +106,13 @@ $r = mb_stripos($euc_jp,b"\n");
 echo "== INVALID PARAMETER TEST ==\n";
 
 $r = mb_stripos($euc_jp,'','EUC-JP');
-($r === FALSE) ? print("OK_NULL\n") : print("NG_NULL\n");
+($r === NULL) ? print("OK_NULL\n") : print("NG_NULL\n");
 $r = mb_stripos($euc_jp, $t_ary, 'EUC-JP');
-($r === FALSE) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
+($r === NULL) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
 $r = mb_stripos($euc_jp, $t_obj, 'EUC-JP');
-($r === FALSE) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
+($r === NULL) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
 $r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING');
-($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
+($r === NULL) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 
 
 ?>
