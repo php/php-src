@@ -3514,6 +3514,7 @@ PHP_FUNCTION(mb_convert_kana)
 	if (ret != NULL) {
 		//???
 		RETVAL_STRINGL((char *)ret->val, ret->len);		/* the string is already strdup()'ed */
+		efree(ret->val);
 	} else {
 		RETVAL_FALSE;
 	}
