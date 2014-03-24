@@ -3073,44 +3073,44 @@ PHP_FUNCTION(mb_convert_encoding)
 
 	if (ZEND_NUM_ARGS() == 3) {
 		switch (Z_TYPE_P(arg_old)) {
-		case IS_ARRAY:
-			target_hash = Z_ARRVAL_P(arg_old);
-			zend_hash_internal_pointer_reset(target_hash);
-			i = zend_hash_num_elements(target_hash);
-			_from_encodings = NULL;
-
-			while (i > 0) {
-				if ((hash_entry = zend_hash_get_current_data(target_hash)) == NULL) {
-					break;
-				}
-
-				convert_to_string_ex(hash_entry);
-
-				if ( _from_encodings) {
-					l = strlen(_from_encodings);
-					n = strlen(Z_STRVAL_P(hash_entry));
-					_from_encodings = erealloc(_from_encodings, l+n+2);
-					memcpy(_from_encodings + l, ",", 1);
-					memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRLEN_P(hash_entry));
-				} else {
-					_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
-				}
-
-				zend_hash_move_forward(target_hash);
-				i--;
-			}
-
-			if (_from_encodings != NULL && !strlen(_from_encodings)) {
-				efree(_from_encodings);
+			case IS_ARRAY:
+				target_hash = Z_ARRVAL_P(arg_old);
+				zend_hash_internal_pointer_reset(target_hash);
+				i = zend_hash_num_elements(target_hash);
 				_from_encodings = NULL;
+
+				while (i > 0) {
+					if ((hash_entry = zend_hash_get_current_data(target_hash)) == NULL) {
+						break;
+					}
+
+					convert_to_string_ex(hash_entry);
+
+					if ( _from_encodings) {
+						l = strlen(_from_encodings);
+						n = strlen(Z_STRVAL_P(hash_entry));
+						_from_encodings = erealloc(_from_encodings, l+n+2);
+						memcpy(_from_encodings + l, ",", 1);
+						memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRLEN_P(hash_entry) + 1);
+					} else {
+						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
+					}
+
+					zend_hash_move_forward(target_hash);
+					i--;
+				}
+
+				if (_from_encodings != NULL && !strlen(_from_encodings)) {
+					efree(_from_encodings);
+					_from_encodings = NULL;
+				}
+				s_free = _from_encodings;
+				break;
+			default:
+				convert_to_string(arg_old);
+				_from_encodings = Z_STRVAL_P(arg_old);
+				break;
 			}
-			s_free = _from_encodings;
-			break;
-		default:
-			convert_to_string(arg_old);
-			_from_encodings = Z_STRVAL_P(arg_old);
-			break;
-		}
 	}
 
 	/* new encoding */
