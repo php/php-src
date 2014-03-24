@@ -84,16 +84,15 @@
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
 
-/* {{{ get_charset
+/* {{{ get_default_charset
  */
-static void get_charset(char **charset, int *charset_len TSRMLS_DC) {
+static char *get_default_charset(TSRMLS_D) {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
-		*charset_len = strlen(PG(internal_encoding));
-		*charset = estrndup(PG(internal_encoding), *charset_len);
+		return PG(internal_encoding);
 	} else if (SG(default_charset) && SG(default_charset)[0] ) {
-		*charset_len = strlen(SG(default_charset));
-		*charset = estrndup(SG(default_charset), *charset_len);
+		return SG(default_charset);
 	}
+	return NULL;
 }
 /* }}} */
 
@@ -1445,7 +1444,7 @@ encode_amp:
  */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
-	char *str, *hint_charset = "";
+	char *str, *hint_charset = NULL;
 	int str_len, hint_charset_len = 0;
 	size_t new_len;
 	long flags = ENT_COMPAT;
@@ -1456,13 +1455,10 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
-	if (hint_charset_len) {
-		replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
-	} else {
-		get_charset(&hint_charset, &hint_charset_len TSRMLS_CC);
-		replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
-		efree(hint_charset);
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
 	}
+	replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
 
 	RETVAL_STRINGL(replaced, (int)new_len, 0);
 }
@@ -1524,8 +1520,8 @@ PHP_FUNCTION(htmlspecialchars_decode)
    Convert all HTML entities to their applicable characters */
 PHP_FUNCTION(html_entity_decode)
 {
-	char *str, *hint_charset = "";
-	int str_len, hint_charset_len = 0;
+	char *str, *hint_charset = NULL;
+	int str_len, hint_charset_len;
 	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
@@ -1535,13 +1531,10 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
-	if (hint_charset_len) {
-		replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
-	} else {
-		get_charset(&hint_charset, &hint_charset_len TSRMLS_CC);
-		replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
-		efree(hint_charset);
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
 	}
+	replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
 
 	if (replaced) {
 		RETURN_STRINGL(replaced, (int)new_len, 0);
