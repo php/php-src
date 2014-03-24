@@ -8,6 +8,9 @@ if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die("skip Test doesn't work on Windows");
 }
 
+if (!$IS_MYSQLND)
+    die("skip mysqlnd only, libmysql does not warning about server gone away");
+
 if (!($output = @exec("lsof -np " . getmypid())))
 	die("skip Test can't find command line tool lsof");
 ?>
