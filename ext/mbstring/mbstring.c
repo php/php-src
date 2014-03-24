@@ -898,7 +898,7 @@ static const zend_encoding *php_mb_zend_encoding_detector(const unsigned char *a
 	return (const zend_encoding *) mbfl_identify_encoding2(&string, (const mbfl_encoding **)list, list_size, 0);
 }
 
-static size_t php_mb_zend_encoding_converter(zend_string **to, zend_string *from, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC)
+static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length, const zend_encoding *encoding_to, const zend_encoding *encoding_from TSRMLS_DC)
 {
 	mbfl_string string, result;
 	mbfl_buffer_converter *convd;
@@ -910,8 +910,8 @@ static size_t php_mb_zend_encoding_converter(zend_string **to, zend_string *from
 	mbfl_string_init(&result);
 	string.no_encoding = ((const mbfl_encoding*)encoding_from)->no_encoding;
 	string.no_language = MBSTRG(language);
-	string.val = (unsigned char*)from->val;
-	string.len = from->len;
+	string.val = (unsigned char*)from;
+	string.len = from_length;
 
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new2((const mbfl_encoding *)encoding_from, (const mbfl_encoding *)encoding_to, string.len);
@@ -934,7 +934,8 @@ static size_t php_mb_zend_encoding_converter(zend_string **to, zend_string *from
 		return (size_t)-1;
 	}	
 
-	*to = STR_INIT(result.val, result.len, 0);
+	*to = result.val;
+	*to_length = result.len;
 
 	mbfl_buffer_converter_delete(convd);
 
