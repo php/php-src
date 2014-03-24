@@ -155,24 +155,31 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int
 php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
-	int n;
-	int to_read;
+	apr_size_t len;
 	php_struct *ctx = SG(server_context);
+	request_rec *r;
+	apr_bucket_brigade *brigade;
+	apr_bucket *partition;
 
-	to_read = ctx->post_len - ctx->post_idx;
-	n = MIN(to_read, count_bytes);
-	
-	if (n > 0) {
-		memcpy(buf, ctx->post_data + ctx->post_idx, n);
-		ctx->post_idx += n;
-	} else {
-		if (ctx->post_data) free(ctx->post_data);
-		ctx->post_data = NULL;
+	r = ctx->r;
+	brigade = ctx->post_data;
+	len = count_bytes;
+
+	switch (apr_brigade_partition(ctx->post_data, count_bytes, &partition)) {
+	case APR_SUCCESS:
+		apr_brigade_flatten(ctx->post_data, buf, &len);
+		brigade = apr_brigade_split(ctx->post_data, partition);
+		apr_brigade_destroy(ctx->post_data);
+		ctx->post_data = brigade;
+		break;
+	case APR_INCOMPLETE:
+		apr_brigade_flatten(ctx->post_data, buf, &len);
+		apr_brigade_cleanup(ctx->post_data);
+		break;
 	}
 
-	return n;
+	return len;
 }
-
 static struct stat*
 php_apache_sapi_get_stat(TSRMLS_D)
 {
@@ -360,10 +367,6 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		ap_input_mode_t mode, apr_read_type_e block, apr_off_t readbytes)
 {
 	php_struct *ctx;
-	long old_index;
-	apr_bucket *b;
-	const char *str;
-	apr_size_t n;
 	apr_status_t rv;
 	TSRMLS_FETCH();
 
@@ -382,15 +385,15 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		return rv;
 	}
 
-	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
-		apr_bucket_read(b, &str, &n, APR_NONBLOCK_READ);
-		if (n > 0) {
-			old_index = ctx->post_len;
-			ctx->post_len += n;
-			ctx->post_data = realloc(ctx->post_data, ctx->post_len + 1);
-			memcpy(ctx->post_data + old_index, str, n);
-		}
+	if (!ctx->post_data) {
+		ctx->post_data = apr_brigade_create(f->r->pool, f->c->bucket_alloc);
 	}
+	if ((rv = ap_save_brigade(f, &ctx->post_data, &bb, f->r->pool)) != APR_SUCCESS) {
+		return rv;
+	}
+	apr_brigade_cleanup(bb);
+	APR_BRIGADE_INSERT_TAIL(bb, apr_bucket_eos_create(bb->bucket_alloc));
+
 	return APR_SUCCESS;
 }
 
@@ -413,8 +416,6 @@ static void php_apache_request_ctor(ap_filter_t *f, php_struct *ctx TSRMLS_DC)
 	f->r->no_local_copy = 1;
 	content_type = sapi_get_default_content_type(TSRMLS_C);
 	f->r->content_type = apr_pstrdup(f->r->pool, content_type);
-	SG(request_info).post_data = ctx->post_data;
-	SG(request_info).post_data_length = ctx->post_len;
 
 	efree(content_type);
 
