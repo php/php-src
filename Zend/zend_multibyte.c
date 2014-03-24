@@ -114,7 +114,7 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 	 * populated, we need to reinitialize script_encoding here.
 	 */
 	{
-		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding"), 0);
+		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding") - 1, 0);
 		zend_multibyte_set_script_encoding_by_string(value, strlen(value) TSRMLS_CC);
 	}
 	return SUCCESS;

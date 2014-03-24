@@ -740,9 +740,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	match_len = 1;
 	str = string;
 	if (array != NULL) {
-		match_len = regs->end[0] - regs->beg[0];
+		ZVAL_DEREF(array);
 		zval_dtor(array);
 		array_init(array);
+
+		match_len = regs->end[0] - regs->beg[0];
 		for (i = 0; i < regs->num_regs; i++) {
 			beg = regs->beg[i];
 			end = regs->end[i];
@@ -1011,9 +1013,11 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	if (err <= -2) {
 		smart_str_free(&out_buf);	
 		RETVAL_FALSE;
-	} else {
-		smart_str_appendc(&out_buf, '\0');
+	} else if (out_buf.s) {
+		smart_str_0(&out_buf);
 		RETVAL_STR(out_buf.s);
+	} else {
+		RETVAL_EMPTY_STRING();
 	}
 }
 /* }}} */

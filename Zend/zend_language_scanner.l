@@ -980,10 +980,13 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	*t = 0;
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
+		unsigned char *str;
+		//??? use zend_string saving memalloc 
 		s = Z_STRVAL_P(zendlval);
-		SCNG(output_filter)((unsigned char **)&Z_STRVAL_P(zendlval), &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
-		Z_STRLEN_P(zendlval) = sz;
-		efree(s);
+		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
+		zval_ptr_dtor(zendlval);
+		ZVAL_STRINGL(zendlval, str, sz);
+		efree(str);
 	}
 }
 

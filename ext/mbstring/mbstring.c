@@ -2047,6 +2047,7 @@ PHP_FUNCTION(mb_parse_str)
 
 	if (track_vars_array != NULL) {
 		/* Clear out the array */
+		ZVAL_DEREF(track_vars_array);
 		zval_dtor(track_vars_array);
 		array_init(track_vars_array);
 	}
@@ -3173,7 +3174,9 @@ PHP_FUNCTION(mb_strtoupper)
 
 	if (newstr) {
 		//???
-		RETURN_STRINGL(newstr, ret_len);
+		RETVAL_STRINGL(newstr, ret_len);
+		efree(newstr);
+		return;
 	}
 	RETURN_FALSE;
 }
@@ -3198,7 +3201,9 @@ PHP_FUNCTION(mb_strtolower)
 
 	if (newstr) {
 		//???
-		RETURN_STRINGL(newstr, ret_len);
+		RETVAL_STRINGL(newstr, ret_len);
+		efree(newstr);
+		return;
 	}
 	RETURN_FALSE;
 }
@@ -3378,6 +3383,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	if (ret != NULL) {
 		//?????
 		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
+		efree(ret->val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -3403,6 +3409,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	if (ret != NULL) {
 		//????
 		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
+		efree(ret->val);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -4365,7 +4372,7 @@ PHP_FUNCTION(mb_get_info)
 		if (MBSTRG(current_http_output_encoding)) {
 			add_assoc_string(return_value, "http_output", (char *)MBSTRG(current_http_output_encoding)->name, 1);
 		}
-		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes"), 0)) != NULL) {
+		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			add_assoc_string(return_value, "http_output_conv_mimetypes", name, 1);
 		}
 		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
@@ -4440,7 +4447,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING((char *)MBSTRG(current_http_output_encoding)->name);
 		}		
 	} else if (!strcasecmp("http_output_conv_mimetypes", typ)) {
-		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes"), 0)) != NULL) {
+		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
 			RETVAL_STRING(name);
 		}
 	} else if (!strcasecmp("func_overload", typ)) {

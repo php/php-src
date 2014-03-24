@@ -691,6 +691,12 @@ END_EXTERN_C()
 		efree(ref);										\
 	} while (0)
 
+#define ZVAL_DEREF(z) do {								\
+		if (Z_ISREF_P((z))) {							\
+			(z) = Z_REFVAL_P((z));						\
+		}												\
+	} while (0)
+
 // TODO: invalud ???
 #define INIT_PZVAL_COPY(z, v)							\
 	do {												\
