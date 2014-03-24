@@ -1082,6 +1082,16 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 	}
 	
 	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+		// Add compiler and link flags if PGO options are selected
+		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:PGINSTRUMENT");
+		}
+		else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:PGUPDATE");
+		}
+
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
 	}
 
@@ -1268,6 +1278,16 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 
 		ldflags = "";
 		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+			// Add compiler and link flags if PGO options are selected
+			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:PGINSTRUMENT");
+			}
+			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:PGUPDATE");
+			}
+
+			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
+
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
 		}
 
