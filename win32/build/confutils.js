@@ -1015,6 +1015,21 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	return resname;
 }
 
+/* Check if PGO is enabled for given module. To disable PGO for a particular module,
+define a global variable by the following name scheme before SAPI() or EXTENSION() call
+	var PHP_MYMODULE_PGO = false; */
+function is_pgo_desired(mod)
+{
+	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
+
+	/* don't disable if there's no mention of the varname */
+	if (eval("typeof " + varname + " == 'undefined'")) {
+		return true;
+	}
+
+	return eval("!!" + varname);
+}
+
 function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 {
 	var SAPI = sapiname.toUpperCase();
@@ -1066,7 +1081,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
 	
-	if(PHP_PGI == "yes" || PHP_PGO != "no") {
+	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
 	}
 
@@ -1252,7 +1267,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var ld = "@$(CC)";
 
 		ldflags = "";
-		if (PHP_PGI == "yes" || PHP_PGO != "no") {
+		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
 		}
 
