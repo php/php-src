@@ -40,6 +40,10 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
 
+- OpenSSL:
+  . Fix bug #66942 (memory leak in openssl_seal()). (Chuan Ma)
+  . Fix bug #66952 (memory leak in openssl_open()). (Chuan Ma)
+
 - SimpleXML:
   . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
     (Anatol)

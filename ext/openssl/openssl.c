@@ -4321,6 +4321,7 @@ PHP_FUNCTION(openssl_seal)
 
 	if (!EVP_EncryptInit(&ctx,cipher,NULL,NULL)) {
 		RETVAL_FALSE;
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4331,10 +4332,12 @@ PHP_FUNCTION(openssl_seal)
 #endif
 	/* allocate one byte extra to make room for \0 */
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
+	EVP_CIPHER_CTX_cleanup(&ctx);
 
 	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
 		RETVAL_FALSE;
 		efree(buf);
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4367,6 +4370,7 @@ PHP_FUNCTION(openssl_seal)
 		efree(buf);
 	}
 	RETVAL_LONG(len1 + len2);
+	EVP_CIPHER_CTX_cleanup(&ctx);
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
@@ -4425,25 +4429,21 @@ PHP_FUNCTION(openssl_open)
 	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, ekey_len, NULL, pkey) && EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
 		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
 			efree(buf);
-			if (keyresource == -1) {
-				EVP_PKEY_free(pkey);
-			}
-			RETURN_FALSE;
+			RETVAL_FALSE;
+		} else {
+			zval_dtor(opendata);
+			buf[len1 + len2] = '\0';
+			ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
+			RETVAL_TRUE;
 		}
 	} else {
 		efree(buf);
-		if (keyresource == -1) {
-			EVP_PKEY_free(pkey);
-		}
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
 	}
-	zval_dtor(opendata);
-	buf[len1 + len2] = '\0';
-	ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
-	RETURN_TRUE;
+	EVP_CIPHER_CTX_cleanup(&ctx);
 }
 /* }}} */
 
