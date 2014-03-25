@@ -4986,6 +4986,7 @@ PHP_FUNCTION(openssl_open)
 	if (keyresource == -1) {
 		EVP_PKEY_free(pkey);
 	}
+	EVP_CIPHER_CTX_cleanup(&ctx);
 	zval_dtor(opendata);
 	buf[len1 + len2] = '\0';
 	ZVAL_STRINGL(opendata, erealloc(buf, len1 + len2 + 1), len1 + len2, 0);
