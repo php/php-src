@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 
 - SPL:
   . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+  . Fixed bug #66834 (empty() does not work on classes that extend ArrayObject) (Tjerk)
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
@@ -22,6 +23,10 @@ PHP                                                                        NEWS
 
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
+
+- Fileinfo:
+  . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
+    expression). (CVE-2013-7345) (Remi)
 
 - GD:
   . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
