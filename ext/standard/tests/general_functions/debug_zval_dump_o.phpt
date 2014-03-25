@@ -118,613 +118,613 @@ echo "Done\n";
 --EXPECTF--
 *** Testing debug_zval_dump() on objects ***
 -- Iteration 1 --
-object(object_class)#%d (6) refcount(5){
+object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(5)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(5)
+  long(20)
   ["value4"]=>
-  long(30) refcount(7)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(5){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (6) refcount(5){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 2 --
-object(no_member_class)#%d (0) refcount(4){
+object(no_member_class)#%d (0) refcount(%d){
 }
 -- Iteration 3 --
-object(contains_object_class)#%d (9) refcount(4){
+object(contains_object_class)#%d (9) refcount(%d){
   ["p"]=>
-  long(30) refcount(2)
+  long(30)
   ["p1":protected]=>
-  long(40) refcount(2)
+  long(40)
   ["p2":"contains_object_class":private]=>
-  long(50) refcount(2)
+  long(50)
   ["class_object1"]=>
-  object(object_class)#%d (6) refcount(7){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
     }
   }
   ["class_object2"]=>
-  object(object_class)#%d (6) refcount(7){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
     }
   }
   ["class_object3":"contains_object_class":private]=>
-  object(object_class)#%d (6) refcount(7){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
     }
   }
   ["class_object4":protected]=>
-  object(object_class)#%d (6) refcount(7){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
     }
   }
   ["no_member_class_object"]=>
-  object(no_member_class)#%d (0) refcount(3){
+  object(no_member_class)#%d (0) refcount(%d){
   }
   ["class_object5"]=>
-  object(contains_object_class)#%d (9) refcount(1){
+  object(contains_object_class)#%d (9) refcount(%d){
     ["p"]=>
-    long(30) refcount(2)
+    long(30)
     ["p1":protected]=>
-    long(40) refcount(2)
+    long(40)
     ["p2":"contains_object_class":private]=>
-    long(50) refcount(2)
+    long(50)
     ["class_object1"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
-      object(object_class)#%d (6) refcount(7){
+      object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(5)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(5)
+        long(20)
         ["value4"]=>
-        long(30) refcount(7)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(5){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
       }
     }
     ["class_object2"]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
-      object(object_class)#%d (6) refcount(7){
+      object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(5)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(5)
+        long(20)
         ["value4"]=>
-        long(30) refcount(7)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(5){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
       }
     }
     ["class_object3":"contains_object_class":private]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
-      object(object_class)#%d (6) refcount(7){
+      object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(5)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(5)
+        long(20)
         ["value4"]=>
-        long(30) refcount(7)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(5){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
       }
     }
     ["class_object4":protected]=>
-    object(object_class)#%d (6) refcount(7){
+    object(object_class)#%d (6) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(5)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(5)
+      long(20)
       ["value4"]=>
-      long(30) refcount(7)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(5){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
-      object(object_class)#%d (6) refcount(7){
+      object(object_class)#%d (6) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(5)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(5)
+        long(20)
         ["value4"]=>
-        long(30) refcount(7)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(5){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
       }
     }
     ["no_member_class_object"]=>
-    object(no_member_class)#%d (0) refcount(3){
+    object(no_member_class)#%d (0) refcount(%d){
     }
     ["class_object5"]=>
     *RECURSION*
   }
 }
 -- Iteration 4 --
-object(object_class)#%d (6) refcount(9){
+object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(5)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(5)
+  long(20)
   ["value4"]=>
-  long(30) refcount(7)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(5){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (6) refcount(9){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 5 --
-object(object_class)#%d (6) refcount(9){
+object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(5)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(5)
+  long(20)
   ["value4"]=>
-  long(30) refcount(7)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(5){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (6) refcount(9){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 6 --
-object(no_member_class)#%d (0) refcount(5){
+object(no_member_class)#%d (0) refcount(%d){
 }
 -- Iteration 7 --
-NULL refcount(1)
+NULL
 -- Iteration 8 --
-object(object_class)#%d (6) refcount(9){
+object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(5)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(5)
+  long(20)
   ["value4"]=>
-  long(30) refcount(7)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(5){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (6) refcount(9){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 9 --
-object(object_class)#%d (6) refcount(9){
+object(object_class)#%d (6) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(5)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(5)
+  long(20)
   ["value4"]=>
-  long(30) refcount(7)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(5){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (6) refcount(9){
+  object(object_class)#%d (6) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(5)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(5)
+    long(20)
     ["value4"]=>
-    long(30) refcount(7)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(5){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
   }
 }
 -- Iteration 10 --
-long(30) refcount(9)
+long(30)
 -- Iteration 11 --
-NULL refcount(1)
+NULL
 
 -- Testing debug_zval_dump() on overwritten object variables --
-long(500) refcount(1)
-long(500) refcount(1)
-long(500) refcount(1)
-long(500) refcount(1)
+long(500)
+long(500)
+long(500)
+long(500)
 
 -- Testing debug_zval_dump() on objects having circular reference --
-object(object_class)#%d (7) refcount(1){
+object(object_class)#%d (7) refcount(%d){
   ["value1"]=>
-  long(5) refcount(1)
+  long(5)
   ["value2":"object_class":private]=>
-  long(10) refcount(7)
+  long(10)
   ["value3":protected]=>
-  long(20) refcount(7)
+  long(20)
   ["value4"]=>
-  long(30) refcount(8)
+  long(30)
   ["array_var"]=>
-  array(2) refcount(7){
+  array(2) refcount(%d){
     ["key1"]=>
-    long(1) refcount(1)
+    long(1)
     ["key2 "]=>
-    long(3) refcount(1)
+    long(3)
   }
   ["object_class1"]=>
-  object(object_class)#%d (7) refcount(1){
+  object(object_class)#%d (7) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(7)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(7)
+    long(20)
     ["value4"]=>
-    long(30) refcount(8)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(7){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
     *RECURSION*
     ["obj"]=>
-    &object(object_class)#%d (7) refcount(2){
+    &object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(7)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(7)
+      long(20)
       ["value4"]=>
-      long(30) refcount(8)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(7){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
-      object(object_class)#%d (7) refcount(1){
+      object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(7)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(7)
+        long(20)
         ["value4"]=>
-        long(30) refcount(8)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(7){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -736,57 +736,57 @@ object(object_class)#%d (7) refcount(1){
     }
   }
   ["obj"]=>
-  &object(object_class)#%d (7) refcount(2){
+  &object(object_class)#%d (7) refcount(%d){
     ["value1"]=>
-    long(5) refcount(1)
+    long(5)
     ["value2":"object_class":private]=>
-    long(10) refcount(7)
+    long(10)
     ["value3":protected]=>
-    long(20) refcount(7)
+    long(20)
     ["value4"]=>
-    long(30) refcount(8)
+    long(30)
     ["array_var"]=>
-    array(2) refcount(7){
+    array(2) refcount(%d){
       ["key1"]=>
-      long(1) refcount(1)
+      long(1)
       ["key2 "]=>
-      long(3) refcount(1)
+      long(3)
     }
     ["object_class1"]=>
-    object(object_class)#%d (7) refcount(1){
+    object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(7)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(7)
+      long(20)
       ["value4"]=>
-      long(30) refcount(8)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(7){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
       ["obj"]=>
-      &object(object_class)#%d (7) refcount(2){
+      &object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(7)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(7)
+        long(20)
         ["value4"]=>
-        long(30) refcount(8)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(7){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
@@ -795,40 +795,40 @@ object(object_class)#%d (7) refcount(1){
       }
     }
     ["obj"]=>
-    &object(object_class)#%d (7) refcount(2){
+    &object(object_class)#%d (7) refcount(%d){
       ["value1"]=>
-      long(5) refcount(1)
+      long(5)
       ["value2":"object_class":private]=>
-      long(10) refcount(7)
+      long(10)
       ["value3":protected]=>
-      long(20) refcount(7)
+      long(20)
       ["value4"]=>
-      long(30) refcount(8)
+      long(30)
       ["array_var"]=>
-      array(2) refcount(7){
+      array(2) refcount(%d){
         ["key1"]=>
-        long(1) refcount(1)
+        long(1)
         ["key2 "]=>
-        long(3) refcount(1)
+        long(3)
       }
       ["object_class1"]=>
       *RECURSION*
       ["obj"]=>
-      &object(object_class)#%d (7) refcount(2){
+      &object(object_class)#%d (7) refcount(%d){
         ["value1"]=>
-        long(5) refcount(1)
+        long(5)
         ["value2":"object_class":private]=>
-        long(10) refcount(7)
+        long(10)
         ["value3":protected]=>
-        long(20) refcount(7)
+        long(20)
         ["value4"]=>
-        long(30) refcount(8)
+        long(30)
         ["array_var"]=>
-        array(2) refcount(7){
+        array(2) refcount(%d){
           ["key1"]=>
-          long(1) refcount(1)
+          long(1)
           ["key2 "]=>
-          long(3) refcount(1)
+          long(3)
         }
         ["object_class1"]=>
         *RECURSION*
