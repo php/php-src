@@ -1,0 +1,4 @@
+Patches applied to file sources tree before generating magic.mgc
+and before running create_data_file.php to create data_file.c.
+
+
