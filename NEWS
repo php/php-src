@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 
 - SPL:
   . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+  . Fixed bug #66834 (empty() does not work on classes that extend ArrayObject) (Tjerk)
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
