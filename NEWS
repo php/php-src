@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fix compilation on libcurl versions between 7.10.5 and 7.12.2, inclusive.
     (Adam)
 
+- Fileinfo:
+  . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
+    expression). (CVE-2013-7345) (Remi)
+
 - FPM:
   . Added clear_env configuration directive to disable clearenv() call.
   (Github PR# 598, Paul Annesley)
