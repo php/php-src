@@ -1,0 +1,39 @@
+Patches applied to file sources tree before generating magic.mgc
+and before running create_data_file.php to create data_file.c.
+
+
+
+From ef2329cf71acb59204dd981e2c6cce6c81fe467c Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Mon, 25 Mar 2013 14:06:55 +0000
+Subject: [PATCH] limit to 100 repetitions to avoid excessive backtracking
+ Carsten Wolff
+
+---
+ magic/Magdir/commands | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/magic/Magdir/commands b/magic/Magdir/commands
+index 67c3eee..4a7d8dd 100644
+--- a/magic/Magdir/commands
++++ b/magic/Magdir/commands
+@@ -1,6 +1,6 @@
+ 
+ #------------------------------------------------------------------------------
+-# $File: commands,v 1.44 2013/02/05 15:20:47 christos Exp $
++# $File: commands,v 1.45 2013/02/06 14:18:52 christos Exp $
+ # commands:  file(1) magic for various shells and interpreters
+ #
+ #0	string/w	:			shell archive or script for antique kernel text
+@@ -49,7 +49,7 @@
+ !:mime	text/x-awk
+ 0	string/wt	#!\ /usr/bin/awk	awk script text executable
+ !:mime	text/x-awk
+-0	regex		=^\\s*BEGIN\\s*[{]	awk script text
++0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+ 
+ # AT&T Bell Labs' Plan 9 shell
+ 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
+-- 
+1.8.5.5
+
