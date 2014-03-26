@@ -3875,6 +3875,9 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	if (Z_ISREF_P(expr)) {
+		expr = Z_REFVAL_P(expr);
+	}
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!IS_OP1_TMP_FREE()) {
