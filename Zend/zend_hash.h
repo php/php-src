@@ -261,6 +261,16 @@ static inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
 }
 
 
+static inline int *zend_hash_exists_ind(const HashTable *ht, zend_string *key)
+{
+	zval *zv;
+
+	zv = zend_hash_find(ht, key);
+	return zv && (Z_TYPE_P(zv) != IS_INDIRECT ||
+			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
+}
+
+
 static inline zval *zend_hash_str_find_ind(const HashTable *ht, const char *str, int len)
 {
 	zval *zv;

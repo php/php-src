@@ -1359,7 +1359,7 @@ PHP_FUNCTION(extract)
 		var_exists = 0;
 
 		if (key_type == HASH_KEY_IS_STRING) {
-			var_exists = zend_hash_exists(&EG(active_symbol_table)->ht, var_name);
+			var_exists = zend_hash_exists_ind(&EG(active_symbol_table)->ht, var_name);
 		} else if (key_type == HASH_KEY_IS_LONG && (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID)) {
 			zval num;
 
