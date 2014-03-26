@@ -1015,6 +1015,21 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	return resname;
 }
 
+/* Check if PGO is enabled for given module. To disable PGO for a particular module,
+define a global variable by the following name scheme before SAPI() or EXTENSION() call
+	var PHP_MYMODULE_PGO = false; */
+function is_pgo_desired(mod)
+{
+	var varname = "PHP_" + mod.toUpperCase() + "_PGO";
+
+	/* don't disable if there's no mention of the varname */
+	if (eval("typeof " + varname + " == 'undefined'")) {
+		return true;
+	}
+
+	return eval("!!" + varname);
+}
+
 function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 {
 	var SAPI = sapiname.toUpperCase();
@@ -1066,7 +1081,17 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";
 	}
 	
-	if(PHP_PGI == "yes" || PHP_PGO != "no") {
+	if(is_pgo_desired(sapiname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+		// Add compiler and link flags if PGO options are selected
+		if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:PGINSTRUMENT");
+		}
+		else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+			ADD_FLAG('CFLAGS_' + SAPI, "/GL /O2");
+			ADD_FLAG('LDFLAGS_' + SAPI, "/LTCG:PGUPDATE");
+		}
+
 		ldflags += " /PGD:$(PGOPGD_DIR)\\" + makefiletarget.substring(0, makefiletarget.indexOf(".")) + ".pgd";
 	}
 
@@ -1203,6 +1228,8 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 	return true;
 }
 
+var static_pgo_enabled = false;
+
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 {
 	var objs = null;
@@ -1252,7 +1279,17 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		var ld = "@$(CC)";
 
 		ldflags = "";
-		if (PHP_PGI == "yes" || PHP_PGO != "no") {
+		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+			// Add compiler and link flags if PGO options are selected
+			if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:PGINSTRUMENT");
+			}
+			else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+				ADD_FLAG('LDFLAGS_' + EXT, "/LTCG:PGUPDATE");
+			}
+
+			ADD_FLAG('CFLAGS_' + EXT, "/GL /O2");
+
 			ldflags = " /PGD:$(PGOPGD_DIR)\\" + dllname.substring(0, dllname.indexOf(".")) + ".pgd";
 		}
 
@@ -1283,6 +1320,19 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
+		if (is_pgo_desired(extname) && (PHP_PGI == "yes" || PHP_PGO != "no")) {
+			if (!static_pgo_enabled) {
+				if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGINSTRUMENT");
+				}
+				else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+					ADD_FLAG('STATIC_EXT_LDFLAGS', "/LTCG:PGUPDATE");
+				}
+
+				ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
+				static_pgo_enabled = true;
+			}
+		}
 
 		/* find the header that declares the module pointer,
 		 * so we can include it in internal_functions.c */
