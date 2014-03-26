@@ -35,12 +35,37 @@
 #define COMMON (is_ref ? "&" : "")
 /* }}} */
 
+static uint zend_obj_num_elements(HashTable *ht)
+{
+	Bucket *p;
+	uint idx;
+	uint num;
+
+	num = ht->nNumOfElements;
+	for (idx = 0; idx < ht->nNumUsed; idx++) {
+		p = ht->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_INDIRECT) {
+			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {
+				num--;
+			}			
+		}
+	}
+	return num;
+}
+
 static int php_array_element_dump(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	int level;
 
 	level = va_arg(args, int);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 	if (hash_key->key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
@@ -60,6 +85,12 @@ static int php_object_property_dump(zval *zv TSRMLS_DC, int num_args, va_list ar
 
 	level = va_arg(args, int);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 	if (hash_key->key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
@@ -136,10 +167,10 @@ again:
 
 			if (Z_OBJ_HANDLER_P(struc, get_class_name)) {
 				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
-				php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
+				php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
 				STR_RELEASE(class_name);
 			} else {
-				php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0);
+				php_printf("%sobject(unknown class)#%d (%d) {\n", COMMON, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
 			}
 			php_element_dump_func = php_object_property_dump;
 	head_done:
@@ -162,7 +193,7 @@ again:
 			break;
 		}
 		case IS_REFERENCE:
-	//??? hide references with refcount==1 (for compatibility)
+//??? hide references with refcount==1 (for compatibility)
 			if (Z_REFCOUNT_P(struc) > 1) {
 				is_ref = 1;
 			}
@@ -200,6 +231,12 @@ static int zval_array_element_dump(zval *zv TSRMLS_DC, int num_args, va_list arg
 
 	level = va_arg(args, int);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 	if (hash_key->key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
@@ -225,6 +262,12 @@ static int zval_object_property_dump(zval *zv TSRMLS_DC, int num_args, va_list a
 
 	level = va_arg(args, int);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 	if (hash_key->key == NULL) { /* numeric key */
 		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
@@ -259,14 +302,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 		php_printf("%*c", level - 1, ' ');
 	}
 
-	if (Z_TYPE_P(struc) == IS_REFERENCE) {
-//??? hide references with refcount==1 (for compatibility)
-		if (Z_REFCOUNT_P(struc) > 1) {
-			is_ref = 1;
-		}
-		struc = Z_REFVAL_P(struc);
-	}
-
+again:
 	switch (Z_TYPE_P(struc)) {
 	case IS_BOOL:
 		php_printf("%sbool(%s)\n", COMMON, Z_LVAL_P(struc)?"true":"false");
@@ -301,7 +337,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level TSRMLS_DC) /* {{{ */
 			return;
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
-		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_hash_num_elements(myht) : 0, Z_REFCOUNT_P(struc));
+		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0, Z_REFCOUNT_P(struc));
 		STR_RELEASE(class_name);
 		zval_element_dump_func = zval_object_property_dump;
 head_done:
@@ -322,6 +358,13 @@ head_done:
 		php_printf("%sresource(%ld) of type (%s) refcount(%u)\n", COMMON, Z_RES_P(struc)->handle, type_name ? type_name : "Unknown", Z_REFCOUNT_P(struc));
 		break;
 	}
+	case IS_REFERENCE:
+//??? hide references with refcount==1 (for compatibility)
+		if (Z_REFCOUNT_P(struc) > 1) {
+			is_ref = 1;
+		}
+		struc = Z_REFVAL_P(struc);
+		goto again;
 	default:
 		php_printf("%sUNKNOWN:0\n", COMMON);
 		break;
@@ -364,6 +407,12 @@ static int php_array_element_export(zval *zv TSRMLS_DC, int num_args, va_list ar
 	level = va_arg(args, int);
 	buf = va_arg(args, smart_str *);
 
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 	if (hash_key->key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
 		smart_str_append_long(buf, (long) hash_key->h);
@@ -399,6 +448,13 @@ static int php_object_element_export(zval *zv TSRMLS_DC, int num_args, va_list a
 
 	level = va_arg(args, int);
 	buf = va_arg(args, smart_str *);
+
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+		if (Z_TYPE_P(zv) == IS_UNDEF) {
+			return 0;
+		}
+	}
 
 	buffer_append_spaces(buf, level + 2);
 	if (hash_key->key != NULL) {
@@ -683,6 +739,12 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 			}
 			propers = Z_OBJPROP_P(struc);
 			if ((d = zend_hash_find(propers, Z_STR_P(name))) != NULL) {
+				if (Z_TYPE_P(d) == IS_INDIRECT) {
+					d = Z_INDIRECT_P(d);
+					if (Z_TYPE_P(d) == IS_UNDEF) {
+						continue;
+					}
+				}
 				php_var_serialize_string(buf, Z_STRVAL_P(name), Z_STRLEN_P(name));
 				php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 			} else {
@@ -694,6 +756,13 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					do {
 						priv_name = zend_mangle_property_name(ce->name->val, ce->name->len, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
 						if ((d = zend_hash_find(propers, priv_name)) != NULL) {
+							if (Z_TYPE_P(d) == IS_INDIRECT) {
+								d = Z_INDIRECT_P(d);
+								if (Z_TYPE_P(d) == IS_UNDEF) {
+									STR_FREE(prot_name);
+									break;
+								}
+							}
 							php_var_serialize_string(buf, priv_name->val, priv_name->len);
 							STR_FREE(priv_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
@@ -702,6 +771,13 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 						STR_FREE(priv_name);
 						prot_name = zend_mangle_property_name("*", 1, Z_STRVAL_P(name), Z_STRLEN_P(name), ce->type & ZEND_INTERNAL_CLASS);
 						if ((d = zend_hash_find(propers, prot_name)) != NULL) {
+							if (Z_TYPE_P(d) == IS_INDIRECT) {
+								d = Z_INDIRECT_P(d);
+								if (Z_TYPE_P(d) == IS_UNDEF) {
+									STR_FREE(prot_name);
+									break;
+								}
+							}
 							php_var_serialize_string(buf, prot_name->val, prot_name->len);
 							STR_FREE(prot_name);
 							php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
@@ -873,10 +949,17 @@ again:
 
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
-					i = zend_hash_get_current_key_ex(myht, &key, &index, 0, &pos);
-					if (i == HASH_KEY_NON_EXISTENT) {
+					data = zend_hash_get_current_data_ex(myht, &pos);
+					if (!data) {
 						break;
+					} else if (Z_TYPE_P(data) == IS_INDIRECT) {
+						data = Z_INDIRECT_P(data);
+						if (Z_TYPE_P(data) == IS_UNDEF) {
+							continue;
+						}
 					}
+
+					i = zend_hash_get_current_key_ex(myht, &key, &index, 0, &pos);
 					if (incomplete_class && strcmp(key->val, MAGIC_MEMBER) == 0) {
 						continue;
 					}
@@ -892,8 +975,7 @@ again:
 
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
-					if ((data = zend_hash_get_current_data_ex(myht, &pos)) == NULL
-						|| (Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
+					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
 						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->nApplyCount > 1)
 					) {
 						smart_str_appendl(buf, "N;", 2);

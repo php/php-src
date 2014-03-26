@@ -181,10 +181,19 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 					return;
 				}
 			} else {
-				if ((gpc_element_p = zend_symtable_str_find(symtable1, index, index_len)) == NULL
-					|| Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
-					array_init(&gpc_element);
-					gpc_element_p = zend_symtable_str_update(symtable1, index, index_len, &gpc_element);
+				gpc_element_p = zend_symtable_str_find(symtable1, index, index_len);
+				if (!gpc_element_p) {
+					zval tmp;
+					array_init(&tmp);
+					gpc_element_p = zend_symtable_str_update_ind(symtable1, index, index_len, &tmp);
+				} else {
+					if (Z_TYPE_P(gpc_element_p) == IS_INDIRECT) {
+						gpc_element_p = Z_INDIRECT_P(gpc_element_p);
+					}
+					if (Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
+						zval_ptr_dtor(gpc_element_p);
+						array_init(gpc_element_p);
+					}
 				}
 			}
 			symtable1 = Z_ARRVAL_P(gpc_element_p);
@@ -219,7 +228,7 @@ plain_var:
 				zend_symtable_str_exists(symtable1, index, index_len)) {
 				zval_ptr_dtor(&gpc_element);
 			} else {
-				gpc_element_p = zend_symtable_str_update(symtable1, index, index_len, &gpc_element);
+				gpc_element_p = zend_symtable_str_update_ind(symtable1, index, index_len, &gpc_element);
 			}
 		}
 	}

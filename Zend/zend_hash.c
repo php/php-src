@@ -267,17 +267,23 @@ ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *p
 	p = zend_hash_find_bucket(ht, key);
 
 	if (p) {
+		zval *data;
+
 		if (flag & HASH_ADD) {
 			return NULL;
 		}
 		ZEND_ASSERT(&p->val != pData);
+		data = &p->val;
+		if ((flag & HASH_UPDATE_INDIRECT) && Z_TYPE_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+		}
 		HANDLE_BLOCK_INTERRUPTIONS();
 		if (ht->pDestructor) {
-			ht->pDestructor(&p->val);
+			ht->pDestructor(data);
 		}
-		ZVAL_COPY_VALUE(&p->val, pData);
+		ZVAL_COPY_VALUE(data, pData);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
-		return &p->val;
+		return data;
 	}
 	
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
@@ -588,7 +594,106 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 	return FAILURE;
 }
 
+ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key)
+{
+	ulong h;
+	uint nIndex;
+	uint idx;
+	Bucket *p;
+	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
+
+	IS_CONSISTENT(ht);
+
+	if (ht->flags & HASH_FLAG_PACKED) {
+		return FAILURE;
+	}
+
+	h = STR_HASH_VAL(key);
+	nIndex = h & ht->nTableMask;
+
+	idx = ht->arHash[nIndex];
+	while (idx != INVALID_IDX) {
+		p = ht->arData + idx;
+		if ((p->key == key) ||
+			(p->h == h &&
+		     p->key &&
+		     p->key->len == key->len &&
+		     memcmp(p->key->val, key->val, key->len) == 0)) {
+			if (Z_TYPE(p->val) == IS_INDIRECT) {
+				zval *data = Z_INDIRECT(p->val);
+
+				if (Z_TYPE_P(data) == IS_UNDEF) {
+					return FAILURE;
+				} else {
+					if (ht->pDestructor) {
+						ht->pDestructor(data);
+					}
+					ZVAL_UNDEF(data);
+				}
+			} else {
+				HANDLE_BLOCK_INTERRUPTIONS();
+				_zend_hash_del_el_ex(ht, idx, p, prev);
+				HANDLE_UNBLOCK_INTERRUPTIONS();
+			}
+			return SUCCESS;
+		}
+		prev = p;
+		idx = p->val.u.next;
+	}
+	return FAILURE;
+}
+
 ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, int len)
+{
+	ulong h;
+	uint nIndex;
+	uint idx;
+	Bucket *p;
+	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
+
+	IS_CONSISTENT(ht);
+
+	h = zend_inline_hash_func(str, len);
+	nIndex = h & ht->nTableMask;
+
+	idx = ht->arHash[nIndex];
+	while (idx != INVALID_IDX) {
+		p = ht->arData + idx;
+		if ((p->h == h) 
+			 && p->key
+			 && (p->key->len == len)
+			 && !memcmp(p->key->val, str, len)) {
+			if (Z_TYPE(p->val) == IS_INDIRECT) {
+				zval *data = Z_INDIRECT(p->val);
+
+				if (Z_TYPE_P(data) == IS_UNDEF) {
+					return FAILURE;
+				} else {
+					if (ht->pDestructor) {
+						ht->pDestructor(data);
+					}
+					ZVAL_UNDEF(data);
+				}
+			} else {
+				HANDLE_BLOCK_INTERRUPTIONS();
+				_zend_hash_del_el_ex(ht, idx, p, prev);
+				HANDLE_UNBLOCK_INTERRUPTIONS();
+			}
+			return SUCCESS;
+		}
+		prev = p;
+		idx = p->val.u.next;
+	}
+	return FAILURE;
+}
+
+ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *str, int len)
 {
 	ulong h;
 	uint nIndex;
@@ -914,7 +1019,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 {
     uint idx;
 	Bucket *p;
-	zval *new_entry;
+	zval *new_entry, *data;
 	zend_bool setTargetPointer;
 
 	IS_CONSISTENT(source);
@@ -928,10 +1033,18 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 		if (setTargetPointer && source->nInternalPointer == idx) {
 			target->nInternalPointer = INVALID_IDX;
 		}
+//???
+		data = &p->val;
+		if (Z_TYPE_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+			if (Z_TYPE_P(data) == IS_UNDEF) {
+				continue;
+			}
+		}
 		if (p->key) {
-			new_entry = zend_hash_update(target, p->key, &p->val);
+			new_entry = zend_hash_update(target, p->key, data);
 		} else {
-			new_entry = zend_hash_index_update(target, p->h, &p->val);
+			new_entry = zend_hash_index_update(target, p->h, data);
 		}
 		if (pCopyConstructor) {
 			pCopyConstructor(new_entry);
@@ -1551,7 +1664,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	uint idx1, idx2;
 	Bucket *p1, *p2 = NULL;
 	int result;
-	zval *pData2;
+	zval *pData1, *pData2;
 
 	IS_CONSISTENT(ht1);
 	IS_CONSISTENT(ht2);
@@ -1620,7 +1733,22 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 				}
 			}
 		}
-		result = compar(&p1->val, pData2 TSRMLS_CC);
+		pData1 = &p1->val;
+		if (Z_TYPE_P(pData1) == IS_INDIRECT) {
+			pData1 = Z_INDIRECT_P(pData1);
+		}
+		if (Z_TYPE_P(pData2) == IS_INDIRECT) {
+			pData2 = Z_INDIRECT_P(pData2);
+		}
+		if (Z_TYPE_P(pData1) == IS_UNDEF) {
+			if (Z_TYPE_P(pData2) != IS_UNDEF) {
+				return -1;
+			}
+		} else if (Z_TYPE_P(pData2) == IS_UNDEF) {
+			return 1;
+		} else {
+			result = compar(pData1, pData2 TSRMLS_CC);
+		}
 		if (result != 0) {
 			HASH_UNPROTECT_RECURSION(ht1); 
 			HASH_UNPROTECT_RECURSION(ht2); 

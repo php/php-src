@@ -336,6 +336,18 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
 			}
 		} else {
+			if (Z_TYPE_P(p) == IS_INDIRECT) {
+				p = Z_INDIRECT_P(p);
+				if (Z_TYPE_P(p) == IS_UNDEF) {
+					if (!is_ref) {
+						zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);
+						p = &tmp;
+						ZVAL_NULL(&tmp);
+					} else {
+						ZVAL_NULL(p);
+					}
+				}
+			}
 			if (is_ref) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(p);
 				Z_ADDREF_P(p);

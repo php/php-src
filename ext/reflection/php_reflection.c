@@ -223,14 +223,23 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) /*
 
 static zend_object_handlers reflection_object_handlers;
 
+static zval *_default_load_entry(zval *object, char *name, int name_len TSRMLS_DC) /* {{{ */
+{
+	zval *value;
+
+	if ((value = zend_hash_str_find_ind(Z_OBJPROP_P(object), name, name_len)) == NULL) {
+		return NULL;
+	}
+	return value;
+}
+
 static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zval *value;
 
-	if ((value = zend_hash_str_find(Z_OBJPROP_P(object), name, name_len)) == NULL) {
+	if ((value = _default_load_entry(object, name, name_len TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
-
 	ZVAL_DUP(return_value, value);
 }
 /* }}} */
@@ -3102,7 +3111,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3125,7 +3134,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3148,7 +3157,7 @@ ZEND_METHOD(reflection_function, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4654,7 +4663,7 @@ ZEND_METHOD(reflection_class, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4677,7 +4686,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4700,7 +4709,7 @@ ZEND_METHOD(reflection_class, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = zend_hash_str_find(Z_OBJPROP_P(getThis()), "name", sizeof("name")-1)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4937,17 +4946,16 @@ ZEND_METHOD(reflection_property, getValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object, name;
+	zval *object, *name;
 	zval *member_p = NULL;
 
 	METHOD_NOTSTATIC(reflection_property_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
-		_default_get_entry(getThis(), "name", sizeof("name")-1, &name TSRMLS_CC);
+		name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL(name));
-		zval_dtor(&name);
+			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL_P(name));
 		return;
 	}
 
@@ -4984,7 +4992,7 @@ ZEND_METHOD(reflection_property, setValue)
 	reflection_object *intern;
 	property_reference *ref;
 	zval *variable_ptr;
-	zval *object, name;
+	zval *object, *name;
 	zval *value;
 	zval *tmp;
 
@@ -4992,10 +5000,9 @@ ZEND_METHOD(reflection_property, setValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		_default_get_entry(getThis(), "name", sizeof("name")-1, &name TSRMLS_CC);
+		name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC);
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
-			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL(name));
-		zval_dtor(&name);
+			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL_P(name));
 		return;
 	}
 

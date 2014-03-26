@@ -4265,13 +4265,16 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF &&
-		((args = zend_hash_str_find(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
-		(args = zend_hash_str_find(&EG(symbol_table).ht, "argv", sizeof("argv")-1)) != NULL) && Z_TYPE_P(args) == IS_ARRAY
+		((args = zend_hash_str_find_ind(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
+		(args = zend_hash_str_find_ind(&EG(symbol_table).ht, "argv", sizeof("argv")-1)) != NULL)
 	) {
 		int pos = 0;
 		zval *entry;
 
-		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
+ 		if (Z_TYPE_P(args) != IS_ARRAY) {
+ 			RETURN_FALSE;
+ 		}
+ 		argc = zend_hash_num_elements(Z_ARRVAL_P(args));
 
 		/* Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL */

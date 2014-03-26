@@ -370,6 +370,12 @@ static int php_array_data_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	first = &f->val;
 	second = &s->val;
 
+	if (Z_TYPE_P(first) == IS_INDIRECT) {
+		first = Z_INDIRECT_P(first);
+	}
+	if (Z_TYPE_P(second) == IS_INDIRECT) {
+		second = Z_INDIRECT_P(second);
+	}
 	if (ARRAYG(compare_func)(&result, first, second TSRMLS_CC) == FAILURE) {
 		return 0;
 	}
@@ -1056,6 +1062,13 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	/* Iterate through hash */
 	zend_hash_internal_pointer_reset(target_hash);
 	while (!EG(exception) && (zv = zend_hash_get_current_data(target_hash)) != NULL) {
+		if (Z_TYPE_P(zv) == IS_INDIRECT) {
+			zv = Z_INDIRECT_P(zv);
+			if (Z_TYPE_P(zv) == IS_UNDEF) {
+				zend_hash_move_forward(target_hash);
+				continue;
+			}
+		}
 		ZVAL_COPY(&args[0], zv);
 		if (recursive &&
 		    (Z_TYPE(args[0]) == IS_ARRAY ||
@@ -1332,6 +1345,14 @@ PHP_FUNCTION(extract)
 	while ((entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(var_array), &pos)) != NULL) {
 		zval final_name;
 
+		if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+			if (Z_TYPE_P(entry) == IS_UNDEF) {
+				zend_hash_move_forward_ex(Z_ARRVAL_P(var_array), &pos);
+				continue;
+			}
+		}
+
 		ZVAL_NULL(&final_name);
 
 		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &var_name, &num_key, 0, &pos);
@@ -1410,6 +1431,9 @@ PHP_FUNCTION(extract)
 				Z_ADDREF_P(entry);
 
 				if ((orig_var = zend_hash_find(&EG(active_symbol_table)->ht, Z_STR(final_name))) != NULL) {
+					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
+						orig_var = Z_INDIRECT_P(orig_var);
+					}
 					zval_ptr_dtor(orig_var);
 					ZVAL_COPY_VALUE(orig_var, entry);
 				} else {
@@ -1417,7 +1441,7 @@ PHP_FUNCTION(extract)
 				}
 			} else {
 				ZVAL_DUP(&data, entry);
-				ZEND_SET_SYMBOL_WITH_LENGTH(&EG(active_symbol_table)->ht, Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1, 0);
+				zend_set_local_var(Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1 TSRMLS_CC);
 			}
 			count++;
 		}
@@ -1442,12 +1466,11 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		entry = Z_REFVAL_P(entry);
 	}
 	if (Z_TYPE_P(entry) == IS_STRING) {
-		if ((value_ptr = zend_hash_find(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
+		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
 			ZVAL_DUP(&data, value_ptr);
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
-	}
-	else if (Z_TYPE_P(entry) == IS_ARRAY) {
+	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		HashPosition pos;
 
 		if ((Z_ARRVAL_P(entry)->nApplyCount > 1)) {
@@ -1459,6 +1482,13 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(entry), &pos);
 		while ((value_ptr = zend_hash_get_current_data_ex(Z_ARRVAL_P(entry), &pos)) != NULL) {
+			if (Z_TYPE_P(value_ptr) == IS_INDIRECT) {
+				value_ptr = Z_INDIRECT_P(value_ptr);
+				if (Z_TYPE_P(value_ptr) == IS_UNDEF) {
+					zend_hash_move_forward_ex(Z_ARRVAL_P(entry), &pos);
+					continue;
+				}
+			}
 			php_compact_var(eg_active_symbol_table, return_value, value_ptr TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_P(entry), &pos);
 		}
@@ -1963,7 +1993,19 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	} else {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 	}
-	val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
+	while (1) {
+		val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
+		if (!val) {
+			return;
+		} else if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+			if (Z_TYPE_P(val) == IS_UNDEF) {
+				zend_hash_move_forward(Z_ARRVAL_P(stack));
+				continue;
+			}
+		}
+		break;
+	}
 	RETVAL_ZVAL_FAST(val);
 
 	/* Delete the first or last value */
@@ -2045,9 +2087,6 @@ PHP_FUNCTION(array_unshift)
 	 * hashtable and replace it with new one */
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[0], argc, NULL);
 	old_hash = *Z_ARRVAL_P(stack);
-	if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
-	}
 	*Z_ARRVAL_P(stack) = *new_hash;
 	FREE_HASHTABLE(new_hash);
 	zend_hash_destroy(&old_hash);
@@ -2128,9 +2167,6 @@ PHP_FUNCTION(array_splice)
 
 	/* Replace input array's hashtable with the new one */
 	old_hash = *Z_ARRVAL_P(array);
-	if (Z_ARRVAL_P(array) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
-	}
 	*Z_ARRVAL_P(array) = *new_hash;
 	FREE_HASHTABLE(new_hash);
 	zend_hash_destroy(&old_hash);
@@ -2789,9 +2825,6 @@ PHP_FUNCTION(array_pad)
 
 	/* Copy the result hash into return value */
 	old_hash = *Z_ARRVAL_P(return_value);
-	if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {
-		zend_reset_all_cv(&EG(symbol_table) TSRMLS_CC);
-	}
 	*Z_ARRVAL_P(return_value) = *new_hash;
 	FREE_HASHTABLE(new_hash);
 	zend_hash_destroy(&old_hash);
@@ -2911,6 +2944,7 @@ PHP_FUNCTION(array_unique)
 	for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++) {
 		p = Z_ARRVAL_P(array)->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (Z_TYPE(p->val) == IS_INDIRECT && Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) continue;
 		arTmp[i].b = *p;
 		arTmp[i].i = i;
 		i++;
@@ -2954,6 +2988,12 @@ static int zval_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 	first = a;
 	second = b;
 
+	if (Z_TYPE_P(first) == IS_INDIRECT) {
+		first = Z_INDIRECT_P(first);
+	}
+	if (Z_TYPE_P(second) == IS_INDIRECT) {
+		second = Z_INDIRECT_P(second);
+	}
 	if (string_compare_function(&result, first, second TSRMLS_CC) == FAILURE) {
 		return 0;
 	}
@@ -2984,6 +3024,13 @@ static int zval_user_compare(zval *a, zval *b TSRMLS_DC) /* {{{ */
 {
 	zval args[2];
 	zval retval;
+
+	if (Z_TYPE_P(a) == IS_INDIRECT) {
+		a = Z_INDIRECT_P(a);
+	}
+	if (Z_TYPE_P(b) == IS_INDIRECT) {
+		b = Z_INDIRECT_P(b);
+	}
 
 	ZVAL_COPY_VALUE(&args[0], a);
 	ZVAL_COPY_VALUE(&args[1], b);

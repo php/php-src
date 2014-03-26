@@ -366,6 +366,8 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
+ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
+ZEND_API void object_properties_load(zend_object *object, HashTable *properties);
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
 
@@ -515,13 +517,12 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, zend_string *name TSRMLS_DC);
-
 ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC);
 
-ZEND_API void zend_reset_all_cv(zend_array *symbol_table TSRMLS_DC);
-
 ZEND_API void zend_rebuild_symbol_table(TSRMLS_D);
+ZEND_API void zend_attach_symbol_table(TSRMLS_D);
+ZEND_API void zend_detach_symbol_table(TSRMLS_D);
+ZEND_API int zend_set_local_var(const char *name, int len, zval *value, int force TSRMLS_DC);
 
 ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);

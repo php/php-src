@@ -557,7 +557,7 @@ tail_call:
 			p = ht->arData + idx;
 			if (!Z_REFCOUNTED(p->val)) {
 				/* count non-refcounted for compatibilty ??? */
-				if (Z_TYPE(p->val) != IS_UNDEF) {
+				if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
 					count++;
 				}
 				continue;

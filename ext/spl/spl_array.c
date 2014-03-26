@@ -324,7 +324,27 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 	case IS_STRING:
 	   offset_key = Z_STR_P(offset);
 fetch_dim_string:
-		if ((retval = (zend_symtable_find(ht, offset_key))) == NULL) {
+		retval = zend_symtable_find(ht, offset_key);
+		if (retval) {
+			if (Z_TYPE_P(retval) == IS_INDIRECT) {
+				retval = Z_INDIRECT_P(retval);
+				if (Z_TYPE_P(retval) == IS_UNDEF) {
+					switch (type) {
+						case BP_VAR_R:
+							zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+						case BP_VAR_UNSET:
+						case BP_VAR_IS:
+							retval = &EG(uninitialized_zval);
+							break;
+						case BP_VAR_RW:
+							zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+						case BP_VAR_W: {
+							ZVAL_NULL(retval);
+						}
+					}
+				}
+			}
+		} else {
 			switch (type) {
 				case BP_VAR_R:
 					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
@@ -430,6 +450,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 
 	if (check_inherited && intern->fptr_offset_set) {
 		zval tmp;
+
 		if (!offset) {
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
@@ -464,7 +485,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
 			}
-			zend_symtable_update(ht, Z_STR_P(offset), value);
+			zend_symtable_update_ind(ht, Z_STR_P(offset), value);
 			return;
 		case IS_DOUBLE:
 		case IS_RESOURCE:
@@ -526,36 +547,29 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
 		} else {
-			if (zend_symtable_del(ht, Z_STR_P(offset)) == FAILURE) {
-				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
-			} else {
-				spl_array_object *obj = intern;
+//??? see below
+#if 0
+			if (zend_symtable_del_ind(ht, Z_STR_P(offset)) == FAILURE) {
+#else 
+			zval *data = zend_symtable_find(ht, Z_STR_P(offset));
 
-				while (1) {
-					if ((obj->ar_flags & SPL_ARRAY_IS_SELF) != 0) {
-						break;
-					} else if (Z_TYPE(obj->array) == IS_OBJECT) {
-					    if ((obj->ar_flags & SPL_ARRAY_USE_OTHER) == 0) {
-							obj = Z_SPLARRAY_P(&obj->array);
-					    	break;
-						} else {
-							obj = Z_SPLARRAY_P(&obj->array);
-					    }
+			if (data) {
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+					if (Z_TYPE_P(data) == IS_UNDEF) {
+						zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 					} else {
-						obj = NULL;
-						break;
+						zval_ptr_dtor(data);
+						ZVAL_UNDEF(data);
 					}
+//??? fix for ext/spl/tests/bug45614.phpt (may be fix is wrong)
+					spl_array_rewind(intern TSRMLS_CC);
+				} else if (zend_symtable_del(ht, Z_STR_P(offset)) == FAILURE) {
+					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 				}
-				if (obj) {
-					zend_property_info *property_info = zend_get_property_info(obj->std.ce, offset, 1 TSRMLS_CC);
-
-					if (property_info &&
-					    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
-					    property_info->offset >= 0) {
-					    zval_ptr_dtor(&obj->std.properties_table[property_info->offset]);
-						ZVAL_UNDEF(&obj->std.properties_table[property_info->offset]);
-					}
-				}
+			} else {
+#endif
+				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
 		}
 		break;
@@ -610,7 +624,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case IS_STRING:
 			{
 				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-				if ((tmp = zend_symtable_find(ht, Z_STR_P(offset))) != NULL) {
+				if ((tmp = zend_symtable_find_ind(ht, Z_STR_P(offset))) != NULL) {
 					switch (check_empty) {
 						case 0:
 							return Z_TYPE_P(tmp) != IS_NULL;
@@ -919,11 +933,16 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSR
 {
 	zend_string *string_key;
 	ulong num_key;
+	zval *data;
 
 	if (Z_TYPE(intern->array) == IS_OBJECT) {
 		do {
 			if (zend_hash_get_current_key_ex(aht, &string_key, &num_key, 0, &intern->pos) == HASH_KEY_IS_STRING) {
-				if (!string_key->len || string_key->val[0]) {
+				data = zend_hash_get_current_data_ex(aht, &intern->pos);
+				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
+				    Z_TYPE_P(data = Z_INDIRECT_P(data)) == IS_UNDEF) {
+					/* skip */
+				} else if (!string_key->len || string_key->val[0]) {
 					return SUCCESS;
 				}
 			} else {
@@ -1002,7 +1021,11 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter TSRMLS_DC)
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT) {
 		return zend_user_it_get_current_data(iter TSRMLS_CC);
 	} else {
-		return zend_hash_get_current_data_ex(aht, &object->pos);
+		zval *data = zend_hash_get_current_data_ex(aht, &object->pos);
+		if (Z_TYPE_P(data) == IS_INDIRECT) {
+			data = Z_INDIRECT_P(data);
+		}
+		return data;
 	}
 }
 /* }}} */
@@ -1096,14 +1119,14 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
 		}
 		ar_flags |= SPL_ARRAY_USE_OTHER;
-		intern->array = *array;
+		ZVAL_COPY_VALUE(&intern->array, array);
 	} else {
 		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0 TSRMLS_CC);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
-		intern->array = *array;
+		ZVAL_COPY_VALUE(&intern->array, array);
 	}
 	if (Z_TYPE_P(array) == IS_OBJECT && Z_OBJ_P(object) == Z_OBJ_P(array)) {
 		intern->ar_flags |= SPL_ARRAY_IS_SELF;
@@ -1507,6 +1530,12 @@ SPL_METHOD(Array, current)
 	if ((entry = zend_hash_get_current_data_ex(aht, &intern->pos)) == NULL) {
 		return;
 	}
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
+		if (Z_TYPE_P(entry) == IS_UNDEF) {
+			return;
+		}
+	}
 	RETVAL_ZVAL(entry, 1, 0);
 }
 /* }}} */
@@ -1765,10 +1794,7 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	/* copy members */
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
-	zend_hash_copy(intern->std.properties, Z_ARRVAL(members), (copy_ctor_func_t) zval_add_ref);
+	object_properties_load(&intern->std, Z_ARRVAL(members));
 	zval_ptr_dtor(&members);
 
 	/* done reading $serialized */

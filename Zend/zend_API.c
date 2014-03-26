@@ -1230,6 +1230,70 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 }
 /* }}} */
 
+ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties) /* {{{ */
+{
+	object->properties = properties;
+	if (object->ce->default_properties_count) {
+		HashPosition pos;
+	    zval *prop, tmp;
+    	zend_string *key;
+	    ulong num_key;
+    	zend_property_info *property_info;
+
+		for (zend_hash_internal_pointer_reset_ex(properties, &pos);
+		     (prop = zend_hash_get_current_data_ex(properties, &pos)) != NULL &&
+	    	 zend_hash_get_current_key_ex(properties, &key, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+		     zend_hash_move_forward_ex(properties, &pos)) {
+
+		    ZVAL_STR(&tmp, key);
+			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+			if (property_info &&
+			    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
+			    property_info->offset >= 0) {
+				ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
+				ZVAL_INDIRECT(prop, &object->properties_table[property_info->offset]);
+			}
+		}		
+	}
+}
+/* }}} */
+
+ZEND_API void object_properties_load(zend_object *object, HashTable *properties) /* {{{ */
+{
+	HashPosition pos;
+    zval *prop, tmp;
+   	zend_string *key;
+    ulong num_key;
+   	zend_property_info *property_info;
+
+	for (zend_hash_internal_pointer_reset_ex(properties, &pos);
+	     (prop = zend_hash_get_current_data_ex(properties, &pos)) != NULL &&
+    	 zend_hash_get_current_key_ex(properties, &key, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
+	     zend_hash_move_forward_ex(properties, &pos)) {
+
+	    ZVAL_STR(&tmp, key);
+		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+		if (property_info &&
+		    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
+		    property_info->offset >= 0) {
+		    zval_ptr_dtor(&object->properties_table[property_info->offset]);
+			ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
+			zval_add_ref(&object->properties_table[property_info->offset]);
+			if (object->properties) {
+				ZVAL_INDIRECT(&tmp, &object->properties_table[property_info->offset]);
+				prop = zend_hash_update(object->properties, key, &tmp);
+			}
+		} else {
+			if (!object->properties) {
+				rebuild_object_properties(object);
+			}
+			prop = zend_hash_update(object->properties, key, prop);
+			zval_add_ref(prop);
+		}
+	}		
+}
+/* }}} */
+
 /* This function requires 'properties' to contain all props declared in the
  * class and all props being public. If only a subset is given or the class
  * has protected members then you need to merge the properties separately by
@@ -1248,8 +1312,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	if (class_type->create_object == NULL) {
 		ZVAL_OBJ(arg, zend_objects_new(class_type TSRMLS_CC));
 		if (properties) {
-			Z_OBJ_P(arg)->properties = properties;
-//???			Z_OBJ_P(arg)->properties_table = NULL;
+			object_properties_init_ex(Z_OBJ_P(arg), properties);
 		} else {
 			object_properties_init(Z_OBJ_P(arg), class_type);
 		}

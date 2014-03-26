@@ -144,6 +144,13 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 	indent += PRINT_ZVAL_INDENT;
 	zend_hash_internal_pointer_reset_ex(ht, &iterator);
 	while ((tmp = zend_hash_get_current_data_ex(ht, &iterator)) != NULL) {
+		if (Z_TYPE_P(tmp) == IS_INDIRECT) {
+			tmp = Z_INDIRECT_P(tmp);
+			if (Z_TYPE_P(tmp) == IS_UNDEF) {
+				zend_hash_move_forward_ex(ht, &iterator);
+				continue;
+			}
+		}
 		for (i = 0; i < indent; i++) {
 			ZEND_PUTS_EX(" ");
 		}

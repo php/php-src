@@ -82,6 +82,12 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
 			return FAILURE;
 		}
+		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
+			zdata = Z_INDIRECT_P(zdata);
+			if (Z_TYPE_P(zdata) == IS_UNDEF) {
+				continue;
+			}
+		}
 		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
 			if (key_type == HASH_KEY_IS_STRING) {
 				zend_string *ekey;
