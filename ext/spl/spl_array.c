@@ -664,7 +664,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case 2:
 			return 1;
 		case 1:
-			return zend_is_true(value);
+			return zend_is_true(value TSRMLS_CC);
 	}
 
 	return 0;
