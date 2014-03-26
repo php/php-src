@@ -85,8 +85,8 @@ PHP_METHOD(SessionHandler, read)
 		return;
 	}
 
-	RETVAL_STRINGL(val, val_len, 1);
-	str_efree(val);
+	RETVAL_STRINGL(val, val_len);
+	efree(val);
 	return;
 }
 /* }}} */
@@ -154,6 +154,8 @@ PHP_METHOD(SessionHandler, create_sid)
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
-	RETURN_STRING(id, 0);
+	//????
+	RETVAL_STRING(id);
+	efree(id);
 }
 /* }}} */

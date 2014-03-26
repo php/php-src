@@ -702,10 +702,10 @@ END_EXTERN_C()
 
 
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
-	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
+	ZEND_SET_SYMBOL(&EG(symbol_table).ht, name, var)
 
 #define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount, _is_ref)	\
-	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
+	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table).ht, name, name_length, var, _refcount, _is_ref)
 
 #define ZEND_DEFINE_PROPERTY(class_ptr, name, value, mask)							\
 {																					\

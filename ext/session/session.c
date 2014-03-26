@@ -78,7 +78,7 @@ zend_class_entry *php_session_id_iface_entry;
    *********** */
 
 #define IF_SESSION_VARS() \
-	if (PS(http_session_vars) && PS(http_session_vars)->type == IS_ARRAY)
+	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY)
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
@@ -96,16 +96,16 @@ static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
 	PS(mod_data) = NULL;
 	PS(mod_user_is_open) = 0;
 	/* Do NOT init PS(mod_user_names) here! */
-	PS(http_session_vars) = NULL;
+	ZVAL_UNDEF(&PS(http_session_vars));
 }
 /* }}} */
 
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
 static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 {
-	if (PS(http_session_vars)) {
+	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
-		PS(http_session_vars) = NULL;
+		ZVAL_UNDEF(&PS(http_session_vars));
 	}
 	/* Do NOT destroy PS(mod_user_names) here! */
 	if (PS(mod_data) || PS(mod_user_implemented)) {
@@ -114,7 +114,7 @@ static inline void php_rshutdown_session_globals(TSRMLS_D) /* {{{ */
 		} zend_end_try();
 	}
 	if (PS(id)) {
-		efree(PS(id));
+		STR_RELEASE(PS(id));
 	}
 }
 /* }}} */
@@ -142,19 +142,19 @@ static int php_session_destroy(TSRMLS_D) /* {{{ */
 
 PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 {
-	zval **sym_track = NULL;
+	zval *sym_track = NULL;
 
 	IF_SESSION_VARS() {
-		zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, (void *) &sym_track);
+		sym_track = zend_hash_str_find(Z_ARRVAL(PS(http_session_vars)), name, namelen);
 	} else {
 		return;
 	}
 
 	if (sym_track == NULL) {
-		zval *empty_var;
+		zval empty_var;
 
-		ALLOC_INIT_ZVAL(empty_var);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, empty_var, 1, 0);
+		ZVAL_NULL(&empty_var);
+		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL(PS(http_session_vars)), name, namelen, &empty_var, 1, 0);
 	}
 }
 /* }}} */
@@ -162,56 +162,49 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		zend_set_hash_symbol(state_val, name, namelen, PZVAL_IS_REF(state_val), 1, Z_ARRVAL_P(PS(http_session_vars)));
+		zend_set_hash_symbol(state_val, name, namelen, Z_ISREF_P(state_val), 1, Z_ARRVAL(PS(http_session_vars)));
 	}
 }
 /* }}} */
 
-PHPAPI int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC) /* {{{ */
+PHPAPI zval* php_get_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 {
-	int ret = FAILURE;
-
 	IF_SESSION_VARS() {
-		ret = zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen + 1, (void **) state_var);
+		return zend_hash_str_find(Z_ARRVAL(PS(http_session_vars)), name, namelen);
 	}
-	return ret;
+	return NULL;
 }
 /* }}} */
 
 static void php_session_track_init(TSRMLS_D) /* {{{ */
 {
-	zval *session_vars = NULL;
-
+	zend_string *var_name = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
 	/* Unconditionally destroy existing array -- possible dirty data */
-	zend_delete_global_variable("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
+	zend_delete_global_variable(var_name TSRMLS_CC);
+	STR_RELEASE(var_name);
 
-	if (PS(http_session_vars)) {
+	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
 
-	MAKE_STD_ZVAL(session_vars);
-	array_init(session_vars);
-	PS(http_session_vars) = session_vars;
+	array_init(&PS(http_session_vars));
 
-	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
 }
 /* }}} */
 
-static char *php_session_encode(int *newlen TSRMLS_DC) /* {{{ */
+static zend_string *php_session_encode(TSRMLS_D) /* {{{ */
 {
-	char *ret = NULL;
-
 	IF_SESSION_VARS() {
 		if (!PS(serializer)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
-			ret = NULL;
-		} else if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE) {
-			ret = NULL;
-		}
+			return NULL;
+		} 
+		return PS(serializer)->encode(TSRMLS_C);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session");
 	}
-	return ret;
+	return NULL;
 }
 /* }}} */
 
@@ -250,7 +243,7 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {
 	int mask;
 	int have;
 
-	p = (unsigned char *) in;
+	p = (unsigned char *)in;
 	q = (unsigned char *)in + inlen;
 
 	w = 0;
@@ -281,7 +274,7 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits) /* {
 }
 /* }}} */
 
-PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
+PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 {
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;
@@ -290,20 +283,20 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 #endif
 	unsigned char *digest;
 	int digest_len;
-	int j;
-	char *buf, *outid;
+	char *buf;
 	struct timeval tv;
-	zval **array;
-	zval **token;
+	zval *array;
+	zval *token;
+	zend_string *outid;
 	char *remote_addr = NULL;
 
 	gettimeofday(&tv, NULL);
 
-	if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &array) == SUCCESS &&
-		Z_TYPE_PP(array) == IS_ARRAY &&
-		zend_hash_find(Z_ARRVAL_PP(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR"), (void **) &token) == SUCCESS
+	if ((array = zend_hash_str_find(&EG(symbol_table).ht, "_SERVER", sizeof("_SERVER") - 1)) &&
+		Z_TYPE_P(array) == IS_ARRAY &&
+		(token = zend_hash_str_find(Z_ARRVAL_P(array), "REMOTE_ADDR", sizeof("REMOTE_ADDR") - 1))
 	) {
-		remote_addr = Z_STRVAL_PP(token);
+		remote_addr = Z_STRVAL_P(token);
 	}
 
 	/* maximum 15+19+19+10 bytes */
@@ -418,13 +411,9 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
 	
-	outid = emalloc((size_t)((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5)));
-	j = (int) (bin_to_readable((char *)digest, digest_len, outid, (char)PS(hash_bits_per_character)) - outid);
+	outid = STR_ALLOC((digest_len + 2) * ((8.0f / PS(hash_bits_per_character) + 0.5)), 0);
+	outid->len = (int)(bin_to_readable((char *)digest, digest_len, outid->val, (char)PS(hash_bits_per_character)) - (char *)&outid->val);
 	efree(digest);
-
-	if (newlen) {
-		*newlen = j;
-	}
 
 	return outid;
 }
@@ -482,7 +471,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 
 	/* If there is no ID, use session module to create one */
 	if (!PS(id)) {
-		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+		PS(id) = PS(mod)->s_create_sid(&PS(mod_data) TSRMLS_CC);
 		if (!PS(id)) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 			return;
@@ -521,7 +510,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		PHP_MD5Final(PS(session_data_hash), &context);
 
 		php_session_decode(val, vallen TSRMLS_CC);
-		str_efree(val);
+		efree(val);
 	} else {
 		memset(PS(session_data_hash),'\0', 16);
 	}
@@ -541,25 +530,24 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 	IF_SESSION_VARS() {
  		if (PS(mod_data) || PS(mod_user_implemented)) {
-			char *val;
-			int vallen;
+			zend_string *val;
 
-			val = php_session_encode(&vallen TSRMLS_CC);
+			val = php_session_encode(TSRMLS_C);
 			if (val) {
 				PHP_MD5_CTX context;
 				unsigned char digest[16];
 
 				/* Generate data's MD5 hash */
 				PHP_MD5Init(&context);
-				PHP_MD5Update(&context, val, vallen);
+				PHP_MD5Update(&context, val->val, val->len);
 				PHP_MD5Final(digest, &context);
 				/* Write only when save is required */
 				if (memcmp(digest, PS(session_data_hash), 16)) {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val->val, val->len TSRMLS_CC);
 				} else {
 					ret = SUCCESS;
 				}
-				efree(val);
+				STR_RELEASE(val);
 			} else {
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
 			}
@@ -864,33 +852,28 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, &PS(http_session_vars), &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-	if (newlen) {
-		*newlen = buf.len;
-	}
-	smart_str_0(&buf);
-	*newstr = buf.c;
-	return SUCCESS;
+	return buf.s;
 }
 /* }}} */
 
 PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 {
 	const char *endptr = val + vallen;
-	zval *session_vars;
+	zval session_vars;
 	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	ALLOC_INIT_ZVAL(session_vars);
 	php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	if (PS(http_session_vars)) {
+	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
-	if (Z_TYPE_P(session_vars) == IS_NULL) {
-		array_init(session_vars);
+	if (Z_TYPE(session_vars) == IS_NULL) {
+		array_init(&PS(http_session_vars));
+	} else {
+		ZVAL_COPY_VALUE(&PS(http_session_vars), &session_vars);
 	}
-	PS(http_session_vars) = session_vars;
-	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
 	return SUCCESS;
 }
 /* }}} */
@@ -908,24 +891,20 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
-			if (key_length > PS_BIN_MAX) continue;
-			smart_str_appendc(&buf, (unsigned char) key_length);
-			smart_str_appendl(&buf, key, key_length);
+			if (key->len > PS_BIN_MAX) continue;
+			smart_str_appendc(&buf, (unsigned char)key->len);
+			smart_str_appendl(&buf, key->val, key->len);
 			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
-			if (key_length > PS_BIN_MAX) continue;
-			smart_str_appendc(&buf, (unsigned char) (key_length & PS_BIN_UNDEF));
-			smart_str_appendl(&buf, key, key_length);
+			if (key->len > PS_BIN_MAX) continue;
+			smart_str_appendc(&buf, (unsigned char) (key->len & PS_BIN_UNDEF));
+			smart_str_appendl(&buf, key->val, key->len);
 	);
 
-	if (newlen) {
-		*newlen = buf.len;
-	}
 	smart_str_0(&buf);
-	*newstr = buf.c;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	return SUCCESS;
+	return buf.s;
 }
 /* }}} */
 
@@ -934,7 +913,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	const char *p;
 	char *name;
 	const char *endptr = val + vallen;
-	zval *current;
+	zval current;
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
@@ -942,7 +921,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	for (p = val; p < endptr; ) {
-		zval **tmp;
+		zval *tmp;
 		namelen = ((unsigned char)(*p)) & (~PS_BIN_UNDEF);
 
 		if (namelen < 0 || namelen > PS_BIN_MAX || (p + namelen) >= endptr) {
@@ -955,17 +934,16 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 		p += namelen + 1;
 
-		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
-			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+		if ((tmp = zend_hash_str_find(&EG(symbol_table).ht, name, namelen))) {
+			if ((Z_TYPE_P(tmp) == IS_ARRAY && Z_ARRVAL_P(tmp) == &EG(symbol_table).ht) || tmp == &PS(http_session_vars)) {
 				efree(name);
 				continue;
 			}
 		}
 
 		if (has_value) {
-			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+				php_set_session_var(name, namelen, &current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
 		}
@@ -991,29 +969,25 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	PS_ENCODE_LOOP(
-			smart_str_appendl(&buf, key, key_length);
-			if (memchr(key, PS_DELIMITER, key_length) || memchr(key, PS_UNDEF_MARKER, key_length)) {
+			smart_str_appendl(&buf, key->val, key->len);
+			if (memchr(key->val, PS_DELIMITER, key->len) || memchr(key->val, PS_UNDEF_MARKER, key->len)) {
 				PHP_VAR_SERIALIZE_DESTROY(var_hash);
 				smart_str_free(&buf);
-				return FAILURE;
+				return NULL;
 			}
 			smart_str_appendc(&buf, PS_DELIMITER);
 
 			php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 		} else {
 			smart_str_appendc(&buf, PS_UNDEF_MARKER);
-			smart_str_appendl(&buf, key, key_length);
+			smart_str_appendl(&buf, key->val, key->len);
 			smart_str_appendc(&buf, PS_DELIMITER);
 	);
 
-	if (newlen) {
-		*newlen = buf.len;
-	}
 	smart_str_0(&buf);
-	*newstr = buf.c;
 
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-	return SUCCESS;
+	return buf.s;
 }
 /* }}} */
 
@@ -1022,7 +996,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	const char *p, *q;
 	char *name;
 	const char *endptr = val + vallen;
-	zval *current;
+	zval current;
 	int namelen;
 	int has_value;
 	php_unserialize_data_t var_hash;
@@ -1032,7 +1006,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 	p = val;
 
 	while (p < endptr) {
-		zval **tmp;
+		zval *tmp;
 		q = p;
 		while (*q != PS_DELIMITER) {
 			if (++q >= endptr) goto break_outer_loop;
@@ -1048,16 +1022,15 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		name = estrndup(p, namelen);
 		q++;
 
-		if (zend_hash_find(&EG(symbol_table), name, namelen + 1, (void **) &tmp) == SUCCESS) {
-			if ((Z_TYPE_PP(tmp) == IS_ARRAY && Z_ARRVAL_PP(tmp) == &EG(symbol_table)) || *tmp == PS(http_session_vars)) {
+		if ((tmp = zend_hash_str_find(&EG(symbol_table).ht, name, namelen))) {
+			if ((Z_TYPE_P(tmp) == IS_ARRAY && Z_ARRVAL_P(tmp) == &EG(symbol_table).ht) || tmp == &PS(http_session_vars)) {
 				goto skip;
 			}
 		}
 
 		if (has_value) {
-			ALLOC_INIT_ZVAL(current);
 			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
+				php_set_session_var(name, namelen, &current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
 		}
@@ -1084,7 +1057,7 @@ static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
 	PS_SERIALIZER_ENTRY(php_binary)
 };
 
-PHPAPI int php_session_register_serializer(const char *name, int (*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
+PHPAPI int php_session_register_serializer(const char *name, zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS), int (*decode)(PS_SERIALIZER_DECODE_ARGS)) /* {{{ */
 {
 	int ret = -1;
 	int i;
@@ -1300,8 +1273,8 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 {
 	smart_str ncookie = {0};
-	char *date_fmt = NULL;
-	char *e_session_name, *e_id;
+	zend_string *date_fmt = NULL;
+	zend_string *e_session_name, *e_id;
 
 	if (SG(headers_sent)) {
 		const char *output_start_filename = php_output_get_start_filename(TSRMLS_C);
@@ -1316,16 +1289,16 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 	}
 
 	/* URL encode session_name and id because they might be user supplied */
-	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)), NULL);
-	e_id = php_url_encode(PS(id), strlen(PS(id)), NULL);
+	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
+	e_id = php_url_encode(PS(id)->val, PS(id)->len);
 
 	smart_str_appends(&ncookie, COOKIE_SET_COOKIE);
-	smart_str_appends(&ncookie, e_session_name);
+	smart_str_appendl(&ncookie, e_session_name->val, e_session_name->len);
 	smart_str_appendc(&ncookie, '=');
-	smart_str_appends(&ncookie, e_id);
+	smart_str_appendl(&ncookie, e_id->val, e_id->len);
 
-	efree(e_session_name);
-	efree(e_id);
+	STR_RELEASE(e_session_name);
+	STR_RELEASE(e_id);
 
 	if (PS(cookie_lifetime) > 0) {
 		struct timeval tv;
@@ -1337,8 +1310,8 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 		if (t > 0) {
 			date_fmt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, t, 0 TSRMLS_CC);
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
-			smart_str_appends(&ncookie, date_fmt);
-			efree(date_fmt);
+			smart_str_appendl(&ncookie, date_fmt->val, date_fmt->len);
+			STR_RELEASE(date_fmt);
 
 			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
 			smart_str_append_long(&ncookie, PS(cookie_lifetime));
@@ -1367,7 +1340,7 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 
 	/*	'replace' must be 0 here, else a previous Set-Cookie
 		header, probably sent with setcookie() will be replaced! */
-	sapi_add_header_ex(ncookie.c, ncookie.len, 0, 0 TSRMLS_CC);
+	sapi_add_header_ex(ncookie.s->val, ncookie.s->len, 0, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -1403,8 +1376,8 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 /* }}} */
 
 #define PPID2SID \
-		convert_to_string((*ppid)); \
-		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
+		convert_to_string((ppid)); \
+		PS(id) = STR_INIT(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0)
 
 PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
@@ -1421,31 +1394,31 @@ PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 	}
 
 	/* if the SID constant exists, destroy it. */
-	zend_hash_del(EG(zend_constants), "sid", sizeof("sid"));
+	zend_hash_str_del(EG(zend_constants), "sid", sizeof("sid") - 1);
 
 	if (PS(define_sid)) {
 		smart_str var = {0};
 
 		smart_str_appends(&var, PS(session_name));
 		smart_str_appendc(&var, '=');
-		smart_str_appends(&var, PS(id));
+		smart_str_appends(&var, PS(id)->val);
 		smart_str_0(&var);
-		REGISTER_STRINGL_CONSTANT("SID", var.c, var.len, 0);
+		REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
 	} else {
-		REGISTER_STRINGL_CONSTANT("SID", STR_EMPTY_ALLOC(), 0, 0);
+		REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
 	}
 
 	if (PS(apply_trans_sid)) {
 		php_url_scanner_reset_vars(TSRMLS_C);
-		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id), strlen(PS(id)), 1 TSRMLS_CC);
+		php_url_scanner_add_var(PS(session_name), strlen(PS(session_name)), PS(id)->val, PS(id)->len, 1 TSRMLS_CC);
 	}
 }
 /* }}} */
 
 PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 {
-	zval **ppid;
-	zval **data;
+	zval *ppid;
+	zval *data;
 	char *p, *value;
 	int nrand;
 	int lensess;
@@ -1463,7 +1436,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 			break;
 
 		case php_session_disabled:
-			value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
+			value = zend_ini_string("session.save_handler", sizeof("session.save_handler") - 1, 0);
 			if (!PS(mod) && value) {
 				PS(mod) = _php_find_ps_module(value TSRMLS_CC);
 				if (!PS(mod)) {
@@ -1471,7 +1444,7 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 					return;
 				}
 			}
-			value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0);
+			value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
 			if (!PS(serializer) && value) {
 				PS(serializer) = _php_find_ps_serializer(value TSRMLS_CC);
 				if (!PS(serializer)) {
@@ -1494,9 +1467,9 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	 * cookie and get variables will be available. */
 
 	if (!PS(id)) {
-		if (PS(use_cookies) && zend_hash_find(&EG(symbol_table), "_COOKIE", sizeof("_COOKIE"), (void **) &data) == SUCCESS &&
-				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+		if (PS(use_cookies) && (data = zend_hash_str_find(&EG(symbol_table).ht, "_COOKIE", sizeof("_COOKIE") - 1)) &&
+				Z_TYPE_P(data) == IS_ARRAY &&
+				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
@@ -1505,18 +1478,18 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_hash_find(&EG(symbol_table), "_GET", sizeof("_GET"), (void **) &data) == SUCCESS &&
-				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+				(data = zend_hash_str_find(&EG(symbol_table).ht, "_GET", sizeof("_GET") - 1)) &&
+				Z_TYPE_P(data) == IS_ARRAY &&
+				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
 			PPID2SID;
 			PS(send_cookie) = 0;
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
-				zend_hash_find(&EG(symbol_table), "_POST", sizeof("_POST"), (void **) &data) == SUCCESS &&
-				Z_TYPE_PP(data) == IS_ARRAY &&
-				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name), lensess + 1, (void **) &ppid) == SUCCESS
+				(data = zend_hash_str_find(&EG(symbol_table).ht, "_POST", sizeof("_POST") - 1)) &&
+				Z_TYPE_P(data) == IS_ARRAY &&
+				(ppid = zend_hash_str_find(Z_ARRVAL_P(data), PS(session_name), lensess))
 		) {
 			PPID2SID;
 			PS(send_cookie) = 0;
@@ -1527,17 +1500,17 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 	 * '<session-name>=<session-id>' to allow URLs of the form
 	 * http://yoursite/<session-name>=<session-id>/script.php */
 
-	if (!PS(use_only_cookies) && !PS(id) && PG(http_globals)[TRACK_VARS_SERVER] &&
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
-			Z_TYPE_PP(data) == IS_STRING &&
-			(p = strstr(Z_STRVAL_PP(data), PS(session_name))) &&
+	if (!PS(use_only_cookies) && !PS(id) && !ZVAL_IS_UNDEF(&PG(http_globals)[TRACK_VARS_SERVER]) &&
+			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "REQUEST_URI", sizeof("REQUEST_URI") - 1)) &&
+			Z_TYPE_P(data) == IS_STRING &&
+			(p = strstr(Z_STRVAL_P(data), PS(session_name))) &&
 			p[lensess] == '='
 	) {
 		char *q;
 
 		p += lensess + 1;
 		if ((q = strpbrk(p, "/?\\"))) {
-			PS(id) = estrndup(p, q - p);
+			PS(id) = STR_INIT(p, q - p, 0);
 			PS(send_cookie) = 0;
 		}
 	}
@@ -1547,13 +1520,13 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 	if (PS(id) &&
 			PS(extern_referer_chk)[0] != '\0' &&
-			PG(http_globals)[TRACK_VARS_SERVER] &&
-			zend_hash_find(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER"), (void **) &data) == SUCCESS &&
-			Z_TYPE_PP(data) == IS_STRING &&
-			Z_STRLEN_PP(data) != 0 &&
-			strstr(Z_STRVAL_PP(data), PS(extern_referer_chk)) == NULL
+			!ZVAL_IS_UNDEF(&PG(http_globals)[TRACK_VARS_SERVER]) &&
+			(data = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_REFERER", sizeof("HTTP_REFERER") - 1)) &&
+			Z_TYPE_P(data) == IS_STRING &&
+			Z_STRLEN_P(data) != 0 &&
+			strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
 	) {
-		efree(PS(id));
+		STR_RELEASE(PS(id));
 		PS(id) = NULL;
 		PS(send_cookie) = 1;
 		if (PS(use_trans_sid) && !PS(use_only_cookies)) {
@@ -1563,8 +1536,8 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 
 	/* Finally check session id for dangarous characters
 	 * Security note: session id may be embedded in HTML pages.*/
-	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
-		efree(PS(id));
+	if (PS(id) && strpbrk(PS(id)->val, "\r\n\t <>'\"\\")) {
+		STR_RELEASE(PS(id));
 		PS(id) = NULL;
 	}
 
@@ -1619,7 +1592,7 @@ static void php_session_reset(TSRMLS_D) /* {{{ */
 PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC) /* {{{ */
 {
 	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
-		*new = php_url_scanner_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen TSRMLS_CC);
+		*new = php_url_scanner_adapt_single_url(url, urllen, PS(session_name), PS(id)->val, newlen TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1632,32 +1605,43 @@ PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t
    Set session cookie parameters */
 static PHP_FUNCTION(session_set_cookie_params)
 {
-	zval **lifetime = NULL;
+	zval *lifetime;
 	char *path = NULL, *domain = NULL;
 	int path_len, domain_len, argc = ZEND_NUM_ARGS();
 	zend_bool secure = 0, httponly = 0;
+	zend_string *ini_name;
 
 	if (!PS(use_cookies) ||
-		zend_parse_parameters(argc TSRMLS_CC, "Z|ssbb", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
+		zend_parse_parameters(argc TSRMLS_CC, "z|ssbb", &lifetime, &path, &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
 	convert_to_string_ex(lifetime);
 
-	zend_alter_ini_entry("session.cookie_lifetime", sizeof("session.cookie_lifetime"), Z_STRVAL_PP(lifetime), Z_STRLEN_PP(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	ini_name = STR_INIT("session.cookie_lifetime", sizeof("session.cookie_lifetime") - 1, 0);
+	zend_alter_ini_entry(ini_name,  Z_STRVAL_P(lifetime), Z_STRLEN_P(lifetime), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+	STR_RELEASE(ini_name);
 
 	if (path) {
-		zend_alter_ini_entry("session.cookie_path", sizeof("session.cookie_path"), path, path_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cookie_path", sizeof("session.cookie_path") - 1, 0);
+		zend_alter_ini_entry(ini_name, path, path_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 	if (domain) {
-		zend_alter_ini_entry("session.cookie_domain", sizeof("session.cookie_domain"), domain, domain_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cookie_domain", sizeof("session.cookie_domain") - 1, 0);
+		zend_alter_ini_entry(ini_name, domain, domain_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 
 	if (argc > 3) {
-		zend_alter_ini_entry("session.cookie_secure", sizeof("session.cookie_secure"), secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cookie_secure", sizeof("session.cookie_secure") - 1, 0);
+		zend_alter_ini_entry(ini_name, secure ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 	if (argc > 4) {
-		zend_alter_ini_entry("session.cookie_httponly", sizeof("session.cookie_httponly"), httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cookie_httponly", sizeof("session.cookie_httponly") - 1, 0);
+		zend_alter_ini_entry(ini_name, httponly ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -1686,15 +1670,18 @@ static PHP_FUNCTION(session_name)
 {
 	char *name = NULL;
 	int name_len;
+	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
-	RETVAL_STRING(PS(session_name), 1);
+	RETVAL_STRING(PS(session_name));
 
 	if (name) {
-		zend_alter_ini_entry("session.name", sizeof("session.name"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.name", sizeof("session.name") - 1, 0);
+		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -1705,6 +1692,7 @@ static PHP_FUNCTION(session_module_name)
 {
 	char *name = NULL;
 	int name_len;
+	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
@@ -1712,7 +1700,7 @@ static PHP_FUNCTION(session_module_name)
 
 	/* Set return_value to current module name */
 	if (PS(mod) && PS(mod)->s_name) {
-		RETVAL_STRING(safe_estrdup(PS(mod)->s_name), 0);
+		RETVAL_STRING(PS(mod)->s_name);
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -1729,7 +1717,9 @@ static PHP_FUNCTION(session_module_name)
 		}
 		PS(mod_data) = NULL;
 
-		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.save_handler", sizeof("session.save_handler") - 1, 0);
+		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -1740,6 +1730,7 @@ static PHP_FUNCTION(session_serializer_name)
 {
 	char *name = NULL;
 	int name_len;
+	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
@@ -1747,15 +1738,17 @@ static PHP_FUNCTION(session_serializer_name)
 
 	/* Return serializer name */
 	if (!name) {
-		RETURN_STRING(zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0), 1);
+		RETURN_STRING(zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0));
 	}
 
+	ini_name = STR_INIT("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
 	/* Set serializer name */
-	if (zend_alter_ini_entry("session.serialize_handler", sizeof("session.serialize_handler"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
-		RETURN_TRUE;
+	if (zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == SUCCESS) {
+		RETVAL_TRUE;
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
 	}
+	STR_RELEASE(ini_name);
 }
 /* }}} */
 
@@ -1763,18 +1756,18 @@ static PHP_FUNCTION(session_serializer_name)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
 {
-	zval ***args = NULL;
+	zval *args = NULL;
 	int i, num_args, argc = ZEND_NUM_ARGS();
-	char *name;
+	zend_string *name;
+	zend_string *ini_name;
 
 	if (PS(session_status) != php_session_none) {
 		RETURN_FALSE;
 	}
 
 	if (argc > 0 && argc <= 2) {
-		zval *obj = NULL, *callback = NULL;
-		zend_uint func_name_len;
-		char *func_name;
+		zval *obj = NULL;
+		zend_string *func_name;
 		HashPosition pos;
 		zend_function *default_mptr, *current_mptr;
 		ulong func_index;
@@ -1788,20 +1781,18 @@ static PHP_FUNCTION(session_set_save_handler)
 		/* Find implemented methods - SessionHandlerInterface */
 		zend_hash_internal_pointer_reset_ex(&php_session_iface_entry->function_table, &pos);
 		i = 0;
-		while (zend_hash_get_current_data_ex(&php_session_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+		while ((default_mptr = zend_hash_get_current_data_ptr_ex(&php_session_iface_entry->function_table, &pos))) {
+			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_index, 0, &pos);
 
-			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
-				if (PS(mod_user_names).names[i] != NULL) {
+			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+				if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
 				}
 
-				MAKE_STD_ZVAL(callback);
-				array_init_size(callback, 2);
+				array_init_size(&PS(mod_user_names).names[i], 2);
 				Z_ADDREF_P(obj);
-				add_next_index_zval(callback, obj);
-				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
-				PS(mod_user_names).names[i] = callback;
+				add_next_index_zval(&PS(mod_user_names).names[i], obj);
+				add_next_index_str(&PS(mod_user_names).names[i], func_name);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session handler's function table is corrupt");
 				RETURN_FALSE;
@@ -1813,20 +1804,18 @@ static PHP_FUNCTION(session_set_save_handler)
 
 		/* Find implemented methods - SessionIdInterface (optional) */
 		zend_hash_internal_pointer_reset_ex(&php_session_id_iface_entry->function_table, &pos);
-		while (zend_hash_get_current_data_ex(&php_session_id_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+		while ((default_mptr = zend_hash_get_current_data_ptr_ex(&php_session_id_iface_entry->function_table, &pos))) {
+			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_index, 0, &pos);
 
-			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
-				if (PS(mod_user_names).names[i] != NULL) {
+			if ((current_mptr = zend_hash_find_ptr(&Z_OBJCE_P(obj)->function_table, func_name))) {
+				if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
 					zval_ptr_dtor(&PS(mod_user_names).names[i]);
 				}
 
-				MAKE_STD_ZVAL(callback);
-				array_init_size(callback, 2);
+				array_init_size(&PS(mod_user_names).names[i], 2);
 				Z_ADDREF_P(obj);
-				add_next_index_zval(callback, obj);
-				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
-				PS(mod_user_names).names[i] = callback;
+				add_next_index_zval(&PS(mod_user_names).names[i], obj);
+				add_next_index_str(&PS(mod_user_names).names[i], func_name);
 			}
 
 			zend_hash_move_forward_ex(&php_session_id_iface_entry->function_table, &pos);
@@ -1836,26 +1825,26 @@ static PHP_FUNCTION(session_set_save_handler)
 		if (register_shutdown) {
 			/* create shutdown function */
 			shutdown_function_entry.arg_count = 1;
-			shutdown_function_entry.arguments = (zval **) safe_emalloc(sizeof(zval *), 1, 0);
+			shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
 
-			MAKE_STD_ZVAL(callback);
-			ZVAL_STRING(callback, "session_register_shutdown", 1);
-			shutdown_function_entry.arguments[0] = callback;
+			ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_register_shutdown");
 
 			/* add shutdown function, removing the old one if it exists */
-			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown"), &shutdown_function_entry TSRMLS_CC)) {
-				zval_ptr_dtor(&callback);
+			if (!register_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1, &shutdown_function_entry TSRMLS_CC)) {
+				zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
 				efree(shutdown_function_entry.arguments);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to register session shutdown function");
 				RETURN_FALSE;
 			}
 		} else {
 			/* remove shutdown function */
-			remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") TSRMLS_CC);
+			remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1 TSRMLS_CC);
 		}
 
 		if (PS(mod) && PS(session_status) == php_session_none && PS(mod) != &ps_mod_user) {
-			zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			ini_name = STR_INIT("session.save_handler", sizeof("session.save_handler") - 1, 0);
+			zend_alter_ini_entry(ini_name, "user", sizeof("user") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+			STR_RELEASE(ini_name);
 		}
 
 		RETURN_TRUE;
@@ -1870,28 +1859,29 @@ static PHP_FUNCTION(session_set_save_handler)
 	}
 
 	/* remove shutdown function */
-	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") TSRMLS_CC);
+	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") - 1 TSRMLS_CC);
 
 	/* at this point argc can only be 6 or 7 */
 	for (i = 0; i < argc; i++) {
-		if (!zend_is_callable(*args[i], 0, &name TSRMLS_CC)) {
+		if (!zend_is_callable(&args[i], 0, &name TSRMLS_CC)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
-			efree(name);
+			STR_RELEASE(name);
 			RETURN_FALSE;
 		}
-		efree(name);
+		STR_RELEASE(name);
 	}
 	
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
-		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.save_handler", sizeof("session.save_handler") - 1, 0);
+		zend_alter_ini_entry(ini_name, "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 
 	for (i = 0; i < argc; i++) {
-		if (PS(mod_user_names).names[i] != NULL) {
+		if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 		}
-		Z_ADDREF_PP(args[i]);
-		PS(mod_user_names).names[i] = *args[i];
+		ZVAL_COPY(&PS(mod_user_names).names[i], &args[i]);
 	}
 
 	RETURN_TRUE;
@@ -1904,12 +1894,13 @@ static PHP_FUNCTION(session_save_path)
 {
 	char *name = NULL;
 	int name_len;
+	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
-	RETVAL_STRING(PS(save_path), 1);
+	RETVAL_STRING(PS(save_path));
 
 	if (name) {
 		if (memchr(name, '\0', name_len) != NULL) {
@@ -1917,7 +1908,9 @@ static PHP_FUNCTION(session_save_path)
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
-		zend_alter_ini_entry("session.save_path", sizeof("session.save_path"), name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.save_path", sizeof("session.save_path") - 1, 0);
+		zend_alter_ini_entry(ini_name, name, name_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -1934,16 +1927,16 @@ static PHP_FUNCTION(session_id)
 	}
 
 	if (PS(id)) {
-		RETVAL_STRING(PS(id), 1);
+		RETVAL_STR(STR_COPY(PS(id)));
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
 
 	if (name) {
 		if (PS(id)) {
-			efree(PS(id));
+			STR_RELEASE(PS(id));
 		}
-		PS(id) = estrndup(name, name_len);
+		PS(id) = STR_INIT(name, name_len, 0);
 	}
 }
 /* }}} */
@@ -1969,11 +1962,11 @@ static PHP_FUNCTION(session_regenerate_id)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
 				RETURN_FALSE;
 			}
-			efree(PS(id));
+			STR_RELEASE(PS(id));
 			PS(id) = NULL;
 		}
 
-		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+		PS(id) = PS(mod)->s_create_sid(&PS(mod_data) TSRMLS_CC);
 		if (PS(id)) {
 			PS(send_cookie) = 1;
 			php_session_reset_id(TSRMLS_C);
@@ -1992,15 +1985,18 @@ static PHP_FUNCTION(session_cache_limiter)
 {
 	char *limiter = NULL;
 	int limiter_len;
+	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &limiter, &limiter_len) == FAILURE) {
 		return;
 	}
 
-	RETVAL_STRING(PS(cache_limiter), 1);
+	RETVAL_STRING(PS(cache_limiter));
 
 	if (limiter) {
-		zend_alter_ini_entry("session.cache_limiter", sizeof("session.cache_limiter"), limiter, limiter_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cache_limiter", sizeof("session.cache_limiter") - 1, 0);
+		zend_alter_ini_entry(ini_name, limiter, limiter_len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -2009,18 +2005,20 @@ static PHP_FUNCTION(session_cache_limiter)
    Return the current cache expire. If new_cache_expire is given, the current cache_expire is replaced with new_cache_expire */
 static PHP_FUNCTION(session_cache_expire)
 {
-	zval **expires = NULL;
-	int argc = ZEND_NUM_ARGS();
+	zval *expires = NULL;
+	zend_string *ini_name;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|Z", &expires) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &expires) == FAILURE) {
 		return;
 	}
 
 	RETVAL_LONG(PS(cache_expire));
 
-	if (argc == 1) {
+	if (expires) {
 		convert_to_string_ex(expires);
-		zend_alter_ini_entry("session.cache_expire", sizeof("session.cache_expire"), Z_STRVAL_PP(expires), Z_STRLEN_PP(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		ini_name = STR_INIT("session.cache_expire", sizeof("session.cache_expire") - 1, 0);
+		zend_alter_ini_entry(ini_name, Z_STRVAL_P(expires), Z_STRLEN_P(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+		STR_RELEASE(ini_name);
 	}
 }
 /* }}} */
@@ -2029,19 +2027,18 @@ static PHP_FUNCTION(session_cache_expire)
    Serializes the current setup and returns the serialized representation */
 static PHP_FUNCTION(session_encode)
 {
-	int len;
-	char *enc;
+	zend_string *enc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	enc = php_session_encode(&len TSRMLS_CC);
+	enc = php_session_encode(TSRMLS_C);
 	if (enc == NULL) {
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRINGL(enc, len, 0);
+	RETURN_STR(enc);
 }
 /* }}} */
 
@@ -2104,7 +2101,7 @@ static PHP_FUNCTION(session_unset)
 		HashTable *ht_sess_var;
 
 		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
-		ht_sess_var = Z_ARRVAL_P(PS(http_session_vars));
+		ht_sess_var = Z_ARRVAL(PS(http_session_vars));
 
 		/* Clean $_SESSION. */
 		zend_hash_clean(ht_sess_var);
@@ -2186,7 +2183,6 @@ static PHP_FUNCTION(session_gc)
 static PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;
-	zval *callback;
 
 	/* This function is registered itself as a shutdown function by
 	 * session_set_save_handler($obj). The reason we now register another
@@ -2196,14 +2192,12 @@ static PHP_FUNCTION(session_register_shutdown)
 	 */
 
 	shutdown_function_entry.arg_count = 1;
-	shutdown_function_entry.arguments = (zval **) safe_emalloc(sizeof(zval *), 1, 0);
+	shutdown_function_entry.arguments = (zval *) safe_emalloc(sizeof(zval), 1, 0);
 
-	MAKE_STD_ZVAL(callback);
-	ZVAL_STRING(callback, "session_write_close", 1);
-	shutdown_function_entry.arguments[0] = callback;
+	ZVAL_STRING(&shutdown_function_entry.arguments[0], "session_write_close");
 
 	if (!append_user_shutdown_function(shutdown_function_entry TSRMLS_CC)) {
-		zval_ptr_dtor(&callback);
+		zval_ptr_dtor(&shutdown_function_entry.arguments[0]);
 		efree(shutdown_function_entry.arguments);
 
 		/* Unable to register shutdown function, presumably because of lack
@@ -2385,7 +2379,7 @@ static int php_rinit_session(zend_bool auto_start TSRMLS_DC) /* {{{ */
 	if (PS(mod) == NULL) {
 		char *value;
 
-		value = zend_ini_string("session.save_handler", sizeof("session.save_handler"), 0);
+		value = zend_ini_string("session.save_handler", sizeof("session.save_handler") - 1, 0);
 		if (value) {
 			PS(mod) = _php_find_ps_module(value TSRMLS_CC);
 		}
@@ -2394,7 +2388,7 @@ static int php_rinit_session(zend_bool auto_start TSRMLS_DC) /* {{{ */
 	if (PS(serializer) == NULL) {
 		char *value;
 
-		value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler"), 0);
+		value = zend_ini_string("session.serialize_handler", sizeof("session.serialize_handler") - 1, 0);
 		if (value) {
 			PS(serializer) = _php_find_ps_serializer(value TSRMLS_CC);
 		}
@@ -2430,9 +2424,9 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 
 	/* this should NOT be done in php_rshutdown_session_globals() */
 	for (i = 0; i < 7; i++) {
-		if (PS(mod_user_names).names[i] != NULL) {
+		if (!ZVAL_IS_UNDEF(&PS(mod_user_names).names[i])) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
-			PS(mod_user_names).names[i] = NULL;
+			ZVAL_UNDEF(&PS(mod_user_names).names[i]);
 		}
 	}
 
@@ -2455,9 +2449,9 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->mod_user_implemented = 0;
 	ps_globals->mod_user_is_open = 0;
 	for (i = 0; i < 7; i++) {
-		ps_globals->mod_user_names.names[i] = NULL;
+		ZVAL_UNDEF(&ps_globals->mod_user_names.names[i]);
 	}
-	ps_globals->http_session_vars = NULL;
+	ZVAL_UNDEF(&ps_globals->http_session_vars);
 }
 /* }}} */
 
@@ -2465,7 +2459,9 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 {
 	zend_class_entry ce;
 
-	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1, 0, NULL TSRMLS_CC);
+	zend_string *sess_var = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
+	zend_register_auto_global(sess_var, 0, NULL TSRMLS_CC);
+	STR_RELEASE(sess_var);
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 
@@ -2549,17 +2545,17 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Session Support", "enabled" );
 
-	if (save_handlers.c) {
+	if (save_handlers.s) {
 		smart_str_0(&save_handlers);
-		php_info_print_table_row(2, "Registered save handlers", save_handlers.c);
+		php_info_print_table_row(2, "Registered save handlers", save_handlers.s->val);
 		smart_str_free(&save_handlers);
 	} else {
 		php_info_print_table_row(2, "Registered save handlers", "none");
 	}
 
-	if (ser_handlers.c) {
+	if (ser_handlers.s) {
 		smart_str_0(&ser_handlers);
-		php_info_print_table_row(2, "Registered serializer handlers", ser_handlers.c);
+		php_info_print_table_row(2, "Registered serializer handlers", ser_handlers.s->val);
 		smart_str_free(&ser_handlers);
 	} else {
 		php_info_print_table_row(2, "Registered serializer handlers", "none");
@@ -2584,16 +2580,16 @@ static const zend_module_dep session_deps[] = { /* {{{ */
 
 static zend_bool early_find_sid_in(zval *dest, int where, php_session_rfc1867_progress *progress TSRMLS_DC) /* {{{ */
 {
-	zval **ppid;
+	zval *ppid;
 
-	if (!PG(http_globals)[where]) {
+	if (ZVAL_IS_UNDEF(&PG(http_globals)[where])) {
 		return 0;
 	}
 
-	if (zend_hash_find(Z_ARRVAL_P(PG(http_globals)[where]), PS(session_name), progress->sname_len+1, (void **)&ppid) == SUCCESS
-			&& Z_TYPE_PP(ppid) == IS_STRING) {
+	if ((ppid = zend_hash_str_find(Z_ARRVAL(PG(http_globals)[where]), PS(session_name), progress->sname_len))
+			&& Z_TYPE_P(ppid) == IS_STRING) {
 		zval_dtor(dest);
-		ZVAL_ZVAL(dest, *ppid, 1, 0);
+		ZVAL_ZVAL(dest, ppid, 1, 0);
 		return 1;
 	}
 
@@ -2619,24 +2615,24 @@ static void php_session_rfc1867_early_find_sid(php_session_rfc1867_progress *pro
 
 static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress TSRMLS_DC) /* {{{ */
 {
-	zval **progress_ary, **cancel_upload;
+	zval *progress_ary, *cancel_upload;
 
-	if (zend_symtable_find(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1, (void**)&progress_ary) != SUCCESS) {
+	if ((progress_ary = zend_symtable_find(Z_ARRVAL(PS(http_session_vars)), progress->key.s)) == NULL) {
 		return 0;
 	}
-	if (Z_TYPE_PP(progress_ary) != IS_ARRAY) {
+	if (Z_TYPE_P(progress_ary) != IS_ARRAY) {
 		return 0;
 	}
-	if (zend_hash_find(Z_ARRVAL_PP(progress_ary), "cancel_upload", sizeof("cancel_upload"), (void**)&cancel_upload) != SUCCESS) {
+	if ((cancel_upload = zend_hash_str_find(Z_ARRVAL_P(progress_ary), "cancel_upload", sizeof("cancel_upload") - 1)) == NULL) {
 		return 0;
 	}
-	return Z_TYPE_PP(cancel_upload) == IS_BOOL && Z_LVAL_PP(cancel_upload);
+	return Z_TYPE_P(cancel_upload) == IS_BOOL && Z_LVAL_P(cancel_upload);
 } /* }}} */
 
 static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update TSRMLS_DC) /* {{{ */
 {
 	if (!force_update) {
-		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
+		if (Z_LVAL(progress->post_bytes_processed) < progress->next_update) {
 			return;
 		}
 #ifdef HAVE_GETTIMEOFDAY
@@ -2651,14 +2647,14 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 			progress->next_update_time = dtv + PS(rfc1867_min_freq);
 		}
 #endif
-		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
+		progress->next_update = Z_LVAL(progress->post_bytes_processed) + progress->update_step;
 	}
 
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
 		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1, progress->data, 2, 0);
+		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL(PS(http_session_vars)), progress->key.s->val, progress->key.s->len, &progress->data, 2, 0);
 	}
 	php_session_flush(TSRMLS_C);
 } /* }}} */
@@ -2668,7 +2664,7 @@ static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress T
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		zend_hash_del(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1);
+		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), progress->key.s);
 	}
 	php_session_flush(TSRMLS_C);
 } /* }}} */
@@ -2700,7 +2696,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			multipart_event_formdata *data = (multipart_event_formdata *) event_data;
 			size_t value_len;
 
-			if (Z_TYPE(progress->sid) && progress->key.c) {
+			if (Z_TYPE(progress->sid) && progress->key.s) {
 				break;
 			}
 
@@ -2716,11 +2712,10 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 				if (name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
 					zval_dtor(&progress->sid);
-					ZVAL_STRINGL(&progress->sid, (*data->value), value_len, 1);
-
-				} else if (name_len == PS(rfc1867_name).len && memcmp(data->name, PS(rfc1867_name).c, name_len) == 0) {
+					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
+				} else if (name_len == PS(rfc1867_name).s->len && memcmp(data->name, PS(rfc1867_name).s->val, name_len) == 0) {
 					smart_str_free(&progress->key);
-					smart_str_appendl(&progress->key, PS(rfc1867_prefix).c, PS(rfc1867_prefix).len);
+					smart_str_appendl(&progress->key, PS(rfc1867_prefix).s->val, PS(rfc1867_prefix).s->len);
 					smart_str_appendl(&progress->key, *data->value, value_len);
 					smart_str_0(&progress->key);
 
@@ -2735,12 +2730,12 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set 
 			 * or when we have no session id */
-			if (!Z_TYPE(progress->sid) || !progress->key.c) {
+			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
 			
 			/* First FILE_START event, initializing data */
-			if (!progress->data) {
+			if (ZVAL_IS_NULL(&progress->data)) {
 
 				if (PS(rfc1867_freq) >= 0) {
 					progress->update_step = PS(rfc1867_freq);
@@ -2750,46 +2745,40 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				progress->next_update = 0;
 				progress->next_update_time = 0.0;
 
-				ALLOC_INIT_ZVAL(progress->data);
-				array_init(progress->data);
+				array_init(&progress->data);
 
-				ALLOC_INIT_ZVAL(progress->post_bytes_processed);
-				ZVAL_LONG(progress->post_bytes_processed, data->post_bytes_processed);
+				ZVAL_LONG(&progress->post_bytes_processed, data->post_bytes_processed);
 
-				ALLOC_INIT_ZVAL(progress->files);
-				array_init(progress->files);
+				array_init(&progress->files);
 
-				add_assoc_long_ex(progress->data, "start_time",      sizeof("start_time"),      (long)sapi_get_request_time(TSRMLS_C));
-				add_assoc_long_ex(progress->data, "content_length",  sizeof("content_length"),  progress->content_length);
-				add_assoc_zval_ex(progress->data, "bytes_processed", sizeof("bytes_processed"), progress->post_bytes_processed);
-				add_assoc_bool_ex(progress->data, "done",            sizeof("done"),            0);
-				add_assoc_zval_ex(progress->data, "files",           sizeof("files"),           progress->files);
+				add_assoc_long_ex(&progress->data, "start_time", sizeof("start_time") - 1, (long)sapi_get_request_time(TSRMLS_C));
+				add_assoc_long_ex(&progress->data, "content_length",  sizeof("content_length"), progress->content_length);
+				add_assoc_zval_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, &progress->post_bytes_processed);
+				add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 0);
+				add_assoc_zval_ex(&progress->data, "files", sizeof("files") - 1, &progress->files);
 
 				php_rinit_session(0 TSRMLS_CC);
-				PS(id) = estrndup(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid));
+				PS(id) = STR_INIT(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid), 0);
 				PS(apply_trans_sid) = progress->apply_trans_sid;
 				PS(send_cookie) = 0;
 			}
 
-			ALLOC_INIT_ZVAL(progress->current_file);
-			array_init(progress->current_file);
-
-			ALLOC_INIT_ZVAL(progress->current_file_bytes_processed);
-			ZVAL_LONG(progress->current_file_bytes_processed, 0);
+			array_init(&progress->current_file);
+			ZVAL_LONG(&progress->current_file_bytes_processed, 0);
 
 			/* Each uploaded file has its own array. Trying to make it close to $_FILES entries. */
-			add_assoc_string_ex(progress->current_file, "field_name",    sizeof("field_name"),      data->name, 1);
-			add_assoc_string_ex(progress->current_file, "name",          sizeof("name"),            *data->filename, 1);
-			add_assoc_null_ex(progress->current_file, "tmp_name",        sizeof("tmp_name"));
-			add_assoc_long_ex(progress->current_file, "error",           sizeof("error"),           0);
+			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name, 1);
+			add_assoc_string_ex(&progress->current_file, "name", sizeof("name") - 1, *data->filename, 1);
+			add_assoc_null_ex(&progress->current_file, "tmp_name", sizeof("tmp_name") - 1);
+			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
 
-			add_assoc_bool_ex(progress->current_file, "done",            sizeof("done"),            0);
-			add_assoc_long_ex(progress->current_file, "start_time",      sizeof("start_time"),      (long)time(NULL));
-			add_assoc_zval_ex(progress->current_file, "bytes_processed", sizeof("bytes_processed"), progress->current_file_bytes_processed);
+			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1, 0);
+			add_assoc_long_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (long)time(NULL));
+			add_assoc_zval_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, &progress->current_file_bytes_processed);
 
-			add_next_index_zval(progress->files, progress->current_file);
+			add_next_index_zval(&progress->files, &progress->current_file);
 			
-			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2797,12 +2786,12 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_DATA: {
 			multipart_event_file_data *data = (multipart_event_file_data *) event_data;
 
-			if (!Z_TYPE(progress->sid) || !progress->key.c) {
+			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
 			
-			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
-			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_LVAL(progress->current_file_bytes_processed) = data->offset + data->length;
+			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2810,17 +2799,17 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_END: {
 			multipart_event_file_end *data = (multipart_event_file_end *) event_data;
 
-			if (!Z_TYPE(progress->sid) || !progress->key.c) {
+			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
 			
 			if (data->temp_filename) {
-				add_assoc_string_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename, 1);
+				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename, 1);
 			}
-			add_assoc_long_ex(progress->current_file, "error", sizeof("error"), data->cancel_upload);
-			add_assoc_bool_ex(progress->current_file, "done",  sizeof("done"),  1);
+			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
+			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1,  1);
 
-			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2828,21 +2817,21 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_END: {
 			multipart_event_end *data = (multipart_event_end *) event_data;
 
-			if (Z_TYPE(progress->sid) && progress->key.c) {
+			if (Z_TYPE(progress->sid) && progress->key.s) {
 				if (PS(rfc1867_cleanup)) {
 					php_session_rfc1867_cleanup(progress TSRMLS_CC);
 				} else {
-					add_assoc_bool_ex(progress->data, "done", sizeof("done"), 1);
-					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
+					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
+					Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
 					php_session_rfc1867_update(progress, 1 TSRMLS_CC);
 				}
 				php_rshutdown_session_globals(TSRMLS_C);
 			}
 
-			if (progress->data) {
+			if (!ZVAL_IS_UNDEF(&progress->data)) {
 				zval_ptr_dtor(&progress->data);
 			}
-			zval_dtor(&progress->sid);
+			zval_ptr_dtor(&progress->sid);
 			smart_str_free(&progress->key);
 			efree(progress);
 			progress = NULL;
