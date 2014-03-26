@@ -224,6 +224,9 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
+	if (Z_ISREF_P(arg)) {
+		arg = Z_REFVAL_P(arg);
+	}
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
