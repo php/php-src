@@ -1753,8 +1753,12 @@ ZEND_API void zend_detach_symbol_table(TSRMLS_D) /* {{{ */
 	
 	/* copy real values from CV slots into symbol table */
 	for (i = 0; i < op_array->last_var; i++) {
-		zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
-		ZVAL_UNDEF(EX_VAR_NUM(i));
+		if (Z_TYPE_P(EX_VAR_NUM(i)) == IS_UNDEF) {
+			zend_hash_del(ht, op_array->vars[i]);
+		} else {
+			zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
+			ZVAL_UNDEF(EX_VAR_NUM(i));
+		}
 	}
 }
 /* }}} */
