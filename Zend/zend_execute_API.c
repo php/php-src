@@ -202,6 +202,9 @@ void init_executor(TSRMLS_D) /* {{{ */
 
 static int zval_call_destructor(zval *zv TSRMLS_DC) /* {{{ */
 {
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_REFCOUNT_P(zv) == 1) {
 		return ZEND_HASH_APPLY_REMOVE;
 	} else {
@@ -210,8 +213,22 @@ static int zval_call_destructor(zval *zv TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static int zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
+{
+	TSRMLS_FETCH();
+
+	if (Z_TYPE_P(zv) == IS_INDIRECT) {
+		zv = Z_INDIRECT_P(zv);
+	}
+	i_zval_ptr_dtor(zv ZEND_FILE_LINE_CC TSRMLS_CC);
+}
+/* }}} */
+
 void shutdown_destructors(TSRMLS_D) /* {{{ */
 {
+	if (CG(unclean_shutdown)) {
+		EG(symbol_table).ht.pDestructor = zend_unclean_zval_ptr_dtor;
+	}
 	zend_try {
 		int symbols;
 		do {
@@ -246,6 +263,10 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		}
 */
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator TSRMLS_CC);
+
+		if (CG(unclean_shutdown)) {
+			EG(symbol_table).ht.pDestructor = zend_unclean_zval_ptr_dtor;
+		}
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table).ht);
 	} zend_end_try();
 
@@ -1638,65 +1659,9 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_reset_all_cv(zend_array *symbol_table TSRMLS_DC) /* {{{ */
-{
-	zend_execute_data *ex;
-	int i;
-
-	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
-		if (ex->op_array && ex->symbol_table == symbol_table) {
-			for (i = 0; i < ex->op_array->last_var; i++) {
-				ZVAL_UNDEF(EX_VAR_NUM_2(ex, i));
-			}
-		}
-	}
-}
-/* }}} */
-
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, zend_string *name TSRMLS_DC) /* {{{ */
-{
-	if (zend_hash_del(ht, name) == SUCCESS) {
-		while (ex && &ex->symbol_table->ht == ht) {
-			int i;
-
-			if (ex->op_array) {
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i]->h == name->h &&
-						ex->op_array->vars[i]->len == name->len &&
-						!memcmp(ex->op_array->vars[i]->val, name->val, name->len)) {
-						ZVAL_UNDEF(EX_VAR_NUM_2(ex, i));
-						break;
-					}
-				}
-			}
-			ex = ex->prev_execute_data;
-		}
-	}
-}
-/* }}} */
-
 ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC) /* {{{ */
 {
-	zend_execute_data *ex;
-
-	if (zend_hash_del(&EG(symbol_table).ht, name) == SUCCESS) {
-		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
-			if (ex->op_array && ex->symbol_table == &EG(symbol_table)) {
-				int i;
-				for (i = 0; i < ex->op_array->last_var; i++) {
-					if (ex->op_array->vars[i]->h == name->h &&
-						ex->op_array->vars[i]->len == name->len &&
-						!memcmp(ex->op_array->vars[i]->val, name->val, name->len)
-					) {
-						ZVAL_UNDEF(EX_VAR_NUM_2(ex, i));
-						break;
-					}
-				}
-			}
-		}
-		return SUCCESS;
-	}
-	return FAILURE;
+    return zend_hash_del_ind(&EG(symbol_table).ht, name);
 }
 /* }}} */
 
@@ -1736,15 +1701,94 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			    ZVAL_COPY_VALUE(EX_VAR_NUM_2(ex, ex->op_array->this_var), &EG(This));
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				if (Z_TYPE_P(EX_VAR_NUM_2(ex, i)) != IS_UNDEF) {
-					zval *zv = zend_hash_update(&EG(active_symbol_table)->ht,
-						ex->op_array->vars[i],
-						EX_VAR_NUM_2(ex, i));
-					ZVAL_INDIRECT(EX_VAR_NUM_2(ex, i), zv);
-				}
+				zval zv;
+					
+				ZVAL_INDIRECT(&zv, EX_VAR_NUM_2(ex, i));
+				zend_hash_update(&EG(active_symbol_table)->ht,
+					ex->op_array->vars[i], &zv);
 			}
 		}
 	}
+}
+/* }}} */
+
+ZEND_API void zend_attach_symbol_table(TSRMLS_D) /* {{{ */
+{
+	int i;
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_op_array *op_array = execute_data->op_array;
+	HashTable *ht = &EG(active_symbol_table)->ht;
+	
+	/* copy real values from symbol table into CV slots and create
+	   INDIRECT references to CV in symbol table  */
+	for (i = 0; i < op_array->last_var; i++) {
+		zval *zv = zend_hash_find(ht, op_array->vars[i]);
+
+		if (zv) {
+			if (Z_TYPE_P(zv) == IS_INDIRECT) {
+				zval *val = Z_INDIRECT_P(zv);
+				if (Z_TYPE_P(val) == IS_UNDEF) {
+					ZVAL_UNDEF(EX_VAR_NUM(i));
+				} else {
+					ZVAL_COPY_VALUE(EX_VAR_NUM(i), val);
+				}
+			} else {
+				ZVAL_COPY_VALUE(EX_VAR_NUM(i), zv);
+			}
+		} else {
+			ZVAL_UNDEF(EX_VAR_NUM(i));
+			zv = zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
+		}
+		ZVAL_INDIRECT(zv, EX_VAR_NUM(i));
+	}
+}
+/* }}} */
+
+ZEND_API void zend_detach_symbol_table(TSRMLS_D) /* {{{ */
+{
+	int i;
+	zend_execute_data *execute_data = EG(current_execute_data);
+	zend_op_array *op_array = execute_data->op_array;
+	HashTable *ht = &EG(active_symbol_table)->ht;
+	
+	/* copy real values from CV slots into symbol table */
+	for (i = 0; i < op_array->last_var; i++) {
+		zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
+		ZVAL_UNDEF(EX_VAR_NUM(i));
+	}
+}
+/* }}} */
+
+ZEND_API int zend_set_local_var(const char *name, int len, zval *value, int force TSRMLS_DC) /* {{{ */
+{
+	if (!EG(active_symbol_table)) {
+		int i;
+		zend_execute_data *execute_data = EG(current_execute_data);
+		zend_op_array *op_array = execute_data->op_array;
+		zend_ulong h = zend_hash_func(name, len);
+
+		if (op_array) {
+			for (i = 0; i < op_array->last_var; i++) {
+				if (op_array->vars[i]->h == h &&
+				    op_array->vars[i]->len == len &&
+				    memcmp(op_array->vars[i]->val, name, len) == 0) {
+					ZVAL_COPY_VALUE(EX_VAR_NUM(i), value);
+					return SUCCESS;
+				}
+			}
+		}
+		if (force) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+			if (EG(active_symbol_table)) {
+				zend_hash_str_update(&EG(active_symbol_table)->ht, name, len, value);
+			}
+		} else {
+			return FAILURE;
+		}
+	} else {
+		return zend_hash_str_update_ind(&EG(active_symbol_table)->ht, name, len, value);
+	}
+	return SUCCESS;
 }
 /* }}} */
 

@@ -85,10 +85,10 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    prop_info->offset >= 0 &&
 				    Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
-					zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-					if (EXPECTED(zv != NULL)) {
-						ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
-					}
+					zval zv;
+
+					ZVAL_INDIRECT(&zv, &zobj->properties_table[prop_info->offset]);
+					zend_hash_add(zobj->properties, prop_info->name, &zv);
 				}
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
@@ -101,10 +101,10 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
 					    prop_info->offset >= 0 &&
 						Z_TYPE(zobj->properties_table[prop_info->offset]) != IS_UNDEF) {
-						zval *zv = zend_hash_add(zobj->properties, prop_info->name, &zobj->properties_table[prop_info->offset]);
-						if (EXPECTED(zv != NULL)) {
-							ZVAL_INDIRECT(&zobj->properties_table[prop_info->offset], zv);
-						}
+						zval zv;
+						
+						ZVAL_INDIRECT(&zv, &zobj->properties_table[prop_info->offset]);
+						zend_hash_add(zobj->properties, prop_info->name, &zv);
 					}
 				}
 			}
@@ -133,15 +133,9 @@ ZEND_API HashTable *zend_std_get_gc(zval *object, zval **table, int *n TSRMLS_DC
 	} else {
 		zend_object *zobj = Z_OBJ_P(object);
 
-		if (zobj->properties) {
-			*table = NULL;
-			*n = 0;
-			return zobj->properties;
-		} else {
-			*table = zobj->properties_table;
-			*n = zobj->ce->default_properties_count;
-			return NULL;
-		}
+		*table = zobj->properties_table;
+		*n = zobj->ce->default_properties_count;
+		return zobj->properties;
 	}
 }
 /* }}} */
@@ -454,20 +448,18 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-		    property_info->offset >= 0 &&
-		    Z_TYPE(zobj->properties_table[property_info->offset]) != IS_UNDEF) {
+		    property_info->offset >= 0) {
 			retval = &zobj->properties_table[property_info->offset];
-			if (Z_TYPE_P(retval) == IS_INDIRECT) {
-				retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) != IS_UNDEF) {
+				goto exit;
 			}
-			goto exit;
-		}
-		if (UNEXPECTED(zobj->properties != NULL)) {
+		} else if (UNEXPECTED(zobj->properties != NULL)) {
 			retval = zend_hash_find(zobj->properties, property_info->name);
 			if (retval) goto exit;
 		}
 	}
 
+	/* magic get */
 	if (zobj->ce->__get) {
 		long *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_GET)) {
@@ -534,6 +526,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 		}
 		retval = &EG(uninitialized_zval);
 	}
+
 exit:
 	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
 		if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
@@ -565,15 +558,12 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-		    property_info->offset >= 0 &&
-		    Z_TYPE(zobj->properties_table[property_info->offset]) != IS_UNDEF) {
+		    property_info->offset >= 0) {
 			variable_ptr = &zobj->properties_table[property_info->offset];
-			if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
-				variable_ptr = Z_INDIRECT_P(variable_ptr);
+			if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
+				goto found;
 			}
-			goto found;
-		}
-		if (EXPECTED(zobj->properties != NULL)) {
+		} else if (EXPECTED(zobj->properties != NULL)) {
 			if ((variable_ptr = zend_hash_find(zobj->properties, property_info->name)) != NULL) {
 found:
 				/* if we already have this value there, we don't actually need to do anything */
@@ -607,11 +597,12 @@ found:
 						zval_ptr_dtor(&garbage);
 					}
 				}
-				return;
+				goto exit;
 			}
 		}
 	}
 
+	/* magic set */
 	if (zobj->ce->__set) {
 		long *guard = zend_get_property_guard(zobj, property_info, member);
 
@@ -653,12 +644,7 @@ write_std_property:
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
 
-			if (zobj->properties) {
-				zval *zv = zend_hash_update(zobj->properties, property_info->name, value);
-			    ZVAL_INDIRECT(&zobj->properties_table[property_info->offset], zv);
-			} else {
-				ZVAL_COPY_VALUE(&zobj->properties_table[property_info->offset], value);
-			}
+			ZVAL_COPY_VALUE(&zobj->properties_table[property_info->offset], value);
 		} else {
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
@@ -667,6 +653,7 @@ write_std_property:
 		}
 	}
 
+exit:
 	if (UNEXPECTED(Z_TYPE(tmp_member) != IS_UNDEF)) {
 		zval_ptr_dtor(&tmp_member);
 	}
@@ -785,15 +772,12 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-		    property_info->offset >= 0 &&
-		    Z_TYPE(zobj->properties_table[property_info->offset]) != IS_UNDEF) {
+		    property_info->offset >= 0) {
 			retval = &zobj->properties_table[property_info->offset];
-			if (Z_TYPE_P(retval) == IS_INDIRECT) {
-				retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) != IS_UNDEF) {
+				goto exit;
 			}
-			goto exit;
-		}
-		if (UNEXPECTED(zobj->properties != NULL)) {
+		} else if (UNEXPECTED(zobj->properties != NULL)) {
 			retval = zend_hash_find(zobj->properties, property_info->name);
 			if (retval) goto exit;
 		}
@@ -810,13 +794,8 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		ZVAL_NULL(&tmp);
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
-			if (zobj->properties) {				
-				retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
-			    ZVAL_INDIRECT(&zobj->properties_table[property_info->offset], retval);
-			} else {
-				retval = &zobj->properties_table[property_info->offset];
-				ZVAL_NULL(retval);
-			}
+			retval = &zobj->properties_table[property_info->offset];
+			ZVAL_NULL(retval);
 		} else {
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
@@ -854,36 +833,39 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
 
-	if (EXPECTED(property_info != NULL) &&
-	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-	    property_info->offset >= 0) {
-		zval_ptr_dtor(&zobj->properties_table[property_info->offset]);
-		ZVAL_UNDEF(&zobj->properties_table[property_info->offset]);
-		if (!zobj->properties) goto exit;
+	if (EXPECTED(property_info != NULL)) {
+		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
+		    property_info->offset >= 0) {
+			if (Z_TYPE(zobj->properties_table[property_info->offset]) != IS_UNDEF) {
+				zval_ptr_dtor(&zobj->properties_table[property_info->offset]);
+				ZVAL_UNDEF(&zobj->properties_table[property_info->offset]);
+				goto exit;
+			}
+		} else if (zobj->properties &&
+        	UNEXPECTED(zend_hash_del(zobj->properties, property_info->name) != FAILURE)) {
+			goto exit;
+		}
 	}
-	if (UNEXPECTED(!property_info) ||
-        !zobj->properties ||
-        UNEXPECTED(zend_hash_del(zobj->properties, property_info->name) == FAILURE)) {
 	
-		if (zobj->ce->__unset) {
-			long *guard = zend_get_property_guard(zobj, property_info, member);
-			if (!((*guard) & IN_UNSET)) {
-				/* have unseter - try with it! */
-				Z_ADDREF_P(object);
-				if (Z_ISREF_P(object)) {
-					SEPARATE_ZVAL(object);
-				}
-				(*guard) |= IN_UNSET; /* prevent circular unsetting */
-				zend_std_call_unsetter(object, member TSRMLS_CC);
-				(*guard) &= ~IN_UNSET;
-				zval_ptr_dtor(object);
-			} else {
-				if (Z_STRVAL_P(member)[0] == '\0') {
-					if (Z_STRLEN_P(member) == 0) {
-						zend_error(E_ERROR, "Cannot access empty property");
-					} else {
-						zend_error(E_ERROR, "Cannot access property started with '\\0'");
-					}
+	/* magic unset */
+	if (zobj->ce->__unset) {
+		long *guard = zend_get_property_guard(zobj, property_info, member);
+		if (!((*guard) & IN_UNSET)) {
+			/* have unseter - try with it! */
+			Z_ADDREF_P(object);
+			if (Z_ISREF_P(object)) {
+				SEPARATE_ZVAL(object);
+			}
+			(*guard) |= IN_UNSET; /* prevent circular unsetting */
+			zend_std_call_unsetter(object, member TSRMLS_CC);
+			(*guard) &= ~IN_UNSET;
+			zval_ptr_dtor(object);
+		} else {
+			if (Z_STRVAL_P(member)[0] == '\0') {
+				if (Z_STRLEN_P(member) == 0) {
+					zend_error(E_ERROR, "Cannot access empty property");
+				} else {
+					zend_error(E_ERROR, "Cannot access property started with '\\0'");
 				}
 			}
 		}
@@ -1382,12 +1364,6 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 					zval *p1 = &zobj1->properties_table[i];
 					zval *p2 = &zobj2->properties_table[i];
 
-					if (Z_TYPE_P(p1) == IS_INDIRECT) {
-						p1 = Z_INDIRECT_P(p1);
-					}
-					if (Z_TYPE_P(p2) == IS_INDIRECT) {
-						p1 = Z_INDIRECT_P(p2);
-					}
 					if (compare_function(&result, p1, p2 TSRMLS_CC)==FAILURE) {
 						Z_OBJ_UNPROTECT_RECURSION(o1);
 						Z_OBJ_UNPROTECT_RECURSION(o2);
@@ -1448,30 +1424,26 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
-		    property_info->offset >= 0 &&
-		    Z_TYPE(zobj->properties_table[property_info->offset]) != IS_UNDEF) {
+		    property_info->offset >= 0) {
 			value = &zobj->properties_table[property_info->offset];
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
+			if (Z_TYPE_P(value) != IS_UNDEF) {
+				goto found;
 			}
-			goto found;
-		}
-		if (UNEXPECTED(zobj->properties != NULL)) {
-			if ((value = zend_hash_find(zobj->properties, property_info->name)) != NULL) {
+		} else if (UNEXPECTED(zobj->properties != NULL) &&
+		           (value = zend_hash_find(zobj->properties, property_info->name)) != NULL) {
 found:
-				switch (has_set_exists) {
-					case 0:
-						result = (Z_TYPE_P(value) != IS_NULL);
-						break;
-					default:
-						result = zend_is_true(value TSRMLS_CC);
-						break;
-					case 2:
-						result = 1;
-						break;
-				}
-				goto exit;
+			switch (has_set_exists) {
+				case 0:
+					result = (Z_TYPE_P(value) != IS_NULL);
+					break;
+				default:
+					result = zend_is_true(value TSRMLS_CC);
+					break;
+				case 2:
+					result = 1;
+					break;
 			}
+			goto exit;
 		}
 	}
 

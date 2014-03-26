@@ -593,9 +593,18 @@ ZEND_FUNCTION(each)
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
 		return;
 	}
-	entry = zend_hash_get_current_data(target_hash);
-	if (!entry) {
-		RETURN_FALSE;
+	while (1) {
+		entry = zend_hash_get_current_data(target_hash);
+		if (!entry) {
+			RETURN_FALSE;
+		} else if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+			if (Z_TYPE_P(entry) == IS_UNDEF) {
+				zend_hash_move_forward(target_hash);
+				continue;
+			}
+		}
+		break;
 	}
 	array_init(return_value);
 
@@ -999,6 +1008,13 @@ ZEND_FUNCTION(get_object_vars)
 	zend_hash_internal_pointer_reset_ex(properties, &pos);
 
 	while ((value = zend_hash_get_current_data_ex(properties, &pos)) != NULL) {
+		if (Z_TYPE_P(value) == IS_INDIRECT) {
+			value = Z_INDIRECT_P(value);
+			if (Z_TYPE_P(value) == IS_UNDEF) {
+				zend_hash_move_forward_ex(properties, &pos);
+				continue;
+			}
+		}
 		if (zend_hash_get_current_key_ex(properties, &key, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
 				zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);

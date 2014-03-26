@@ -340,17 +340,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-//???: object may become INDIRECT
-	if (OP1_TYPE == IS_CV && Z_TYPE_P(object) == IS_INDIRECT) {
-		object = Z_INDIRECT_P(object);
-	}
-
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		make_real_object(object TSRMLS_CC);
-//???
-		if (Z_TYPE_P(object) == IS_INDIRECT) {
-			object = Z_INDIRECT_P(object);
-		}
 	}
 	if (UNEXPECTED(Z_ISREF_P(object))) {
 		object = Z_REFVAL_P(object);
@@ -1048,10 +1039,6 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 		FREE_OP1();
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-//???: STRING may become INDIRECT
-		if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
-			varname = Z_INDIRECT_P(varname);
-		}
 /*
 		if (!target_symbol_table) {
 			CHECK_EXCEPTION();
@@ -1075,6 +1062,29 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 					retval = zend_hash_update(target_symbol_table, Z_STR_P(varname), &EG(uninitialized_zval));
 					break;
 				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+//??? GLOBAL or $$name variable may be an INDIRECT pointer to CV
+		} else if (/*(opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
+			Z_TYPE_P(retval) == IS_INDIRECT) {
+			retval = Z_INDIRECT_P(retval);
+			if (Z_TYPE_P(retval) == IS_UNDEF) {
+				switch (type) {
+					case BP_VAR_R:
+					case BP_VAR_UNSET:
+						zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
+						/* break missing intentionally */
+					case BP_VAR_IS:
+						retval = EX_VAR(opline->result.var);
+						ZVAL_NULL(retval);
+						break;
+					case BP_VAR_RW:
+						zend_error(E_NOTICE,"Undefined variable: %s", Z_STRVAL_P(varname));
+						/* break missing intentionally */
+					case BP_VAR_W:
+						ZVAL_NULL(retval);
+						break;
+					EMPTY_SWITCH_DEFAULT_CASE()
+				}
 			}
 		}
 		switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
@@ -1860,9 +1870,15 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
 
+	if ((nested && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) ||
+	    EG(active_symbol_table) == &EG(symbol_table)) {
+		zend_detach_symbol_table(TSRMLS_C);
+	}
+	
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
-	if (!EG(active_symbol_table)) {
+	
+	if (EG(active_symbol_table) != &EG(symbol_table)) {
 		i_free_compiled_variables(execute_data TSRMLS_CC);
 	}
 
@@ -1881,6 +1897,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		LOAD_REGS();
 		LOAD_OPLINE();
 		if (UNEXPECTED(opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
+
+			zend_attach_symbol_table(TSRMLS_C);
 
 			EX(function_state).function = (zend_function *) EX(op_array);
 			EX(function_state).arguments = NULL;
@@ -3027,11 +3045,6 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		zval_ptr_dtor(EX_VAR_NUM(opline->op2.var));
 	}
 	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
-	if (EG(active_symbol_table)) {
-		zend_string *cv = CV_DEF_OF(opline->op2.var);
-		zval *zv = zend_hash_update(&EG(active_symbol_table)->ht, cv, EX_VAR_NUM(opline->op2.var));
-		ZVAL_INDIRECT(EX_VAR_NUM(opline->op2.var), zv);
-	}
 	if (UNEXPECTED(EG(exception) != exception)) {
 		EG(exception)->gc.refcount++;
 		HANDLE_EXCEPTION();
@@ -3222,7 +3235,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg_num = opline->op2.num + EX(call)->num_additional_args + 1;
 
-again:
+ZEND_VM_C_LABEL(send_again):
 	switch (Z_TYPE_P(args)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(args);
@@ -3350,7 +3363,7 @@ ZEND_VM_C_LABEL(unpack_iter_dtor):
 		}
 		case IS_REFERENCE:
 			args = Z_REFVAL_P(args);
-			goto again;
+			ZEND_VM_C_GOTO(send_again);
 			break;
 		default:
 			zend_error(E_WARNING, "Only arrays and Traversables can be unpacked");
@@ -3419,10 +3432,6 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 					
 			ZVAL_COPY_VALUE(&tmp, opline->op2.zv);
 			zval_update_constant(&tmp, 0 TSRMLS_CC);
-//???: var_ptr may become INDIRECT
-			if (Z_TYPE_P(var_ptr) == IS_INDIRECT) {
-				var_ptr = Z_INDIRECT_P(var_ptr);
-			}
 			ZVAL_COPY_VALUE(var_ptr, &tmp);
 		} else {
 			ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
@@ -3467,10 +3476,6 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 	for (; arg_num <= arg_count; ++arg_num) {
 		zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
-//??? "params" may became IS_INDIRECT because of symtable initialization in zend_error
-		if (Z_TYPE_P(params) == IS_INDIRECT) {
-			params = Z_INDIRECT_P(params);
-		}
 		zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
 		if (Z_REFCOUNTED_P(param)) {
 			Z_ADDREF_P(param);
@@ -3805,7 +3810,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		ulong hval;
 
-again:
+ZEND_VM_C_LABEL(add_again):
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -3827,7 +3832,7 @@ ZEND_VM_C_LABEL(num_index):
 				break;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
-				goto again;
+				ZEND_VM_C_GOTO(add_again);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
@@ -3877,7 +3882,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-again:
+ZEND_VM_C_LABEL(cast_again):
 	switch (opline->extended_value) {
 		case IS_NULL:
 			convert_to_null(result);
@@ -3917,7 +3922,7 @@ again:
 			break;
 		case IS_REFERENCE:
 			result = Z_REFVAL_P(result);
-			goto again;
+			ZEND_VM_C_GOTO(cast_again);
 			break;
 	}
 	FREE_OP1_IF_VAR();
@@ -4061,15 +4066,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	if (OP1_TYPE == IS_CV &&
 	    OP2_TYPE == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (EG(active_symbol_table)) {
-			zend_string *cv = CV_DEF_OF(opline->op1.var);
-
-			zend_delete_variable(EX(prev_execute_data), &EG(active_symbol_table)->ht, cv TSRMLS_CC);
-			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
-		} else if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
-		}
+		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -4112,11 +4110,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_std_unset_static_property(ce, Z_STR_P(varname), ((OP1_TYPE == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-//???: STRING may become INDIRECT
-		if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
-			varname = Z_INDIRECT_P(varname);
-		}
-		zend_delete_variable(execute_data, target_symbol_table, Z_STR_P(varname) TSRMLS_CC);
+		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
 	}
 
 	if (OP1_TYPE != IS_CONST && varname == &tmp) {
@@ -4145,12 +4139,11 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE != IS_VAR || container) {
-//???deref
-container_again:
+ZEND_VM_C_LABEL(container_again):
 		switch (Z_TYPE_P(container)) {
 			case IS_ARRAY: {
 				HashTable *ht = Z_ARRVAL_P(container);
-offset_again:
+ZEND_VM_C_LABEL(offset_again):
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4189,7 +4182,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 						break;
 					case IS_REFERENCE:
 						offset = Z_REFVAL_P(offset);
-						goto offset_again;
+						ZEND_VM_C_GOTO(offset_again);
 						break;
 					default:
 						zend_error(E_WARNING, "Illegal offset type in unset");
@@ -4221,7 +4214,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 				ZEND_VM_CONTINUE(); /* bailed out before */
 			case IS_REFERENCE:
 				container = Z_REFVAL_P(container);
-				goto container_again;
+				ZEND_VM_C_GOTO(container_again);
 				break;
 			default:
 				FREE_OP2();
@@ -4492,16 +4485,28 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 
 			fe_ht = Z_OBJPROP_P(array);
 			zend_hash_set_pointer(fe_ht, (HashPointer*)EX_VAR((opline+1)->op1.var));
-			do {
+			while (1) {
 				if ((value = zend_hash_get_current_data(fe_ht)) == NULL) {
 					/* reached end of iteration */
 					ZEND_VM_JMP(EX(op_array)->opcodes+opline->op2.opline_num);
 				}
+
+				if (Z_TYPE_P(value) == IS_INDIRECT) {
+					value = Z_INDIRECT_P(value);
+					if (Z_TYPE_P(value) == IS_UNDEF) {
+						zend_hash_move_forward(fe_ht);
+						continue;
+					}
+				}
+
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
 
 				zend_hash_move_forward(fe_ht);
-			} while (key_type != HASH_KEY_IS_LONG &&
-			         zend_check_property_access(zobj, str_key TSRMLS_CC) != SUCCESS);
+				if (key_type == HASH_KEY_IS_LONG ||
+				    zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS) {
+					break;
+				}
+			}
 
 			if (key) {
 				if (key_type == HASH_KEY_IS_LONG) {
@@ -4599,17 +4604,8 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
-			if (Z_TYPE_P(value) == IS_INDIRECT) {
-				value = Z_INDIRECT_P(value);
-			}
 			if (Z_TYPE_P(value) == IS_REFERENCE) {
 				value = Z_REFVAL_P(value);
-			}
-		} else if (EG(active_symbol_table)) {
-			zend_string *cv = CV_DEF_OF(opline->op1.var);
-
-			if ((value = zend_hash_find(&EG(active_symbol_table)->ht, cv)) == NULL) {
-				isset = 0;
 			}
 		} else {
 			isset = 0;
@@ -4648,10 +4644,6 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			}
 		} else {
 			target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-//???: STRING may become INDIRECT
-			if (OP1_TYPE == IS_CV && Z_TYPE_P(varname) == IS_INDIRECT) {
-				varname = Z_INDIRECT_P(varname);
-			}
 			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
 				isset = 0;
 			}
@@ -4704,7 +4696,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 
 		ht = Z_ARRVAL_P(container);
 
-again:
+ZEND_VM_C_LABEL(isset_again):
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4722,18 +4714,18 @@ ZEND_VM_C_LABEL(num_index_prop):
 				if (OP2_TYPE != IS_CONST) {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_prop));
 				}
-				if ((value = zend_hash_find(ht, Z_STR_P(offset))) != NULL) {
+				if ((value = zend_hash_find_ind(ht, Z_STR_P(offset))) != NULL) {
 					isset = 1;
 				}
 				break;
 			case IS_NULL:
-				if ((value = zend_hash_find(ht, STR_EMPTY_ALLOC())) != NULL) {
+				if ((value = zend_hash_find_ind(ht, STR_EMPTY_ALLOC())) != NULL) {
 					isset = 1;
 				}
 				break;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
-				goto again;
+				ZEND_VM_C_GOTO(isset_again);
 				break;
 			default:
 				zend_error(E_WARNING, "Illegal offset type in isset or empty");

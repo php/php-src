@@ -142,32 +142,39 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 {
 	int i;
 
-	if (!old_object->properties) {
+	if (old_object->ce->default_properties_count) {
 		for (i = 0; i < old_object->ce->default_properties_count; i++) {
 			zval_ptr_dtor(&new_object->properties_table[i]);
 			ZVAL_COPY(&new_object->properties_table[i], &old_object->properties_table[i]);
 		}
-	} else {
+	}
+	if (old_object->properties) {
+		HashPosition pos;
+		zval *prop, new_prop;
+		ulong num_key;
+		zend_string *key;
+
 		if (!new_object->properties) {
 			ALLOC_HASHTABLE(new_object->properties);
 			zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
-		zend_hash_copy(new_object->properties, old_object->properties, zval_add_ref_unref);
-		if (old_object->properties_table) {
-			HashPosition pos;
-			zval *prop;
-			zend_property_info *prop_info;
 
-			for (zend_hash_internal_pointer_reset_ex(&old_object->ce->properties_info, &pos);
-			     (prop_info = zend_hash_get_current_data_ptr_ex(&old_object->ce->properties_info, &pos)) != NULL;
-			     zend_hash_move_forward_ex(&old_object->ce->properties_info, &pos)) {
-				if ((prop_info->flags & ZEND_ACC_STATIC) == 0) {
-					if ((prop = zend_hash_find(new_object->properties, prop_info->name)) != NULL) {
-						ZVAL_INDIRECT(&new_object->properties_table[prop_info->offset], prop);
-					} else {
-						ZVAL_UNDEF(&new_object->properties_table[prop_info->offset]);
-					}
-				}
+		for (zend_hash_internal_pointer_reset_ex(old_object->properties, &pos);
+		     (prop = zend_hash_get_current_data_ex(old_object->properties, &pos)) != NULL;
+		     zend_hash_move_forward_ex(old_object->properties, &pos)) {
+			if (Z_TYPE_P(prop) == IS_INDIRECT) {
+				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
+			} else {
+				ZVAL_COPY_VALUE(&new_prop, prop);
+				zval_add_ref_unref(&new_prop);
+			}
+			switch (zend_hash_get_current_key_ex(old_object->properties, &key, &num_key, 0, &pos)) {
+				case HASH_KEY_IS_STRING:
+					zend_hash_update(new_object->properties, key, &new_prop);
+					break;
+				case HASH_KEY_IS_LONG:
+					zend_hash_index_update(new_object->properties, num_key, &new_prop);
+					break;
 			}
 		}
 	}

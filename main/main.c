@@ -857,13 +857,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	if (PG(track_errors) && module_initialized &&
 			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
-		if (!EG(active_symbol_table)) {
-			zend_rebuild_symbol_table(TSRMLS_C);
-		}
-		if (EG(active_symbol_table)) {
-			zval tmp;
-			ZVAL_STRINGL(&tmp, buffer, buffer_len);
-			zend_hash_str_update(&EG(active_symbol_table)->ht, "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+		zval tmp;
+		ZVAL_STRINGL(&tmp, buffer, buffer_len);
+		if (zend_set_local_var("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+			zval_ptr_dtor(&tmp);
 		}
 	}
 	if (replace_buffer) {
@@ -1195,7 +1192,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (EG(active_symbol_table)) {
 			zval tmp;
 			ZVAL_STRINGL(&tmp, buffer, buffer_len);
-			zend_hash_str_update(&EG(active_symbol_table)->ht, "php_errormsg", sizeof("php_errormsg")-1, &tmp);
+			if (zend_set_local_var("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+				zval_ptr_dtor(&tmp);
+			}
 		}
 	}
 

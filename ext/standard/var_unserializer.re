@@ -77,7 +77,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 		(*var_hashx)->last_dtor = var_hash;
 	}
 
-	Z_ADDREF_P(rval);
+	if (Z_REFCOUNTED_P(rval)) Z_ADDREF_P(rval);
 	var_hash->data[var_hash->used_slots++] = rval;
 }
 
@@ -310,7 +310,21 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 		} else {
 			/* object properties should include no integers */
 			convert_to_string(&key);
-			data = zend_hash_update(ht, Z_STR(key), &d);
+//???
+#if 1
+			data = zend_hash_update_ind(ht, Z_STR(key), &d);
+#else
+			if ((data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+				if (Z_TYPE_P(data) == IS_INDIRECT) {
+					data = Z_INDIRECT_P(data);
+				}
+				zval_ptr_dtor(data);
+//???				var_push_dtor(var_hash, data);
+				ZVAL_UNDEF(data);
+			} else {
+				data = zend_hash_update(ht, Z_STR(key), &d);
+			}
+#endif
 		}
 		
 		zval_dtor(&key);
