@@ -1605,8 +1605,6 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	zval_ptr_dtor(var_ptr);
 	if (param == NULL) {
-//???
-#if 1
 		if (IS_CONSTANT_TYPE(Z_TYPE_P(opline->op2.zv))) {
 			zval tmp;
 
@@ -1614,17 +1612,8 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			zval_update_constant(&tmp, 0 TSRMLS_CC);
 			ZVAL_COPY_VALUE(var_ptr, &tmp);
 		} else {
-			ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
-			zval_copy_ctor(var_ptr);
+			ZVAL_DUP(var_ptr, opline->op2.zv);
 		}
-#else
-		ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
-		if (IS_CONSTANT_TYPE(Z_TYPE_P(var_ptr))) {
-			zval_update_constant(var_ptr, 0 TSRMLS_CC);
-		} else {
-			zval_copy_ctor(var_ptr);
-		}
-#endif
 	} else {
 		ZVAL_COPY(var_ptr, param);
 	}
@@ -18498,7 +18487,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -19495,7 +19484,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	} else {
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
-		zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		zval *variable_ptr;
 
 		zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR, BP_VAR_W TSRMLS_CC);
@@ -22055,7 +22044,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_CV, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -22872,7 +22861,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
-		zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		zval *variable_ptr;
 
 		zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV, BP_VAR_W TSRMLS_CC);
@@ -26625,7 +26614,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -28317,7 +28306,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_CV, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -35270,7 +35259,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -36261,7 +36250,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
-		zval *dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 		zval *variable_ptr;
 
 		zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_VAR, BP_VAR_W TSRMLS_CC);
@@ -38567,7 +38556,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 					}
 					return zend_binary_assign_op_obj_helper_SPEC_CV_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				} else {
-					zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, IS_CV, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -39378,7 +39367,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	} else {
 		zend_free_op free_op_data1, free_op_data2;
 		zval *value;
-		zval *dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 		zval *variable_ptr;
 
 		zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), object_ptr, dim, IS_CV, BP_VAR_W TSRMLS_CC);

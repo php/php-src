@@ -456,7 +456,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 					}
 					ZEND_VM_DISPATCH_TO_HELPER_EX(zend_binary_assign_op_obj_helper, binary_op, binary_op);
 				} else {
-					zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+					zval *dim = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 
 					zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), container, dim, OP2_TYPE, BP_VAR_RW TSRMLS_CC);
 					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
@@ -1692,7 +1692,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	} else {
 		zend_free_op free_op2, free_op_data1, free_op_data2;
 		zval *value;
-		zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zval *dim = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 		zval *variable_ptr;
 
 		zend_fetch_dimension_address(EX_VAR((opline+1)->op2.var), object_ptr, dim, OP2_TYPE, BP_VAR_W TSRMLS_CC);
@@ -3398,8 +3398,6 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	zval_ptr_dtor(var_ptr);
 	if (param == NULL) {
-//???
-#if 1
 		if (IS_CONSTANT_TYPE(Z_TYPE_P(opline->op2.zv))) {
 			zval tmp;
 					
@@ -3407,17 +3405,8 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 			zval_update_constant(&tmp, 0 TSRMLS_CC);
 			ZVAL_COPY_VALUE(var_ptr, &tmp);
 		} else {
-			ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
-			zval_copy_ctor(var_ptr);
+			ZVAL_DUP(var_ptr, opline->op2.zv);
 		}
-#else
-		ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
-		if (IS_CONSTANT_TYPE(Z_TYPE_P(var_ptr))) {
-			zval_update_constant(var_ptr, 0 TSRMLS_CC);
-		} else {
-			zval_copy_ctor(var_ptr);
-		}
-#endif
 	} else {
 		ZVAL_COPY(var_ptr, param);
 	}
