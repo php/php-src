@@ -4062,8 +4062,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 	if (IS_CONST == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -4129,8 +4129,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 	if (IS_CONST == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -5719,8 +5719,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 	if (IS_CONST == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -5786,8 +5786,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	if (IS_CONST == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -6387,8 +6387,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 	if (IS_CONST == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -6454,8 +6454,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	if (IS_CONST == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -7125,10 +7125,10 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 
 	exception = EG(exception);
-	if (Z_REFCOUNTED_P(EX_VAR_NUM(opline->op2.var))) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op2.var));
+	if (Z_REFCOUNTED_P(EX_VAR(opline->op2.var))) {
+		zval_ptr_dtor(EX_VAR(opline->op2.var));
 	}
-	ZVAL_OBJ(EX_VAR_NUM(opline->op2.var), EG(exception));
+	ZVAL_OBJ(EX_VAR(opline->op2.var), EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
 		EG(exception)->gc.refcount++;
 		HANDLE_EXCEPTION();
@@ -9072,8 +9072,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -9139,8 +9139,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -10704,8 +10704,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -10771,8 +10771,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -11261,8 +11261,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -11328,8 +11328,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	if (IS_TMP_VAR == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -15475,8 +15475,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	if (IS_VAR == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -15689,8 +15689,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	if (IS_VAR == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -19955,8 +19955,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	if (IS_VAR == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -20169,8 +20169,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	if (IS_VAR == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -21355,8 +21355,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 	if (IS_VAR == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -21422,8 +21422,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	if (IS_VAR == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -32379,8 +32379,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	if (IS_CV == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -32591,8 +32591,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	if (IS_CV == IS_CV &&
 	    IS_CONST == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -36608,8 +36608,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	if (IS_CV == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -36820,8 +36820,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	if (IS_CV == IS_CV &&
 	    IS_VAR == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;
@@ -37888,8 +37888,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	if (IS_CV == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR_NUM(opline->op1.var));
-		ZVAL_UNDEF(EX_VAR_NUM(opline->op1.var));
+		zval_ptr_dtor(EX_VAR(opline->op1.var));
+		ZVAL_UNDEF(EX_VAR(opline->op1.var));
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -37955,8 +37955,8 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	if (IS_CV == IS_CV &&
 	    IS_UNUSED == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
-			value = EX_VAR_NUM(opline->op1.var);
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_UNDEF) {
+			value = EX_VAR(opline->op1.var);
 			ZVAL_DEREF(value);
 		} else {
 			isset = 0;

@@ -314,7 +314,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
 			STR_RELEASE(name);
-			return i;
+			return (int)EX_VAR_NUM_2(NULL, i);
 		}
 		i++;
 	}
@@ -326,7 +326,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 	}
 
 	op_array->vars[i] = zend_new_interned_string(name TSRMLS_CC);
-	return i;
+	return (int)EX_VAR_NUM_2(NULL, i);
 }
 /* }}} */
 
@@ -681,7 +681,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		     CG(active_op_array)->opcodes[CG(active_op_array)->last-1].opcode != ZEND_BEGIN_SILENCE)) {
 			result->op_type = IS_CV;
 			result->u.op.var = lookup_cv(CG(active_op_array), Z_STR(varname->u.constant) TSRMLS_CC);
-			Z_STR(varname->u.constant) = CG(active_op_array)->vars[result->u.op.var];
+			Z_STR(varname->u.constant) = CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)];
 			result->EA = 0;
 			return;
 		}
@@ -745,7 +745,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		opline.result_type = IS_VAR;
 		opline.result.var = get_temporary_variable(CG(active_op_array));
 		opline.op1_type = IS_CONST;
-		LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[result->u.op.var]));
+		LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)]));
 		GET_POLYMORPHIC_CACHE_SLOT(opline.op1.constant);
 		if (class_node.op_type == IS_CONST) {
 			opline.op2_type = IS_CONST;
@@ -769,7 +769,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 			opline.result_type = IS_VAR;
 			opline.result.var = get_temporary_variable(CG(active_op_array));
 			opline.op1_type = IS_CONST;
-			LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[opline_ptr->op1.var]));
+			LITERAL_STR(opline.op1, STR_COPY(CG(active_op_array)->vars[EX_VAR_TO_NUM(opline_ptr->op1.var)]));
 			GET_POLYMORPHIC_CACHE_SLOT(opline.op1.constant);
 			if (class_node.op_type == IS_CONST) {
 				opline.op2_type = IS_CONST;
@@ -946,7 +946,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 				opline->result.var = get_temporary_variable(CG(active_op_array));
 				opline->op1_type = IS_CONST;
 				LITERAL_STR(opline->op1,
-					STR_COPY(CG(active_op_array)->vars[value->u.op.var]));
+					STR_COPY(CG(active_op_array)->vars[EX_VAR_TO_NUM(value->u.op.var)]));
 				SET_UNUSED(opline->op2);
 				opline->extended_value = ZEND_FETCH_LOCAL;
 				GET_NODE(value, opline->result);
@@ -1856,7 +1856,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 	} else {
 		var.op_type = IS_CV;
 		var.u.op.var = lookup_cv(CG(active_op_array), Z_STR(varname->u.constant) TSRMLS_CC);
-		Z_STR(varname->u.constant) = CG(active_op_array)->vars[var.u.op.var];
+		Z_STR(varname->u.constant) = CG(active_op_array)->vars[EX_VAR_TO_NUM(var.u.op.var)];
 		var.EA = 0;
 		if (Z_STRHASH(varname->u.constant) == THIS_HASHVAL &&
 			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
@@ -2998,7 +2998,7 @@ void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var
 	opline->op1.constant = zend_add_class_name_literal(CG(active_op_array), &catch_class.u.constant TSRMLS_CC);
 	opline->op2_type = IS_CV;
 	opline->op2.var = lookup_cv(CG(active_op_array), Z_STR(catch_var->u.constant) TSRMLS_CC);
-	Z_STR(catch_var->u.constant) = CG(active_op_array)->vars[opline->op2.var];
+	Z_STR(catch_var->u.constant) = CG(active_op_array)->vars[EX_VAR_TO_NUM(opline->op2.var)];
 	opline->result.num = 0; /* 1 means it's the last catch in the block */
 
 	catch_token->u.op.opline_num = catch_op_number;
@@ -7002,7 +7002,7 @@ int zend_get_class_fetch_type(const char *class_name, uint class_name_len) /* {{
 
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var) /* {{{ */
 {
-	return op_array->vars[var];
+	return op_array->vars[EX_VAR_TO_NUM(var)];
 }
 /* }}} */
 

@@ -402,6 +402,8 @@ struct _zend_execute_data {
 #define EX_VAR(n)				EX_VAR_2(execute_data, n)
 #define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
 
+#define EX_VAR_TO_NUM(n)		(EX_VAR_2(NULL, n) - EX_VAR_NUM_2(NULL, 0))
+
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
 #define IS_VAR		(1<<2)

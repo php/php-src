@@ -697,7 +697,6 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		op_array->literals = (zend_literal*)erealloc(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
-
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {

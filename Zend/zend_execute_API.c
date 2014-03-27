@@ -1696,9 +1696,9 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			ex->symbol_table = EG(active_symbol_table);
 
 			if (ex->op_array->this_var != -1 &&
-			    Z_TYPE_P(EX_VAR_NUM_2(ex, ex->op_array->this_var)) == IS_UNDEF &&
+			    Z_TYPE_P(EX_VAR_2(ex, ex->op_array->this_var)) == IS_UNDEF &&
 			    Z_TYPE(EG(This)) != IS_UNDEF) {
-			    ZVAL_COPY_VALUE(EX_VAR_NUM_2(ex, ex->op_array->this_var), &EG(This));
+			    ZVAL_COPY_VALUE(EX_VAR_2(ex, ex->op_array->this_var), &EG(This));
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				zval zv;
