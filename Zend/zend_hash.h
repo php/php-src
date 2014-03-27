@@ -261,7 +261,7 @@ static inline zval *zend_hash_find_ind(const HashTable *ht, zend_string *key)
 }
 
 
-static inline int *zend_hash_exists_ind(const HashTable *ht, zend_string *key)
+static inline int zend_hash_exists_ind(const HashTable *ht, zend_string *key)
 {
 	zval *zv;
 
