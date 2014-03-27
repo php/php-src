@@ -441,18 +441,18 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			EX(function_state).function = (zend_function *) EX(op_array);
 			EX(function_state).arguments = NULL;
 
-			if (Z_TYPE(EG(This)) != IS_UNDEF) {
+			if (Z_OBJ(EG(This))) {
 				if (UNEXPECTED(EG(exception) != NULL) && EX(call)->is_ctor_call) {
 					if (EX(call)->is_ctor_result_used) {
 						Z_DELREF(EG(This));
 					}
 					if (Z_REFCOUNT(EG(This)) == 1) {
-						zend_object_store_ctor_failed(&EG(This) TSRMLS_CC);
+						zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
 					}
 				}
 				zval_ptr_dtor(&EG(This));
 			}
-			ZVAL_COPY_VALUE(&EG(This), &EX(current_this));
+			Z_OBJ(EG(This)) = EX(current_this);
 			EG(scope) = EX(current_scope);
 			EG(called_scope) = EX(current_called_scope);
 
@@ -483,7 +483,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	zend_uint num_args;
 
 	SAVE_OPLINE();
-	ZVAL_COPY_VALUE(&EX(object), &EX(call)->object);
+	EX(object) = EX(call)->object;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name->val, fbc->common.function_name->val);
@@ -500,7 +500,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	}
 	if (fbc->common.scope &&
 		!(fbc->common.fn_flags & ZEND_ACC_STATIC) &&
-		Z_TYPE(EX(object)) == IS_UNDEF) {
+		!EX(object)) {
 
 		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 			/* FIXME: output identifiers properly */
@@ -517,20 +517,22 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 	if (fbc->type == ZEND_USER_FUNCTION || fbc->common.scope) {
 		should_change_scope = 1;
-		ZVAL_COPY_VALUE(&EX(current_this), &EG(This));
+		EX(current_this) = Z_OBJ(EG(This));
 		EX(current_scope) = EG(scope);
 		EX(current_called_scope) = EG(called_scope);
-		EG(This) = EX(object);
-		EG(scope) = (fbc->type == ZEND_USER_FUNCTION || Z_TYPE(EX(object)) == IS_UNDEF) ? fbc->common.scope : NULL;
+		Z_OBJ(EG(This)) = EX(object);
+//???		EG(scope) = (fbc->type == ZEND_USER_FUNCTION || !EX(object)) ? fbc->common.scope : NULL;
+		EG(scope) = fbc->common.scope;
 		EG(called_scope) = EX(call)->called_scope;
 	}
 
-	num_args = opline->extended_value + EX(call)->num_additional_args;
-	if (EX(call)->num_additional_args) {
+	if (UNEXPECTED(EX(call)->num_additional_args != 0)) {
+		num_args = opline->extended_value + EX(call)->num_additional_args;
 		EX(function_state).arguments = zend_vm_stack_push_args(num_args TSRMLS_CC);
 	} else {
 		zval tmp;
 
+		num_args = opline->extended_value;
 		ZVAL_LONG(&tmp, num_args);
 		EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
 		zend_vm_stack_push(&tmp TSRMLS_CC);
@@ -556,9 +558,9 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
-				fbc->internal_function.handler(num_args, ret, &EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+				fbc->internal_function.handler(num_args, ret TSRMLS_CC);
 			} else {
-				zend_execute_internal(execute_data, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
+				zend_execute_internal(execute_data, NULL TSRMLS_CC);
 			}
 
 			if (!RETURN_VALUE_USED(opline)) {
@@ -603,8 +605,8 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		ZVAL_NULL(EX_VAR(opline->result.var));
 
 		/* Not sure what should be done here if it's a static method */
-		if (EXPECTED(Z_TYPE(EX(object)) != IS_UNDEF)) {
-			Z_OBJ_HT_P(&EX(object))->call_method(fbc->common.function_name, num_args, EX_VAR(opline->result.var), &EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+		if (EXPECTED(EX(object) != NULL)) {
+			EX(object)->handlers->call_method(fbc->common.function_name, EX(object), num_args, EX_VAR(opline->result.var) TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
@@ -628,18 +630,18 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	EX(function_state).arguments = NULL;
 
 	if (should_change_scope) {
-		if (Z_TYPE(EG(This)) != IS_UNDEF) {
+		if (Z_OBJ(EG(This))) {
 			if (UNEXPECTED(EG(exception) != NULL) && EX(call)->is_ctor_call) {
 				if (EX(call)->is_ctor_result_used) {
 					Z_DELREF(EG(This));
 				}
 				if (Z_REFCOUNT(EG(This)) == 1) {
-					zend_object_store_ctor_failed(&EG(This) TSRMLS_CC);
+					zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
 				}
 			}
 			zval_ptr_dtor(&EG(This));
 		}
-		ZVAL_COPY_VALUE(&EG(This), &EX(current_this));
+		Z_OBJ(EG(This)) = EX(current_this);
 		EG(scope) = EX(current_scope);
 		EG(called_scope) = EX(current_called_scope);
 	}
@@ -935,7 +937,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 	object_init_ex(&object_zval, Z_CE_P(EX_VAR(opline->op1.var)));
-	constructor = Z_OBJ_HT(object_zval)->get_constructor(&object_zval TSRMLS_CC);
+	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval) TSRMLS_CC);
 
 	if (constructor == NULL) {
 		if (RETURN_VALUE_USED(opline)) {
@@ -953,7 +955,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		/* We are not handling overloaded classes right now */
 		call->fbc = constructor;
-		ZVAL_COPY_VALUE(&call->object, &object_zval);
+		call->object = Z_OBJ(object_zval);
 		call->called_scope = Z_CE_P(EX_VAR(opline->op1.var));
 		call->num_additional_args = 0;
 		call->is_ctor_call = 1;
@@ -1193,16 +1195,16 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	if (EX(call) >= EX(call_slots)) {
 		call_slot *call = EX(call);
 		do {
-			if (Z_TYPE(call->object) != IS_UNDEF) {
+			if (call->object) {
 				if (call->is_ctor_call) {
 					if (call->is_ctor_result_used) {
-						Z_DELREF(call->object);
+						call->object->gc.refcount--;
 					}
-					if (Z_REFCOUNT(call->object) == 1) {
-						zend_object_store_ctor_failed(&call->object TSRMLS_CC);
+					if (call->object->gc.refcount == 1) {
+						zend_object_store_ctor_failed(call->object TSRMLS_CC);
 					}
 				}
-				zval_ptr_dtor(&call->object);
+				OBJ_RELEASE(call->object);
 			}
 			call--;
 		} while (call >= EX(call_slots));
@@ -1432,7 +1434,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 		call->called_scope = NULL;
 		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
@@ -1462,7 +1464,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			STR_FREE(lcname);
 
 			call->fbc = Z_FUNC_P(func);
-			ZVAL_UNDEF(&call->object);
+			call->object = NULL;
 			call->called_scope = NULL;
 			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
@@ -1474,8 +1476,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
-			if (Z_REFCOUNTED(call->object)) {
-				Z_ADDREF(call->object);
+			if (call->object) {
+				call->object->gc.refcount++;
 			}
 			if (IS_CONST == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -1513,7 +1515,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
-				ZVAL_UNDEF(&call->object);
+				call->object = NULL;
 				call->called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(call->called_scope == NULL)) {
 					CHECK_EXCEPTION();
@@ -1530,17 +1532,17 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 				}
 			} else {
 				call->called_scope = Z_OBJCE_P(obj);
-				ZVAL_COPY_VALUE(&call->object, obj);
+				call->object = Z_OBJ_P(obj);
 
-				call->fbc = Z_OBJ_HT_P(obj)->get_method(obj, Z_STR_P(method), NULL TSRMLS_CC);
+				call->fbc = Z_OBJ_HT_P(obj)->get_method(&call->object, Z_STR_P(method), NULL TSRMLS_CC);
 				if (UNEXPECTED(call->fbc == NULL)) {
-					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(method));
+					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(method));
 				}
 
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-					ZVAL_UNDEF(&call->object);
+					call->object = NULL;
 				} else {
-					Z_ADDREF(call->object); /* For $this pointer */
+					call->object->gc.refcount++; /* For $this pointer */
 				}
 			}
 
@@ -1585,7 +1587,7 @@ static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPC
 		CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 	}
 
-	ZVAL_UNDEF(&call->object);
+	call->object = NULL;
 	call->called_scope = NULL;
 	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
@@ -1758,7 +1760,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 		call->called_scope = NULL;
 		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
@@ -1789,7 +1791,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			zval_dtor(free_op2.var);
 
 			call->fbc = Z_FUNC_P(func);
-			ZVAL_UNDEF(&call->object);
+			call->object = NULL;
 			call->called_scope = NULL;
 			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
@@ -1801,8 +1803,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
-			if (Z_REFCOUNTED(call->object)) {
-				Z_ADDREF(call->object);
+			if (call->object) {
+				call->object->gc.refcount++;
 			}
 			if (IS_TMP_VAR == IS_VAR && 1 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -1840,7 +1842,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
-				ZVAL_UNDEF(&call->object);
+				call->object = NULL;
 				call->called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(call->called_scope == NULL)) {
 					CHECK_EXCEPTION();
@@ -1857,17 +1859,17 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 				}
 			} else {
 				call->called_scope = Z_OBJCE_P(obj);
-				ZVAL_COPY_VALUE(&call->object, obj);
+				call->object = Z_OBJ_P(obj);
 
-				call->fbc = Z_OBJ_HT_P(obj)->get_method(obj, Z_STR_P(method), NULL TSRMLS_CC);
+				call->fbc = Z_OBJ_HT_P(obj)->get_method(&call->object, Z_STR_P(method), NULL TSRMLS_CC);
 				if (UNEXPECTED(call->fbc == NULL)) {
-					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(method));
+					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(method));
 				}
 
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-					ZVAL_UNDEF(&call->object);
+					call->object = NULL;
 				} else {
-					Z_ADDREF(call->object); /* For $this pointer */
+					call->object->gc.refcount++; /* For $this pointer */
 				}
 			}
 
@@ -1947,7 +1949,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 		call->called_scope = NULL;
 		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
@@ -1978,7 +1980,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			zval_ptr_dtor_nogc(free_op2.var);
 
 			call->fbc = Z_FUNC_P(func);
-			ZVAL_UNDEF(&call->object);
+			call->object = NULL;
 			call->called_scope = NULL;
 			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
@@ -1990,8 +1992,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
-			if (Z_REFCOUNTED(call->object)) {
-				Z_ADDREF(call->object);
+			if (call->object) {
+				call->object->gc.refcount++;
 			}
 			if (IS_VAR == IS_VAR && (free_op2.var != NULL) && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -2029,7 +2031,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
-				ZVAL_UNDEF(&call->object);
+				call->object = NULL;
 				call->called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(call->called_scope == NULL)) {
 					CHECK_EXCEPTION();
@@ -2046,17 +2048,17 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 				}
 			} else {
 				call->called_scope = Z_OBJCE_P(obj);
-				ZVAL_COPY_VALUE(&call->object, obj);
+				call->object = Z_OBJ_P(obj);
 
-				call->fbc = Z_OBJ_HT_P(obj)->get_method(obj, Z_STR_P(method), NULL TSRMLS_CC);
+				call->fbc = Z_OBJ_HT_P(obj)->get_method(&call->object, Z_STR_P(method), NULL TSRMLS_CC);
 				if (UNEXPECTED(call->fbc == NULL)) {
-					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(method));
+					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(method));
 				}
 
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-					ZVAL_UNDEF(&call->object);
+					call->object = NULL;
 				} else {
-					Z_ADDREF(call->object); /* For $this pointer */
+					call->object->gc.refcount++; /* For $this pointer */
 				}
 			}
 
@@ -2174,7 +2176,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 		call->called_scope = NULL;
 		call->num_additional_args = 0;
 		call->is_ctor_call = 0;
@@ -2204,7 +2206,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			STR_FREE(lcname);
 
 			call->fbc = Z_FUNC_P(func);
-			ZVAL_UNDEF(&call->object);
+			call->object = NULL;
 			call->called_scope = NULL;
 			call->num_additional_args = 0;
 			call->is_ctor_call = 0;
@@ -2216,8 +2218,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
-			if (Z_REFCOUNTED(call->object)) {
-				Z_ADDREF(call->object);
+			if (call->object) {
+				call->object->gc.refcount++;
 			}
 			if (IS_CV == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -2255,7 +2257,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
-				ZVAL_UNDEF(&call->object);
+				call->object = NULL;
 				call->called_scope = zend_fetch_class_by_name(Z_STR_P(obj), NULL, 0 TSRMLS_CC);
 				if (UNEXPECTED(call->called_scope == NULL)) {
 					CHECK_EXCEPTION();
@@ -2272,17 +2274,17 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 				}
 			} else {
 				call->called_scope = Z_OBJCE_P(obj);
-				ZVAL_COPY_VALUE(&call->object, obj);
+				call->object = Z_OBJ_P(obj);
 
-				call->fbc = Z_OBJ_HT_P(obj)->get_method(obj, Z_STR_P(method), NULL TSRMLS_CC);
+				call->fbc = Z_OBJ_HT_P(obj)->get_method(&call->object, Z_STR_P(method), NULL TSRMLS_CC);
 				if (UNEXPECTED(call->fbc == NULL)) {
-					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(obj), Z_STRVAL_P(method));
+					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(method));
 				}
 
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-					ZVAL_UNDEF(&call->object);
+					call->object = NULL;
 				} else {
-					Z_ADDREF(call->object); /* For $this pointer */
+					call->object->gc.refcount++; /* For $this pointer */
 				}
 			}
 
@@ -2525,7 +2527,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 
 	call->fbc = EX(function_state).function;
-	ZVAL_UNDEF(&call->object);
+	call->object = NULL;
 	call->called_scope = NULL;
 	call->num_additional_args = 0;
 	call->is_ctor_call = 0;
@@ -2915,7 +2917,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		}
 
 		EX(function_state).function = (zend_function *) new_op_array;
-		ZVAL_UNDEF(&EX(object));
+		EX(object) = NULL;
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -3810,16 +3812,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -3831,7 +3833,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -4731,16 +4736,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -4752,7 +4757,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -5559,16 +5567,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -5580,7 +5588,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -6242,16 +6253,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -6263,7 +6274,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -6524,7 +6538,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), &EG(This) TSRMLS_CC);
+	zend_create_closure(EX_VAR(opline->result.var), Z_FUNC_P(zfunc), EG(scope), Z_OBJ(EG(This)) ? &EG(This) : NULL TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -7041,16 +7055,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -7062,7 +7076,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -7971,7 +7988,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		EX(function_state).function = (zend_function *) new_op_array;
-		ZVAL_UNDEF(&EX(object));
+		EX(object) = NULL;
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -8896,29 +8913,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CONST != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -8931,9 +8947,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -9694,29 +9710,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_TMP_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -9729,9 +9744,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -10526,29 +10541,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -10561,9 +10575,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -11882,29 +11896,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CV != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -11917,9 +11930,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -13088,7 +13101,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 
 		EX(function_state).function = (zend_function *) new_op_array;
-		ZVAL_UNDEF(&EX(object));
+		EX(object) = NULL;
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -15094,29 +15107,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CONST != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -15129,9 +15141,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -15223,16 +15235,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -15244,7 +15256,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -17379,29 +17394,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_TMP_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -17414,9 +17428,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -17509,16 +17523,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -17530,7 +17544,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -19665,29 +19682,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -19700,9 +19716,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -19795,16 +19811,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -19816,7 +19832,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -21210,16 +21229,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -21231,7 +21250,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -23039,29 +23061,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CV != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -23074,9 +23095,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -23168,16 +23189,16 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		if (UNEXPECTED(ce->constructor == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot call constructor");
 		}
-		if (Z_TYPE(EG(This)) != IS_UNDEF && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		if (Z_OBJ(EG(This)) && Z_OBJCE(EG(This)) != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
 			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
 		}
 		call->fbc = ce->constructor;
 	}
 
 	if (call->fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		if (Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (Z_OBJ(EG(This)) &&
 		    Z_OBJ_HT(EG(This))->get_class_entry &&
 		    !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
@@ -23189,7 +23210,10 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name->val, call->fbc->common.function_name->val);
 			}
 		}
-		ZVAL_COPY(&call->object, &EG(This));
+		call->object = Z_OBJ(EG(This));
+		if (call->object) {
+			call->object->gc.refcount++;
+		}
 	}
 
 	call->num_additional_args = 0;
@@ -24611,29 +24635,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CONST != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -24646,9 +24669,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -25993,29 +26016,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_TMP_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -26028,9 +26050,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -27283,29 +27305,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -27318,9 +27339,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -28973,29 +28994,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	}
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CV != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -29008,9 +29028,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -30346,7 +30366,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		}
 
 		EX(function_state).function = (zend_function *) new_op_array;
-		ZVAL_UNDEF(&EX(object));
+		EX(object) = NULL;
 
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);
@@ -32203,29 +32223,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CONST != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -32238,9 +32257,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -34270,29 +34289,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_TMP_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_TMP_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -34305,9 +34323,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -36430,29 +36448,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_VAR == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_VAR == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -36465,9 +36482,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -39544,29 +39561,28 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	}
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	ZVAL_COPY_VALUE(&call->object, object);
+	call->object = Z_TYPE_P(object) == IS_OBJECT ? Z_OBJ_P(object) : NULL;
 
-	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
-	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
-		call->called_scope = Z_OBJCE(call->object);
+	if (EXPECTED(call->object != NULL)) {
+		call->called_scope = zend_get_class_entry(call->object TSRMLS_CC);
 
 		if (IS_CV != IS_CONST ||
 		    (call->fbc = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope)) == NULL) {
-		    zend_object *object = Z_OBJ(call->object);
+		    zend_object *object = call->object;
 
-			if (UNEXPECTED(Z_OBJ_HT(call->object)->get_method == NULL)) {
+			if (UNEXPECTED(object->handlers->get_method == NULL)) {
 				zend_error_noreturn(E_ERROR, "Object does not support method calls");
 			}
 
 			/* First, locate the function. */
-			call->fbc = Z_OBJ_HT(call->object)->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
+			call->fbc = object->handlers->get_method(&call->object, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (opline->op2.literal + 1) : NULL) TSRMLS_CC);
 			if (UNEXPECTED(call->fbc == NULL)) {
-				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(&call->object), Z_STRVAL_P(function_name));
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(call->object), Z_STRVAL_P(function_name));
 			}
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(call->fbc->type <= ZEND_USER_FUNCTION) &&
 			    EXPECTED((call->fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0) &&
-			    EXPECTED(Z_OBJ(call->object) == object)) {
+			    EXPECTED(call->object == object)) {
 				CACHE_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, call->called_scope, call->fbc);
 			}
 		}
@@ -39579,9 +39595,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
-		ZVAL_UNDEF(&call->object);
+		call->object = NULL;
 	} else {
-		Z_ADDREF(call->object); /* For $this pointer */
+		call->object->gc.refcount++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;

@@ -87,20 +87,17 @@ typedef HashTable *(*zend_object_get_debug_info_t)(zval *object, int *is_temp TS
 /* args on stack! */
 /* Andi - EX(fbc) (function being called) needs to be initialized already in the INIT fcall opcode so that the parameters can be parsed the right way. We need to add another callback for this.
  */
-typedef int (*zend_object_call_method_t)(zend_string *method, INTERNAL_FUNCTION_PARAMETERS);
-typedef union _zend_function *(*zend_object_get_method_t)(zval *object_ptr, zend_string *method, const struct _zend_literal *key TSRMLS_DC);
-typedef union _zend_function *(*zend_object_get_constructor_t)(zval *object TSRMLS_DC);
+typedef int (*zend_object_call_method_t)(zend_string *method, zend_object *object, INTERNAL_FUNCTION_PARAMETERS);
+typedef union _zend_function *(*zend_object_get_method_t)(zend_object **object, zend_string *method, const struct _zend_literal *key TSRMLS_DC);
+typedef union _zend_function *(*zend_object_get_constructor_t)(zend_object *object TSRMLS_DC);
 
 /* Object maintenance/destruction */
-typedef void (*zend_object_add_ref_t)(zval *object TSRMLS_DC);
-typedef void (*zend_object_del_ref_t)(zval *object TSRMLS_DC);
-typedef void (*zend_object_delete_obj_t)(zval *object TSRMLS_DC);
 typedef void (*zend_object_dtor_obj_t)(zend_object *object TSRMLS_DC);
 typedef void (*zend_object_free_obj_t)(zend_object *object TSRMLS_DC);
 typedef zend_object* (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 
-typedef zend_class_entry *(*zend_object_get_class_entry_t)(const zval *object TSRMLS_DC);
-typedef zend_string *(*zend_object_get_class_name_t)(const zval *object, int parent TSRMLS_DC);
+typedef zend_class_entry *(*zend_object_get_class_entry_t)(const zend_object *object TSRMLS_DC);
+typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object, int parent TSRMLS_DC);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
 typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2 TSRMLS_DC);
 
@@ -112,7 +109,7 @@ typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type TSRMLS_D
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
 typedef int (*zend_object_count_elements_t)(zval *object, long *count TSRMLS_DC);
 
-typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zval *zobj_ptr TSRMLS_DC);
+typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, union _zend_function **fptr_ptr, zend_object **obj_ptr TSRMLS_DC);
 
 typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval **table, int *n TSRMLS_DC);
 
@@ -160,7 +157,7 @@ BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const struct _zend_literal *key TSRMLS_DC);
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, const struct _zend_literal *key TSRMLS_DC);
 ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, const struct _zend_literal *key TSRMLS_DC);
-ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC);
+ZEND_API union _zend_function *zend_std_get_constructor(zend_object *object TSRMLS_DC);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_properties(zval *object TSRMLS_DC);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC);

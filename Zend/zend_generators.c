@@ -88,7 +88,9 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 	/* If yield was used as a function argument there may be active
 	 * method calls those objects need to be freed */
 	while (execute_data->call >= execute_data->call_slots) {
-		zval_ptr_dtor(&execute_data->call->object);
+		if (execute_data->call->object) {
+			OBJ_RELEASE(execute_data->call->object);
+		}
 		execute_data->call--;
 	}
 }
@@ -116,7 +118,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
 
-		zval_ptr_dtor(&execute_data->current_this);
+		if (execute_data->current_this) {
+			OBJ_RELEASE(execute_data->current_this);
+		}
 
 		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
@@ -293,7 +297,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 
 	object_init_ex(return_value, zend_ce_generator);
 
-	if (Z_TYPE(EG(This)) != IS_UNDEF) {
+	if (Z_OBJ(EG(This))) {
 		Z_ADDREF(EG(This));
 	}
 
@@ -301,7 +305,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	execute_data->current_scope = EG(scope);
 	execute_data->current_called_scope = EG(called_scope);
 	execute_data->symbol_table = EG(active_symbol_table);
-	ZVAL_COPY_VALUE(&execute_data->current_this, &EG(This));
+	execute_data->current_this = Z_OBJ(EG(This));
 
 	/* Save execution context in generator object. */
 	generator = (zend_generator *) Z_OBJ_P(return_value);
@@ -314,7 +318,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 }
 /* }}} */
 
-static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+static zend_function *zend_generator_get_constructor(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_error(E_RECOVERABLE_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
 
@@ -342,19 +346,19 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		zend_op **original_opline_ptr = EG(opline_ptr);
 		zend_op_array *original_active_op_array = EG(active_op_array);
 		zend_array *original_active_symbol_table = EG(active_symbol_table);
-		zval original_This;
+		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
 		zend_vm_stack original_stack = EG(argument_stack);
 
-		ZVAL_COPY_VALUE(&original_This, &EG(This));
+		original_This = Z_OBJ(EG(This));
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(opline_ptr) = &generator->execute_data->opline;
 		EG(active_op_array) = generator->execute_data->op_array;
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
-		ZVAL_COPY_VALUE(&EG(This), &generator->execute_data->current_this);
+		Z_OBJ(EG(This)) = generator->execute_data->current_this;
 		EG(scope) = generator->execute_data->current_scope;
 		EG(called_scope) = generator->execute_data->current_called_scope;
 		EG(argument_stack) = generator->stack;
@@ -377,7 +381,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
 		EG(active_symbol_table) = original_active_symbol_table;
-		EG(This) = original_This;
+		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;
 		EG(called_scope) = original_called_scope;
 		EG(argument_stack) = original_stack;

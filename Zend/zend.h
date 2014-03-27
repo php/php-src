@@ -286,8 +286,13 @@ typedef enum {
 #include "zend_hash.h"
 #include "zend_llist.h"
 
-#define INTERNAL_FUNCTION_PARAMETERS zend_uint param_count, zval *return_value, zval *this_ptr, int return_value_used TSRMLS_DC
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value, this_ptr, return_value_used TSRMLS_CC
+#define INTERNAL_FUNCTION_PARAMETERS zend_uint param_count, zval *return_value TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value TSRMLS_CC
+
+#define USED_RET() \
+	(!EG(current_execute_data) || \
+	 !EG(current_execute_data)->opline || \
+	 !(EG(current_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((noreturn));

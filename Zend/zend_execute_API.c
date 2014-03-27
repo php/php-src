@@ -39,11 +39,11 @@
 #endif
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
-ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0},0}, NULL, NULL, 0, NULL, NULL, 0 };
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, {{0},0} };
+ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
 #include <process.h>
@@ -191,7 +191,7 @@ void init_executor(TSRMLS_D) /* {{{ */
 	EG(scope) = NULL;
 	EG(called_scope) = NULL;
 
-	ZVAL_UNDEF(&EG(This));
+	ZVAL_OBJ(&EG(This), NULL);
 
 	EG(active_op_array) = NULL;
 
@@ -213,7 +213,7 @@ static int zval_call_destructor(zval *zv TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
+static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 {
 	TSRMLS_FETCH();
 
@@ -745,7 +745,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 	fci.size = sizeof(fci);
 	fci.function_table = function_table;
-	fci.object_ptr = object;
+	fci.object = object ? Z_OBJ_P(object) : NULL;
 	ZVAL_COPY_VALUE(&fci.function_name, function_name);
 	fci.retval = retval_ptr;
 	fci.param_count = param_count;
@@ -767,7 +767,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_class_entry *current_called_scope;
 	zend_class_entry *calling_scope = NULL;
 	zend_class_entry *called_scope = NULL;
-	zval current_this;
+	zend_object *current_this;
 	zend_execute_data execute_data;
 	zend_fcall_info_cache fci_cache_local;
 	zval tmp;
@@ -795,7 +795,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		execute_data = *EG(current_execute_data);
 		EX(op_array) = NULL;
 		EX(opline) = NULL;
-		ZVAL_UNDEF(&EX(object));
+		EX(object) = NULL;
 	} else {
 		/* This only happens when we're called outside any execute()'s
 		 * It shouldn't be strictly necessary to NULL execute_data out,
@@ -812,7 +812,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			fci_cache = &fci_cache_local;
 		}
 
-		if (!zend_is_callable_ex(&fci->function_name, fci->object_ptr, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
+		if (!zend_is_callable_ex(&fci->function_name, fci->object, IS_CALLABLE_CHECK_SILENT, &callable_name, fci_cache, &error TSRMLS_CC)) {
 			if (error) {
 				zend_error(E_WARNING, "Invalid callback %s, %s", callable_name->val, error);
 				efree(error);
@@ -835,11 +835,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(function_state).function = fci_cache->function_handler;
 	calling_scope = fci_cache->calling_scope;
 	called_scope = fci_cache->called_scope;
-	fci->object_ptr = &fci_cache->object;
-	ZVAL_COPY_VALUE(&EX(object), fci->object_ptr);
-	if (fci->object_ptr && Z_TYPE_P(fci->object_ptr) == IS_OBJECT &&
+	EX(object) = fci->object = fci_cache->object;
+	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
-	     !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(fci->object_ptr)]))) {
+	     !IS_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
 		return FAILURE;
 	}
 
@@ -913,7 +912,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
 
-	ZVAL_COPY_VALUE(&current_this, &EG(This));
+	current_this = Z_OBJ(EG(This));
 
 	current_called_scope = EG(called_scope);
 	if (called_scope) {
@@ -922,14 +921,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(called_scope) = NULL;
 	}
 
-	if (fci->object_ptr) {
-		if ((EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
-			ZVAL_UNDEF(&EG(This));
-		} else {
-			ZVAL_COPY(&EG(This), fci->object_ptr);
-		}
+	if (!fci->object ||
+	    (EX(function_state).function->common.fn_flags & ZEND_ACC_STATIC)) {
+		Z_OBJ(EG(This)) = NULL;
 	} else {
-		ZVAL_UNDEF(&EG(This));
+		Z_OBJ(EG(This)) = fci->object;
+		Z_ADDREF(EG(This));
 	}
 
 	EX(prev_execute_data) = EG(current_execute_data);
@@ -968,9 +965,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
-			EX(function_state).function->internal_function.handler(fci->param_count, fci->retval, fci->object_ptr, 1 TSRMLS_CC);
+			EX(function_state).function->internal_function.handler(fci->param_count, fci->retval TSRMLS_CC);
 		} else {
-			zend_execute_internal(&execute_data, fci, 1 TSRMLS_CC);
+			zend_execute_internal(&execute_data, fci TSRMLS_CC);
 		}
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
@@ -991,8 +988,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 //???		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
 
 		/* Not sure what should be done here if it's a static method */
-		if (fci->object_ptr) {
-			Z_OBJ_HT_P(fci->object_ptr)->call_method(EX(function_state).function->common.function_name, fci->param_count, fci->retval, fci->object_ptr, 1 TSRMLS_CC);
+		if (fci->object) {
+			fci->object->handlers->call_method(EX(function_state).function->common.function_name, fci->object, fci->param_count, fci->retval TSRMLS_CC);
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
 		}
@@ -1009,10 +1006,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 	zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 
-	zval_ptr_dtor(&EG(This));
+	if (Z_OBJ(EG(This))) {
+		zval_ptr_dtor(&EG(This));
+	}
 	EG(called_scope) = current_called_scope;
 	EG(scope) = current_scope;
-	ZVAL_COPY_VALUE(&EG(This), &current_this);
+	Z_OBJ(EG(This)) = current_this;
 	EG(current_execute_data) = EX(prev_execute_data);
 
 	if (EG(exception)) {
@@ -1101,14 +1100,14 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_li
 	fcall_info.retval = &local_retval;
 	fcall_info.param_count = 1;
 	fcall_info.params = args;
-	fcall_info.object_ptr = NULL;
+	fcall_info.object = NULL;
 	fcall_info.no_separation = 1;
 
 	fcall_cache.initialized = EG(autoload_func) ? 1 : 0;
 	fcall_cache.function_handler = EG(autoload_func);
 	fcall_cache.calling_scope = NULL;
 	fcall_cache.called_scope = NULL;
-	ZVAL_UNDEF(&fcall_cache.object);
+	fcall_cache.object = NULL;
 
 	zend_exception_save(TSRMLS_C);
 	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
@@ -1697,7 +1696,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 
 			if (ex->op_array->this_var != -1 &&
 			    Z_TYPE_P(EX_VAR_2(ex, ex->op_array->this_var)) == IS_UNDEF &&
-			    Z_TYPE(EG(This)) != IS_UNDEF) {
+			    Z_OBJ(EG(This))) {
 			    ZVAL_COPY_VALUE(EX_VAR_2(ex, ex->op_array->this_var), &EG(This));
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
@@ -1790,7 +1789,7 @@ ZEND_API int zend_set_local_var(const char *name, int len, zval *value, int forc
 			return FAILURE;
 		}
 	} else {
-		return zend_hash_str_update_ind(&EG(active_symbol_table)->ht, name, len, value);
+		return (zend_hash_str_update_ind(&EG(active_symbol_table)->ht, name, len, value) != NULL) ? SUCCESS : FAILURE;
 	}
 	return SUCCESS;
 }

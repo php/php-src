@@ -368,7 +368,7 @@ typedef struct _list_llist_element {
 typedef struct _call_slot {
 	zend_function     *fbc;
 	zend_class_entry  *called_scope;
-	zval               object;
+	zend_object       *object;
 	zend_uint          num_additional_args;
 	zend_bool          is_ctor_call;
 	zend_bool          is_ctor_result_used;
@@ -378,7 +378,7 @@ struct _zend_execute_data {
 	struct _zend_op *opline;
 	zend_function_state function_state;
 	zend_op_array *op_array;
-	zval object;
+	zend_object *object;
 	zend_array *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval old_error_reporting;
@@ -387,7 +387,7 @@ struct _zend_execute_data {
 //???
 	zend_class_entry *current_scope;
 	zend_class_entry *current_called_scope;
-	zval current_this;
+	zend_object *current_this;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object *delayed_exception;
 	call_slot *call_slots;

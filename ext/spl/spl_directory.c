@@ -578,9 +578,9 @@ static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, i
 }
 /* }}} */
 
-static HashTable *spl_filesystem_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(obj);
+	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(object);
 	zval tmp;
 	HashTable *rv;
 	zend_string *pnstr;
@@ -659,19 +659,19 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 }
 /* }}} */
 
-zend_function *spl_filesystem_object_get_method_check(zval *object_ptr, zend_string *method, const struct _zend_literal *key TSRMLS_DC) /* {{{ */
+zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend_string *method, const struct _zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	spl_filesystem_object *fsobj = Z_SPLFILESYSTEM_P(object_ptr);
+	spl_filesystem_object *fsobj = spl_filesystem_from_obj(*object);
 	
 	if (fsobj->u.dir.entry.d_name[0] == '\0' && fsobj->orig_path == NULL) {
 		zend_function *func;
 		zend_string *tmp = STR_INIT("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
-		func = zend_get_std_object_handlers()->get_method(object_ptr, tmp, NULL TSRMLS_CC);
+		func = zend_get_std_object_handlers()->get_method(object, tmp, NULL TSRMLS_CC);
 		STR_RELEASE(tmp);
 		return func;
 	}
 	
-	return zend_get_std_object_handlers()->get_method(object_ptr, method, key TSRMLS_CC);
+	return zend_get_std_object_handlers()->get_method(object, method, key TSRMLS_CC);
 }
 /* }}} */
 
@@ -828,12 +828,12 @@ SPL_METHOD(DirectoryIterator, seek)
 
 	if (intern->u.dir.index > pos) {
 		/* we first rewind */
-		zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_rewind, "rewind", NULL);
+		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_rewind, "rewind", NULL);
 	}
 
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
-		zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_valid, "valid", &retval);
+		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_valid, "valid", &retval);
 		if (!ZVAL_IS_UNDEF(&retval)) {
 			valid = zend_is_true(&retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
@@ -841,7 +841,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		if (!valid) {
 			break;
 		}
-		zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(getThis()), &intern->u.dir.func_next, "next", NULL);
+		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_next, "next", NULL);
 	}
 } /* }}} */
 
@@ -2091,7 +2091,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	fci.size = sizeof(fci);
 	fci.function_table = EG(function_table);
-	fci.object_ptr = NULL;
+	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;
 	fci.params = params;
@@ -2103,7 +2103,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
 	fcic.called_scope = NULL;
-	ZVAL_UNDEF(&fcic.object);
+	fcic.object = NULL;
 
 	result = zend_call_function(&fci, &fcic TSRMLS_CC);
 	

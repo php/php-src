@@ -84,7 +84,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 		fci.function_table = &PHPDBG_G(registered);
 		ZVAL_STRINGL(&fci.function_name, function->string, function->length);
 		fci.symbol_table = EG(active_symbol_table);
-		fci.object_ptr = NULL;
+		fci.object = NULL;
 		fci.retval = &fretval;
 		fci.no_separation = 1;
 
@@ -512,7 +512,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	fci.function_table = &Z_OBJCE(exception)->function_table;
 	ZVAL_STRINGL(&fci.function_name, "__tostring", sizeof("__tostring") - 1);
 	fci.symbol_table = NULL;
-	fci.object_ptr = &exception;
+	fci.object = EG(exception);
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;

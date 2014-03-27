@@ -303,7 +303,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fci.function_table = &uwrap->ce->function_table;
 		ZVAL_UNDEF(&fci.function_name);
 		fci.symbol_table = NULL;
-		fci.object_ptr = object;
+		fci.object = Z_OBJ_P(object);
 		fci.retval = &retval;
 		fci.param_count = 0;
 		fci.params = NULL;
@@ -313,7 +313,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fcc.function_handler = uwrap->ce->constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(object);
-		ZVAL_COPY_VALUE(&fcc.object, object);
+		fcc.object = Z_OBJ_P(object);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name->val, uwrap->ce->constructor->common.function_name->val);
@@ -978,7 +978,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		switch (value) {
 		case PHP_STREAM_TRUNCATE_SUPPORTED:
 			if (zend_is_callable_ex(&func_name,
-					ZVAL_IS_UNDEF(&us->object)? NULL : &us->object,
+					ZVAL_IS_UNDEF(&us->object)? NULL : Z_OBJ(us->object),
 					IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL TSRMLS_CC))
 				ret = PHP_STREAM_OPTION_RETURN_OK;
 			else

@@ -55,7 +55,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 		efree(arguments);
 		zend_error(E_RECOVERABLE_ERROR, "Cannot get arguments for calling closure");
 		RETVAL_FALSE;
-	} else if (call_user_function_ex(CG(function_table), NULL, this_ptr, return_value, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
+	} else if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL TSRMLS_CC) == FAILURE) {
 		RETVAL_FALSE;
 	}
 	efree(arguments);
@@ -121,7 +121,7 @@ ZEND_METHOD(Closure, bind)
 }
 /* }}} */
 
-static zend_function *zend_closure_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+static zend_function *zend_closure_get_constructor(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_error(E_RECOVERABLE_ERROR, "Instantiation of 'Closure' is not allowed");
 	return NULL;
@@ -134,9 +134,9 @@ static int zend_closure_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {{{ */
+ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)Z_OBJ_P(obj);
+	zend_closure *closure = (zend_closure *)object;
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 
 	invoke->common = closure->func.common;
@@ -164,7 +164,7 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_closure_get_method(zval *object_ptr, zend_string *method, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_string *lc_name;
 
@@ -174,10 +174,10 @@ static zend_function *zend_closure_get_method(zval *object_ptr, zend_string *met
 		memcmp(lc_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 	) {
 		STR_FREE(lc_name);
-		return zend_get_closure_invoke_method(object_ptr TSRMLS_CC);
+		return zend_get_closure_invoke_method(*object TSRMLS_CC);
 	}
 	STR_FREE(lc_name);
-	return std_object_handlers.get_method(object_ptr, method, key TSRMLS_CC);
+	return std_object_handlers.get_method(object, method, key TSRMLS_CC);
 }
 /* }}} */
 
@@ -271,7 +271,7 @@ static zend_object *zend_closure_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval *zobj_ptr TSRMLS_DC) /* {{{ */
+int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
 
@@ -283,13 +283,13 @@ int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function
 	*fptr_ptr = &closure->func;
 
 	if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
-		if (zobj_ptr) {
-			ZVAL_COPY_VALUE(zobj_ptr, &closure->this_ptr);
+		if (obj_ptr) {
+			*obj_ptr = Z_OBJ(closure->this_ptr);
 		}
 		*ce_ptr = Z_OBJCE(closure->this_ptr);
 	} else {
-		if (zobj_ptr) {
-			ZVAL_UNDEF(zobj_ptr);
+		if (obj_ptr) {
+			*obj_ptr = NULL;
 		}
 		*ce_ptr = closure->func.common.scope;
 	}

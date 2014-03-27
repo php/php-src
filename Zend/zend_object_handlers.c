@@ -897,7 +897,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->function_state.function;
 	zval method_name, method_args;
 	zval method_result;
-	zend_class_entry *ce = Z_OBJCE_P(this_ptr);
+	zend_class_entry *ce = Z_OBJCE_P(getThis());
 
 	array_init_size(&method_args, ZEND_NUM_ARGS());
 
@@ -915,7 +915,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
 	*/
 	ZVAL_UNDEF(&method_result);
-	zend_call_method_with_2_params(this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result, &method_name, &method_args);
+	zend_call_method_with_2_params(getThis(), ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result, &method_name, &method_args);
 
 	if (Z_TYPE(method_result) != IS_UNDEF) {
 		RETVAL_ZVAL_FAST(&method_result);
@@ -1025,11 +1025,11 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 }
 /* }}} */
 
-static union _zend_function *zend_std_get_method(zval *object, zend_string *method_name, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
+	zend_object *zobj = *obj_ptr;
 	zval *func;
 	zend_function *fbc;
-	zend_object *zobj = Z_OBJ_P(object);
 	zend_string *lc_method_name;
 
 	if (EXPECTED(key != NULL)) {
@@ -1058,7 +1058,7 @@ static union _zend_function *zend_std_get_method(zval *object, zend_string *meth
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
-		updated_fbc = zend_check_private_int(fbc, Z_OBJ_HANDLER_P(object, get_class_entry)(object TSRMLS_CC), lc_method_name TSRMLS_CC);
+		updated_fbc = zend_check_private_int(fbc, zobj->handlers->get_class_entry(zobj TSRMLS_CC), lc_method_name TSRMLS_CC);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
 		} else {
@@ -1193,7 +1193,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				STR_FREE(lc_function_name);
 			}
 			if (ce->__call &&
-			    Z_TYPE(EG(This)) == IS_OBJECT &&
+			    Z_OBJ(EG(This)) &&
 			    Z_OBJ_HT(EG(This))->get_class_entry &&
 			    instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
 				return zend_get_user_call_function(ce, function_name);
@@ -1303,9 +1303,8 @@ ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_str
 }
 /* }}} */
 
-ZEND_API union _zend_function *zend_std_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj TSRMLS_DC) /* {{{ */
 {
-	zend_object *zobj = Z_OBJ_P(object);
 	zend_function *constructor = zobj->ce->constructor;
 
 	if (constructor) {
@@ -1496,20 +1495,15 @@ exit:
 }
 /* }}} */
 
-zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_std_object_get_class(const zend_object *object TSRMLS_DC) /* {{{ */
 {
-	zend_object *zobj;
-	zobj = Z_OBJ_P(object);
-
-	return zobj->ce;
+	return object->ce;
 }
 /* }}} */
 
-zend_string* zend_std_object_get_class_name(const zval *object, int parent TSRMLS_DC) /* {{{ */
+zend_string* zend_std_object_get_class_name(const zend_object *zobj, int parent TSRMLS_DC) /* {{{ */
 {
-	zend_object *zobj;
 	zend_class_entry *ce;
-	zobj = Z_OBJ_P(object);
 
 	if (parent) {
 		if (!zobj->ce->parent) {
@@ -1590,7 +1584,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 }
 /* }}} */
 
-int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval *zobj_ptr TSRMLS_DC) /* {{{ */
+int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr TSRMLS_DC) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce;
@@ -1608,12 +1602,12 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 
 	*ce_ptr = ce;
 	if ((*fptr_ptr)->common.fn_flags & ZEND_ACC_STATIC) {
-		if (zobj_ptr) {
-			ZVAL_UNDEF(zobj_ptr);
+		if (obj_ptr) {
+			*obj_ptr = NULL;
 		}
 	} else {
-		if (zobj_ptr) {
-			ZVAL_COPY_VALUE(zobj_ptr, obj);
+		if (obj_ptr) {
+			*obj_ptr = Z_OBJ_P(obj);
 		}
 	}
 	return SUCCESS;

@@ -83,7 +83,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!this_ptr || !instanceof_function(Z_OBJCE_P(this_ptr), ce TSRMLS_CC)) {                             \
+	if (!Z_OBJ(EG(This)) || !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {           \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \
@@ -624,7 +624,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 						/* see if this is a closure */
 						if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 							&& memcmp(mptr->common.function_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-							&& (closure = zend_get_closure_invoke_method(obj TSRMLS_CC)) != NULL)
+							&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj) TSRMLS_CC)) != NULL)
 						{
 							mptr = closure;
 						} else {
@@ -1394,7 +1394,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
 	fci.symbol_table = NULL;
-	fci.object_ptr = &reflector;
+	fci.object = Z_OBJ(reflector);
 	fci.retval = &retval;
 	fci.param_count = ctor_argc;
 	fci.params = params;
@@ -1404,7 +1404,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fcc.function_handler = ce_ptr->constructor;
 	fcc.calling_scope = ce_ptr;
 	fcc.called_scope = Z_OBJCE(reflector);
-	ZVAL_COPY_VALUE(&fcc.object, &reflector);
+	fcc.object = Z_OBJ(reflector);
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -1426,7 +1426,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 
 	ZVAL_STRINGL(&fci.function_name, "reflection::export", sizeof("reflection::export") - 1);
 	fci.function_table = &reflection_ptr->function_table;
-	fci.object_ptr = NULL;
+	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = 2;
 	fci.params = params;
@@ -1910,7 +1910,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
 	fci.symbol_table = NULL;
-	fci.object_ptr = NULL;
+	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = num_args;
 	fci.params = params;
@@ -1920,7 +1920,7 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	ZVAL_UNDEF(&fcc.object);
+	fcc.object = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -1974,7 +1974,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
 	fci.symbol_table = NULL;
-	fci.object_ptr = NULL;
+	fci.object = NULL;
 	fci.retval = &retval;
 	fci.param_count = argc;
 	fci.params = params;
@@ -1984,7 +1984,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.function_handler = fptr;
 	fcc.calling_scope = EG(scope);
 	fcc.called_scope = NULL;
-	ZVAL_UNDEF(&fcc.object);
+	fcc.object = NULL;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2200,7 +2200,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (ce == zend_ce_closure && Z_TYPE_P(classref) == IS_OBJECT
 					&& (lcname_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-					&& (fptr = zend_get_closure_invoke_method(classref TSRMLS_CC)) != NULL)
+					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref) TSRMLS_CC)) != NULL)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 -					   not the closure itself */
@@ -2741,7 +2741,7 @@ ZEND_METHOD(reflection_method, __construct)
 
 	if (ce == zend_ce_closure && orig_obj && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(orig_obj TSRMLS_CC)) != NULL)
+		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj) TSRMLS_CC)) != NULL)
 	{
 		/* do nothing, mptr already set */
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
@@ -2821,7 +2821,7 @@ ZEND_METHOD(reflection_method, invoke)
 {
 	zval retval;
 	zval *params = NULL;
-	zval object;
+	zend_object *object;
 	reflection_object *intern;
 	zend_function *mptr;
 	int result, num_args = 0;
@@ -2862,7 +2862,7 @@ ZEND_METHOD(reflection_method, invoke)
 	 * Else, we verify that the given object is an instance of the class.
 	 */
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC) {
-		ZVAL_UNDEF(&object);
+		object = NULL;
 		obj_ce = mptr->common.scope;
 	} else {
 		if (Z_TYPE(params[0]) != IS_OBJECT) {
@@ -2877,14 +2877,14 @@ ZEND_METHOD(reflection_method, invoke)
 			/* Returns from this function */
 		}
 
-		ZVAL_COPY_VALUE(&object, &params[0]);
+		object = Z_OBJ(params[0]);
 	}
 
 	fci.size = sizeof(fci);
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
 	fci.symbol_table = NULL;
-	fci.object_ptr = &object;
+	fci.object = object;
 	fci.retval = &retval;
 	fci.param_count = num_args - 1;
 	fci.params = params + 1;
@@ -2894,7 +2894,7 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	ZVAL_COPY_VALUE(&fcc.object, &object);
+	fcc.object = object;
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2989,7 +2989,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fci.function_table = NULL;
 	ZVAL_UNDEF(&fci.function_name);
 	fci.symbol_table = NULL;
-	fci.object_ptr = object;
+	fci.object = object ? Z_OBJ_P(object) : NULL;
 	fci.retval = &retval;
 	fci.param_count = argc;
 	fci.params = params;
@@ -2999,11 +2999,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
-	if (object) {
-		ZVAL_COPY_VALUE(&fcc.object, object);
-	} else {
-		ZVAL_UNDEF(&fcc.object);
-	}
+	fcc.object = (object) ? Z_OBJ_P(object) : NULL;
 	
 	/* 
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
@@ -3700,7 +3696,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	lc_name = zend_str_tolower_dup(name, name_len);
 	if (ce == zend_ce_closure && !ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(&intern->obj TSRMLS_CC)) != NULL)
+		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj) TSRMLS_CC)) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
@@ -3708,7 +3704,7 @@ ZEND_METHOD(reflection_class, getMethod)
 		efree(lc_name);
 	} else if (ce == zend_ce_closure && ZVAL_IS_UNDEF(&intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(&obj_tmp TSRMLS_CC)) != NULL) {
+		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp) TSRMLS_CC)) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
 		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
@@ -3735,7 +3731,7 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	if (mptr->common.fn_flags & filter) {
 		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& memcmp(mptr->common.function_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-			&& (closure = zend_get_closure_invoke_method(obj TSRMLS_CC)) != NULL)
+			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj) TSRMLS_CC)) != NULL)
 		{
 			mptr = closure;
 		}
@@ -3786,7 +3782,7 @@ ZEND_METHOD(reflection_class, getMethods)
 	array_init(return_value);
 	zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) _addmethod_va, 4, &ce, return_value, filter, intern->obj);
 	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure TSRMLS_CC)) {
-		zend_function *closure = zend_get_closure_invoke_method(&intern->obj TSRMLS_CC);
+		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj) TSRMLS_CC);
 		if (closure) {
 			_addmethod(closure, ce, return_value, filter, &intern->obj TSRMLS_CC);
 			_free_function(closure TSRMLS_CC);
@@ -4198,7 +4194,7 @@ ZEND_METHOD(reflection_class, newInstance)
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
-	constructor = Z_OBJ_HT_P(return_value)->get_constructor(return_value TSRMLS_CC);
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value) TSRMLS_CC);
 	EG(scope) = old_scope;
 
 	/* Run the constructor if there is one */
@@ -4223,7 +4219,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.function_table = EG(function_table);
 		ZVAL_UNDEF(&fci.function_name);
 		fci.symbol_table = NULL;
-		fci.object_ptr = return_value;
+		fci.object = Z_OBJ_P(return_value);
 		fci.retval = &retval;
 		fci.param_count = num_args;
 		fci.params = params;
@@ -4233,7 +4229,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		ZVAL_COPY_VALUE(&fcc.object, return_value);
+		fcc.object = Z_OBJ_P(return_value);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			if (!ZVAL_IS_UNDEF(&retval)) {
@@ -4297,7 +4293,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
-	constructor = Z_OBJ_HT_P(return_value)->get_constructor(return_value TSRMLS_CC);
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value) TSRMLS_CC);
 	EG(scope) = old_scope;
 
 	/* Run the constructor if there is one */
@@ -4322,7 +4318,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fci.function_table = EG(function_table);
 		ZVAL_UNDEF(&fci.function_name);
 		fci.symbol_table = NULL;
-		fci.object_ptr = return_value;
+		fci.object = Z_OBJ_P(return_value);
 		fci.retval = &retval;
 		fci.param_count = argc;
 		fci.params = params;
@@ -4332,7 +4328,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
-		ZVAL_COPY_VALUE(&fcc.object, return_value);
+		fcc.object = Z_OBJ_P(return_value);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			if (params) {

@@ -36,7 +36,7 @@
 		} \
 		incomplete_class = 1; \
 	} else { \
-		class_name = zend_get_object_classname(struc TSRMLS_CC); \
+		class_name = zend_get_object_classname(Z_OBJ_P(struc) TSRMLS_CC); \
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\

@@ -121,7 +121,7 @@ typedef enum {
 typedef struct _spl_cbfilter_it_intern {
 	zend_fcall_info       fci;
 	zend_fcall_info_cache fcc;
-	zval 				  object;
+	zend_object           *object;
 } _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {

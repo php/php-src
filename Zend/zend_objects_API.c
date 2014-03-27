@@ -216,10 +216,8 @@ ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TS
 }
 
 /* Called when the ctor was terminated by an exception */
-ZEND_API void zend_object_store_ctor_failed(zval *zobject TSRMLS_DC)
+ZEND_API void zend_object_store_ctor_failed(zend_object *obj TSRMLS_DC)
 {
-	zend_object *obj = Z_OBJ_P(zobject);
-
 	obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 

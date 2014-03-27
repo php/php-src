@@ -827,7 +827,7 @@ PHP_FUNCTION(end)
 
 	zend_hash_internal_pointer_end(array);
 
-	if (return_value_used) {
+	if (USED_RET()) {
 		if ((entry = zend_hash_get_current_data(array)) == NULL) {
 			RETURN_FALSE;
 		}
@@ -850,7 +850,7 @@ PHP_FUNCTION(prev)
 
 	zend_hash_move_backwards(array);
 
-	if (return_value_used) {
+	if (USED_RET()) {
 		if ((entry = zend_hash_get_current_data(array)) == NULL) {
 			RETURN_FALSE;
 		}
@@ -873,7 +873,7 @@ PHP_FUNCTION(next)
 
 	zend_hash_move_forward(array);
 
-	if (return_value_used) {
+	if (USED_RET()) {
 		if ((entry = zend_hash_get_current_data(array)) == NULL) {
 			RETURN_FALSE;
 		}
@@ -896,7 +896,7 @@ PHP_FUNCTION(reset)
 
 	zend_hash_internal_pointer_reset(array);
 
-	if (return_value_used) {
+	if (USED_RET()) {
 		if ((entry = zend_hash_get_current_data(array)) == NULL) {
 			RETURN_FALSE;
 		}
@@ -2126,7 +2126,7 @@ PHP_FUNCTION(array_splice)
 
 	/* Don't create the array of removed elements if it's not going
 	 * to be used; e.g. only removing and/or replacing elements */
-	if (return_value_used) {
+	if (USED_RET()) {
 		int size = length;
 
 		/* Clamp the offset.. */

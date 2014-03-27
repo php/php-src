@@ -40,7 +40,7 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 	EG(opline_ptr) = &PHPDBG_EX(opline);
 	EG(active_op_array) = PHPDBG_EX(op_array);
 	EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-	ZVAL_COPY_VALUE(&EG(This), &PHPDBG_EX(current_this));
+	Z_OBJ(EG(This)) = PHPDBG_EX(current_this);
 	EG(scope) = PHPDBG_EX(current_scope);
 	EG(called_scope) = PHPDBG_EX(current_called_scope);
 } /* }}} */
@@ -82,7 +82,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		EG(opline_ptr) = &PHPDBG_EX(opline);
 		EG(active_op_array) = PHPDBG_EX(op_array);
 		EG(active_symbol_table) = PHPDBG_EX(symbol_table);
-		ZVAL_COPY_VALUE(&EG(This), &PHPDBG_EX(current_this));
+		Z_OBJ(EG(This)) = PHPDBG_EX(current_this);
 		EG(scope) = PHPDBG_EX(current_scope);
 		EG(called_scope) = PHPDBG_EX(current_called_scope);
 	}
@@ -107,7 +107,7 @@ static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
 	if ((class = zend_hash_str_find(Z_ARRVAL_P(tmp), "object", sizeof("object") - 1)) == NULL) {
 		class = zend_hash_str_find(Z_ARRVAL_P(tmp), "class", sizeof("class") - 1);
 	} else {
-		class_name = zend_get_object_classname(class TSRMLS_CC);
+		class_name = zend_get_object_classname(Z_OBJ_P(class) TSRMLS_CC);
 	}
 
 	if (class) {

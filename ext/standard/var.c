@@ -166,7 +166,7 @@ again:
 			}
 
 			if (Z_OBJ_HANDLER_P(struc, get_class_name)) {
-				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
+				class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc), 0 TSRMLS_CC);
 				php_printf("%sobject(%s)#%d (%d) {\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0);
 				STR_RELEASE(class_name);
 			} else {
@@ -336,7 +336,7 @@ again:
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
+		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc), 0 TSRMLS_CC);
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, class_name->val, Z_OBJ_HANDLE_P(struc), myht ? zend_obj_num_elements(myht) : 0, Z_REFCOUNT_P(struc));
 		STR_RELEASE(class_name);
 		zval_element_dump_func = zval_object_property_dump;
@@ -552,7 +552,7 @@ again:
 				smart_str_appendc(buf, '\n');
 				buffer_append_spaces(buf, level - 1);
 			}
-			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(struc, 0 TSRMLS_CC);
+			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc), 0 TSRMLS_CC);
 
 			smart_str_appendl(buf, class_name->val, class_name->len);
 			smart_str_appendl(buf, "::__set_state(array(\n", 21);
@@ -749,7 +749,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				php_var_serialize_intern(buf, d, var_hash TSRMLS_CC);
 			} else {
 				zend_class_entry *ce;
-				ce = zend_get_class_entry(struc TSRMLS_CC);
+				ce = zend_get_class_entry(Z_OBJ_P(struc) TSRMLS_CC);
 				if (ce) {
 					zend_string *prot_name, *priv_name;
 

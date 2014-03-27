@@ -48,7 +48,7 @@ typedef struct _zend_fcall_info {
 	zval *retval;
 	zend_uint param_count;
 	zval *params;
-	zval *object_ptr;
+	zend_object *object;
 	zend_bool no_separation;
 } zend_fcall_info;
 
@@ -57,7 +57,7 @@ typedef struct _zend_fcall_info_cache {
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
-	zval object;
+	zend_object *object;
 } zend_fcall_info_cache;
 
 #define ZEND_NS_NAME(ns, name)			ns "\\" name
@@ -295,7 +295,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 
 #define IS_CALLABLE_STRICT  (IS_CALLABLE_CHECK_IS_STATIC)
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC);
 ZEND_API zend_bool zend_is_callable(zval *callable, uint check_flags, zend_string **callable_name TSRMLS_DC);
 ZEND_API zend_bool zend_make_callable(zval *callable, zend_string **callable_name TSRMLS_DC);
 ZEND_API const char *zend_get_module_version(const char *module_name);
@@ -339,11 +339,11 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, int name_length, zend_bool silent TSRMLS_DC);
 
-ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC);
-ZEND_API zend_string *zend_get_object_classname(const zval *object TSRMLS_DC);
+ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *object TSRMLS_DC);
+ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS_DC);
 ZEND_API char *zend_get_type_by_const(int type);
 
-#define getThis() (this_ptr)
+#define getThis() (Z_OBJ(EG(This)) ? &EG(This) : NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)

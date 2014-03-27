@@ -49,7 +49,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object_ptr = object;
+	fci.object = (object && Z_TYPE_P(object) == IS_OBJECT) ? Z_OBJ_P(object) : NULL;
 	ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
@@ -96,11 +96,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		} else {
 			fcic.called_scope = EG(called_scope);
 		}
-		if (object) {
-			ZVAL_COPY_VALUE(&fcic.object, object);
-		} else {
-			ZVAL_UNDEF(&fcic.object);
-		}
+		fcic.object = object ? Z_OBJ_P(object) : NULL;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
 		zval_ptr_dtor(&fci.function_name);
 	}

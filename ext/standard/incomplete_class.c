@@ -87,9 +87,12 @@ static int incomplete_class_has_property(zval *object, zval *member, int check_e
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval *object, zend_string *method, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	incomplete_class_message(object, E_ERROR TSRMLS_CC);
+	zval zobject;
+
+	ZVAL_OBJ(&zobject, *object);
+	incomplete_class_message(&zobject, E_ERROR TSRMLS_CC);
 	return NULL;
 }
 /* }}} */

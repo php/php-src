@@ -480,7 +480,7 @@ static zend_always_inline zval *_get_zval_ptr_var_fast(zend_uint var, const zend
 
 static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 {
-	if (EXPECTED(Z_TYPE(EG(This)) != IS_UNDEF)) {
+	if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
 		return &EG(This);
 	} else {
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
@@ -491,7 +491,7 @@ static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
 	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_TYPE(EG(This)) != IS_UNDEF)) {
+		if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
 			should_free->var = NULL;
 			return &EG(This);
 		} else {
@@ -1423,18 +1423,16 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 
 ZEND_API opcode_handler_t *zend_opcode_handlers;
 
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
+ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci TSRMLS_DC)
 {
 	if (fci != NULL) {
 		execute_data_ptr->function_state.function->internal_function.handler(
-			fci->param_count, fci->retval,
-			fci->object_ptr, 1 TSRMLS_CC
+			fci->param_count, fci->retval TSRMLS_CC
 		);
 	} else {
 		zval *return_value = EX_VAR_2(execute_data_ptr, execute_data_ptr->opline->result.var);
 		execute_data_ptr->function_state.function->internal_function.handler(
-			execute_data_ptr->opline->extended_value, return_value,
-			&execute_data_ptr->object, return_value_used TSRMLS_CC
+			execute_data_ptr->opline->extended_value, return_value TSRMLS_CC
 		);
 	}
 }
@@ -1582,8 +1580,8 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 
 	EG(argument_stack)->top = (zval*)zend_vm_stack_frame_base(execute_data);
 
-	ZVAL_UNDEF(&EX(object));
-	ZVAL_UNDEF(&EX(current_this));
+	EX(object) = NULL;
+	EX(current_this) = NULL;
 	ZVAL_UNDEF(&EX(old_error_reporting));
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(call) = NULL;
@@ -1600,7 +1598,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		zend_attach_symbol_table(TSRMLS_C);
 	}
 
-	if (op_array->this_var != -1 && Z_TYPE(EG(This)) != IS_UNDEF) {
+	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
 		ZVAL_COPY(EX_VAR(op_array->this_var), &EG(This));
 	}
 

@@ -829,24 +829,24 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 	}
 } /* }}} */
 
-static union _zend_function *spl_recursive_it_get_method(zval *object_ptr, zend_string *method, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_string *method, const zend_literal *key TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
-	spl_recursive_it_object *object = Z_SPLRECURSIVE_IT_P(object_ptr);
+	spl_recursive_it_object *object = spl_recursive_it_from_obj(*zobject);
 	long                     level = object->level;
 	zval                    *zobj;
 
 	if (!object->iterators) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", Z_OBJCE_P(object_ptr)->name->val);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", zend_get_class_entry(*zobject TSRMLS_CC)->name->val);
 	}
 	zobj = &object->iterators[level].zobject;
 
-	function_handler = std_object_handlers.get_method(object_ptr, method, key TSRMLS_CC);
+	function_handler = std_object_handlers.get_method(zobject, method, key TSRMLS_CC);
 	if (!function_handler) {
 		if ((function_handler = zend_hash_find_ptr(&Z_OBJCE_P(zobj)->function_table, method)) == NULL) {
 			if (Z_OBJ_HT_P(zobj)->get_method) {
-				ZVAL_COPY_VALUE(object_ptr, zobj);
-				function_handler = Z_OBJ_HT_P(object_ptr)->get_method(object_ptr, method, key TSRMLS_CC);
+				*zobject = Z_OBJ_P(zobj);
+				function_handler = (*zobject)->handlers->get_method(zobject, method, key TSRMLS_CC);
 			}
 		}
 	}
@@ -1276,22 +1276,22 @@ static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_
 }
 #endif
 
-static union _zend_function *spl_dual_it_get_method(zval *object_ptr, zend_string *method, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zend_literal *key TSRMLS_DC)
 {
 	union _zend_function *function_handler;
 	spl_dual_it_object   *intern;
 
-	intern = Z_SPLDUAL_IT_P(object_ptr);
+	intern = spl_dual_it_from_obj(*object);
 
-	function_handler = std_object_handlers.get_method(object_ptr, method, key TSRMLS_CC);
+	function_handler = std_object_handlers.get_method(object, method, key TSRMLS_CC);
 	if (!function_handler && intern->inner.ce) {
 		if ((function_handler = zend_hash_find_ptr(&intern->inner.ce->function_table, method)) == NULL) {
 			if (Z_OBJ_HT(intern->inner.zobject)->get_method) {
-				ZVAL_COPY_VALUE(object_ptr, &intern->inner.zobject);
-				function_handler = Z_OBJ_HT_P(object_ptr)->get_method(object_ptr, method, key TSRMLS_CC);
+				*object = Z_OBJ(intern->inner.zobject);
+				function_handler = (*object)->handlers->get_method(object, method, key TSRMLS_CC);
 			}
 		} else {
-			ZVAL_COPY_VALUE(object_ptr, &intern->inner.zobject);
+			*object = Z_OBJ(intern->inner.zobject);
 		}
 	}
 	return function_handler;
@@ -1498,7 +1498,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_CallbackFilterIterator:
 		case DIT_RecursiveCallbackFilterIterator: {
 			_spl_cbfilter_it_intern *cfi = emalloc(sizeof(*cfi));
-			cfi->fci.object_ptr = NULL;
+			cfi->fci.object = NULL;
 			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Of", &zobject, ce_inner, &cfi->fci, &cfi->fcc) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				efree(cfi);
@@ -1507,9 +1507,8 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			if (Z_REFCOUNTED_P(&cfi->fci.function_name)) {
 				Z_ADDREF(cfi->fci.function_name);
 			}
-			if (Z_TYPE(cfi->fcc.object) == IS_OBJECT) {
-				ZVAL_COPY(&cfi->object, &cfi->fcc.object);
-			}
+			cfi->object = cfi->fcc.object;
+			if (cfi->object) cfi->object->gc.refcount++;
 			intern->u.cbfilter = cfi;
 			break;
 		}
@@ -2260,8 +2259,8 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 			_spl_cbfilter_it_intern *cbfilter = object->u.cbfilter;
 			object->u.cbfilter = NULL;
 			zval_ptr_dtor(&cbfilter->fci.function_name);
-			if (cbfilter->fci.object_ptr) {
-				zval_ptr_dtor(cbfilter->fci.object_ptr);
+			if (cbfilter->fci.object) {
+				OBJ_RELEASE(cbfilter->fci.object);
 			}
 			efree(cbfilter);
 		}

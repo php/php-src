@@ -232,10 +232,10 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) /* {{{ */
+ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *zobject TSRMLS_DC) /* {{{ */
 {
-	if (Z_OBJ_HT_P(zobject)->get_class_entry) {
-		return Z_OBJ_HT_P(zobject)->get_class_entry(zobject TSRMLS_CC);
+	if (zobject->handlers->get_class_entry) {
+		return zobject->handlers->get_class_entry(zobject TSRMLS_CC);
 	} else {
 		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
 		return NULL;
@@ -244,17 +244,17 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zval *zobject TSRMLS_DC) /
 /* }}} */
 
 /* returns 1 if you need to copy result, 0 if it's already a copy */
-ZEND_API zend_string *zend_get_object_classname(const zval *object TSRMLS_DC) /* {{{ */
+ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_string *ret;
 
-	if (Z_OBJ_HT_P(object)->get_class_name != NULL) {
-		ret = Z_OBJ_HT_P(object)->get_class_name(object, 0 TSRMLS_CC);
+	if (object->handlers->get_class_name != NULL) {
+		ret = object->handlers->get_class_name(object, 0 TSRMLS_CC);
 		if (ret) {
 			return ret;
 		}
 	}
-	return Z_OBJCE_P(object)->name;
+	return zend_get_class_entry(object TSRMLS_CC)->name;
 }
 /* }}} */
 
@@ -2807,8 +2807,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope);
-			if (Z_TYPE(fcc->object) == IS_UNDEF && Z_TYPE(EG(This)) == IS_OBJECT) {
-				ZVAL_COPY_VALUE(&fcc->object, &EG(This));
+			if (!fcc->object && Z_OBJ(EG(This))) {
+				fcc->object = Z_OBJ(EG(This));
 			}
 			ret = 1;
 		}
@@ -2821,8 +2821,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(scope)->parent;
-			if (Z_TYPE(fcc->object) == IS_UNDEF && Z_TYPE(EG(This)) == IS_OBJECT) {
-				ZVAL_COPY_VALUE(&fcc->object, &EG(This));
+			if (!fcc->object && Z_OBJ(EG(This))) {
+				fcc->object = Z_OBJ(EG(This));
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2834,8 +2834,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(called_scope);
 			fcc->calling_scope = EG(called_scope);
-			if (Z_TYPE(fcc->object) == IS_UNDEF && Z_TYPE(EG(This)) == IS_OBJECT) {
-				ZVAL_COPY_VALUE(&fcc->object, &EG(This));
+			if (!fcc->object && Z_OBJ(EG(This))) {
+				fcc->object = Z_OBJ(EG(This));
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2844,13 +2844,13 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		zend_class_entry *scope = EG(active_op_array) ? EG(active_op_array)->scope : NULL;
 
 		fcc->calling_scope = ce;
-		if (scope && Z_TYPE(fcc->object) == IS_UNDEF && Z_TYPE(EG(This)) != IS_UNDEF &&
+		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
 		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&
 		    instanceof_function(scope, fcc->calling_scope TSRMLS_CC)) {
-			ZVAL_COPY_VALUE(&fcc->object, &EG(This));
-			fcc->called_scope = Z_OBJCE(fcc->object);
+			fcc->object = Z_OBJ(EG(This));
+			fcc->called_scope = Z_OBJCE(EG(This));
 		} else {
-			fcc->called_scope = Z_TYPE(fcc->object) == IS_OBJECT ? Z_OBJCE(fcc->object) : fcc->calling_scope;
+			fcc->called_scope = fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : fcc->calling_scope;
 		}
 		*strict_class = 1;
 		ret = 1;
@@ -2976,10 +2976,10 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		}
 		if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0 &&
 		    (fcc->calling_scope &&
-		     ((Z_TYPE(fcc->object) == IS_OBJECT && fcc->calling_scope->__call) ||
-		      (Z_TYPE(fcc->object) == IS_UNDEF && fcc->calling_scope->__callstatic)))) {
+		     ((fcc->object && fcc->calling_scope->__call) ||
+		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-				if (!zend_check_private(fcc->function_handler, Z_TYPE(fcc->object) == IS_OBJECT ? Z_OBJCE(fcc->object) : EG(scope), lmname TSRMLS_CC)) {
+				if (!zend_check_private(fcc->function_handler, fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : EG(scope), lmname TSRMLS_CC)) {
 					retval = 0;
 					fcc->function_handler = NULL;
 					goto get_function_via_handler;
@@ -2994,7 +2994,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		}
 	} else {
 get_function_via_handler:
-		if (Z_TYPE(fcc->object) == IS_OBJECT && fcc->calling_scope == ce_org) {
+		if (fcc->object && fcc->calling_scope == ce_org) {
 			if (strict_class && ce_org->__call) {
 				fcc->function_handler = emalloc(sizeof(zend_internal_function));
 				fcc->function_handler->internal_function.type = ZEND_INTERNAL_FUNCTION;
@@ -3008,8 +3008,8 @@ get_function_via_handler:
 				STR_ADDREF(mname);
 				call_via_handler = 1;
 				retval = 1;
-			} else if (Z_OBJ_HT(fcc->object)->get_method) {
-				fcc->function_handler = Z_OBJ_HT(fcc->object)->get_method(&fcc->object, mname, NULL TSRMLS_CC);
+			} else if (fcc->object->handlers->get_method) {
+				fcc->function_handler = fcc->object->handlers->get_method(&fcc->object, mname, NULL TSRMLS_CC);
 				if (fcc->function_handler) {
 					if (strict_class &&
 					    (!fcc->function_handler->common.scope ||
@@ -3035,10 +3035,10 @@ get_function_via_handler:
 			if (fcc->function_handler) {
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
-				if (call_via_handler && Z_TYPE(fcc->object) == IS_UNDEF && Z_TYPE(EG(This)) != IS_UNDEF &&
+				if (call_via_handler && !fcc->object && Z_OBJ(EG(This)) &&
 				    Z_OBJ_HT(EG(This))->get_class_entry &&
 				    instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					ZVAL_COPY_VALUE(&fcc->object, &EG(This));
+					fcc->object = Z_OBJ(EG(This));
 				}
 			}
 		}
@@ -3046,14 +3046,14 @@ get_function_via_handler:
 
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
-			if (Z_TYPE(fcc->object) == IS_UNDEF && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			if (!fcc->object && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 				if (error) {
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 					retval = 0;
 				} else {
 					zend_error(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val);
 				}
-			} else if (Z_TYPE(fcc->object) == IS_UNDEF && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
+			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;
 				char *verb;
 				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -3067,8 +3067,8 @@ get_function_via_handler:
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				}
-				if (Z_TYPE(EG(This)) != IS_UNDEF && instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					ZVAL_COPY_VALUE(&fcc->object, &EG(This));
+				if (Z_OBJ(EG(This)) && instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object = Z_OBJ(EG(This));
 					if (error) {
 						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(This))->name->val);
 						if (severity == E_ERROR) {
@@ -3090,7 +3090,7 @@ get_function_via_handler:
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					if (!zend_check_private(fcc->function_handler, Z_TYPE(fcc->object) == IS_OBJECT ? Z_OBJCE(fcc->object) : EG(scope), lmname TSRMLS_CC)) {
+					if (!zend_check_private(fcc->function_handler, fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : EG(scope), lmname TSRMLS_CC)) {
 						if (error) {
 							if (*error) {
 								efree(*error);
@@ -3122,8 +3122,8 @@ get_function_via_handler:
 	STR_FREE(lmname);
 	STR_RELEASE(mname);
 
-	if (Z_TYPE(fcc->object) == IS_OBJECT) {
-		fcc->called_scope = Z_OBJCE(fcc->object);
+	if (fcc->object) {
+		fcc->called_scope = zend_get_class_entry(fcc->object TSRMLS_CC);
 	}
 	if (retval) {
 		fcc->initialized = 1;
@@ -3132,7 +3132,7 @@ get_function_via_handler:
 }
 /* }}} */
 
-ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint check_flags, zend_string **callable_name, zend_fcall_info_cache *fcc, char **error TSRMLS_DC) /* {{{ */
 {
 	zend_bool ret;
 	zend_fcall_info_cache fcc_local;
@@ -3152,23 +3152,19 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 	fcc->called_scope = NULL;
 	fcc->function_handler = NULL;
 	fcc->calling_scope = NULL;
-	ZVAL_UNDEF(&fcc->object);
+	fcc->object = NULL;
 
-	if (object_ptr && Z_TYPE_P(object_ptr) != IS_OBJECT) {
-		object_ptr = NULL;
-	}
-
-	if (object_ptr &&
+	if (object &&
 	    (!EG(objects_store).object_buckets ||
-	     !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(object_ptr)]))) {
+	     !IS_VALID(EG(objects_store).object_buckets[object->handle]))) {
 		return 0;
 	}
 
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
-			if (object_ptr) {
-				ZVAL_COPY_VALUE(&fcc->object, object_ptr);
-				fcc->calling_scope = Z_OBJCE_P(object_ptr);
+			if (object) {
+				fcc->object = object;
+				fcc->calling_scope = zend_get_class_entry(object TSRMLS_CC);
 				if (callable_name) {
 					char *ptr;
 
@@ -3254,7 +3250,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 
 						fcc->calling_scope = Z_OBJCE_P(obj); /* TBFixed: what if it's overloaded? */
 
-						ZVAL_COPY_VALUE(&fcc->object, obj);
+						fcc->object = Z_OBJ_P(obj);
 
 						if (callable_name) {
 							char *ptr;
@@ -3378,7 +3374,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 
 	fci->size = sizeof(*fci);
 	fci->function_table = fcc->calling_scope ? &fcc->calling_scope->function_table : EG(function_table);
-	fci->object_ptr = &fcc->object;
+	fci->object = fcc->object;
 	ZVAL_COPY_VALUE(&fci->function_name, callable);
 	fci->retval = NULL;
 	fci->param_count = 0;
@@ -3752,7 +3748,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_string *class_name = zend_get_object_classname(object TSRMLS_CC);
+		zend_string *class_name = zend_get_object_classname(Z_OBJ_P(object) TSRMLS_CC);
 		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name->val);
 	}
 	ZVAL_STRINGL(&property, name, name_length);
@@ -3930,7 +3926,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_string *class_name = zend_get_object_classname(object TSRMLS_CC);
+		zend_string *class_name = zend_get_object_classname(Z_OBJ_P(object) TSRMLS_CC);
 		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", name, class_name->val);
 	}
 

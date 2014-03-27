@@ -92,7 +92,7 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		zend_uint name_len;
 
 		if (exception != NULL) {
-			zend_get_object_classname(exception, &classname, &name_len TSRMLS_CC);
+			zend_get_object_classname(Z_OBJ_P(exception), &classname, &name_len TSRMLS_CC);
 			DTRACE_EXCEPTION_THROWN((char *)classname);
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
@@ -445,7 +445,7 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 
 			TRACE_APPEND_STR("Object(");
 
-			class_name = zend_get_object_classname(arg TSRMLS_CC);
+			class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
 
 			TRACE_APPEND_STRL(class_name->val, class_name->len);
 //???			if(!dup) {
@@ -612,7 +612,7 @@ ZEND_METHOD(exception, __toString)
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
 		ZVAL_COPY_VALUE(&fci.function_name, &fname);
 		fci.symbol_table = NULL;
-		fci.object_ptr = exception;
+		fci.object = Z_OBJ_P(exception);
 		fci.retval = &trace;
 		fci.param_count = 0;
 		fci.params = NULL;

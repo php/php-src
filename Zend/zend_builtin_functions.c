@@ -771,7 +771,7 @@ ZEND_FUNCTION(get_class)
 		}
 	}
 
-	RETURN_STR(zend_get_object_classname(obj TSRMLS_CC));
+	RETURN_STR(zend_get_object_classname(Z_OBJ_P(obj) TSRMLS_CC));
 }
 /* }}} */
 
@@ -817,10 +817,10 @@ ZEND_FUNCTION(get_parent_class)
 
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(arg)->get_class_name
-			&& (name = Z_OBJ_HT_P(arg)->get_class_name(arg, 1 TSRMLS_CC)) != NULL) {
+			&& (name = Z_OBJ_HT_P(arg)->get_class_name(Z_OBJ_P(arg), 1 TSRMLS_CC)) != NULL) {
 			RETURN_STR(name);
 		} else {
-			ce = zend_get_class_entry(arg TSRMLS_CC);
+			ce = zend_get_class_entry(Z_OBJ_P(arg) TSRMLS_CC);
 		}
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
 	    ce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
@@ -1134,7 +1134,7 @@ ZEND_FUNCTION(method_exists)
 
 		if (Z_TYPE_P(klass) == IS_OBJECT 
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
-		&& (func = Z_OBJ_HT_P(klass)->get_method(klass, method_name, NULL TSRMLS_CC)) != NULL
+		&& (func = Z_OBJ_HT_P(klass)->get_method(&Z_OBJ_P(klass), method_name, NULL TSRMLS_CC)) != NULL
 		) {
 			if (func->type == ZEND_INTERNAL_FUNCTION 
 			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
@@ -2071,8 +2071,8 @@ ZEND_FUNCTION(debug_print_backtrace)
 		function_name = (ptr->function_state.function->common.scope &&
 			ptr->function_state.function->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					Z_TYPE(ptr->object) != IS_UNDEF ?
-						Z_OBJCE(ptr->object) : 
+					ptr->object ?
+						zend_get_class_entry(ptr->object TSRMLS_CC) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
 				(ptr->function_state.function->common.function_name ?
@@ -2080,11 +2080,11 @@ ZEND_FUNCTION(debug_print_backtrace)
 				 NULL);
 
 		if (function_name) {
-			if (Z_TYPE(ptr->object) != IS_UNDEF) {
+			if (ptr->object) {
 				if (ptr->function_state.function->common.scope) {
 					class_name = ptr->function_state.function->common.scope->name;
 				} else {
-					class_name = zend_get_object_classname(&ptr->object TSRMLS_CC);
+					class_name = zend_get_object_classname(ptr->object TSRMLS_CC);
 				}
 
 				call_type = "->";
@@ -2250,8 +2250,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		function_name = (ptr->function_state.function->common.scope &&
 			ptr->function_state.function->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					Z_TYPE(ptr->object) != IS_UNDEF ?
-						Z_OBJCE(ptr->object) : 
+					ptr->object ?
+						zend_get_class_entry(ptr->object TSRMLS_CC) : 
 						ptr->function_state.function->common.scope,
 					ptr->function_state.function)->val :
 				(ptr->function_state.function->common.function_name ?
@@ -2261,17 +2261,19 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (function_name) {
 			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name, 1);
 
-			if (Z_TYPE(ptr->object) == IS_OBJECT) {
+			if (ptr->object) {
 				if (ptr->function_state.function->common.scope) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(ptr->function_state.function->common.scope->name));
 				} else {
-					class_name = zend_get_object_classname(&ptr->object TSRMLS_CC);
+					class_name = zend_get_object_classname(ptr->object TSRMLS_CC);
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(class_name));
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
-					add_assoc_zval_ex(&stack_frame, "object", sizeof("object")-1, &ptr->object);
-					Z_ADDREF(ptr->object);
+					zval object;
+					ZVAL_OBJ(&object, ptr->object);
+					add_assoc_zval_ex(&stack_frame, "object", sizeof("object")-1, &object);
+					Z_ADDREF(object);
 				}
 
 				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->", 1);

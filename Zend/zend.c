@@ -370,7 +370,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 			zend_string *class_name = NULL;
 
 			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-				class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(expr, 0 TSRMLS_CC);
+				class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
 			}
 			if (class_name) {
 				zend_printf("%s Object (", class_name->val);
@@ -429,7 +429,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				int is_temp;
 
 				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-					class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(expr, 0 TSRMLS_CC);
+					class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
 				}
 				if (class_name) {
 					ZEND_PUTS_EX(class_name->val);
