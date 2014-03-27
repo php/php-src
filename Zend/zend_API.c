@@ -227,7 +227,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
-	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+	if (Z_ISREF_P(arg)) {
 		arg = Z_REFVAL_P(arg);
 	}
 	return zend_get_type_by_const(Z_TYPE_P(arg));
@@ -360,7 +360,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		spec_walk++;
 	}
 
-	if (Z_TYPE_P(arg) == IS_REFERENCE) {
+	if (Z_ISREF_P(arg)) {
 		arg = Z_REFVAL_P(arg);
 	}
 
@@ -1117,7 +1117,7 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 {
 //	zval *p = pp;
 
-	if (Z_TYPE_P(pp) == IS_REFERENCE) {
+	if (Z_ISREF_P(pp)) {
 		pp = Z_REFVAL_P(pp);
 	}
 	if (IS_CONSTANT_TYPE(Z_TYPE_P(pp))) {
@@ -2716,7 +2716,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 
 	if (num_symbol_tables <= 0) return FAILURE;
 
-	if (is_ref && Z_TYPE_P(symbol) != IS_REFERENCE) {
+	if (is_ref && !Z_ISREF_P(symbol)) {
 		ZVAL_NEW_REF(symbol, symbol);
 	}
 

@@ -797,7 +797,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
+	if (Z_ISREF_P(var_ptr)) {
 		var_ptr = Z_REFVAL_P(var_ptr);
 	} else {
 		SEPARATE_ZVAL(var_ptr);
@@ -846,7 +846,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
+	if (Z_ISREF_P(var_ptr)) {
 		var_ptr = Z_REFVAL_P(var_ptr);
 	} else {
 		SEPARATE_ZVAL(var_ptr);
@@ -895,7 +895,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 	retval = EX_VAR(opline->result.var);
 
-	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
+	if (Z_ISREF_P(var_ptr)) {
 		var_ptr = Z_REFVAL_P(var_ptr);
 		ZVAL_DUP(retval, var_ptr);
 	} else {
@@ -942,7 +942,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 
 	retval = EX_VAR(opline->result.var);
 
-	if (Z_TYPE_P(var_ptr) == IS_REFERENCE) {
+	if (Z_ISREF_P(var_ptr)) {
 		var_ptr = Z_REFVAL_P(var_ptr);
 		ZVAL_DUP(retval, var_ptr);
 	} else {
@@ -1367,7 +1367,7 @@ ZEND_VM_HELPER(zend_fetch_property_address_read_helper, VAR|UNUSED|CV, CONST|TMP
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
 	offset  = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+	if (UNEXPECTED(Z_ISREF_P(container))) {
 		container = Z_REFVAL_P(container);
 	}
 
@@ -1686,7 +1686,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(object_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
-	if (Z_TYPE_P(object_ptr) == IS_REFERENCE && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_OBJECT) {
+	if (Z_ISREF_P(object_ptr) && Z_TYPE_P(Z_REFVAL_P(object_ptr)) == IS_OBJECT) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 	}
 	if (Z_TYPE_P(object_ptr) == IS_OBJECT) {
@@ -1837,7 +1837,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	}
 	if (OP1_TYPE == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_REFERENCE)) {
+	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -2389,7 +2389,7 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		if (Z_TYPE_P(var) == IS_REFERENCE) {
+		if (Z_ISREF_P(var)) {
 			var = Z_REFVAL_P(var);
 		}
 		if (Z_TYPE_P(var) != IS_STRING) {
@@ -2478,7 +2478,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	}
 
 	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
-	if (Z_TYPE_P(object) == IS_REFERENCE) {
+	if (Z_ISREF_P(object)) {
 		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
 	} else {
 		ZVAL_COPY_VALUE(&call->object, object);
@@ -2676,7 +2676,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 		SAVE_OPLINE();
 		function_name_ptr = function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		if (Z_TYPE_P(function_name) == IS_REFERENCE) {
+		if (Z_ISREF_P(function_name)) {
 			function_name = Z_REFVAL_P(function_name);
 		}
 
@@ -4465,7 +4465,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 	zval *key = NULL;
 
 	array = array_ref = EX_VAR(opline->op1.var);
-	if (Z_TYPE_P(array) == IS_REFERENCE) {
+	if (Z_ISREF_P(array)) {
 		array = Z_REFVAL_P(array);
 	}
 	if (opline->extended_value & ZEND_FE_FETCH_WITH_KEY) {
@@ -4607,7 +4607,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	    (opline->extended_value & ZEND_QUICK_SET)) {
 		if (Z_TYPE_P(EX_VAR_NUM(opline->op1.var)) != IS_UNDEF) {
 			value = EX_VAR_NUM(opline->op1.var);
-			if (Z_TYPE_P(value) == IS_REFERENCE) {
+			if (Z_ISREF_P(value)) {
 				value = Z_REFVAL_P(value);
 			}
 		} else {
@@ -4690,7 +4690,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	container = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_IS);
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (Z_TYPE_P(container) == IS_REFERENCE) {
+	if (Z_ISREF_P(container)) {
 		container = Z_REFVAL_P(container);
 	}
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {

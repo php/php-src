@@ -539,7 +539,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	if (subpats && Z_TYPE_P(subpats) == IS_REFERENCE) {
+	if (subpats && Z_ISREF_P(subpats)) {
 		subpats = Z_REFVAL_P(subpats);
 	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
@@ -1778,7 +1778,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(input))) != NULL) {
 		zval subject, *ref_entry = NULL;
 		
-		if (Z_TYPE_P(entry) == IS_REFERENCE) {
+		if (Z_ISREF_P(entry)) {
 			ref_entry = entry;
 			entry = Z_REFVAL_P(entry);
 		}

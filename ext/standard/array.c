@@ -288,7 +288,7 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 			) {
 				Z_ARRVAL_P(array)->nApplyCount++;
-				if (Z_TYPE_P(element) == IS_REFERENCE) {
+				if (Z_ISREF_P(element)) {
 					element = Z_REFVAL_P(element);
 				}
 				cnt += php_count_recursive(element, COUNT_RECURSIVE TSRMLS_CC);
@@ -3966,7 +3966,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < argc; i++) {
 		zval *arg = &args[i];
 
-		if (Z_TYPE_P(arg) == IS_REFERENCE) {
+		if (Z_ISREF_P(arg)) {
 			arg = Z_REFVAL_P(arg);
 		}
 		if (Z_TYPE_P(arg) == IS_ARRAY) {

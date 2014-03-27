@@ -585,7 +585,7 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
-	if (Z_TYPE_P(array) == IS_REFERENCE) {
+	if (Z_ISREF_P(array)) {
 		array = Z_REFVAL_P(array);
 	}
 	target_hash = HASH_OF(array);

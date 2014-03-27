@@ -882,9 +882,9 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+				if (Z_ISREF_P(op1)) {
 					op1 = Z_REFVAL_P(op1);
-				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+				} else if (Z_ISREF_P(op2)) {
 					op2 = Z_REFVAL_P(op2);
 				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
@@ -935,9 +935,9 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+				if (Z_ISREF_P(op1)) {
 					op1 = Z_REFVAL_P(op1);
-				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+				} else if (Z_ISREF_P(op2)) {
 					op2 = Z_REFVAL_P(op2);
 				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
@@ -982,9 +982,9 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+				if (Z_ISREF_P(op1)) {
 					op1 = Z_REFVAL_P(op1);
-				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+				} else if (Z_ISREF_P(op2)) {
 					op2 = Z_REFVAL_P(op2);
 				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
@@ -1053,9 +1053,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 				return SUCCESS;
 
 			default:
-				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+				if (Z_ISREF_P(op1)) {
 					op1 = Z_REFVAL_P(op1);
-				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+				} else if (Z_ISREF_P(op2)) {
 					op2 = Z_REFVAL_P(op2);
 				} else if (!converted) {
 					ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
@@ -1666,9 +1666,9 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return SUCCESS;
 					}
 				}
-				if (Z_TYPE_P(op1) == IS_REFERENCE) {
+				if (Z_ISREF_P(op1)) {
 					op1 = Z_REFVAL_P(op1);
-				} else if (Z_TYPE_P(op2) == IS_REFERENCE) {
+				} else if (Z_ISREF_P(op2)) {
 					op2 = Z_REFVAL_P(op2);
 				} else if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL) {
