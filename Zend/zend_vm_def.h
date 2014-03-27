@@ -2464,13 +2464,6 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 	object = GET_OP1_OBJ_ZVAL_PTR_DEREF(BP_VAR_R);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -2759,12 +2752,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					ZVAL_UNDEF(&call->object);
 				} else {
-//???
-					if (!Z_ISREF(call->object)) {
-						Z_ADDREF(call->object); /* For $this pointer */
-					} else {
-						ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-					}
+					Z_ADDREF(call->object); /* For $this pointer */
 				}
 			}
 

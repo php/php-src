@@ -722,13 +722,10 @@ END_EXTERN_C()
 				if (Z_ISREF_P(_zv)) {					\
 					Z_DELREF_P(_zv);					\
 					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
-				} else if (Z_TYPE_P(_zv) == IS_OBJECT ||\
-				    Z_TYPE_P(_zv) == IS_RESOURCE) {		\
-					/*Z_ADDREF_P(_zv);*/				\
-				} else {								\
+				} else if (Z_TYPE_P(_zv) != IS_OBJECT &&\
+				    Z_TYPE_P(_zv) != IS_RESOURCE) {		\
 					Z_DELREF_P(_zv);					\
 					zval_copy_ctor(_zv);				\
-					Z_SET_REFCOUNT_P(_zv, 1);			\
 				}										\
 			}											\
 		}												\

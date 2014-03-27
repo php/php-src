@@ -1540,12 +1540,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					ZVAL_UNDEF(&call->object);
 				} else {
-//???
-					if (!Z_ISREF(call->object)) {
-						Z_ADDREF(call->object); /* For $this pointer */
-					} else {
-						ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-					}
+					Z_ADDREF(call->object); /* For $this pointer */
 				}
 			}
 
@@ -1883,12 +1878,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					ZVAL_UNDEF(&call->object);
 				} else {
-//???
-					if (!Z_ISREF(call->object)) {
-						Z_ADDREF(call->object); /* For $this pointer */
-					} else {
-						ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-					}
+					Z_ADDREF(call->object); /* For $this pointer */
 				}
 			}
 
@@ -2077,12 +2067,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					ZVAL_UNDEF(&call->object);
 				} else {
-//???
-					if (!Z_ISREF(call->object)) {
-						Z_ADDREF(call->object); /* For $this pointer */
-					} else {
-						ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-					}
+					Z_ADDREF(call->object); /* For $this pointer */
 				}
 			}
 
@@ -2308,12 +2293,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					ZVAL_UNDEF(&call->object);
 				} else {
-//???
-					if (!Z_ISREF(call->object)) {
-						Z_ADDREF(call->object); /* For $this pointer */
-					} else {
-						ZVAL_DUP(&call->object, Z_REFVAL(call->object));
-					}
+					Z_ADDREF(call->object); /* For $this pointer */
 				}
 			}
 
@@ -8928,13 +8908,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -9733,13 +9706,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -10572,13 +10538,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -11935,13 +11894,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 
 	object = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -15154,13 +15106,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -17446,13 +17391,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -19739,13 +19677,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -23120,13 +23051,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 
 	object = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -24699,13 +24623,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -26088,13 +26005,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -27385,13 +27295,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -29082,13 +28985,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 
 	object = _get_obj_zval_ptr_unused(TSRMLS_C);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -32319,13 +32215,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -34393,13 +34282,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -36560,13 +36442,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {
@@ -39681,13 +39556,6 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 
 	object = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	ZVAL_COPY_VALUE(&call->object, object);
-/*???
-	if (Z_ISREF_P(object)) {
-		ZVAL_COPY_VALUE(&call->object, Z_REFVAL_P(object));
-	} else {
-		ZVAL_COPY_VALUE(&call->object, object);
-	}
-*/
 
 	if (EXPECTED(Z_TYPE(call->object) != IS_UNDEF) &&
 	    EXPECTED(Z_TYPE(call->object) == IS_OBJECT)) {

@@ -480,7 +480,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_DOUBLE:
 					case IS_BOOL:
 						convert_to_string_ex(arg);
-						if (UNEXPECTED(Z_ISREF_P(arg) != 0)) {
+						if (UNEXPECTED(Z_ISREF_P(arg))) {
 							/* it's dangerous to return pointers to string
 							   buffer of referenced variable, because it can
 							   be clobbered throug magic callbacks */
@@ -525,7 +525,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_DOUBLE:
 					case IS_BOOL:
 						convert_to_string_ex(arg);
-						if (UNEXPECTED(Z_ISREF_P(arg) != 0)) {
+						if (UNEXPECTED(Z_ISREF_P(arg))) {
 							/* it's dangerous to return pointers to string
 							   buffer of referenced variable, because it can
 							   be clobbered throug magic callbacks */

@@ -430,9 +430,7 @@ END_EXTERN_C()
 
 #define convert_scalar_to_number_ex(pzv)							\
 	if (Z_TYPE_P(pzv)!=IS_LONG && Z_TYPE_P(pzv)!=IS_DOUBLE) {		\
-		if (!Z_ISREF_P(pzv)) {										\
-			SEPARATE_ZVAL(pzv);										\
-		}															\
+		SEPARATE_ZVAL_IF_NOT_REF(pzv);								\
 		convert_scalar_to_number(pzv TSRMLS_CC);					\
 	}
 

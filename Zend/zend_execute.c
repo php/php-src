@@ -71,22 +71,22 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 		if (!Z_DELREF_P(z)) {
 			Z_SET_REFCOUNT_P(z, 1);
 //???			Z_UNSET_ISREF_P(z);
-			if (Z_ISREF_P(z)) {
+//???			if (Z_ISREF_P(z)) {
 //???				zend_reference *ref = Z_REF_P(z);
 //???				ZVAL_COPY_VALUE(z, &ref->val);
 //???				efree(ref);
-			}
+//???			}
 			should_free->var = z;
 /*		should_free->is_var = 1; */
-		} else {
-			if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
+//???		} else {
+//???			if (unref && Z_ISREF_P(z) && Z_REFCOUNT_P(z) == 1) {
 //???			Z_UNSET_ISREF_P(z);
-				if (Z_ISREF_P(z)) {
+//???				if (Z_ISREF_P(z)) {
 //???					zend_reference *ref = Z_REF_P(z);
 //???					ZVAL_COPY_VALUE(z, &ref->val);
 //???					efree(ref);
-				}
-			}
+//???				}
+//???			}
 		}
 	}
 }
