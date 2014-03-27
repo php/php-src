@@ -228,7 +228,7 @@ static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, zend_uint var, int
 	return ptr;
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 
@@ -236,7 +236,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_R(zval *ptr, zend_uint
 	return &EG(uninitialized_zval);
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 
@@ -244,12 +244,12 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_UNSET(zval *ptr, zend_
 	return &EG(uninitialized_zval);
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zval *ptr, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_IS(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	return &EG(uninitialized_zval);
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	zend_string *cv = CV_DEF_OF(var);
 
@@ -258,7 +258,7 @@ static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_RW(zval *ptr, zend_uin
 	return ptr;
 }
 
-static zend_never_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, zend_uint var TSRMLS_DC)
+static zend_always_inline zval *_get_zval_cv_lookup_BP_VAR_W(zval *ptr, zend_uint var TSRMLS_DC)
 {
 	ZVAL_NULL(ptr);
 	return ptr;
@@ -337,7 +337,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_IS(const zend_execute_da
 {
 	zval *ret = EX_VAR_NUM(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_IS(ret, var TSRMLS_CC);
 	}
 	return ret;
@@ -347,7 +347,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_IS(const zend_exec
 {
 	zval *ret = EX_VAR_NUM(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_IS(ret, var TSRMLS_CC);
 	}
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
@@ -383,7 +383,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_dat
 {
 	zval *ret = EX_VAR_NUM(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_W(ret, var TSRMLS_CC);
 	}
 	return ret;
@@ -393,7 +393,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execu
 {
 	zval *ret = EX_VAR_NUM(var);
 
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
+	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_W(ret, var TSRMLS_CC);
 	}
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_REFERENCE)) {
