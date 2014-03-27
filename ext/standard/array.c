@@ -288,9 +288,7 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 				zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 			) {
 				Z_ARRVAL_P(array)->nApplyCount++;
-				if (Z_ISREF_P(element)) {
-					element = Z_REFVAL_P(element);
-				}
+				ZVAL_DEREF(element);
 				cnt += php_count_recursive(element, COUNT_RECURSIVE TSRMLS_CC);
 				Z_ARRVAL_P(array)->nApplyCount--;
 			}
@@ -421,14 +419,8 @@ static int php_array_natural_general_compare(const void *a, const void *b, int f
 	fval = &f->val;
 	sval = &s->val;
 
-	if (Z_ISREF_P(fval)) {
-		fval = Z_REFVAL_P(fval);
-	}
-
-	if (Z_ISREF_P(sval)) {
-		sval = Z_REFVAL_P(sval);
-	}
-
+	ZVAL_DEREF(fval);
+	ZVAL_DEREF(sval);
 	ZVAL_COPY_VALUE(&first, fval);
 	ZVAL_COPY_VALUE(&second, sval);
 
@@ -1462,9 +1454,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 {
 	zval *value_ptr, data;
 
-	if (Z_ISREF_P(entry)) {
-		entry = Z_REFVAL_P(entry);
-	}
+	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_STRING) {
 		if ((value_ptr = zend_hash_find_ind(eg_active_symbol_table, Z_STR_P(entry))) != NULL) {
 			ZVAL_DUP(&data, value_ptr);
@@ -1582,11 +1572,7 @@ PHP_FUNCTION(array_fill_keys)
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos);
 	while ((entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(keys), &pos)) != NULL) {
-
-		if (UNEXPECTED(Z_ISREF_P(entry))) {
-			entry = Z_REFVAL_P(entry);
-		}
-
+		ZVAL_DEREF(entry);
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			zval_add_ref(val);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
@@ -2280,12 +2266,8 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 					HashTable *thash;
 					zval tmp;
 					
-					if (Z_ISREF_P(src_zval)) {
-						src_zval = Z_REFVAL_P(src_zval);
-					}
-					if (Z_ISREF_P(dest_zval)) {
-						dest_zval = Z_REFVAL_P(dest_zval);
-					}
+					ZVAL_DEREF(src_zval);
+					ZVAL_DEREF(dest_zval);
 					thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
 					if ((thash && thash->nApplyCount > 1) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
@@ -2369,9 +2351,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 	     zend_hash_move_forward_ex(src, &pos)) {
 
 		src_zval = src_entry;
-		if (Z_ISREF_P(src_zval)) {
-			src_zval = Z_REFVAL_P(src_zval);
-		}
+		ZVAL_DEREF(src_zval);
 		switch (zend_hash_get_current_key_ex(src, &string_key, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (Z_TYPE_P(src_zval) != IS_ARRAY ||
@@ -2405,9 +2385,7 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 		}
 
 		dest_zval = dest_entry;
-		if (Z_ISREF_P(dest_zval)) {
-			dest_zval = Z_REFVAL_P(dest_zval);
-		}
+		ZVAL_DEREF(dest_zval);
 		if (Z_ARRVAL_P(dest_zval)->nApplyCount > 1 ||
 		    Z_ARRVAL_P(src_zval)->nApplyCount > 1 ||
 		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
@@ -2444,9 +2422,7 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	for (i = 0; i < argc; i++) {
 		zval *arg = args + i;
 
-		if (Z_ISREF_P(arg)) {
-			arg = Z_REFVAL_P(arg);
-		}
+		ZVAL_DEREF(arg);
 		if (Z_TYPE_P(arg) != IS_ARRAY) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is not an array", i + 1);
 			RETURN_NULL();
@@ -2464,9 +2440,7 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	for (i = 0; i < argc; i++) {
 		zval *arg = args + i;
 
-		if (Z_ISREF_P(arg)) {
-			arg = Z_REFVAL_P(arg);
-		}
+		ZVAL_DEREF(arg);
 		if (!replace) {
 			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_P(arg), recursive TSRMLS_CC);
 		} else if (recursive && i > 0) { /* First array will be copied directly instead */
@@ -3966,9 +3940,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < argc; i++) {
 		zval *arg = &args[i];
 
-		if (Z_ISREF_P(arg)) {
-			arg = Z_REFVAL_P(arg);
-		}
+		ZVAL_DEREF(arg);
 		if (Z_TYPE_P(arg) == IS_ARRAY) {
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */

@@ -198,9 +198,7 @@ static zend_always_inline zval *_get_zval_ptr_var_deref(zend_uint var, const zen
 		ret = Z_INDIRECT_P(ret);
 	}
 	should_free->var = ret;
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -281,9 +279,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref(zend_uint var, int type T
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup(ret, var, type TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -304,9 +300,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_R(const zend_execu
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_R(ret, var TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -327,9 +321,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_UNSET(const zend_e
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_UNSET(ret, var TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -350,9 +342,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_IS(const zend_exec
 	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_IS(ret, var TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -373,9 +363,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_RW(const zend_exec
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_RW(ret, var TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -396,9 +384,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execu
 	if (Z_TYPE_P(ret) == IS_UNDEF) {
 		return _get_zval_cv_lookup_BP_VAR_W(ret, var TSRMLS_CC);
 	}
-	if (UNEXPECTED(Z_ISREF_P(ret))) {
-		ret = Z_REFVAL_P(ret);
-	}
+	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -535,9 +521,7 @@ static inline void make_real_object(zval *object_ptr TSRMLS_DC)
 {
 	zval *object = object_ptr;
 
-	if (UNEXPECTED(Z_ISREF_P(object_ptr))) {
-		object = Z_REFVAL_P(object);
-	}
+	ZVAL_DEREF(object);
 	if (Z_TYPE_P(object) == IS_NULL
 		|| (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0)
 		|| (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)
@@ -612,9 +596,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "none", "" TSRMLS_CC);
 		}
-		if (Z_ISREF_P(arg)) {
-			arg = Z_REFVAL_P(arg);
-		}
+		ZVAL_DEREF(arg);
 		if (Z_TYPE_P(arg) == IS_OBJECT) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
@@ -631,9 +613,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
 				}
 
-				if (Z_ISREF_P(arg)) {
-					arg = Z_REFVAL_P(arg);
-				}
+				ZVAL_DEREF(arg);
 				if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
 				}
@@ -662,9 +642,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
  	zval tmp;
  	zval *object = object_ptr;
 
- 	if (Z_ISREF_P(object)) {
- 		object = Z_REFVAL_P(object);
- 	}
+ 	ZVAL_DEREF(object);
 	if (Z_TYPE_P(object) != IS_OBJECT) {
 		if (object == &EG(error_zval)) {
  			if (retval) {
@@ -709,16 +687,11 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 
 	/* separate our value if necessary */
 	if (value_type == IS_TMP_VAR) {
-		if (UNEXPECTED(Z_ISREF_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
-        } else {
-			ZVAL_COPY_VALUE(&tmp, value);
-        }
+		ZVAL_DEREF(value);
+		ZVAL_COPY_VALUE(&tmp, value);
 		value = &tmp;
 	} else if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_ISREF_P(value))) {
-			value = Z_REFVAL_P(value);
-		}
+		ZVAL_DEREF(value);
 		ZVAL_DUP(&tmp, value);
 	} else if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
@@ -799,10 +772,7 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 
 static inline zval* zend_assign_tmp_to_variable(zval *variable_ptr, zval *value TSRMLS_DC)
 {
-	if (Z_ISREF_P(variable_ptr)) {
-		variable_ptr = Z_REFVAL_P(variable_ptr);
-	}
-
+	ZVAL_DEREF(variable_ptr);
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
@@ -827,10 +797,7 @@ static inline zval* zend_assign_tmp_to_variable(zval *variable_ptr, zval *value 
 
 static inline zval* zend_assign_const_to_variable(zval *variable_ptr, zval *value TSRMLS_DC)
 {
-	if (Z_ISREF_P(variable_ptr)) {
-		variable_ptr = Z_REFVAL_P(variable_ptr);
-	}
-
+	ZVAL_DEREF(variable_ptr);
 	if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
 		Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
@@ -1082,10 +1049,7 @@ static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval
     zval *retval;
     zval *container = container_ptr;
 
-	if (Z_ISREF_P(container)) {
-		container = Z_REFVAL_P(container);
-	}
-
+	ZVAL_DEREF(container);
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY:
 			if (type != BP_VAR_UNSET) {
@@ -1245,9 +1209,7 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 {
 	zval *retval;
 
-	if (UNEXPECTED(Z_ISREF_P(container))) {
-		container = Z_REFVAL_P(container);
-	}
+	ZVAL_DEREF(container);
 	switch (Z_TYPE_P(container)) {
 
 		case IS_ARRAY:
@@ -1342,10 +1304,7 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 {
 	zval *container = container_ptr;
 
-	if (Z_ISREF_P(container)) {
-		container = Z_REFVAL_P(container);
-	}
-
+	ZVAL_DEREF(container);
 	if (Z_TYPE_P(container) != IS_OBJECT) {
 		if (container == &EG(error_zval)) {
 			ZVAL_INDIRECT(result, &EG(error_zval));

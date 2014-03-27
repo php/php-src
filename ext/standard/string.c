@@ -2502,10 +2502,7 @@ PHP_FUNCTION(substr_replace)
 					zval *repl_str;
 					zval zrepl;
 
-					if (Z_ISREF_P(tmp_repl)) {
-						tmp_repl = Z_REFVAL_P(tmp_repl);
-					}
-
+					ZVAL_DEREF(tmp_repl);
 					if (Z_TYPE_P(tmp_repl) != IS_STRING) {
 						ZVAL_DUP(&zrepl, tmp_repl);
 						convert_to_string(&zrepl);
@@ -4428,9 +4425,7 @@ PHP_FUNCTION(parse_str)
 		array_init(&ret);
 		sapi_module.treat_data(PARSE_STRING, res, &ret TSRMLS_CC);
 		/* Clear out the array that was passed in. */
-		if (Z_ISREF_P(arrayArg)) {
-			arrayArg = Z_REFVAL_P(arrayArg);
-		}
+		ZVAL_DEREF(arrayArg);
 		zval_dtor(arrayArg);
 		ZVAL_COPY_VALUE(arrayArg, &ret);
 	}

@@ -81,12 +81,12 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
 		} else {
-			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
+//???			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
 				/* convert reference to regular value */
 //???				zend_reference *ref = Z_REF_P(zval_ptr);
 //???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
 //???				efree_rel(ref);
-			}
+//???			}
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
 		}
 	}
@@ -98,13 +98,13 @@ static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LIN
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
-		} else {
-			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
+//???		} else {
+//???			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
 				/* convert reference to regular value */
 //???				zend_reference *ref = Z_REF_P(zval_ptr);
 //???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
 //???				efree_rel(ref);
-			}
+//???			}
 		}
 	}
 }

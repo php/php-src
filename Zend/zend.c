@@ -410,9 +410,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC) /* {{{ */
 
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
-	if (Z_ISREF_P(expr)) {
-		expr = Z_REFVAL_P(expr);
-	}
+	ZVAL_DEREF(expr);
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS_EX("Array\n");

@@ -402,10 +402,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		return 0;
 	}
 
-	if (Z_ISREF_P(rval)) {
-		rval = Z_REFVAL_P(rval);
-	}
-
+	ZVAL_DEREF(rval);
 	if (Z_OBJCE_P(rval) != PHP_IC_ENTRY &&
 		zend_hash_str_exists(&Z_OBJCE_P(rval)->function_table, "__wakeup", sizeof("__wakeup")-1)) {
 		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1);

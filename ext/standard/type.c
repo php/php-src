@@ -98,10 +98,7 @@ PHP_FUNCTION(settype)
 		return;
 	}
 
-	if (Z_TYPE_P(var)) {
-		var = Z_REFVAL_P(var);
-	}
-
+	ZVAL_DEREF_REF(var);
 	if (!strcasecmp(type, "integer")) {
 		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
@@ -224,9 +221,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 		RETURN_FALSE;
 	}
 
-	if (Z_ISREF_P(arg)) {
-		arg = Z_REFVAL_P(arg);
-	}
+	ZVAL_DEREF(arg);
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce;
@@ -392,8 +387,8 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		if (callable_name && Z_ISREF_P(callable_name)) {
-			callable_name = Z_REFVAL_P(callable_name);
+		if (callable_name) {
+			ZVAL_DEREF(callable_name);
 		}
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);

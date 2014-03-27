@@ -669,15 +669,30 @@ END_EXTERN_C()
 		zval_copy_ctor(__z1);							\
 	} while (0)
 
+#define ZVAL_DEREF(z) do {								\
+		if (UNEXPECTED(Z_ISREF_P(z))) {					\
+			(z) = Z_REFVAL_P(z);						\
+		}												\
+	} while (0)
+
+//??? this macro should be used to get argument value passed by referebce
+//??? unfortunately it's not always work as expected
+#if 0
+#define ZVAL_DEREF_REF(z) do {							\
+		ZEND_ASSERT(Z_ISREF_P(z));						\
+		(z) = Z_REFVAL_P(z);							\
+	} while (0)
+#else
+#define ZVAL_DEREF_REF(z)								\
+	ZVAL_DEREF(z)
+#endif
+
 #define ZVAL_DUP_DEREF(z, v)							\
 	do {												\
 		zval *__z1 = (z);								\
 		zval *__z2 = (v);								\
-		if (Z_ISREF_P(__z2)) {							\
-			ZVAL_COPY_VALUE(__z1, Z_REFVAL_P(__z2));	\
-		} else {										\
-			ZVAL_COPY_VALUE(__z1, __z2);				\
-		}												\
+		ZVAL_DEREF(__z2);								\
+		ZVAL_COPY_VALUE(__z1, __z2);					\
 		zval_copy_ctor(__z1);							\
 	} while (0)
 
@@ -689,12 +704,6 @@ END_EXTERN_C()
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
 		GC_REMOVE_FROM_BUFFER(ref);						\
 		efree(ref);										\
-	} while (0)
-
-#define ZVAL_DEREF(z) do {								\
-		if (Z_ISREF_P((z))) {							\
-			(z) = Z_REFVAL_P((z));						\
-		}												\
 	} while (0)
 
 // TODO: invalud ???
@@ -738,9 +747,8 @@ END_EXTERN_C()
 			if (Z_REFCOUNT_P(__zv) == 1) {				\
 				ZVAL_UNREF(__zv);						\
 			} else {									\
-				zval *ref = Z_REFVAL_P(__zv);			\
 				Z_DELREF_P(__zv);						\
-				ZVAL_DUP(__zv, ref);					\
+				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));		\
 			}											\
 		}												\
 	} while (0)

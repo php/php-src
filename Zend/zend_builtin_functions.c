@@ -585,9 +585,7 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
-	if (Z_ISREF_P(array)) {
-		array = Z_REFVAL_P(array);
-	}
+	ZVAL_DEREF_REF(array);
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");

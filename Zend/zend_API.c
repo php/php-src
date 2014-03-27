@@ -227,9 +227,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 
 ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
-	if (Z_ISREF_P(arg)) {
-		arg = Z_REFVAL_P(arg);
-	}
+	ZVAL_DEREF(arg);
 	return zend_get_type_by_const(Z_TYPE_P(arg));
 }
 /* }}} */
@@ -360,9 +358,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		spec_walk++;
 	}
 
-	if (Z_ISREF_P(arg)) {
-		arg = Z_REFVAL_P(arg);
-	}
+	ZVAL_DEREF(arg);
 
 	switch (c) {
 		case 'l':
@@ -1115,11 +1111,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 
 static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
-//	zval *p = pp;
-
-	if (Z_ISREF_P(pp)) {
-		pp = Z_REFVAL_P(pp);
-	}
+	ZVAL_DEREF(pp);
 	if (IS_CONSTANT_TYPE(Z_TYPE_P(pp))) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
@@ -3226,18 +3218,12 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						break;
 					}
 
-					if (UNEXPECTED(Z_ISREF_P(method))) {
-						method = Z_REFVAL_P(method);
-					}
-
+					ZVAL_DEREF(method);
 					if (Z_TYPE_P(method) != IS_STRING) {
 						break;
 					}
 
-					if (UNEXPECTED(Z_ISREF_P(obj))) {
-						obj = Z_REFVAL_P(obj);
-					}
-
+					ZVAL_DEREF(obj);
 					if (Z_TYPE_P(obj) == IS_STRING) {
 						if (callable_name) {
 							char *ptr;

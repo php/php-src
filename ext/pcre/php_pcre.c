@@ -539,8 +539,8 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	if (subpats && Z_ISREF_P(subpats)) {
-		subpats = Z_REFVAL_P(subpats);
+	if (subpats) {
+		ZVAL_DEREF_REF(subpats);
 	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
@@ -1392,9 +1392,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		}
 	}
 	if (ZEND_NUM_ARGS() > 4) {
-		if (Z_ISREF_P(zcount)) {
-			zcount = Z_REFVAL_P(zcount);
-		}
+		ZVAL_DEREF_REF(zcount);
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}

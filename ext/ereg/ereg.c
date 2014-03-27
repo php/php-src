@@ -350,8 +350,8 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 	match_len = 1;
 
-	if (array && Z_ISREF_P(array)) {
-		array = Z_REFVAL_P(array);
+	if (array) {
+		ZVAL_DEREF_REF(array);
 	}
 
 	if (array && err != REG_NOMATCH) {

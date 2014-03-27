@@ -375,9 +375,7 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
 
-	if (Z_ISREF_P(arg)) {
-		arg = Z_REFVAL_P(arg);
-	}
+	ZVAL_DEREF(arg);
 	switch (Z_TYPE_P(arg)) {
 		case IS_NULL:
 			TRACE_APPEND_STR("NULL, ");
