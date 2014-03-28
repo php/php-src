@@ -26,9 +26,8 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					zend_function *func;
 					zval *function_name = &op_array->literals[opline->op2.constant + 1].constant;
-					if ((zend_hash_quick_find(&script->function_table,
-							Z_STRVAL_P(function_name), Z_STRLEN_P(function_name) + 1,
-							Z_HASH_P(function_name), (void **)&func) == SUCCESS)) {
+					if ((func = zend_hash_find_ptr(&script->function_table,
+							Z_STR_P(function_name))) != NULL) {
 						call_stack[call].func = func;
 					}
 				}

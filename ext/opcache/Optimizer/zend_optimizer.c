@@ -41,65 +41,56 @@ static void zend_optimizer_collect_constant(HashTable **constants, zval *name, z
 
 	if (!*constants) {
 		*constants = emalloc(sizeof(HashTable));
-		zend_hash_init(*constants, 16, NULL, (void (*)(void *))zend_optimizer_zval_dtor_wrapper, 0);
+		zend_hash_init(*constants, 16, NULL, zend_optimizer_zval_dtor_wrapper, 0);
 	}
-	val = *value;
-	zval_copy_ctor(&val);
-	zend_hash_add(*constants, Z_STRVAL_P(name), Z_STRLEN_P(name)+1, (void**)&val, sizeof(zval), NULL);
+	ZVAL_DUP(&val, value);
+	zend_hash_add(*constants, Z_STR_P(name), &val);
 }
 
 static int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval* value)
 {
 	zval *val;
 
-	if (zend_hash_find(constants, Z_STRVAL_P(name), Z_STRLEN_P(name)+1, (void**)&val) == SUCCESS) {
-		*value = *val;
-		zval_copy_ctor(value);
+	if ((val = zend_hash_find(constants, Z_STR_P(name))) != NULL) {
+		ZVAL_DUP(value, val);
 		return 1;
 	}
 	return 0;
 }
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_5_X_API_NO
-static int zend_optimizer_lookup_cv(zend_op_array *op_array, char* name, int name_len)
+static int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 {
 	int i = 0;
-	ulong hash_value = zend_inline_hash_func(name, name_len+1);
+	ulong hash_value = STR_HASH_VAL(name);
 
 	while (i < op_array->last_var) {
-		if (op_array->vars[i].name == name ||
-		    (op_array->vars[i].hash_value == hash_value &&
-		     op_array->vars[i].name_len == name_len &&
-		     memcmp(op_array->vars[i].name, name, name_len) == 0)) {
+		if (op_array->vars[i] == name ||
+		    (op_array->vars[i]->h == hash_value &&
+		     op_array->vars[i]->len == name->len &&
+		     memcmp(op_array->vars[i], name->val, name->len) == 0)) {
 			return i;
 		}
 		i++;
 	}
 	i = op_array->last_var;
 	op_array->last_var++;
-	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_compiled_variable));
-	if (IS_INTERNED(name)) {
-		op_array->vars[i].name = name;
-	} else {
-		op_array->vars[i].name = estrndup(name, name_len);
-	}
-	op_array->vars[i].name_len = name_len;
-	op_array->vars[i].hash_value = hash_value;
+	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_string*));
+	op_array->vars[i] = STR_DUP(name, 0);
 	return i;
 }
 #endif
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC)
+int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC)
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
 	op_array->literals = (zend_literal*)erealloc(op_array->literals, op_array->last_literal * sizeof(zend_literal));
-	op_array->literals[i].constant = *zv;
-	op_array->literals[i].hash_value = 0;
+	ZVAL_COPY_VALUE(&op_array->literals[i].constant, zv);
 	op_array->literals[i].cache_slot = -1;
-	Z_SET_REFCOUNT(op_array->literals[i].constant, 2);
-	Z_SET_ISREF(op_array->literals[i].constant);
+//???	Z_SET_REFCOUNT(op_array->literals[i].constant, 2);
+//???	Z_SET_ISREF(op_array->literals[i].constant);
 	return i;
 }
 
@@ -155,21 +146,25 @@ static void update_op1_const(zend_op_array *op_array,
 				case ZEND_CATCH:
 				case ZEND_FETCH_CONSTANT:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
+					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
+//???					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					op_array->literals[opline->op1.constant].cache_slot = op_array->last_cache_slot++;
 					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					op_array->literals[opline->op1.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op1.constant+1].constant), Z_STRLEN(op_array->literals[opline->op1.constant+1].constant) + 1);
+					STR_HASH_VAL(Z_STR(op_array->literals[opline->op1.constant+1].constant));
+//???					op_array->literals[opline->op1.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op1.constant+1].constant), Z_STRLEN(op_array->literals[opline->op1.constant+1].constant) + 1);
 					break;
 				case ZEND_DO_FCALL:
 					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
+					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
+//???					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					op_array->literals[opline->op1.constant].cache_slot = op_array->last_cache_slot++;
 					break;
 				default:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
+					STR_HASH_VAL(Z_STR(ZEND_OP1_LITERAL(opline)));
+//???					Z_HASH_P(&ZEND_OP1_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)) + 1);
 					break;
 			}
 		} else {
@@ -189,7 +184,8 @@ static void update_op2_const(zend_op_array *op_array,
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val TSRMLS_CC);
 	if (Z_TYPE_P(val) == IS_STRING) {
-		Z_HASH_P(&ZEND_OP2_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1);
+		STR_HASH_VAL(Z_STR(ZEND_OP2_LITERAL(opline)));
+//???		Z_HASH_P(&ZEND_OP2_LITERAL(opline)) = zend_hash_func(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1);
 		switch (opline->opcode) {
 			case ZEND_FETCH_R:
 			case ZEND_FETCH_W:
@@ -207,13 +203,15 @@ static void update_op2_const(zend_op_array *op_array,
 				op_array->literals[opline->op2.constant].cache_slot = op_array->last_cache_slot++;
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
+				STR_HASH_VAL(Z_STR(op_array->literals[opline->op2.constant+1].constant));
+//???				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
 				break;
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val TSRMLS_CC);
-				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
+				STR_HASH_VAL(Z_STR(op_array->literals[opline->op2.constant+1].constant));
+//???				op_array->literals[opline->op2.constant+1].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[opline->op2.constant+1].constant), Z_STRLEN(op_array->literals[opline->op2.constant+1].constant) + 1);
 				/* break missing intentionally */						
 			/*case ZEND_FETCH_CONSTANT:*/
 			case ZEND_ASSIGN_OBJ:
@@ -554,24 +552,24 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 
 	for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
 		p = script->function_table.arData + idx;
-		if (!p->xData) continue;
-		op_array = (zend_op_array*)p->xData;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		op_array = (zend_op_array*)Z_PTR(p->val);
 		zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
 	}
 
 	for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
 		p = script->class_table.arData + idx;
-		if (!p->xData) continue;
-		ce = (zend_class_entry*)p->xData;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		ce = (zend_class_entry*)Z_PTR(p->val);
 		for (j = 0; j < ce->function_table.nNumUsed; j++) {
 			q = ce->function_table.arData + j;
-			if (!q->xData) continue;
-			op_array = (zend_op_array*)q->xData;
+			if (Z_TYPE(q->val) == IS_UNDEF) continue;
+			op_array = (zend_op_array*)Z_PTR(q->val);
 			if (op_array->scope == ce) {
 				zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
 			} else if (op_array->type == ZEND_USER_FUNCTION) {
 				zend_op_array *orig_op_array;
-				if (zend_hash_find(&op_array->scope->function_table, q->arKey, q->nKeyLength, (void**)&orig_op_array) == SUCCESS) {
+				if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, q->key)) != NULL) {
 					HashTable *ht = op_array->static_variables;
 					*op_array = *orig_op_array;
 					op_array->static_variables = ht;

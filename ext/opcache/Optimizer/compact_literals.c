@@ -91,14 +91,12 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
 	int i, j, n, *pos, *map, cache_slots;
-	ulong h;
 	literal_info *info;
 	int l_null = -1;
 	int l_false = -1;
 	int l_true = -1;
 	HashTable hash;
-	char *key;
-	int key_len;
+	zend_string *key;
 
 	if (op_array->last_literal) {
 		info = (literal_info*)ecalloc(op_array->last_literal, sizeof(literal_info));
@@ -283,7 +281,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 		/* Merge equal constants */
 		j = 0; cache_slots = 0;
 		zend_hash_init(&hash, 16, NULL, NULL, 0);
-		hash.flags |= HASH_FLAG_BIG_DATA;
+//???		hash.flags |= HASH_FLAG_BIG_DATA;
 		map = (int*)ecalloc(op_array->last_literal, sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {
@@ -327,11 +325,11 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					}
 					break;
 				case IS_LONG:
-					if (zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i].constant), (void**)&pos) == SUCCESS) {
+					if ((pos = zend_hash_index_find_ptr(&hash, Z_LVAL(op_array->literals[i].constant))) != NULL) {
 						map[i] = *pos;
 					} else {
 						map[i] = j;
-						zend_hash_index_update(&hash, Z_LVAL(op_array->literals[i].constant), (void**)&j, sizeof(int), NULL);
+						zend_hash_index_update_ptr(&hash, Z_LVAL(op_array->literals[i].constant), (void**)&j);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -340,11 +338,11 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					}
 					break;
 				case IS_DOUBLE:
-					if (zend_hash_find(&hash, (char*)&Z_DVAL(op_array->literals[i].constant), sizeof(double), (void**)&pos) == SUCCESS) {
+					if ((pos = zend_hash_str_find_ptr(&hash, (char*)&Z_DVAL(op_array->literals[i].constant), sizeof(double))) != NULL) {
 						map[i] = *pos;
 					} else {
 						map[i] = j;
-						zend_hash_add(&hash, (char*)&Z_DVAL(op_array->literals[i].constant), sizeof(double), (void**)&j, sizeof(int), NULL);
+						zend_hash_str_add_ptr(&hash, (char*)&Z_DVAL(op_array->literals[i].constant), sizeof(double), (void**)&j);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -356,27 +354,27 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 				case IS_CONSTANT:
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
-							key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i].constant);
-							key = emalloc(key_len);
-							key_len = snprintf(key, key_len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i].constant));
+							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i].constant);
+							key = STR_ALLOC(key_len, 0);
+							key->len = snprintf(key->val, key->len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i].constant));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
+							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num].constant;
 							key_len = Z_STRLEN_P(class_name) + sizeof("::") + Z_STRLEN(op_array->literals[i].constant);
-							key = emalloc(key_len);
+							key = STR_ALLOC(key_len, 0);
 							memcpy(key, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
 							memcpy(key + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
 							memcpy(key + Z_STRLEN_P(class_name) + sizeof("::") - 1,
 								Z_STRVAL(op_array->literals[i].constant),
 								Z_STRLEN(op_array->literals[i].constant) + 1);
 						} else {
-							key = Z_STRVAL(op_array->literals[i].constant);
-							key_len = Z_STRLEN(op_array->literals[i].constant)+1;
+							key = STR_INIT(Z_STRVAL(op_array->literals[i].constant), Z_STRLEN(op_array->literals[i].constant), 0);
 						}
-						h = zend_hash_func(key, key_len);
-						h += info[i].flags;
+						key->h = zend_hash_func(key->val, key->len);
+						key->h += info[i].flags;
 					}
 					if ((info[i].flags & LITERAL_MAY_MERGE) &&
-						zend_hash_quick_find(&hash, key, key_len, h, (void**)&pos) == SUCCESS &&
+						(pos = zend_hash_find_ptr(&hash, key)) != NULL &&
 					   	Z_TYPE(op_array->literals[i].constant) == Z_TYPE(op_array->literals[*pos].constant) &&
 						info[i].flags == info[*pos].flags) {
 
@@ -394,22 +392,22 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					} else {
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
-							zend_hash_quick_add(&hash, key, key_len, h, (void**)&j, sizeof(int), NULL);
+							zend_hash_add_ptr(&hash, key, (void**)&j);
 							if (info[i].flags & (LITERAL_EX_OBJ|LITERAL_EX_CLASS)) {
-								efree(key);
+								STR_RELEASE(key);
 							}
 						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
-						if (!op_array->literals[j].hash_value) {
-							if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
-								op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
-							} else {
-								op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
-							}
-						}
+//???						if (!Z_STR(op_array->literals[j].hash_value) {
+//???							if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
+//???								op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
+//???							} else {
+//???								op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
+//???							}
+//???						}
 						if (LITERAL_NUM_SLOTS(info[i].flags)) {
 							op_array->literals[j].cache_slot = cache_slots;
 							cache_slots += LITERAL_NUM_SLOTS(info[i].flags);
@@ -419,13 +417,13 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						while (n > 1) {
 							i++;
 							if (i != j) op_array->literals[j] = op_array->literals[i];
-							if (!op_array->literals[j].hash_value) {
-								if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
-									op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
-								} else {
-									op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
-								}
-							}
+//???							if (!op_array->literals[j].hash_value) {
+//???								if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
+//???									op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
+//???								} else {
+//???									op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
+//???								}
+//???							}
 							j++;
 							n--;
 						}
