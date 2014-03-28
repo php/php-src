@@ -2716,7 +2716,9 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 	while (num_symbol_tables-- > 0) {
 		symbol_table = va_arg(symbol_table_list, HashTable *);
 		zend_hash_str_update(symbol_table, name, name_length, symbol);
-		Z_ADDREF_P(symbol);
+		if (Z_REFCOUNTED_P(symbol)) {
+			Z_ADDREF_P(symbol);
+		}
 	}
 	va_end(symbol_table_list);
 	return SUCCESS;

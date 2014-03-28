@@ -282,7 +282,7 @@ static void handle_form(STD_PARA)
 				if (!strncasecmp(ctx->tag.s->val, "form", sizeof("form") - 1)) {
 					doit = 1;		
 				}
-				if (doit && ctx->val.s->val && ctx->lookup_data && *ctx->lookup_data) {
+				if (doit && ctx->val.s && ctx->lookup_data && *ctx->lookup_data) {
 					char *e, *p = (char *)zend_memnstr(ctx->val.s->val, "://", sizeof("://") - 1, ctx->val.s->val + ctx->val.s->len);
 					if (p) {
 						e = memchr(p, '/', (ctx->val.s->val + ctx->val.s->len) - p);
@@ -1066,8 +1066,12 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 
 PHPAPI int php_url_scanner_reset_vars(TSRMLS_D)
 {
-	BG(url_adapt_state_ex).form_app.s->len = 0;
-	BG(url_adapt_state_ex).url_app.s->len = 0;
+	if (BG(url_adapt_state_ex).form_app.s) {
+		BG(url_adapt_state_ex).form_app.s->len = 0;
+	}
+	if (BG(url_adapt_state_ex).url_app.s) {
+		BG(url_adapt_state_ex).url_app.s->len = 0;
+	}
 
 	return SUCCESS;
 }

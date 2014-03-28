@@ -78,7 +78,7 @@ zend_class_entry *php_session_id_iface_entry;
    *********** */
 
 #define IF_SESSION_VARS() \
-	if (Z_TYPE(PS(http_session_vars)) == IS_ARRAY)
+	if (Z_ISREF_P(&PS(http_session_vars)) && Z_TYPE_P(Z_REFVAL(PS(http_session_vars))) == IS_ARRAY)
 
 #define SESSION_CHECK_ACTIVE_STATE	\
 	if (PS(session_status) == php_session_active) {	\
@@ -140,12 +140,12 @@ static int php_session_destroy(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
+PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC) /* {{{ */
 {
 	zval *sym_track = NULL;
 
 	IF_SESSION_VARS() {
-		sym_track = zend_hash_str_find(Z_ARRVAL(PS(http_session_vars)), name, namelen);
+		sym_track = zend_hash_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name);
 	} else {
 		return;
 	}
@@ -154,23 +154,23 @@ PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 		zval empty_var;
 
 		ZVAL_NULL(&empty_var);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL(PS(http_session_vars)), name, namelen, &empty_var, 1, 0);
+		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name->val, name->len, &empty_var, 1, 0);
 	}
 }
 /* }}} */
 
-PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC) /* {{{ */
+PHPAPI void php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		zend_set_hash_symbol(state_val, name, namelen, Z_ISREF_P(state_val), 1, Z_ARRVAL(PS(http_session_vars)));
+		zend_set_hash_symbol(state_val, name->val, name->len, Z_ISREF_P(state_val), 1, Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))));
 	}
 }
 /* }}} */
 
-PHPAPI zval* php_get_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
+PHPAPI zval* php_get_session_var(zend_string *name TSRMLS_DC) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		return zend_hash_str_find(Z_ARRVAL(PS(http_session_vars)), name, namelen);
+		return zend_hash_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name);
 	}
 	return NULL;
 }
@@ -178,6 +178,7 @@ PHPAPI zval* php_get_session_var(char *name, size_t namelen TSRMLS_DC) /* {{{ */
 
 static void php_session_track_init(TSRMLS_D) /* {{{ */
 {
+	zval session_vars;
 	zend_string *var_name = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
 	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable(var_name TSRMLS_CC);
@@ -187,7 +188,8 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
 
-	array_init(&PS(http_session_vars));
+	array_init(&session_vars);
+	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
 
 	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
 }
@@ -455,8 +457,7 @@ PHPAPI int php_session_valid_key(const char *key) /* {{{ */
 
 static void php_session_initialize(TSRMLS_D) /* {{{ */
 {
-	char *val = NULL;
-	int vallen;
+	zend_string *val = NULL;
 
 	if (!PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
@@ -489,7 +490,7 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 
 	/* Read data */
 	php_session_track_init(TSRMLS_C);
-	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
+	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val TSRMLS_CC) == FAILURE) {
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
 		/*
@@ -506,11 +507,11 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 
 		/* Store read data's MD5 hash */
 		PHP_MD5Init(&context);
-		PHP_MD5Update(&context, val, vallen);
+		PHP_MD5Update(&context, val->val, val->len);
 		PHP_MD5Final(PS(session_data_hash), &context);
 
-		php_session_decode(val, vallen TSRMLS_CC);
-		efree(val);
+		php_session_decode(val->val, val->len TSRMLS_CC);
+		STR_RELEASE(val);
 	} else {
 		memset(PS(session_data_hash),'\0', 16);
 	}
@@ -543,13 +544,13 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 				PHP_MD5Final(digest, &context);
 				/* Write only when save is required */
 				if (memcmp(digest, PS(session_data_hash), 16)) {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val->val, val->len TSRMLS_CC);
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val TSRMLS_CC);
 				} else {
 					ret = SUCCESS;
 				}
 				STR_RELEASE(val);
 			} else {
-				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
+				ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC() TSRMLS_CC);
 			}
 		}
 
@@ -850,7 +851,7 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 	php_serialize_data_t var_hash;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	php_var_serialize(&buf, &PS(http_session_vars), &var_hash TSRMLS_CC);
+	php_var_serialize(&buf, Z_REFVAL(PS(http_session_vars)), &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	return buf.s;
 }
@@ -862,6 +863,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	zval session_vars;
 	php_unserialize_data_t var_hash;
 
+	ZVAL_NULL(&session_vars);
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -869,10 +871,9 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 		zval_ptr_dtor(&PS(http_session_vars));
 	}
 	if (Z_TYPE(session_vars) == IS_NULL) {
-		array_init(&PS(http_session_vars));
-	} else {
-		ZVAL_COPY_VALUE(&PS(http_session_vars), &session_vars);
-	}
+		array_init(&session_vars);
+	} 
+	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
 	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
 	return SUCCESS;
 }
@@ -911,11 +912,11 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary) /* {{{ */
 PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 {
 	const char *p;
-	char *name;
 	const char *endptr = val + vallen;
 	zval current;
-	int namelen;
 	int has_value;
+	int namelen;
+	zend_string *name;
 	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
@@ -930,11 +931,11 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 
 		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
 
-		name = estrndup(p + 1, namelen);
+		name = STR_INIT(p + 1, namelen, 0);
 
 		p += namelen + 1;
 
-		if ((tmp = zend_hash_str_find(&EG(symbol_table).ht, name, namelen))) {
+		if ((tmp = zend_hash_find(&EG(symbol_table).ht, name))) {
 			if ((Z_TYPE_P(tmp) == IS_ARRAY && Z_ARRVAL_P(tmp) == &EG(symbol_table).ht) || tmp == &PS(http_session_vars)) {
 				efree(name);
 				continue;
@@ -942,13 +943,14 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 		}
 
 		if (has_value) {
+			ZVAL_NULL(&current);
 			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, &current, &var_hash  TSRMLS_CC);
+				php_set_session_var(name, &current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
 		}
-		PS_ADD_VARL(name, namelen);
-		efree(name);
+		PS_ADD_VARL(name);
+		STR_RELEASE(name);
 	}
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -994,17 +996,18 @@ PS_SERIALIZER_ENCODE_FUNC(php) /* {{{ */
 PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 {
 	const char *p, *q;
-	char *name;
 	const char *endptr = val + vallen;
-	zval current;
-	int namelen;
+	zval stack, *current = NULL;
 	int has_value;
+	int namelen;
+	zend_string *name;
 	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
 	p = val;
 
+	array_init(&stack);
 	while (p < endptr) {
 		zval *tmp;
 		q = p;
@@ -1019,30 +1022,34 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		}
 
 		namelen = q - p;
-		name = estrndup(p, namelen);
+		name = STR_INIT(p, namelen, 0);
 		q++;
 
-		if ((tmp = zend_hash_str_find(&EG(symbol_table).ht, name, namelen))) {
+		if ((tmp = zend_hash_find(&EG(symbol_table).ht, name))) {
 			if ((Z_TYPE_P(tmp) == IS_ARRAY && Z_ARRVAL_P(tmp) == &EG(symbol_table).ht) || tmp == &PS(http_session_vars)) {
 				goto skip;
 			}
 		}
 
 		if (has_value) {
-			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, namelen, &current, &var_hash  TSRMLS_CC);
+			zval dummy;
+			ZVAL_NULL(&dummy);
+			//??? hash table resize?
+			current = zend_hash_next_index_insert(Z_ARRVAL(stack), &dummy);
+			if (php_var_unserialize(current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+				php_set_session_var(name, current, &var_hash TSRMLS_CC);
 			}
-			zval_ptr_dtor(&current);
 		}
-		PS_ADD_VARL(name, namelen);
+		PS_ADD_VARL(name);
 skip:
-		efree(name);
+		STR_RELEASE(name);
 
 		p = q;
 	}
 break_outer_loop:
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	zval_ptr_dtor(&stack);
 
 	return SUCCESS;
 }
@@ -1340,7 +1347,8 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 
 	/*	'replace' must be 0 here, else a previous Set-Cookie
 		header, probably sent with setcookie() will be replaced! */
-	sapi_add_header_ex(ncookie.s->val, ncookie.s->len, 0, 0 TSRMLS_CC);
+	sapi_add_header_ex(estrndup(ncookie.s->val, ncookie.s->len), ncookie.s->len, 0, 0 TSRMLS_CC);
+	smart_str_free(&ncookie);
 }
 /* }}} */
 
@@ -1404,6 +1412,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 		smart_str_appends(&var, PS(id)->val);
 		smart_str_0(&var);
 		REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
+		smart_str_free(&var);
 	} else {
 		REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
 	}
@@ -2101,7 +2110,7 @@ static PHP_FUNCTION(session_unset)
 		HashTable *ht_sess_var;
 
 		SEPARATE_ZVAL_IF_NOT_REF(&PS(http_session_vars));
-		ht_sess_var = Z_ARRVAL(PS(http_session_vars));
+		ht_sess_var = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));
 
 		/* Clean $_SESSION. */
 		zend_hash_clean(ht_sess_var);
@@ -2459,9 +2468,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 {
 	zend_class_entry ce;
 
-	zend_string *sess_var = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
-	zend_register_auto_global(sess_var, 0, NULL TSRMLS_CC);
-	STR_RELEASE(sess_var);
+	zend_register_auto_global(STR_INIT("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL TSRMLS_CC);
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 
@@ -2617,7 +2624,7 @@ static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress 
 {
 	zval *progress_ary, *cancel_upload;
 
-	if ((progress_ary = zend_symtable_find(Z_ARRVAL(PS(http_session_vars)), progress->key.s)) == NULL) {
+	if ((progress_ary = zend_symtable_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s)) == NULL) {
 		return 0;
 	}
 	if (Z_TYPE_P(progress_ary) != IS_ARRAY) {
@@ -2654,7 +2661,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
 		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL(PS(http_session_vars)), progress->key.s->val, progress->key.s->len, &progress->data, 2, 0);
+		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s->val, progress->key.s->len, &progress->data, 2, 0);
 	}
 	php_session_flush(TSRMLS_C);
 } /* }}} */
@@ -2664,7 +2671,7 @@ static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress T
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), progress->key.s);
+		zend_hash_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
 	}
 	php_session_flush(TSRMLS_C);
 } /* }}} */
@@ -2806,6 +2813,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (data->temp_filename) {
 				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename, 1);
 			}
+
 			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1,  1);
 

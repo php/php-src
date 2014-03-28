@@ -34,9 +34,9 @@
 
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
 #define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
-#define PS_READ_ARGS void **mod_data, const zend_string *key, char **val, int *vallen TSRMLS_DC
-#define PS_WRITE_ARGS void **mod_data, const zend_string *key, const char *val, const int vallen TSRMLS_DC
-#define PS_DESTROY_ARGS void **mod_data, const zend_string *key TSRMLS_DC
+#define PS_READ_ARGS void **mod_data, zend_string *key, zend_string **val TSRMLS_DC
+#define PS_WRITE_ARGS void **mod_data, zend_string *key, zend_string *val TSRMLS_DC
+#define PS_DESTROY_ARGS void **mod_data, zend_string *key TSRMLS_DC
 #define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
 #define PS_CREATE_SID_ARGS void **mod_data TSRMLS_DC
 
@@ -220,9 +220,9 @@ typedef struct ps_serializer_struct {
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
-PHPAPI void php_add_session_var(char *name, size_t namelen TSRMLS_DC);
-PHPAPI void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
-PHPAPI zval *php_get_session_var(char *name, size_t namelen TSRMLS_DC);
+PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC);
+PHPAPI void php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI zval *php_get_session_var(zend_string *name TSRMLS_DC);
 
 PHPAPI int php_session_register_module(ps_module *);
 
@@ -239,39 +239,41 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 PHPAPI int php_session_valid_key(const char *key);
 PHPAPI void php_session_reset_id(TSRMLS_D);
 
-#define PS_ADD_VARL(name,namelen) do {										\
-	php_add_session_var(name, namelen TSRMLS_CC);							\
+#define PS_ADD_VARL(name) do {										\
+	php_add_session_var(name TSRMLS_CC);							\
 } while (0)
 
-#define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
+#define PS_ADD_VAR(name) PS_ADD_VARL(name)
 
-#define PS_DEL_VARL(name,namelen) do {										\
-	if (PS(http_session_vars)) {											\
-		zend_hash_del(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1);	\
-	}																		\
+#define PS_DEL_VARL(name) do {										\
+	if (!ZVAL_IS_NULL(&PS(http_session_vars))) {					\
+		zend_hash_del(Z_ARRVAL(PS(http_session_vars)), name);		\
+	}																\
 } while (0)
 
 
-#define PS_ENCODE_VARS 											\
-	zend_string *key;											\
-	ulong num_key;												\
+#define PS_ENCODE_VARS 												\
+	zend_string *key;												\
+	ulong num_key;													\
 	zval *struc;
 
-#define PS_ENCODE_LOOP(code) do {									\
-		HashTable *_ht = Z_ARRVAL(PS(http_session_vars));			\
-		int key_type;												\
-																	\
-		for (zend_hash_internal_pointer_reset(_ht);					\
-				(key_type = zend_hash_get_current_key_ex(_ht, &key, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; \
-					zend_hash_move_forward(_ht)) {					\
-			if (key_type == HASH_KEY_IS_LONG) {						\
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld", num_key);	\
-				continue;											\
-			}														\
-			if ((struc = php_get_session_var(key->val, key->len TSRMLS_CC))) {	\
-				code;		 										\
-			} 														\
-		}															\
+#define PS_ENCODE_LOOP(code) do {										\
+		HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
+		int key_type;													\
+																		\
+		for (zend_hash_internal_pointer_reset(_ht);						\
+				(key_type = zend_hash_get_current_key_ex(_ht, &key,		\
+						&num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; 	\
+					zend_hash_move_forward(_ht)) {						\
+			if (key_type == HASH_KEY_IS_LONG) {							\
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
+						"Skipping numeric key %ld", num_key);			\
+				continue;												\
+			}															\
+			if ((struc = php_get_session_var(key TSRMLS_CC))) {			\
+				code;		 											\
+			} 															\
+		}																\
 	} while(0)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)

@@ -518,8 +518,12 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 
 PHPAPI int php_url_scanner_reset_vars(TSRMLS_D)
 {
-	BG(url_adapt_state_ex).form_app.s->len = 0;
-	BG(url_adapt_state_ex).url_app.s->len = 0;
+	if (BG(url_adapt_state_ex).form_app.s) {
+		BG(url_adapt_state_ex).form_app.s->len = 0;
+	}
+	if (BG(url_adapt_state_ex).url_app.s) {
+		BG(url_adapt_state_ex).url_app.s->len = 0;
+	}
 
 	return SUCCESS;
 }
