@@ -112,10 +112,10 @@ typedef struct _php_session_rfc1867_progress {
 	size_t    content_length;
 
 	zval      data;                 /* the array exported to session data */
-	zval      post_bytes_processed; /* data["bytes_processed"] */
+	zval	 *post_bytes_processed; /* data["bytes_processed"] */
 	zval      files;                /* data["files"] array */
 	zval      current_file;         /* array of currently uploading file */
-	zval      current_file_bytes_processed;
+	zval	 *current_file_bytes_processed;
 } php_session_rfc1867_progress;
 
 typedef struct _php_ps_globals {
@@ -174,8 +174,8 @@ typedef struct _php_ps_globals {
 	php_session_rfc1867_progress *rfc1867_progress;
 	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
 	zend_bool rfc1867_cleanup; /* session.upload_progress.cleanup */
-	smart_str rfc1867_prefix;  /* session.upload_progress.prefix */
-	smart_str rfc1867_name;    /* session.upload_progress.name */
+	char *rfc1867_prefix;  /* session.upload_progress.prefix */
+	char *rfc1867_name;    /* session.upload_progress.name */
 	long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 

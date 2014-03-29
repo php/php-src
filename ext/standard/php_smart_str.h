@@ -31,8 +31,6 @@
 #define smart_str_0(x) do {											\
 	if ((x)->s) {													\
 		(x)->s->val[(x)->s->len] = '\0';							\
-	} else {														\
-		smart_str_appendc((x), '\0');								\
 	}																\
 } while (0)
 

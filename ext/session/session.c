@@ -769,25 +769,6 @@ static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static ZEND_INI_MH(OnUpdateSmartStr) /* {{{ */
-{
-	smart_str *p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base;
-
-	base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	p = (smart_str *) (base+(size_t) mh_arg1);
-
-	smart_str_sets(p, new_value);
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -830,9 +811,9 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.upload_progress.cleanup",
 	                                                "1",     ZEND_INI_PERDIR, OnUpdateBool,        rfc1867_cleanup, php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.prefix",
-	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateSmartStr,      rfc1867_prefix,  php_ps_globals, ps_globals)
+	                                     "upload_progress_", ZEND_INI_PERDIR, OnUpdateString,      rfc1867_prefix,  php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.name",
-	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateSmartStr,      rfc1867_name,    php_ps_globals, ps_globals)
+	                          "PHP_SESSION_UPLOAD_PROGRESS", ZEND_INI_PERDIR, OnUpdateString,      rfc1867_name,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.freq",  "1%", ZEND_INI_PERDIR, OnUpdateRfc1867Freq, rfc1867_freq,    php_ps_globals, ps_globals)
 	STD_PHP_INI_ENTRY("session.upload_progress.min_freq",
 	                                                   "1",  ZEND_INI_PERDIR, OnUpdateReal,        rfc1867_min_freq,php_ps_globals, ps_globals)
@@ -2639,7 +2620,7 @@ static zend_bool php_check_cancel_upload(php_session_rfc1867_progress *progress 
 static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, int force_update TSRMLS_DC) /* {{{ */
 {
 	if (!force_update) {
-		if (Z_LVAL(progress->post_bytes_processed) < progress->next_update) {
+		if (Z_LVAL_P(progress->post_bytes_processed) < progress->next_update) {
 			return;
 		}
 #ifdef HAVE_GETTIMEOFDAY
@@ -2654,7 +2635,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 			progress->next_update_time = dtv + PS(rfc1867_min_freq);
 		}
 #endif
-		progress->next_update = Z_LVAL(progress->post_bytes_processed) + progress->update_step;
+		progress->next_update = Z_LVAL_P(progress->post_bytes_processed) + progress->update_step;
 	}
 
 	php_session_initialize(TSRMLS_C);
@@ -2720,9 +2701,9 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				if (name_len == progress->sname_len && memcmp(data->name, PS(session_name), name_len) == 0) {
 					zval_dtor(&progress->sid);
 					ZVAL_STRINGL(&progress->sid, (*data->value), value_len);
-				} else if (name_len == PS(rfc1867_name).s->len && memcmp(data->name, PS(rfc1867_name).s->val, name_len) == 0) {
+				} else if (memcmp(data->name, PS(rfc1867_name), name_len + 1) == 0) {
 					smart_str_free(&progress->key);
-					smart_str_appendl(&progress->key, PS(rfc1867_prefix).s->val, PS(rfc1867_prefix).s->len);
+					smart_str_appends(&progress->key, PS(rfc1867_prefix));
 					smart_str_appendl(&progress->key, *data->value, value_len);
 					smart_str_0(&progress->key);
 
@@ -2742,7 +2723,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			}
 			
 			/* First FILE_START event, initializing data */
-			if (ZVAL_IS_NULL(&progress->data)) {
+			if (ZVAL_IS_UNDEF(&progress->data)) {
 
 				if (PS(rfc1867_freq) >= 0) {
 					progress->update_step = PS(rfc1867_freq);
@@ -2753,16 +2734,15 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				progress->next_update_time = 0.0;
 
 				array_init(&progress->data);
-
-				ZVAL_LONG(&progress->post_bytes_processed, data->post_bytes_processed);
-
 				array_init(&progress->files);
 
 				add_assoc_long_ex(&progress->data, "start_time", sizeof("start_time") - 1, (long)sapi_get_request_time(TSRMLS_C));
-				add_assoc_long_ex(&progress->data, "content_length",  sizeof("content_length"), progress->content_length);
-				add_assoc_zval_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, &progress->post_bytes_processed);
+				add_assoc_long_ex(&progress->data, "content_length",  sizeof("content_length") - 1, progress->content_length);
+				add_assoc_long_ex(&progress->data, "bytes_processed", sizeof("bytes_processed") - 1, data->post_bytes_processed);
 				add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 0);
 				add_assoc_zval_ex(&progress->data, "files", sizeof("files") - 1, &progress->files);
+
+				progress->post_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->data), "bytes_processed", sizeof("bytes_processed") - 1);
 
 				php_rinit_session(0 TSRMLS_CC);
 				PS(id) = STR_INIT(Z_STRVAL(progress->sid), Z_STRLEN(progress->sid), 0);
@@ -2771,7 +2751,6 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			}
 
 			array_init(&progress->current_file);
-			ZVAL_LONG(&progress->current_file_bytes_processed, 0);
 
 			/* Each uploaded file has its own array. Trying to make it close to $_FILES entries. */
 			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name, 1);
@@ -2781,12 +2760,13 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1, 0);
 			add_assoc_long_ex(&progress->current_file, "start_time", sizeof("start_time") - 1, (long)time(NULL));
-			add_assoc_zval_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, &progress->current_file_bytes_processed);
+			add_assoc_long_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);
 			
-			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
+			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), "bytes_processed", sizeof("bytes_processed") - 1);
 
+			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
 		break;
@@ -2797,8 +2777,8 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 				break;
 			}
 			
-			Z_LVAL(progress->current_file_bytes_processed) = data->offset + data->length;
-			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
+			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2817,7 +2797,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);
 			add_assoc_bool_ex(&progress->current_file, "done", sizeof("done") - 1,  1);
 
-			Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
+			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
 		}
@@ -2830,7 +2810,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 					php_session_rfc1867_cleanup(progress TSRMLS_CC);
 				} else {
 					add_assoc_bool_ex(&progress->data, "done", sizeof("done") - 1, 1);
-					Z_LVAL(progress->post_bytes_processed) = data->post_bytes_processed;
+					Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 					php_session_rfc1867_update(progress, 1 TSRMLS_CC);
 				}
 				php_rshutdown_session_globals(TSRMLS_C);

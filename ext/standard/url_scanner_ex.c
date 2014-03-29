@@ -282,7 +282,7 @@ static void handle_form(STD_PARA)
 				if (!strncasecmp(ctx->tag.s->val, "form", sizeof("form") - 1)) {
 					doit = 1;		
 				}
-				if (doit && ctx->val.s && ctx->lookup_data && *ctx->lookup_data) {
+				if (doit && ctx->val.s->val && ctx->lookup_data && *ctx->lookup_data) {
 					char *e, *p = (char *)zend_memnstr(ctx->val.s->val, "://", sizeof("://") - 1, ctx->val.s->val + ctx->val.s->len);
 					if (p) {
 						e = memchr(p, '/', (ctx->val.s->val + ctx->val.s->len) - p);
@@ -1006,7 +1006,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 		*handled_output_len = len;
 	} else if (BG(url_adapt_state_ex).url_app.s->len == 0) {
 		url_adapt_state_ex_t *ctx = &BG(url_adapt_state_ex);
-		if (ctx->buf.s) {
+		if (ctx->buf.s && ctx->buf.s->len) {
 			smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
 			smart_str_appendl(&ctx->result, output, output_len);
 
@@ -1035,7 +1035,7 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	}
 
 
-	if (BG(url_adapt_state_ex).url_app.s) {
+	if (BG(url_adapt_state_ex).url_app.s && BG(url_adapt_state_ex).url_app.s->len != 0) {
 		smart_str_appends(&BG(url_adapt_state_ex).url_app, PG(arg_separator).output);
 	}
 
