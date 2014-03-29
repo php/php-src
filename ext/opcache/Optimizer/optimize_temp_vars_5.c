@@ -73,6 +73,7 @@ static const char op_const_means_class[256]  = {
 static void optimize_temporary_variables(zend_op_array *op_array)
 {
 	int T = op_array->T;
+	int offset = op_array->last_var;
 	char *taken_T;			/* T index in use */
 	zend_op **start_of_T;	/* opline where T is first used */
 	char *valid_T;			/* Is the map_T valid */
@@ -96,12 +97,12 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
         if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR | IS_CONST)) {
 			if (!(op_const_means_class[opline->opcode] & RESULT_IS_UNUSED)) {
-				start_of_T[VAR_NUM(ZEND_RESULT(opline).var)] = opline;
+				start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
 			}
 		}
 #else
         if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
-			start_of_T[VAR_NUM(ZEND_RESULT(opline).var)] = opline;
+			start_of_T[VAR_NUM(ZEND_RESULT(opline).var) - offset] = opline;
 		}
 #endif
 		opline--;
@@ -119,13 +120,13 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 			|| ((op_const_means_class[opline->opcode] & OP1_CONST_IS_CLASS) && ZEND_OP1_TYPE(opline) == IS_CONST)
 #endif
 			) {
-			currT = VAR_NUM(ZEND_OP1(opline).var);
+			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
 			if (!valid_T[currT]) {
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				valid_T[currT] = 1;
 			}
-			ZEND_OP1(opline).var = NUM_VAR(map_T[currT]);
+			ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
 		/* Skip OP_DATA */
@@ -140,13 +141,13 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 			|| ((op_const_means_class[opline->opcode] & OP2_CONST_IS_CLASS) && ZEND_OP2_TYPE(opline) == IS_CONST)
 #endif
 		   ) {
-			currT = VAR_NUM(ZEND_OP2(opline).var);
+			currT = VAR_NUM(ZEND_OP2(opline).var) - offset;
 			if (!valid_T[currT]) {
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				valid_T[currT] = 1;
 			}
-			ZEND_OP2(opline).var = NUM_VAR(map_T[currT]);
+			ZEND_OP2(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
@@ -155,25 +156,25 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 		if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
             opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
 #endif
-			currT = VAR_NUM(opline->extended_value);
+			currT = VAR_NUM(opline->extended_value) - offset;
 			if (!valid_T[currT]) {
 				GET_AVAILABLE_T();
 				map_T[currT] = i;
 				valid_T[currT] = 1;
 			}
-			opline->extended_value = NUM_VAR(map_T[currT]);
+			opline->extended_value = NUM_VAR(map_T[currT] + offset);
 		}
 
 		/* Allocate OP_DATA->op2 after "operands", but before "result" */
 		if (opline->opcode == ZEND_ASSIGN_DIM &&
 		    (opline + 1)->opcode == ZEND_OP_DATA &&
 		    ZEND_OP2_TYPE(opline + 1) & (IS_VAR | IS_TMP_VAR)) {
-			currT = VAR_NUM(ZEND_OP2(opline + 1).var);
+			currT = VAR_NUM(ZEND_OP2(opline + 1).var) - offset;
 			GET_AVAILABLE_T();
 			map_T[currT] = i;
 			valid_T[currT] = 1;
 			taken_T[i] = 0;
-			ZEND_OP2(opline + 1).var = NUM_VAR(i);
+			ZEND_OP2(opline + 1).var = NUM_VAR(i + offset);
 			var_to_free = i;
 		}
 
@@ -183,12 +184,12 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 #else
 		if (ZEND_RESULT_TYPE(opline) & (IS_VAR | IS_TMP_VAR)) {
 #endif
-				currT = VAR_NUM(ZEND_RESULT(opline).var);
+				currT = VAR_NUM(ZEND_RESULT(opline).var) - offset;
 				if (valid_T[currT]) {
 					if (start_of_T[currT] == opline) {
 						taken_T[map_T[currT]] = 0;
 					}
-					ZEND_RESULT(opline).var = NUM_VAR(map_T[currT]);
+					ZEND_RESULT(opline).var = NUM_VAR(map_T[currT] + offset);
 				} else { /* Au still needs to be assigned a T which is a bit dumb. Should consider changing Zend */
 					GET_AVAILABLE_T();
 
@@ -199,7 +200,7 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 						map_T[currT] = i;
 						valid_T[currT] = 1;
 					}
-					ZEND_RESULT(opline).var = NUM_VAR(i);
+					ZEND_RESULT(opline).var = NUM_VAR(i + offset);
 				}
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 			}

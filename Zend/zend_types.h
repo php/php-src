@@ -459,7 +459,7 @@ struct _zend_ast_ref {
 		_ref->gc.refcount = 1;									\
 		_ref->gc.u.v.type = IS_REFERENCE;						\
 		_ref->gc.u.v.gc_info = 0;								\
-		_ref->val = *(r);										\
+		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_P(z) = IS_REFERENCE;								\
 	} while (0)

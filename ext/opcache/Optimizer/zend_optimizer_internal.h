@@ -24,7 +24,10 @@
 
 #include "ZendAccelerator.h"
 
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
+#if 1 //???ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+# define VAR_NUM(v) EX_VAR_TO_NUM(v)
+# define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_VAR_NUM_2(0, v))
+#elif ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 # define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
 # define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_TMP_VAR_NUM(0, v))
 #elif ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
