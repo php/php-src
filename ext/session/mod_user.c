@@ -50,7 +50,12 @@ ps_module ps_mod_user = {
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)
 {
 	int i;
-	call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC);
+	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC) == FAILURE) {
+		zval_ptr_dtor(retval);
+		ZVAL_UNDEF(retval);
+	} else if (ZVAL_IS_UNDEF(retval)) {
+		ZVAL_NULL(retval);
+	}
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&argv[i]);
 	}
