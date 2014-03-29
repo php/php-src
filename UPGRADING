@@ -262,6 +262,9 @@ PHP 5.6 UPGRADE NOTES
   Added scanner mode INI_SCANNER_TYPED to yield typed .ini values. 
   For PHP >= 5.6.1
 
+- JSON:
+  Added JSON_PRESERVE_ZERO_FRACTION option (PHP >= 5.6.5)
+
 ========================================
 6. New Functions
 ========================================

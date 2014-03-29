@@ -10,6 +10,10 @@
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
     named pipes). (steffenb198@aol.com)
 
+- JSON:
+  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
+    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+
 22 Jan 2015, PHP 5.6.5
 
 - Core:
