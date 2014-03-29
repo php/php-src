@@ -112,9 +112,9 @@ string(11) "-2147483648"
 -- Iteration 6 --
 string(7) "123.456"
 -- Iteration 7 --
-string(4) "1230"
+string(6) "1230.0"
 -- Iteration 8 --
-string(5) "-1230"
+string(7) "-1230.0"
 -- Iteration 9 --
 string(4) "true"
 -- Iteration 10 --
