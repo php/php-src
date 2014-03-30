@@ -218,7 +218,7 @@ static void handle_form(STD_PARA)
 				if (!strncasecmp(ctx->tag.s->val, "form", sizeof("form") - 1)) {
 					doit = 1;		
 				}
-				if (doit && ctx->val.s->val && ctx->lookup_data && *ctx->lookup_data) {
+				if (doit && ctx->val.s && ctx->lookup_data && *ctx->lookup_data) {
 					char *e, *p = (char *)zend_memnstr(ctx->val.s->val, "://", sizeof("://") - 1, ctx->val.s->val + ctx->val.s->len);
 					if (p) {
 						e = memchr(p, '/', (ctx->val.s->val + ctx->val.s->len) - p);
