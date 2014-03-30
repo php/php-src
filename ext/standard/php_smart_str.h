@@ -185,8 +185,8 @@ static inline char *smart_str_print_unsigned(char *buf, long num) {
 	smart_str_appendl_ex((dest), ((smart_str *)(src))->s->val, 		\
 		((smart_str *)(src))->s->len, (what));
 
-
 #define smart_str_setl(dest, src, nlen) do {						\
+	smart_str_free((dest));											\
 	smart_str_appendl_ex((dest), (src), (nlen), 0);					\
 } while (0)
 
