@@ -351,6 +351,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	p = ZCSG(interned_strings).arData + idx;
 	p->key = (zend_string*) ZCSG(interned_strings_top);
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len);
+	p->h = h;
 	p->key->gc.refcount = 1;
 	p->key->gc.u.v.type = IS_STRING;
 	p->key->gc.u.v.flags = IS_STR_INTERNED | IS_STR_PERMANENT;
