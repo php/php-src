@@ -592,12 +592,12 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && retval_ptr) {
-		long retval;
+		double retval;
 
-		convert_to_long_ex(&retval_ptr);
-		retval = Z_LVAL_P(retval_ptr);
+		convert_to_double_ex(&retval_ptr);
+		retval = Z_DVAL_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
-		return retval < 0 ? -1 : retval > 0 ? 1 : 0;
+		return retval < 0.0 ? -1 : retval > 0.0 ? 1 : 0;
 	} else {
 		return 0;
 	}
