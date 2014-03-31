@@ -494,7 +494,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 #endif
 			collect_constants = 0;
 			break;
-
 #if ZEND_EXTENSION_API_NO >= PHP_5_5_X_API_NO
 		case ZEND_FETCH_R:
 		case ZEND_FETCH_W:
@@ -559,7 +558,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			}
 			break;
 #endif
-		
 		}
 		opline++;
 		i++;

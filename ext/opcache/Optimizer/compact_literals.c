@@ -378,9 +378,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 					   	Z_TYPE(op_array->literals[i].constant) == Z_TYPE(op_array->literals[*pos].constant) &&
 						info[i].flags == info[*pos].flags) {
 
-						if (info[i].flags & (LITERAL_EX_OBJ|LITERAL_EX_CLASS)) {
-							efree(key);
-						}
+						STR_RELEASE(key);
 						map[i] = *pos;
 						zval_dtor(&op_array->literals[i].constant);
 						n = LITERAL_NUM_RELATED(info[i].flags);
@@ -393,9 +391,7 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
 							zend_hash_add_ptr(&hash, key, (void**)&j);
-							if (info[i].flags & (LITERAL_EX_OBJ|LITERAL_EX_CLASS)) {
-								STR_RELEASE(key);
-							}
+							STR_RELEASE(key);
 						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];

@@ -69,7 +69,7 @@ static int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		    (op_array->vars[i]->h == hash_value &&
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i], name->val, name->len) == 0)) {
-			return i;
+			return (int)EX_VAR_NUM_2(NULL, i);
 		}
 		i++;
 	}
@@ -77,7 +77,30 @@ static int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 	op_array->last_var++;
 	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_string*));
 	op_array->vars[i] = STR_DUP(name, 0);
-	return i;
+
+	/* all IS_TMP_VAR and IS_VAR variable numbers have to be adjusted */
+	{
+		zend_op *opline = op_array->opcodes;
+		zend_op *end = opline + op_array->last;
+		while (opline < end) {
+			if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+				opline->op1.var += sizeof(zval);
+			}
+			if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
+				opline->op2.var += sizeof(zval);
+			}
+			if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+				opline->result.var += sizeof(zval);
+			}
+			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS ||
+			    opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
+				opline->extended_value += sizeof(zval);
+			}
+			opline++;
+		}
+	}
+	
+	return (int)EX_VAR_NUM_2(NULL, i);
 }
 #endif
 

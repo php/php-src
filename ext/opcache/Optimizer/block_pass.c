@@ -533,7 +533,7 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 
-# define VAR_NUM_EX(op) ((op ## _type & (IS_TMP_VAR|IS_VAR))?VAR_NUM((op).var):(op).var)
+# define VAR_NUM_EX(op) VAR_NUM((op).var)
 
 # define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
 # define SET_VAR_SOURCE(opline) Tsource[VAR_NUM(opline->result.var)] = opline
@@ -627,7 +627,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
 	/* we track data dependencies only insight a single basic block */
 	if (op_array->T) {
-		Tsource = ecalloc(op_array->T, sizeof(zend_op *));
+		Tsource = ecalloc(op_array->last_var + op_array->T, sizeof(zend_op *));
 	}
 	opline = block->start_opline;
 	end = opline + block->len;
@@ -1637,12 +1637,13 @@ next_target:
 				zend_op *target, *target_end;
 				char *same_t=NULL;
 				zend_code_block *target_block;
-				int var_num = 0;
-				if (op_array->T >= (zend_uint)op_array->last_var) {
-					var_num = op_array->T;
-				} else {
-					var_num = op_array->last_var;
-				}
+				int var_num = op_array->last_var + op_array->T;
+//???				if (op_array->T >= (zend_uint)op_array->last_var) {
+//???					var_num = op_array->T;
+//???				} else {
+//???					var_num = op_array->last_var;
+//???				}
+		
 				if (var_num <= 0) {
    					return;
 				}
