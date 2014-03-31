@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol)
 
+- Fileinfo:
+  . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
+    (Remi)
+
 ?? ??? 2014, PHP 5.4.27
 
 - Core:
