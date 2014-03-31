@@ -5442,6 +5442,7 @@ void zend_do_declare_property(znode *var_name, const znode *value, zend_uint acc
 	Z_STR(var_name->u.constant) = zend_new_interned_string(Z_STR(var_name->u.constant) TSRMLS_CC);
 	zend_declare_property_ex(CG(active_class_entry), Z_STR(var_name->u.constant), &property, access_type, comment TSRMLS_CC);
 //???	efree(Z_STRVAL(var_name->u.constant));
+	STR_RELEASE(Z_STR(var_name->u.constant));
 }
 /* }}} */
 

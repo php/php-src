@@ -49,8 +49,9 @@ static int zend_prepare_function_for_execution(zend_op_array *op_array);
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
 static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC);
 
-static void zend_accel_destroy_zend_function(zend_function *function)
+static void zend_accel_destroy_zend_function(zval *zv)
 {
+	zend_function *function = Z_PTR_P(zv);
 	TSRMLS_FETCH();
 
 	if (function->type == ZEND_USER_FUNCTION) {
@@ -67,7 +68,7 @@ static void zend_accel_destroy_zend_function(zend_function *function)
 static void zend_accel_destroy_zend_class(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
-	ce->function_table.pDestructor = (dtor_func_t) zend_accel_destroy_zend_function;
+	ce->function_table.pDestructor = zend_accel_destroy_zend_function;
 	destroy_zend_class(zv);
 }
 
@@ -150,8 +151,8 @@ int compact_persistent_script(zend_persistent_script *persistent_script)
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
 	if (destroy_elements) {
-		persistent_script->function_table.pDestructor = (dtor_func_t)zend_accel_destroy_zend_function;
-		persistent_script->class_table.pDestructor = (dtor_func_t)zend_accel_destroy_zend_class;
+		persistent_script->function_table.pDestructor = zend_accel_destroy_zend_function;
+		persistent_script->class_table.pDestructor = zend_accel_destroy_zend_class;
 	} else {
 		persistent_script->function_table.pDestructor = NULL;
 		persistent_script->class_table.pDestructor = NULL;
@@ -196,7 +197,8 @@ static int move_user_function(zval *zv
 #endif 
 
 	if (function->type == ZEND_USER_FUNCTION) {
-		zend_hash_update_mem(function_table, hash_key->key, function, sizeof(zend_function));
+		zend_hash_update_ptr(function_table, hash_key->key, function);
+//???		zend_hash_update_mem(function_table, hash_key->key, function, sizeof(zend_function));
 		return 1;
 	} else {
 		return 0;
@@ -231,12 +233,15 @@ void zend_accel_copy_internal_functions(TSRMLS_D)
 	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
-static void zend_destroy_property_info(zend_property_info *property_info)
+static void zend_destroy_property_info(zval *zv)
 {
+	zend_property_info *property_info = Z_PTR_P(zv);
+
 	STR_RELEASE(property_info->name);
 	if (property_info->doc_comment) {
 		STR_RELEASE(property_info->doc_comment);
 	}
+	efree(property_info);
 }
 
 static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
@@ -250,15 +255,17 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 #endif
 		case IS_STRING:
 	    case IS_CONSTANT:
-	    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_STR_P(src))) != NULL) {
-	    		Z_STR_P(src) = ptr;
-			} else {
-				zend_string *old = Z_STR_P(src);
+			if (!IS_INTERNED(Z_STR_P(src))) {
+				if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_STR_P(src))) != NULL) {
+					Z_STR_P(src) = ptr;
+				} else {
+					zend_string *old = Z_STR_P(src);
 
-				Z_STR_P(src) = STR_DUP(old, 0);
-				Z_STR_P(src)->gc = old->gc;
-		    	if (bind && Z_REFCOUNT_P(src) > 1) {
-					accel_xlat_set(old, Z_STR_P(src));
+					Z_STR_P(src) = STR_DUP(old, 0);
+					Z_STR_P(src)->gc = old->gc;
+					if (bind && Z_REFCOUNT_P(src) > 1) {
+						accel_xlat_set(old, Z_STR_P(src));
+					}
 				}
 			}
 			break;
@@ -513,7 +520,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = (dtor_func_t) zend_destroy_property_info;
+	ht->pDestructor = zend_destroy_property_info;
 #if ZEND_DEBUG
 //???	ht->inconsistent = 0;
 #endif
@@ -801,15 +808,17 @@ static int zend_hash_unique_copy_mem(HashTable *target, HashTable *source, uniqu
 {
 	uint idx;
 	Bucket *p;
-	void *t;
+	zval *t;
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
-			if ((t = zend_hash_add_mem(target, p->key, Z_PTR(p->val), size)) != NULL) {
+			if ((t = zend_hash_add(target, p->key, &p->val)) != NULL) {
+				Z_PTR_P(t) = emalloc(size);
+				memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
 				if (pCopyConstructor) {
-					pCopyConstructor(t);
+					pCopyConstructor(Z_PTR_P(t));
 				}
 			} else {
 				if (p->key->len > 0 && p->key->val[0] == 0) {
@@ -817,29 +826,33 @@ static int zend_hash_unique_copy_mem(HashTable *target, HashTable *source, uniqu
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
 						/* update closure */
-						if ((t = zend_hash_update_mem(target, p->key, Z_PTR(p->val), size)) != NULL) {
+						if ((t = zend_hash_update(target, p->key, &p->val)) != NULL) {
+							Z_PTR_P(t) = emalloc(size);
+							memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
 							if (pCopyConstructor) {
-								pCopyConstructor(t);
+								pCopyConstructor(Z_PTR_P(t));
 							}
 						}
 					} else {
 						/* ignore and wait for runtime */
 					} 
 #endif
-				} else if (!ignore_dups && (t = zend_hash_find_ptr(target, p->key)) != NULL) {
+				} else if (!ignore_dups && (t = zend_hash_find(target, p->key)) != NULL) {
 					*fail_data = Z_PTR(p->val);
-					*conflict_data = t;
+					*conflict_data = Z_PTR_P(t);
 					return FAILURE;
 				}
 			}
 		} else {
-			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update_mem(target, p->h, Z_PTR(p->val), size)) != NULL) {
+			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update(target, p->h, &p->val)) != NULL) {
+				Z_PTR_P(t) = emalloc(size);
+				memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
 				if (pCopyConstructor) {
-					pCopyConstructor(t);
+					pCopyConstructor(Z_PTR_P(t));
 				}
-			} else if (!ignore_dups && (t = zend_hash_index_find_ptr(target,p->h)) != NULL) {
+			} else if (!ignore_dups && (t = zend_hash_index_find(target,p->h)) != NULL) {
 				*fail_data = Z_PTR(p->val);
-				*conflict_data = t;
+				*conflict_data = Z_PTR_P(t);
 				return FAILURE;
 			}
 		}

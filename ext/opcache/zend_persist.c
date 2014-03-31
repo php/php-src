@@ -186,7 +186,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 	if (op_array->filename) {
 		/* do not free! PHP has centralized filename storage, compiler will free it */
-		zend_accel_memdup_string(op_array->filename);
+		op_array->filename = zend_accel_memdup_string(op_array->filename);
 	}
 
 	if (main_persistent_script) {
@@ -354,9 +354,13 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			for (i = 0; i < op_array->num_args; i++) {
 				if (op_array->arg_info[i].name) {
 //???					zend_accel_store_interned_string(op_array->arg_info[i].name, op_array->arg_info[i].name_len + 1);
+					efree(op_array->arg_info[i].name);
+					op_array->arg_info[i].name = NULL;
 				}
 				if (op_array->arg_info[i].class_name) {
 //???					zend_accel_store_interned_string(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
+					efree(op_array->arg_info[i].class_name);
+					op_array->arg_info[i].class_name = NULL;
 				}
 			}
 		}
@@ -476,7 +480,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 
 		if (ZEND_CE_FILENAME(ce)) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
-			zend_accel_memdup_string(ZEND_CE_FILENAME(ce));
+			ZEND_CE_FILENAME(ce) = zend_accel_memdup_string(ZEND_CE_FILENAME(ce));
 		}
 		if (ZEND_CE_DOC_COMMENT(ce)) {
 			if (ZCG(accel_directives).save_comments) {

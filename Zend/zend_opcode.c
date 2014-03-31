@@ -115,6 +115,9 @@ ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC)
 			destroy_op_array((zend_op_array *) function TSRMLS_CC);
 			break;
 		case ZEND_INTERNAL_FUNCTION:
+			if (function->common.function_name) {
+				STR_RELEASE(function->common.function_name);
+			}
 			/* do nothing */
 			break;
 	}

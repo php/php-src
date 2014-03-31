@@ -2524,9 +2524,14 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals TSRMLS_DC)
 	zend_accel_copy_internal_functions(TSRMLS_C);
 }
 
+static void accel_globals_internal_func_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
+
 static void accel_globals_dtor(zend_accel_globals *accel_globals TSRMLS_DC)
 {
-	accel_globals->function_table.pDestructor = NULL;
+	accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
 	zend_hash_destroy(&accel_globals->function_table);
 }
 
@@ -2724,6 +2729,7 @@ void accel_shutdown(TSRMLS_D)
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (ZCG(accel_directives).interned_strings_buffer) {
 # ifndef ZTS
+		zend_hash_clean(CG(auto_globals));
 		zend_hash_clean(CG(function_table));
 		zend_hash_clean(CG(class_table));
 		zend_hash_clean(EG(zend_constants));
