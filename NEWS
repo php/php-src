@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
     expression). (CVE-2013-7345) (Remi)
+  . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
+    (Remi)
+
 
 - GD:
   . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
