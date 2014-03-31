@@ -2187,16 +2187,14 @@ static void accel_fast_hash_destroy(HashTable *ht)
 	
 	for (idx = 0; idx < ht->nNumUsed; idx++) {	
 		p = ht->arData + idx;
-		if (!p->xData) continue;
-		ht->pDestructor(&p->xData);
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		ht->pDestructor(&p->val);
 	}
 }
 
-static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
+static void accel_fast_zval_dtor(zval *zvalue)
 {
-	zval *zvalue = *zval_ptr;
-
-	if (Z_DELREF_P(zvalue) == 0) {
+	if (Z_REFCOUNTED_P(zvalue) && Z_DELREF_P(zvalue) == 0) {
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 #else
@@ -2207,13 +2205,13 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 					TSRMLS_FETCH();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
+					GC_REMOVE_FROM_BUFFER(Z_ARR_P(zvalue));
 #endif
-					if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
+					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
 						/* break possible cycles */
 						Z_TYPE_P(zvalue) = IS_NULL;
-						zvalue->value.ht->pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
-						accel_fast_hash_destroy(zvalue->value.ht);
+						Z_ARRVAL_P(zvalue)->pDestructor = accel_fast_zval_dtor;
+						accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
 					}
 				}
 				break;
@@ -2222,9 +2220,9 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 					TSRMLS_FETCH();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
+					GC_REMOVE_FROM_BUFFER(Z_OBJ_P(zvalue));
 #endif
-					Z_OBJ_HT_P(zvalue)->del_ref(zvalue TSRMLS_CC);
+					zend_objects_store_del(Z_OBJ_P(zvalue) TSRMLS_CC);
 				}
 				break;
 			case IS_RESOURCE:
@@ -2232,7 +2230,7 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 					TSRMLS_FETCH();
 
 					/* destroy resource */
-					zend_list_delete(zvalue->value.lval);
+					zend_list_delete(Z_RES_P(zvalue));
 				}
 				break;
 			case IS_LONG:
@@ -2248,13 +2246,15 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 	}
 }
 
-static int accel_clean_non_persistent_function(zend_function *function TSRMLS_DC)
+static int accel_clean_non_persistent_function(zval *zv TSRMLS_DC)
 {
+	zend_function *function = Z_PTR_P(zv);
+
 	if (function->type == ZEND_INTERNAL_FUNCTION) {
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
+			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
 			accel_fast_hash_destroy(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
 		}
@@ -2264,11 +2264,13 @@ static int accel_clean_non_persistent_function(zend_function *function TSRMLS_DC
 	}
 }
 
-static int accel_cleanup_function_data(zend_function *function TSRMLS_DC)
+static int accel_cleanup_function_data(zval *zv TSRMLS_DC)
 {
+	zend_function *function = Z_PTR_P(zv);
+
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
-			function->op_array.static_variables->pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
+			function->op_array.static_variables->pDestructor = accel_fast_zval_dtor;
 			accel_fast_hash_destroy(function->op_array.static_variables);
 			function->op_array.static_variables = NULL;
 		}
@@ -2276,9 +2278,9 @@ static int accel_cleanup_function_data(zend_function *function TSRMLS_DC)
 	return 0;
 }
 
-static int accel_clean_non_persistent_class(zend_class_entry **pce TSRMLS_DC)
+static int accel_clean_non_persistent_class(zval *zv TSRMLS_DC)
 {
-	zend_class_entry *ce = *pce;
+	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		return ZEND_HASH_APPLY_STOP;
@@ -2291,17 +2293,15 @@ static int accel_clean_non_persistent_class(zend_class_entry **pce TSRMLS_DC)
 			int i;
 
 			for (i = 0; i < ce->default_static_members_count; i++) {
-				if (ce->static_members_table[i]) {
-					accel_fast_zval_ptr_dtor(&ce->static_members_table[i]);
-					ce->static_members_table[i] = NULL;
-				}
+				accel_fast_zval_dtor(&ce->static_members_table[i]);
+				ZVAL_UNDEF(&ce->static_members_table[i]);
 			}
 			ce->static_members_table = NULL;
 		}
 #else
 		zend_hash_apply(&ce->function_table, (apply_func_t) accel_cleanup_function_data TSRMLS_CC);
 		if (ce->static_members) {
-			ce->static_members->pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
+			ce->static_members->pDestructor = accel_fast_zval_dtor;
 			accel_fast_hash_destroy(ce->static_members);
 			ce->static_members = NULL;
 		}
@@ -2310,12 +2310,14 @@ static int accel_clean_non_persistent_class(zend_class_entry **pce TSRMLS_DC)
 	}
 }
 
-static int accel_clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
+static int accel_clean_non_persistent_constant(zval *zv TSRMLS_DC)
 {
+	zend_constant *c = Z_PTR_P(zv);
+
 	if (c->flags & CONST_PERSISTENT) {
 		return ZEND_HASH_APPLY_STOP;
 	} else {
-		interned_free(c->name);
+		STR_RELEASE(c->name);
 		return ZEND_HASH_APPLY_REMOVE;
 	}
 }
@@ -2323,21 +2325,21 @@ static int accel_clean_non_persistent_constant(zend_constant *c TSRMLS_DC)
 static void zend_accel_fast_shutdown(TSRMLS_D)
 {
 	if (EG(full_tables_cleanup)) {
-		EG(symbol_table).pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
+		EG(symbol_table).ht.pDestructor = accel_fast_zval_dtor;
 	} else {
 		dtor_func_t old_destructor;
 
 		if (EG(objects_store).top > 1 || zend_hash_num_elements(&EG(regular_list)) > 0) {
 			/* We don't have to destroy all zvals if they cannot call any destructors */
 
-		    old_destructor = EG(symbol_table).pDestructor;
-			EG(symbol_table).pDestructor = (dtor_func_t)accel_fast_zval_ptr_dtor;
+		    old_destructor = EG(symbol_table).ht.pDestructor;
+			EG(symbol_table).ht.pDestructor = accel_fast_zval_dtor;
 			zend_try {
-				zend_hash_graceful_reverse_destroy(&EG(symbol_table));
+				zend_hash_graceful_reverse_destroy(&EG(symbol_table).ht);
 			} zend_end_try();
-			EG(symbol_table).pDestructor = old_destructor;
+			EG(symbol_table).ht.pDestructor = old_destructor;
 		}
-		zend_hash_init(&EG(symbol_table), 0, NULL, NULL, 0);
+		zend_hash_init(&EG(symbol_table).ht, 0, NULL, NULL, 0);
 		old_destructor = EG(function_table)->pDestructor;
 		EG(function_table)->pDestructor = NULL;
 		zend_hash_reverse_apply(EG(function_table), (apply_func_t) accel_clean_non_persistent_function TSRMLS_CC);

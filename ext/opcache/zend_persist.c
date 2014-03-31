@@ -354,12 +354,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			for (i = 0; i < op_array->num_args; i++) {
 				if (op_array->arg_info[i].name) {
 //???					zend_accel_store_interned_string(op_array->arg_info[i].name, op_array->arg_info[i].name_len + 1);
-					efree(op_array->arg_info[i].name);
+					efree((char*)op_array->arg_info[i].name);
 					op_array->arg_info[i].name = NULL;
 				}
 				if (op_array->arg_info[i].class_name) {
 //???					zend_accel_store_interned_string(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
-					efree(op_array->arg_info[i].class_name);
+					efree((char*)op_array->arg_info[i].class_name);
 					op_array->arg_info[i].class_name = NULL;
 				}
 			}
