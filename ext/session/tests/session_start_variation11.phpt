@@ -18,18 +18,18 @@ ob_start();
 echo "*** Testing session_start() : variation ***\n";
 
 session_id('test');
-var_dump(session_start(['read_only'=>FALSE]));
+var_dump(session_start(['read_and_close'=>FALSE]));
 var_dump(session_status());
 $_SESSION['abc'] = 123;
 var_dump(session_commit());
 
-var_dump(session_start(['read_only'=>TRUE]));
+var_dump(session_start(['read_and_close'=>TRUE]));
 var_dump(session_status());
 var_dump($_SESSION);
 $_SESSION['abc'] = 456;
 var_dump(session_commit());
 
-var_dump(session_start(['read_only'=>FALSE]));
+var_dump(session_start(['read_and_close'=>FALSE]));
 var_dump(session_status());
 var_dump($_SESSION);
 var_dump(session_destroy());

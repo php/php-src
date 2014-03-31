@@ -2342,9 +2342,9 @@ static PHP_FUNCTION(session_start)
 				case IS_STRING:
 				case IS_BOOL:
 				case IS_LONG:
-					if (!strncmp(key, "read_only", sizeof("read_only")-1)) {
+					if (!strncmp(key, "read_and_close", sizeof("read_and_close")-1)) {
 						convert_to_boolean(*value);
-						PS(read_only) = Z_BVAL_PP(value); /* this does not have to be PS() */
+						PS(read_and_close) = Z_BVAL_PP(value); /* this does not have to be PS() */
 					} else {
 						convert_to_string(*value);
 						if (php_session_start_set_ini(key, key_len, Z_STRVAL_PP(value), Z_STRLEN_PP(value) TSRMLS_CC) == FAILURE) {
@@ -2366,7 +2366,7 @@ static PHP_FUNCTION(session_start)
 		RETURN_FALSE;
 	}
 
-	if (PS(read_only)) {
+	if (PS(read_and_close)) {
 		php_session_close(TSRMLS_C);
 	}
 	RETURN_TRUE;
