@@ -272,7 +272,7 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 		if (ce->default_properties_table) {
 		    int i;
 
-			ADD_SIZE(sizeof(zval*) * ce->default_properties_count);
+			ADD_SIZE(sizeof(zval) * ce->default_properties_count);
 			for (i = 0; i < ce->default_properties_count; i++) {
 				ADD_SIZE(zend_persist_zval_calc(&ce->default_properties_table[i] TSRMLS_CC));
 			}
@@ -280,7 +280,7 @@ static uint zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 		if (ce->default_static_members_table) {
 		    int i;
 
-			ADD_SIZE(sizeof(zval*) * ce->default_static_members_count);
+			ADD_SIZE(sizeof(zval) * ce->default_static_members_count);
 			for (i = 0; i < ce->default_static_members_count; i++) {
 				ADD_SIZE(zend_persist_zval_calc(&ce->default_static_members_table[i] TSRMLS_CC));
 			}

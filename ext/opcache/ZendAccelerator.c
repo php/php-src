@@ -353,7 +353,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len);
 	p->key->gc.refcount = 1;
 	p->key->gc.u.v.type = IS_STRING;
-	p->key->gc.u.v.flags |= IS_STR_INTERNED;
+	p->key->gc.u.v.flags = IS_STR_INTERNED | IS_STR_PERMANENT;
 	p->key->h = str->h;
 	p->key->len = str->len;
 	memcpy(p->key->val, str->val, str->len);

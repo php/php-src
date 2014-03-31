@@ -395,7 +395,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 		if (!p->key) {
 			q->key = NULL;
 		} else {
-			q->key = STR_DUP(q->key, 0);
+			q->key = STR_DUP(p->key, 0);
 		}
 
 		/* Copy data */
@@ -467,7 +467,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		}
 
 		/* Copy data */
-		Z_PTR(q->val) = (void *) emalloc(sizeof(zend_function));
+		ZVAL_PTR(&q->val, (void *) emalloc(sizeof(zend_op_array)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
 		*new_entry = *(zend_op_array*)Z_PTR(p->val);
 
@@ -562,7 +562,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		}
 
 		/* Copy data */
-		Z_PTR(q->val) = (void *) emalloc(sizeof(zend_property_info));
+		ZVAL_PTR(&q->val, (void *) emalloc(sizeof(zend_property_info)));
 		prop_info = Z_PTR(q->val);
 		*prop_info = *(zend_property_info*)Z_PTR(p->val);
 
@@ -636,9 +636,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	if (old_ce->default_properties_table) {
 		int i;
 
-		ce->default_properties_table = emalloc(sizeof(zval*) * old_ce->default_properties_count);
+		ce->default_properties_table = emalloc(sizeof(zval) * old_ce->default_properties_count);
 		for (i = 0; i < old_ce->default_properties_count; i++) {
-			zend_clone_zval(&old_ce->default_properties_table[i], 0 TSRMLS_CC);
+			ZVAL_COPY_VALUE(&ce->default_properties_table[i], &old_ce->default_properties_table[i]);
+			zend_clone_zval(&ce->default_properties_table[i], 0 TSRMLS_CC);
 		}
 	}
 #else
@@ -652,9 +653,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	if (old_ce->default_static_members_table) {
 		int i;
 
-		ce->default_static_members_table = emalloc(sizeof(zval*) * old_ce->default_static_members_count);
+		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
 		for (i = 0; i < old_ce->default_static_members_count; i++) {
-			zend_clone_zval(&old_ce->default_static_members_table[i], 1 TSRMLS_CC);
+			ZVAL_COPY_VALUE(&ce->default_static_members_table[i], &old_ce->default_static_members_table[i]);
+			zend_clone_zval(&ce->default_static_members_table[i], 1 TSRMLS_CC);
 		}
 	}
 	ce->static_members_table = ce->default_static_members_table;
@@ -851,15 +853,15 @@ static int zend_hash_unique_copy_ptr(HashTable *target, HashTable *source, uniqu
 {
 	uint idx;
 	Bucket *p;
-	void *t;
+	zval *t;
 
 	for (idx = 0; idx < source->nNumUsed; idx++) {		
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (p->key) {
-			if ((t = zend_hash_add_ptr(target, p->key, Z_PTR(p->val))) != NULL) {
+			if ((t = zend_hash_add(target, p->key, &p->val)) != NULL) {
 				if (pCopyConstructor) {
-					pCopyConstructor(t);
+					pCopyConstructor(&Z_PTR_P(t));
 				}
 			} else {
 				if (p->key->len > 0 && p->key->val[0] == 0) {
@@ -867,29 +869,29 @@ static int zend_hash_unique_copy_ptr(HashTable *target, HashTable *source, uniqu
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
 						/* update closure */
-						if ((t = zend_hash_update_ptr(target, p->key, Z_PTR(p->val))) != NULL) {
+						if ((t = zend_hash_update(target, p->key, &p->val)) != NULL) {
 							if (pCopyConstructor) {
-								pCopyConstructor(t);
+								pCopyConstructor(&Z_PTR_P(t));
 							}
 						}
 					} else {
 						/* ignore and wait for runtime */
 					} 
 #endif
-				} else if (!ignore_dups && (t = zend_hash_find_ptr(target, p->key)) != NULL) {
+				} else if (!ignore_dups && (t = zend_hash_find(target, p->key)) != NULL) {
 					*fail_data = Z_PTR(p->val);
-					*conflict_data = t;
+					*conflict_data = Z_PTR_P(t);
 					return FAILURE;
 				}
 			}
 		} else {
-			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update_ptr(target, p->h, Z_PTR(p->val))) != NULL) {
+			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update(target, p->h, &p->val)) != NULL) {
 				if (pCopyConstructor) {
-					pCopyConstructor(t);
+					pCopyConstructor(&Z_PTR_P(t));
 				}
-			} else if (!ignore_dups && (t = zend_hash_index_find_ptr(target,p->h)) != NULL) {
+			} else if (!ignore_dups && (t = zend_hash_index_find(target,p->h)) != NULL) {
 				*fail_data = Z_PTR(p->val);
-				*conflict_data = t;
+				*conflict_data = Z_PTR_P(t);
 				return FAILURE;
 			}
 		}

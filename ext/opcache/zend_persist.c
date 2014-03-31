@@ -339,7 +339,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		if ((new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name))) {
 			op_array->function_name = new_name;
 		} else {
-			zend_accel_store_string(op_array->function_name);
+			zend_accel_store_interned_string(op_array->function_name);
 		}
 	}
 
@@ -453,7 +453,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 		if (ce->default_properties_table) {
 		    int i;
 
-			zend_accel_store(ce->default_properties_table, sizeof(zval*) * ce->default_properties_count);
+			zend_accel_store(ce->default_properties_table, sizeof(zval) * ce->default_properties_count);
 			for (i = 0; i < ce->default_properties_count; i++) {
 				zend_persist_zval(&ce->default_properties_table[i] TSRMLS_CC);
 			}
@@ -461,7 +461,7 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 		if (ce->default_static_members_table) {
 		    int i;
 
-			zend_accel_store(ce->default_static_members_table, sizeof(zval*) * ce->default_static_members_count);
+			zend_accel_store(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
 			for (i = 0; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i] TSRMLS_CC);
 			}
@@ -564,15 +564,17 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 	}
 }
 
-static int zend_update_property_info_ce(zend_property_info *prop TSRMLS_DC)
+static int zend_update_property_info_ce(zval *zv TSRMLS_DC)
 {
+	zend_property_info *prop = Z_PTR_P(zv);
+
 	prop->ce = zend_shared_alloc_get_xlat_entry(prop->ce);
 	return 0;
 }
 
-static int zend_update_parent_ce(zend_class_entry **pce TSRMLS_DC)
+static int zend_update_parent_ce(zval *zv TSRMLS_DC)
 {
-	zend_class_entry *ce = *pce;
+	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->parent) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
