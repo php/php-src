@@ -6239,7 +6239,9 @@ void zend_do_indirect_references(znode *result, const znode *num_references, zno
 	if (CG(active_op_array)->scope && CG(active_op_array)->this_var == -1) {
 		zend_string *key = STR_INIT("this", sizeof("this")-1, 0);
 		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key TSRMLS_CC);
-		STR_RELEASE(key);
+		if (CG(active_op_array)->vars[EX_VAR_TO_NUM(CG(active_op_array)->this_var)] != key) {
+			STR_RELEASE(key);
+		}
 	}
 }
 /* }}} */
