@@ -612,7 +612,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				zend_ast_destroy(ast->ast);
 				efree(ast);
 //???
-			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, str_index->gc.u.v.flags TSRMLS_CC)) {
+			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, str_index->gc.u.v.flags & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC)) {
 				char *actual, *str;
 				const char *save = str_index->val;
 				int len;
