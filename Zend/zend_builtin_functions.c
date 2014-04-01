@@ -1015,10 +1015,14 @@ ZEND_FUNCTION(get_object_vars)
 		}
 		if (zend_hash_get_current_key_ex(properties, &key, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
-				zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
 				/* Not separating references */
 				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				add_assoc_zval_ex(return_value, prop_name, prop_len, value);
+				if (key->val[0] == 0) {
+					zend_unmangle_property_name_ex(key->val, key->len, &class_name, &prop_name, (int*) &prop_len);
+					zend_hash_str_update(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+				} else {
+					zend_hash_update(Z_ARRVAL_P(return_value), key, value);
+				}
 			}
 		}
 		zend_hash_move_forward_ex(properties, &pos);
