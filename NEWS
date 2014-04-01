@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
     (Remi)
 
+- XSL:
+  . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
+    when loaded with "file://"). (Anatol)
+
 ?? ??? 2014, PHP 5.4.27
 
 - Core:
