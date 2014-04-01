@@ -2021,7 +2021,7 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 			if (Z_TYPE(name) != IS_STRING) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
 			}
-			Z_STR(name) = STR_DUP(Z_STR(name), 0);
+			Z_STR(name) = STR_COPY(Z_STR(name));
 			FREE_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
 			last_op->op2.constant =
 				zend_add_func_name_literal(CG(active_op_array), &name TSRMLS_CC);
@@ -7233,7 +7233,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	}
 
 	if (case_sensitive) {
-		lookup_name = STR_DUP(Z_STR_P(name), 0);
+		lookup_name = STR_COPY(Z_STR_P(name));
 	} else {
 		lookup_name = STR_ALLOC(Z_STRLEN_P(name), 0);
 		zend_str_tolower_copy(lookup_name->val, Z_STRVAL_P(name), Z_STRLEN_P(name));

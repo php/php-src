@@ -276,7 +276,7 @@ static zend_function *_copy_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 		zend_function *copy_fptr;
 		copy_fptr = emalloc(sizeof(zend_function));
 		memcpy(copy_fptr, fptr, sizeof(zend_function));
-		copy_fptr->internal_function.function_name = STR_DUP(fptr->internal_function.function_name, 0);
+		copy_fptr->internal_function.function_name = STR_COPY(fptr->internal_function.function_name);
 		return copy_fptr;
 	} else {
 		/* no copy needed */

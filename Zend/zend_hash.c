@@ -1414,7 +1414,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str
 		p = ht->arData + idx;
 		if (p->key) {
 			if (duplicate) {
-				*str_index = STR_DUP(p->key, 0);
+				*str_index = STR_COPY(p->key);
 			} else {
 				*str_index = p->key;
 			}

@@ -49,7 +49,8 @@ static void copy_zend_constant(zval *zv)
 
 	Z_PTR_P(zv) = malloc(sizeof(zend_constant)/*, c->flags & CONST_PERSISTENT*/);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
-	c->name = STR_DUP(c->name, c->flags & CONST_PERSISTENT);
+//???	c->name = STR_DUP(c->name, c->flags & CONST_PERSISTENT);
+	c->name = STR_COPY(c->name);
 //???	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 //???	}

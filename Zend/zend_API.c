@@ -1083,7 +1083,7 @@ static int zend_merge_property(zval *value TSRMLS_DC, int num_args, va_list args
 		zend_object_handlers *obj_ht = va_arg(args, zend_object_handlers *);
 		zval member;
 
-		ZVAL_STR(&member, STR_DUP(hash_key->key, 0));
+		ZVAL_STR(&member, STR_COPY(hash_key->key));
 		obj_ht->write_property(obj, &member, value, 0 TSRMLS_CC);
 		zval_ptr_dtor(&member);
 	}
