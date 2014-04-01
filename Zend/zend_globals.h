@@ -141,6 +141,7 @@ struct _zend_compiler_globals {
 	zend_stack context_stack;
 
 	zend_string *empty_string;
+	zend_string *one_char_string[256];
 
 	HashTable interned_strings;
 

@@ -1225,7 +1225,7 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 				zval tmp;
 				zend_string *str;
 
-				if (Z_TYPE_P(dim) != IS_LONG) {
+				if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 					switch(Z_TYPE_P(dim)) {
 						/* case IS_LONG: */
 						case IS_STRING:
@@ -1253,13 +1253,19 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 					dim = &tmp;
 				}
 
-				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+				if (UNEXPECTED(Z_LVAL_P(dim) < 0) || UNEXPECTED(Z_STRLEN_P(container) <= Z_LVAL_P(dim))) {
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
 					}
 					str = STR_EMPTY_ALLOC();
 				} else {
-					str = STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0);
+					zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+					
+					if (CG(one_char_string)[c]) {
+						str = CG(one_char_string)[c];
+					} else {
+						str = STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0);
+					}
 				}
 				ZVAL_STR(result, str);
 				return;

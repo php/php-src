@@ -382,6 +382,12 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 #if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
 	/* empty string */
 	CG(empty_string) = accel_new_interned_string(CG(empty_string) TSRMLS_CC);
+	for (j = 0; j < 256; j++) {
+		char s[2];
+		s[0] = j;
+		s[1] = 0;
+		CG(one_char_string)[j] = accel_new_interned_string(STR_INIT(s, 1, 0) TSRMLS_CC);
+	}
 #endif
 
 	/* function table hash keys */
