@@ -1669,7 +1669,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		filename = STR_EMPTY_ALLOC();
 	}
 
-	dirname = STR_DUP(filename, 0);
+	dirname = STR_INIT(filename->val, filename->len, 0);
 	zend_dirname(dirname->val, dirname->len);
 
 	if (strcmp(dirname->val, ".") == 0) {

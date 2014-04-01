@@ -741,7 +741,7 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (IS_INTERNED(Z_STR_P(str))) {
-		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
+		Z_STR_P(str) = STR_INIT(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 	}
 
 	if (Z_TYPE_P(value) != IS_STRING) {

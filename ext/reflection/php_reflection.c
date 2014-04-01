@@ -575,14 +575,13 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 				zend_string *prop_name;
 				ulong index;
 
-				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, 1, &pos) == HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
 					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
 						if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 							count++;
 							_property_string(&dyn, NULL, prop_name->val, sub_indent.buf->val TSRMLS_CC);
 						}
 					}
-					efree(prop_name);
 				}
 				zend_hash_move_forward_ex(properties, &pos);
 			}

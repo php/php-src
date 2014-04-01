@@ -125,11 +125,11 @@ static zend_always_inline zend_string *zend_str_copy(zend_string *s)
 
 static zend_always_inline zend_string *zend_str_dup(zend_string *s, int persistent)
 {
-//???	if (IS_INTERNED(s)) {
-//???		return s;
-//???	} else {
+	if (IS_INTERNED(s)) {
+		return s;
+	} else {
 		return STR_INIT(s->val, s->len, persistent);
-//???	}
+	}
 }
 
 static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len, int persistent)

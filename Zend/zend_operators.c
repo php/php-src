@@ -1154,10 +1154,11 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 			zval op1_copy = *op1;
 
 			Z_TYPE_P(result) = IS_STRING;
-			Z_STR_P(result) = STR_DUP(Z_STR(op1_copy), 0);
+			Z_STR_P(result) = STR_ALLOC(Z_STRLEN(op1_copy), 0);
 			for (i = 0; i < Z_STRLEN(op1_copy); i++) {
 				Z_STRVAL_P(result)[i] = ~Z_STRVAL(op1_copy)[i];
 			}
+			Z_STRVAL_P(result)[i] = 0;
 			return SUCCESS;
 		}
 		default:
@@ -1187,10 +1188,11 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 			shorter = op1;
 		}
 
-		str = STR_DUP(Z_STR_P(longer), 0);
+		str = STR_ALLOC(Z_STRLEN_P(longer), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] |= Z_STRVAL_P(shorter)[i];
+			str->val[i] = Z_STRVAL_P(longer)[i] | Z_STRVAL_P(shorter)[i];
 		}
+		memcpy(str->val + i, Z_STRVAL_P(longer) + i, Z_STRLEN_P(longer) - i + 1);
 		if (result==op1) {
 			STR_RELEASE(Z_STR_P(result));
 		}
@@ -1231,10 +1233,11 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			shorter = op1;
 		}
 
-		str = STR_DUP(Z_STR_P(shorter), 0);
+		str = STR_ALLOC(Z_STRLEN_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] &= Z_STRVAL_P(longer)[i];
+			str->val[i] = Z_STRVAL_P(shorter)[i] & Z_STRVAL_P(longer)[i];
 		}
+		str->val[i] = 0;
 		if (result==op1) {
 			STR_RELEASE(Z_STR_P(result));
 		}
@@ -1275,10 +1278,11 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			shorter = op1;
 		}
 
-		str = STR_DUP(Z_STR_P(shorter), 0);
+		str = STR_ALLOC(Z_STRLEN_P(shorter), 0);
 		for (i = 0; i < Z_STRLEN_P(shorter); i++) {
-			str->val[i] ^= Z_STRVAL_P(longer)[i];
+			str->val[i] = Z_STRVAL_P(shorter)[i] ^ Z_STRVAL_P(longer)[i];
 		}
+		str->val[i] = 0;
 		if (result==op1) {
 			STR_RELEASE(Z_STR_P(result));
 		}
@@ -1872,10 +1876,10 @@ static void increment_string(zval *str) /* {{{ */
 	}
 
 	if (IS_INTERNED(Z_STR_P(str))) {
-		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
+		Z_STR_P(str) = STR_INIT(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 	} else if (Z_REFCOUNT_P(str) > 1) {
 		Z_DELREF_P(str);
-		Z_STR_P(str) = STR_DUP(Z_STR_P(str), 0);
+		Z_STR_P(str) = STR_INIT(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 	} else {
 		STR_FORGET_HASH_VAL(Z_STR_P(str));
 	}

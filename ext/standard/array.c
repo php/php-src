@@ -2865,7 +2865,7 @@ PHP_FUNCTION(array_change_key_case)
 				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 				break;
 			case HASH_KEY_IS_STRING:
-				new_key = STR_DUP(string_key, 0);
+				new_key = STR_INIT(string_key->val, string_key->len, 0);
 				if (change_to_upper) {
 					php_strtoupper(new_key->val, new_key->len);
 				} else {
