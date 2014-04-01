@@ -111,6 +111,7 @@ static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
 
 static void zend_persist_zval(zval *z TSRMLS_DC)
 {
+	zend_uchar flags;
 	void *new_ptr;
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -120,7 +121,9 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
+			flags = Z_STR_P(z)->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			zend_accel_store_interned_string(Z_STR_P(z));
+			Z_STR_P(z)->gc.u.v.flags |= flags;
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:

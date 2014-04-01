@@ -73,7 +73,9 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 
 		/* persist bucket and key */
 		if (p->key) {
+			zend_uchar flags = p->key->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(p->key, 1);
+			p->key->gc.u.v.flags |= flags;
 		}
 
 		ADD_SIZE(pPersistElement(&p->val TSRMLS_CC));
@@ -105,6 +107,7 @@ static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 
 static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 {
+	zend_uchar flags;
 	uint size;
 	START_SIZE();
 
@@ -115,7 +118,9 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
+			flags = Z_STR_P(z)->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
+			Z_STR_P(z)->gc.u.v.flags |= flags;
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
