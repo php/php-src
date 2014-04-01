@@ -403,6 +403,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			q->key = NULL;
 		} else {
 			q->key = STR_DUP(p->key, 0);
+			q->key->gc.u.v.flags = p->key->gc.u.v.flags;
 		}
 
 		/* Copy data */
@@ -646,7 +647,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		ce->default_properties_table = emalloc(sizeof(zval) * old_ce->default_properties_count);
 		for (i = 0; i < old_ce->default_properties_count; i++) {
 			ZVAL_COPY_VALUE(&ce->default_properties_table[i], &old_ce->default_properties_table[i]);
-			zend_clone_zval(&ce->default_properties_table[i], 0 TSRMLS_CC);
+			zend_clone_zval(&ce->default_properties_table[i], 1 TSRMLS_CC);
 		}
 	}
 #else
