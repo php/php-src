@@ -105,6 +105,10 @@ PHP                                                                        NEWS
 - SQLite:
   . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
 
+- XSL:
+  . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
+    when loaded with "file://"). (Anatol)
+
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2014, PHP 5.6.0 Alpha 3
 
