@@ -1433,7 +1433,7 @@ PHP_FUNCTION(extract)
 				}
 			} else {
 				ZVAL_DUP(&data, entry);
-				zend_set_local_var(Z_STRVAL(final_name), Z_STRLEN(final_name), &data, 1 TSRMLS_CC);
+				zend_set_local_var(Z_STR(final_name), &data, 1 TSRMLS_CC);
 			}
 			count++;
 		}
@@ -2685,13 +2685,13 @@ PHP_FUNCTION(array_column)
 			Z_ADDREF_P(zcolval);
 		}
 		if (zkeyval && Z_TYPE_P(zkeyval) == IS_STRING) {
-			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
+			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 		} else if (zkeyval && Z_TYPE_P(zkeyval) == IS_OBJECT) {
 			SEPARATE_ZVAL(zkeyval);
 			convert_to_string(zkeyval);
-			add_assoc_zval(return_value, Z_STRVAL_P(zkeyval), zcolval);
+			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(zkeyval), zcolval);
 		} else {
 			add_next_index_zval(return_value, zcolval);
 		}
@@ -4492,8 +4492,7 @@ PHP_FUNCTION(array_map)
 			add_next_index_zval(return_value, &result);
 		} else {
 			if (key_type == HASH_KEY_IS_STRING) {
-//???
-				add_assoc_zval_ex(return_value, str_key->val, str_key->len, &result);
+				zend_hash_update(Z_ARRVAL_P(return_value), str_key, &result);
 			} else {
 				add_index_zval(return_value, num_key, &result);
 			}
@@ -4588,8 +4587,7 @@ PHP_FUNCTION(array_chunk)
 			key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &str_key, &num_key, 0, &pos);
 			switch (key_type) {
 				case HASH_KEY_IS_STRING:
-//???
-					add_assoc_zval_ex(&chunk, str_key->val, str_key->len, entry);
+					zend_hash_update(Z_ARRVAL(chunk), str_key, entry);
 					break;
 				default:
 					add_index_zval(&chunk, num_key, entry);
@@ -4661,8 +4659,7 @@ PHP_FUNCTION(array_combine)
 			}
 
 			zval_add_ref(entry_values);
-//???
-			add_assoc_zval_ex(return_value, Z_STRVAL_P(key_ptr), Z_STRLEN_P(key_ptr), entry_values);
+			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(key_ptr), entry_values);
 
 			if (key_ptr != entry_keys) {
 				zval_dtor(&key);

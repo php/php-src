@@ -4592,7 +4592,7 @@ static int add_config_entry_cb(zval *entry TSRMLS_DC, int num_args, va_list args
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
 		array_init(&tmp);
 		zend_hash_apply_with_arguments(Z_ARRVAL_P(entry) TSRMLS_CC, (apply_func_args_t) add_config_entry_cb, 1, tmp);
-		add_assoc_zval_ex(retval, hash_key->key->val, hash_key->key->len, &tmp);
+		zend_hash_update(Z_ARRVAL_P(retval), hash_key->key, &tmp);
 	}
 	return 0;
 }
@@ -5926,8 +5926,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			ZVAL_DUP(&element, arg2);
 
 			if (arg3 && Z_STRLEN_P(arg3) > 0) {
-//???
-				add_assoc_zval_ex(find_hash, Z_STRVAL_P(arg3), Z_STRLEN_P(arg3), &element);
+				zend_symtable_update(Z_ARRVAL_P(find_hash), Z_STR_P(arg3), &element);
 			} else {
 				add_next_index_zval(find_hash, &element);
 			}

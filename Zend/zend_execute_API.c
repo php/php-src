@@ -1762,7 +1762,40 @@ ZEND_API void zend_detach_symbol_table(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_set_local_var(const char *name, int len, zval *value, int force TSRMLS_DC) /* {{{ */
+ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS_DC) /* {{{ */
+{
+	if (!EG(active_symbol_table)) {
+		int i;
+		zend_execute_data *execute_data = EG(current_execute_data);
+		zend_op_array *op_array = execute_data->op_array;
+		zend_ulong h = STR_HASH_VAL(name);
+
+		if (op_array) {
+			for (i = 0; i < op_array->last_var; i++) {
+				if (op_array->vars[i]->h == h &&
+				    op_array->vars[i]->len == name->len &&
+				    memcmp(op_array->vars[i]->val, name->val, name->len) == 0) {
+					ZVAL_COPY_VALUE(EX_VAR_NUM(i), value);
+					return SUCCESS;
+				}
+			}
+		}
+		if (force) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+			if (EG(active_symbol_table)) {
+				zend_hash_update(&EG(active_symbol_table)->ht, name, value);
+			}
+		} else {
+			return FAILURE;
+		}
+	} else {
+		return (zend_hash_update_ind(&EG(active_symbol_table)->ht, name, value) != NULL) ? SUCCESS : FAILURE;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int force TSRMLS_DC) /* {{{ */
 {
 	if (!EG(active_symbol_table)) {
 		int i;

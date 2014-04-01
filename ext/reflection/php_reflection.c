@@ -3387,8 +3387,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
 		}
 
-//???		add_assoc_zval(return_value, key, &prop_copy);
-		add_assoc_zval(return_value, key->val, &prop_copy);
+		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
 	}
 }
 /* }}} */
@@ -4369,8 +4368,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
 			zend_reflection_class_factory(ce->interfaces[i], &interface TSRMLS_CC);
-//???
-			add_assoc_zval_ex(return_value, ce->interfaces[i]->name->val, ce->interfaces[i]->name->len, &interface);
+			zend_hash_update(Z_ARRVAL_P(return_value), ce->interfaces[i]->name, &interface);
 		}
 	}
 }
@@ -4416,8 +4414,7 @@ ZEND_METHOD(reflection_class, getTraits)
 	for (i=0; i < ce->num_traits; i++) {
 		zval trait;
 		zend_reflection_class_factory(ce->traits[i], &trait TSRMLS_CC);
-//???
-		add_assoc_zval_ex(return_value, ce->traits[i]->name->val, ce->traits[i]->name->len, &trait);
+		zend_hash_update(Z_ARRVAL_P(return_value), ce->traits[i]->name, &trait);
 	}
 }
 /* }}} */
@@ -5249,8 +5246,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 		if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 			&& fptr->internal_function.module == module) {
 			reflection_function_factory(fptr, NULL, &function TSRMLS_CC);
-//???
-			add_assoc_zval(return_value, fptr->common.function_name->val, &function);
+			zend_hash_update(Z_ARRVAL_P(return_value), fptr->common.function_name, &function);
 		}
 		zend_hash_move_forward_ex(CG(function_table), &iterator);
 	}
@@ -5266,9 +5262,7 @@ static int _addconstant(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 
 	if (number == constant->module_number) {
 		ZVAL_DUP(&const_val, &constant->value);
-//???		INIT_PZVAL(const_val);
-
-		add_assoc_zval_ex(retval, constant->name->val, constant->name->len, &const_val);
+		zend_hash_update(Z_ARRVAL_P(retval), constant->name, &const_val);
 	}
 	return 0;
 }
@@ -5327,19 +5321,19 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 /* }}} */
 
 /* {{{ add_extension_class */
-static int add_extension_class(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int add_extension_class(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
+	zend_class_entry *ce = Z_PTR_P(zv);
 	zval *class_array = va_arg(args, zval*), zclass;
 	struct _zend_module_entry *module = va_arg(args, struct _zend_module_entry*);
 	int add_reflection_class = va_arg(args, int);
 
-	if (((*pce)->type == ZEND_INTERNAL_CLASS) && (*pce)->info.internal.module && !strcasecmp((*pce)->info.internal.module->name, module->name)) {
+	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
 		if (add_reflection_class) {
-			zend_reflection_class_factory(*pce, &zclass TSRMLS_CC);
-//???
-			add_assoc_zval_ex(class_array, (*pce)->name->val, (*pce)->name->len, &zclass);
+			zend_reflection_class_factory(ce, &zclass TSRMLS_CC);
+			zend_hash_update(Z_ARRVAL_P(class_array), ce->name, &zclass);
 		} else {
-			add_next_index_str(class_array, STR_COPY((*pce)->name));
+			add_next_index_str(class_array, STR_COPY(ce->name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;

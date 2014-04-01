@@ -3948,8 +3948,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key,
 												&num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
-//???
-					add_assoc_zval_ex(return_value, string_key->val, string_key->len, &result);
+					zend_hash_update(Z_ARRVAL_P(return_value), string_key, &result);
 					break;
 
 				case HASH_KEY_IS_LONG:

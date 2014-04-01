@@ -1202,7 +1202,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 					add_index_zval(return_value, Z_LVAL(element->inf), &retval);
 					break;
 				case IS_STRING:
-					add_assoc_zval_ex(return_value, Z_STRVAL(element->inf), Z_STRLEN(element->inf), &retval);
+					zend_hash_update(Z_ARRVAL_P(return_value), Z_STR(element->inf), &retval);
 					break;
 				default:
 					zval_ptr_dtor(&retval);

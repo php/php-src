@@ -1885,7 +1885,7 @@ static int add_constant_info(zval *item, void *arg TSRMLS_DC)
 	}
 
 	ZVAL_DUP(&const_val, &constant->value);
-	add_assoc_zval_ex(name_array, constant->name->val, constant->name->len, &const_val);
+	zend_hash_update(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
 
@@ -1969,7 +1969,7 @@ ZEND_FUNCTION(get_defined_constants)
 
 			ZVAL_DUP_DEREF(&const_val, &val->value);
 
-			add_assoc_zval_ex(&modules[module_number], val->name->val, val->name->len, &const_val);
+			zend_hash_update(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}

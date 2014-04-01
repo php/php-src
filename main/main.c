@@ -859,7 +859,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			(Z_TYPE(EG(user_error_handler)) == IS_UNDEF || !(EG(user_error_handler_error_reporting) & type))) {
 		zval tmp;
 		ZVAL_STRINGL(&tmp, buffer, buffer_len);
-		if (zend_set_local_var("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+		if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
 			zval_ptr_dtor(&tmp);
 		}
 	}
@@ -1192,7 +1192,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (EG(active_symbol_table)) {
 			zval tmp;
 			ZVAL_STRINGL(&tmp, buffer, buffer_len);
-			if (zend_set_local_var("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
+			if (zend_set_local_var_str("php_errormsg", sizeof("php_errormsg")-1, &tmp, 0 TSRMLS_CC) == FAILURE) {
 				zval_ptr_dtor(&tmp);
 			}
 		}
