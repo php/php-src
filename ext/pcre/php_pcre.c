@@ -1231,7 +1231,11 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	zend_string *result;
 
 	/* Make sure we're dealing with strings. */	
-	convert_to_string_ex(subject);
+	if (Z_TYPE_P(subject) != IS_STRING) {
+		SEPARATE_ZVAL(subject);
+		convert_to_string_ex(subject);
+	}
+
 	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
 //???	ZVAL_STRINGL(&empty_replace, "", 0, 0);
 	ZVAL_EMPTY_STRING(&empty_replace);
@@ -1327,8 +1331,8 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		RETURN_FALSE;
 	}
 
-	SEPARATE_ZVAL(replace);
 	if (Z_TYPE_P(replace) != IS_ARRAY && (Z_TYPE_P(replace) != IS_OBJECT || !is_callable_replace)) {
+		SEPARATE_ZVAL(replace);
 		convert_to_string_ex(replace);
 	}
 	if (is_callable_replace) {
@@ -1341,16 +1345,15 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		STR_RELEASE(callback_name);
 	}
 
-	SEPARATE_ZVAL(regex);
-	SEPARATE_ZVAL(subject);
-
 	if (ZEND_NUM_ARGS() > 3) {
 		limit_val = limit;
 	}
 		
-	if (Z_TYPE_P(regex) != IS_ARRAY)
+	if (Z_TYPE_P(regex) != IS_ARRAY) {
+		SEPARATE_ZVAL(regex);
 		convert_to_string_ex(regex);
-	
+	}
+		
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
@@ -1359,7 +1362,6 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
-			SEPARATE_ZVAL(subject_entry);
 			old_replace_count = replace_count;
 			if ((result = php_replace_in_subject(regex, replace, subject_entry, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
