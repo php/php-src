@@ -3520,11 +3520,12 @@ ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
+	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	is_equal_function(EX_VAR(opline->result.var),
+	ZVAL_BOOL(result, fast_equal_function(result,
 				 GET_OP1_ZVAL_PTR(BP_VAR_R),
-				 GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC);
+				 GET_OP2_ZVAL_PTR(BP_VAR_R) TSRMLS_CC));
 
 	FREE_OP2();
 	CHECK_EXCEPTION();
