@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-20 Mar 2014, PHP 5.5.11RC1
+03 Apr 2014, PHP 5.5.11
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - FPM:
   . Added clear_env configuration directive to disable clearenv() call.
   (Github PR# 598, Paul Annesley)
+
+- Fileinfo:
+  . Fixed bug #66946 (fileinfo: extensive backtracking in awk rule regular
+    expression). (CVE-2013-7345) (Remi)
 
 - GD:
   . Fixed bug #66714 (imageconvolution breakage). (Brad Daily)
