@@ -242,16 +242,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
-	 				efree((char*)ce->trait_aliases[i]->trait_method->method_name);
+	 				STR_RELEASE(ce->trait_aliases[i]->trait_method->method_name);
 				}
 				if (ce->trait_aliases[i]->trait_method->class_name) {
-	 				efree((char*)ce->trait_aliases[i]->trait_method->class_name);
+	 				STR_RELEASE(ce->trait_aliases[i]->trait_method->class_name);
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
 			
 			if (ce->trait_aliases[i]->alias) {
-				efree((char*)ce->trait_aliases[i]->alias);
+				STR_RELEASE(ce->trait_aliases[i]->alias);
 			}
 			
 			efree(ce->trait_aliases[i]);
@@ -265,8 +265,8 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		size_t i = 0;
 		
 		while (ce->trait_precedences[i]) {
-			efree((char*)ce->trait_precedences[i]->trait_method->method_name);
-			efree((char*)ce->trait_precedences[i]->trait_method->class_name);
+			STR_RELEASE(ce->trait_precedences[i]->trait_method->method_name);
+			STR_RELEASE(ce->trait_precedences[i]->trait_method->class_name);
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
