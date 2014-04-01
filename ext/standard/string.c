@@ -3798,17 +3798,27 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 {
 	zval		*search_entry,
 				*replace_entry = NULL,
-				 temp_result;
+				 temp_result,
+				 tmp_subject;
 	char		*replace_value = NULL;
 	int			 replace_len = 0;
 
 	/* Make sure we're dealing with strings. */
-	convert_to_string_ex(subject);
-	Z_TYPE_P(result) = IS_STRING;
+	if (Z_ISREF_P(subject)) {
+		subject = Z_REFVAL_P(subject);
+	}
+	ZVAL_UNDEF(&tmp_subject);
+	if (Z_TYPE_P(subject) != IS_STRING) {
+		ZVAL_DUP(&tmp_subject, subject);
+		convert_to_string_ex(&tmp_subject);
+		subject = &tmp_subject;
+	}
 	if (Z_STRLEN_P(subject) == 0) {
+		zval_ptr_dtor(&tmp_subject);
 		ZVAL_EMPTY_STRING(result);
 		return;
 	}
+	Z_TYPE_P(result) = IS_STRING;
 
 	/* If search is an array */
 	if (Z_TYPE_P(search) == IS_ARRAY) {
@@ -3876,6 +3886,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 			Z_STR_P(result) = Z_STR(temp_result);
 
 			if (Z_STRLEN_P(result) == 0) {
+				zval_ptr_dtor(&tmp_subject);
 				return;
 			}
 
@@ -3899,6 +3910,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 			ZVAL_DUP(result, subject);
 		}
 	}
+	zval_ptr_dtor(&tmp_subject);
 }
 /* }}} */
 
@@ -3917,15 +3929,16 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		return;
 	}
 
-	SEPARATE_ZVAL(search);
-	SEPARATE_ZVAL(replace);
-	SEPARATE_ZVAL(subject);
-
 	/* Make sure we're dealing with strings and do the replacement. */
 	if (Z_TYPE_P(search) != IS_ARRAY) {
+		SEPARATE_ZVAL(search);
 		convert_to_string_ex(search);
-		convert_to_string_ex(replace);
+		if (Z_TYPE_P(replace) != IS_STRING) {
+			convert_to_string_ex(replace);
+			SEPARATE_ZVAL(replace);
+		}
 	} else if (Z_TYPE_P(replace) != IS_ARRAY) {
+		SEPARATE_ZVAL(replace);
 		convert_to_string_ex(replace);
 	}
 
@@ -3938,7 +3951,6 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		   and add the result to the return_value array. */
 		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
 			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
-				SEPARATE_ZVAL(subject_entry);
 				php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity, (argc > 3) ? &count : NULL);
 			} else {
 				Z_ADDREF_P(subject_entry);

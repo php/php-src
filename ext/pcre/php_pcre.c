@@ -1226,14 +1226,20 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	zval		*regex_entry,
 				*replace_entry = NULL,
 				*replace_value,
+				 tmp_subject,
 				 empty_replace;
 	zend_string	*subject_value;
 	zend_string *result;
 
-	/* Make sure we're dealing with strings. */	
+	/* Make sure we're dealing with strings. */
+	if (Z_ISREF_P(subject)) {
+		subject = Z_REFVAL_P(subject);
+	}
+	ZVAL_UNDEF(&tmp_subject);
 	if (Z_TYPE_P(subject) != IS_STRING) {
-		SEPARATE_ZVAL(subject);
-		convert_to_string_ex(subject);
+		ZVAL_DUP(&tmp_subject, subject);
+		convert_to_string_ex(&tmp_subject);
+		subject = &tmp_subject;
 	}
 
 	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
@@ -1284,12 +1290,14 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 				subject_value = result;
 			} else {
 				STR_RELEASE(subject_value);
+				zval_ptr_dtor(&tmp_subject);
 				return NULL;
 			}
 
 			zend_hash_move_forward(Z_ARRVAL_P(regex));
 		}
 
+		zval_ptr_dtor(&tmp_subject);
 		return subject_value;
 	} else {
 		result = php_pcre_replace(Z_STR_P(regex),
@@ -1299,6 +1307,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 								  is_callable_replace,
 								  limit,
 								  replace_count TSRMLS_CC);
+		zval_ptr_dtor(&tmp_subject);
 		return result;
 	}
 }
