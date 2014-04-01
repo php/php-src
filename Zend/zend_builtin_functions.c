@@ -1862,10 +1862,9 @@ static int add_extension_info(zval *item, void *arg TSRMLS_DC)
 	return 0;
 }
 
-static int add_zendext_info(zval *item, void *arg TSRMLS_DC)
+static int add_zendext_info(zend_extension *ext, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
-	zend_extension *ext = (zend_extension*)Z_PTR_P(item);
 	add_next_index_string(name_array, ext->name, 1);
 	return 0;
 }
