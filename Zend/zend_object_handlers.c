@@ -269,7 +269,7 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_always_inline struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zval *member, int silent, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zend_always_inline struct _zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zend_string *member, int silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	zend_property_info *scope_property_info;
@@ -279,9 +279,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		return property_info;
 	}
 
-	if (UNEXPECTED(Z_STRVAL_P(member)[0] == '\0')) {
+	if (UNEXPECTED(member->val[0] == '\0')) {
 		if (!silent) {
-			if (Z_STRLEN_P(member) == 0) {
+			if (member->len == 0) {
 				zend_error_noreturn(E_ERROR, "Cannot access empty property");
 			} else {
 				zend_error_noreturn(E_ERROR, "Cannot access property started with '\\0'");
@@ -290,7 +290,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		return NULL;
 	}
 	property_info = NULL;
-	if ((property_info = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(member))) != NULL) {
+	if ((property_info = zend_hash_find_ptr(&ce->properties_info, member)) != NULL) {
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_SHADOW) != 0)) {
 			/* if it's a shadow - go to access it's private */
 			property_info = NULL;
@@ -304,7 +304,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 					 */
 				} else {
 					if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0) && !silent) {
-						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, Z_STRVAL_P(member));
+						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 					}
 					if (key) {
 						CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, property_info);
@@ -320,7 +320,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	if (EG(scope) != ce
 		&& EG(scope)
 		&& is_derived_class(ce, EG(scope))
-		&& (scope_property_info = zend_hash_find_ptr(&EG(scope)->properties_info, Z_STR_P(member))) != NULL
+		&& (scope_property_info = zend_hash_find_ptr(&EG(scope)->properties_info, member)) != NULL
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
 		if (key) {
 			CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, scope_property_info);
@@ -330,7 +330,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		if (UNEXPECTED(denied_access != 0)) {
 			/* Information was available, but we were denied access.  Error out. */
 			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, Z_STRVAL_P(member));
+				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, member->val);
 			}
 			return NULL;
 		} else {
@@ -341,7 +341,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		}
 	} else {
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
-		EG(std_property_info).name = Z_STR_P(member);
+		EG(std_property_info).name = member;
 		EG(std_property_info).ce = ce;
 		EG(std_property_info).offset = -1;
 		property_info = &EG(std_property_info);
@@ -352,21 +352,26 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC) /* {{{ */
 {
-	return zend_get_property_info_quick(ce, member, silent, NULL TSRMLS_CC);
+	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, NULL TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_info_name TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
-	const char *class_name, *prop_name;
-	zval member;
+	const char *class_name = NULL;
+	const char *prop_name;
+	zend_string *member;
 	int prop_name_len;
 
-	zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
-	ZVAL_STRINGL(&member, prop_name, prop_name_len);
-	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
-	zval_dtor(&member);
+	if (prop_info_name->val[0] == 0) {
+		zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
+		member = STR_INIT(prop_name, prop_name_len, 0);
+	} else {
+		member = STR_COPY(prop_info_name);
+	}
+	property_info = zend_get_property_info_quick(zobj->ce, member, 1, NULL TSRMLS_CC);
+	STR_RELEASE(member);
 	if (!property_info) {
 		return FAILURE;
 	}
@@ -444,7 +449,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, member, silent || (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), silent || (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -554,7 +559,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 		key = NULL;
 	}
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__set != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (zobj->ce->__set != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -768,7 +773,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -831,7 +836,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 		key = NULL;
 	}
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (zobj->ce->__unset != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -1419,7 +1424,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 		key = NULL;
 	}
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, 1, key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), 1, key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
