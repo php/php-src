@@ -86,7 +86,7 @@ static void zend_hash_do_resize(HashTable *ht);
 		if (packed) { \
 			(ht)->flags |= HASH_FLAG_PACKED; \
 		} else { \
-			(ht)->arHash = (zend_uint*) pecalloc((ht)->nTableSize, sizeof(zend_uint), (ht)->flags & HASH_FLAG_PERSISTENT);	\
+			(ht)->arHash = (zend_uint*) safe_pemalloc((ht)->nTableSize, sizeof(zend_uint), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
 			memset((ht)->arHash, INVALID_IDX, (ht)->nTableSize * sizeof(zend_uint));	\
 		} \
 		(ht)->nTableMask = (ht)->nTableSize - 1;						\
@@ -149,7 +149,7 @@ ZEND_API void zend_hash_packed_to_hash(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->flags &= ~HASH_FLAG_PACKED;
-	ht->arHash = (zend_uint*) pecalloc(ht->nTableSize, sizeof(zend_uint), ht->flags & HASH_FLAG_PERSISTENT);
+	ht->arHash = (zend_uint*) safe_pemalloc(ht->nTableSize, sizeof(zend_uint), 0, ht->flags & HASH_FLAG_PERSISTENT);
 	zend_hash_rehash(ht);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
