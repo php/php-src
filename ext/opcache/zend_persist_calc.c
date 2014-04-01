@@ -135,7 +135,7 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 			size = zend_shared_memdup_size(Z_REF_P(z), sizeof(zend_reference));
 			if (size) {
 				ADD_SIZE(size);
-				zend_persist_zval_calc(Z_REFVAL_P(z) TSRMLS_CC);
+				ADD_SIZE(zend_persist_zval_calc(Z_REFVAL_P(z) TSRMLS_CC));
 			}
 			break;
 		case IS_CONSTANT_AST:
