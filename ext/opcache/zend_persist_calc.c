@@ -190,7 +190,15 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (op_array->function_name) {
-		ADD_INTERNED_STRING(op_array->function_name, 0);
+		zend_string *old_name = op_array->function_name;
+		zend_string *new_name = zend_shared_alloc_get_xlat_entry(old_name);
+
+		if (new_name) {
+			op_array->function_name = new_name;
+		} else {
+			ADD_INTERNED_STRING(op_array->function_name, 0);
+			zend_shared_alloc_register_xlat_entry(old_name, op_array->function_name);
+		}
     }
 
 	if (op_array->arg_info &&
