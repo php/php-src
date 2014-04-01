@@ -68,7 +68,7 @@ static int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		if (op_array->vars[i] == name ||
 		    (op_array->vars[i]->h == hash_value &&
 		     op_array->vars[i]->len == name->len &&
-		     memcmp(op_array->vars[i], name->val, name->len) == 0)) {
+		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
 			return (int)EX_VAR_NUM_2(NULL, i);
 		}
 		i++;
