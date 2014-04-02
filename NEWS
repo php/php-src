@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.12
+- Core:
+  . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
+    UNIX sockets). (Mike)
+
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
 
