@@ -731,6 +731,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size TSRMLS_CC);
+			if (toread == (size_t) -1) {
+				/* e.g. underlying read(2) returned -1 */
+				break;
+			}
 		} else {
 			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
