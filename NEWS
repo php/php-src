@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
+  . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
+    UNIX sockets). (Mike)
   . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
 
 - SPL:
