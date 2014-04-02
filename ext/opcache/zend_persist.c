@@ -115,15 +115,15 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 	void *new_ptr;
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	switch (z->type & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(z) & IS_CONSTANT_TYPE_MASK) {
 #else
-	switch (z->type & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(z) & ~IS_CONSTANT_INDEX) {
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
-			flags = Z_STR_P(z)->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
+			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			zend_accel_store_interned_string(Z_STR_P(z));
-			Z_STR_P(z)->gc.u.v.flags |= flags;
+			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:

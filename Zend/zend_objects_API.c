@@ -48,11 +48,11 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 		zend_object *obj = objects->object_buckets[i];
 
 		if (IS_VALID(obj)) {
-			if (!(obj->gc.u.v.flags & IS_OBJ_DESTRUCTOR_CALLED)) {
-				obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
-				obj->gc.refcount++;
+			if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+				GC_REFCOUNT(obj)++;
 				obj->handlers->dtor_obj(obj TSRMLS_CC);
-				obj->gc.refcount--;
+				GC_REFCOUNT(obj)--;
 			}
 		}
 	}
@@ -69,7 +69,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSR
 		zend_object *obj = objects->object_buckets[i];
 
 		if (IS_VALID(obj)) {
-			obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
+			GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 		}
 	}
 }
@@ -136,24 +136,24 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 	 */
 	if (EG(objects_store).object_buckets &&
 	    IS_VALID(EG(objects_store).object_buckets[object->handle])) {
-		if (object->gc.refcount == 0) {
+		if (GC_REFCOUNT(object) == 0) {
 			int failure = 0;
 
-			if (!(object->gc.u.v.flags & IS_OBJ_DESTRUCTOR_CALLED)) {
-				object->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
+			if (!(GC_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
+				GC_FLAGS(object) |= IS_OBJ_DESTRUCTOR_CALLED;
 
 				if (object->handlers->dtor_obj) {
-					object->gc.refcount++;
+					GC_REFCOUNT(object)++;
 					zend_try {
 						object->handlers->dtor_obj(object TSRMLS_CC);
 					} zend_catch {
 						failure = 1;
 					} zend_end_try();
-					object->gc.refcount--;
+					GC_REFCOUNT(object)--;
 				}
 			}
 			
-			if (object->gc.refcount == 0) {
+			if (GC_REFCOUNT(object) == 0) {
 				zend_uint handle = object->handle;
 
 				EG(objects_store).object_buckets[handle] = SET_INVALID(object);
@@ -171,7 +171,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 				zend_bailout();
 			}
 		} else {
-			object->gc.refcount--;
+			GC_REFCOUNT(object)--;
 		}
 	}
 }
@@ -218,7 +218,7 @@ ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TS
 /* Called when the ctor was terminated by an exception */
 ZEND_API void zend_object_store_ctor_failed(zend_object *obj TSRMLS_DC)
 {
-	obj->gc.u.v.flags |= IS_OBJ_DESTRUCTOR_CALLED;
+	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 
 /* Proxy objects workings */
@@ -254,9 +254,8 @@ ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS
 {
 	zend_proxy_object *obj = emalloc(sizeof(zend_proxy_object));
 
-	obj->std.gc.refcount = 1;
-	obj->std.gc.u.v.type = IS_OBJECT;
-	obj->std.gc.u.v.gc_info = 0;
+	GC_REFCOUNT(obj) = 1;
+	GC_TYPE_INFO(obj) = IS_OBJECT;
 	obj->std.ce = NULL;
 	obj->std.properties = NULL;
 	obj->std.guards = NULL;

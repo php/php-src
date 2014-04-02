@@ -254,7 +254,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		return FAILURE;
 	}
 	fh.filename = filename;
-	Z_TYPE(fh) = ZEND_HANDLE_FP;
+	fh.type = ZEND_HANDLE_FP;
 	browdata->current_section_name = NULL;
 	zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW,
 			(zend_ini_parser_cb_t) php_browscap_parser_cb, browdata TSRMLS_CC);

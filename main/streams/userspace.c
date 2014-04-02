@@ -289,7 +289,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 
 	if (context) {
 		add_property_resource(object, "context", context->res);
-		context->res->gc.refcount++;
+		GC_REFCOUNT(context->res)++;
 	} else {
 		add_property_null(object, "context");
 	}

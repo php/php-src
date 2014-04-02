@@ -393,7 +393,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			ht->nNumUsed = p->h + 1;
 		} else {
 			q = ht->arData + ht->nNumUsed;
-			q->val.u.next = ht->arHash[nIndex];
+			Z_NEXT(q->val) = ht->arHash[nIndex];
 			ht->arHash[nIndex] = ht->nNumUsed++;
 		}
 
@@ -403,7 +403,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			q->key = NULL;
 		} else {
 			q->key = STR_DUP(p->key, 0);
-			q->key->gc.u.v.flags = p->key->gc.u.v.flags;
+			GC_FLAGS(q->key) = GC_FLAGS(p->key);
 		}
 
 		/* Copy data */
@@ -462,7 +462,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 			ht->nNumUsed = p->h + 1;
 		} else {
 			q = ht->arData + ht->nNumUsed;
-			q->val.u.next = ht->arHash[nIndex];
+			Z_NEXT(q->val) = ht->arHash[nIndex];
 			ht->arHash[nIndex] = ht->nNumUsed++;
 		}
 
@@ -557,7 +557,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 			ht->nNumUsed = p->h + 1;
 		} else {
 			q = ht->arData + ht->nNumUsed;
-			q->val.u.next = ht->arHash[nIndex];
+			Z_NEXT(q->val) = ht->arHash[nIndex];
 			ht->arHash[nIndex] = ht->nNumUsed++;
 		}
 

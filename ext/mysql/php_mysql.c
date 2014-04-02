@@ -427,11 +427,11 @@ static void _free_mysql_result(zend_resource *rsrc TSRMLS_DC)
 static void php_mysql_set_default_link(zend_resource *link TSRMLS_DC)
 {
 	if (MySG(default_link) != NULL) {
-		if (--(MySG(default_link)->gc.refcount) == 0) {
+		if (--GC_REFCOUNT((MySG(default_link))) == 0) {
 			zend_list_delete(MySG(default_link));
 		}
 	}
-	++link->gc.refcount;
+	++GC_REFCOUNT(link);
 	MySG(default_link) = link;
 }
 /* }}} */
@@ -568,7 +568,7 @@ ZEND_MODULE_STARTUP_D(mysql)
 	le_result = zend_register_list_destructors_ex(_free_mysql_result, NULL, "mysql result", module_number);
 	le_link = zend_register_list_destructors_ex(_close_mysql_link, NULL, "mysql link", module_number);
 	le_plink = zend_register_list_destructors_ex(NULL, _close_mysql_plink, "mysql link persistent", module_number);
-	Z_TYPE(mysql_module_entry) = type;
+	mysql_module_entry.type = type;
 
 	REGISTER_LONG_CONSTANT("MYSQL_ASSOC", MYSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_NUM", MYSQL_NUM, CONST_CS | CONST_PERSISTENT);
@@ -986,7 +986,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			link = (zend_resource *)index_ptr->ptr;
 			if (link && (link->type == le_link || link->type == le_plink)) {
-				link->gc.refcount++;
+				GC_REFCOUNT(link)++;
 				ZVAL_RES(return_value, link);
 				php_mysql_set_default_link(link TSRMLS_CC);
 				STR_RELEASE(hashed_details);
@@ -1126,10 +1126,10 @@ PHP_FUNCTION(mysql_close)
 		}
 #endif
 		if (!mysql_link) {
-			--res->gc.refcount;
+			--GC_REFCOUNT(res);
 			MySG(default_link) = NULL;
 		} else if (mysql_link && Z_RES_P(mysql_link) == MySG(default_link)) {
-			--res->gc.refcount;
+			--GC_REFCOUNT(res);
 			MySG(default_link) = NULL;
 			zend_list_close(res);
 		} else {
@@ -2431,9 +2431,9 @@ PHP_FUNCTION(mysql_fetch_field)
 	add_property_long(return_value, "primary_key", IS_PRI_KEY(mysql_field->flags)?1:0);
 	add_property_long(return_value, "multiple_key", (mysql_field->flags&MULTIPLE_KEY_FLAG?1:0));
 	add_property_long(return_value, "unique_key", (mysql_field->flags&UNIQUE_KEY_FLAG?1:0));
-	add_property_long(return_value, "numeric", IS_NUM(Z_TYPE_P(mysql_field))?1:0);
+	add_property_long(return_value, "numeric", IS_NUM(mysql_field->type)?1:0);
 	add_property_long(return_value, "blob", IS_BLOB(mysql_field->flags)?1:0);
-	add_property_string(return_value, "type", php_mysql_get_field_name(Z_TYPE_P(mysql_field)), 1);
+	add_property_string(return_value, "type", php_mysql_get_field_name(mysql_field->type), 1);
 	add_property_long(return_value, "unsigned", (mysql_field->flags&UNSIGNED_FLAG?1:0));
 	add_property_long(return_value, "zerofill", (mysql_field->flags&ZEROFILL_FLAG?1:0));
 }
@@ -2504,7 +2504,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			RETVAL_LONG(mysql_field->length);
 			break;
 		case PHP_MYSQL_FIELD_TYPE:
-			RETVAL_STRING(php_mysql_get_field_name(Z_TYPE_P(mysql_field)));
+			RETVAL_STRING(php_mysql_get_field_name(mysql_field->type));
 			break;
 		case PHP_MYSQL_FIELD_FLAGS:
 			memcpy(buf, "", sizeof(""));

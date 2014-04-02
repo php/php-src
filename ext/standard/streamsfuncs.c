@@ -196,7 +196,7 @@ PHP_FUNCTION(stream_socket_server)
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (context) {
-		context->res->gc.refcount++;
+		GC_REFCOUNT(context->res)++;
 	}
 
 	if (zerrno)	{
@@ -1236,7 +1236,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (filter) {
 		filter->res = ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter());
-		filter->res->gc.refcount++;
+		GC_REFCOUNT(filter->res)++;
 		RETURN_RES(filter->res);
 	} else {
 		RETURN_FALSE;

@@ -289,13 +289,13 @@ static void accel_interned_strings_restore_state(TSRMLS_D)
 
 		nIndex = p->h & ZCSG(interned_strings).nTableMask;
 		if (ZCSG(interned_strings).arHash[nIndex] == idx) {
-			ZCSG(interned_strings).arHash[nIndex] = p->val.u.next;
+			ZCSG(interned_strings).arHash[nIndex] = Z_NEXT(p->val);
 		} else {
 			uint prev = ZCSG(interned_strings).arHash[nIndex];
-			while (ZCSG(interned_strings).arData[prev].val.u.next != idx) {
-				prev = ZCSG(interned_strings).arData[prev].val.u.next;
+			while (Z_NEXT(ZCSG(interned_strings).arData[prev].val) != idx) {
+				prev = Z_NEXT(ZCSG(interned_strings).arData[prev].val);
  			}
-			ZCSG(interned_strings).arData[prev].val.u.next = p->val.u.next;
+			Z_NEXT(ZCSG(interned_strings).arData[prev].val) = Z_NEXT(p->val);
  		}
 	}
 }
@@ -335,7 +335,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 				return p->key;
 			}
 		}
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 
 	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len) >=
@@ -352,14 +352,15 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	p->key = (zend_string*) ZCSG(interned_strings_top);
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len);
 	p->h = h;
-	p->key->gc.refcount = 1;
-	p->key->gc.u.v.type = IS_STRING;
-	p->key->gc.u.v.flags = IS_STR_INTERNED | IS_STR_PERMANENT;
+	GC_REFCOUNT(p->key) = 1;
+// TODO: use one assignment ???
+	GC_TYPE(p->key) = IS_STRING;
+	GC_FLAGS(p->key) = IS_STR_INTERNED | IS_STR_PERMANENT;
 	p->key->h = str->h;
 	p->key->len = str->len;
 	memcpy(p->key->val, str->val, str->len);
 	ZVAL_STR(&p->val, p->key);
-	p->val.u.next = ZCSG(interned_strings).arHash[nIndex];
+	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
 	ZCSG(interned_strings).arHash[nIndex] = idx;
 
 //???	if (free_src) {

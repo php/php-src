@@ -22,6 +22,22 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
+#ifdef WORDS_BIGENDIAN
+# define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
+# define ZEND_ENDIAN_LOHI_3(lo, mi, hi)    hi; mi; lo;
+# define ZEND_ENDIAN_LOHI_4(a, b, c, d)    d; c; b; a;
+# define ZEND_ENDIAN_LOHI_C(lo, hi)        hi, lo
+# define ZEND_ENDIAN_LOHI_C_3(lo, mi, hi)  hi, mi, lo,
+# define ZEND_ENDIAN_LOHI_C_4(a, b, c, d)  d, c, b, a
+#else
+# define ZEND_ENDIAN_LOHI(lo, hi)          lo; hi;
+# define ZEND_ENDIAN_LOHI_3(lo, mi, hi)    lo; mi; hi;
+# define ZEND_ENDIAN_LOHI_4(a, b, c, d)    a; b; c; d;
+# define ZEND_ENDIAN_LOHI_C(lo, hi)        lo, hi
+# define ZEND_ENDIAN_LOHI_C_3(lo, mi, hi)  lo, mi, hi,
+# define ZEND_ENDIAN_LOHI_C_4(a, b, c, d)  a, b, c, d
+#endif
+
 typedef unsigned char zend_bool;
 typedef unsigned char zend_uchar;
 typedef unsigned int zend_uint;
@@ -90,22 +106,29 @@ typedef union _zend_value {
 
 struct _zval_struct {
 	zend_value        value;			/* value */
-	zend_uchar        type;				/* active type */
-	zend_uchar        var_flags;		/* various IS_VAR flags */
 	union {
-		zend_uint     next;             /* hash collision chain */
+		struct {
+			ZEND_ENDIAN_LOHI_4(
+				zend_uchar    type,		/* active type */
+				zend_uchar    flags,    /* various IS_VAR flags */
+				zend_uchar    res1,
+				zend_uchar    res2)
+		} v;
+		zend_uint type_info;
 	} u;
+	zend_uint     next;                 /* hash collision chain */
 };
 
 struct _zend_refcounted {
 	zend_uint         refcount;			/* reference counter 32-bit */
 	union {
 		struct {
-			zend_uchar        type;
-			zend_uchar        flags;    /* used for strings & objects */
-			zend_ushort       gc_info;  /* keeps GC root number (or 0) and color */
+			ZEND_ENDIAN_LOHI_3(
+				zend_uchar    type,
+				zend_uchar    flags,    /* used for strings & objects */
+				zend_ushort   gc_info)  /* keeps GC root number (or 0) and color */
 		} v;
-		zend_uint long_type;
+		zend_uint type_info;
 	} u;
 };
 
@@ -210,8 +233,38 @@ struct _zend_ast_ref {
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define IS_REFCOUNTED(type)			((type) >= IS_STRING)
 
-#define Z_TYPE(zval)				(zval).type
+#define Z_TYPE(zval)				(zval).u.v.type
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
+
+#define Z_FLAGS(zval)				(zval).u.v.flags
+#define Z_FLAGS_P(zval_p)			Z_FLAGS(*(zval_p))
+
+#define Z_TYPE_INFO(zval)			(zval).u.type_info
+#define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
+
+#define Z_NEXT(zval)				(zval).next
+#define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
+
+#define Z_COUNTED(zval)				(zval).value.counted
+#define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
+
+#define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
+#define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
+#define GC_FLAGS(p)					((zend_refcounted*)(p))->u.v.flags
+#define GC_INFO(p)					((zend_refcounted*)(p))->u.v.gc_info
+#define GC_TYPE_INFO(p)				((zend_refcounted*)(p))->u.type_info
+
+#define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
+#define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
+
+#define Z_GC_FLAGS(zval)			GC_FLAGS(Z_COUNTED(zval))
+#define Z_GC_FLAGS_P(zval_p)		Z_GC_TYPE(*(zval_p))
+
+#define Z_GC_INFO(zval)				GC_INFO(Z_COUNTED(zval))
+#define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
+
+#define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
+#define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
 /* zval.var_flags */
 #define IS_VAR_RET_REF				(1<<0) /* return by by reference */
@@ -230,18 +283,18 @@ struct _zend_ast_ref {
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
 
 #define Z_OBJ_APPLY_COUNT(zval) \
-	(Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT)
+	(Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT)
 
 #define Z_OBJ_INC_APPLY_COUNT(zval) do { \
-		Z_OBJ(zval)->gc.u.v.flags = \
-			(Z_OBJ(zval)->gc.u.v.flags & ~IS_OBJ_APPLY_COUNT) | \
-			((Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT) + 1); \
+		Z_GC_FLAGS(zval) = \
+			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \
+			((Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT) + 1); \
 	} while (0)
 	
 #define Z_OBJ_DEC_APPLY_COUNT(zval) do { \
-		Z_OBJ(zval)->gc.u.v.flags = \
-			(Z_OBJ(zval)->gc.u.v.flags & ~IS_OBJ_APPLY_COUNT) | \
-			((Z_OBJ(zval)->gc.u.v.flags & IS_OBJ_APPLY_COUNT) - 1); \
+		Z_GC_FLAGS(zval) = \
+			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \
+			((Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT) - 1); \
 	} while (0)
 
 #define Z_OBJ_APPLY_COUNT_P(zv)     Z_OBJ_APPLY_COUNT(*(zv))
@@ -264,15 +317,6 @@ struct _zend_ast_ref {
 
 #define Z_DVAL(zval)				(zval).value.dval
 #define Z_DVAL_P(zval_p)			Z_DVAL(*(zval_p))
-
-#define Z_COUNTED(zval)				(zval).value.counted
-#define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
-
-#define Z_GC_TYPE(zval)				Z_COUNTED(zval)->type
-#define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
-
-#define Z_GC_INFO(zval)				Z_COUNTED(zval)->u.v.gc_info
-#define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
 
 #define Z_STR(zval)					(zval).value.str
 #define Z_STR_P(zval_p)				Z_STR(*(zval_p))
@@ -393,9 +437,8 @@ struct _zend_ast_ref {
 #define ZVAL_NEW_ARR(z) do {									\
 		zval *__z = (z);										\
 		zend_array *_arr = emalloc(sizeof(zend_array));			\
-		_arr->gc.refcount = 1;									\
-		_arr->gc.u.v.type = IS_ARRAY;							\
-		_arr->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_arr) = 1;									\
+		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_P(__z) = IS_ARRAY;								\
 	} while (0)
@@ -403,9 +446,8 @@ struct _zend_ast_ref {
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
 		zval *__z = (z);										\
 		zend_array *_arr = malloc(sizeof(zend_array));			\
-		_arr->gc.refcount = 1;									\
-		_arr->gc.u.v.type = IS_ARRAY;							\
-		_arr->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_arr) = 1;									\
+		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
 		Z_ARR_P(__z) = _arr;									\
 		Z_TYPE_P(__z) = IS_ARRAY;								\
 	} while (0)
@@ -424,9 +466,8 @@ struct _zend_ast_ref {
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
 		zend_resource *_res = emalloc(sizeof(zend_resource));	\
-		_res->gc.refcount = 1;									\
-		_res->gc.u.v.type = IS_RESOURCE;						\
-		_res->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_res) = 1;									\
+		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -437,9 +478,8 @@ struct _zend_ast_ref {
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
 		zend_resource *_res = malloc(sizeof(zend_resource));	\
-		_res->gc.refcount = 1;									\
-		_res->gc.u.v.type = IS_RESOURCE;						\
-		_res->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_res) = 1;									\
+		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -456,9 +496,8 @@ struct _zend_ast_ref {
 
 #define ZVAL_NEW_REF(z, r) do {									\
 		zend_reference *_ref = emalloc(sizeof(zend_reference));	\
-		_ref->gc.refcount = 1;									\
-		_ref->gc.u.v.type = IS_REFERENCE;						\
-		_ref->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_ref) = 1;									\
+		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_P(z) = IS_REFERENCE;								\
@@ -467,9 +506,8 @@ struct _zend_ast_ref {
 #define ZVAL_NEW_AST(z, a) do {									\
 		zval *__z = (z);										\
 		zend_ast_ref *_ast = emalloc(sizeof(zend_ast_ref));		\
-		_ast->gc.refcount = 1;									\
-		_ast->gc.u.v.type = IS_CONSTANT_AST;					\
-		_ast->gc.u.v.gc_info = 0;								\
+		GC_REFCOUNT(_ast) = 1;									\
+		GC_TYPE_INFO(_ast) = IS_CONSTANT_AST;					\
 		_ast->ast = (a);										\
 		Z_AST_P(__z) = _ast;									\
 		Z_TYPE_P(__z) = IS_CONSTANT_AST;						\
@@ -497,9 +535,8 @@ struct _zend_ast_ref {
 
 #define ZVAL_STR_OFFSET(z, s, o) do {							\
 		zend_str_offset *x = emalloc(sizeof(zend_str_offset));	\
-		x->gc.refcount = 1;										\
-		x->gc.u.v.type = IS_STR_OFFSET;							\
-		x->gc.u.v.gc_info = 0;									\
+		GC_REFCOUNT(x) = 1;										\
+		GC_TYPE_INFO(x) = IS_STR_OFFSET;						\
 		x->str = (s);											\
 		x->offset = (o);										\
 		Z_STR_OFFSET_P(z) = x;									\

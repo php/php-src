@@ -139,7 +139,7 @@ SPL_API int spl_hash_verify_pos_ex(spl_array_object * intern, HashTable * ht TSR
 			if (idx == intern->pos) {
 				return SUCCESS;
 			}
-			idx = ht->arData[idx].val.u.next;
+			idx = Z_NEXT(ht->arData[idx].val);
 		}
 	}
 /*	HASH_UNPROTECT_RECURSION(ht); */
@@ -367,7 +367,7 @@ fetch_dim_string:
 	case IS_DOUBLE:
 	case IS_BOOL:
 	case IS_LONG:
-		if (offset->type == IS_DOUBLE) {
+		if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
@@ -496,7 +496,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
 			}
-			if (offset->type == IS_DOUBLE) {
+			if (Z_TYPE_P(offset) == IS_DOUBLE) {
 				index = (long)Z_DVAL_P(offset);
 			} else {
 				index = Z_LVAL_P(offset);
@@ -577,7 +577,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	case IS_RESOURCE:
 	case IS_BOOL:
 	case IS_LONG:
-		if (offset->type == IS_DOUBLE) {
+		if (Z_TYPE_P(offset) == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
 		} else {
 			index = Z_LVAL_P(offset);
@@ -642,7 +642,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case IS_LONG:
 			{
 				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-				if (offset->type == IS_DOUBLE) {
+				if (Z_TYPE_P(offset) == IS_DOUBLE) {
 					index = (long)Z_DVAL_P(offset);
 				} else {
 					index = Z_LVAL_P(offset);

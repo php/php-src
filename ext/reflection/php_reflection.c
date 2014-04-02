@@ -4507,7 +4507,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		return;
 	}
 
-	switch(class_name->type) {
+	switch (Z_TYPE_P(class_name)) {
 		case IS_STRING:
 			if ((class_ce = zend_lookup_class(Z_STR_P(class_name) TSRMLS_CC)) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
@@ -4551,7 +4551,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		return;
 	}
 
-	switch(interface->type) {
+	switch (Z_TYPE_P(interface)) {
 		case IS_STRING:
 			if ((interface_ce = zend_lookup_class(Z_STR_P(interface) TSRMLS_CC)) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,

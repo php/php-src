@@ -116,7 +116,7 @@ static void php_set_default_dir(zend_resource *res TSRMLS_DC)
 	}
 
 	if (res) {
-		res->gc.refcount++;
+		GC_REFCOUNT(res)++;
 	}
 	
 	DIRG(default_dir) = res;

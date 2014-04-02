@@ -92,7 +92,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
 	/* highlight stuff coming back from zendlex() */
-	token.type = 0;
+	ZVAL_UNDEF(&token);
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
@@ -116,11 +116,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_WHITESPACE:
 				zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
-				token.type = 0;
+				ZVAL_UNDEF(&token);
 				continue;
 				break;
 			default:
-				if (token.type == 0) {
+				if (Z_TYPE(token) == IS_UNDEF) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
 					next_color = syntax_highlighter_ini->highlight_default;
@@ -140,7 +140,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -154,7 +154,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 					break;
 			}
 		}
-		token.type = 0;
+		ZVAL_UNDEF(&token);
 	}
 
 	if (last_color != syntax_highlighter_ini->highlight_html) {
@@ -170,7 +170,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 	int token_type;
 	int prev_space = 0;
 
-	token.type = 0;
+	ZVAL_UNDEF(&token);
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_WHITESPACE:
@@ -181,7 +181,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 						/* lack of break; is intentional */
 			case T_COMMENT:
 			case T_DOC_COMMENT:
-				token.type = 0;
+				ZVAL_UNDEF(&token);
 				continue;
 			
 			case T_END_HEREDOC:
@@ -192,7 +192,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				}
 				zend_write("\n", sizeof("\n") - 1);
 				prev_space = 1;
-				token.type = 0;
+				ZVAL_UNDEF(&token);
 				continue;
 
 			default:
@@ -200,7 +200,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				break;
 		}
 
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 				case T_OPEN_TAG:
 				case T_OPEN_TAG_WITH_ECHO:
@@ -215,7 +215,8 @@ ZEND_API void zend_strip(TSRMLS_D)
 					break;
 			}
 		}
-		prev_space = token.type = 0;
+		prev_space = 0;
+		ZVAL_UNDEF(&token);
 	}
 }
 

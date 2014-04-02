@@ -36,7 +36,7 @@ void zend_interned_strings_dtor(TSRMLS_D);
 END_EXTERN_C()
 
 #ifndef ZTS
-# define IS_INTERNED(s)					((s)->gc.u.v.flags & IS_STR_INTERNED)
+# define IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 #else
 # define IS_INTERNED(s)					0
 #endif
@@ -72,7 +72,7 @@ static zend_always_inline void zend_str_forget_hash_val(zend_string *s)
 static zend_always_inline zend_uint zend_str_refcount(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		return s->gc.refcount;
+		return GC_REFCOUNT(s);
 	}
 	return 1;
 }
@@ -80,7 +80,7 @@ static zend_always_inline zend_uint zend_str_refcount(zend_string *s)
 static zend_always_inline zend_uint zend_str_addref(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		return ++s->gc.refcount;
+		return ++GC_REFCOUNT(s);
 	}
 	return 1;
 }
@@ -88,7 +88,7 @@ static zend_always_inline zend_uint zend_str_addref(zend_string *s)
 static zend_always_inline zend_uint zend_str_delref(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
-		return --s->gc.refcount;
+		return --GC_REFCOUNT(s);
 	}
 	return 1;
 }
@@ -97,10 +97,11 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 {
 	zend_string *ret = pemalloc(sizeof(zend_string) + len, persistent);
 
-	ret->gc.refcount = 1;
-	ret->gc.u.v.type = IS_STRING;
-	ret->gc.u.v.flags = (persistent ? IS_STR_PERSISTENT : 0);
-	ret->gc.u.v.gc_info = 0;
+	GC_REFCOUNT(ret) = 1;
+// TODO use one assignment ???
+	GC_TYPE(ret) = IS_STRING;
+	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
+	GC_INFO(ret) = 0;
 	ret->h = 0;
 	ret->len = len;
 	return ret;
@@ -155,7 +156,7 @@ static zend_always_inline void zend_str_free(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		ZEND_ASSERT(STR_REFCOUNT(s) <= 1);
-		pefree(s, s->gc.u.v.flags & IS_STR_PERSISTENT);
+		pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 	}
 }
 
@@ -163,7 +164,7 @@ static zend_always_inline void zend_str_release(zend_string *s)
 {
 	if (!IS_INTERNED(s)) {
 		if (STR_DELREF(s) == 0) {
-			pefree(s, s->gc.u.v.flags & IS_STR_PERSISTENT);
+			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 		}
 	}
 }

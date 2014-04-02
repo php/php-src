@@ -202,7 +202,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			 memcmp(p->key->val, key->val, key->len) == 0)) {
 			return p;
 		}
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return NULL;
 }
@@ -223,7 +223,7 @@ static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht,
 			 && !memcmp(p->key->val, str, len)) {
 			return p;
 		}
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return NULL;
 }
@@ -241,7 +241,7 @@ static zend_always_inline Bucket *zend_hash_index_find_bucket(const HashTable *h
 		if (p->h == h && !p->key) {
 			return p;
 		}
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return NULL;
 }
@@ -300,7 +300,7 @@ ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *p
 	STR_ADDREF(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h & ht->nTableMask;
-	p->val.u.next = ht->arHash[nIndex];
+	Z_NEXT(p->val) = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -388,7 +388,7 @@ new_packed:
 			p->h = h;
 			p->key = NULL;
 			ZVAL_COPY_VALUE(&p->val, pData);
-			p->val.u.next = INVALID_IDX;
+			Z_NEXT(p->val) = INVALID_IDX;
 
 			HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -433,7 +433,7 @@ convert_to_hash:
 	p->key = NULL;
 	nIndex = h & ht->nTableMask;
 	ZVAL_COPY_VALUE(&p->val, pData);
-	p->val.u.next = ht->arHash[nIndex];
+	Z_NEXT(p->val) = ht->arHash[nIndex];
 	ht->arHash[nIndex] = idx;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -486,7 +486,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 			}
 		}
 		nIndex = ht->arData[j].h & ht->nTableMask;
-		ht->arData[j].val.u.next = ht->arHash[nIndex];
+		Z_NEXT(ht->arData[j].val) = ht->arHash[nIndex];
 		ht->arHash[nIndex] = j;
 		j++;
 	}
@@ -498,9 +498,9 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint idx, Buc
 {
 	if (!(ht->flags & HASH_FLAG_PACKED)) {
 		if (prev) {
-			prev->val.u.next = p->val.u.next;
+			Z_NEXT(prev->val) = Z_NEXT(p->val);
 		} else {
-			ht->arHash[p->h & ht->nTableMask] = p->val.u.next;
+			ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
 		}
 	}
 	if (ht->nNumUsed - 1 == idx) {
@@ -544,11 +544,11 @@ static zend_always_inline void _zend_hash_del_el(HashTable *ht, uint idx, Bucket
 		idx = ht->arHash[nIndex];
 		if (p != ht->arData + idx) {
 			prev = ht->arData + idx;
-			while (ht->arData + prev->val.u.next != p) {
-				idx = prev->val.u.next;
+			while (ht->arData + Z_NEXT(prev->val) != p) {
+				idx = Z_NEXT(prev->val);
 				prev = ht->arData + idx;
 			}
-			idx = prev->val.u.next;
+			idx = Z_NEXT(prev->val);
 	 	}
 	}
 
@@ -589,7 +589,7 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 			return SUCCESS;
 		}
 		prev = p;
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return FAILURE;
 }
@@ -641,7 +641,7 @@ ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key)
 			return SUCCESS;
 		}
 		prev = p;
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return FAILURE;
 }
@@ -688,7 +688,7 @@ ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, int len)
 			return SUCCESS;
 		}
 		prev = p;
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return FAILURE;
 }
@@ -722,7 +722,7 @@ ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *str, int len)
 			return SUCCESS;
 		}
 		prev = p;
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return FAILURE;
 }
@@ -763,7 +763,7 @@ ZEND_API int zend_hash_index_del(HashTable *ht, ulong h)
 			return SUCCESS;
 		}
 		prev = p;
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	return FAILURE;
 }
@@ -1292,7 +1292,7 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr)
 					ht->nInternalPointer = idx;
 					return 1;
 				}
-				idx = ht->arData[idx].val.u.next;
+				idx = Z_NEXT(ht->arData[idx].val);
 			}
 		}
 		return 0;
@@ -1516,7 +1516,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_s
 				if (q->h == num_index && q->key == NULL) {
 					break;
 				}
-				idx2 = q->val.u.next;
+				idx2 = Z_NEXT(q->val);
 			}
 		} else if (key_type == HASH_KEY_IS_STRING) {
 			h = STR_HASH_VAL(str_index);
@@ -1536,7 +1536,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_s
 				     memcmp(q->key->val, str_index->val, str_index->len) == 0)) {
 					break;
 				}
-				idx2 = q->val.u.next;
+				idx2 = Z_NEXT(q->val);
 			}
 		} else {
 			return FAILURE;
@@ -1562,13 +1562,13 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_s
 
 		/* remove old key from hash */
 		if (ht->arHash[p->h & ht->nTableMask] == idx1) {
-			ht->arHash[p->h & ht->nTableMask] = p->val.u.next;
+			ht->arHash[p->h & ht->nTableMask] = Z_NEXT(p->val);
  		} else {
 			uint idx3 = ht->arHash[p->h & ht->nTableMask];
-			while (ht->arData[idx3].val.u.next != idx1) {
-				idx3 = ht->arData[idx3].val.u.next;
+			while (Z_NEXT(ht->arData[idx3].val) != idx1) {
+				idx3 = Z_NEXT(ht->arData[idx3].val);
 			} 
-			ht->arData[idx3].val.u.next = p->val.u.next;
+			Z_NEXT(ht->arData[idx3].val) = Z_NEXT(p->val);
  		}
 
 		/* update key */
@@ -1585,7 +1585,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_s
 		}
 
 		/* insert new key into hash */
-		p->val.u.next = ht->arHash[p->h & ht->nTableMask];
+		Z_NEXT(p->val) = ht->arHash[p->h & ht->nTableMask];
 		ht->arHash[p->h & ht->nTableMask] = idx1;
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 

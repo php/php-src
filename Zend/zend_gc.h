@@ -131,7 +131,7 @@ END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
-		if (GC_ADDRESS(_p->u.v.gc_info)) { \
+		if (GC_ADDRESS(GC_INFO(_p))) { \
 			gc_remove_from_buffer(_p TSRMLS_CC); \
 		} \
 	} while (0)

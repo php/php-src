@@ -1807,7 +1807,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	    value_ptr &&
 	    !Z_ISREF_P(value_ptr) &&
 	    opline->extended_value == ZEND_RETURNS_FUNCTION &&
-	    !(value_ptr->var_flags & IS_VAR_RET_REF)) {
+	    !(Z_FLAGS_P(value_ptr) & IS_VAR_RET_REF)) {
 		if (!OP2_FREE) {
 			PZVAL_LOCK(value_ptr); /* undo the effect of get_zval_ptr_ptr() */
 		}
@@ -2025,7 +2025,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 			ZVAL_NULL(ret);
 //???			ret->var.ptr_ptr = &ret->var.ptr;
-			ret->var_flags = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+			Z_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
@@ -2050,7 +2050,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 			ZVAL_NULL(return_value);
 //???			ret->var.ptr_ptr = &ret->var.ptr;
-			return_value->var_flags = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
+			Z_FLAGS_P(return_value) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 		}
 
 		if (UNEXPECTED((EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
@@ -2092,7 +2092,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		} else {
 //???			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
 //???			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
-			EX_VAR(opline->result.var)->var_flags = 0;
+			Z_FLAGS_P(EX_VAR(opline->result.var)) = 0;
 //???			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		}
 	}
@@ -2501,7 +2501,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		call->object->gc.refcount++; /* For $this pointer */
+		GC_REFCOUNT(call->object)++; /* For $this pointer */
 	}
 
 	call->num_additional_args = 0;
@@ -2617,7 +2617,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		}
 		call->object = Z_OBJ(EG(This));
 		if (call->object) {
-			call->object->gc.refcount++;
+			GC_REFCOUNT(call->object)++;
 		}
 	}
 
@@ -2691,7 +2691,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
-				call->object->gc.refcount++;
+				GC_REFCOUNT(call->object)++;
 			}
 			if (OP2_TYPE == IS_VAR && OP2_FREE && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
@@ -2756,7 +2756,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					call->object = NULL;
 				} else {
-					call->object->gc.refcount++; /* For $this pointer */
+					GC_REFCOUNT(call->object)++; /* For $this pointer */
 				}
 			}
 
@@ -2913,7 +2913,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 		if (OP1_TYPE == IS_VAR && !Z_ISREF_P(retval_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
-			    (retval_ptr->var_flags & IS_VAR_RET_REF)) {
+			    (Z_FLAGS_P(retval_ptr) & IS_VAR_RET_REF)) {
 //???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
@@ -3025,7 +3025,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 	ZVAL_OBJ(EX_VAR(opline->op2.var), EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
-		EG(exception)->gc.refcount++;
+		GC_REFCOUNT(EG(exception))++;
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;
@@ -3109,7 +3109,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	if ((!(opline->extended_value & ZEND_ARG_SEND_FUNCTION) ||
-	     (varptr->var_flags & IS_VAR_RET_REF)) &&
+	     (Z_FLAGS_P(varptr) & IS_VAR_RET_REF)) &&
 	    ((!Z_REFCOUNTED_P(varptr) && Z_TYPE_P(varptr) != IS_STRING) || 
 	     Z_ISREF_P(varptr) ||
 	     Z_TYPE_P(varptr) == IS_OBJECT ||
@@ -3909,7 +3909,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 	inc_filename = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
 	ZVAL_UNDEF(&tmp_inc_filename);
-	if (inc_filename->type!=IS_STRING) {
+	if (Z_TYPE_P(inc_filename) != IS_STRING) {
 		ZVAL_DUP(&tmp_inc_filename, inc_filename);
 		convert_to_string(&tmp_inc_filename);
 		inc_filename = &tmp_inc_filename;
@@ -5202,9 +5202,9 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			if (call->object) {
 				if (call->is_ctor_call) {
 					if (call->is_ctor_result_used) {
-						call->object->gc.refcount--;
+						GC_REFCOUNT(call->object)--;
 					}
-					if (call->object->gc.refcount == 1) {
+					if (GC_REFCOUNT(call->object) == 1) {
 						zend_object_store_ctor_failed(call->object TSRMLS_CC);
 					}
 				}
@@ -5445,7 +5445,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 				 * not return by reference we throw a notice. */
 				if (OP1_TYPE == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (value_ptr->var_flags & IS_VAR_RET_REF))
+				         && (Z_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
 //???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 ) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");

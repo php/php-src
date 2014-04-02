@@ -3968,7 +3968,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 	zval tmp_member;
 	timelib_sll value = -1;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -4034,7 +4034,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, const
 	php_interval_obj *obj;
 	zval tmp_member, tmp_value;
 
- 	if (member->type != IS_STRING) {
+ 	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
@@ -4054,7 +4054,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, const
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
-		if (value->type != IS_LONG) {         \
+		if (Z_TYPE_P(value) != IS_LONG) {     \
 			tmp_value = *value;               \
 			zval_copy_ctor(&tmp_value);       \
 			convert_to_long(&tmp_value);      \

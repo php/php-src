@@ -52,7 +52,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		previous = zend_read_property(default_exception_ce, pzv, "previous", sizeof("previous")-1, 1 TSRMLS_CC);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property(default_exception_ce, pzv, "previous", sizeof("previous")-1, &tmp TSRMLS_CC);
-			add_previous->gc.refcount--;
+			GC_REFCOUNT(add_previous)--;
 			return;
 		}
 		pzv = previous;

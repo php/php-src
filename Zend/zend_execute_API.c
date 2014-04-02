@@ -561,7 +561,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					save = NULL;
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
-				p->type = IS_STRING;
+				Z_TYPE_P(p) = IS_STRING;
 				if (!inline_change) {
 					ZVAL_STRINGL(p, actual, actual_len);
 				} else if (save && save->val != actual) {
@@ -600,19 +600,19 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
-			if (!(str_index->gc.u.v.flags & (IS_STR_CONSTANT | IS_STR_AST))) {
+			if (!(GC_FLAGS(str_index) & (IS_STR_CONSTANT | IS_STR_AST))) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
 
-			if (str_index->gc.u.v.flags & IS_STR_AST) {
+			if (GC_FLAGS(str_index) & IS_STR_AST) {
 				zend_ast_ref *ast = *(zend_ast_ref **)str_index->val;
 
 				zend_ast_evaluate(&const_value, ast->ast, scope TSRMLS_CC);
 				zend_ast_destroy(ast->ast);
 				efree(ast);
 //???
-			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, str_index->gc.u.v.flags & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC)) {
+			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, GC_FLAGS(str_index) & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC)) {
 				char *actual, *str;
 				const char *save = str_index->val;
 				int len;
@@ -624,7 +624,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					len -= ((colon - str) + 1);
 					str = colon;
 				} else {
-					if (str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED) {
+					if (GC_FLAGS(str_index) & IS_STR_CONSTANT_UNQUALIFIED) {
 						if ((actual = (char *)zend_memrchr(str, '\\', len))) {
 							actual++;
 							len -= (actual - str);
@@ -638,7 +638,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					if (save[0] == '\\') {
 						++save;
 					}
-					if (!(str_index->gc.u.v.flags & IS_STR_CONSTANT_UNQUALIFIED)) {
+					if (!(GC_FLAGS(str_index) & IS_STR_CONSTANT_UNQUALIFIED)) {
 						zend_error(E_ERROR, "Undefined constant '%s'", save);
 					}
 					zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str, str);
@@ -1687,8 +1687,8 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				EG(active_symbol_table) = *(EG(symtable_cache_ptr)--);
 			} else {
 				EG(active_symbol_table) = emalloc(sizeof(zend_array));
-				EG(active_symbol_table)->gc.refcount = 0;
-				EG(active_symbol_table)->gc.u.v.type = IS_ARRAY;
+				GC_REFCOUNT(EG(active_symbol_table)) = 0;
+				GC_TYPE_INFO(EG(active_symbol_table)) = IS_ARRAY;
 				zend_hash_init(&EG(active_symbol_table)->ht, ex->op_array->last_var, NULL, ZVAL_PTR_DTOR, 0);
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}

@@ -28,10 +28,8 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
-	object->gc.refcount = 1;
-	object->gc.u.v.type = IS_OBJECT;
-	object->gc.u.v.flags = 0;
-	object->gc.u.v.gc_info = 0;
+	GC_REFCOUNT(object) = 1;
+	GC_TYPE_INFO(object) = IS_OBJECT;
 	object->ce = ce;
 	object->properties = NULL;
 	object->guards = NULL;

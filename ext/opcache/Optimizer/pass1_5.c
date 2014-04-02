@@ -238,7 +238,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
-				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
+				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 				/* substitute persistent constants */
 				zend_uint tv = ZEND_RESULT(opline).var;
 				zval c;
@@ -257,12 +257,12 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			/* class constant */
 			if (ZEND_OP1_TYPE(opline) != IS_UNUSED &&
 			    ZEND_OP2_TYPE(opline) == IS_CONST &&
-				ZEND_OP2_LITERAL(opline).type == IS_STRING) {
+				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 
 				zend_class_entry *ce = NULL;
 
 				if (ZEND_OP1_TYPE(opline) == IS_CONST &&
-			        ZEND_OP1_LITERAL(opline).type == IS_STRING) {
+			        Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 					/* for A::B */
 					if (op_array->scope && 
 						!strncasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
@@ -348,8 +348,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			   extension_loaded(x)
 			*/
 			if (opline->extended_value == 1 && (opline - 1)->opcode == ZEND_SEND_VAL &&
-				ZEND_OP1_TYPE(opline - 1) == IS_CONST && ZEND_OP1_LITERAL(opline - 1).type == IS_STRING &&
-				ZEND_OP1_TYPE(opline) == IS_CONST && ZEND_OP1_LITERAL(opline).type == IS_STRING) {
+				ZEND_OP1_TYPE(opline - 1) == IS_CONST && Z_TYPE(ZEND_OP1_LITERAL(opline - 1)) == IS_STRING &&
+				ZEND_OP1_TYPE(opline) == IS_CONST && Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 				if ((Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("function_exists")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
 						"function_exists", sizeof("function_exists")-1)) ||

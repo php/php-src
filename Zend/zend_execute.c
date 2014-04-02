@@ -953,7 +953,7 @@ static inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval
 	zend_string *offset_key;
 	ulong hval;
 
-	switch (dim->type) {
+	switch (Z_TYPE_P(dim)) {
 		case IS_NULL:
 			offset_key = STR_EMPTY_ALLOC();
 			goto fetch_string_dim;

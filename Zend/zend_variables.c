@@ -30,7 +30,7 @@
 ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 //???	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
-	switch (p->u.v.type) {
+	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
@@ -45,7 +45,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
-					arr->gc.u.v.type = IS_NULL;
+					GC_TYPE(arr) = IS_NULL;
 					zend_hash_destroy(&arr->ht);
 					goto gc_exit;
 				}
@@ -69,7 +69,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_resource *res = (zend_resource*)p;
 				TSRMLS_FETCH();
 
-				if (--res->gc.refcount == 0) {
+				if (--GC_REFCOUNT(res) == 0) {
 					/* destroy resource */
 					zend_list_delete(res);
 				}
@@ -77,7 +77,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
-				if (--ref->gc.refcount == 0) {
+				if (--GC_REFCOUNT(ref) == 0) {
 					zval_ptr_dtor(&ref->val);
 					goto gc_exit;
 				}
@@ -96,7 +96,7 @@ exit:
 ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 //???	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
-	switch (p->u.v.type) {
+	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
@@ -111,7 +111,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
-					arr->gc.u.v.type = IS_NULL;
+					GC_TYPE(arr) = IS_NULL;
 					zend_hash_destroy(&arr->ht);
 					goto gc_exit;
 				}
@@ -256,8 +256,8 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
 
-				ast->gc.refcount = 1;
-				ast->gc.u.v.type = IS_CONSTANT_AST;
+				GC_REFCOUNT(ast) = 1;
+				GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
 				ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
 				Z_AST_P(zvalue) = ast;
 			}

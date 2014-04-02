@@ -73,9 +73,9 @@ static uint zend_hash_persist_calc(HashTable *ht, uint (*pPersistElement)(zval *
 
 		/* persist bucket and key */
 		if (p->key) {
-			zend_uchar flags = p->key->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
+			zend_uchar flags = GC_FLAGS(p->key) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(p->key, 1);
-			p->key->gc.u.v.flags |= flags;
+			GC_FLAGS(p->key) |= flags;
 		}
 
 		ADD_SIZE(pPersistElement(&p->val TSRMLS_CC));
@@ -112,15 +112,15 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 	START_SIZE();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	switch (z->type & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(z) & IS_CONSTANT_TYPE_MASK) {
 #else
-	switch (z->type & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(z) & ~IS_CONSTANT_INDEX) {
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
-			flags = Z_STR_P(z)->gc.u.v.flags & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
+			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
-			Z_STR_P(z)->gc.u.v.flags |= flags;
+			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:

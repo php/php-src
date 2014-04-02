@@ -617,7 +617,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	zend_op_array *retval;
 	char *opened_path = NULL;
 
-	if (filename->type != IS_STRING) {
+	if (Z_TYPE_P(filename) != IS_STRING) {
 		tmp = *filename;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
@@ -1152,7 +1152,7 @@ inline_html:
 		if (readsize < yyleng) {
 			yyless(readsize);
 		}
-		zendlval->type = IS_STRING;
+		Z_TYPE_P(zendlval) = IS_STRING;
 	} else {
 	  ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
@@ -2952,12 +2952,12 @@ yy173:
 			} else {
 				Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
 			}
-			zendlval->type = IS_DOUBLE;
+			Z_TYPE_P(zendlval) = IS_DOUBLE;
 			return T_DNUMBER;
 		}
 	}
 
-	zendlval->type = IS_LONG;
+	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LNUMBER;
 }
 #line 2964 "Zend/zend_language_scanner.c"
@@ -3310,7 +3310,7 @@ yy200:
 		} else {
 			Z_LVAL_P(zendlval) = strtol(bin, NULL, 2);
 		}
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, NULL));
@@ -3346,7 +3346,7 @@ yy203:
 		} else {
 			Z_LVAL_P(zendlval) = strtol(hex, NULL, 16);
 		}
-		zendlval->type = IS_LONG;
+		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, NULL));

@@ -351,22 +351,22 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 
 static zend_always_inline zend_uint zval_refcount_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return Z_COUNTED_P(pz)->refcount;
+	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline zend_uint zval_set_refcount_p(zval* pz, zend_uint rc) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return Z_COUNTED_P(pz)->refcount = rc;
+	return GC_REFCOUNT(Z_COUNTED_P(pz)) = rc;
 }
 
 static zend_always_inline zend_uint zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return ++Z_COUNTED_P(pz)->refcount;
+	return ++GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline zend_uint zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return --Z_COUNTED_P(pz)->refcount;
+	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 /* excpt.h on Digital Unix 4.0 defines function_table */

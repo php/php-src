@@ -43,7 +43,7 @@ ZEND_API zval *zend_list_insert(void *ptr, int type TSRMLS_DC)
 
 ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC)
 {
-	if (res->gc.refcount <= 0) {
+	if (GC_REFCOUNT(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
 	} else {
 		return SUCCESS;
@@ -52,7 +52,7 @@ ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC)
 
 ZEND_API int _zend_list_close(zend_resource *res TSRMLS_DC)
 {
-	if (res->gc.refcount <= 0) {
+	if (GC_REFCOUNT(res) <= 0) {
 		return zend_list_delete(res);
 	} else if (res->type >= 0) {
 		zend_rsrc_list_dtors_entry *ld;

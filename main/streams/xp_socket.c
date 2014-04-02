@@ -733,7 +733,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 			if (xparam->outputs.client) {
 				xparam->outputs.client->context = stream->context;
 				if (stream->context) {
-					stream->context->res->gc.refcount++;
+					GC_REFCOUNT(stream->context->res)++;
 				}
 			}
 		}

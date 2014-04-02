@@ -37,8 +37,8 @@ ZEND_API zend_ulong zend_hash_func(const char *str, uint len)
 static void _str_dtor(zval *zv)
 {
 	zend_string *str = Z_STR_P(zv);
-	str->gc.u.v.flags &= ~IS_STR_INTERNED;
-	str->gc.refcount = 1;
+	GC_FLAGS(str) &= ~IS_STR_INTERNED;
+	GC_REFCOUNT(str) = 1;
 }
 
 void zend_interned_strings_init(TSRMLS_D)
@@ -104,12 +104,12 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 				return p->key;
 			}
 		}
-		idx = p->val.u.next;
+		idx = Z_NEXT(p->val);
 	}
 	
-	str->gc.refcount = 1;
+	GC_REFCOUNT(str) = 1;
 //	str->gc.u.v.type = IS_INTERNED_STRING;
-	str->gc.u.v.flags |= IS_STR_INTERNED;
+	GC_FLAGS(str) |= IS_STR_INTERNED;
 
 //???	if (CG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength) >=
 //???	    CG(interned_strings_end)) {
@@ -154,7 +154,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	Z_STR(p->val) = str;
 	Z_TYPE(p->val) = IS_STRING;
 	nIndex = h & CG(interned_strings).nTableMask;
-	p->val.u.next = CG(interned_strings).arHash[nIndex];
+	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
 	CG(interned_strings).arHash[nIndex] = idx;
 		
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -175,8 +175,8 @@ static void zend_interned_strings_snapshot_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		ZEND_ASSERT(p->key->gc.u.v.flags & IS_STR_PERSISTENT);
-		p->key->gc.u.v.flags |= IS_STR_PERMANENT;
+		ZEND_ASSERT(GC_FLAGS(p->key) & IS_STR_PERSISTENT);
+		GC_FLAGS(p->key) |= IS_STR_PERMANENT;
 	}
 #endif
 }
@@ -192,23 +192,23 @@ static void zend_interned_strings_restore_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		if (p->key->gc.u.v.flags & IS_STR_PERMANENT) break;
+		if (GC_FLAGS(p->key) & IS_STR_PERMANENT) break;
 		CG(interned_strings).nNumUsed--;
 		CG(interned_strings).nNumOfElements--;
 
-		p->key->gc.u.v.flags &= ~IS_STR_INTERNED;
-		p->key->gc.refcount = 1;
+		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
+		GC_REFCOUNT(p->key) = 1;
 		STR_FREE(p->key);
 
 		nIndex = p->h & CG(interned_strings).nTableMask;
 		if (CG(interned_strings).arHash[nIndex] == idx) {
-			CG(interned_strings).arHash[nIndex] = p->val.u.next;
+			CG(interned_strings).arHash[nIndex] = Z_NEXT(p->val);
 		} else {
 			uint prev = CG(interned_strings).arHash[nIndex];
-			while (CG(interned_strings).arData[prev].val.u.next != idx) {
-				prev = CG(interned_strings).arData[prev].val.u.next;
+			while (Z_NEXT(CG(interned_strings).arData[prev].val) != idx) {
+				prev = Z_NEXT(CG(interned_strings).arData[prev].val);
  			}
-			CG(interned_strings).arData[prev].val.u.next = p->val.u.next;
+			Z_NEXT(CG(interned_strings).arData[prev].val) = Z_NEXT(p->val);
  		}
  	}
 #endif

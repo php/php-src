@@ -73,7 +73,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	if (--iter->std.gc.refcount > 0) {
+	if (--GC_REFCOUNT(iter) > 0) {
 		return;
 	}
 

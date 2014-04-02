@@ -69,7 +69,7 @@ static int _php_stream_release_context(zval *zv, void *pContext TSRMLS_DC)
 {
 	zend_resource *le = Z_RES_P(zv);
 	if (le->ptr == pContext) {
-		return --le->gc.refcount == 0;
+		return --GC_REFCOUNT(le) == 0;
 	}
 	return 0;
 }
@@ -138,10 +138,10 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 				
 				*stream = (php_stream*)le->ptr;
 				if (!regentry) { /* not found in regular list */
-					le->gc.refcount++;
+					GC_REFCOUNT(le)++;
 					(*stream)->res = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
 				} else {
-					regentry->gc.refcount++;
+					GC_REFCOUNT(regentry)++;
 					(*stream)->res = regentry;
 				}
 			}
@@ -2155,7 +2155,7 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 	stream->context = context;
 
 	if (context) {
-		context->res->gc.refcount++;
+		GC_REFCOUNT(context->res)++;
 	}
 	if (oldcontext) {
 		zend_list_delete(oldcontext->res);
