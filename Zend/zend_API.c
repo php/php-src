@@ -3844,7 +3844,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				zval_dtor(property);
 				ZVAL_COPY_VALUE(property, value);
 				if (Z_REFCOUNT_P(value) > 0) {
-					zval_copy_ctor(property);
+					zval_opt_copy_ctor(property);
 				}
 			} else {
 				zval garbage;

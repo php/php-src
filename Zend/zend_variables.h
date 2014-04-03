@@ -43,7 +43,18 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zvalue)) {
-		if (Z_TYPE_FLAGS_P(zvalue) & IS_TYPE_COPYABLE) {
+		if (Z_COPYABLE_P(zvalue)) {
+			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
+		} else {
+			Z_ADDREF_P(zvalue);
+		}
+	}
+}
+
+static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
+{
+	if (Z_OPT_REFCOUNTED_P(zvalue)) {
+		if (Z_OPT_COPYABLE_P(zvalue)) {
 			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			Z_ADDREF_P(zvalue);
@@ -60,6 +71,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_ptr_dtor(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_dtor_wrapper(zval *zvalue);
 #define zval_copy_ctor(zvalue) _zval_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
+#define zval_opt_copy_ctor(zvalue) _zval_opt_copy_ctor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 #define zval_internal_dtor(zvalue) _zval_internal_dtor((zvalue) ZEND_FILE_LINE_CC)

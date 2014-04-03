@@ -832,6 +832,10 @@ PHP_FUNCTION(end)
 			RETURN_FALSE;
 		}
 
+		if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+		}
+
 		RETURN_ZVAL_FAST(entry);
 	}
 }
@@ -853,6 +857,10 @@ PHP_FUNCTION(prev)
 	if (USED_RET()) {
 		if ((entry = zend_hash_get_current_data(array)) == NULL) {
 			RETURN_FALSE;
+		}
+
+		if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
 		}
 
 		RETURN_ZVAL_FAST(entry);
@@ -878,6 +886,10 @@ PHP_FUNCTION(next)
 			RETURN_FALSE;
 		}
 
+		if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+		}
+
 		RETURN_ZVAL_FAST(entry);
 	}
 }
@@ -901,6 +913,10 @@ PHP_FUNCTION(reset)
 			RETURN_FALSE;
 		}
 
+		if (Z_TYPE_P(entry) == IS_INDIRECT) {
+			entry = Z_INDIRECT_P(entry);
+		}
+
 		RETURN_ZVAL_FAST(entry);
 	}
 }
@@ -919,6 +935,10 @@ PHP_FUNCTION(current)
 
 	if ((entry = zend_hash_get_current_data(array)) == NULL) {
 		RETURN_FALSE;
+	}
+
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
 	}
 
 	RETURN_ZVAL_FAST(entry);

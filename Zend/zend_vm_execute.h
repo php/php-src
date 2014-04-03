@@ -2551,7 +2551,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CONST != IS_TMP_VAR) {
-				zval_copy_ctor(EX(return_value));
+				zval_opt_copy_ctor(EX(return_value));
 			}
 
 		} else if (Z_ISREF_P(retval_ptr)) {
@@ -2560,7 +2560,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CONST == IS_CV) {
-				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+				if (Z_OPT_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -2646,7 +2646,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	/* Not sure if a complete copy is what we want here */
 	ZVAL_COPY_VALUE(&exception, value);
 	if (!0) {
-		zval_copy_ctor(&exception);
+		zval_opt_copy_ctor(&exception);
 	}
 
 	zend_throw_exception_object(&exception TSRMLS_CC);
@@ -2676,7 +2676,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 		ZVAL_COPY_VALUE(&valptr, value);
 		if (!0) {
-			zval_copy_ctor(&valptr);
+			zval_opt_copy_ctor(&valptr);
 		}
 		zend_vm_stack_push(&valptr TSRMLS_CC);
 
@@ -2770,7 +2770,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!0) {
-			zval_copy_ctor(result);
+			zval_opt_copy_ctor(result);
 		}
 	}
 
@@ -2801,7 +2801,7 @@ cast_again:
 			} else {
 				ZVAL_COPY_VALUE(result, expr);
 				if (!0) {
-					zval_copy_ctor(result);
+					zval_opt_copy_ctor(result);
 				}
 			}
 			break;
@@ -3157,7 +3157,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 
 #if DEBUG_ZEND>=2
@@ -3185,7 +3185,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
-				zval_copy_ctor(EX_VAR(opline->result.var));
+				zval_opt_copy_ctor(EX_VAR(opline->result.var));
 			}
 		}
 
@@ -3210,7 +3210,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		zval_copy_ctor(EX_VAR(opline->result.var));
+		zval_opt_copy_ctor(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -3231,7 +3231,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -4208,7 +4208,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 	if (Z_TYPE_FLAGS_P(val) & IS_TYPE_CONSTANT) {
 		ZVAL_COPY_VALUE(&c.value, val);
 		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_copy_ctor(&c.value);
+			zval_opt_copy_ctor(&c.value);
 		}
 		zval_update_constant(&c.value, NULL TSRMLS_CC);
 	} else {
@@ -4257,7 +4257,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -4293,7 +4293,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -4323,7 +4323,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -4910,7 +4910,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -4946,7 +4946,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -4976,7 +4976,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!1) {
@@ -5889,7 +5889,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -5925,7 +5925,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -5955,7 +5955,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -6578,7 +6578,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -6614,7 +6614,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -6644,7 +6644,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -7284,7 +7284,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				value = opline->op1.zv;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -7320,7 +7320,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -7350,7 +7350,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -7625,7 +7625,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_TMP_VAR != IS_TMP_VAR) {
-				zval_copy_ctor(EX(return_value));
+				zval_opt_copy_ctor(EX(return_value));
 			}
 
 		} else if (Z_ISREF_P(retval_ptr)) {
@@ -7634,7 +7634,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_TMP_VAR == IS_CV) {
-				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+				if (Z_OPT_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -7720,7 +7720,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Not sure if a complete copy is what we want here */
 	ZVAL_COPY_VALUE(&exception, value);
 	if (!1) {
-		zval_copy_ctor(&exception);
+		zval_opt_copy_ctor(&exception);
 	}
 
 	zend_throw_exception_object(&exception TSRMLS_CC);
@@ -7750,7 +7750,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 		ZVAL_COPY_VALUE(&valptr, value);
 		if (!1) {
-			zval_copy_ctor(&valptr);
+			zval_opt_copy_ctor(&valptr);
 		}
 		zend_vm_stack_push(&valptr TSRMLS_CC);
 
@@ -7845,7 +7845,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!1) {
-			zval_copy_ctor(result);
+			zval_opt_copy_ctor(result);
 		}
 	}
 
@@ -7876,7 +7876,7 @@ cast_again:
 			} else {
 				ZVAL_COPY_VALUE(result, expr);
 				if (!1) {
-					zval_copy_ctor(result);
+					zval_opt_copy_ctor(result);
 				}
 			}
 			break;
@@ -8259,7 +8259,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!1) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 
 #if DEBUG_ZEND>=2
@@ -8288,7 +8288,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!1) {
-				zval_copy_ctor(EX_VAR(opline->result.var));
+				zval_opt_copy_ctor(EX_VAR(opline->result.var));
 			}
 		}
 
@@ -8314,7 +8314,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!1) {
-		zval_copy_ctor(EX_VAR(opline->result.var));
+		zval_opt_copy_ctor(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -8335,7 +8335,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!1) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -9249,7 +9249,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -9285,7 +9285,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -9315,7 +9315,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -9902,7 +9902,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -9938,7 +9938,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -9968,7 +9968,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!1) {
@@ -10881,7 +10881,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -10917,7 +10917,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -10947,7 +10947,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -11438,7 +11438,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -11474,7 +11474,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -11504,7 +11504,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -12088,7 +12088,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -12124,7 +12124,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!1) {
@@ -12154,7 +12154,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -12621,7 +12621,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_VAR != IS_TMP_VAR) {
-				zval_copy_ctor(EX(return_value));
+				zval_opt_copy_ctor(EX(return_value));
 			}
 			zval_ptr_dtor_nogc(free_op1.var);
 		} else if (Z_ISREF_P(retval_ptr)) {
@@ -12630,7 +12630,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_VAR == IS_CV) {
-				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+				if (Z_OPT_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -12717,7 +12717,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Not sure if a complete copy is what we want here */
 	ZVAL_COPY_VALUE(&exception, value);
 	if (!0) {
-		zval_copy_ctor(&exception);
+		zval_opt_copy_ctor(&exception);
 	}
 
 	zend_throw_exception_object(&exception TSRMLS_CC);
@@ -12799,7 +12799,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 		ZVAL_COPY_VALUE(&val, varptr);
 		if (!0) {
-			zval_copy_ctor(&val);
+			zval_opt_copy_ctor(&val);
 		}
 		zval_ptr_dtor_nogc(free_op1.var);
 		zend_vm_stack_push(&val TSRMLS_CC);
@@ -12962,7 +12962,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!0) {
-			zval_copy_ctor(result);
+			zval_opt_copy_ctor(result);
 		}
 	}
 
@@ -12993,7 +12993,7 @@ cast_again:
 			} else {
 				ZVAL_COPY_VALUE(result, expr);
 				if (!0) {
-					zval_copy_ctor(result);
+					zval_opt_copy_ctor(result);
 				}
 			}
 			break;
@@ -13488,7 +13488,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 		zval_ptr_dtor_nogc(free_op1.var);
 #if DEBUG_ZEND>=2
@@ -13517,7 +13517,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
-				zval_copy_ctor(EX_VAR(opline->result.var));
+				zval_opt_copy_ctor(EX_VAR(opline->result.var));
 			}
 		}
 		zval_ptr_dtor_nogc(free_op1.var);
@@ -13543,7 +13543,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		zval_copy_ctor(EX_VAR(opline->result.var));
+		zval_opt_copy_ctor(EX_VAR(opline->result.var));
 	}
 	zval_ptr_dtor_nogc(free_op1.var);
 	CHECK_EXCEPTION();
@@ -13564,7 +13564,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -13883,10 +13883,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -14137,7 +14134,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -14236,7 +14233,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -15003,17 +15000,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -15056,17 +15043,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_CONST TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);}
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_CONST, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -15949,7 +15926,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -15986,7 +15963,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -16017,7 +15994,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -16348,10 +16325,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -16603,7 +16577,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -16702,7 +16676,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -17291,17 +17265,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDL
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -17344,17 +17308,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);}
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (1) {
 			zval_dtor(value);
@@ -17999,7 +17953,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -18036,7 +17990,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -18067,7 +18021,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!1) {
@@ -18398,10 +18352,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -18653,7 +18604,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -18752,7 +18703,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -19520,17 +19471,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -19573,17 +19514,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_VAR TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);}
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -20440,7 +20371,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -20477,7 +20408,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -20508,7 +20439,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -20564,10 +20495,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -21125,17 +21053,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -21567,7 +21485,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -21604,7 +21522,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -21635,7 +21553,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -21966,10 +21884,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -22220,7 +22135,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -22319,7 +22234,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -22907,17 +22822,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -22960,17 +22865,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_CV TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);}
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_CV, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -23676,7 +23571,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -23713,7 +23608,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -23744,7 +23639,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -23880,10 +23775,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -24133,7 +24025,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -24232,7 +24124,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -25133,7 +25025,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -25169,7 +25061,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -25199,7 +25091,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -25254,10 +25146,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -25508,7 +25397,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -25607,7 +25496,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -26422,7 +26311,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -26458,7 +26347,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -26488,7 +26377,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!1) {
@@ -26543,10 +26432,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -26797,7 +26683,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -26896,7 +26782,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -27711,7 +27597,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -27747,7 +27633,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -27777,7 +27663,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -27833,10 +27719,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -28113,7 +27996,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -28149,7 +28032,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -28179,7 +28062,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -28234,10 +28117,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -28487,7 +28367,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -28586,7 +28466,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -29399,7 +29279,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = NULL;
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -29435,7 +29315,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -29465,7 +29345,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -29913,7 +29793,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CV != IS_TMP_VAR) {
-				zval_copy_ctor(EX(return_value));
+				zval_opt_copy_ctor(EX(return_value));
 			}
 
 		} else if (Z_ISREF_P(retval_ptr)) {
@@ -29922,7 +29802,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
 			if (IS_CV == IS_CV) {
-				if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+				if (Z_OPT_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 			}
 		}
 	}
@@ -30008,7 +29888,7 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Not sure if a complete copy is what we want here */
 	ZVAL_COPY_VALUE(&exception, value);
 	if (!0) {
-		zval_copy_ctor(&exception);
+		zval_opt_copy_ctor(&exception);
 	}
 
 	zend_throw_exception_object(&exception TSRMLS_CC);
@@ -30090,7 +29970,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		}
 		ZVAL_COPY_VALUE(&val, varptr);
 		if (!0) {
-			zval_copy_ctor(&val);
+			zval_opt_copy_ctor(&val);
 		}
 
 		zend_vm_stack_push(&val TSRMLS_CC);
@@ -30241,7 +30121,7 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!0) {
-			zval_copy_ctor(result);
+			zval_opt_copy_ctor(result);
 		}
 	}
 
@@ -30272,7 +30152,7 @@ cast_again:
 			} else {
 				ZVAL_COPY_VALUE(result, expr);
 				if (!0) {
-					zval_copy_ctor(result);
+					zval_opt_copy_ctor(result);
 				}
 			}
 			break;
@@ -30628,7 +30508,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	if (i_zend_is_true(value TSRMLS_CC)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 
 #if DEBUG_ZEND>=2
@@ -30656,7 +30536,7 @@ static int ZEND_FASTCALL  ZEND_JMP_SET_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		} else {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 			if (!0) {
-				zval_copy_ctor(EX_VAR(opline->result.var));
+				zval_opt_copy_ctor(EX_VAR(opline->result.var));
 			}
 		}
 
@@ -30681,7 +30561,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 	if (!0) {
-		zval_copy_ctor(EX_VAR(opline->result.var));
+		zval_opt_copy_ctor(EX_VAR(opline->result.var));
 	}
 
 	CHECK_EXCEPTION();
@@ -30702,7 +30582,7 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), value);
 		if (!0) {
-			zval_copy_ctor(EX_VAR(opline->result.var));
+			zval_opt_copy_ctor(EX_VAR(opline->result.var));
 		}
 	}
 
@@ -31020,10 +30900,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -31273,7 +31150,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -31372,7 +31249,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -32133,17 +32010,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -32186,17 +32053,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	variable_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_CONST TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_CONST, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -32867,7 +32724,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -32903,7 +32760,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -32933,7 +32790,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -33264,10 +33121,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -33518,7 +33372,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -33617,7 +33471,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -34200,17 +34054,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -34253,17 +34097,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	variable_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_TMP_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (1) {
 			zval_dtor(value);
@@ -34789,7 +34623,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -34825,7 +34659,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -34855,7 +34689,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!1) {
@@ -35186,10 +35020,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -35440,7 +35271,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -35539,7 +35370,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -36301,17 +36132,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -36354,17 +36175,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	variable_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_VAR TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_VAR, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -37101,7 +36912,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -37137,7 +36948,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -37167,7 +36978,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -37223,10 +37034,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -37781,17 +37589,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -38091,7 +37889,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -38127,7 +37925,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -38157,7 +37955,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {
@@ -38488,10 +38286,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		make_real_object(object TSRMLS_CC);
-	}
-	ZVAL_DEREF(object);
+	object = make_real_object(object TSRMLS_CC);
 
 	value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
@@ -38741,7 +38536,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -38840,7 +38635,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+	object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
@@ -39422,17 +39217,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		variable_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-			zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-			if (zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type TSRMLS_CC)) {
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->str) + Z_STR_OFFSET_P(EX_VAR((opline+1)->op2.var))->offset, 1);
-				}
-			} else if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(EX_VAR(opline->result.var));
-			}
-//??? instead of FREE_OP_VAR_PTR(free_op_data2);
-			STR_RELEASE(old_str);
-			efree(Z_STR_OFFSET_P(variable_ptr));
+			zend_assign_to_string_offset(variable_ptr, value, (opline+1)->op1_type, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 		} else if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			if (IS_TMP_FREE(free_op_data1)) {
 				zval_dtor(value);
@@ -39475,17 +39260,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	variable_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
 	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET)) {
-		zend_string *old_str = Z_STR_P(Z_STR_OFFSET_P(variable_ptr)->str);
-		if (zend_assign_to_string_offset(variable_ptr, value, IS_CV TSRMLS_CC)) {
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_STRINGL(EX_VAR(opline->result.var), Z_STRVAL_P(Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->str) + Z_STR_OFFSET_P(EX_VAR(opline->op1.var))->offset, 1);
-			}
-		} else if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-//??? instead of
-		STR_RELEASE(old_str);
-		efree(Z_STR_OFFSET_P(variable_ptr));
+		zend_assign_to_string_offset(variable_ptr, value, IS_CV, (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
 	} else if (IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) {
 		if (0) {
 			zval_dtor(value);
@@ -40071,7 +39846,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 				value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -40107,7 +39882,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			) {
 //???				INIT_PZVAL_COPY(copy, value);
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
+				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
 
 				/* Temporary variables don't need ctor copying */
 				if (!0) {
@@ -40137,7 +39912,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		) {
 //???			INIT_PZVAL_COPY(copy, key);
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
 
 			/* Temporary variables don't need ctor copying */
 			if (!0) {

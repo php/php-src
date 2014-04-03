@@ -139,8 +139,7 @@ END_EXTERN_C()
 static zend_always_inline void gc_check_possible_root(zval *z TSRMLS_DC)
 {
 	ZVAL_DEREF(z);
-	if ((Z_TYPE_FLAGS_P(z) & IS_TYPE_COLLECTABLE) &&
-	    UNEXPECTED(!Z_GC_INFO_P(z))) {
+	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
 		gc_possible_root(Z_COUNTED_P(z) TSRMLS_CC);
 	}
 }

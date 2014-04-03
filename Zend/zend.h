@@ -661,7 +661,7 @@ END_EXTERN_C()
 		zval *__z1 = (z);								\
 		zval *__z2 = (v);								\
 		ZVAL_COPY_VALUE(__z1, __z2);					\
-		if (Z_REFCOUNTED_P(__z1)) {						\
+		if (Z_OPT_REFCOUNTED_P(__z1)) {					\
 			Z_ADDREF_P(__z1);							\
 		}												\
 	} while (0)
@@ -671,7 +671,7 @@ END_EXTERN_C()
 		zval *__z1 = (z);								\
 		zval *__z2 = (v);								\
 		ZVAL_COPY_VALUE(__z1, __z2);					\
-		zval_copy_ctor(__z1);							\
+		zval_opt_copy_ctor(__z1);						\
 	} while (0)
 
 #define ZVAL_DEREF(z) do {								\
@@ -698,7 +698,7 @@ END_EXTERN_C()
 		zval *__z2 = (v);								\
 		ZVAL_DEREF(__z2);								\
 		ZVAL_COPY_VALUE(__z1, __z2);					\
-		zval_copy_ctor(__z1);							\
+		zval_opt_copy_ctor(__z1);						\
 	} while (0)
 
 #define ZVAL_UNREF(z) do {								\
@@ -718,66 +718,69 @@ END_EXTERN_C()
 		Z_UNSET_ISREF_P(z);								\
 	} while (0)
 
-#define SEPARATE_ZVAL(zv) do {											\
-		zval *_zv = (zv);												\
-		if (Z_REFCOUNTED_P(_zv)) {										\
-			if (Z_REFCOUNT_P(_zv) > 1) {								\
-				if (Z_ISREF_P(_zv)) {									\
-					Z_DELREF_P(_zv);									\
-					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));						\
-				} else if (Z_TYPE_FLAGS_P(_zv) & IS_TYPE_COPYABLE) {	\
-					Z_DELREF_P(_zv);									\
-					zval_copy_ctor_func(_zv);							\
-				}														\
-			}															\
-		}																\
+#define SEPARATE_ZVAL(zv) do {							\
+		zval *_zv = (zv);								\
+		if (Z_REFCOUNTED_P(_zv)) {						\
+			if (Z_REFCOUNT_P(_zv) > 1) {				\
+				if (Z_ISREF_P(_zv)) {					\
+					Z_DELREF_P(_zv);					\
+					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
+				} else if (Z_COPYABLE_P(_zv)) {			\
+					Z_DELREF_P(_zv);					\
+					zval_copy_ctor_func(_zv);			\
+				}										\
+			}											\
+		}												\
 	} while (0)
 
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {								\
-		zval *_zv = (zv);												\
-		if (!Z_ISREF_P(_zv) &&											\
-		    (Z_TYPE_FLAGS_P(_zv) & IS_TYPE_COPYABLE) &&					\
-		    Z_REFCOUNT_P(_zv) > 1) {									\
-			Z_DELREF_P(_zv);											\
-			zval_copy_ctor_func(_zv);									\
-		}      															\
+#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
+		zval *_zv = (zv);								\
+		if (!Z_ISREF_P(_zv) &&							\
+		    Z_COPYABLE_P(_zv) &&						\
+		    Z_REFCOUNT_P(_zv) > 1) {					\
+			Z_DELREF_P(_zv);							\
+			zval_copy_ctor_func(_zv);					\
+		}      											\
 	} while (0)
 
-#define SEPARATE_ZVAL_IF_REF(zv) do {									\
-		zval *__zv = (zv);												\
-		if (Z_ISREF_P(__zv)) {											\
-			if (Z_REFCOUNT_P(__zv) == 1) {								\
-				ZVAL_UNREF(__zv);										\
-			} else {													\
-				Z_DELREF_P(__zv);										\
-				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));						\
-			}															\
-		}																\
+#define SEPARATE_ZVAL_IF_REF(zv) do {					\
+		zval *__zv = (zv);								\
+		if (Z_ISREF_P(__zv)) {							\
+			if (Z_REFCOUNT_P(__zv) == 1) {				\
+				ZVAL_UNREF(__zv);						\
+			} else {									\
+				Z_DELREF_P(__zv);						\
+				ZVAL_DUP(__zv, Z_REFVAL_P(__zv));		\
+			}											\
+		}												\
 	} while (0)
 
-#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {							\
-		zval *__zv = (zv);												\
-		if (!Z_ISREF_P(__zv)) {											\
-		    if (!(Z_TYPE_FLAGS_P(__zv) & IS_TYPE_COPYABLE) ||			\
-			    Z_REFCOUNT_P(__zv) == 1) {								\
-				ZVAL_NEW_REF(__zv, __zv);								\
-			} else {													\
-				Z_DELREF_P(__zv);										\
-				ZVAL_NEW_REF(__zv, __zv);								\
-				zval_copy_ctor_func(Z_REFVAL_P(__zv));					\
-			}															\
-		}																\
+#define SEPARATE_ZVAL_TO_MAKE_IS_REF(zv) do {			\
+		zval *__zv = (zv);								\
+		if (!Z_ISREF_P(__zv)) {							\
+		    if (!Z_COPYABLE_P(__zv) ||					\
+			    Z_REFCOUNT_P(__zv) == 1) {				\
+				ZVAL_NEW_REF(__zv, __zv);				\
+			} else {									\
+				Z_DELREF_P(__zv);						\
+				ZVAL_NEW_REF(__zv, __zv);				\
+				zval_copy_ctor_func(Z_REFVAL_P(__zv));	\
+			}											\
+		}												\
 	} while (0)
 
+
+// TODO: remove ???
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	ZVAL_COPY_VALUE(&(zv), (pzv));			\
-	if (Z_REFCOUNTED_P(pzv)) {				\
+	if (Z_OPT_REFCOUNTED_P(pzv)) {			\
 		if (Z_REFCOUNT_P(pzv)>1) {			\
 			zval_copy_ctor(&(zv));			\
 			Z_DELREF_P((pzv));				\
 		}									\
 	}										\
 
+// TODO: remove ???
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
 	int is_ref, refcount;						\
 												\
@@ -787,7 +790,7 @@ END_EXTERN_C()
 	zval_dtor(*ppzv_dest);						\
 	ZVAL_COPY_VALUE(*ppzv_dest, pzv_src);		\
 	if (copy) {                                 \
-		zval_copy_ctor(*ppzv_dest);				\
+		zval_opt_copy_ctor(*ppzv_dest);			\
     }		                                    \
 	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);		\
 	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\

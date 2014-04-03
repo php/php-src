@@ -583,7 +583,7 @@ END_EXTERN_C()
 				Z_REFVAL_P(__zv));				\
 		}										\
 		if (copy) {								\
-			zval_copy_ctor(__z);				\
+			zval_opt_copy_ctor(__z);			\
 	    }										\
 		if (dtor) {								\
 			if (!copy) {						\
