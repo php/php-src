@@ -20,28 +20,28 @@ PHP                                                                        NEWS
   . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
     when loaded with "file://"). (Anatol)
 
-?? ??? 2014, PHP 5.4.27
+03 Apr 2014, PHP 5.4.27
 
 - Core:
   . Fixed bug #60602 (proc_open() changes environment array) (Tjerk)
 
 - Fileinfo:
-  . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
+  . Fixed bug #66946 (fileinfo: extensive backtracking in awk rule regular
     expression). (CVE-2013-7345) (Remi)
 
 - FPM:
   . Added clear_env configuration directive to disable clearenv() call.
-  (Github PR# 598, Paul Annesley)
+    (Github PR# 598, Paul Annesley)
 
 - GMP
-  . fixed bug#66872 (invalid argument crashes gmp_testbit) (Pierre)
+  . Fixed bug #66872 (invalid argument crashes gmp_testbit) (Pierre)
 
 - Mail:
   . Fixed bug #66535 (Don't add newline after X-PHP-Originating-Script) (Tjerk)
 
 - MySQLi:
   . Fixed bug #66762 (Segfault in mysqli_stmt::bind_result() when link closed)
-  (Remi)
+    (Remi)
 
 - Openssl:
   . Fixed bug #66833 (Default disgest algo is still MD5, switch to SHA1). (Remi)
