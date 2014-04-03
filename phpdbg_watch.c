@@ -208,12 +208,12 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_
 	return SUCCESS;
 }
 
-static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch TSRMLS_DC) {
+static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch, zend_bool user_request TSRMLS_DC) {
 	if (watch->type == WATCH_ON_HASHTABLE || (watch->type == WATCH_ON_ZVAL && (Z_TYPE_P(watch->addr.zv) == IS_ARRAY || Z_TYPE_P(watch->addr.zv) == IS_OBJECT))) {
 		HashTable *ht;
 		phpdbg_btree_result *result;
 
-		if (watch->type == WATCH_ON_HASHTABLE) {
+		if (watch->type == WATCH_ON_HASHTABLE && user_request) {
 			HashPosition position;
 			zval **zv;
 			zval key;
@@ -235,7 +235,7 @@ static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch TSRMLS_
 				}
 
 				if (zend_hash_find(&PHPDBG_G(watchpoints), str, str_len, (void **) &watchpoint) == SUCCESS) {
-					phpdbg_delete_watchpoint_recursive(*watchpoint TSRMLS_CC);
+					phpdbg_delete_watchpoint_recursive(*watchpoint, 1 TSRMLS_CC);
 				}
 			}
 		} else {
@@ -249,7 +249,7 @@ static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch TSRMLS_
 			}
 
 			if ((result = phpdbg_btree_find(&PHPDBG_G(watchpoint_tree), (zend_ulong) ht))) {
-				phpdbg_delete_watchpoint_recursive((phpdbg_watchpoint_t *) result->ptr TSRMLS_CC);
+				phpdbg_delete_watchpoint_recursive((phpdbg_watchpoint_t *) result->ptr, user_request TSRMLS_CC);
 			}
 		}
 	}
@@ -269,7 +269,7 @@ static int phpdbg_delete_watchpoint(phpdbg_watchpoint_t *tmp_watch TSRMLS_DC) {
 	watch = result->ptr;
 
 	if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
-		ret = phpdbg_delete_watchpoint_recursive(watch TSRMLS_CC);
+		ret = phpdbg_delete_watchpoint_recursive(watch, 1 TSRMLS_CC);
 	} else {
 		ret = zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 	}
@@ -447,7 +447,7 @@ void phpdbg_watch_HashTable_dtor(zval **zv) {
 		phpdbg_notice("%.*s was removed, removing watchpoint%s", (int)watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_RECURSIVE)?" recursively":"");
 
 		if (watch->flags & PHPDBG_WATCH_RECURSIVE) {
-			phpdbg_delete_watchpoint_recursive(watch TSRMLS_CC);
+			phpdbg_delete_watchpoint_recursive(watch, 0 TSRMLS_CC);
 		} else {
 			zend_hash_del(&PHPDBG_G(watchpoints), watch->str, watch->str_len);
 		}

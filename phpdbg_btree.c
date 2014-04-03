@@ -202,7 +202,7 @@ check_branch_existence:
 		if (last_dual_branch->branches[last_dual_branch_branch] == last_dual_branch + 1) {
 			phpdbg_btree_branch *original_branch = last_dual_branch->branches[!last_dual_branch_branch];
 
-			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], i_last_dual_branch * sizeof(phpdbg_btree_branch));
+			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], (i_last_dual_branch + 1) * sizeof(phpdbg_btree_branch));
 			efree(last_dual_branch->branches[!last_dual_branch_branch]);
 			last_dual_branch->branches[!last_dual_branch_branch] = last_dual_branch + 1;
 
