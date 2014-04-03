@@ -501,16 +501,13 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_exec
 	return get_zval_ptr(op_type, op, execute_data, should_free, type);
 }
 
-static void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr TSRMLS_DC)
+static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr TSRMLS_DC)
 {
-	if (variable_ptr == &EG(error_zval) || value_ptr == &EG(error_zval)) {
-		ZVAL_NULL(variable_ptr);
-	} else if (EXPECTED(variable_ptr != value_ptr)) {
-		zval tmp;
+	if (EXPECTED(variable_ptr != value_ptr)) {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
-		ZVAL_COPY(&tmp, value_ptr);
+		Z_ADDREF_P(value_ptr);
 		zval_ptr_dtor(variable_ptr);
-		ZVAL_COPY_VALUE(variable_ptr, &tmp);
+		ZVAL_COPY_VALUE(variable_ptr, value_ptr);
 	} else if (!Z_ISREF_P(variable_ptr)) {
 		ZVAL_NEW_REF(variable_ptr, variable_ptr);
 	}

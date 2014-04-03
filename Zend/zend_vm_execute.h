@@ -19643,7 +19643,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	}
 	if (IS_VAR == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
+	    UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -19652,7 +19652,12 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDL
 	    (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
-	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	if ((IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) ||
+	    (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == &EG(error_zval)))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	}
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		if (!(free_op2.var != NULL)) {
@@ -23024,7 +23029,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	}
 	if (IS_VAR == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
+	    UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -23033,7 +23038,12 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	    (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
-	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	if ((IS_VAR == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) ||
+	    (IS_CV == IS_VAR && UNEXPECTED(value_ptr == &EG(error_zval)))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	}
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		if (!0) {
@@ -36414,7 +36424,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	}
 	if (IS_CV == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
+	    UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -36423,7 +36433,12 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	    (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
-	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	if ((IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) ||
+	    (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == &EG(error_zval)))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	}
 
 	if (IS_VAR == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		if (!(free_op2.var != NULL)) {
@@ -39529,7 +39544,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	}
 	if (IS_CV == IS_VAR &&
 	    UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISREF_P(EX_VAR(opline->op1.var)))) {
+	    UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
 		zend_error_noreturn(E_ERROR, "Cannot assign by reference to overloaded object");
 	}
 
@@ -39538,7 +39553,12 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 	    (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(variable_ptr) == IS_STR_OFFSET))) {
 		zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 	}
-	zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	if ((IS_CV == IS_VAR && UNEXPECTED(variable_ptr == &EG(error_zval))) ||
+	    (IS_CV == IS_VAR && UNEXPECTED(value_ptr == &EG(error_zval)))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr TSRMLS_CC);
+	}
 
 	if (IS_CV == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
 		if (!0) {
