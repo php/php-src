@@ -180,6 +180,11 @@ php_stream_filter_status_t userfilter_filter(
 	zval zpropname;
 	int call_result;
 
+	/* the userfilter object probably doesn't exist anymore */
+	if (CG(unclean_shutdown)) {
+		return ret;
+	}
+
 	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", sizeof("stream"), (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */
 		ALLOC_INIT_ZVAL(zstream);
