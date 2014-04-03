@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   . Fixed bug #61019 (Out of memory on command stream_get_contents). (Mike)
   . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
     UNIX sockets). (Mike)
+  . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)  
 
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
