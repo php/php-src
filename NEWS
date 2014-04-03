@@ -7,6 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
     UNIX sockets). (Mike)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)
+  . Fixed bug #66736 (fpassthru broken). (Mike)
 
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol)
