@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
     UNIX sockets). (Mike)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)  
+  . Fixed bug #66736 (fpassthru broken). (Mike)
   . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
 
 - SPL:
