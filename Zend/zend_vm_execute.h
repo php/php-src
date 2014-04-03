@@ -853,7 +853,7 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+	zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(param == NULL)) {
@@ -893,7 +893,7 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zend_uint arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
+	zend_uint arg_count = zend_vm_stack_get_args_count_ex(EX(prev_execute_data) TSRMLS_CC);
 	zval *params;
 
 	SAVE_OPLINE();
@@ -908,7 +908,7 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	}
 
 	for (; arg_num <= arg_count; ++arg_num) {
-		zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+		zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
 		zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
 		if (Z_REFCOUNTED_P(param)) {
@@ -1600,21 +1600,21 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zval *param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+	zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
 	zval *var_ptr;
 
 	SAVE_OPLINE();
 	var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	zval_ptr_dtor(var_ptr);
 	if (param == NULL) {
-		if (Z_TYPE_FLAGS_P(opline->op2.zv) & IS_TYPE_CONSTANT) {
-			zval tmp;
-
-			ZVAL_COPY_VALUE(&tmp, opline->op2.zv);
-			zval_update_constant(&tmp, 0 TSRMLS_CC);
-			ZVAL_COPY_VALUE(var_ptr, &tmp);
+		ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
+		if (Z_OPT_CONSTANT_P(var_ptr)) {
+			zval_update_constant(var_ptr, 0 TSRMLS_CC);
 		} else {
-			ZVAL_DUP(var_ptr, opline->op2.zv);
+			/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(var_ptr))) {
+				_zval_copy_ctor_func(var_ptr ZEND_FILE_LINE_CC);
+			}
 		}
 	} else {
 		ZVAL_COPY(var_ptr, param);
@@ -3929,7 +3929,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_TYPE_FLAGS_P(value) & IS_TYPE_CONSTANT) {
+			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;
@@ -4205,14 +4205,17 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 	name  = opline->op1.zv;
 	val   = opline->op2.zv;
 
-	if (Z_TYPE_FLAGS_P(val) & IS_TYPE_CONSTANT) {
-		ZVAL_COPY_VALUE(&c.value, val);
+	ZVAL_COPY_VALUE(&c.value, val);
+	if (Z_OPT_CONSTANT(c.value)) {
 		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
 			zval_opt_copy_ctor(&c.value);
 		}
 		zval_update_constant(&c.value, NULL TSRMLS_CC);
 	} else {
-		ZVAL_DUP(&c.value, val);
+		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+		if (UNEXPECTED(Z_OPT_COPYABLE(c.value))) {
+			_zval_copy_ctor_func(&c.value ZEND_FILE_LINE_CC);
+		}
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
 	c.name = STR_DUP(Z_STR_P(name), 0);
@@ -15337,7 +15340,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_TYPE_FLAGS_P(value) & IS_TYPE_CONSTANT) {
+			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;
@@ -24664,7 +24667,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		}
 
 		if (EXPECTED((value = zend_hash_find(&ce->constants_table, Z_STR_P(opline->op2.zv))) != NULL)) {
-			if (Z_TYPE_FLAGS_P(value) & IS_TYPE_CONSTANT) {
+			if (Z_CONSTANT_P(value)) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;

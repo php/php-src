@@ -326,6 +326,9 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
+#define Z_CONSTANT(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_CONSTANT) != 0)
+#define Z_CONSTANT_P(zval_p)		Z_CONSTANT(*(zval_p))
+
 #define Z_REFCOUNTED(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED) != 0)
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
@@ -338,6 +341,9 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 /* the following Z_OPT_* macros make better code when Z_TYPE_INFO accessed before */
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & 0xff)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
+
+#define Z_OPT_CONSTANT(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_CONSTANT << Z_TYPE_FLAGS_SHIFT)) != 0)
+#define Z_OPT_CONSTANT_P(zval_p)	Z_OPT_CONSTANT(*(zval_p))
 
 #define Z_OPT_REFCOUNTED(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))

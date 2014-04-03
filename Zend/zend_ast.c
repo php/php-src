@@ -67,7 +67,7 @@ ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 	int i;
 
 	if (ast->kind == ZEND_CONST) {
-		return !(Z_TYPE_FLAGS(ast->u.val) & IS_TYPE_CONSTANT);
+		return !Z_CONSTANT(ast->u.val);
 	} else {
 		for (i = 0; i < ast->children; i++) {
 			if ((&ast->u.child)[i]) {
@@ -223,7 +223,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			break;
 		case ZEND_CONST:
 			ZVAL_DUP(result, &ast->u.val);
-			if (Z_TYPE_FLAGS_P(result) & IS_TYPE_CONSTANT) {
+			if (Z_CONSTANT_P(result)) {
 				zval_update_constant_ex(result, (void *) 1, scope TSRMLS_CC);
 			}
 			break;
