@@ -558,7 +558,7 @@ PHP_FUNCTION(urldecode)
 	out_str = STR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_url_decode(out_str->val, out_str->len);
 
-    RETURN_STR(out_str);
+    RETURN_NEW_STR(out_str);
 }
 /* }}} */
 
@@ -653,7 +653,7 @@ PHP_FUNCTION(rawurldecode)
 	out_str = STR_INIT(in_str->val, in_str->len, 0);
 	out_str->len = php_raw_url_decode(out_str->val, out_str->len);
 
-    RETURN_STR(out_str);
+    RETURN_NEW_STR(out_str);
 }
 /* }}} */
 

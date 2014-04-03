@@ -131,7 +131,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC)
 
 # define literal_dtor(zv) do { \
 		zval_dtor(zv); \
-		Z_TYPE_P(zv) = IS_NULL; \
+		ZVAL_NULL(zv); \
 	} while (0)
 
 #define COPY_NODE(target, src) do { \

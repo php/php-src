@@ -38,12 +38,17 @@ static zend_always_inline void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC);
 
+#define zval_copy_ctor_func(zv) _zval_copy_ctor_func(zv ZEND_FILE_LINE_CC)
+
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (!Z_REFCOUNTED_P(zvalue)) {
-		return;
+	if (Z_REFCOUNTED_P(zvalue)) {
+		if (Z_TYPE_FLAGS_P(zvalue) & IS_TYPE_COPYABLE) {
+			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
+		} else {
+			Z_ADDREF_P(zvalue);
+		}
 	}
-	_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key);

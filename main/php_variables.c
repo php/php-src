@@ -49,7 +49,7 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, int str_len, zva
 	assert(strval != NULL);
 	
 	/* Prepare value */
-	ZVAL_STR(&new_entry, STR_INIT(strval, str_len, 0));
+	ZVAL_NEW_STR(&new_entry, STR_INIT(strval, str_len, 0));
 	php_register_variable_ex(var, &new_entry, track_vars_array TSRMLS_CC);
 }
 
@@ -609,11 +609,9 @@ static inline void php_register_server_variables(TSRMLS_D)
 	/* store request init time */
 	{
 		zval request_time_float, request_time_long;
-		Z_TYPE(request_time_float) = IS_DOUBLE;
-		Z_DVAL(request_time_float) = sapi_get_request_time(TSRMLS_C);
+		ZVAL_DOUBLE(&request_time_float, sapi_get_request_time(TSRMLS_C));
 		php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-		Z_TYPE(request_time_long) = IS_LONG;
-		Z_LVAL(request_time_long) = zend_dval_to_lval(Z_DVAL(request_time_float));
+		ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
 		php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
 	}
 

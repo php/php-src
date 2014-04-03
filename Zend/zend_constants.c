@@ -206,7 +206,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 	zend_constant c;
 	
 //???	ZVAL_STRINGL(&c.value, strval, strlen, 0);
-	ZVAL_STR(&c.value, STR_INIT(strval, strlen, flags & CONST_PERSISTENT));
+	ZVAL_NEW_STR(&c.value, STR_INIT(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
 	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;

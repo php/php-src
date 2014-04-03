@@ -656,6 +656,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
 	old_len = Z_STRLEN_P(str);
 	Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), old_len + ZEND_MMAP_AHEAD, 0);
+	Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	memset(Z_STRVAL_P(str) + old_len, 0, ZEND_MMAP_AHEAD + 1);
 
 	SCNG(yy_in) = NULL;
@@ -1178,7 +1179,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
 //???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1501,11 +1502,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	if (len < SIZEOF_LONG * 8) {
 		if (len == 0) {
-			Z_LVAL_P(zendlval) = 0;
+			ZVAL_LONG(zendlval, 0);
 		} else {
-			Z_LVAL_P(zendlval) = strtol(bin, NULL, 2);
+			ZVAL_LONG(zendlval, strtol(bin, NULL, 2));
 		}
-		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, NULL));
@@ -1515,22 +1515,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{LNUM} {
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
 	} else {
 		errno = 0;
-		Z_LVAL_P(zendlval) = strtol(yytext, NULL, 0);
+		ZVAL_LONG(zendlval, strtol(yytext, NULL, 0));
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
-				Z_DVAL_P(zendlval) = zend_oct_strtod(yytext, NULL);
+				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, NULL));
 			} else {
-				Z_DVAL_P(zendlval) = zend_strtod(yytext, NULL);
+				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, NULL));
 			}
-			Z_TYPE_P(zendlval) = IS_DOUBLE;
 			return T_DNUMBER;
 		}
 	}
-
-	Z_TYPE_P(zendlval) = IS_LONG;
 	return T_LNUMBER;
 }
 
@@ -1546,11 +1543,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
 		if (len == 0) {
-			Z_LVAL_P(zendlval) = 0;
+			ZVAL_LONG(zendlval, 0);
 		} else {
-			Z_LVAL_P(zendlval) = strtol(hex, NULL, 16);
+			ZVAL_LONG(zendlval, strtol(hex, NULL, 16));
 		}
-		Z_TYPE_P(zendlval) = IS_LONG;
 		return T_LNUMBER;
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, NULL));
@@ -1583,7 +1579,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		/* We create a special __CLASS__ constant that is going to be resolved
 		   at run-time */
 		ZVAL_STRINGL(zendlval, "__CLASS__", sizeof("__CLASS__") - 1);
-		Z_TYPE_P(zendlval) = IS_CONSTANT;
+		Z_TYPE_INFO_P(zendlval) = IS_CONSTANT_EX;
 	} else {
 		if (ce && ce->name) {
 			ZVAL_STR(zendlval, STR_COPY(ce->name));
@@ -1625,7 +1621,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			len += sizeof("::")-1;
 			len += CG(active_op_array)->function_name->len;
 		}
-		ZVAL_STR(zendlval, STR_ALLOC(len, 0));
+		ZVAL_NEW_STR(zendlval, STR_ALLOC(len, 0));
 		len = 0;
 		if (CG(active_class_entry)->name) {
 			memcpy(Z_STRVAL_P(zendlval), CG(active_class_entry)->name->val, CG(active_class_entry)->name->len);
@@ -1655,9 +1651,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_string *filename = zend_get_compiled_filename(TSRMLS_C);
 
 	if (!filename) {
-		filename = STR_EMPTY_ALLOC();
+		ZVAL_EMPTY_STRING(zendlval);
+	} else {
+		ZVAL_STR(zendlval, STR_COPY(filename));
 	}
-	ZVAL_STR(zendlval, STR_COPY(filename));
 	return T_FILE;
 }
 
@@ -1706,7 +1703,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 	HANDLE_NEWLINES(yytext, yyleng);
 //???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
@@ -1715,7 +1712,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<%=" {
 	if (CG(asp_tags)) {
 //???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -1726,7 +1723,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?=" {
 //???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
 }
@@ -1735,7 +1732,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
 //???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1746,7 +1743,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 //???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way, no copying intentional */
+	ZVAL_EMPTY_STRING(zendlval); /* tricky way, no copying intentional */
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -1756,7 +1753,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 //???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way, no copying intentional */
+		ZVAL_EMPTY_STRING(zendlval); /* tricky way, no copying intentional */
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1815,7 +1812,7 @@ inline_html:
 		if (readsize < yyleng) {
 			yyless(readsize);
 		}
-		Z_TYPE_P(zendlval) = IS_STRING;
+		Z_TYPE_INFO_P(zendlval) = IS_STRING_EX;
 	} else {
 	  ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
@@ -1940,7 +1937,7 @@ inline_html:
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
 //???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -1950,7 +1947,7 @@ inline_html:
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
 //???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_STR(zendlval, STR_EMPTY_ALLOC()); /* tricky way to no copying - intentional */ 
+		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);

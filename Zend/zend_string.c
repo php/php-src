@@ -152,7 +152,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	p->h = h;
 	p->key = str;
 	Z_STR(p->val) = str;
-	Z_TYPE(p->val) = IS_STRING;
+	Z_TYPE_INFO(p->val) = IS_INTERNED_STRING_EX;
 	nIndex = h & CG(interned_strings).nTableMask;
 	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
 	CG(interned_strings).arHash[nIndex] = idx;

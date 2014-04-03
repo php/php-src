@@ -109,14 +109,17 @@ struct _zval_struct {
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
-				zend_uchar    type,		/* active type */
-				zend_uchar    flags,    /* various IS_VAR flags */
-				zend_uchar    res1,
-				zend_uchar    res2)
+				zend_uchar    type,			/* active type */
+				zend_uchar    type_flags,
+				zend_uchar    const_flags,
+				zend_uchar    reserved)	    /* various IS_VAR flags */
 		} v;
 		zend_uint type_info;
-	} u;
-	zend_uint     next;                 /* hash collision chain */
+	} u1;
+	union {
+		zend_uint     var_flags;
+		zend_uint     next;                 /* hash collision chain */
+	} u2;
 };
 
 struct _zend_refcounted {
@@ -204,45 +207,45 @@ struct _zend_ast_ref {
 #define IS_BOOL						3
 #define IS_LONG						4
 #define IS_DOUBLE					5
-//#define IS_INTERNED_STRING			6
-#define IS_STRING					7
-#define IS_ARRAY					8
-#define IS_OBJECT					9
-#define IS_RESOURCE					10
-#define IS_REFERENCE				11
+#define IS_STRING					6
+#define IS_ARRAY					7
+#define IS_OBJECT					8
+#define IS_RESOURCE					9
+#define IS_REFERENCE				10
 
-#define IS_CONSTANT					12
-#define IS_CONSTANT_ARRAY			13
-#define IS_CONSTANT_AST				14
-#define IS_CALLABLE					15
+#define IS_CONSTANT					11
+#define IS_CONSTANT_ARRAY			12
+#define IS_CONSTANT_AST				13
+#define IS_CALLABLE					14
 
-#define IS_STR_OFFSET				16
-#define IS_PTR						17
+#define IS_STR_OFFSET				15
+#define IS_PTR						16
 
-/* Ugly hack to support constants as static array indices */
-#define IS_CONSTANT_TYPE_MASK		0x00f
-#define IS_CONSTANT_UNQUALIFIED		0x010
-//???#define IS_CONSTANT_INDEX			0x080
-#define IS_LEXICAL_VAR				0x020
-#define IS_LEXICAL_REF				0x040
-#define IS_CONSTANT_IN_NAMESPACE	0x100
+static inline zend_uchar zval_get_type(const zval* pz) {
+	return pz->u1.v.type;
+}
 
-#define IS_CONSTANT_TYPE(type)		\
-	(((type) & IS_CONSTANT_TYPE_MASK) >= IS_CONSTANT && ((type) & IS_CONSTANT_TYPE_MASK) <= IS_CONSTANT_AST)
-
-/* All data types < IS_STRING have their constructor/destructors skipped */
-#define IS_REFCOUNTED(type)			((type) >= IS_STRING)
-
-#define Z_TYPE(zval)				(zval).u.v.type
+//???
+#if 0
+# define Z_TYPE(zval)				(zval).u1.v.type
+#else
+# define Z_TYPE(zval)				zval_get_type(&(zval))
+#endif
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
 
-#define Z_FLAGS(zval)				(zval).u.v.flags
-#define Z_FLAGS_P(zval_p)			Z_FLAGS(*(zval_p))
+#define Z_TYPE_FLAGS(zval)			(zval).u1.v.type_flags
+#define Z_TYPE_FLAGS_P(zval_p)		Z_TYPE_FLAGS(*(zval_p))
 
-#define Z_TYPE_INFO(zval)			(zval).u.type_info
+#define Z_CONST_FLAGS(zval)			(zval).u1.v.const_flags
+#define Z_CONST_FLAGS_P(zval_p)		Z_CONST_FLAGS(*(zval_p))
+
+#define Z_VAR_FLAGS(zval)			(zval).u2.var_flags
+#define Z_VAR_FLAGS_P(zval_p)		Z_VAR_FLAGS(*(zval_p))
+
+#define Z_TYPE_INFO(zval)			(zval).u1.type_info
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
-#define Z_NEXT(zval)				(zval).next
+#define Z_NEXT(zval)				(zval).u2.next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
 
 #define Z_COUNTED(zval)				(zval).value.counted
@@ -266,7 +269,32 @@ struct _zend_ast_ref {
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
-/* zval.var_flags */
+/* zval.u1.v.type_flags */
+#define IS_TYPE_CONSTANT			(1<<0)
+#define IS_TYPE_REFCOUNTED			(1<<1)
+#define IS_TYPE_COLLECTABLE			(1<<2)
+#define IS_TYPE_COPYABLE			(1<<3)
+
+/* extended types */
+#define IS_INTERNED_STRING_EX		IS_STRING
+
+#define IS_STRING_EX				(IS_STRING         | ((                   IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << 8))
+#define IS_ARRAY_EX					(IS_ARRAY          | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COLLECTABLE | IS_TYPE_COPYABLE) << 8))
+#define IS_OBJECT_EX				(IS_OBJECT         | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COLLECTABLE                   ) << 8))
+#define IS_RESOURCE_EX				(IS_RESOURCE       | ((                   IS_TYPE_REFCOUNTED                                         ) << 8))
+#define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                                         ) << 8))
+
+#define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << 8))
+#define IS_CONSTANT_ARRAY_EX		(IS_CONSTANT_ARRAY | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << 8))
+#define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED |                       IS_TYPE_COPYABLE) << 8))
+
+/* zval.u1.v.const_flags */
+#define IS_CONSTANT_UNQUALIFIED		0x010
+#define IS_LEXICAL_VAR				0x020
+#define IS_LEXICAL_REF				0x040
+#define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
+
+/* zval.u2.var_flags */
 #define IS_VAR_RET_REF				(1<<0) /* return by by reference */
 
 /* string flags (zval.value->gc.u.flags) */
@@ -278,7 +306,7 @@ struct _zend_ast_ref {
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
 #define IS_STR_AST                  (1<<5) /* constant expression index */
 
-/* object flags (zval.value->gc.u.vflags) */
+/* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
 
@@ -301,9 +329,8 @@ struct _zend_ast_ref {
 #define Z_OBJ_INC_APPLY_COUNT_P(zv) Z_OBJ_INC_APPLY_COUNT(*(zv))
 #define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
 
-#define Z_REFCOUNTED(zval)			(IS_REFCOUNTED(Z_TYPE(zval)) && \
-									 (Z_TYPE(zval) != IS_STRING || \
-									  !IS_INTERNED(Z_STR(zval))))
+/* All data types < IS_STRING have their constructor/destructors skipped */
+#define Z_REFCOUNTED(zval)			(Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED)
 #define Z_REFCOUNTED_P(zval_p)		Z_REFCOUNTED(*(zval_p))
 
 #define Z_ISREF(zval)				(Z_TYPE(zval) == IS_REFERENCE)
@@ -396,42 +423,61 @@ struct _zend_ast_ref {
 #define Z_STR_OFFSET(zval)			(zval).value.str_offset
 #define Z_STR_OFFSET_P(zval_p)		Z_STR_OFFSET(*(zval_p))
 
-#define ZVAL_UNDEF(z) do {			\
-		Z_TYPE_P(z) = IS_UNDEF;		\
+#define ZVAL_UNDEF(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_UNDEF;	\
 	} while (0)
 
-#define ZVAL_NULL(z) do {			\
-		Z_TYPE_P(z) = IS_NULL;		\
+#define ZVAL_NULL(z) do {				\
+		Z_TYPE_INFO_P(z) = IS_NULL;		\
 	} while (0)
 
-#define ZVAL_BOOL(z, b) do {		\
-		zval *__z = (z);			\
-		Z_LVAL_P(__z) = ((b) != 0);	\
-		Z_TYPE_P(__z) = IS_BOOL;	\
+#define ZVAL_BOOL(z, b) do {			\
+		zval *__z = (z);				\
+		Z_LVAL_P(__z) = ((b) != 0);		\
+		Z_TYPE_INFO_P(__z) = IS_BOOL;	\
 	} while (0)
 
-#define ZVAL_LONG(z, l) {			\
-		zval *__z = (z);			\
-		Z_LVAL_P(__z) = l;			\
-		Z_TYPE_P(__z) = IS_LONG;	\
+#define ZVAL_LONG(z, l) {				\
+		zval *__z = (z);				\
+		Z_LVAL_P(__z) = l;				\
+		Z_TYPE_INFO_P(__z) = IS_LONG;	\
 	}
 
-#define ZVAL_DOUBLE(z, d) {			\
-		zval *__z = (z);			\
-		Z_DVAL_P(__z) = d;			\
-		Z_TYPE_P(__z) = IS_DOUBLE;	\
+#define ZVAL_DOUBLE(z, d) {				\
+		zval *__z = (z);				\
+		Z_DVAL_P(__z) = d;				\
+		Z_TYPE_INFO_P(__z) = IS_DOUBLE;	\
 	}
 
 #define ZVAL_STR(z, s) do {						\
 		zval *__z = (z);						\
-		Z_STR_P(__z) = (s);						\
-		Z_TYPE_P(__z) = IS_STRING;				\
+		zend_string *__s = (s);					\
+		Z_STR_P(__z) = __s;						\
+		/* interned strings support */			\
+		Z_TYPE_INFO_P(__z) = IS_INTERNED(__s) ? \
+			IS_INTERNED_STRING_EX : 			\
+			IS_STRING_EX;						\
+	} while (0)
+
+#define ZVAL_INT_STR(z, s) do {					\
+		zval *__z = (z);						\
+		zend_string *__s = (s);					\
+		Z_STR_P(__z) = __s;						\
+		Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
+	} while (0)
+
+#define ZVAL_NEW_STR(z, s) do {					\
+		zval *__z = (z);						\
+		zend_string *__s = (s);					\
+		Z_STR_P(__z) = __s;						\
+		/* interned strings support */			\
+		Z_TYPE_INFO_P(__z) = IS_STRING_EX;		\
 	} while (0)
 
 #define ZVAL_ARR(z, a) do {						\
 		zval *__z = (z);						\
 		Z_ARR_P(__z) = (a);						\
-		Z_TYPE_P(__z) = IS_ARRAY;				\
+		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 
 #define ZVAL_NEW_ARR(z) do {									\
@@ -440,7 +486,7 @@ struct _zend_ast_ref {
 		GC_REFCOUNT(_arr) = 1;									\
 		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
 		Z_ARR_P(__z) = _arr;									\
-		Z_TYPE_P(__z) = IS_ARRAY;								\
+		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
@@ -449,19 +495,19 @@ struct _zend_ast_ref {
 		GC_REFCOUNT(_arr) = 1;									\
 		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
 		Z_ARR_P(__z) = _arr;									\
-		Z_TYPE_P(__z) = IS_ARRAY;								\
+		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
 #define ZVAL_OBJ(z, o) do {						\
 		zval *__z = (z);						\
 		Z_OBJ_P(__z) = (o);						\
-		Z_TYPE_P(__z) = IS_OBJECT;				\
+		Z_TYPE_INFO_P(__z) = IS_OBJECT_EX;		\
 	} while (0)
 
 #define ZVAL_RES(z, r) do {						\
 		zval *__z = (z);						\
 		Z_RES_P(__z) = (r);						\
-		Z_TYPE_P(__z) = IS_RESOURCE;			\
+		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;	\
 	} while (0)
 
 #define ZVAL_NEW_RES(z, h, p, t) do {							\
@@ -473,7 +519,7 @@ struct _zend_ast_ref {
 		_res->ptr = (p);										\
 		zval *__z = (z);										\
 		Z_RES_P(__z) = _res;									\
-		Z_TYPE_P(__z) = IS_RESOURCE;							\
+		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_RES(z, h, p, t) do {				\
@@ -485,13 +531,13 @@ struct _zend_ast_ref {
 		_res->ptr = (p);										\
 		zval *__z = (z);										\
 		Z_RES_P(__z) = _res;									\
-		Z_TYPE_P(__z) = IS_RESOURCE;							\
+		Z_TYPE_INFO_P(__z) = IS_RESOURCE_EX;					\
 	} while (0)
 
 #define ZVAL_REF(z, r) do {										\
 		zval *__z = (z);										\
 		Z_REF_P(__z) = (r);										\
-		Z_TYPE_P(__z) = IS_REFERENCE;							\
+		Z_TYPE_INFO_P(__z) = IS_REFERENCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_REF(z, r) do {									\
@@ -500,7 +546,7 @@ struct _zend_ast_ref {
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
-		Z_TYPE_P(z) = IS_REFERENCE;								\
+		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
 
 #define ZVAL_NEW_AST(z, a) do {									\
@@ -510,27 +556,27 @@ struct _zend_ast_ref {
 		GC_TYPE_INFO(_ast) = IS_CONSTANT_AST;					\
 		_ast->ast = (a);										\
 		Z_AST_P(__z) = _ast;									\
-		Z_TYPE_P(__z) = IS_CONSTANT_AST;						\
+		Z_TYPE_INFO_P(__z) = IS_CONSTANT_AST_EX;				\
 	} while (0)
 
 #define ZVAL_INDIRECT(z, v) do {								\
 		Z_INDIRECT_P(z) = (v);									\
-		Z_TYPE_P(z) = IS_INDIRECT;								\
+		Z_TYPE_INFO_P(z) = IS_INDIRECT;							\
 	} while (0)
 
 #define ZVAL_PTR(z, p) do {										\
 		Z_PTR_P(z) = (p);										\
-		Z_TYPE_P(z) = IS_PTR;									\
+		Z_TYPE_INFO_P(z) = IS_PTR;								\
 	} while (0)
 
 #define ZVAL_FUNC(z, f) do {									\
 		Z_FUNC_P(z) = (f);										\
-		Z_TYPE_P(z) = IS_PTR;									\
+		Z_TYPE_INFO_P(z) = IS_PTR;								\
 	} while (0)
 
 #define ZVAL_CE(z, c) do {										\
 		Z_CE_P(z) = (c);										\
-		Z_TYPE_P(z) = IS_PTR;									\
+		Z_TYPE_INFO_P(z) = IS_PTR;								\
 	} while (0)
 
 #define ZVAL_STR_OFFSET(z, s, o) do {							\
@@ -540,7 +586,7 @@ struct _zend_ast_ref {
 		x->str = (s);											\
 		x->offset = (o);										\
 		Z_STR_OFFSET_P(z) = x;									\
-		Z_TYPE_P(z) = IS_STR_OFFSET;							\
+		Z_TYPE_INFO_P(z) = IS_STR_OFFSET;						\
 	} while (0)
 
 #endif /* ZEND_TYPES_H */

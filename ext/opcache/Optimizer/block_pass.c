@@ -924,12 +924,16 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			} else {
 				Z_STR(ZEND_OP1_LITERAL(last_op)) = STR_REALLOC(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
 			}
+			Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
 			memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
 			zval_dtor(&ZEND_OP1_LITERAL(opline));
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			Z_STR(ZEND_OP1_LITERAL(opline)) = zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op)) TSRMLS_CC);
-			Z_TYPE(ZEND_OP1_LITERAL(last_op)) = IS_NULL;
+			if (IS_INTERNED(Z_STR(ZEND_OP1_LITERAL(opline)))) {
+				Z_TYPE_FLAGS(ZEND_OP1_LITERAL(opline)) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+			}
+			ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
 #else
 			Z_STR(ZEND_OP1_LITERAL(opline)) = Z_STR(ZEND_OP1_LITERAL(last_op));
 #endif
@@ -968,12 +972,16 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			} else {
 				Z_STR(ZEND_OP2_LITERAL(src)) = STR_REALLOC(Z_STR(ZEND_OP2_LITERAL(src)), l, 0);
 			}
+			Z_TYPE_INFO(ZEND_OP2_LITERAL(last_op)) = IS_STRING_EX;
 			memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
 			STR_RELEASE(Z_STR(ZEND_OP2_LITERAL(opline)));
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 			Z_STR(ZEND_OP2_LITERAL(opline)) = zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src)) TSRMLS_CC);
-			Z_TYPE(ZEND_OP2_LITERAL(src)) = IS_NULL;
+			if (IS_INTERNED(Z_STR(ZEND_OP2_LITERAL(opline)))) {
+				Z_TYPE_FLAGS(ZEND_OP2_LITERAL(opline)) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+			}
+			ZVAL_NULL(&ZEND_OP2_LITERAL(src));
 #else
 			Z_STR(ZEND_OP2_LITERAL(opline)) = Z_STR(ZEND_OP2_LITERAL(src));
 #endif
@@ -1055,7 +1063,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				/* BOOL */
 				result = ZEND_OP1_LITERAL(opline);
 				convert_to_boolean(&result);
-				Z_TYPE(ZEND_OP1_LITERAL(opline)) = IS_NULL;
+				ZVAL_NULL(&ZEND_OP1_LITERAL(opline));
 			}
 //???			PZ_SET_REFCOUNT_P(&result, 1);
 //???			PZ_UNSET_ISREF_P(&result);

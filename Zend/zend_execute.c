@@ -738,10 +738,12 @@ static inline int zend_assign_to_string_offset(zval *str_offset, zval *value, in
 	if (offset >= Z_STRLEN_P(str)) {
 		int old_len = Z_STRLEN_P(str);
 		Z_STR_P(str) = STR_REALLOC(Z_STR_P(str), offset + 1, 0);
+		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		Z_STRVAL_P(str)[offset+1] = 0;
 	} else if (IS_INTERNED(Z_STR_P(str))) {
 		Z_STR_P(str) = STR_INIT(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
+		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	}
 
 	if (Z_TYPE_P(value) != IS_STRING) {
@@ -1223,7 +1225,6 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 
 		case IS_STRING: {
 				zval tmp;
-				zend_string *str;
 
 				if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 					switch(Z_TYPE_P(dim)) {
@@ -1257,17 +1258,16 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
 					}
-					str = STR_EMPTY_ALLOC();
+					ZVAL_EMPTY_STRING(result);
 				} else {
 					zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[Z_LVAL_P(dim)];
 					
 					if (CG(one_char_string)[c]) {
-						str = CG(one_char_string)[c];
+						ZVAL_INT_STR(result, CG(one_char_string)[c]);
 					} else {
-						str = STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0);
+						ZVAL_NEW_STR(result, STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0));
 					}
 				}
-				ZVAL_STR(result, str);
 				return;
 			}
 			break;

@@ -353,9 +353,13 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string) + str->len);
 	p->h = h;
 	GC_REFCOUNT(p->key) = 1;
-// TODO: use one assignment ???
+#if 1
+	/* optimized single assignment */
+	GC_TYPE_INFO(p->key) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
+#else
 	GC_TYPE(p->key) = IS_STRING;
 	GC_FLAGS(p->key) = IS_STR_INTERNED | IS_STR_PERMANENT;
+#endif
 	p->key->h = str->h;
 	p->key->len = str->len;
 	memcpy(p->key->val, str->val, str->len);
@@ -2204,9 +2208,9 @@ static void accel_fast_zval_dtor(zval *zvalue)
 {
 	if (Z_REFCOUNTED_P(zvalue) && Z_DELREF_P(zvalue) == 0) {
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-		switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+		switch (Z_TYPE_P(zvalue)) {
 #else
-		switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
+		switch (Z_TYPE_P(zvalue)) {
 #endif
 			case IS_ARRAY:
 			case IS_CONSTANT_ARRAY: {
@@ -2217,7 +2221,7 @@ static void accel_fast_zval_dtor(zval *zvalue)
 #endif
 					if (Z_ARR_P(zvalue) != &EG(symbol_table)) {
 						/* break possible cycles */
-						Z_TYPE_P(zvalue) = IS_NULL;
+						ZVAL_NULL(zvalue);
 						Z_ARRVAL_P(zvalue)->pDestructor = accel_fast_zval_dtor;
 						accel_fast_hash_destroy(Z_ARRVAL_P(zvalue));
 					}

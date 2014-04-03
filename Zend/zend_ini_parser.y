@@ -102,7 +102,7 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	int op1_len = Z_STRLEN_P(op1);
 	int length = op1_len + Z_STRLEN_P(op2);
 
-	ZVAL_STR(result, STR_REALLOC(Z_STR_P(op1), length, 1));
+	ZVAL_NEW_STR(result, STR_REALLOC(Z_STR_P(op1), length, 1));
 	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 	Z_STRVAL_P(result)[length] = 0;
 }

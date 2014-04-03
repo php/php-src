@@ -7,7 +7,7 @@
  */
 
 #if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
-# define ZEND_IS_CONSTANT_TYPE(t)	(((t) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT)
+# define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 #else
 # define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 #endif
@@ -177,7 +177,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				if (requires_conversion) { /* ZEND_ADD_CHAR */
 					char chval = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
 
-					ZVAL_STR(&ZEND_OP2_LITERAL(opline), str);
+					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
 					ptr[0] = chval;
 					opline->opcode = ZEND_ADD_STRING;
 					ptr++;

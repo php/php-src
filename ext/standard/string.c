@@ -917,7 +917,7 @@ PHP_FUNCTION(wordwrap)
 			}
 		}
 
-		RETURN_STR(newtext);
+		RETURN_NEW_STR(newtext);
 	} else {
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
@@ -1000,7 +1000,7 @@ PHP_FUNCTION(wordwrap)
 		/* free unused memory */
 		newtext = STR_REALLOC(newtext, newtextlen, 0);
 
-		RETURN_STR(newtext);
+		RETURN_NEW_STR(newtext);
 	}
 }
 /* }}} */
@@ -1222,7 +1222,7 @@ PHP_FUNCTION(implode)
 			return;
 		}
 
-		ZVAL_STR(&tmp, STR_EMPTY_ALLOC());
+		ZVAL_EMPTY_STRING(&tmp);
 		delim = &tmp;
 
 		SEPARATE_ZVAL(arg1);
@@ -1356,7 +1356,7 @@ PHP_FUNCTION(strtoupper)
 
 	result = STR_INIT(arg, arglen, 0);
 	php_strtoupper(result->val, result->len);
-	RETURN_STR(result);
+	RETURN_NEW_STR(result);
 }
 /* }}} */
 
@@ -1391,7 +1391,7 @@ PHP_FUNCTION(strtolower)
 
 	result = STR_INIT(str, arglen, 0);
 	php_strtolower(result->val, result->len);
-	RETURN_STR(result);
+	RETURN_NEW_STR(result);
 }
 /* }}} */
 
@@ -1513,7 +1513,7 @@ PHP_FUNCTION(dirname)
 	ret = STR_INIT(str, str_len, 0);
 	ret->len = zend_dirname(ret->val, str_len);
 
-	RETURN_STR(ret);
+	RETURN_NEW_STR(ret);
 }
 /* }}} */
 
@@ -2183,7 +2183,7 @@ PHP_FUNCTION(chunk_split)
 		memcpy(result->val, str, str_len);
 		memcpy(result->val + str_len, end, endlen);
 		result->val[result->len] = '\0';
-		RETURN_STR(result);
+		RETURN_NEW_STR(result);
 	}
 
 	if (!str_len) {
@@ -2380,7 +2380,7 @@ PHP_FUNCTION(substr_replace)
 			}
 			memcpy((result->val + f + repl_len), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
 			result->val[result->len] = '\0';
-			RETURN_STR(result);
+			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Functionality of 'from' and 'len' as arrays is not implemented");
 			RETURN_STR(STR_COPY(Z_STR_P(str)));
@@ -2611,7 +2611,7 @@ PHP_FUNCTION(quotemeta)
 
 	*q = '\0';
 
-	RETURN_STR(STR_REALLOC(str, q - str->val, 0));
+	RETURN_NEW_STR(STR_REALLOC(str, q - str->val, 0));
 }
 /* }}} */
 
@@ -3153,7 +3153,7 @@ PHP_FUNCTION(strrev)
 
 	*p = '\0';
 
-	RETVAL_STR(n);
+	RETVAL_NEW_STR(n);
 }
 /* }}} */
 
@@ -3569,7 +3569,7 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 		return 0;
 	}
 
-	ZVAL_STR(result, STR_ALLOC(len + (char_count * (to_len - 1)), 0));
+	ZVAL_NEW_STR(result, STR_ALLOC(len + (char_count * (to_len - 1)), 0));
 	target = Z_STRVAL_P(result); //??? = target = safe_emalloc(char_count, to_len, len + 1);
 
 	if (case_sensitivity) {
@@ -3818,7 +3818,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 		ZVAL_EMPTY_STRING(result);
 		return;
 	}
-	Z_TYPE_P(result) = IS_STRING;
+//???	Z_TYPE_P(result) = IS_STRING;
 
 	/* If search is an array */
 	if (Z_TYPE_P(search) == IS_ARRAY) {
@@ -3884,6 +3884,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 
 			STR_FREE(Z_STR_P(result));
 			Z_STR_P(result) = Z_STR(temp_result);
+			Z_TYPE_INFO_P(result) = Z_TYPE_INFO(temp_result);
 
 			if (Z_STRLEN_P(result) == 0) {
 				zval_ptr_dtor(&tmp_subject);
@@ -4163,7 +4164,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		php_char_to_str(broken_str->val, broken_str->len,'\n', "<br />\n", 7, return_value);
 		STR_FREE(broken_str);
 	} else {
-		RETURN_STR(broken_str);
+		RETURN_NEW_STR(broken_str);
 	}
 }
 /* }}} */
@@ -4260,7 +4261,7 @@ PHP_FUNCTION(nl2br)
 
 	*target = '\0';
 
-	RETURN_STR(result);
+	RETURN_NEW_STR(result);
 }
 /* }}} */
 
@@ -4879,7 +4880,7 @@ PHP_FUNCTION(str_repeat)
 
 	result->val[result_len] = '\0';
 
-	RETURN_STR(result);
+	RETURN_NEW_STR(result);
 }
 /* }}} */
 
@@ -5254,7 +5255,7 @@ PHP_FUNCTION(str_pad)
 
 	result->val[result->len] = '\0';
 
-	RETURN_STR(result);
+	RETURN_NEW_STR(result);
 }
 /* }}} */
 
@@ -5464,7 +5465,7 @@ PHP_FUNCTION(money_format)
 	}
 	str->val[str->len] = '\0';
 
-	RETURN_STR(STR_REALLOC(str, str->len, 0));
+	RETURN_NEW_STR(STR_REALLOC(str, str->len, 0));
 }
 /* }}} */
 #endif

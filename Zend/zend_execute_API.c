@@ -479,7 +479,7 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 #define IS_VISITED_CONSTANT			0x080 //??? IS_CONSTANT_INDEX
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
-#define MARK_CONSTANT_VISITED(p)	Z_TYPE_P(p) |= IS_VISITED_CONSTANT
+#define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
 
 static void zval_deep_copy(zval *p)
 {
@@ -500,7 +500,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 	if (IS_CONSTANT_VISITED(p)) {
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
-	} else if ((Z_TYPE_P(p) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 //???		zend_uchar is_ref;
 
@@ -508,10 +508,10 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 		MARK_CONSTANT_VISITED(p);
 
-		refcount = Z_REFCOUNT_P(p);
+		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
 //???		is_ref = Z_ISREF_P(p);
 
-		if (!zend_get_constant_ex(Z_STRVAL_P(p), Z_STRLEN_P(p), &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
+		if (!zend_get_constant_ex(Z_STRVAL_P(p), Z_STRLEN_P(p), &const_value, scope, Z_CONST_FLAGS_P(p) TSRMLS_CC)) {
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
@@ -527,17 +527,19 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 //???					Z_STRVAL_P(p) = colon + 1;
 					Z_STR_P(p) = STR_INIT(colon + 1, len, 0);
 				}
+				Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
 				int actual_len = Z_STRLEN_P(p);
-				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
+				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						zend_string *s = STR_INIT(actual, actual_len, 0);
 //???						STR_RELEASE(Z_STR_P(p));
 						Z_STR_P(p) = s;
+						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 					}
 				}
 				if (actual[0] == '\\') {
@@ -549,7 +551,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					}
 					--actual_len;
 				}
-				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
+				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
 					if (save->val[0] == '\\') {
 						zend_error(E_ERROR, "Undefined constant '%s'", save->val + 1);
 					} else {
@@ -561,11 +563,14 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					save = NULL;
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
-				Z_TYPE_P(p) = IS_STRING;
 				if (!inline_change) {
 					ZVAL_STRINGL(p, actual, actual_len);
-				} else if (save && save->val != actual) {
-					STR_RELEASE(save);
+				} else {
+					Z_TYPE_INFO_P(p) = IS_INTERNED(Z_STR_P(p)) ?
+						IS_INTERNED_STRING_EX : IS_STRING_EX;
+					if (save && save->val != actual) {
+						STR_RELEASE(save);
+					}
 				}
 			}
 		} else {
@@ -585,7 +590,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 		SEPARATE_ZVAL_IF_NOT_REF(p);
 
-		Z_TYPE_P(p) = IS_ARRAY;
+		Z_TYPE_INFO_P(p) = IS_ARRAY_EX;
 		if (!inline_change) {
 			HashTable *ht = Z_ARRVAL_P(p);
 			ZVAL_NEW_ARR(p);
@@ -1147,7 +1152,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 	int retval;
 
 	if (retval_ptr) {
-		ZVAL_STR(&pv, STR_ALLOC(str_len + sizeof("return ;")-1, 1));
+		ZVAL_NEW_STR(&pv, STR_ALLOC(str_len + sizeof("return ;")-1, 1));
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';

@@ -441,8 +441,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 	zend_update_class_constants(ce TSRMLS_CC);
 
 	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
-	return_value->value.obj = &intern->std;
-	Z_TYPE_P(return_value) = IS_OBJECT;
+	ZVAL_OBJ(return_value, &intern->std);
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
 		ZVAL_STRINGL(&arg1, file_path, file_path_len);
@@ -484,8 +483,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			zend_update_class_constants(ce TSRMLS_CC);
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
-			return_value->value.obj = &intern->std;
-			Z_TYPE_P(return_value) = IS_OBJECT;
+			ZVAL_OBJ(return_value, &intern->std);
 
 			spl_filesystem_object_get_file_name(source TSRMLS_CC);
 			if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
@@ -506,8 +504,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce TSRMLS_CC));
 
-			return_value->value.obj = &intern->std;
-			Z_TYPE_P(return_value) = IS_OBJECT;
+			ZVAL_OBJ(return_value, &intern->std);
 
 			spl_filesystem_object_get_file_name(source TSRMLS_CC);
 
@@ -632,7 +629,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 		if (intern->u.dir.sub_path) {
 			ZVAL_STRINGL(&tmp, intern->u.dir.sub_path, intern->u.dir.sub_path_len);
 		} else {
-			ZVAL_STR(&tmp, STR_EMPTY_ALLOC());
+			ZVAL_EMPTY_STRING(&tmp);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
 		STR_RELEASE(pnstr);
@@ -1548,7 +1545,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPath)
 	if (intern->u.dir.sub_path) {
 		RETURN_STRINGL(intern->u.dir.sub_path, intern->u.dir.sub_path_len);
 	} else {
-		RETURN_STR(STR_EMPTY_ALLOC());
+		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */

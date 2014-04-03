@@ -169,7 +169,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
-					ZVAL_STR(&new_property, STR_INIT("1", sizeof("1")-1, persistent));
+					ZVAL_NEW_STR(&new_property, STR_INIT("1", sizeof("1")-1, persistent));
 				} else if (
 					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
@@ -177,7 +177,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
 					// TODO: USE STR_EMPTY_ALLOC()?
-					ZVAL_STR(&new_property, STR_INIT("", sizeof("")-1, persistent));
+					ZVAL_NEW_STR(&new_property, STR_INIT("", sizeof("")-1, persistent));
 				} else { /* Other than true/false setting */
 					ZVAL_STR(&new_property, STR_DUP(Z_STR_P(arg2), persistent));
 				}

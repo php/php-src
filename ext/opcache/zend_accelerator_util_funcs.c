@@ -249,9 +249,9 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 	void *ptr;
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	switch ((Z_TYPE_P(src) & IS_CONSTANT_TYPE_MASK)) {
+	switch (Z_TYPE_P(src)) {
 #else
-	switch ((Z_TYPE_P(src) & ~IS_CONSTANT_INDEX)) {
+	switch (Z_TYPE_P(src)) {
 #endif
 		case IS_STRING:
 	    case IS_CONSTANT:

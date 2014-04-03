@@ -112,14 +112,17 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 	START_SIZE();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	switch (Z_TYPE_P(z) & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(z)) {
 #else
-	switch (Z_TYPE_P(z) & ~IS_CONSTANT_INDEX) {
+	switch (Z_TYPE_P(z)) {
 #endif
 		case IS_STRING:
 		case IS_CONSTANT:
 			flags = Z_GC_FLAGS_P(z) & ~ (IS_STR_PERSISTENT | IS_STR_INTERNED | IS_STR_PERMANENT);
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
+			if (IS_INTERNED(Z_STR_P(z))) {
+				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+			}
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:

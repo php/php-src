@@ -98,10 +98,14 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 	zend_string *ret = pemalloc(sizeof(zend_string) + len, persistent);
 
 	GC_REFCOUNT(ret) = 1;
-// TODO use one assignment ???
+#if 1
+	/* optimized single assignment */
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
+#else
 	GC_TYPE(ret) = IS_STRING;
 	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
 	GC_INFO(ret) = 0;
+#endif
 	ret->h = 0;
 	ret->len = len;
 	return ret;

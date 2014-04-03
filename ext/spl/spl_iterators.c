@@ -1167,7 +1167,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	zval_ptr_dtor(&entry);
 	zval_ptr_dtor(&postfix);
 
-	RETURN_STR(str);
+	RETURN_NEW_STR(str);
 } /* }}} */
 
 /* {{{ proto mixed RecursiveTreeIterator::key()
@@ -1223,7 +1223,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	zval_ptr_dtor(&key);
 	zval_ptr_dtor(&postfix);
 
-	RETURN_STR(str);
+	RETURN_NEW_STR(str);
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_recursive_tree_it___construct, 0, 0, 1) 

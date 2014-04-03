@@ -136,17 +136,9 @@ ZEND_API void gc_init(TSRMLS_D)
 
 ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 {
-	if (UNEXPECTED(GC_ADDRESS(GC_INFO(ref)) &&
-		           GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK &&
-		           GC_ADDRESS(GC_INFO(ref)) >= GC_G(last_unused) - GC_G(buf))) {
-		/* The given zval is a garbage that is going to be deleted by
-		 * currently running GC */
-		return;
-	}
-
 	GC_BENCH_INC(zval_possible_root);
 
-	if (GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK) {
+	if (EXPECTED(GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK)) {
 		GC_SET_PURPLE(GC_INFO(ref));
 
 		if (!GC_ADDRESS(GC_INFO(ref))) {
@@ -193,7 +185,7 @@ ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
 	gc_root_buffer *root;
 
-	if (UNEXPECTED(GC_ADDRESS(GC_INFO(ref)) &&
+	if (UNEXPECTED(/*GC_ADDRESS(GC_INFO(ref)) &&*/
 	               GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK &&
 		           GC_ADDRESS(GC_INFO(ref)) >= GC_G(last_unused) - GC_G(buf))) {
 		/* The given zval is a garbage that is going to be deleted by
@@ -675,16 +667,6 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 				zend_hash_destroy(&arr->ht);
 				GC_REMOVE_FROM_BUFFER(arr);
 				efree(arr);
-			} else if (GC_TYPE(p) == IS_REFERENCE) {
-				zend_reference *ref = (zend_reference*)p;
-
-				GC_TYPE(ref) = IS_NULL;
-				if (EXPECTED(EG(objects_store).object_buckets != NULL) ||
-				    Z_TYPE(ref->val) != IS_OBJECT) {
-					zval_dtor(&ref->val);
-				}
-				GC_REMOVE_FROM_BUFFER(ref);
-				efree(ref);
 			}
 			current = GC_G(next_to_free);
 		}

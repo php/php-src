@@ -29,14 +29,13 @@
 
 ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
-//???	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 //???				CHECK_ZVAL_STRING_REL(zvalue);
 				STR_RELEASE(str);
-				goto exit;
+				break;
 			}
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -47,23 +46,24 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					zend_hash_destroy(&arr->ht);
-					goto gc_exit;
+					GC_REMOVE_FROM_BUFFER(arr);
+					efree(arr);
 				}
-				goto exit;
+				break;
 			}
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast =(zend_ast_ref*)p;
 		
 				zend_ast_destroy(ast->ast);
 				efree(ast);
-				goto exit;
+				break;
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
 				TSRMLS_FETCH();
 
 				OBJ_RELEASE(obj);
-				goto exit;
+				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
@@ -73,36 +73,30 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* destroy resource */
 					zend_list_delete(res);
 				}
-				goto exit;
+				break;
 			}
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 				if (--GC_REFCOUNT(ref) == 0) {
 					zval_ptr_dtor(&ref->val);
-					goto gc_exit;
+					efree(ref);
 				}
-				goto exit;
+				break;
 			}
 		default:
-			goto exit;
+			break;
 	}
-gc_exit:
-	GC_REMOVE_FROM_BUFFER(p);
-	efree(p);
-exit:
-	return;
 }
 
 ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
-//???	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
 	switch (GC_TYPE(p)) {
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
 //???				CHECK_ZVAL_STRING_REL(zvalue);
 				STR_FREE(str);
-				goto exit;
+				break;
 			}
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {
@@ -113,23 +107,24 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					zend_hash_destroy(&arr->ht);
-					goto gc_exit;
+					GC_REMOVE_FROM_BUFFER(arr);
+					efree(arr);
 				}
-				goto exit;
+				break;
 			}
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast =(zend_ast_ref*)p;
 
 				zend_ast_destroy(ast->ast);
 				efree(ast);
-				goto exit;
+				break;
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
 				TSRMLS_FETCH();
 
 				zend_objects_store_del(obj TSRMLS_CC);
-				goto exit;
+				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
@@ -137,27 +132,23 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 
 				/* destroy resource */
 				zend_list_delete(res);
-				goto exit;
+				break;
 			}
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 
 				zval_ptr_dtor(&ref->val);
-				goto gc_exit;
+				efree(ref);
+				break;
 			}
 		default:
-			goto exit;
+			break;
 	}
-gc_exit:
-	GC_REMOVE_FROM_BUFFER(p);
-	efree(p);
-exit:
-	return;
 }
 
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
@@ -181,7 +172,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 
 ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
@@ -233,7 +224,7 @@ ZEND_API void zval_add_ref_unref(zval *p)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zvalue) & IS_CONSTANT_TYPE_MASK) {
+	switch (Z_TYPE_P(zvalue)) {
 		case IS_CONSTANT:
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(zvalue);
@@ -316,8 +307,8 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 	zend_bool is_ref;
 	zval tmp;
   
-	if (Z_TYPE_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
-		is_ref = Z_TYPE_P(p) & IS_LEXICAL_REF;
+	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
+		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
     
 		if (!EG(active_symbol_table)) {
 			zend_rebuild_symbol_table(TSRMLS_C);

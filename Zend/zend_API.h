@@ -548,7 +548,7 @@ END_EXTERN_C()
 #define CHECK_NULL_PATH(p, l) (strlen(p) != l)
 
 #define ZVAL_STRINGL(z, s, l) do {				\
-		ZVAL_STR(z, STR_INIT(s, l, 0));			\
+		ZVAL_NEW_STR(z, STR_INIT(s, l, 0));		\
 	} while (0)
 
 #define ZVAL_STRING(z, s) do {					\
@@ -557,11 +557,11 @@ END_EXTERN_C()
 	} while (0)
 
 #define ZVAL_EMPTY_STRING(z) do {				\
-		ZVAL_STR(z, STR_EMPTY_ALLOC());			\
+		ZVAL_INT_STR(z, STR_EMPTY_ALLOC());		\
 	} while (0)
 
 #define ZVAL_PSTRINGL(z, s, l) do {				\
-		ZVAL_STR(z, STR_INIT(s, l, 1));			\
+		ZVAL_NEW_STR(z, STR_INIT(s, l, 1));		\
 	} while (0)
 
 #define ZVAL_PSTRING(z, s) do {					\
@@ -601,6 +601,8 @@ END_EXTERN_C()
 #define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)
 #define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
 #define RETVAL_STR(s)			 		ZVAL_STR(return_value, s)
+#define RETVAL_INT_STR(s)		 		ZVAL_INT_STR(return_value, s)
+#define RETVAL_NEW_STR(s)		 		ZVAL_NEW_STR(return_value, s)
 #define RETVAL_STRING(s)		 		ZVAL_STRING(return_value, s)
 #define RETVAL_STRINGL(s, l)		 	ZVAL_STRINGL(return_value, s, l)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
@@ -614,6 +616,8 @@ END_EXTERN_C()
 #define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
 #define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
 #define RETURN_STR(s) 					{ RETVAL_STR(s); return; }
+#define RETURN_INT_STR(s)				{ RETVAL_INT_STR(s); return; }
+#define RETURN_NEW_STR(s)				{ RETVAL_NEW_STR(s); return; }
 #define RETURN_STRING(s) 				{ RETVAL_STRING(s); return; }
 #define RETURN_STRINGL(s, l) 			{ RETVAL_STRINGL(s, l); return; }
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }

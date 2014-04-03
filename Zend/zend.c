@@ -236,14 +236,14 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 again:
 	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
-			Z_STR_P(expr_copy) = STR_EMPTY_ALLOC();
+			ZVAL_EMPTY_STRING(expr_copy);
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(expr)) {
 				// TODO: ??? use interned string
-				Z_STR_P(expr_copy) = STR_INIT("1", 1, 0);
+				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
 			} else {
-				Z_STR_P(expr_copy) = STR_EMPTY_ALLOC();
+				ZVAL_EMPTY_STRING(expr_copy);
 			}
 			break;
 		case IS_RESOURCE: {
@@ -251,13 +251,13 @@ again:
 				int len;
 
 				len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(expr));
-				Z_STR_P(expr_copy) = STR_INIT(buf, len, 0);
+				ZVAL_NEW_STR(expr_copy, STR_INIT(buf, len, 0));
 			}
 			break;
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
 			// TODO: ??? use interned string
-			Z_STR_P(expr_copy) = STR_INIT("Array", sizeof("Array") - 1, 0);
+			ZVAL_NEW_STR(expr_copy, STR_INIT("Array", sizeof("Array") - 1, 0));
 			break;
 		case IS_OBJECT:
 			{
@@ -293,7 +293,7 @@ again:
 					zval_ptr_dtor(z);
 				}
 				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
-				Z_STR_P(expr_copy) = STR_EMPTY_ALLOC();
+				ZVAL_EMPTY_STRING(expr_copy);
 			}
 			break;
 		case IS_DOUBLE:
@@ -314,7 +314,6 @@ again:
 			convert_to_string(expr_copy);
 			break;
 	}
-	Z_TYPE_P(expr_copy) = IS_STRING;
 	*use_copy = 1;
 }
 /* }}} */
@@ -1165,7 +1164,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 #endif
 			va_copy(usr_copy, args);
 			len = zend_vspprintf(&str, 0, format, usr_copy);
-			ZVAL_STR(&params[1], STR_INIT(str, len, 0));
+			ZVAL_NEW_STR(&params[1], STR_INIT(str, len, 0));
 			efree(str);
 #ifdef va_copy
 			va_end(usr_copy);

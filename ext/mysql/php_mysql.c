@@ -1893,7 +1893,7 @@ PHP_FUNCTION(mysql_real_escape_string)
 	new_str = STR_ALLOC(str_len * 2, 0);
 	new_str->len = mysql_real_escape_string(mysql->conn, new_str->val, str, str_len);
 
-	RETURN_STR(new_str);
+	RETURN_NEW_STR(new_str);
 }
 /* }}} */
 

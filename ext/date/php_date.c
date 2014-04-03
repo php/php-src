@@ -2491,7 +2491,6 @@ static void date_object_free_storage_period(zend_object *object TSRMLS_DC) /* {{
 /* Advanced Interface */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC) /* {{{ */
 {
-	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	return object;
 } /* }}} */

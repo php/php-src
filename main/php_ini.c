@@ -594,7 +594,7 @@ int php_init_config(TSRMLS_D)
 		{
 			zval tmp;
 
-			ZVAL_STR(&tmp, STR_INIT(fh.filename, strlen(fh.filename), 1));
+			ZVAL_NEW_STR(&tmp, STR_INIT(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (php_ini_opened_path) {
 				efree(php_ini_opened_path);

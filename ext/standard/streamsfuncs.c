@@ -399,7 +399,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		}
 		read_buf->val[recvd] = '\0';
 		read_buf->len = recvd;
-		RETURN_STR(read_buf);
+		RETURN_NEW_STR(read_buf);
 	}
 
 	STR_FREE(read_buf);

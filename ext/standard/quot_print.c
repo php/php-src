@@ -257,7 +257,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	str_out->val[j] = '\0';
 	str_out->len = j;
     
-	RETVAL_STR(str_out);
+	RETVAL_NEW_STR(str_out);
 }
 /* }}} */
 

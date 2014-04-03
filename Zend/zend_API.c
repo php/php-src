@@ -285,7 +285,7 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
-			Z_TYPE_P(arg) = IS_NULL;
+			ZVAL_NULL(arg);
 			zend_make_printable_zval(z, arg, &use_copy);
 			if (!use_copy) {
 				ZVAL_ZVAL(arg, z, 1, 1);
@@ -325,7 +325,7 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
-			Z_TYPE_P(arg) = IS_NULL;
+			ZVAL_NULL(arg);
 			zend_make_printable_zval(z, arg, &use_copy);
 			if (!use_copy) {
 				ZVAL_ZVAL(arg, z, 1, 1);
@@ -1112,7 +1112,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
 	ZVAL_DEREF(pp);
-	if (IS_CONSTANT_TYPE(Z_TYPE_P(pp))) {
+	if (Z_TYPE_FLAGS_P(pp) & IS_TYPE_CONSTANT) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
 		if ((*scope)->parent) {
@@ -3670,7 +3670,7 @@ ZEND_API int zend_declare_property_string(zend_class_entry *ce, const char *name
 {
 	zval property;
 
-	ZVAL_STR(&property, STR_INIT(value, strlen(value), ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, STR_INIT(value, strlen(value), ce->type & ZEND_INTERNAL_CLASS));
 	return zend_declare_property(ce, name, name_length, &property, access_type TSRMLS_CC);
 }
 /* }}} */
@@ -3679,7 +3679,7 @@ ZEND_API int zend_declare_property_stringl(zend_class_entry *ce, const char *nam
 {
 	zval property;
 
-	ZVAL_STR(&property, STR_INIT(value, value_len, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&property, STR_INIT(value, value_len, ce->type & ZEND_INTERNAL_CLASS));
 	return zend_declare_property(ce, name, name_length, &property, access_type TSRMLS_CC);
 }
 /* }}} */
@@ -3731,7 +3731,7 @@ ZEND_API int zend_declare_class_constant_stringl(zend_class_entry *ce, const cha
 {
 	zval constant;
 
-	ZVAL_STR(&constant, STR_INIT(value, value_length, ce->type & ZEND_INTERNAL_CLASS));
+	ZVAL_NEW_STR(&constant, STR_INIT(value, value_length, ce->type & ZEND_INTERNAL_CLASS));
 	return zend_declare_class_constant(ce, name, name_length, &constant TSRMLS_CC);
 }
 /* }}} */

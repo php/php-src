@@ -1271,7 +1271,7 @@ static int php_valid_var_name(char *var_name, int var_name_len) /* {{{ */
 
 PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
 {
-	ZVAL_STR(result, STR_ALLOC(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
+	ZVAL_NEW_STR(result, STR_ALLOC(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
 
 	if (add_underscore) {

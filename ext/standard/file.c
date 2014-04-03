@@ -556,7 +556,7 @@ PHP_FUNCTION(file_get_contents)
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
 		RETVAL_STR(contents);
 	} else {
-		RETVAL_STR(STR_EMPTY_ALLOC());
+		RETVAL_EMPTY_STRING();
 	}
 
 	php_stream_close(stream);
@@ -1751,7 +1751,7 @@ PHPAPI PHP_FUNCTION(fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_STR(return_value, STR_ALLOC(len, 0));
+	ZVAL_NEW_STR(return_value, STR_ALLOC(len, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(stream, Z_STRVAL_P(return_value), len);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/

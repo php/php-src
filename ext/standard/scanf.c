@@ -1207,8 +1207,7 @@ done:
 static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
 {
 	if (numVars) {
-		Z_TYPE_P(return_value) = IS_LONG;
-		Z_LVAL_P(return_value) = SCAN_ERROR_EOF;  /* EOF marker */
+		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
 		convert_to_null(return_value);

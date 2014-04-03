@@ -553,7 +553,7 @@ ZEND_METHOD(exception, getTraceAsString)
 
 	str->val[str->len] = '\0';	
 
-	RETURN_STR(str); 
+	RETURN_NEW_STR(str); 
 }
 /* }}} */
 

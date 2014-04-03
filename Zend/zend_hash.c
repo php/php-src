@@ -1437,7 +1437,7 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 	idx = pos ? (*pos) : ht->nInternalPointer;
 
 	if (idx == INVALID_IDX) {
-		Z_TYPE_P(key) = IS_NULL;
+		ZVAL_NULL(key);
 	} else {
 		p = ht->arData + idx;
 		if (p->key) {
