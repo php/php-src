@@ -171,6 +171,24 @@ $op2_get_zval_ptr_deref = array(
 	"CV"     => "_get_zval_ptr_cv_deref_\\1(execute_data, opline->op2.var TSRMLS_CC)",
 );
 
+$op1_get_zval_ptr_ptr_undef = array(
+	"ANY"    => "get_zval_ptr_ptr_undef(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var TSRMLS_CC)",
+);
+
+$op2_get_zval_ptr_ptr_undef = array(
+	"ANY"    => "get_zval_ptr_ptr_undef(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC)",
+	"CONST"  => "NULL",
+	"UNUSED" => "NULL",
+	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var TSRMLS_CC)",
+);
+
 $op1_get_obj_zval_ptr = array(
 	"ANY"    => "get_obj_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
@@ -348,6 +366,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 	global $op1_type, $op2_type, $op1_get_zval_ptr, $op2_get_zval_ptr,
 		$op1_get_zval_ptr_deref, $op2_get_zval_ptr_deref,
 		$op1_get_zval_ptr_ptr, $op2_get_zval_ptr_ptr,
+		$op1_get_zval_ptr_ptr_undef, $op2_get_zval_ptr_ptr_undef,
 		$op1_get_obj_zval_ptr, $op2_get_obj_zval_ptr,
 		$op1_get_obj_zval_ptr_deref, $op2_get_obj_zval_ptr_deref,
 		$op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
@@ -369,6 +388,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/GET_OP2_ZVAL_PTR_DEREF\(([^)]*)\)/",
 			"/GET_OP1_ZVAL_PTR_PTR\(([^)]*)\)/",
 			"/GET_OP2_ZVAL_PTR_PTR\(([^)]*)\)/",
+			"/GET_OP1_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/",
+			"/GET_OP2_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/",
 			"/GET_OP1_OBJ_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP2_OBJ_ZVAL_PTR\(([^)]*)\)/",
 			"/GET_OP1_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/",
@@ -407,6 +428,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_get_zval_ptr_deref[$op2],
 			$op1_get_zval_ptr_ptr[$op1],
 			$op2_get_zval_ptr_ptr[$op2],
+			$op1_get_zval_ptr_ptr_undef[$op1],
+			$op2_get_zval_ptr_ptr_undef[$op2],
 			$op1_get_obj_zval_ptr[$op1],
 			$op2_get_obj_zval_ptr[$op2],
 			$op1_get_obj_zval_ptr_deref[$op1],
