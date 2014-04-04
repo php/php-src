@@ -2936,17 +2936,17 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	}
 
 	{
-		zval valptr;
+		zval *top;
 		zval *value;
 		zend_free_op free_op1;
 
 		value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-
-		ZVAL_COPY_VALUE(&valptr, value);
+		top = EG(argument_stack)->top;
+		EG(argument_stack)->top++;
+		ZVAL_COPY_VALUE(top, value);
 		if (!IS_OP1_TMP_FREE()) {
-			zval_opt_copy_ctor(&valptr);
+			zval_opt_copy_ctor(top);
 		}
-		zend_vm_stack_push(&valptr TSRMLS_CC);
 		FREE_OP1_IF_VAR();
 	}
 	CHECK_EXCEPTION();
@@ -2956,23 +2956,26 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 {
 	USE_OPLINE
-	zval *varptr, var;
+	zval *varptr, *top;
 	zend_free_op free_op1;
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	top = EG(argument_stack)->top;
+	EG(argument_stack)->top++;
 	if (Z_ISREF_P(varptr)) {
 //???		if (OP1_TYPE == IS_CV ||
 //???		    (OP1_TYPE == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
-			ZVAL_DUP(&var, Z_REFVAL_P(varptr));
-			varptr = &var;
+			ZVAL_DUP(top, Z_REFVAL_P(varptr));
 			FREE_OP1();
 //???		} else {
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
-	} else if (OP1_TYPE == IS_CV) {
-		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+	} else {
+		if (OP1_TYPE == IS_CV) {
+			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+		}
+		ZVAL_COPY_VALUE(top, varptr);
 	}
-	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

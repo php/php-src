@@ -2665,17 +2665,17 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 
 	{
-		zval valptr;
+		zval *top;
 		zval *value;
 
 
 		value = opline->op1.zv;
-
-		ZVAL_COPY_VALUE(&valptr, value);
+		top = EG(argument_stack)->top;
+		EG(argument_stack)->top++;
+		ZVAL_COPY_VALUE(top, value);
 		if (!0) {
-			zval_opt_copy_ctor(&valptr);
+			zval_opt_copy_ctor(top);
 		}
-		zend_vm_stack_push(&valptr TSRMLS_CC);
 
 	}
 	CHECK_EXCEPTION();
@@ -7721,17 +7721,17 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	}
 
 	{
-		zval valptr;
+		zval *top;
 		zval *value;
 		zend_free_op free_op1;
 
 		value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-
-		ZVAL_COPY_VALUE(&valptr, value);
+		top = EG(argument_stack)->top;
+		EG(argument_stack)->top++;
+		ZVAL_COPY_VALUE(top, value);
 		if (!1) {
-			zval_opt_copy_ctor(&valptr);
+			zval_opt_copy_ctor(top);
 		}
-		zend_vm_stack_push(&valptr TSRMLS_CC);
 
 	}
 	CHECK_EXCEPTION();
@@ -12687,23 +12687,26 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *varptr, var;
+	zval *varptr, *top;
 	zend_free_op free_op1;
 
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	top = EG(argument_stack)->top;
+	EG(argument_stack)->top++;
 	if (Z_ISREF_P(varptr)) {
 //???		if (IS_VAR == IS_CV ||
 //???		    (IS_VAR == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
-			ZVAL_DUP(&var, Z_REFVAL_P(varptr));
-			varptr = &var;
+			ZVAL_DUP(top, Z_REFVAL_P(varptr));
 			zval_ptr_dtor_nogc(free_op1.var);
 //???		} else {
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
-	} else if (IS_VAR == IS_CV) {
-		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+	} else {
+		if (IS_VAR == IS_CV) {
+			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+		}
+		ZVAL_COPY_VALUE(top, varptr);
 	}
-	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -29272,23 +29275,26 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *varptr, var;
+	zval *varptr, *top;
 
 
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	top = EG(argument_stack)->top;
+	EG(argument_stack)->top++;
 	if (Z_ISREF_P(varptr)) {
 //???		if (IS_CV == IS_CV ||
 //???		    (IS_CV == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
-			ZVAL_DUP(&var, Z_REFVAL_P(varptr));
-			varptr = &var;
+			ZVAL_DUP(top, Z_REFVAL_P(varptr));
 
 //???		} else {
 //???			varptr = Z_REFVAL_P(varptr);
 //???		}
-	} else if (IS_CV == IS_CV) {
-		if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+	} else {
+		if (IS_CV == IS_CV) {
+			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
+		}
+		ZVAL_COPY_VALUE(top, varptr);
 	}
-	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
