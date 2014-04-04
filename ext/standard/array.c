@@ -592,18 +592,19 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && retval_ptr) {
-		long long_retval;
-		double double_retval;
-		
 		if (Z_TYPE_P(retval_ptr) == IS_DOUBLE) {
-			double_retval = Z_DVAL_P(retval_ptr);
+			double dretval;
+
+			dretval = Z_DVAL_P(retval_ptr);
 			zval_ptr_dtor(&retval_ptr);
-			return double_retval < 0.0 ? -1 : double_retval > 0.0 ? 1 : 0;
+			return dretval < 0.0 ? -1 : dretval > 0.0 ? 1 : 0;
 		} else {
+			long lretval;
+
 			convert_to_long_ex(&retval_ptr);
-			long_retval = Z_LVAL_P(retval_ptr);
+			lretval = Z_LVAL_P(retval_ptr);
 			zval_ptr_dtor(&retval_ptr);
-			return long_retval < 0 ? -1 : long_retval > 0 ? 1 : 0;
+			return lretval < 0 ? -1 : lretval > 0 ? 1 : 0;
 		}
 	} else {
 		return 0;
