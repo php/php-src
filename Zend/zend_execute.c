@@ -85,7 +85,7 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 #define EXTRACT_ZVAL_PTR(zv) do {						\
 		zval *__zv = (zv);								\
 		if (Z_TYPE_P(__zv) == IS_INDIRECT) {			\
-			ZVAL_COPY_VALUE(__zv, Z_INDIRECT_P(__zv));	\
+			ZVAL_COPY(__zv, Z_INDIRECT_P(__zv));		\
 		}												\
 	} while (0)
 
@@ -423,13 +423,15 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_
 	zval *ret = EX_VAR(var);
 
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
-		ret = Z_INDIRECT_P(ret);
+		should_free->var = NULL;
+		return Z_INDIRECT_P(ret);
 	} else if (!Z_REFCOUNTED_P(ret)) {
-		should_free->var = ret;
+		should_free->var = ret; //???
+		return ret;
+	} else {
+		PZVAL_UNLOCK(ret, should_free);
 		return ret;
 	}
-	PZVAL_UNLOCK(ret, should_free);
-	return ret;
 }
 
 static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
@@ -1077,7 +1079,7 @@ num_index:
 	return retval;
 }
 
-static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type TSRMLS_DC)
+static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type, int is_ref TSRMLS_DC)
 {
     zval *retval;
     zval *container = container_ptr;
@@ -1085,7 +1087,7 @@ static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval
 	ZVAL_DEREF(container);
 	switch (Z_TYPE_P(container)) {
 		case IS_ARRAY:
-			if (type != BP_VAR_UNSET) {
+			if (container == container_ptr) {
 				SEPARATE_ZVAL(container);
 			}
 fetch_from_array:
@@ -1098,10 +1100,12 @@ fetch_from_array:
 			} else {
 				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
 			}
-//???			ZVAL_COPY(result, retval);
-			if (Z_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
-			ZVAL_INDIRECT(result, retval);
-			return;
+			if (is_ref) {
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+				ZVAL_COPY(result, retval);
+			} else {
+				ZVAL_INDIRECT(result, retval);
+			}
 			break;
 
 		case IS_NULL:
@@ -1109,18 +1113,12 @@ fetch_from_array:
 				ZVAL_INDIRECT(result, &EG(error_zval));
 			} else if (type != BP_VAR_UNSET) {
 convert_to_array:
-				if (!Z_ISREF_P(container_ptr)) {
-					SEPARATE_ZVAL(container);
-				}
-
-				zval_dtor(container);
 				array_init(container);
 				goto fetch_from_array;
 			} else {
 				/* for read-mode only */
 				ZVAL_NULL(result);
 			}
-			return;
 			break;
 
 		case IS_STRING: {
@@ -1134,7 +1132,7 @@ convert_to_array:
 				}
 
 				if (type != BP_VAR_UNSET) {
-					if (!Z_ISREF_P(container_ptr)) {
+					if (container == container_ptr) {
 						SEPARATE_ZVAL(container);
 					}
 				}
@@ -1168,7 +1166,6 @@ convert_to_array:
 				}
 				ZVAL_STR_OFFSET(result, container, Z_LVAL_P(dim));
 				if (!IS_INTERNED(Z_STR_P(container))) STR_ADDREF(Z_STR_P(container));
-				return;
 			}
 			break;
 
@@ -1207,8 +1204,12 @@ convert_to_array:
 //???					PZVAL_LOCK(overloaded_result);
 //???					ZVAL_COPY(result, overloaded_result);
 					if (result != overloaded_result) {
-						if (Z_REFCOUNTED_P(overloaded_result)) Z_ADDREF_P(overloaded_result);
-						ZVAL_INDIRECT(result, overloaded_result);
+						if (is_ref && overloaded_result != &EG(uninitialized_zval)) {
+							SEPARATE_ZVAL_TO_MAKE_IS_REF(overloaded_result);
+							ZVAL_COPY(result, overloaded_result);
+						} else {
+							ZVAL_INDIRECT(result, overloaded_result);
+						}
 					}
 				} else {
 					ZVAL_INDIRECT(result, &EG(error_zval));
@@ -1217,7 +1218,6 @@ convert_to_array:
 //???					zval_ptr_dtor(dim);
 //???				}
 			}
-			return;
 			break;
 
 		case IS_BOOL:
@@ -1337,7 +1337,7 @@ static void zend_fetch_dimension_address_read(zval *result, zval *container, zva
 	}
 }
 
-static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, const zend_literal *key, int type TSRMLS_DC)
+static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, const zend_literal *key, int type, int is_ref TSRMLS_DC)
 {
 	zval *container = container_ptr;
 
@@ -1353,7 +1353,7 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 		    ((Z_TYPE_P(container) == IS_NULL ||
 		     (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0) ||
 		     (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
-			if (!Z_ISREF_P(container_ptr)) {
+			if (container == container_ptr) {
 				SEPARATE_ZVAL(container);
 			}
 			object_init(container);
@@ -1370,24 +1370,33 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 			if (Z_OBJ_HT_P(container)->read_property &&
 				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key, result TSRMLS_CC)) != NULL) {
 				if (ptr != result) {
-//???				ZVAL_COPY(result, ptr);
-					if (Z_REFCOUNTED_P(ptr)) Z_ADDREF_P(ptr);
-					ZVAL_INDIRECT(result, ptr);
+					if (is_ref && ptr != &EG(uninitialized_zval)) {
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(ptr);
+						ZVAL_COPY(result, ptr);
+					} else {
+						ZVAL_INDIRECT(result, ptr);
+					}
 				}
 			} else {
 				zend_error_noreturn(E_ERROR, "Cannot access undefined property for object with overloaded property access");
 			}
 		} else {
-//???			ZVAL_COPY(result, ptr);
-			if (Z_REFCOUNTED_P(ptr)) Z_ADDREF_P(ptr);
-			ZVAL_INDIRECT(result, ptr);
+			if (is_ref) {
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(ptr);
+				ZVAL_COPY(result, ptr);
+			} else {
+				ZVAL_INDIRECT(result, ptr);
+			}
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
 		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key, result TSRMLS_CC);
 		if (ptr != result) {
-//???		ZVAL_COPY(result, ptr);
-			if (Z_REFCOUNTED_P(ptr)) Z_ADDREF_P(ptr);
-			ZVAL_INDIRECT(result, ptr);
+			if (is_ref && ptr != &EG(uninitialized_zval)) {
+				SEPARATE_ZVAL_TO_MAKE_IS_REF(ptr);
+				ZVAL_COPY(result, ptr);
+			} else {
+				ZVAL_INDIRECT(result, ptr);
+			}
 		}
 	} else {
 		zend_error(E_WARNING, "This object doesn't support property references");
