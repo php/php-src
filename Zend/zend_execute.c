@@ -982,359 +982,356 @@ static inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
 	return NULL;
 }
 
-static inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type TSRMLS_DC)
+static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type TSRMLS_DC)
 {
 	zval *retval;
 	zend_string *offset_key;
 	ulong hval;
 
-	switch (Z_TYPE_P(dim)) {
-		case IS_NULL:
-			offset_key = STR_EMPTY_ALLOC();
-			goto fetch_string_dim;
-
-		case IS_STRING:
-			offset_key = Z_STR_P(dim);
-			if (dim_type != IS_CONST) {
-				ZEND_HANDLE_NUMERIC_EX(offset_key->val, offset_key->len + 1, hval, goto num_index);
+	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
+		hval = Z_LVAL_P(dim);
+num_index:
+		retval = zend_hash_index_find(ht, hval);
+		if (retval == NULL) {
+			switch (type) {
+				case BP_VAR_R:
+					zend_error(E_NOTICE,"Undefined offset: %ld", hval);
+					/* break missing intentionally */
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_RW:
+					zend_error(E_NOTICE,"Undefined offset: %ld", hval);
+					/* break missing intentionally */
+				case BP_VAR_W:
+					retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
+					break;
 			}
-fetch_string_dim:
-			retval = zend_hash_find(ht, offset_key);
-// ??? support for $GLOBALS[...]
-			if (retval) {
-				if (Z_TYPE_P(retval) == IS_INDIRECT) {
-					retval = Z_INDIRECT_P(retval);
-					if (Z_TYPE_P(retval) == IS_UNDEF) {
-						switch (type) {
-							case BP_VAR_R:
-								zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
-								/* break missing intentionally */
-							case BP_VAR_UNSET:
-							case BP_VAR_IS:
-								retval = &EG(uninitialized_zval);
-								break;
-							case BP_VAR_RW:
-								zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
-								/* break missing intentionally */
-							case BP_VAR_W:
-								ZVAL_NULL(retval);
-								break;
-						}
+		}
+	} else if (EXPECTED(Z_TYPE_P(dim) == IS_STRING)) {
+		offset_key = Z_STR_P(dim);
+		if (dim_type != IS_CONST) {
+			ZEND_HANDLE_NUMERIC_EX(offset_key->val, offset_key->len+1, hval, goto num_index);
+		}
+str_index:
+		retval = zend_hash_find(ht, offset_key);
+		if (retval) {
+			/* support for $GLOBALS[...] */
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
+				retval = Z_INDIRECT_P(retval);
+				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+					switch (type) {
+						case BP_VAR_R:
+							zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+							/* break missing intentionally */
+						case BP_VAR_UNSET:
+						case BP_VAR_IS:
+							retval = &EG(uninitialized_zval);
+							break;
+						case BP_VAR_RW:
+							zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+							/* break missing intentionally */
+						case BP_VAR_W:
+							ZVAL_NULL(retval);
+							break;
 					}
 				}
-			} else { 
-				switch (type) {
-					case BP_VAR_R:
-						zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
-						/* break missing intentionally */
-					case BP_VAR_UNSET:
-					case BP_VAR_IS:
-						retval = &EG(uninitialized_zval);
-						break;
-					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
-						/* break missing intentionally */
-					case BP_VAR_W:
-						retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
-						break;
-				}
 			}
-			break;
-		case IS_DOUBLE:
-			hval = zend_dval_to_lval(Z_DVAL_P(dim));
-			goto num_index;
-		case IS_RESOURCE:
-			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
-			hval = Z_RES_HANDLE_P(dim);
-			goto num_index;
-		case IS_BOOL:
-		case IS_LONG:
-			hval = Z_LVAL_P(dim);
-num_index:
-			retval = zend_hash_index_find(ht, hval);
-			if (retval == NULL) {
-				switch (type) {
-					case BP_VAR_R:
-						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
-						/* break missing intentionally */
-					case BP_VAR_UNSET:
-					case BP_VAR_IS:
-						retval = &EG(uninitialized_zval);
-						break;
-					case BP_VAR_RW:
-						zend_error(E_NOTICE,"Undefined offset: %ld", hval);
-						/* break missing intentionally */
-					case BP_VAR_W:
-						retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-						break;
-				}
+		} else { 
+			switch (type) {
+				case BP_VAR_R:
+					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
+					/* break missing intentionally */
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval);
+					break;
+				case BP_VAR_RW:
+					zend_error(E_NOTICE,"Undefined index: %s", offset_key->val);
+					/* break missing intentionally */
+				case BP_VAR_W:
+					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
+					break;
 			}
-			break;
-
-		default:
-			zend_error(E_WARNING, "Illegal offset type");
-			return (type == BP_VAR_W || type == BP_VAR_RW) ?
-				&EG(error_zval) : &EG(uninitialized_zval);
+		}
+	} else {
+		switch (Z_TYPE_P(dim)) {
+			case IS_NULL:
+				offset_key = STR_EMPTY_ALLOC();
+				goto str_index;
+			case IS_DOUBLE:
+				hval = zend_dval_to_lval(Z_DVAL_P(dim));
+				goto num_index;
+			case IS_RESOURCE:
+				zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+				hval = Z_RES_HANDLE_P(dim);
+				goto num_index;
+			case IS_BOOL:
+				hval = Z_LVAL_P(dim);
+				goto num_index;
+			default:
+				zend_error(E_WARNING, "Illegal offset type");
+				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
+					&EG(error_zval) : &EG(uninitialized_zval);
+		}
 	}
 	return retval;
 }
 
-static void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type, int is_ref TSRMLS_DC)
+static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *container_ptr, zval *dim, int dim_type, int type, int is_ref TSRMLS_DC)
 {
     zval *retval;
     zval *container = container_ptr;
 
 	ZVAL_DEREF(container);
-	switch (Z_TYPE_P(container)) {
-		case IS_ARRAY:
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		if (container == container_ptr) {
+			SEPARATE_ZVAL(container);
+		}
+fetch_from_array:
+		if (dim == NULL) {
+			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
+			if (retval == NULL) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				retval = &EG(error_zval);
+			}
+		} else {
+			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
+		}
+		if (is_ref) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+			ZVAL_COPY(result, retval);
+		} else {
+			ZVAL_INDIRECT(result, retval);
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
+convert_to_array:
+			array_init(container);
+			goto fetch_from_array;
+		}
+		if (dim == NULL) {
+			zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
+		}
+
+		if (type != BP_VAR_UNSET) {
 			if (container == container_ptr) {
 				SEPARATE_ZVAL(container);
 			}
-fetch_from_array:
-			if (dim == NULL) {
-				retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
-				if (retval == NULL) {
-					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-					retval = &EG(error_zval);
-				}
-			} else {
-				retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
-			}
-			if (is_ref) {
-				SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
-				ZVAL_COPY(result, retval);
-			} else {
-				ZVAL_INDIRECT(result, retval);
-			}
-			break;
+		}
 
-		case IS_NULL:
-			if (container == &EG(error_zval)) {
-				ZVAL_INDIRECT(result, &EG(error_zval));
-			} else if (type != BP_VAR_UNSET) {
-convert_to_array:
-				array_init(container);
-				goto fetch_from_array;
-			} else {
-				/* for read-mode only */
-				ZVAL_NULL(result);
-			}
-			break;
+		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+			zval tmp;
 
-		case IS_STRING: {
-				zval tmp;
-
-				if (type != BP_VAR_UNSET && Z_STRLEN_P(container)==0) {
-					goto convert_to_array;
-				}
-				if (dim == NULL) {
-					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
-				}
-
-				if (type != BP_VAR_UNSET) {
-					if (container == container_ptr) {
-						SEPARATE_ZVAL(container);
+			switch(Z_TYPE_P(dim)) {
+				case IS_STRING:
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+						break;
 					}
-				}
-
-				if (Z_TYPE_P(dim) != IS_LONG) {
-
-					switch(Z_TYPE_P(dim)) {
-						/* case IS_LONG: */
-						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-								break;
-							}
-							if (type != BP_VAR_UNSET) {
-								zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
-							}
-
-							break;
-						case IS_DOUBLE:
-						case IS_NULL:
-						case IS_BOOL:
-							zend_error(E_NOTICE, "String offset cast occurred");
-							break;
-						default:
-							zend_error(E_WARNING, "Illegal offset type");
-							break;
+					if (type != BP_VAR_UNSET) {
+						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					}
-
-					ZVAL_DUP(&tmp, dim);
-					convert_to_long(&tmp);
-					dim = &tmp;
-				}
-				ZVAL_STR_OFFSET(result, container, Z_LVAL_P(dim));
-				if (!IS_INTERNED(Z_STR_P(container))) STR_ADDREF(Z_STR_P(container));
+					break;
+				case IS_DOUBLE:
+				case IS_NULL:
+				case IS_BOOL:
+					zend_error(E_NOTICE, "String offset cast occurred");
+					break;
+				default:
+					zend_error(E_WARNING, "Illegal offset type");
+					break;
 			}
-			break;
 
-		case IS_OBJECT:
-			if (!Z_OBJ_HT_P(container)->read_dimension) {
-				zend_error_noreturn(E_ERROR, "Cannot use object as array");
-			} else {
-				zval *overloaded_result;
+			ZVAL_DUP(&tmp, dim);
+			convert_to_long(&tmp);
+			dim = &tmp;
+		}
 
-//???				if (dim_type == IS_TMP_VAR) {
-//???					zval *orig = dim;
-//???					MAKE_REAL_ZVAL_PTR(dim);
-//???					ZVAL_NULL(orig);
-//???				}
-				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
+		if (!IS_INTERNED(Z_STR_P(container))) STR_ADDREF(Z_STR_P(container));
+		ZVAL_STR_OFFSET(result, container, Z_LVAL_P(dim));
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (!Z_OBJ_HT_P(container)->read_dimension) {
+			zend_error_noreturn(E_ERROR, "Cannot use object as array");
+		} else {
+//???			if (dim_type == IS_TMP_VAR) {
+//???				zval *orig = dim;
+//???				MAKE_REAL_ZVAL_PTR(dim);
+//???				ZVAL_NULL(orig);
+//???			}
+			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
-				if (overloaded_result && Z_TYPE_P(overloaded_result) != IS_UNDEF) {
-					if (!Z_ISREF_P(overloaded_result)) {
-						if (Z_REFCOUNTED_P(overloaded_result) &&
-						    Z_REFCOUNT_P(overloaded_result) > 1) {
-							if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
-								Z_DELREF_P(overloaded_result);
-								ZVAL_DUP(result, overloaded_result);
-								overloaded_result = result;
-							} else {
-								ZVAL_COPY(result, overloaded_result);
-								overloaded_result = result;
-							}
-						}
-						if (Z_TYPE_P(overloaded_result) != IS_OBJECT) {
-							zend_class_entry *ce = Z_OBJCE_P(container);
-							zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
-						}
-					}
-//???					AI_SET_PTR(result, overloaded_result);
-//???					PZVAL_LOCK(overloaded_result);
-//???					ZVAL_COPY(result, overloaded_result);
-					if (result != overloaded_result) {
-						if (is_ref && overloaded_result != &EG(uninitialized_zval)) {
-							SEPARATE_ZVAL_TO_MAKE_IS_REF(overloaded_result);
-							ZVAL_COPY(result, overloaded_result);
+			if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
+				if (!Z_ISREF_P(retval)) {
+					if (Z_REFCOUNTED_P(retval) &&
+					    Z_REFCOUNT_P(retval) > 1) {
+						if (Z_TYPE_P(retval) != IS_OBJECT) {
+							Z_DELREF_P(retval);
+							ZVAL_DUP(result, retval);
+							retval = result;
 						} else {
-							ZVAL_INDIRECT(result, overloaded_result);
+							ZVAL_COPY(result, retval);
+							retval = result;
 						}
 					}
-				} else {
-					ZVAL_INDIRECT(result, &EG(error_zval));
+					if (Z_TYPE_P(retval) != IS_OBJECT) {
+						zend_class_entry *ce = Z_OBJCE_P(container);
+						zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
+					}
 				}
-//???				if (dim_type == IS_TMP_VAR) {
-//???					zval_ptr_dtor(dim);
-//???				}
-			}
-			break;
-
-		case IS_BOOL:
-			if (type != BP_VAR_UNSET && Z_LVAL_P(container)==0) {
-				goto convert_to_array;
-			}
-			/* break missing intentionally */
-
-		default:
-			if (type == BP_VAR_UNSET) {
-				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
-				ZVAL_NULL(result);
+//???				AI_SET_PTR(result, retval);
+//???				PZVAL_LOCK(retval);
+//???				ZVAL_COPY(result, retval);
+				if (result != retval) {
+					if (is_ref && retval != &EG(uninitialized_zval)) {
+						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+						ZVAL_COPY(result, retval);
+					} else {
+						ZVAL_INDIRECT(result, retval);
+					}
+				}
 			} else {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
 				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
-			break;
+//???			if (dim_type == IS_TMP_VAR) {
+//???				zval_ptr_dtor(dim);
+//???			}
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_NULL)) {
+		if (container == &EG(error_zval)) {
+			ZVAL_INDIRECT(result, &EG(error_zval));
+		} else if (type != BP_VAR_UNSET) {
+			goto convert_to_array;
+		} else {
+			/* for read-mode only */
+			ZVAL_NULL(result);
+		}
+	} else {
+		if (type != BP_VAR_UNSET &&
+		    Z_TYPE_P(container) == IS_BOOL &&
+		    Z_LVAL_P(container)==0) {
+			goto convert_to_array;
+		}
+		if (type == BP_VAR_UNSET) {
+			zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
+			ZVAL_NULL(result);
+		} else {
+			zend_error(E_WARNING, "Cannot use a scalar value as an array");
+			ZVAL_INDIRECT(result, &EG(error_zval));
+		}
 	}
 }
 
-static void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
+static zend_never_inline void zend_fetch_dimension_address_W(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 0 TSRMLS_CC);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_W_ref(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W, 1 TSRMLS_CC);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_RW(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_RW, 0 TSRMLS_CC);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, zval *container_ptr, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET, 0 TSRMLS_CC);
+}
+
+static zend_always_inline void zend_fetch_dimension_address_read(zval *result, zval *container, zval *dim, int dim_type, int type TSRMLS_DC)
 {
 	zval *retval;
 
 	ZVAL_DEREF(container);
-	switch (Z_TYPE_P(container)) {
+	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
+		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
+		ZVAL_COPY(result, retval);
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
+		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
+			zval tmp;
 
-		case IS_ARRAY:
-			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
-			ZVAL_COPY(result, retval);
-			return;
-
-		case IS_NULL:
-			ZVAL_NULL(result);
-			return;
-
-		case IS_STRING: {
-				zval tmp;
-
-				if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-					switch(Z_TYPE_P(dim)) {
-						/* case IS_LONG: */
-						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
-								break;
-							}
-							if (type != BP_VAR_IS) {
-								zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
-							}
-							break;
-						case IS_DOUBLE:
-						case IS_NULL:
-						case IS_BOOL:
-							if (type != BP_VAR_IS) {
-								zend_error(E_NOTICE, "String offset cast occurred");
-							}
-							break;
-						default:
-							zend_error(E_WARNING, "Illegal offset type");
-							break;
+			switch(Z_TYPE_P(dim)) {
+				/* case IS_LONG: */
+				case IS_STRING:
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+						break;
 					}
-
-					ZVAL_DUP(&tmp, dim);
-					convert_to_long(&tmp);
-					dim = &tmp;
-				}
-
-				if (UNEXPECTED(Z_LVAL_P(dim) < 0) || UNEXPECTED(Z_STRLEN_P(container) <= Z_LVAL_P(dim))) {
 					if (type != BP_VAR_IS) {
-						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					}
-					ZVAL_EMPTY_STRING(result);
-				} else {
-					zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[Z_LVAL_P(dim)];
-					
-					if (CG(one_char_string)[c]) {
-						ZVAL_INT_STR(result, CG(one_char_string)[c]);
-					} else {
-						ZVAL_NEW_STR(result, STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0));
+					break;
+				case IS_DOUBLE:
+				case IS_NULL:
+				case IS_BOOL:
+					if (type != BP_VAR_IS) {
+						zend_error(E_NOTICE, "String offset cast occurred");
 					}
-				}
-				return;
+					break;
+				default:
+					zend_error(E_WARNING, "Illegal offset type");
+					break;
 			}
-			break;
 
-		case IS_OBJECT:
-			if (!Z_OBJ_HT_P(container)->read_dimension) {
-				zend_error_noreturn(E_ERROR, "Cannot use object as array");
+			ZVAL_DUP(&tmp, dim);
+			convert_to_long(&tmp);
+			dim = &tmp;
+		}
+
+		if (UNEXPECTED(Z_LVAL_P(dim) < 0) || UNEXPECTED(Z_STRLEN_P(container) <= Z_LVAL_P(dim))) {
+			if (type != BP_VAR_IS) {
+				zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
+			}
+			ZVAL_EMPTY_STRING(result);
+		} else {
+			zend_uchar c = (zend_uchar)Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+
+			if (CG(one_char_string)[c]) {
+				ZVAL_INT_STR(result, CG(one_char_string)[c]);
 			} else {
-				zval *overloaded_result;
-
-//???				if (dim_type == IS_TMP_VAR) {
-//???					zval *orig = dim;
-//???					MAKE_REAL_ZVAL_PTR(dim);
-//???					ZVAL_NULL(orig);
-//???				}
-				overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
-
-				if (result) {
-					if (overloaded_result) {
-						if (result != overloaded_result) {
-							ZVAL_COPY(result, overloaded_result);
-						}
-					} else {
-						ZVAL_NULL(result);
-					}
-				}
-//???				if (dim_type == IS_TMP_VAR) {
-//???					zval_ptr_dtor(dim);
-//???				}
+				ZVAL_NEW_STR(result, STR_INIT(Z_STRVAL_P(container) + Z_LVAL_P(dim), 1, 0));
 			}
-			return;
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (!Z_OBJ_HT_P(container)->read_dimension) {
+			zend_error_noreturn(E_ERROR, "Cannot use object as array");
+		} else {
+//???			if (dim_type == IS_TMP_VAR) {
+//???				zval *orig = dim;
+//???				MAKE_REAL_ZVAL_PTR(dim);
+//???				ZVAL_NULL(orig);
+//???			}
+			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
-		default:
-			ZVAL_NULL(result);
-			return;
+			if (result) {
+				if (retval) {
+					if (result != retval) {
+						ZVAL_COPY(result, retval);
+					}
+				} else {
+					ZVAL_NULL(result);
+				}
+			}
+//???			if (dim_type == IS_TMP_VAR) {
+//???				zval_ptr_dtor(dim);
+//???			}
+		}
+	} else {
+		ZVAL_NULL(result);
 	}
+}
+
+static zend_never_inline void zend_fetch_dimension_address_read_R(zval *result, zval *container, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R TSRMLS_CC);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result, zval *container, zval *dim, int dim_type TSRMLS_DC)
+{
+	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS TSRMLS_CC);
 }
 
 static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, const zend_literal *key, int type, int is_ref TSRMLS_DC)
