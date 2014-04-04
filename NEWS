@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     UNIX sockets). (Mike)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)
   . Fixed bug #66736 (fpassthru broken). (Mike)
+  . Fixed bug #67024 (getimagesize should recognize BMP files with negative 
+    height). (Gabor Buella)
 
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol)
