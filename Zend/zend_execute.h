@@ -68,7 +68,7 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, char **class_name, zend_class_entry **pce TSRMLS_DC);
-ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
+ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
 
 static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
 {
@@ -94,13 +94,6 @@ static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LIN
 		if (!Z_DELREF_P(zval_ptr)) {
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
-//???		} else {
-//???			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
-				/* convert reference to regular value */
-//???				zend_reference *ref = Z_REF_P(zval_ptr);
-//???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
-//???				efree_rel(ref);
-//???			}
 		}
 	}
 }
@@ -285,12 +278,8 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
 
 static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data *ex)
 {
-	if (ex) {
-		zval *p = ex->function_state.arguments;
-		return Z_LVAL_P(p);
-	} else {
-		return 0;			
-	}
+	zval *p = ex->function_state.arguments;
+	return Z_LVAL_P(p);
 }
 
 static zend_always_inline zval* zend_vm_stack_get_arg_ex(zend_execute_data *ex, int requested_arg)
@@ -301,12 +290,16 @@ static zend_always_inline zval* zend_vm_stack_get_arg_ex(zend_execute_data *ex, 
 	if (UNEXPECTED(requested_arg > arg_count)) {
 		return NULL;
 	}
-	return (zval*)p - arg_count + requested_arg - 1;
+	return p - arg_count + requested_arg - 1;
 }
 
 static zend_always_inline int zend_vm_stack_get_args_count(TSRMLS_D)
 {
-	return zend_vm_stack_get_args_count_ex(EG(current_execute_data)->prev_execute_data);
+	if (EG(current_execute_data)->prev_execute_data) {
+		return zend_vm_stack_get_args_count_ex(EG(current_execute_data)->prev_execute_data);
+	} else {
+		return 0;
+	}
 }
 
 static zend_always_inline zval* zend_vm_stack_get_arg(int requested_arg TSRMLS_DC)

@@ -1961,6 +1961,10 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 			}
 		}
 	}
+
+	if (cur_arg_info->class_name || cur_arg_info->type_hint) {
+		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
+	}
 }
 /* }}} */
 

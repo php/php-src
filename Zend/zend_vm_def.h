@@ -3337,35 +3337,21 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
+	zval *arguments = EX(prev_execute_data)->function_state.arguments;
+	zend_uint arg_count = Z_LVAL_P(arguments);
 
 	SAVE_OPLINE();
-	if (UNEXPECTED(param == NULL)) {
-		if (zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, NULL, opline->extended_value TSRMLS_CC)) {
-			const char *space;
-			const char *class_name;
-			zend_execute_data *ptr;
-
-			if (EG(active_op_array)->scope) {
-				class_name = EG(active_op_array)->scope->name->val;
-				space = "::";
-			} else {
-				class_name = space = "";
-			}
-			ptr = EX(prev_execute_data);
-
-			if(ptr && ptr->op_array) {
-				zend_error(E_WARNING, "Missing argument %u for %s%s%s(), called in %s on line %d and defined", opline->op1.num, class_name, space, get_active_function_name(TSRMLS_C), ptr->op_array->filename->val, ptr->opline->lineno);
-			} else {
-				zend_error(E_WARNING, "Missing argument %u for %s%s%s()", opline->op1.num, class_name, space, get_active_function_name(TSRMLS_C));
-			}
-		}
+	if (UNEXPECTED(arg_num > arg_count)) {
+		zend_verify_missing_arg(execute_data, arg_num TSRMLS_CC);
 	} else {
 		zval *var_ptr;
+		zval *param = arguments - arg_count + arg_num - 1;
 
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
-		var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-		if (Z_REFCOUNTED_P(var_ptr)) Z_DELREF_P(var_ptr);
+		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+			zend_verify_arg_type((zend_function *) EX(op_array), arg_num, param, opline->extended_value TSRMLS_CC);
+		}
+		var_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+		if (UNEXPECTED(Z_REFCOUNTED_P(var_ptr))) Z_DELREF_P(var_ptr);
 		ZVAL_COPY(var_ptr, param);
 	}
 
@@ -3377,13 +3363,14 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
+	zval *arguments = EX(prev_execute_data)->function_state.arguments;
+	zend_uint arg_count = Z_LVAL_P(arguments);
 	zval *var_ptr;
 
 	SAVE_OPLINE();
-	var_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	zval_ptr_dtor(var_ptr);
-	if (param == NULL) {
+	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+	if (UNEXPECTED(Z_REFCOUNTED_P(var_ptr))) Z_DELREF_P(var_ptr);
+	if (arg_num > arg_count) {
 		ZVAL_COPY_VALUE(var_ptr, opline->op2.zv);
 		if (Z_OPT_CONSTANT_P(var_ptr)) {
 			zval_update_constant(var_ptr, 0 TSRMLS_CC);
@@ -3394,10 +3381,13 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 			}
 		}
 	} else {
+		zval *param = arguments - arg_count + arg_num - 1;
 		ZVAL_COPY(var_ptr, param);
 	}
 
-	zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, var_ptr, opline->extended_value TSRMLS_CC);
+	if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+		zend_verify_arg_type((zend_function *) EX(op_array), arg_num, var_ptr, opline->extended_value TSRMLS_CC);
+	}
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3407,27 +3397,34 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 {
 	USE_OPLINE
 	zend_uint arg_num = opline->op1.num;
-	zend_uint arg_count = zend_vm_stack_get_args_count_ex(EX(prev_execute_data) TSRMLS_CC);
+	zval *arguments = EX(prev_execute_data)->function_state.arguments;
+	zend_uint arg_count = Z_LVAL_P(arguments);
 	zval *params;
 
 	SAVE_OPLINE();
 
-	params = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	if (Z_REFCOUNTED_P(params)) Z_DELREF_P(params);
+	params = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+	if (UNEXPECTED(Z_REFCOUNTED_P(params))) Z_DELREF_P(params);
 
 	if (arg_num <= arg_count) {
+		zval *param = arguments - arg_count + arg_num - 1;
 		array_init_size(params, arg_count - arg_num + 1);
+		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+			do {
+				zend_verify_arg_type((zend_function *) EX(op_array), arg_num, param, opline->extended_value TSRMLS_CC);
+				zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
+				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+				param++;
+			} while (++arg_num <= arg_count);
+		} else {
+			do {
+				zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
+				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+				param++;
+			} while (++arg_num <= arg_count);
+		}
 	} else {
 		array_init(params);
-	}
-
-	for (; arg_num <= arg_count; ++arg_num) {
-		zval *param = zend_vm_stack_get_arg_ex(EX(prev_execute_data), arg_num TSRMLS_CC);
-		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, param, opline->extended_value TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_P(params), param);
-		if (Z_REFCOUNTED_P(param)) {
-			Z_ADDREF_P(param);
-		}
 	}
 
 	CHECK_EXCEPTION();
