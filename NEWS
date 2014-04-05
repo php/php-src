@@ -107,6 +107,10 @@ PHP                                                                        NEWS
   . New pg_flush() and pg_consume_input() functions added to manually complete
     non-blocking reads/writes to underlying connection sockets. (Daniel Lowrey)
 
+- SimpleXML:
+  . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
+    (Anatol)
+
 - SQLite:
   . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
 
