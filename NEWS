@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed problem in mysqli_commit()/mysqli_rollback() with second parameter
     (extra comma) and third parameters (lack of escaping). (Andrey)
 
+- SimpleXML:
+  . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
+    (Anatol)
+
 - XSL:
   . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
     when loaded with "file://"). (Anatol)
