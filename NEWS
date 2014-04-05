@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #64330 (stream_socket_server() creates wrong Abstract Namespace 
     UNIX sockets). (Mike)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)  
+  . Fixed bug #66736 (fpassthru broken). (Mike)
   . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
 
 - SPL:
@@ -105,6 +106,10 @@ PHP                                                                        NEWS
     polling status constants. (Daniel Lowrey)
   . New pg_flush() and pg_consume_input() functions added to manually complete
     non-blocking reads/writes to underlying connection sockets. (Daniel Lowrey)
+
+- SimpleXML:
+  . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
+    (Anatol)
 
 - SQLite:
   . Updated the bundled libsqlite to the version 3.8.3.1 (Anatol)
