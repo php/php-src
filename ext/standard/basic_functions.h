@@ -81,8 +81,6 @@ PHP_FUNCTION(error_get_last);
 
 PHP_FUNCTION(call_user_func);
 PHP_FUNCTION(call_user_func_array);
-PHP_FUNCTION(call_user_method);
-PHP_FUNCTION(call_user_method_array);
 PHP_FUNCTION(forward_static_call);
 PHP_FUNCTION(forward_static_call_array);
 
