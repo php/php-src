@@ -5,8 +5,6 @@ Basic return hints no yield
 function foo() : array {
 	yield;
 }
-
-foo();
 ?>
 --EXPECTF--
 Fatal error: The "yield" expression can not be used inside a function with a return type hint in %s on line %d
