@@ -1878,7 +1878,6 @@ void zend_do_function_return_hint(const znode *return_hint, zend_bool allow_null
 				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
 			}
 		} else {
-			printf("non constant return hint\n");
 			CG(active_op_array)->return_hint.type = IS_OBJECT;
 			CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
 			CG(active_op_array)->return_hint.class_name = zend_new_interned_string

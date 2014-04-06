@@ -2618,7 +2618,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 						"the function %s was expected to return callable and returned %s",
 						EX(function_state).function->common.function_name,
 						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
-				}
+				} break;
 
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;
@@ -8026,7 +8026,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						"the function %s was expected to return callable and returned %s",
 						EX(function_state).function->common.function_name,
 						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
-				}
+				} break;
 
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;
@@ -13334,7 +13334,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						"the function %s was expected to return callable and returned %s",
 						EX(function_state).function->common.function_name,
 						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
-				}
+				} break;
 
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;
@@ -30997,7 +30997,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 						"the function %s was expected to return callable and returned %s",
 						EX(function_state).function->common.function_name,
 						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
-				}
+				} break;
 
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;

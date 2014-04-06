@@ -2872,7 +2872,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 						"the function %s was expected to return callable and returned %s", 
 						EX(function_state).function->common.function_name, 
 						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
-				}
+				} break;
 				
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;
