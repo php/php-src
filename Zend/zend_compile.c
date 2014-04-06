@@ -2893,6 +2893,10 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
+	
+	if (CG(active_op_array)->return_hint.used) {
+		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can not be used inside a function with a return type hint");
+	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
