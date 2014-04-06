@@ -1,5 +1,7 @@
 --TEST--
 zend multibyte (6)
+--XFAIL--
+https://bugs.php.net/bug.php?id=66582
 --INI--
 zend.multibyte=On
 zend.script_encoding=EUC-JP
