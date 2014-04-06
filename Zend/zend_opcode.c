@@ -81,7 +81,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
 	op_array->required_num_args = 0;
-
+	op_array->return_hint.used = 0;
+	
 	op_array->scope = NULL;
 
 	op_array->brk_cont_array = NULL;
@@ -409,6 +410,12 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 			}
 		}
 		efree(op_array->arg_info);
+	}
+	
+	if (op_array->return_hint.used) {
+		if (op_array->return_hint.type == IS_OBJECT) {
+			str_efree(op_array->return_hint.class_name);
+		}
 	}
 }
 

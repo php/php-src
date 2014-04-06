@@ -2594,6 +2594,57 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	SAVE_OPLINE();
 	retval_ptr = opline->op1.zv;
 
+	if (EX(function_state).function->common.return_hint.used) {
+		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+
+		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_error(E_ERROR,
+				"the function %s was expected to return %s and returned null",
+				EX(function_state).function->common.function_name,
+				(return_hint->type == IS_OBJECT) ?
+					return_hint->class_name : zend_get_type_by_const(return_hint->type));
+		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return array and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				} break;
+
+				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT ||
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return callable and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				}
+
+				case IS_OBJECT: {
+					zend_class_entry **ce = NULL;
+
+					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+					}
+
+					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s, the class could not be found",
+							EX(function_state).function->common.function_name, return_hint->class_name);
+					}
+
+					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+					}
+				}
+			}
+		}
+	}
+
 	if (!EG(return_value_ptr_ptr)) {
 
 	} else {
@@ -7951,6 +8002,57 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
+	if (EX(function_state).function->common.return_hint.used) {
+		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+
+		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_error(E_ERROR,
+				"the function %s was expected to return %s and returned null",
+				EX(function_state).function->common.function_name,
+				(return_hint->type == IS_OBJECT) ?
+					return_hint->class_name : zend_get_type_by_const(return_hint->type));
+		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return array and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				} break;
+
+				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT ||
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return callable and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				}
+
+				case IS_OBJECT: {
+					zend_class_entry **ce = NULL;
+
+					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+					}
+
+					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s, the class could not be found",
+							EX(function_state).function->common.function_name, return_hint->class_name);
+					}
+
+					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+					}
+				}
+			}
+		}
+	}
+
 	if (!EG(return_value_ptr_ptr)) {
 		zval_dtor(free_op1.var);
 	} else {
@@ -13207,6 +13309,57 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (EX(function_state).function->common.return_hint.used) {
+		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+
+		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_error(E_ERROR,
+				"the function %s was expected to return %s and returned null",
+				EX(function_state).function->common.function_name,
+				(return_hint->type == IS_OBJECT) ?
+					return_hint->class_name : zend_get_type_by_const(return_hint->type));
+		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return array and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				} break;
+
+				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT ||
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return callable and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				}
+
+				case IS_OBJECT: {
+					zend_class_entry **ce = NULL;
+
+					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+					}
+
+					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s, the class could not be found",
+							EX(function_state).function->common.function_name, return_hint->class_name);
+					}
+
+					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+					}
+				}
+			}
+		}
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 		zval_ptr_dtor_nogc(&free_op1.var);
@@ -30819,6 +30972,57 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (EX(function_state).function->common.return_hint.used) {
+		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+
+		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_error(E_ERROR,
+				"the function %s was expected to return %s and returned null",
+				EX(function_state).function->common.function_name,
+				(return_hint->type == IS_OBJECT) ?
+					return_hint->class_name : zend_get_type_by_const(return_hint->type));
+		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return array and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				} break;
+
+				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT ||
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return callable and returned %s",
+						EX(function_state).function->common.function_name,
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				}
+
+				case IS_OBJECT: {
+					zend_class_entry **ce = NULL;
+
+					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+					}
+
+					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s, the class could not be found",
+							EX(function_state).function->common.function_name, return_hint->class_name);
+					}
+
+					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s",
+							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+					}
+				}
+			}
+		}
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 

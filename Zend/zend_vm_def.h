@@ -2848,6 +2848,57 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	if (EX(function_state).function->common.return_hint.used) {
+		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
+
+		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
+			zend_error(E_ERROR,
+				"the function %s was expected to return %s and returned null", 
+				EX(function_state).function->common.function_name, 
+				(return_hint->type == IS_OBJECT) ? 
+					return_hint->class_name : zend_get_type_by_const(return_hint->type));
+		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+			switch (return_hint->type) {
+				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return array and returned %s", 
+						EX(function_state).function->common.function_name, 
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				} break;
+				
+				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT || 
+					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+					zend_error(E_ERROR,
+						"the function %s was expected to return callable and returned %s", 
+						EX(function_state).function->common.function_name, 
+						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+				}
+				
+				case IS_OBJECT: {
+					zend_class_entry **ce = NULL;
+					
+					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s", 
+							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+					}
+					
+					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s, the class could not be found", 
+							EX(function_state).function->common.function_name, return_hint->class_name);
+					}
+					
+					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+						zend_error(E_ERROR,
+							"the function %s was expected to return %s and returned %s", 
+							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+					}
+				}
+			}
+		}
+	}
+
 	if (!EG(return_value_ptr_ptr)) {
 		FREE_OP1();
 	} else {

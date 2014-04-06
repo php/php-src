@@ -1862,6 +1862,31 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
+/* {{{ */
+void zend_do_function_return_hint(const znode *return_hint, zend_bool allow_null TSRMLS_DC) {
+	if (return_hint->op_type != IS_UNUSED) {
+		CG(active_op_array)->return_hint.used = 1;
+		CG(active_op_array)->return_hint.allow_null = allow_null;
+		
+		if (return_hint->op_type == IS_CONST) {
+			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
+				CG(active_op_array)->return_hint.type = IS_OBJECT;
+				CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
+				CG(active_op_array)->return_hint.class_name = zend_new_interned_string
+					(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
+			} else {
+				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
+			}
+		} else {
+			printf("non constant return hint\n");
+			CG(active_op_array)->return_hint.type = IS_OBJECT;
+			CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
+			CG(active_op_array)->return_hint.class_name = zend_new_interned_string
+				(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
+		}
+	}
+} /* }}} */
+
 void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -2806,6 +2831,20 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	start_op_number = get_next_op_number(CG(active_op_array));
 
+	if (CG(active_op_array)->return_hint.used && expr) {
+		if (expr->op_type == IS_UNUSED && !CG(active_op_array)->return_hint.allow_null) {
+			zend_error(E_COMPILE_ERROR, "return hint error in %s", CG(active_op_array)->function_name);
+		} else {
+			if (expr->op_type == IS_CONST) {
+				if (Z_TYPE(expr->u.constant) & ~IS_CONSTANT_TYPE_MASK != CG(active_op_array)->return_hint.type) {
+					zend_error(E_COMPILE_ERROR, "return type mismatch");
+				}
+			}
+			
+			/* work out if we can do anything else */
+		}
+	}
+
 #ifdef ZTS
 	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr TSRMLS_CC);
 	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy TSRMLS_CC);
@@ -3512,7 +3551,38 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 			REALLOC_BUF_IF_EXCEED(buf, offset, length, 32);
 		}
 	}
+	
 	*(offset++) = ')';
+	
+	if (fptr->common.return_hint.used) {
+		REALLOC_BUF_IF_EXCEED(buf, offset, length, 4);
+		*(offset++) = ' ';
+		*(offset++) = ':';
+		*(offset++) = ' ';
+		
+		if (fptr->common.return_hint.allow_null) {
+			*(offset++) = '?';
+		}
+		
+		switch (fptr->common.return_hint.type) {
+			case IS_OBJECT:
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, fptr->common.return_hint.class_name_len);
+				memcpy(offset, fptr->common.return_hint.class_name, fptr->common.return_hint.class_name_len);
+				offset += fptr->common.return_hint.class_name_len;
+			break;
+			
+			default: {
+				char *type = zend_get_type_by_const(fptr->common.return_hint.type);
+				if (type) {
+					size_t type_len = strlen(type);
+					REALLOC_BUF_IF_EXCEED(buf, offset, length, type_len);
+					memcpy(offset, type, type_len);
+					offset += type_len;
+				}
+			}
+		}
+	}
+	
 	*offset = '\0';
 
 	return buf;
@@ -3586,6 +3656,51 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
 			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
 			efree(method_prototype);
+		}
+	}
+	
+	if (parent->common.return_hint.used) {
+		
+		if (!child->common.return_hint.used) {
+			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type missing", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			efree(method_prototype);
+			return;
+		}
+		
+		if (child->common.return_hint.type != parent->common.return_hint.type) {
+			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type mismatch", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			efree(method_prototype);
+			return;
+		}
+		
+		if (child->common.return_hint.type == IS_OBJECT) {
+			zend_class_entry **pce = NULL, **cce = NULL;
+			
+			if (zend_lookup_class(child->common.return_hint.class_name, child->common.return_hint.class_name_len, &cce TSRMLS_CC) != SUCCESS) {
+				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s declares return type %s, which could not be found", 
+					ZEND_FN_SCOPE_NAME(child), child->common.function_name, child->common.return_hint.class_name);
+				efree(method_prototype);
+				return;
+			}
+			
+			if (zend_lookup_class(parent->common.return_hint.class_name, parent->common.return_hint.class_name_len, &pce TSRMLS_CC) != SUCCESS) {
+				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s declares return type %s, which could not be found", 
+					ZEND_FN_SCOPE_NAME(parent), parent->common.function_name, parent->common.return_hint.class_name);
+				efree(method_prototype);
+				return;
+			}
+			
+			if (!instanceof_function(*cce, *pce TSRMLS_CC)) {
+				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type mismatch", 
+					ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+				efree(method_prototype);
+				return;
+			}
 		}
 	}
 }

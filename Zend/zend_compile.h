@@ -264,6 +264,14 @@ typedef struct _zend_compiled_variable {
 	ulong hash_value;
 } zend_compiled_variable;
 
+typedef struct _zend_return_hint {
+	zend_uchar type;
+	const char *class_name;
+	zend_uint class_name_len;
+	zend_bool allow_null;
+	zend_bool used;
+} zend_return_hint;
+
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
@@ -274,8 +282,9 @@ struct _zend_op_array {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
+	zend_return_hint return_hint;
 	/* END of common elements */
-
+	
 	zend_uint *refcount;
 
 	zend_op *opcodes;
@@ -331,6 +340,7 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
+	zend_return_hint return_hint;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -351,6 +361,7 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_uint required_num_args;
 		zend_arg_info *arg_info;
+		zend_return_hint return_hint;
 	} common;
 
 	zend_op_array op_array;
@@ -515,6 +526,7 @@ void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRM
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
+void zend_do_function_return_hint(const znode *return_hint, zend_bool allow_null TSRMLS_DC);
 void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
