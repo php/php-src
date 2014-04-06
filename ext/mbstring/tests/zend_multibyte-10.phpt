@@ -1,8 +1,5 @@
 --TEST--
 zend multibyte (10)
---SKIPIF--
---XFAIL--
-https://bugs.php.net/bug.php?id=66582
 --INI--
 zend.multibyte=1
 --FILE--
