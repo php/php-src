@@ -104,6 +104,7 @@ static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 
 again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 			result = 0;
 			break;

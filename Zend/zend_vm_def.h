@@ -4516,8 +4516,7 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
 	zval *container;
-	zval *value;
-	int result = 0;
+	int result;
 	ulong hval;
 	zval *offset;
 
@@ -4526,10 +4525,9 @@ ZEND_VM_HELPER_EX(zend_isset_isempty_dim_prop_obj_handler, VAR|UNUSED|CV, CONST|
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
-		HashTable *ht;
-		int isset = 0;
-
-		ht = Z_ARRVAL_P(container);
+		HashTable *ht = Z_ARRVAL_P(container);
+		zval *value = NULL;
+		zend_string *str;
 
 ZEND_VM_C_LABEL(isset_again):
 		switch (Z_TYPE_P(offset)) {
@@ -4541,22 +4539,19 @@ ZEND_VM_C_LABEL(isset_again):
 			case IS_LONG:
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_prop):
-				if ((value = zend_hash_index_find(ht, hval)) != NULL) {
-					isset = 1;
-				}
+				value = zend_hash_index_find(ht, hval);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (OP2_TYPE != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_prop));
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, ZEND_VM_C_GOTO(num_index_prop));
 				}
-				if ((value = zend_hash_find_ind(ht, Z_STR_P(offset))) != NULL) {
-					isset = 1;
-				}
+ZEND_VM_C_LABEL(str_index_prop):
+				value = zend_hash_find_ind(ht, str);
 				break;
 			case IS_NULL:
-				if ((value = zend_hash_find_ind(ht, STR_EMPTY_ALLOC())) != NULL) {
-					isset = 1;
-				}
+				str = STR_EMPTY_ALLOC();
+				ZEND_VM_C_GOTO(str_index_prop);
 				break;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
@@ -4568,17 +4563,10 @@ ZEND_VM_C_LABEL(num_index_prop):
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
-			if (isset && Z_TYPE_P(value) == IS_NULL) {
-				result = 0;
-			} else {
-				result = isset;
-			}
+			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
+			result = (value != NULL && Z_TYPE_P(value) > IS_NULL);
 		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-			if (!isset || !i_zend_is_true(value TSRMLS_CC)) {
-				result = 0;
-			} else {
-				result = 1;
-			}
+			result = (value == NULL || !i_zend_is_true(value TSRMLS_CC));
 		}
 		FREE_OP2();
 	} else if (Z_TYPE_P(container) == IS_OBJECT) {
@@ -4587,18 +4575,21 @@ ZEND_VM_C_LABEL(num_index_prop):
 //???		}
 		if (prop_dim) {
 			if (Z_OBJ_HT_P(container)->has_property) {
-				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISSET) == 0, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
 			if (Z_OBJ_HT_P(container)->has_dimension) {
-				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISSET) == 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
 			}
+		}
+		if ((opline->extended_value & ZEND_ISSET) == 0) {
+			result = !result;
 		}
 //???		if (IS_OP2_TMP_FREE()) {
 //???			zval_ptr_dtor(offset);
@@ -4608,42 +4599,35 @@ ZEND_VM_C_LABEL(num_index_prop):
 	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
-		if (Z_TYPE_P(offset) != IS_LONG) {
+		result = 0;
+		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
 						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
 				offset = &tmp;
-			} else {
-				/* can not be converted to proper offset, return "not set" */
-				result = 0;
 			}
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
-			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
+			if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
+				if ((opline->extended_value & ZEND_ISSET) ||
+				    Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
-				}
-			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
-					result = 1;
-				}
+				} 
 			}
+		}
+		if ((opline->extended_value & ZEND_ISSET) == 0) {
+			result = !result;
 		}
 		FREE_OP2();
 	} else {
+		result = ((opline->extended_value & ZEND_ISSET) == 0);
 		FREE_OP2();
 	}
 
-	if (opline->extended_value & ZEND_ISSET) {
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-	} else {
-		ZVAL_BOOL(EX_VAR(opline->result.var), !result);
-	}
-
+	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 	FREE_OP1_IF_VAR();
-
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
