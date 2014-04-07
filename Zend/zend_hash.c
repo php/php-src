@@ -1306,22 +1306,13 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
     uint idx;
 	
 	IS_CONSISTENT(ht);
-
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-			if (pos) {
-				*pos = idx;
-			} else {
-				ht->nInternalPointer = idx;
-			}
+			*pos = idx;
 			return;
 		}
 	}
-	if (pos) {
-		*pos = INVALID_IDX;
-	} else {
-		ht->nInternalPointer = INVALID_IDX;
-	}
+	*pos = INVALID_IDX;
 }
 
 
@@ -1338,26 +1329,17 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 	while (idx > 0) {
 		idx--;
 		if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-			if (pos) {
-				*pos = idx;
-			} else {
-				ht->nInternalPointer = idx;
-			}
+			*pos = idx;
 			return;
 		}
 	}
-	if (pos) {
-		*pos = INVALID_IDX;
-	} else {
-		ht->nInternalPointer = INVALID_IDX;
-	}
+	*pos = INVALID_IDX;
 }
 
 
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 {
-	HashPosition *current = pos ? pos : &ht->nInternalPointer;
-	uint idx = *current;
+	uint idx = *pos;
 
 	IS_CONSISTENT(ht);
 
@@ -1365,11 +1347,11 @@ ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 		while (1) {
 			idx++;
 			if (idx >= ht->nNumUsed) {
-				*current = INVALID_IDX;
+				*pos = INVALID_IDX;
 				return SUCCESS;
 			}
 			if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-				*current = idx;
+				*pos = idx;
 				return SUCCESS;
 			}
 		}
@@ -1380,8 +1362,7 @@ ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos)
 
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 {
-	HashPosition *current = pos ? pos : &ht->nInternalPointer;
-	uint idx = *current;
+	uint idx = *pos;
 
 	IS_CONSISTENT(ht);
 
@@ -1389,11 +1370,11 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 		while (idx > 0) {
 			idx--;
 			if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-				*current = idx;
+				*pos = idx;
 				return SUCCESS;
 			}
 		}
-		*current = INVALID_IDX;
+		*pos = INVALID_IDX;
  		return SUCCESS;
 	} else {
  		return FAILURE;
@@ -1404,13 +1385,10 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 /* This function should be made binary safe  */
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, ulong *num_index, zend_bool duplicate, HashPosition *pos)
 {
-	uint idx;
+	uint idx = *pos;
 	Bucket *p;
 
-	idx = pos ? (*pos) : ht->nInternalPointer;
-
 	IS_CONSISTENT(ht);
-
 	if (idx != INVALID_IDX) {
 		p = ht->arData + idx;
 		if (p->key) {
@@ -1430,13 +1408,10 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str
 
 ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos)
 {
-	uint idx;
+	uint idx = *pos;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
-
-	idx = pos ? (*pos) : ht->nInternalPointer;
-
 	if (idx == INVALID_IDX) {
 		ZVAL_NULL(key);
 	} else {
@@ -1452,13 +1427,10 @@ ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, 
 
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 {
-    uint idx;
+    uint idx = *pos;
 	Bucket *p;
 
-	idx = pos ? (*pos) : ht->nInternalPointer;
-
 	IS_CONSISTENT(ht);
-
 	if (idx != INVALID_IDX) {
 		p = ht->arData + idx;
 		if (p->key) {
@@ -1473,13 +1445,10 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 
 ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 {
-	uint idx;
+	uint idx = *pos;
 	Bucket *p;
 
-	idx = pos ? (*pos) : ht->nInternalPointer;
-
 	IS_CONSISTENT(ht);
-
 	if (idx != INVALID_IDX) {
 		p = ht->arData + idx;
 		return &p->val;
@@ -1491,19 +1460,17 @@ ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 /* This function changes key of current element without changing elements'
  * order. If element with target key already exists, it will be deleted first.
  */
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_string *str_index, ulong num_index, int mode, HashPosition *pos)
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, zend_string *str_index, ulong num_index, int mode)
 {
-	uint idx1, idx2;
+	uint idx1 = ht->nInternalPointer;
+	uint idx2;
 	Bucket *p, *q;
 	ulong h;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
 #endif
 
-	idx1 = pos ? (*pos) : ht->nInternalPointer;
-
 	IS_CONSISTENT(ht);
-
 	if (idx1 != INVALID_IDX) {
 		p = ht->arData + idx1;
 		if (key_type == HASH_KEY_IS_LONG) {

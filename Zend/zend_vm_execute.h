@@ -3092,7 +3092,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				ulong int_key;
 				zend_uchar key_type;
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS)) {
@@ -8148,7 +8148,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				ulong int_key;
 				zend_uchar key_type;
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS)) {
@@ -13246,7 +13246,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				ulong int_key;
 				zend_uchar key_type;
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS)) {
@@ -13319,7 +13319,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					}
 				}
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 
 				zend_hash_move_forward(fe_ht);
 				if (key_type == HASH_KEY_IS_LONG ||
@@ -29701,7 +29701,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				ulong int_key;
 				zend_uchar key_type;
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS)) {

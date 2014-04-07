@@ -4266,7 +4266,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 				ulong int_key;
 				zend_uchar key_type;
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key TSRMLS_CC) == SUCCESS)) {
@@ -4339,7 +4339,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					}
 				}
 
-				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &int_key, 0, NULL);
+				key_type = zend_hash_get_current_key(fe_ht, &str_key, &int_key, 0);
 
 				zend_hash_move_forward(fe_ht);
 				if (key_type == HASH_KEY_IS_LONG ||

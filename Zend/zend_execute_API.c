@@ -601,7 +601,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		/* First go over the array and see if there are any constant indices */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
 		while ((element = zend_hash_get_current_data(Z_ARRVAL_P(p))) != NULL) {
-			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(p), &str_index, &num_index, 0, NULL) != HASH_KEY_IS_STRING) {
+			if (zend_hash_get_current_key(Z_ARRVAL_P(p), &str_index, &num_index, 0) != HASH_KEY_IS_STRING) {
 				zend_hash_move_forward(Z_ARRVAL_P(p));
 				continue;
 			}
@@ -666,17 +666,17 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
-					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STR(const_value), HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_symtable_update_current_key_ex(Z_ARRVAL_P(p), Z_STR(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, Z_LVAL(const_value), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_DOUBLE:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_LONG, NULL, zend_dval_to_lval(Z_DVAL(const_value)), HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_NULL:
-					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, STR_EMPTY_ALLOC(), 0, HASH_UPDATE_KEY_IF_BEFORE, NULL);
+					ret = zend_hash_update_current_key_ex(Z_ARRVAL_P(p), HASH_KEY_IS_STRING, STR_EMPTY_ALLOC(), 0, HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				default:
 					ret = SUCCESS;

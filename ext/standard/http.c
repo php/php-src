@@ -55,7 +55,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	arg_sep_len = strlen(arg_sep);
 
 	for (zend_hash_internal_pointer_reset(ht);
-		(key_type = zend_hash_get_current_key_ex(ht, &key, &idx, 0, NULL)) != HASH_KEY_NON_EXISTENT;
+		(key_type = zend_hash_get_current_key(ht, &key, &idx, 0)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward(ht)
 	) {
 		/* handling for private & protected object properties */
@@ -78,7 +78,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			prop_len = 0;
 		}
 
-		if ((zdata = zend_hash_get_current_data_ex(ht, NULL)) == NULL) {
+		if ((zdata = zend_hash_get_current_data(ht)) == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
 			return FAILURE;
 		}

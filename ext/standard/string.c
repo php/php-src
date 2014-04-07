@@ -3958,8 +3958,8 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 				COPY_PZVAL_TO_ZVAL(result, subject_entry);
 			}
 			/* Add to return array */
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(subject), &string_key,
-												&num_key, 0, NULL)) {
+			switch (zend_hash_get_current_key(Z_ARRVAL_P(subject), &string_key,
+												&num_key, 0)) {
 				case HASH_KEY_IS_STRING:
 					zend_hash_update(Z_ARRVAL_P(return_value), string_key, &result);
 					break;

@@ -664,8 +664,8 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		int tmp_fd;
 
 
-		type = zend_hash_get_current_key_ex(Z_ARRVAL_P(stream_array),
-				&key, &num_ind, 0, NULL);
+		type = zend_hash_get_current_key(Z_ARRVAL_P(stream_array),
+				&key, &num_ind, 0);
 		if (type == HASH_KEY_NON_EXISTENT ||
 			(elem = zend_hash_get_current_data(Z_ARRVAL_P(stream_array))) == NULL) {
 			continue; /* should not happen */

@@ -618,7 +618,7 @@ ZEND_FUNCTION(each)
 	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 
 	/* add the key elements */
-	switch (zend_hash_get_current_key_ex(target_hash, &key, &num_key, 0, NULL)) {
+	switch (zend_hash_get_current_key(target_hash, &key, &num_key, 0)) {
 		case HASH_KEY_IS_STRING:
 			inserted_pointer = add_get_index_str(return_value, 0, STR_COPY(key));
 			break;
@@ -1446,7 +1446,7 @@ ZEND_FUNCTION(get_included_files)
 
 	array_init(return_value);
 	zend_hash_internal_pointer_reset(&EG(included_files));
-	while (zend_hash_get_current_key_ex(&EG(included_files), &entry, NULL, 0, NULL) == HASH_KEY_IS_STRING) {
+	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 0) == HASH_KEY_IS_STRING) {
 		add_next_index_str(return_value, STR_COPY(entry));
 		zend_hash_move_forward(&EG(included_files));
 	}

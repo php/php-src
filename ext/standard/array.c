@@ -2015,7 +2015,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	RETVAL_ZVAL_FAST(val);
 
 	/* Delete the first or last value */
-	zend_hash_get_current_key_ex(Z_ARRVAL_P(stack), &key, &index, 0, NULL);
+	zend_hash_get_current_key(Z_ARRVAL_P(stack), &key, &index, 0);
 	if (key && Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
 		zend_delete_global_variable(key TSRMLS_CC);
 	} else if (key) {

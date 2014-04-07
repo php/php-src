@@ -262,8 +262,8 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 		int key_type;													\
 																		\
 		for (zend_hash_internal_pointer_reset(_ht);						\
-				(key_type = zend_hash_get_current_key_ex(_ht, &key,		\
-						&num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; 	\
+				(key_type = zend_hash_get_current_key(_ht, &key,		\
+						&num_key, 0)) != HASH_KEY_NON_EXISTENT; 	\
 					zend_hash_move_forward(_ht)) {						\
 			if (key_type == HASH_KEY_IS_LONG) {							\
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\

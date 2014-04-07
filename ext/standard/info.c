@@ -214,7 +214,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			php_info_print(name);
 			php_info_print("[\"");
 
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(data), &string_key, &num_key, 0, NULL)) {
+			switch (zend_hash_get_current_key(Z_ARRVAL_P(data), &string_key, &num_key, 0)) {
 				case HASH_KEY_IS_STRING:
 					if (!sapi_module.phpinfo_as_text) {
 						php_info_print_html_esc(string_key->val, string_key->len);
