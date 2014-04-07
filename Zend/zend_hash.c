@@ -82,7 +82,7 @@ static void zend_hash_do_resize(HashTable *ht);
 
 #define CHECK_INIT(ht, packed) do {												\
 	if (UNEXPECTED((ht)->nTableMask == 0)) {							\
-		(ht)->arData = (Bucket *) pecalloc((ht)->nTableSize, sizeof(Bucket), (ht)->flags & HASH_FLAG_PERSISTENT);	\
+		(ht)->arData = (Bucket *) safe_pemalloc((ht)->nTableSize, sizeof(Bucket), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
 		if (packed) { \
 			(ht)->flags |= HASH_FLAG_PACKED; \
 		} else { \
@@ -132,7 +132,6 @@ static void zend_hash_packed_grow(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->arData = (Bucket *) perealloc(ht->arData, (ht->nTableSize << 1) * sizeof(Bucket), ht->flags & HASH_FLAG_PERSISTENT);
-	memset(ht->arData + ht->nTableSize, 0, sizeof(Bucket) * ht->nTableSize);
 	ht->nTableSize = (ht->nTableSize << 1);
 	ht->nTableMask = ht->nTableSize - 1;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -350,31 +349,41 @@ ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zv
 	CHECK_INIT(ht, h >= 0 && h < ht->nTableSize);
 
 	if (ht->flags & HASH_FLAG_PACKED) {
-		if (h >= 0 && h < ht->nTableSize) {
-			p = ht->arData + h;
-			if (Z_TYPE(p->val) != IS_UNDEF) {
-				if (ht->pDestructor) {
-					ht->pDestructor(&p->val);
+		if (EXPECTED(h >= 0))  {
+			if (h < ht->nNumUsed) {
+				p = ht->arData + h;
+				if (Z_TYPE(p->val) != IS_UNDEF) {
+					if (flag & (HASH_NEXT_INSERT | HASH_ADD)) {
+						return NULL;
+					}
+					if (ht->pDestructor) {
+						ht->pDestructor(&p->val);
+					}
+					ZVAL_COPY_VALUE(&p->val, pData);
+					if ((long)h >= (long)ht->nNextFreeElement) {
+						ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+					}
+					return &p->val;
+				} else { /* we have to keep the order :( */
+				    goto convert_to_hash;
 				}
-				ZVAL_COPY_VALUE(&p->val, pData);
-				HANDLE_UNBLOCK_INTERRUPTIONS();
-				if ((long)h >= (long)ht->nNextFreeElement) {
-					ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
-				}
-				return &p->val;
-			}
-			if (h >= ht->nNumUsed) { /* we have to keep the order :( */
-			    goto new_packed;
+			} else if (EXPECTED(h < ht->nTableSize)) {
+				p = ht->arData + h;
+			} else if (h < ht->nTableSize * 2 &&
+			           ht->nTableSize - ht->nNumOfElements < ht->nTableSize / 2) {
+				zend_hash_packed_grow(ht);
+				p = ht->arData + h;
 			} else {
 			    goto convert_to_hash;
 			}
-		} else if (h >= ht->nNumUsed && /* we have to keep the order :( */
-		           h < ht->nTableSize * 2 &&
-		           ht->nTableSize - ht->nNumOfElements < ht->nTableSize / 2) {
-			zend_hash_packed_grow(ht);
-new_packed:
 			HANDLE_BLOCK_INTERRUPTIONS();
+			/* incremental initialization of empty Buckets */
 			if (h >= ht->nNumUsed) {
+				Bucket *q = ht->arData + ht->nNumUsed;
+				while (q != p) {
+					ZVAL_UNDEF(&q->val);
+					q++;
+				}
 				ht->nNumUsed = h + 1;
 			}
 			ht->nNumOfElements++;
@@ -384,7 +393,6 @@ new_packed:
 			if ((long)h >= (long)ht->nNextFreeElement) {
 				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
 			}
-			p = ht->arData + h;
 			p->h = h;
 			p->key = NULL;
 			ZVAL_COPY_VALUE(&p->val, pData);
@@ -401,7 +409,7 @@ convert_to_hash:
 
 	p = zend_hash_index_find_bucket(ht, h);
 	if (p) {
-		if (flag & HASH_NEXT_INSERT || flag & HASH_ADD) {
+		if (flag & (HASH_NEXT_INSERT | HASH_ADD)) {
 			return NULL;
 		}
 		ZEND_ASSERT(&p->val != pData);
@@ -740,7 +748,7 @@ ZEND_API int zend_hash_index_del(HashTable *ht, ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->flags & HASH_FLAG_PACKED) {
-		if (h >=0 && h < ht->nTableSize) {
+		if (h >=0 && h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				HANDLE_BLOCK_INTERRUPTIONS();
@@ -820,7 +828,6 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 	ht->nNextFreeElement = 0;
 	ht->nInternalPointer = INVALID_IDX;
 	if (ht->nTableMask) {
-		memset(ht->arData, 0, ht->nTableSize*sizeof(Bucket));
 		if (!(ht->flags & HASH_FLAG_PACKED)) {
 			memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(zend_uint));	
 		}
@@ -1207,7 +1214,7 @@ ZEND_API zval *zend_hash_index_find(const HashTable *ht, ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->flags & HASH_FLAG_PACKED) {
-		if (h >= 0 && h < ht->nTableSize) {
+		if (h >= 0 && h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
 				return &p->val;
@@ -1228,7 +1235,7 @@ ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h)
 	IS_CONSISTENT(ht);
 
 	if (ht->flags & HASH_FLAG_PACKED) {
-		if (h >= 0 && h < ht->nTableSize) {
+		if (h >= 0 && h < ht->nNumUsed) {
 			if (Z_TYPE(ht->arData[h].val) != IS_UNDEF) {
 				return 1;
 			}
