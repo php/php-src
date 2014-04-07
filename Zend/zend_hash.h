@@ -89,6 +89,8 @@ ZEND_API zval *_zend_hash_str_add_or_update(HashTable *ht, const char *key, int 
 		_zend_hash_str_add_or_update(ht, key, len, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
 ZEND_API zval *_zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
+#define zend_hash_index_add(ht, h, pData) \
+		_zend_hash_index_update_or_next_insert(ht, h, pData, HASH_ADD ZEND_FILE_LINE_CC)
 #define zend_hash_index_update(ht, h, pData) \
 		_zend_hash_index_update_or_next_insert(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_next_index_insert(ht, pData) \

@@ -805,152 +805,120 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 #endif
 }
 
-static int zend_hash_unique_copy_mem(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, uint size, int ignore_dups, void **fail_data, void **conflict_data)
-{
-	uint idx;
-	Bucket *p;
-	zval *t;
-
-	for (idx = 0; idx < source->nNumUsed; idx++) {		
-		p = source->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (p->key) {
-			if ((t = zend_hash_add(target, p->key, &p->val)) != NULL) {
-				Z_PTR_P(t) = emalloc(size);
-				memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
-				if (pCopyConstructor) {
-					pCopyConstructor(Z_PTR_P(t));
-				}
-			} else {
-				if (p->key->len > 0 && p->key->val[0] == 0) {
-					/* Mangled key */
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
-						/* update closure */
-						if ((t = zend_hash_update(target, p->key, &p->val)) != NULL) {
-							Z_PTR_P(t) = emalloc(size);
-							memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
-							if (pCopyConstructor) {
-								pCopyConstructor(Z_PTR_P(t));
-							}
-						}
-					} else {
-						/* ignore and wait for runtime */
-					} 
-#endif
-				} else if (!ignore_dups && (t = zend_hash_find(target, p->key)) != NULL) {
-					*fail_data = Z_PTR(p->val);
-					*conflict_data = Z_PTR_P(t);
-					return FAILURE;
-				}
-			}
-		} else {
-			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update(target, p->h, &p->val)) != NULL) {
-				Z_PTR_P(t) = emalloc(size);
-				memcpy(Z_PTR_P(t), Z_PTR(p->val), size);
-				if (pCopyConstructor) {
-					pCopyConstructor(Z_PTR_P(t));
-				}
-			} else if (!ignore_dups && (t = zend_hash_index_find(target,p->h)) != NULL) {
-				*fail_data = Z_PTR(p->val);
-				*conflict_data = Z_PTR_P(t);
-				return FAILURE;
-			}
-		}
-	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
-
-	return SUCCESS;
-}
-
-static int zend_hash_unique_copy_ptr(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, int ignore_dups, void **fail_data, void **conflict_data)
-{
-	uint idx;
-	Bucket *p;
-	zval *t;
-
-	for (idx = 0; idx < source->nNumUsed; idx++) {		
-		p = source->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (p->key) {
-			if ((t = zend_hash_add(target, p->key, &p->val)) != NULL) {
-				if (pCopyConstructor) {
-					pCopyConstructor(&Z_PTR_P(t));
-				}
-			} else {
-				if (p->key->len > 0 && p->key->val[0] == 0) {
-					/* Mangled key */
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
-						/* update closure */
-						if ((t = zend_hash_update(target, p->key, &p->val)) != NULL) {
-							if (pCopyConstructor) {
-								pCopyConstructor(&Z_PTR_P(t));
-							}
-						}
-					} else {
-						/* ignore and wait for runtime */
-					} 
-#endif
-				} else if (!ignore_dups && (t = zend_hash_find(target, p->key)) != NULL) {
-					*fail_data = Z_PTR(p->val);
-					*conflict_data = Z_PTR_P(t);
-					return FAILURE;
-				}
-			}
-		} else {
-			if (!zend_hash_index_exists(target, p->h) && (t = zend_hash_index_update(target, p->h, &p->val)) != NULL) {
-				if (pCopyConstructor) {
-					pCopyConstructor(&Z_PTR_P(t));
-				}
-			} else if (!ignore_dups && (t = zend_hash_index_find(target,p->h)) != NULL) {
-				*fail_data = Z_PTR(p->val);
-				*conflict_data = Z_PTR_P(t);
-				return FAILURE;
-			}
-		}
-	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
-
-	return SUCCESS;
-}
-
-static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
+static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor TSRMLS_DC)
 {
 	zend_function *function1, *function2;
-	TSRMLS_FETCH();
+	uint idx;
+	Bucket *p;
+	zval *t;
 
-	if (zend_hash_unique_copy_mem(target, source, pCopyConstructor, sizeof(zend_function), 0, (void**)&function1, (void**)&function2) != SUCCESS) {
-		CG(in_compilation) = 1;
-		zend_set_compiled_filename(function1->op_array.filename TSRMLS_CC);
-		CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
-		if (function2->type == ZEND_USER_FUNCTION
-			&& function2->op_array.last > 0) {
-			zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
-					   function1->common.function_name->val,
-					   function2->op_array.filename->val,
-					   (int)function2->op_array.opcodes[0].lineno);
+	for (idx = 0; idx < source->nNumUsed; idx++) {		
+		p = source->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (p->key) {
+			t = zend_hash_add(target, p->key, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				if (p->key->len > 0 && p->key->val[0] == 0) {
+					/* Mangled key */
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+					if (((zend_function*)Z_PTR(p->val))->common.fn_flags & ZEND_ACC_CLOSURE) {
+						/* update closure */
+						t = zend_hash_update(target, p->key, &p->val);
+					} else {
+						/* ignore and wait for runtime */
+						continue;
+					} 
+#else
+					/* ignore and wait for runtime */
+					continue;
+#endif
+				} else {
+					t = zend_hash_find(target, p->key);
+					goto failure;
+				}
+			}
 		} else {
-			zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+		    t = zend_hash_index_add(target, p->h, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				t = zend_hash_index_find(target, p->h);				
+				goto failure;
+			}
 		}
+		if (pCopyConstructor) {
+			Z_PTR_P(t) = emalloc(sizeof(zend_function));
+			memcpy(Z_PTR_P(t), Z_PTR(p->val), sizeof(zend_function));
+			pCopyConstructor(Z_PTR_P(t));
+		}
+	}
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
+	return;
+
+failure:
+	function1 = Z_PTR(p->val);
+	function2 = Z_PTR_P(t);
+	CG(in_compilation) = 1;
+	zend_set_compiled_filename(function1->op_array.filename TSRMLS_CC);
+	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
+	if (function2->type == ZEND_USER_FUNCTION
+		&& function2->op_array.last > 0) {
+		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+				   function1->common.function_name->val,
+				   function2->op_array.filename->val,
+				   (int)function2->op_array.opcodes[0].lineno);
+	} else {
+		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
 	}
 }
 
 static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor TSRMLS_DC)
 {
 	zend_class_entry *ce1, *ce2;
+	uint idx;
+	Bucket *p;
+	zval *t;
 
-	if (zend_hash_unique_copy_ptr(target, source, pCopyConstructor, ZCG(accel_directives).ignore_dups, (void**)&ce1, (void**)&ce2) != SUCCESS) {
-		CG(in_compilation) = 1;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-		zend_set_compiled_filename(ce1->info.user.filename TSRMLS_CC);
-		CG(zend_lineno) = ce1->info.user.line_start;
-#else
-		zend_set_compiled_filename(ce1->filename TSRMLS_CC);
-		CG(zend_lineno) = ce1->line_start;
-#endif
-		zend_error(E_ERROR, "Cannot redeclare class %s", ce1->name->val);
+	for (idx = 0; idx < source->nNumUsed; idx++) {		
+		p = source->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (p->key) {
+			t = zend_hash_add(target, p->key, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				if (p->key->len > 0 && p->key->val[0] == 0) {
+					/* Mangled key - ignore and wait for runtime */
+					continue;
+				} else if (!ZCG(accel_directives).ignore_dups) {
+					t = zend_hash_find(target, p->key);
+					goto failure;
+				}
+			}
+		} else {
+			t = zend_hash_index_add(target, p->h, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				if (!ZCG(accel_directives).ignore_dups) {
+					t = zend_hash_index_find(target,p->h);
+					goto failure;
+				}
+			}
+		}
+		if (pCopyConstructor) {
+			pCopyConstructor(&Z_PTR_P(t));
+		}
 	}
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
+	return;
+
+failure:
+	ce1 = Z_PTR(p->val);
+	ce2 = Z_PTR_P(t);
+	CG(in_compilation) = 1;
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	zend_set_compiled_filename(ce1->info.user.filename TSRMLS_CC);
+	CG(zend_lineno) = ce1->info.user.line_start;
+#else
+	zend_set_compiled_filename(ce1->filename TSRMLS_CC);
+	CG(zend_lineno) = ce1->line_start;
+#endif
+	zend_error(E_ERROR, "Cannot redeclare class %s", ce1->name->val);
 }
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
@@ -993,7 +961,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, (unique_copy_ctor_func_t)zend_prepare_function_for_execution);
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, (unique_copy_ctor_func_t)zend_prepare_function_for_execution TSRMLS_CC);
 		}
 
 		zend_prepare_function_for_execution(op_array);
@@ -1019,7 +987,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 
 	} else /* if (!from_shared_memory) */ {
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, NULL);
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, NULL TSRMLS_CC);
 		}
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
 			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, NULL TSRMLS_CC);
