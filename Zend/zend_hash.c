@@ -82,11 +82,12 @@ static void zend_hash_do_resize(HashTable *ht);
 
 #define CHECK_INIT(ht, packed) do {												\
 	if (UNEXPECTED((ht)->nTableMask == 0)) {							\
-		(ht)->arData = (Bucket *) safe_pemalloc((ht)->nTableSize, sizeof(Bucket), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
 		if (packed) { \
+			(ht)->arData = (Bucket *) safe_pemalloc((ht)->nTableSize, sizeof(Bucket), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
 			(ht)->flags |= HASH_FLAG_PACKED; \
 		} else { \
-			(ht)->arHash = (zend_uint*) safe_pemalloc((ht)->nTableSize, sizeof(zend_uint), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
+			(ht)->arData = (Bucket *) safe_pemalloc((ht)->nTableSize, sizeof(Bucket) + sizeof(zend_uint), 0, (ht)->flags & HASH_FLAG_PERSISTENT);	\
+			(ht)->arHash = (zend_uint*)((ht)->arData + (ht)->nTableSize);	\
 			memset((ht)->arHash, INVALID_IDX, (ht)->nTableSize * sizeof(zend_uint));	\
 		} \
 		(ht)->nTableMask = (ht)->nTableSize - 1;						\
@@ -131,7 +132,7 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor,
 static void zend_hash_packed_grow(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
-	ht->arData = (Bucket *) perealloc(ht->arData, (ht->nTableSize << 1) * sizeof(Bucket), ht->flags & HASH_FLAG_PERSISTENT);
+	ht->arData = (Bucket *) safe_perealloc(ht->arData, (ht->nTableSize << 1), sizeof(Bucket), 0, ht->flags & HASH_FLAG_PERSISTENT);
 	ht->nTableSize = (ht->nTableSize << 1);
 	ht->nTableMask = ht->nTableSize - 1;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -148,7 +149,8 @@ ZEND_API void zend_hash_packed_to_hash(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->flags &= ~HASH_FLAG_PACKED;
-	ht->arHash = (zend_uint*) safe_pemalloc(ht->nTableSize, sizeof(zend_uint), 0, ht->flags & HASH_FLAG_PERSISTENT);
+	ht->arData = (Bucket *) safe_perealloc(ht->arData, ht->nTableSize, sizeof(Bucket) + sizeof(zend_uint), 0, ht->flags & HASH_FLAG_PERSISTENT);
+	ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
 	zend_hash_rehash(ht);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
@@ -157,7 +159,8 @@ ZEND_API void zend_hash_to_packed(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->flags |= HASH_FLAG_PACKED;
-	pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
+//???	pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
+	ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
 	ht->arHash = (zend_uint*)&uninitialized_bucket;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
@@ -463,8 +466,8 @@ static void zend_hash_do_resize(HashTable *ht)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else if ((ht->nTableSize << 1) > 0) {	/* Let's double the table size */
 		HANDLE_BLOCK_INTERRUPTIONS();
-		ht->arData = (Bucket *) perealloc(ht->arData, (ht->nTableSize << 1) * sizeof(Bucket), ht->flags & HASH_FLAG_PERSISTENT);
-		ht->arHash = (zend_uint *) perealloc(ht->arHash, (ht->nTableSize << 1) * sizeof(zend_uint), ht->flags & HASH_FLAG_PERSISTENT);
+		ht->arData = (Bucket *) safe_perealloc(ht->arData, (ht->nTableSize << 1), sizeof(Bucket) + sizeof(zend_uint), 0, ht->flags & HASH_FLAG_PERSISTENT);
+		ht->arHash = (zend_uint*)(ht->arData + (ht->nTableSize << 1));
 		ht->nTableSize = (ht->nTableSize << 1);
 		ht->nTableMask = ht->nTableSize - 1;
 		zend_hash_rehash(ht);
@@ -797,9 +800,6 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	}
 	if (ht->nTableMask) {
 		pefree(ht->arData, ht->flags & HASH_FLAG_PERSISTENT);
-		if (!(ht->flags & HASH_FLAG_PACKED)) {
-			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
-		}
 	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
@@ -865,9 +865,6 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 	}
 	if (ht->nTableMask) {
 		pefree(ht->arData, ht->flags & HASH_FLAG_PERSISTENT);
-		if (!(ht->flags & HASH_FLAG_PACKED)) {
-			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
-		}
 	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
@@ -890,9 +887,6 @@ ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht)
 
 	if (ht->nTableMask) {
 		pefree(ht->arData, ht->flags & HASH_FLAG_PERSISTENT);
-		if (!(ht->flags & HASH_FLAG_PACKED)) {
-			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
-		}
 	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
@@ -1653,7 +1647,8 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 	} else {
 		if (renumber) {
 			ht->flags |= HASH_FLAG_PACKED;
-			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
+//???			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
+			ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
 			ht->arHash = (zend_uint*)&uninitialized_bucket;
 		} else {
 			zend_hash_rehash(ht);

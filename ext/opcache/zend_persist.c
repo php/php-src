@@ -67,11 +67,12 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 		return;
 	}
-	zend_accel_store(ht->arData, sizeof(Bucket) * ht->nTableSize);
-	if (!(ht->flags & HASH_FLAG_PACKED)) {
-		zend_accel_store(ht->arHash, sizeof(zend_uint) * ht->nTableSize);
-	} else {
+	if (ht->flags & HASH_FLAG_PACKED) {
+		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nTableSize);
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
+	} else {
+		zend_accel_store(ht->arData, (sizeof(Bucket) + sizeof(zend_uint)) * ht->nTableSize);
+		ht->arHash = (zend_uint*)(ht->arData + ht->nTableSize);
 	}
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
