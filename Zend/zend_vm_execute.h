@@ -2670,8 +2670,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 
 		value = opline->op1.zv;
-		top = EG(argument_stack)->top;
-		EG(argument_stack)->top++;
+		top = zend_vm_stack_top_inc(TSRMLS_C);
 		ZVAL_COPY_VALUE(top, value);
 		if (!0) {
 			zval_opt_copy_ctor(top);
@@ -7726,8 +7725,7 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_free_op free_op1;
 
 		value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-		top = EG(argument_stack)->top;
-		EG(argument_stack)->top++;
+		top = zend_vm_stack_top_inc(TSRMLS_C);
 		ZVAL_COPY_VALUE(top, value);
 		if (!1) {
 			zval_opt_copy_ctor(top);
@@ -12691,8 +12689,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_AR
 	zend_free_op free_op1;
 
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-	top = EG(argument_stack)->top;
-	EG(argument_stack)->top++;
+	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
 //???		if (IS_VAR == IS_CV ||
 //???		    (IS_VAR == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
@@ -29279,8 +29276,7 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 
 
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
-	top = EG(argument_stack)->top;
-	EG(argument_stack)->top++;
+	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
 //???		if (IS_CV == IS_CV ||
 //???		    (IS_CV == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {

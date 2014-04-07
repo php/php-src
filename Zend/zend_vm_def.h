@@ -2941,8 +2941,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 		zend_free_op free_op1;
 
 		value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		top = EG(argument_stack)->top;
-		EG(argument_stack)->top++;
+		top = zend_vm_stack_top_inc(TSRMLS_C);
 		ZVAL_COPY_VALUE(top, value);
 		if (!IS_OP1_TMP_FREE()) {
 			zval_opt_copy_ctor(top);
@@ -2960,8 +2959,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	top = EG(argument_stack)->top;
-	EG(argument_stack)->top++;
+	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
 //???		if (OP1_TYPE == IS_CV ||
 //???		    (OP1_TYPE == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
