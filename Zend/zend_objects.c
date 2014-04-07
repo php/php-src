@@ -33,8 +33,16 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 	object->ce = ce;
 	object->properties = NULL;
 	object->guards = NULL;
-	memset(object->properties_table, 0, sizeof(zval) * ce->default_properties_count);
 	zend_objects_store_put(object);
+	if (EXPECTED(ce->default_properties_count != 0)) {
+		zval *p = object->properties_table;
+		zval *end = p + ce->default_properties_count;
+
+		do {
+			ZVAL_UNDEF(p);
+			p++;
+		} while (p != end);
+	}
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)

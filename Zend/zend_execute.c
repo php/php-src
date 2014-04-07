@@ -1614,7 +1614,16 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		EX(prev_execute_data) = EG(current_execute_data);
 	}
 
-	memset(EX_VAR_NUM(0), 0, sizeof(zval) * op_array->last_var);
+	do {
+		/* Initialize CV variables */
+		zval *var = EX_VAR_NUM(0);
+		zval *end = var + op_array->last_var;
+
+		while (var != end) {
+			ZVAL_UNDEF(var);
+			var++;
+		}
+	} while (0);
 
 	EX(call_slots) = (call_slot*)((char *)execute_data + execute_data_size + vars_size);
 
