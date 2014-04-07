@@ -996,6 +996,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 	SAVE_OPLINE();
 	varname = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
+	ZVAL_UNDEF(&tmp_varname);
  	if (OP1_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(varname) != IS_STRING)) {
 		ZVAL_DUP_DEREF(&tmp_varname, varname);
 		convert_to_string(&tmp_varname);
@@ -1011,7 +1012,7 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 			} else {
 				ce = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(ce == NULL)) {
-					if (OP1_TYPE != IS_CONST && varname == &tmp_varname) {
+					if (OP1_TYPE != IS_CONST) {
 						zval_dtor(&tmp_varname);
 					}
 					FREE_OP1();
@@ -1027,7 +1028,8 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 		FREE_OP1();
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-		if ((retval = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
+		retval = zend_hash_find(target_symbol_table, Z_STR_P(varname));
+		if (retval == NULL) {
 			switch (type) {
 				case BP_VAR_R:
 				case BP_VAR_UNSET:
@@ -1069,56 +1071,25 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 				}
 			}
 		}
-		switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
-			case ZEND_FETCH_GLOBAL:
-				if (OP1_TYPE != IS_TMP_VAR) {
-					FREE_OP1();
-				}
-				break;
-			case ZEND_FETCH_LOCAL:
-				FREE_OP1();
-				break;
-			case ZEND_FETCH_STATIC:
-				zval_update_constant(retval, (void*) 1 TSRMLS_CC);
-				break;
-			case ZEND_FETCH_GLOBAL_LOCK:
-				if (OP1_TYPE == IS_VAR && !OP1_FREE) {
-					Z_ADDREF_P(EX_VAR(opline->op1.var));
-				}
-				break;
+		if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_STATIC) {
+			zval_update_constant(retval, (void*) 1 TSRMLS_CC);
+		} else if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
+			FREE_OP1();
 		}
 	}
 
-
-	if (OP1_TYPE != IS_CONST && varname == &tmp_varname) {
+	if (OP1_TYPE != IS_CONST) {
 		zval_dtor(&tmp_varname);
 	}
 
-	if (opline->extended_value & ZEND_FETCH_MAKE_REF) {
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
-	}
-
-	if (EXPECTED(retval != NULL)) {
-		switch (type) {
-			case BP_VAR_R:
-			case BP_VAR_IS:
-				ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				break;
-			case BP_VAR_UNSET: {
-	//???			zend_free_op free_res;
-	//???
-	//???			PZVAL_UNLOCK(*retval, &free_res);
-	//???			if (retval != &EG(uninitialized_zval_ptr)) {
-	//???				SEPARATE_ZVAL_IF_NOT_REF(retval);
-	//???			}
-	//???			PZVAL_LOCK(*retval);
-	//???			FREE_OP_VAR_PTR(free_res);
-			}
-			/* break missing intentionally */
-			default:
-				ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				break;
-		} 
+	ZEND_ASSERT(retval != NULL);
+	if (type == BP_VAR_R || type == BP_VAR_IS) {
+		ZVAL_COPY(EX_VAR(opline->result.var), retval);
+	} else {
+		if (/*type == BP_VAR_W &&*/ (opline->extended_value & ZEND_FETCH_MAKE_REF)) {
+			SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
+		}
+		ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -1143,8 +1114,11 @@ ZEND_VM_HANDLER(92, ZEND_FETCH_FUNC_ARG, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 {
 	USE_OPLINE
 
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_fetch_var_address_helper, type,
-		zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC) ? BP_VAR_W : BP_VAR_R);
+	if (zend_is_by_ref_func_arg_fetch(opline, EX(call) TSRMLS_CC)) {
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_fetch_var_address_helper, type, BP_VAR_W);
+	} else {
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_fetch_var_address_helper, type, BP_VAR_R);
+	}
 }
 
 ZEND_VM_HANDLER(95, ZEND_FETCH_UNSET, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)

@@ -959,27 +959,22 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 
 static inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
 {
-	switch (fetch_type) {
-		case ZEND_FETCH_LOCAL:
-			if (!EG(active_symbol_table)) {
-				zend_rebuild_symbol_table(TSRMLS_C);
-			}
-			return &EG(active_symbol_table)->ht;
-			break;
-		case ZEND_FETCH_GLOBAL:
-		case ZEND_FETCH_GLOBAL_LOCK:
-			return &EG(symbol_table).ht;
-			break;
-		case ZEND_FETCH_STATIC:
-			if (!EG(active_op_array)->static_variables) {
-				ALLOC_HASHTABLE(EG(active_op_array)->static_variables);
-				zend_hash_init(EG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
-			}
-			return EG(active_op_array)->static_variables;
-			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
+	HashTable *ht;
+
+	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) || 
+	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
+		ht = &EG(symbol_table).ht;
+	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
+		ZEND_ASSERT(EG(active_op_array)->static_variables != NULL);
+		ht = EG(active_op_array)->static_variables;
+	} else {
+		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
+		if (!EG(active_symbol_table)) {
+			zend_rebuild_symbol_table(TSRMLS_C);
+		}
+		ht = &EG(active_symbol_table)->ht;
 	}
-	return NULL;
+	return ht;
 }
 
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type TSRMLS_DC)
