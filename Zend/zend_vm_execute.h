@@ -13781,42 +13781,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = opline->op2.zv;
 
-				if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = opline->op2.zv;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = opline->op2.zv;
-			var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -13824,23 +13810,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -13852,76 +13832,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
+assign_op_dim_exit:
+
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = opline->op2.zv;
+	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -16084,42 +16198,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -16127,23 +16227,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_dtor(free_op2.var);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -16155,77 +16249,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
-	zval_dtor(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
+assign_op_dim_exit:
+	zval_dtor(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+	zval_dtor(free_op2.var);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -18004,42 +18231,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -18047,23 +18260,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_ptr_dtor_nogc(free_op2.var);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -18075,77 +18282,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
-	zval_ptr_dtor_nogc(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
+assign_op_dim_exit:
+	zval_ptr_dtor_nogc(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+	zval_ptr_dtor_nogc(free_op2.var);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -20007,42 +20347,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = NULL;
 
-				if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = NULL;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = NULL;
-			var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -20050,23 +20376,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -20078,76 +20398,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
+assign_op_dim_exit:
+
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = NULL;
+	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type, ZEND_OPCODE_HANDLER_ARGS)
@@ -21337,42 +21791,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-				if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_VAR == IS_VAR && !(free_op1.var != NULL)) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-			var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -21380,23 +21820,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -21408,76 +21842,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-		CHECK_EXCEPTION();
+assign_op_dim_exit:
+
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_VAR == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_VAR_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -23119,42 +23687,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_UNUSED == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = opline->op2.zv;
 
-				if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_UNUSED == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = opline->op2.zv;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = opline->op2.zv;
-			var_ptr = NULL;
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -23162,23 +23716,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -23190,76 +23738,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = opline->op2.zv;
+	var_ptr = NULL;
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -24433,42 +25115,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_UNUSED == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_UNUSED == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = NULL;
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -24476,23 +25144,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_dtor(free_op2.var);
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -24504,77 +25166,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_dim_exit:
+	zval_dtor(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = NULL;
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+	}
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
 	zval_dtor(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-
-		CHECK_EXCEPTION();
-	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -25662,42 +26457,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_UNUSED == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_UNUSED == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = NULL;
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -25705,23 +26486,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_ptr_dtor_nogc(free_op2.var);
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -25733,77 +26508,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_dim_exit:
+	zval_ptr_dtor_nogc(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = NULL;
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+	}
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
 	zval_ptr_dtor_nogc(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-
-		CHECK_EXCEPTION();
-	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -26892,42 +27800,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_UNUSED == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = NULL;
 
-				if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_UNUSED == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = NULL;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = NULL;
-			var_ptr = NULL;
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -26935,23 +27829,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -26963,76 +27851,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = NULL;
+	var_ptr = NULL;
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27290,42 +28312,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_UNUSED == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-				if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_UNUSED == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-			var_ptr = NULL;
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -27333,23 +28341,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -27361,76 +28363,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	var_ptr = NULL;
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_UNUSED == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -30018,42 +31154,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_CV == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = opline->op2.zv;
 
-				if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_CV == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = opline->op2.zv;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = opline->op2.zv;
-			var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CONST TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -30061,23 +31183,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -30089,76 +31205,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = opline->op2.zv;
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CONST(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -32107,42 +33357,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_CV == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_CV == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_TMP_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -32150,23 +33386,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_dtor(free_op2.var);
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -32178,77 +33408,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_dim_exit:
+	zval_dtor(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+	}
+
+	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
 	zval_dtor(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-
-		CHECK_EXCEPTION();
-	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_TMP(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -33906,42 +35269,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op2, free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_CV == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-				if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_CV == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-			var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_VAR TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -33949,23 +35298,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-		zval_ptr_dtor_nogc(free_op2.var);
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -33977,77 +35320,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
+
+assign_op_dim_exit:
+	zval_ptr_dtor_nogc(free_op2.var);
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
+	}
+
+	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
 	zval_ptr_dtor_nogc(free_op2.var);
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
-
-		CHECK_EXCEPTION();
-	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_VAR(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
@@ -35787,42 +37263,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_CV == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = NULL;
 
-				if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_CV == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = NULL;
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = NULL;
-			var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_UNUSED TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -35830,23 +37292,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -35858,76 +37314,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = NULL;
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, ZEND_OPCODE_HANDLER_ARGS)
@@ -36982,42 +38572,28 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op_data2, free_op_data1;
 	zval *var_ptr;
-	zval *value;
+	zval *value, *container;
 
 	SAVE_OPLINE();
-	switch (opline->extended_value) {
-		case ZEND_ASSIGN_OBJ:
-			return zend_binary_assign_op_obj_helper_SPEC_CV_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-			break;
-		case ZEND_ASSIGN_DIM: {
-				zval *container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (IS_CV == IS_VAR && !0) {
+			Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
+		}
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else {
+		zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-				if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(container) == IS_STR_OFFSET)) {
-					zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
-				} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-					if (IS_CV == IS_VAR && !0) {
-						Z_ADDREF_P(container);  /* undo the effect of get_obj_zval_ptr_ptr() */
-					}
-					return zend_binary_assign_op_obj_helper_SPEC_CV_CV(binary_op, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				} else {
-					zval *dim = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-
-					zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
-				}
-			}
-			break;
-		default:
-			value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-			var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
-			/* do nothing */
-			break;
+		zend_fetch_dimension_address_RW(EX_VAR((opline+1)->op2.var), container, dim, IS_CV TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
@@ -37025,23 +38601,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 	}
 
 	if (UNEXPECTED(var_ptr == &EG(error_zval))) {
-		if (RETURN_VALUE_USED(opline)) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
-
-
-		CHECK_EXCEPTION();
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			ZEND_VM_INC_OPCODE();
-		}
-		ZEND_VM_NEXT_OPCODE();
+		goto assign_op_dim_exit;
 	}
 
 	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT)
-	   && Z_OBJ_HANDLER_P(var_ptr, get)
-	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
 		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
 		Z_ADDREF_P(objval);
@@ -37053,76 +38623,210 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
-	if (RETURN_VALUE_USED(opline)) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 	}
 
-	if (opline->extended_value == ZEND_ASSIGN_DIM) {
-		FREE_OP(free_op_data1);
-		FREE_OP_VAR_PTR(free_op_data2);
+assign_op_dim_exit:
 
-		CHECK_EXCEPTION();
-		ZEND_VM_INC_OPCODE();
-	} else {
+	FREE_OP(free_op_data1);
+	FREE_OP_VAR_PTR(free_op_data2);
 
-		CHECK_EXCEPTION();
+	CHECK_EXCEPTION();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zval *var_ptr;
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+	var_ptr = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
+
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
+		zend_error_noreturn(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 	}
+
+	if (IS_CV == IS_VAR && UNEXPECTED(var_ptr == &EG(error_zval))) {
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		goto assign_op_exit;
+	}
+
+	SEPARATE_ZVAL_IF_NOT_REF(var_ptr);
+	ZVAL_DEREF(var_ptr);
+
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
+	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
+		/* proxy object */
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		Z_ADDREF_P(objval);
+		binary_op(objval, objval, value TSRMLS_CC);
+		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
+		zval_ptr_dtor(objval);
+	} else {
+	    ZVAL_DEREF(var_ptr);
+		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
+	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+	}
+
+assign_op_exit:
+
+
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(add_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SUB_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(sub_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MUL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(mul_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_DIV_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(div_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_MOD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(mod_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(shift_left_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_SR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(shift_right_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_CONCAT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(concat_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_OR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_or_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_AND_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_and_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	USE_OPLINE
+
+	if (EXPECTED(opline->extended_value == 0)) {
+		return zend_binary_assign_op_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) {
+		return zend_binary_assign_op_dim_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	} else /* if (EXPECTED(opline->extended_value == ZEND_ASSIGN_DIM)) */ {
+		return zend_binary_assign_op_obj_helper_SPEC_CV_CV(bitwise_xor_function, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
 }
 
 static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t incdec_op, ZEND_OPCODE_HANDLER_ARGS)
