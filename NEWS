@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     UNIX sockets). (Mike)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)  
   . Fixed bug #66736 (fpassthru broken). (Mike)
+  . Fixed bug #67043 (substr_compare broke by previous change) (Tjerk)
 
 - Embed:
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
