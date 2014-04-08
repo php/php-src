@@ -28,7 +28,7 @@ extern ZEND_API zend_class_entry *zend_ce_generator;
 typedef struct _zend_generator {
 	zend_object std;
 
-	zend_object_iterator iterator;
+	zend_object_iterator *iterator;
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;

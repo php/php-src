@@ -3158,7 +3158,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 
 	if (object &&
 	    (!EG(objects_store).object_buckets ||
-	     !IS_VALID(EG(objects_store).object_buckets[object->handle]))) {
+	     !IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle]))) {
 		return 0;
 	}
 
@@ -3246,7 +3246,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 
 					} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 						if (!EG(objects_store).object_buckets ||
-						    !IS_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
+						    !IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(obj)])) {
 							return 0;
 						}
 

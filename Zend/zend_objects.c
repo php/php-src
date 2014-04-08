@@ -128,13 +128,6 @@ ZEND_API void zend_objects_destroy_object(zend_object *object TSRMLS_DC)
 	}
 }
 
-ZEND_API void zend_object_free(zend_object *object TSRMLS_DC)
-{
-	zend_object_std_dtor(object TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(object);
-}
-
 ZEND_API zend_object *zend_objects_new(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + sizeof(zval) * (ce->default_properties_count - 1));

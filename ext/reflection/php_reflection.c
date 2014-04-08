@@ -328,8 +328,6 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
 	zend_object_std_dtor(object TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 }
 /* }}} */
 
@@ -6085,6 +6083,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	zend_std_obj_handlers = zend_get_std_object_handlers();
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;
 	reflection_object_handlers.write_property = _reflection_write_property;

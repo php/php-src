@@ -1861,8 +1861,6 @@ static void date_period_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 	date_period_it_invalidate_current(iter TSRMLS_CC);
 
 	zval_ptr_dtor(&iterator->intern.data);
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -1999,6 +1997,7 @@ static void date_register_classes(TSRMLS_D) /* {{{ */
 	ce_date.create_object = date_object_new_date;
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_date, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
 	date_object_handlers_date.compare_objects = date_object_compare_date;
@@ -2034,6 +2033,7 @@ static void date_register_classes(TSRMLS_D) /* {{{ */
 	ce_timezone.create_object = date_object_new_timezone;
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
 	date_object_handlers_timezone.get_properties = date_object_get_properties_timezone;
@@ -2061,6 +2061,7 @@ static void date_register_classes(TSRMLS_D) /* {{{ */
 	ce_interval.create_object = date_object_new_interval;
 	date_ce_interval = zend_register_internal_class_ex(&ce_interval, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_interval, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	date_object_handlers_interval.offset = XtOffsetOf(php_interval_obj, std);
 	date_object_handlers_interval.free_obj = date_object_free_storage_interval;
 	date_object_handlers_interval.clone_obj = date_object_clone_interval;
 	date_object_handlers_interval.read_property = date_interval_read_property;
@@ -2076,6 +2077,7 @@ static void date_register_classes(TSRMLS_D) /* {{{ */
 	date_ce_period->iterator_funcs.funcs = &date_period_it_funcs;
 	zend_class_implements(date_ce_period TSRMLS_CC, 1, zend_ce_traversable);
 	memcpy(&date_object_handlers_period, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
 	date_object_handlers_period.clone_obj = date_object_clone_period;
 	date_object_handlers_period.get_properties = date_object_get_properties_period;
@@ -2440,8 +2442,6 @@ static void date_object_free_storage_date(zend_object *object TSRMLS_DC) /* {{{ 
 	}
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 } /* }}} */
 
 static void date_object_free_storage_timezone(zend_object *object TSRMLS_DC) /* {{{ */
@@ -2452,8 +2452,6 @@ static void date_object_free_storage_timezone(zend_object *object TSRMLS_DC) /* 
 		free(intern->tzi.z.abbr);
 	}
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 } /* }}} */
 
 static void date_object_free_storage_interval(zend_object *object TSRMLS_DC) /* {{{ */
@@ -2462,8 +2460,6 @@ static void date_object_free_storage_interval(zend_object *object TSRMLS_DC) /* 
 
 	timelib_rel_time_dtor(intern->diff);
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 } /* }}} */
 
 static void date_object_free_storage_period(zend_object *object TSRMLS_DC) /* {{{ */
@@ -2484,8 +2480,6 @@ static void date_object_free_storage_period(zend_object *object TSRMLS_DC) /* {{
 
 	timelib_rel_time_dtor(intern->interval);
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 } /* }}} */
 
 /* Advanced Interface */

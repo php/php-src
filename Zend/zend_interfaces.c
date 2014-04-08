@@ -153,7 +153,6 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
 	zval_ptr_dtor(object);
-	efree(iter);
 }
 /* }}} */
 

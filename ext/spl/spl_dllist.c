@@ -366,9 +366,6 @@ static void spl_dllist_object_free_storage(zend_object *object TSRMLS_DC) /* {{{
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
 	}
-
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 }
 /* }}} */
 
@@ -923,8 +920,6 @@ static void spl_dllist_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zval_ptr_dtor(&iterator->intern.it.data);
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -1387,6 +1382,7 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
 	memcpy(&spl_handler_SplDoublyLinkedList, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
 	spl_handler_SplDoublyLinkedList.count_elements = spl_dllist_object_count_elements;
 	spl_handler_SplDoublyLinkedList.get_debug_info = spl_dllist_object_get_debug_info;

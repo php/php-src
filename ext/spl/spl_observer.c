@@ -113,9 +113,6 @@ void spl_SplObjectStorage_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
 	}
-
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 } /* }}} */
 
 static zend_string *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *this, zval *obj TSRMLS_DC) {
@@ -1291,6 +1288,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;

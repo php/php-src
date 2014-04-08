@@ -843,7 +843,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EX(object) = fci->object = fci_cache->object;
 	if (fci->object &&
 	    (!EG(objects_store).object_buckets ||
-	     !IS_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
+	     !IS_OBJ_VALID(EG(objects_store).object_buckets[fci->object->handle]))) {
 		return FAILURE;
 	}
 

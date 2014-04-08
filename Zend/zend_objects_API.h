@@ -24,43 +24,16 @@
 
 #include "zend.h"
 
-//???typedef void (*zend_objects_store_dtor_t)(zend_object *object TSRMLS_DC);
-//???typedef void (*zend_objects_free_object_storage_t)(void *object TSRMLS_DC);
-//???typedef void (*zend_objects_store_clone_t)(zend_object *object, zend_object **object_clone TSRMLS_DC);
+#define OBJ_BUCKET_INVALID			(1<<0)
 
-//???typedef union _zend_object_store_bucket {
-//???	zend_object *object;
-//???	int next_free;
-//???	zend_bool destructor_called;
-//???	zend_bool valid;
-//???	zend_uchar apply_count;
-//???	union _store_bucket {
-//???		struct _store_object {
-//???			zend_object *object;
-//???			zend_objects_store_dtor_t dtor;
-//???			zend_objects_free_object_storage_t free_storage;
-//???			zend_objects_store_clone_t clone;
-//???			const zend_object_handlers *handlers;
-//???			zend_uint refcount;
-//???			gc_root_buffer *buffered;
-//???		} obj;
-//???		zend_object *obj;
-//???		struct {
-//???			int next;
-//???		} free_list;
-//???	} bucket;
-//???} zend_object_store_bucket;
+#define IS_OBJ_VALID(o)				(!(((zend_uintptr_t)(o)) & OBJ_BUCKET_INVALID))
 
-#define FREE_BUCKET				1
+#define SET_OBJ_INVALID(o)			((zend_object*)((((zend_uintptr_t)(o)) | OBJ_BUCKET_INVALID)))
 
-#define IS_VALID(o)				(!(((zend_uintptr_t)(o)) & FREE_BUCKET))
+#define GET_OBJ_BUCKET_NUMBER(o)	(((zend_intptr_t)(o)) >> 1)
 
-#define SET_INVALID(o)			((zend_object*)((((zend_uintptr_t)(o)) | FREE_BUCKET)))
-
-#define GET_BUCKET_NUMBER(o)	(((zend_intptr_t)(o)) >> 1)
-
-#define SET_BUCKET_NUMBER(o, n)	do { \
-		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | FREE_BUCKET); \
+#define SET_OBJ_BUCKET_NUMBER(o, n)	do { \
+		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | OBJ_BUCKET_INVALID); \
 	} while (0)
 
 
@@ -98,7 +71,7 @@ ZEND_API void zend_object_store_ctor_failed(zend_object *object TSRMLS_DC);
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects TSRMLS_DC);
 
-#define ZEND_OBJECTS_STORE_HANDLERS zend_object_free, zend_object_std_dtor, zend_objects_clone_obj
+#define ZEND_OBJECTS_STORE_HANDLERS 0, zend_object_std_dtor, zend_objects_destroy_object, zend_objects_clone_obj
 
 ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC);
 

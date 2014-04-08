@@ -160,7 +160,6 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	object->level = 0;
 
 	zval_ptr_dtor(&iter->intern.data);
-	efree(iter);
 }
 
 static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis TSRMLS_DC)
@@ -888,9 +887,6 @@ static void spl_RecursiveIteratorIterator_free_storage(zend_object *_object TSRM
 	smart_str_free(&object->prefix[5]);
 
 	smart_str_free(&object->postfix[0]);
-
-	GC_REMOVE_FROM_BUFFER(_object);
-	efree(object);
 }
 /* }}} */
 
@@ -2266,10 +2262,7 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 		}
 	}
 
-	//zend_object_std_dtor(&object->std TSRMLS_CC);
-
-	GC_REMOVE_FROM_BUFFER(_object);
-	efree(object);
+	//???zend_object_std_dtor(&object->std TSRMLS_CC);
 }
 /* }}} */
 
@@ -3603,12 +3596,14 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_ITERATOR(RecursiveIteratorIterator);
 
 	memcpy(&spl_handlers_rec_it_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_handlers_rec_it_it.offset = XtOffsetOf(spl_recursive_it_object, std);
 	spl_handlers_rec_it_it.get_method = spl_recursive_it_get_method;
 	spl_handlers_rec_it_it.clone_obj = NULL;
 	spl_handlers_rec_it_it.dtor_obj = spl_RecursiveIteratorIterator_dtor;
 	spl_handlers_rec_it_it.free_obj = spl_RecursiveIteratorIterator_free_storage;
 
 	memcpy(&spl_handlers_dual_it, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	spl_handlers_dual_it.offset = XtOffsetOf(spl_dual_it_object, std);
 	spl_handlers_dual_it.get_method = spl_dual_it_get_method;
 	/*spl_handlers_dual_it.call_method = spl_dual_it_call_method;*/
 	spl_handlers_dual_it.clone_obj = NULL;

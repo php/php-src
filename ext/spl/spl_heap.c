@@ -245,9 +245,9 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userda
 
 	if (heap->count+1 > heap->max_size) {
 		/* we need to allocate more memory */
+		heap->elements  = erealloc(heap->elements, heap->max_size * 2 * sizeof(zval));
+		memset(heap->elements + heap->max_size, 0, heap->max_size * sizeof(zval));
 		heap->max_size *= 2;
-		heap->elements  = erealloc(heap->elements, heap->max_size * sizeof(zval));
-		memset(heap->elements + heap->max_size/2 * sizeof(zval), 0, heap->max_size/2 * sizeof(zval));
 	}
 
 	heap->ctor(elem TSRMLS_CC);
@@ -377,9 +377,6 @@ static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ *
 		zend_hash_destroy(intern->debug_info);
 		efree(intern->debug_info);
 	}
-
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 }
 /* }}} */
 
@@ -878,8 +875,6 @@ static void spl_heap_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zval_ptr_dtor(&iterator->intern.it.data);
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -1198,6 +1193,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	REGISTER_SPL_STD_CLASS_EX(SplHeap, spl_heap_object_new, spl_funcs_SplHeap);
 	memcpy(&spl_handler_SplHeap, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplHeap.offset         = XtOffsetOf(spl_heap_object, std);
 	spl_handler_SplHeap.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplHeap.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplHeap.get_debug_info = spl_heap_object_get_debug_info;
@@ -1218,6 +1214,7 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
 	REGISTER_SPL_STD_CLASS_EX(SplPriorityQueue, spl_heap_object_new, spl_funcs_SplPriorityQueue);
 	memcpy(&spl_handler_SplPriorityQueue, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplPriorityQueue.offset         = XtOffsetOf(spl_heap_object, std);
 	spl_handler_SplPriorityQueue.clone_obj      = spl_heap_object_clone;
 	spl_handler_SplPriorityQueue.count_elements = spl_heap_object_count_elements;
 	spl_handler_SplPriorityQueue.get_debug_info = spl_pqueue_object_get_debug_info;

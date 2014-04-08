@@ -27,6 +27,7 @@ static zend_class_entry zend_iterator_class_entry;
 static void iter_wrapper_dtor(zend_object *object TSRMLS_DC);
 
 static zend_object_handlers iterator_object_handlers = {
+	0,
 	iter_wrapper_dtor,
 	NULL,
 	NULL,

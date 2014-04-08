@@ -209,9 +209,6 @@ static void spl_fixedarray_object_free_storage(zend_object *object TSRMLS_DC) /*
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 	zval_ptr_dtor(&intern->retval);
-
-	GC_REMOVE_FROM_BUFFER(object);
-	efree(intern);
 }
 /* }}} */
 
@@ -870,8 +867,6 @@ static void spl_fixedarray_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ 
 
 	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zval_ptr_dtor(&iterator->intern.it.data);
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -1115,6 +1110,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	REGISTER_SPL_STD_CLASS_EX(SplFixedArray, spl_fixedarray_new, spl_funcs_SplFixedArray);
 	memcpy(&spl_handler_SplFixedArray, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
+	spl_handler_SplFixedArray.offset          = XtOffsetOf(spl_fixedarray_object, std);
 	spl_handler_SplFixedArray.clone_obj       = spl_fixedarray_object_clone;
 	spl_handler_SplFixedArray.read_dimension  = spl_fixedarray_object_read_dimension;
 	spl_handler_SplFixedArray.write_dimension = spl_fixedarray_object_write_dimension;

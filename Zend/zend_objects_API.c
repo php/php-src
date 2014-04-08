@@ -42,12 +42,12 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 
 ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i = 1;
+	zend_uint i;
 
 	for (i = 1; i < objects->top ; i++) {
 		zend_object *obj = objects->object_buckets[i];
 
-		if (IS_VALID(obj)) {
+		if (IS_OBJ_VALID(obj)) {
 			if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 				GC_REFCOUNT(obj)++;
@@ -68,7 +68,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSR
 	for (i = 1; i < objects->top ; i++) {
 		zend_object *obj = objects->object_buckets[i];
 
-		if (IS_VALID(obj)) {
+		if (IS_OBJ_VALID(obj)) {
 			GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 		}
 	}
@@ -76,17 +76,33 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSR
 
 ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects TSRMLS_DC)
 {
-	zend_uint i = 1;
+	zend_uint i;
 
+	/* Free object properties but don't free object their selves */
 	for (i = 1; i < objects->top ; i++) {
 		zend_object *obj = objects->object_buckets[i];
 
-		if (IS_VALID(obj)) {
-			objects->object_buckets[i] = SET_INVALID(obj);
-			if (obj->handlers->free_obj) {
-				obj->handlers->free_obj(obj TSRMLS_CC);
+		if (IS_OBJ_VALID(obj)) {
+			if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+				if (obj->handlers->free_obj) {
+					GC_REFCOUNT(obj)++;
+					obj->handlers->free_obj(obj TSRMLS_CC);
+					GC_REFCOUNT(obj)--;
+				}
 			}
+		}
+	}
+
+	/* Now free objects theirselves */
+	for (i = 1; i < objects->top ; i++) {
+		zend_object *obj = objects->object_buckets[i];
+
+		if (IS_OBJ_VALID(obj)) {
 			/* Not adding to free list as we are shutting down anyway */
+			void *ptr = ((char*)obj) - obj->handlers->offset;
+			GC_REMOVE_FROM_BUFFER(obj);
+			efree(ptr);
 		}
 	}
 }
@@ -100,7 +116,7 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
 
 	if (EG(objects_store).free_list_head != -1) {
 		handle = EG(objects_store).free_list_head;
-		EG(objects_store).free_list_head = GET_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
+		EG(objects_store).free_list_head = GET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle]);
 	} else {
 		if (EG(objects_store).top == EG(objects_store).size) {
 			EG(objects_store).size <<= 1;
@@ -113,17 +129,16 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
 }
 
 #define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle)															\
-            SET_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
+            SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
 			EG(objects_store).free_list_head = handle;
 
 ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
 {
-	int handle = object->handle;
+	zend_uint handle = object->handle;
+	void *ptr = ((char*)object) - object->handlers->offset;
 
-	EG(objects_store).object_buckets[handle] = SET_INVALID(object);
-	if (object->handlers->free_obj) {
-		object->handlers->free_obj(object TSRMLS_CC);
-	}
+	GC_REMOVE_FROM_BUFFER(object);
+	efree(ptr);
 	ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 }
 /* }}} */
@@ -135,7 +150,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 		when the refcount reaches 0 a second time
 	 */
 	if (EG(objects_store).object_buckets &&
-	    IS_VALID(EG(objects_store).object_buckets[object->handle])) {
+	    IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle])) {
 		if (GC_REFCOUNT(object) == 0) {
 			int failure = 0;
 
@@ -155,15 +170,24 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 			
 			if (GC_REFCOUNT(object) == 0) {
 				zend_uint handle = object->handle;
+				void *ptr;
 
-				EG(objects_store).object_buckets[handle] = SET_INVALID(object);
-				if (object->handlers->free_obj) {
-					zend_try {
-						object->handlers->free_obj(object TSRMLS_CC);
-					} zend_catch {
-						failure = 1;
-					} zend_end_try();
+				EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
+				if (!(GC_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
+					GC_FLAGS(object) |= IS_OBJ_FREE_CALLED;
+					if (object->handlers->free_obj) {
+						zend_try {
+							GC_REFCOUNT(object)++;
+							object->handlers->free_obj(object TSRMLS_CC);
+							GC_REFCOUNT(object)++;
+						} zend_catch {
+							failure = 1;
+						} zend_end_try();
+					}
 				}
+				ptr = ((char*)object) - object->handlers->offset;
+				GC_REMOVE_FROM_BUFFER(object);
+				efree(ptr);
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 			}
 			

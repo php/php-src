@@ -305,6 +305,7 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
+#define IS_OBJ_FREE_CALLED			(1<<4)
 
 #define Z_OBJ_APPLY_COUNT(zval) \
 	(Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT)

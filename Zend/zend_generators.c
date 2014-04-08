@@ -212,12 +212,9 @@ static void zend_generator_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 	zend_object_std_dtor(&generator->std TSRMLS_CC);
 
-	if (generator->iterator.std.handle) {
-		zend_iterator_dtor(&generator->iterator TSRMLS_CC);
+	if (generator->iterator) {
+		zend_iterator_dtor(generator->iterator TSRMLS_CC);
 	}
-
-	GC_REMOVE_FROM_BUFFER(generator);
-	efree(generator);
 }
 /* }}} */
 
@@ -599,7 +596,9 @@ ZEND_METHOD(Generator, __wakeup)
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
+	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 	zval_ptr_dtor(&iterator->data);
+	generator->iterator = NULL;
 }
 /* }}} */
 
@@ -679,7 +678,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 		return NULL;
 	}
 
-	iterator = &generator->iterator;
+	iterator = generator->iterator = emalloc(sizeof(zend_object_iterator));
 	
 	zend_iterator_init(iterator TSRMLS_CC);
 

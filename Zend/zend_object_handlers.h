@@ -116,6 +116,8 @@ typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval **table, int *n TS
 typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC);
 
 struct _zend_object_handlers {
+	/* offset of real object header (usually zero) */
+	int										offset;
 	/* general object functions */
 	zend_object_free_obj_t					free_obj;
 	zend_object_dtor_obj_t					dtor_obj;

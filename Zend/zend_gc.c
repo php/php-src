@@ -218,7 +218,7 @@ tail_call:
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+		if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		             (get_gc = obj->handlers->get_gc) != NULL)) {
 			int i, n;
 			zval *table;
@@ -302,7 +302,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 		             (get_gc = obj->handlers->get_gc) != NULL)) {
 				int i, n;
 				zval *table;
@@ -399,7 +399,7 @@ tail_call:
 				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				if (EXPECTED(IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+				if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 				             (get_gc = obj->handlers->get_gc) != NULL)) {
 					int i, n;
 					zval *table;
@@ -490,7 +490,7 @@ tail_call:
 			/* PURPLE instead of BLACK to prevent buffering in nested gc calls */
 //???			GC_SET_PURPLE(GC_INFO(obj));
 
-			if (EXPECTED(IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
 				int i, n;
 				zval *table;
@@ -634,14 +634,15 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 				zend_object *obj = (zend_object*)p;
 
 				if (EG(objects_store).object_buckets &&
-				    obj->handlers->dtor_obj &&
-				    IS_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 					!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 
 					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-					GC_REFCOUNT(obj)++;
-					obj->handlers->dtor_obj(obj TSRMLS_CC);
-					GC_REFCOUNT(obj)--;
+					if (obj->handlers->dtor_obj) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->dtor_obj(obj TSRMLS_CC);
+						GC_REFCOUNT(obj)--;
+					}
 				}
 			}
 			current = GC_G(next_to_free);
@@ -656,17 +657,41 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 				zend_object *obj = (zend_object*)p;
 
 				if (EG(objects_store).object_buckets &&
-					IS_VALID(EG(objects_store).object_buckets[obj->handle])) {
-					GC_TYPE(obj) = IS_NULL;
-					zend_objects_store_free(obj TSRMLS_CC);
+				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
+					!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+
+					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+					if (obj->handlers->free_obj) {
+						GC_REFCOUNT(obj)++;
+						obj->handlers->free_obj(obj TSRMLS_CC);
+						GC_REFCOUNT(obj)--;
+					}
 				}
 			} else if (GC_TYPE(p) == IS_ARRAY) {
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
 				zend_hash_destroy(&arr->ht);
-				GC_REMOVE_FROM_BUFFER(arr);
-				efree(arr);
+			}
+			current = GC_G(next_to_free);
+		}
+
+		/* Free objects */
+		current = GC_G(to_free).next;
+		while (current != &GC_G(to_free)) {
+			p = current->ref;
+			GC_G(next_to_free) = current->next;
+			if (GC_TYPE(p) == IS_OBJECT) {
+				zend_object *obj = (zend_object*)p;
+
+				if (EG(objects_store).object_buckets &&
+				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
+
+					zend_objects_store_free(obj TSRMLS_CC);
+				}
+			} else {
+				GC_REMOVE_FROM_BUFFER(p);
+				efree(p);
 			}
 			current = GC_G(next_to_free);
 		}

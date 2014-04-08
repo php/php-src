@@ -1620,7 +1620,9 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 /* }}} */
 
 ZEND_API zend_object_handlers std_object_handlers = {
-	zend_object_free,						/* free_obj */
+	0,										/* offset */
+
+	zend_object_std_dtor,					/* free_obj */
 	zend_objects_destroy_object,			/* dtor_obj */
 	zend_objects_clone_obj,					/* clone_obj */
 
