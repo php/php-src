@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)  
   . Fixed bug #66736 (fpassthru broken). (Mike)
   . Fixed bug #66822 (Cannot use T_POW in const expression) (Tjerk)
+  . Fixed bug #67043 (substr_compare broke by previous change) (Tjerk)
 
 - SPL:
   . Added feature #65545 (SplFileObject::fread()) (Tjerk)
