@@ -91,7 +91,7 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "PDO Driver for Firebird/InterBase", "enabled");
+	php_info_print_table_header(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */

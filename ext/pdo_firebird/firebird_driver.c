@@ -607,14 +607,14 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *val TS
 static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {       
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	ISC_STATUS *s = H->isc_status;
+	const ISC_STATUS *s = H->isc_status;
 	char buf[400];
 	long i = 0, l, sqlcode = isc_sqlcode(s);
 
 	if (sqlcode) {
 		add_next_index_long(info, sqlcode);
 
-		while ((l = isc_interprete(&buf[i],&s))) {
+		while ((sizeof(buf)>(i+2))&&(l = fb_interpret(&buf[i],(sizeof(buf)-i-2),&s))) {
 			i += l;
 			strcpy(&buf[i++], " ");
 		}
@@ -697,8 +697,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRM
 
 	if (!dbh->methods) {
 		char errmsg[512];
-		ISC_STATUS *s = H->isc_status;
-		isc_interprete(errmsg, &s);
+		const ISC_STATUS *s = H->isc_status;
+		fb_interpret(errmsg, sizeof(errmsg),&s);
 		zend_throw_exception_ex(php_pdo_get_exception(), H->isc_status[1] TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
 				"HY000", H->isc_status[1], errmsg);
 	}
