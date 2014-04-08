@@ -466,14 +466,35 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	}
 
 	memset(ht->arBuckets, 0, ht->nTableSize * sizeof(Bucket *));
-	p = ht->pListHead;
-	while (p != NULL) {
+	for (p = ht->pListHead; p != NULL; p = p->pListNext) {
 		nIndex = p->h & ht->nTableMask;
 		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
 		ht->arBuckets[nIndex] = p;
-		p = p->pListNext;
 	}
 	return SUCCESS;
+}
+
+ZEND_API void zend_hash_reindex(HashTable *ht) {
+	Bucket *p;
+	uint nIndex;
+	ulong offset = 0;
+
+	IS_CONSISTENT(ht);
+	if (UNEXPECTED(ht->nNumOfElements == 0)) {
+		return;
+	}
+
+	memset(ht->arBuckets, 0, ht->nTableSize * sizeof(Bucket *));
+	for (p = ht->pListHead; p != NULL; p = p->pListNext) {
+		if (p->nKeyLength == 0) {
+			p->h = offset++;
+		}
+
+		nIndex = p->h & ht->nTableMask;
+		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[nIndex]);
+		ht->arBuckets[nIndex] = p;
+	}
+	ht->nNextFreeElement = offset;
 }
 
 ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint nKeyLength, ulong h, int flag)

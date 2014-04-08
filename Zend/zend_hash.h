@@ -227,6 +227,7 @@ ZEND_API int zend_hash_minmax(const HashTable *ht, compare_func_t compar, int fl
 ZEND_API int zend_hash_num_elements(const HashTable *ht);
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
+ZEND_API void zend_hash_reindex(HashTable *ht);
 
 /*
  * DJBX33A (Daniel J. Bernstein, Times 33 with Addition)
