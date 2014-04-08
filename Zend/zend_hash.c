@@ -29,18 +29,24 @@
 		(element)->pNext->pLast = (element);				\
 	}
 
-#define CONNECT_TO_GLOBAL_DLLIST(element, ht)				\
-	(element)->pListLast = (ht)->pListTail;					\
-	(ht)->pListTail = (element);							\
-	(element)->pListNext = NULL;							\
-	if ((element)->pListLast != NULL) {						\
-		(element)->pListLast->pListNext = (element);		\
-	}														\
-	if (!(ht)->pListHead) {									\
+#define CONNECT_TO_GLOBAL_DLLIST_EX(element, ht, last, next)\
+	(element)->pListLast = (last);							\
+	(element)->pListNext = (next);							\
+	if ((last) != NULL) {									\
+		(last)->pListNext = (element);						\
+	} else {												\
 		(ht)->pListHead = (element);						\
 	}														\
-	if ((ht)->pInternalPointer == NULL) {					\
-		(ht)->pInternalPointer = (element);					\
+	if ((next) != NULL) {									\
+		(next)->pListLast = (element);						\
+	} else {												\
+		(ht)->pListTail = (element);						\
+	}														\
+
+#define CONNECT_TO_GLOBAL_DLLIST(element, ht)									\
+	CONNECT_TO_GLOBAL_DLLIST_EX(element, ht, (ht)->pListTail, (Bucket *) NULL);	\
+	if ((ht)->pInternalPointer == NULL) {										\
+		(ht)->pInternalPointer = (element);										\
 	}
 
 #if ZEND_DEBUG
@@ -122,13 +128,13 @@ ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
 		memcpy((p)->pData, pData, nDataSize);											\
 	}
 
-#define INIT_DATA(ht, p, pData, nDataSize);								\
+#define INIT_DATA(ht, p, _pData, nDataSize);								\
 	if (nDataSize == sizeof(void*)) {									\
-		memcpy(&(p)->pDataPtr, pData, sizeof(void *));					\
+		memcpy(&(p)->pDataPtr, (_pData), sizeof(void *));					\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
 		(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);\
-		memcpy((p)->pData, pData, nDataSize);							\
+		memcpy((p)->pData, (_pData), nDataSize);							\
 		(p)->pDataPtr=NULL;												\
 	}
 
@@ -1246,21 +1252,12 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 				q->pData = p->pData;
 			}
 			q->pDataPtr = p->pDataPtr;
-			q->pListNext = p->pListNext;
-			q->pListLast = p->pListLast;
-			if (q->pListNext) {
-				p->pListNext->pListLast = q;
-			} else {
-				ht->pListTail = q;
-			}
-			if (q->pListLast) {
-				p->pListLast->pListNext = q;
-			} else {
-				ht->pListHead = q;
-			}
+
+			CONNECT_TO_GLOBAL_DLLIST_EX(q, ht, p->pListLast, p->pListNext);
 			if (ht->pInternalPointer == p) {
 				ht->pInternalPointer = q;
 			}
+
 			if (pos) {
 				*pos = q;
 			}
@@ -1290,6 +1287,75 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 		return FAILURE;
 	}
 }
+
+/* Performs an in-place splice operation on a hashtable:
+ * The elements between offset and offset+length are removed and the elements in list[list_count]
+ * are inserted in their place. The removed elements can be optionally collected into a hashtable.
+ * This operation reindexes the hashtable, i.e. integer keys will be zero-based and sequential,
+ * while string keys stay intact. The same applies to the elements inserted into the removed HT. */
+ZEND_API void _zend_hash_splice(HashTable *ht, uint nDataSize, copy_ctor_func_t pCopyConstructor, uint offset, uint length, void **list, uint list_count, HashTable *removed ZEND_FILE_LINE_DC) /* {{{ */
+{
+	int pos;
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+	CHECK_INIT(ht);
+
+	/* Skip all elements until offset */
+	for (pos = 0, p = ht->pListHead; pos < offset && p; pos++, p = p->pListNext);
+
+	while (pos < offset + length && p) {
+		/* Copy removed element into HT, if it was specified */
+		if (removed != NULL) {
+			void *new_entry;
+
+			if (p->nKeyLength == 0) {
+				zend_hash_next_index_insert(removed, p->pData, sizeof(zval *), &new_entry);
+			} else {
+				zend_hash_quick_update(removed, p->arKey, p->nKeyLength, p->h, p->pData, sizeof(zval *), &new_entry);
+			}
+
+			if (pCopyConstructor) {
+				pCopyConstructor(new_entry);
+			}
+		}
+
+		/* Remove element */
+		{
+			Bucket *p_next = p->pListNext;	
+			zend_hash_bucket_delete(ht, p);
+			p = p_next;
+		}
+
+		pos++;
+	}
+
+	if (list != NULL) {
+		int i;
+		for (i = 0; i < list_count; i++) {
+			/* Add new element only to the global linked list, not the bucket list.
+			 * Also use key 0 for everything, as we'll reindex the hashtable anyways. */
+			Bucket *q = pemalloc_rel(sizeof(Bucket), ht->persistent);
+			q->arKey = NULL;
+			q->nKeyLength = 0;
+			q->h = 0;
+			INIT_DATA(ht, q, list[i], nDataSize);
+
+			CONNECT_TO_GLOBAL_DLLIST_EX(q, ht, p ? p->pListLast : ht->pListTail, p);
+
+			ht->nNumOfElements++;
+
+			if (pCopyConstructor) {
+				pCopyConstructor(q->pData);
+			}
+		}
+
+		ZEND_HASH_IF_FULL_DO_RESIZE(ht);
+	}
+
+	zend_hash_reindex(ht);
+}
+/* }}} */
 
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 							compare_func_t compar, int renumber TSRMLS_DC)
