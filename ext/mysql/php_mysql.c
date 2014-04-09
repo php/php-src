@@ -1547,6 +1547,7 @@ static void php_mysql_do_query_general(php_mysql_conn *mysql, char *query, int q
 	ZEND_REGISTER_RESOURCE(return_value, mysql_result, le_result);
 	if (use_store == MYSQL_USE_RESULT) {
 		mysql->active_result_res = Z_RES_P(return_value);
+		Z_ADDREF_P(return_value);
 	}
 }
 /* }}} */
