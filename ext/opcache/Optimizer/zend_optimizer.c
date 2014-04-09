@@ -551,17 +551,17 @@ int zend_accel_script_optimize(zend_persistent_script *script TSRMLS_DC)
 
 	p = script->function_table.pListHead;
 	while (p) {
-		zend_op_array *op_array = (zend_op_array*)p->pData;
+		zend_op_array *op_array = (zend_op_array*) zend_bucket_data(p);
 		zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
 		p = p->pListNext;
 	}
 
 	p = script->class_table.pListHead;
 	while (p) {
-		zend_class_entry *ce = (zend_class_entry*)p->pDataPtr;
+		zend_class_entry *ce = *(zend_class_entry**) zend_bucket_data(p);
 		q = ce->function_table.pListHead;
 		while (q) {
-			zend_op_array *op_array = (zend_op_array*)q->pData;
+			zend_op_array *op_array = (zend_op_array*) zend_bucket_data(q);
 			if (op_array->scope == ce) {
 				zend_accel_optimize(op_array, script, &constants TSRMLS_CC);
 			} else if (op_array->type == ZEND_USER_FUNCTION) {

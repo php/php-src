@@ -1776,14 +1776,14 @@ static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func
 
 	while (b1 < end) {
 try_again:
-		m = (zend_module_entry*)(*b1)->pData;
+		m = (zend_module_entry*) zend_bucket_data(*b1);
 		if (!m->module_started && m->deps) {
 			const zend_module_dep *dep = m->deps;
 			while (dep->name) {
 				if (dep->type == MODULE_DEP_REQUIRED || dep->type == MODULE_DEP_OPTIONAL) {
 					b2 = b1 + 1;
 					while (b2 < end) {
-						r = (zend_module_entry*)(*b2)->pData;
+						r = (zend_module_entry*) zend_bucket_data(*b2);
 						if (strcasecmp(dep->name, r->name) == 0) {
 							tmp = *b1;
 							*b1 = *b2;

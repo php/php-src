@@ -398,4 +398,8 @@ const char *accel_new_interned_string(const char *arKey, int nKeyLength, int fre
 # define ZEND_CE_DOC_COMMENT_LEN(ce)	(ce)->doc_comment_len
 #endif
 
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_X_API_NO
+# define zend_bucket_data(bucket) (bucket->pData)
+#endif
+
 #endif /* ZEND_ACCELERATOR_H */

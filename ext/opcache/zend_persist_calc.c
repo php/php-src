@@ -57,7 +57,11 @@ static uint zend_hash_persist_calc(HashTable *ht, int (*pPersistElement)(void *p
 	while (p) {
 		/* persist bucket and key */
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+# if ZEND_EXTENSION_API_NO > PHP_5_5_X_API_NO
+		ADD_DUP_SIZE(p, sizeof(Bucket) + el_size);
+# else
 		ADD_DUP_SIZE(p, sizeof(Bucket));
+# endif
 		if (p->nKeyLength) {
 			const char *tmp = accel_new_interned_string(p->arKey, p->nKeyLength, 0 TSRMLS_CC);
 			if (tmp != p->arKey) {
@@ -70,14 +74,16 @@ static uint zend_hash_persist_calc(HashTable *ht, int (*pPersistElement)(void *p
 		ADD_DUP_SIZE(p, sizeof(Bucket) - 1 + p->nKeyLength);
 #endif
 
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_X_API_NO
 		/* persist data pointer in bucket */
 		if (!p->pDataPtr) {
 			ADD_DUP_SIZE(p->pData, el_size);
 		}
+#endif
 
 		/* persist the data itself */
 		if (pPersistElement) {
-			ADD_SIZE(pPersistElement(p->pData TSRMLS_CC));
+			ADD_SIZE(pPersistElement(zend_bucket_data(p) TSRMLS_CC));
 		}
 
 		p = p->pListNext;

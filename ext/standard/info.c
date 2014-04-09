@@ -648,11 +648,10 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 /* {{{ module_name_cmp */
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 {
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
+	zend_module_entry *f = zend_bucket_data(*(Bucket **) a);
+	zend_module_entry *s = zend_bucket_data(*(Bucket **) b);
 
-	return strcasecmp(((zend_module_entry *)f->pData)->name,
-				  ((zend_module_entry *)s->pData)->name);
+	return strcasecmp(f->name, s->name);
 }
 /* }}} */
 

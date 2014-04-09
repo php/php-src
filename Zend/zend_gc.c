@@ -315,7 +315,7 @@ tail_call:
 		}
 	}
 	while (p != NULL) {
-		pz = *(zval**)p->pData;
+		pz = *(zval**) zend_bucket_data(p);
 		if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 			pz->refcount__gc++;
 		}
@@ -358,7 +358,7 @@ static void zobj_scan_black(struct _store_object *obj, zval *pz TSRMLS_DC)
 		}
 		p = props->pListHead;
 		while (p != NULL) {
-			pz = *(zval**)p->pData;
+			pz = *(zval**) zend_bucket_data(p);
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc++;
 			}
@@ -422,7 +422,7 @@ tail_call:
 			}
 		}
 		while (p != NULL) {
-			pz = *(zval**)p->pData;
+			pz = *(zval**) zend_bucket_data(p);
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc--;
 			}
@@ -464,7 +464,7 @@ static void zobj_mark_grey(struct _store_object *obj, zval *pz TSRMLS_DC)
 			}
 			p = props->pListHead;
 			while (p != NULL) {
-				pz = *(zval**)p->pData;
+				pz = *(zval**) zend_bucket_data(p);
 				if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 					pz->refcount__gc--;
 				}
@@ -562,10 +562,10 @@ tail_call:
 		}
 		while (p != NULL) {
 			if (p->pListNext == NULL) {
-				pz = *(zval**)p->pData;
+				pz = *(zval**) zend_bucket_data(p);
 				goto tail_call;
 			} else {
-				zval_scan(*(zval**)p->pData TSRMLS_CC);
+				zval_scan(*(zval**) zend_bucket_data(p) TSRMLS_CC);
 			}
 			p = p->pListNext;
 		}
@@ -602,7 +602,7 @@ static void zobj_scan(zval *pz TSRMLS_DC)
 					}
 					p = props->pListHead;
 					while (p != NULL) {
-						zval_scan(*(zval**)p->pData TSRMLS_CC);
+						zval_scan(*(zval**) zend_bucket_data(p) TSRMLS_CC);
 						p = p->pListNext;
 					}
 				}
@@ -693,7 +693,7 @@ tail_call:
 		GC_G(zval_to_free) = (zval_gc_info*)pz;
 
 		while (p != NULL) {
-			pz = *(zval**)p->pData;
+			pz = *(zval**) zend_bucket_data(p);
 			if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 				pz->refcount__gc++;
 			}
@@ -739,7 +739,7 @@ static void zobj_collect_white(zval *pz TSRMLS_DC)
 				}
 				p = props->pListHead;
 				while (p != NULL) {
-					pz = *(zval**)p->pData;
+					pz = *(zval**) zend_bucket_data(p);
 					if (Z_TYPE_P(pz) != IS_ARRAY || Z_ARRVAL_P(pz) != &EG(symbol_table)) {
 						pz->refcount__gc++;
 					}

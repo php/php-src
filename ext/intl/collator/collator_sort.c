@@ -209,17 +209,9 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
  */
 static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 {
-	Bucket *f;
-	Bucket *s;
 	zval result;
-	zval *first;
-	zval *second;
-
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
-
-	first = *((zval **) f->pData);
-	second = *((zval **) s->pData);
+	zval *first = *(zval **) zend_bucket_data(*(Bucket **) a);
+	zval *second = *(zval **) zend_bucket_data(*(Bucket **) b);
 
 	if( INTL_G(compare_func)( &result, first, second TSRMLS_CC) == FAILURE )
 		return 0;
