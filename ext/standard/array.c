@@ -1948,7 +1948,7 @@ PHP_FUNCTION(array_unshift)
 PHP_FUNCTION(array_splice)
 {
 	zval *array,				/* Input array */
-		 *repl_array = NULL,	/* Replacement array */
+		 **repl_array = NULL,	/* Replacement array */
 		 ***repl = NULL;		/* Replacement elements */
 	HashTable *rem_hash = NULL;	/* Removed elements' hash */
 	Bucket *p;					/* Bucket used for traversing hash */
@@ -1958,7 +1958,7 @@ PHP_FUNCTION(array_splice)
 			repl_num = 0;		/* Number of replacement elements */
 	int		num_in;				/* Number of elements in the input array */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lZ", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 
@@ -1970,12 +1970,12 @@ PHP_FUNCTION(array_splice)
 
 	if (repl_array) {
 		/* Make sure the last argument, if passed, is an array */
-		convert_to_array(repl_array);
+		convert_to_array_ex(repl_array);
 
 		/* Create the array of replacement elements */
-		repl_num = zend_hash_num_elements(Z_ARRVAL_P(repl_array));
+		repl_num = zend_hash_num_elements(Z_ARRVAL_PP(repl_array));
 		repl = (zval ***)safe_emalloc(repl_num, sizeof(zval **), 0);
-		for (p = Z_ARRVAL_P(repl_array)->pListHead, i = 0; p; p = p->pListNext, i++) {
+		for (p = Z_ARRVAL_PP(repl_array)->pListHead, i = 0; p; p = p->pListNext, i++) {
 			repl[i] = ((zval **)p->pData);
 		}
 	}
