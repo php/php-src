@@ -235,14 +235,17 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 
 again:
 	switch (Z_TYPE_P(expr)) {
-		case IS_NULL:
+		case IS_NULL: {
+			TSRMLS_FETCH();
 			ZVAL_EMPTY_STRING(expr_copy);
 			break;
+		}
 		case IS_BOOL:
 			if (Z_LVAL_P(expr)) {
 				// TODO: ??? use interned string
 				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
 			} else {
+				TSRMLS_FETCH();
 				ZVAL_EMPTY_STRING(expr_copy);
 			}
 			break;
@@ -514,14 +517,11 @@ static void zend_init_exception_op(TSRMLS_D) /* {{{ */
 #ifdef ZTS
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS_DC) /* {{{ */
 {
-	zend_function tmp_func;
-	zend_class_entry *tmp_class;
-
 	compiler_globals->compiled_filename = NULL;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL, &tmp_func, sizeof(zend_function));
+	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
@@ -533,7 +533,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->auto_globals = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->auto_globals, 8, NULL, NULL, 1, 0);
-	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL, NULL, sizeof(zend_auto_global) /* empty element */);
+	zend_hash_copy(compiler_globals->auto_globals, global_auto_globals_table, NULL /* empty element */);
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
@@ -576,8 +576,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	zend_init_rsrc_plist(TSRMLS_C);
 	zend_init_exception_op(TSRMLS_C);
 	EG(lambda_count) = 0;
-	EG(user_error_handler) = NULL;
-	EG(user_exception_handler) = NULL;
+	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
 	EG(current_execute_data) = NULL;

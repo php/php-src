@@ -43,9 +43,9 @@ static void _str_dtor(zval *zv)
 
 void zend_interned_strings_init(TSRMLS_D)
 {
-#ifndef ZTS
 	zend_string *str;
 
+#ifndef ZTS
 	zend_hash_init(&CG(interned_strings), 0, NULL, _str_dtor, 1);
 	
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;

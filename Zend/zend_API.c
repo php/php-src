@@ -1207,22 +1207,18 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 	if (class_type->default_properties_count) {
 //???		object->properties_table = emalloc(sizeof(zval*) * class_type->default_properties_count);
 		for (i = 0; i < class_type->default_properties_count; i++) {
-			ZVAL_COPY_VALUE(&object->properties_table[i], &class_type->default_properties_table[i]);
-			if (Z_REFCOUNTED(class_type->default_properties_table[i])) {
 #if ZTS
-				ALLOC_ZVAL( object->properties_table[i]);
-				MAKE_COPY_ZVAL(&class_type->default_properties_table[i], object->properties_table[i]);
+			ZVAL_DUP(&object->properties_table[i], &class_type->default_properties_table[i]);
 #else
-				Z_ADDREF(object->properties_table[i]);
+			ZVAL_COPY(&object->properties_table[i], &class_type->default_properties_table[i]);
 #endif
-			}
 		}
 		object->properties = NULL;
 	}
 }
 /* }}} */
 
-ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties) /* {{{ */
+ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties TSRMLS_DC) /* {{{ */
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
@@ -1250,7 +1246,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 }
 /* }}} */
 
-ZEND_API void object_properties_load(zend_object *object, HashTable *properties) /* {{{ */
+ZEND_API void object_properties_load(zend_object *object, HashTable *properties TSRMLS_DC) /* {{{ */
 {
 	HashPosition pos;
     zval *prop, tmp;
@@ -1304,7 +1300,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	if (class_type->create_object == NULL) {
 		ZVAL_OBJ(arg, zend_objects_new(class_type TSRMLS_CC));
 		if (properties) {
-			object_properties_init_ex(Z_OBJ_P(arg), properties);
+			object_properties_init_ex(Z_OBJ_P(arg), properties TSRMLS_CC);
 		} else {
 			object_properties_init(Z_OBJ_P(arg), class_type);
 		}
@@ -1656,7 +1652,7 @@ ZEND_API zval *add_get_index_stringl(zval *arg, ulong index, const char *str, ui
 }
 /* }}} */
 
-ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
+ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC) /* {{{ */
 {
 	zval *result;
 
@@ -2171,7 +2167,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
 		internal_function->handler = ptr->handler;
-		internal_function->function_name = zend_new_interned_string(STR_INIT(ptr->fname, fname_len, 1));
+		internal_function->function_name = zend_new_interned_string(STR_INIT(ptr->fname, fname_len, 1) TSRMLS_CC);
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		if (ptr->flags) {

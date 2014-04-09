@@ -68,7 +68,7 @@ static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
 
 ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC)
 {
-	zend_object_std_init(&iter->std, &zend_iterator_class_entry);
+	zend_object_std_init(&iter->std, &zend_iterator_class_entry TSRMLS_CC);
 	iter->std.handlers = &iterator_object_handlers;
 }
 

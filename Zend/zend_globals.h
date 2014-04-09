@@ -152,7 +152,7 @@ struct _zend_compiler_globals {
 	zend_bool encoding_declared;
 
 #ifdef ZTS
-	zval ***static_members_table;
+	zval **static_members_table;
 	int last_static_member;
 #endif
 };
