@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Added feature #65545 (SplFileObject::fread()) (Tjerk)
+  . Fixed bug #66702 (RegexIterator::INVERT_MATCH does not invert). (Joshua
+    Thijssen)
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour) (Tjerk)
