@@ -1436,9 +1436,10 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	zval tmp, *arg = NULL;
 	zval retval;
 
-	// ??? how to pass aht as a reference to later method call?
-	array_init(&tmp);
-	zend_hash_copy(Z_ARRVAL(tmp), aht, (copy_ctor_func_t)zval_add_ref);
+	/* A tricky way to pass "aht" by reference, copy HashTable */
+	//??? It may be not safe, if user comparison handler accesses "aht"
+	ZVAL_NEW_ARR(&tmp);
+	*Z_ARRVAL(tmp) = *aht;
 
 	if (!use_arg) {
 		aht->nApplyCount++;
@@ -1463,7 +1464,13 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, 2, &tmp, arg TSRMLS_CC);
 		aht->nApplyCount--;
 	}
-	zval_ptr_dtor(&tmp);
+	/* A tricky way to pass "aht" by reference, copy back and cleanup */
+	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp))) {
+		*aht = *Z_ARRVAL_P(Z_REFVAL(tmp));
+		GC_REMOVE_FROM_BUFFER(Z_ARR_P(Z_REFVAL(tmp)));
+		efree(Z_ARR_P(Z_REFVAL(tmp)));
+		efree(Z_REF(tmp));
+	}
 	if (!ZVAL_IS_UNDEF(&retval)) {
 		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
 	}
