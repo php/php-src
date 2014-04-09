@@ -4314,7 +4314,7 @@ PHP_FUNCTION(mb_send_mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd->val);
 	} 
 
-	if (!err && php_mail(to_r, subject, message, headers, extra_cmd->val TSRMLS_CC)) {
+	if (!err && php_mail(to_r, subject, message, headers, extra_cmd ? extra_cmd->val : NULL TSRMLS_CC)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
