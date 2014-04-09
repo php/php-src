@@ -515,13 +515,21 @@ static void zend_init_exception_op(TSRMLS_D) /* {{{ */
 /* }}} */
 
 #ifdef ZTS
+static void function_copy_ctor(zval *zv)
+{
+	zend_function *old_func = Z_FUNC_P(zv);
+	Z_FUNC_P(zv) = pemalloc(sizeof(zend_internal_function), 1);
+	memcpy(Z_FUNC_P(zv), old_func, sizeof(zend_internal_function));
+	function_add_ref(Z_FUNC_P(zv));
+}
+
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS_DC) /* {{{ */
 {
 	compiler_globals->compiled_filename = NULL;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_copy(compiler_globals->function_table, global_function_table, NULL);
+	zend_hash_copy(compiler_globals->function_table, global_function_table, function_copy_ctor);
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);

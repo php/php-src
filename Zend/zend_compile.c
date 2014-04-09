@@ -3093,6 +3093,10 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			zend_hash_copy(op_array->static_variables, static_variables, zval_add_ref_unref);
 		}
 		op_array->run_time_cache = NULL;
+	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
+		if (function->common.function_name) {
+			STR_ADDREF(function->common.function_name);
+		}
 	}
 }
 /* }}} */
@@ -6951,10 +6955,10 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		if (CG(static_members_table) && n >= CG(last_static_member)) {
 			/* Support for run-time declaration: dl() */
 			CG(last_static_member) = n+1;
-			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval**));
+			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval*));
 			CG(static_members_table)[n] = NULL;
 		}
-		ce->static_members_table = (zval**)(zend_intptr_t)n;
+		ce->static_members_table = (zval*)(zend_intptr_t)n;
 #else
 		ce->static_members_table = NULL;
 #endif
