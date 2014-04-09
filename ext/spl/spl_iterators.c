@@ -464,7 +464,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 					zval *aggregate = iterator;
 					zend_call_method_with_0_params(aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", iterator);
-					inc_refcount = 0;
+//???					inc_refcount = 0;
 				}
 
 				if (user_caching_it_flags) {
@@ -478,7 +478,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 					zval_ptr_dtor(iterator);
 				}
 				iterator = &caching_it;
-				inc_refcount = 0;
+//???				inc_refcount = 0;
 			} else {
 				iterator = NULL;
 			}
@@ -493,7 +493,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 					zval *aggregate = iterator;
 					zend_call_method_with_0_params(aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", iterator);
-					inc_refcount = 0;
+//???					inc_refcount = 0;
 				}
 			} else {
 				iterator = NULL;
@@ -550,11 +550,11 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	ce_iterator = Z_OBJCE_P(iterator); /* respect inheritance, don't use spl_ce_RecursiveIterator */
 	intern->iterators[0].iterator = ce_iterator->get_iterator(ce_iterator, iterator, 0 TSRMLS_CC);
-	if (inc_refcount) {
+//???	if (inc_refcount) {
 		ZVAL_COPY(&intern->iterators[0].zobject, iterator);
-	} else {
-		ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
-	}
+//???	} else {
+//???		ZVAL_COPY_VALUE(&intern->iterators[0].zobject, iterator);
+//???	}
 	intern->iterators[0].ce = ce_iterator;
 	intern->iterators[0].state = RS_START;
 
