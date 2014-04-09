@@ -973,7 +973,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						!ZVAL_IS_UNDEF(&retval)) {
 					convert_to_string_ex(&retval);
 					smart_str_appendl(&out_buf, Z_STRVAL(retval), Z_STRLEN(retval));
-					eval_buf.s->len = 0;
+					if (eval_buf.s) {
+						eval_buf.s->len = 0;
+					}
 					zval_ptr_dtor(&retval);
 				} else {
 					efree(description);
