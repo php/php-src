@@ -61,7 +61,7 @@ PHPAPI void
 mysqlnd_reverse_api_register_api(MYSQLND_REVERSE_API * apiext TSRMLS_DC)
 {
 	zend_hash_add(&mysqlnd_api_ext_ht, apiext->module->name, strlen(apiext->module->name) + 1, &apiext,
-				  sizeof(MYSQLND_REVERSE_API), NULL);
+				  sizeof(MYSQLND_REVERSE_API *), NULL);
 }
 /* }}} */
 
