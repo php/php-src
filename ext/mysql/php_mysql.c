@@ -1978,7 +1978,7 @@ Q: String or long first?
 					}
 					if (!tmp_field) { /* no match found */
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in MySQL result index %ld",
-									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_P(result));
+									(table_name?table_name:""), (table_name?".":""), field_name, Z_RES_P(result)->handle);
 						efree(field_name);
 						if (table_name) {
 							efree(table_name);
