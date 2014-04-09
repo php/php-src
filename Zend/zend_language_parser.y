@@ -1056,10 +1056,10 @@ possible_comma:
 ;
 
 non_empty_static_array_pair_list:
-		non_empty_static_array_pair_list ',' static_scalar T_DOUBLE_ARROW static_scalar	{ zend_do_add_static_array_element(&$$, &$3, &$5); }
-	|	non_empty_static_array_pair_list ',' static_scalar { zend_do_add_static_array_element(&$$, NULL, &$3); }
-	|	static_scalar T_DOUBLE_ARROW static_scalar { $$.op_type = IS_CONST; array_init(&$$.u.constant); zend_do_add_static_array_element(&$$, &$1, &$3); }
-	|	static_scalar { $$.op_type = IS_CONST; array_init(&$$.u.constant); zend_do_add_static_array_element(&$$, NULL, &$1); }
+		non_empty_static_array_pair_list ',' static_scalar T_DOUBLE_ARROW static_scalar	{ zend_do_add_static_array_element(&$$, &$3, &$5 TSRMLS_CC); }
+	|	non_empty_static_array_pair_list ',' static_scalar { zend_do_add_static_array_element(&$$, NULL, &$3 TSRMLS_CC); }
+	|	static_scalar T_DOUBLE_ARROW static_scalar { $$.op_type = IS_CONST; array_init(&$$.u.constant); zend_do_add_static_array_element(&$$, &$1, &$3 TSRMLS_CC); }
+	|	static_scalar { $$.op_type = IS_CONST; array_init(&$$.u.constant); zend_do_add_static_array_element(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
 expr:

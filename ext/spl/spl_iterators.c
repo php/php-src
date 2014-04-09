@@ -2559,7 +2559,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			
 			ZVAL_ZVAL(&zcacheval, &intern->current.data, 1, 0);
 
-			array_set_zval_key(HASH_OF(&intern->u.caching.zcache), key, &zcacheval);
+			array_set_zval_key(HASH_OF(&intern->u.caching.zcache), key, &zcacheval TSRMLS_CC);
 
 			zval_ptr_dtor(&zcacheval);
 		}
@@ -3455,7 +3455,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 		if (EG(exception)) {
 			return ZEND_HASH_APPLY_STOP;
 		}
-		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data);
+		array_set_zval_key(Z_ARRVAL_P(return_value), &key, data TSRMLS_CC);
 		zval_dtor(&key);
 	} else {
 		Z_ADDREF_P(data);

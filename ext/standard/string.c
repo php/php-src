@@ -2408,7 +2408,6 @@ PHP_FUNCTION(substr_replace)
 		while ((tmp_str = zend_hash_get_current_data_ex(Z_ARRVAL_P(str), &pos_str)) != NULL) {
 			zval *orig_str;
 			zval dummy;
-			ulong refcount;
 
 			if (Z_ISREF_P(tmp_str)) {
 				/* see bug #55871 */
@@ -3010,7 +3009,7 @@ static void php_strtr_array_destroy_ppres(PPRES *d)
 /* }}} */
 
 /* {{{ php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value) */
-static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
+static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value TSRMLS_DC)
 {
 	STRLEN		pos = 0,
 				nextwpos = 0,
@@ -3065,7 +3064,7 @@ end_outer_loop: ;
 /* }}} */
 
 /* {{{ php_strtr_array */
-static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *pats)
+static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *pats TSRMLS_DC)
 {
 	PPRES		*data;
 	STR			text;
@@ -3082,7 +3081,7 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 	}
 	data = php_strtr_array_prepare(&text, patterns, patterns_len, 2, 2);
 	efree(patterns);
-	php_strtr_array_do_repl(&text, data, return_value);
+	php_strtr_array_do_repl(&text, data, return_value TSRMLS_CC);
 	php_strtr_array_destroy_ppres(data);
 	zend_llist_destroy(allocs);
 	efree(allocs);
@@ -3113,7 +3112,7 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (ac == 2) {
-		php_strtr_array(return_value, str, str_len, HASH_OF(from));
+		php_strtr_array(return_value, str, str_len, HASH_OF(from) TSRMLS_CC);
 	} else {
 		convert_to_string_ex(from);
 
@@ -3794,7 +3793,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, int length, char *needle, int
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, int *replace_count)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, int *replace_count TSRMLS_DC)
 {
 	zval		*search_entry,
 				*replace_entry = NULL,
@@ -3952,7 +3951,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		   and add the result to the return_value array. */
 		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
 			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
-				php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity, (argc > 3) ? &count : NULL);
+				php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 			} else {
 				Z_ADDREF_P(subject_entry);
 				COPY_PZVAL_TO_ZVAL(result, subject_entry);
@@ -3972,7 +3971,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			zend_hash_move_forward(Z_ARRVAL_P(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
+		php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 	}
 	if (argc > 3) {
 		zval_dtor(Z_REFVAL_P(zcount));

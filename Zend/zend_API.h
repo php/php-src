@@ -366,8 +366,8 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API void object_properties_init(zend_object *object, zend_class_entry *class_type);
-ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties);
-ZEND_API void object_properties_load(zend_object *object, HashTable *properties);
+ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properties TSRMLS_DC);
+ZEND_API void object_properties_load(zend_object *object, HashTable *properties TSRMLS_DC);
 
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destroy_ht TSRMLS_DC);
 
@@ -432,7 +432,7 @@ ZEND_API zval *add_get_index_str(zval *arg, ulong index, zend_string *str);
 ZEND_API zval *add_get_index_string(zval *arg, ulong idx, const char *str, int duplicate);
 ZEND_API zval *add_get_index_stringl(zval *arg, ulong idx, const char *str, uint length, int duplicate);
 
-ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
+ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC);
 
 ZEND_API int add_property_long_ex(zval *arg, const char *key, uint key_len, long l TSRMLS_DC);
 ZEND_API int add_property_null_ex(zval *arg, const char *key, uint key_len TSRMLS_DC);

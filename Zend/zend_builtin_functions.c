@@ -2290,7 +2290,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				if (ptr->function_state.arguments) {
 					zval args;
 					debug_backtrace_get_args(ptr->function_state.arguments, &args TSRMLS_CC);
-					add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &args TSRMLS_CC);
+					add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &args);
 				}
 			}
 		} else {

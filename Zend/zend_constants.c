@@ -49,11 +49,19 @@ static void copy_zend_constant(zval *zv)
 
 	Z_PTR_P(zv) = malloc(sizeof(zend_constant)/*, c->flags & CONST_PERSISTENT*/);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
+
+	c = Z_PTR_P(zv);
 //???	c->name = STR_DUP(c->name, c->flags & CONST_PERSISTENT);
 	c->name = STR_COPY(c->name);
-//???	if (!(c->flags & CONST_PERSISTENT)) {
+	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
-//???	}
+	} else {
+//??? internal_copy_ctor needed
+		if (Z_TYPE(c->value) == IS_STRING) {
+			Z_STR(c->value) = STR_DUP(Z_STR(c->value), 1);
+		}
+
+	}
 }
 
 
@@ -239,7 +247,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 			memcpy(const_name->val, "\0__CLASS__", sizeof("\0__CLASS__")-1);
 			zend_str_tolower_copy(const_name->val + sizeof("\0__CLASS__")-1, EG(scope)->name->val, EG(scope)->name->len);
 			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = emalloc(sizeof(zend_constant));
+				c = malloc(sizeof(zend_constant));
 				memset(c, 0, sizeof(zend_constant));
 				ZVAL_STR(&c->value, STR_COPY(EG(scope)->name));
 				zend_hash_add_ptr(EG(zend_constants), const_name, c);
@@ -248,7 +256,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 		} else {
 			zend_string *const_name = STR_INIT("\0__CLASS__", sizeof("\0__CLASS__")-1, 0);
 			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = emalloc(sizeof(zend_constant));
+				c = malloc(sizeof(zend_constant));
 				memset(c, 0, sizeof(zend_constant));
 				ZVAL_EMPTY_STRING(&c->value);
 				zend_hash_add_ptr(EG(zend_constants), const_name, c);

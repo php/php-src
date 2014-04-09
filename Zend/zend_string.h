@@ -35,11 +35,7 @@ void zend_interned_strings_dtor(TSRMLS_D);
 
 END_EXTERN_C()
 
-#ifndef ZTS
-# define IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
-#else
-# define IS_INTERNED(s)					0
-#endif
+#define IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
 #define STR_HASH_VAL(s)					zend_str_hash_val(s)
 #define STR_FORGET_HASH_VAL(s)			zend_str_forget_hash_val(s)

@@ -3104,7 +3104,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3127,7 +3127,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3150,7 +3150,7 @@ ZEND_METHOD(reflection_function, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4653,7 +4653,7 @@ ZEND_METHOD(reflection_class, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4676,7 +4676,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4699,7 +4699,7 @@ ZEND_METHOD(reflection_class, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1) TSRMLS_CC) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING

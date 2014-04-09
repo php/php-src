@@ -1799,7 +1799,7 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	/* copy members */
-	object_properties_load(&intern->std, Z_ARRVAL(members));
+	object_properties_load(&intern->std, Z_ARRVAL(members) TSRMLS_CC);
 	zval_ptr_dtor(&members);
 
 	/* done reading $serialized */

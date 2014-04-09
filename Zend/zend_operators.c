@@ -611,15 +611,18 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 	double dval;
 
 	switch (Z_TYPE_P(op)) {
-		case IS_NULL:
+		case IS_NULL: {
+			TSRMLS_FETCH();
 			ZVAL_EMPTY_STRING(op);
 			break;
+		}
 		case IS_STRING:
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(op)) {
 				ZVAL_NEW_STR(op, STR_INIT("1", 1, 0));
 			} else {
+				TSRMLS_FETCH();
 				ZVAL_EMPTY_STRING(op);
 			}
 			break;

@@ -1636,7 +1636,7 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
-	iterator = spl_filesystem_object_to_iterator(dir_object);
+	iterator = spl_filesystem_object_to_iterator(dir_object TSRMLS_CC);
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
 	/* ->current must be initialized; rewind doesn't set it and valid
@@ -1667,7 +1667,7 @@ static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 /* {{{ spl_filesystem_dir_it_valid */
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter TSRMLS_CC);
 
 	return object->u.dir.entry.d_name[0] != '\0' ? SUCCESS : FAILURE;
 }
@@ -1685,7 +1685,7 @@ static zval *spl_filesystem_dir_it_current_data(zend_object_iterator *iter TSRML
 /* {{{ spl_filesystem_dir_it_current_key */
 static void spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
-	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter TSRMLS_CC);
 
 	ZVAL_LONG(key, object->u.dir.index);
 }
@@ -1694,7 +1694,7 @@ static void spl_filesystem_dir_it_current_key(zend_object_iterator *iter, zval *
 /* {{{ spl_filesystem_dir_it_move_forward */
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter TSRMLS_CC);
 	
 	object->u.dir.index++;
 	spl_filesystem_dir_read(object TSRMLS_CC);
@@ -1708,7 +1708,7 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS
 /* {{{ spl_filesystem_dir_it_rewind */
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
-	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter TSRMLS_CC);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
@@ -1739,7 +1739,7 @@ static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 static zval *spl_filesystem_tree_it_current_data(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
-	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator TSRMLS_CC);
 
 	if (SPL_FILE_DIR_CURRENT(object, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
 		if (ZVAL_IS_UNDEF(&iterator->current)) {
@@ -1762,7 +1762,7 @@ static zval *spl_filesystem_tree_it_current_data(zend_object_iterator *iter TSRM
 /* {{{ spl_filesystem_tree_it_current_key */
 static void spl_filesystem_tree_it_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
-	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
+	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter TSRMLS_CC);
 
 	if (SPL_FILE_DIR_KEY(object, SPL_FILE_DIR_KEY_AS_FILENAME)) {
 		ZVAL_STRING(key, object->u.dir.entry.d_name);
@@ -1777,7 +1777,7 @@ static void spl_filesystem_tree_it_current_key(zend_object_iterator *iter, zval 
 static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
-	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator TSRMLS_CC);
 	
 	object->u.dir.index++;
 	do {
@@ -1798,7 +1798,7 @@ static void spl_filesystem_tree_it_move_forward(zend_object_iterator *iter TSRML
 static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
-	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator);
+	spl_filesystem_object   *object   = spl_filesystem_iterator_to_object(iterator TSRMLS_CC);
 	
 	object->u.dir.index = 0;
 	if (object->u.dir.dirp) {
@@ -1835,7 +1835,7 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
-	iterator = spl_filesystem_object_to_iterator(dir_object);
+	iterator = spl_filesystem_object_to_iterator(dir_object TSRMLS_CC);
 
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;

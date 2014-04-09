@@ -1046,7 +1046,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 /* }}} */
 
 /* {{{ date_format - (gm)date helper */
-static zend_string *date_format(char *format, int format_len, timelib_time *t, int localtime)
+static zend_string *date_format(char *format, int format_len, timelib_time *t, int localtime TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, length = 0;
@@ -1239,7 +1239,7 @@ PHPAPI zend_string *php_format_date(char *format, int format_len, time_t ts, int
 		timelib_unixtime2gmt(t, ts);
 	}
 
-	string = date_format(format, format_len, t, localtime);
+	string = date_format(format, format_len, t, localtime TSRMLS_CC);
 	
 	timelib_time_dtor(t);
 	return string;
@@ -2191,7 +2191,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 	}
 
 	/* first we add the date and time in ISO format */
-	ZVAL_STR(&zv, date_format("Y-m-d H:i:s", sizeof("Y-m-d H:i:s")-1, dateobj->time, 1));
+	ZVAL_STR(&zv, date_format("Y-m-d H:i:s", sizeof("Y-m-d H:i:s")-1, dateobj->time, 1 TSRMLS_CC));
 	zend_hash_str_update(props, "date", sizeof("date")-1, &zv);
 
 	/* then we add the timezone name (or similar) */
@@ -2979,7 +2979,7 @@ PHP_FUNCTION(date_format)
 	}
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
-	RETURN_STR(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime));
+	RETURN_STR(date_format(format, format_len, dateobj->time, dateobj->time->is_localtime TSRMLS_CC));
 }
 /* }}} */
 
@@ -3550,15 +3550,15 @@ PHP_FUNCTION(date_diff)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
-	dateobj1 = Z_PHPDATE_P(object1 TSRMLS_CC);
-	dateobj2 = Z_PHPDATE_P(object2 TSRMLS_CC);
+	dateobj1 = Z_PHPDATE_P(object1);
+	dateobj2 = Z_PHPDATE_P(object2);
 	DATE_CHECK_INITIALIZED(dateobj1->time, DateTimeInterface);
 	DATE_CHECK_INITIALIZED(dateobj2->time, DateTimeInterface);
 	timelib_update_ts(dateobj1->time, NULL);
 	timelib_update_ts(dateobj2->time, NULL);
 
 	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
-	interval = Z_PHPINTERVAL_P(return_value TSRMLS_CC);
+	interval = Z_PHPINTERVAL_P(return_value);
 	interval->diff = timelib_diff(dateobj1->time, dateobj2->time);
 	if (absolute) {
 		interval->diff->invert = 0;
@@ -3603,7 +3603,7 @@ PHP_FUNCTION(timezone_open)
 	if (SUCCESS != timezone_initialize(&tzi, tz TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
-	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC) TSRMLS_CC);
+	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC));
 	tzobj->type = TIMELIB_ZONETYPE_ID;
 	tzobj->tzi.tz = tzi;
 	tzobj->initialized = 1;
@@ -4214,7 +4214,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 /* }}} */
 
 /* {{{ date_interval_format -  */
-static zend_string *date_interval_format(char *format, int format_len, timelib_rel_time *t)
+static zend_string *date_interval_format(char *format, int format_len, timelib_rel_time *t TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, length, have_format_spec = 0;
@@ -4291,7 +4291,7 @@ PHP_FUNCTION(date_interval_format)
 	diobj = Z_PHPINTERVAL_P(object);
 	DATE_CHECK_INITIALIZED(diobj->initialized, DateInterval);
 
-	RETURN_STR(date_interval_format(format, format_len, diobj->diff));
+	RETURN_STR(date_interval_format(format, format_len, diobj->diff TSRMLS_CC));
 }
 /* }}} */
 

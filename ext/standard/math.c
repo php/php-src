@@ -900,7 +900,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
  */
-PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
+PHPAPI zend_string * _php_math_longtobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 	char buf[(sizeof(unsigned long) << 3) + 1];
@@ -960,7 +960,7 @@ PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 		return STR_INIT(ptr, end - ptr, 0);
 	}
 	
-	return _php_math_longtobase(arg, base);
+	return _php_math_longtobase(arg, base TSRMLS_CC);
 }	
 /* }}} */
 
@@ -1023,7 +1023,7 @@ PHP_FUNCTION(decbin)
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 2);
+	result = _php_math_longtobase(arg, 2 TSRMLS_CC);
 	RETURN_STR(result);
 }
 /* }}} */
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(decoct)
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 8);
+	result = _php_math_longtobase(arg, 8 TSRMLS_CC);
 	RETURN_STR(result);
 }
 /* }}} */
@@ -1055,7 +1055,7 @@ PHP_FUNCTION(dechex)
 		return;
 	}
 	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 16);
+	result = _php_math_longtobase(arg, 16 TSRMLS_CC);
 	RETURN_STR(result);
 }
 /* }}} */

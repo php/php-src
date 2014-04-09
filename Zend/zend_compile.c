@@ -3093,6 +3093,10 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 			zend_hash_copy(op_array->static_variables, static_variables, zval_add_ref_unref);
 		}
 		op_array->run_time_cache = NULL;
+	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
+		if (function->common.function_name) {
+			STR_ADDREF(function->common.function_name);
+		}
 	}
 }
 /* }}} */
@@ -3733,17 +3737,8 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 /* }}} */
 
 #ifdef ZTS
-static void zval_internal_ctor(zval **p) /* {{{ */
-{
-	zval *orig_ptr = *p;
-
-	ALLOC_ZVAL(*p);
-	MAKE_COPY_ZVAL(&orig_ptr, *p);
-}
-/* }}} */
-
 # define zval_property_ctor(parent_ce, ce) \
-	(((parent_ce)->type != (ce)->type) ? zval_internal_ctor : zval_add_ref))
+	(((parent_ce)->type != (ce)->type) ? ZVAL_COPY_CTOR : zval_add_ref)
 #else
 # define zval_property_ctor(parent_ce, ce) \
 	zval_add_ref
@@ -3784,22 +3779,14 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			}
 		}
 		for (i = 0; i < parent_ce->default_properties_count; i++) {
-			ZVAL_COPY_VALUE(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
-			if (Z_REFCOUNTED(ce->default_properties_table[i])) {
 #ifdef ZTS
-				if (parent_ce->type != ce->type) {
-					zval *p;
-
-					ALLOC_ZVAL(p);
-					MAKE_COPY_ZVAL(&ce->default_properties_table[i], p);
-					ce->default_properties_table[i] = p;
-				} else {
-					Z_ADDREF_P(ce->default_properties_table[i]);
-				}
-#else
-				Z_ADDREF(ce->default_properties_table[i]);
-#endif
+			if (parent_ce->type != ce->type) {
+				ZVAL_DUP(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
+				continue;
 			}
+#endif
+
+			ZVAL_COPY(&ce->default_properties_table[i], &parent_ce->default_properties_table[i]);
 		}
 		ce->default_properties_count += parent_ce->default_properties_count;
 	}
@@ -5921,7 +5908,7 @@ void zend_do_add_array_element(znode *result, const znode *expr, const znode *of
 }
 /* }}} */
 
-void zend_do_add_static_array_element(znode *result, znode *offset, const znode *expr) /* {{{ */
+void zend_do_add_static_array_element(znode *result, znode *offset, const znode *expr TSRMLS_DC) /* {{{ */
 {
 	zval element;
 
@@ -6968,10 +6955,10 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		if (CG(static_members_table) && n >= CG(last_static_member)) {
 			/* Support for run-time declaration: dl() */
 			CG(last_static_member) = n+1;
-			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval**));
+			CG(static_members_table) = realloc(CG(static_members_table), (n+1)*sizeof(zval*));
 			CG(static_members_table)[n] = NULL;
 		}
-		ce->static_members_table = (zval**)(zend_intptr_t)n;
+		ce->static_members_table = (zval*)(zend_intptr_t)n;
 #else
 		ce->static_members_table = NULL;
 #endif
