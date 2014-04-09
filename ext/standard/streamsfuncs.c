@@ -702,6 +702,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 
 	/* destroy old array and add new one */
 	zend_hash_destroy(Z_ARRVAL_P(stream_array));
+	GC_REMOVE_FROM_BUFFER(Z_ARR_P(stream_array));
 	efree(Z_ARR_P(stream_array));
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL(new_array));
