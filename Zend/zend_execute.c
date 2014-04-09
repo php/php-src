@@ -654,6 +654,10 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		if (Z_TYPE_P(object) == IS_NULL ||
 		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
 		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
+//??? The following block may handle only non-interned empty string,
+//??? but it doesn't work anyway
+//??? see: Zend/tests/bug54265.phpt
+#if 0
 			if (Z_REFCOUNTED_P(object)) {
 				if (!Z_ISREF_P(object_ptr)) {
 					SEPARATE_ZVAL(object);
@@ -671,8 +675,9 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 				}
 				Z_DELREF_P(object);
 			} else {
+#endif
 				zend_error(E_WARNING, "Creating default object from empty value");
-			}
+//???			}
 			zval_dtor(object);
 			object_init(object);
 		} else {
