@@ -480,7 +480,7 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	return SUCCESS;
 }
 
-ZEND_API void zend_hash_reindex(HashTable *ht) {
+ZEND_API void zend_hash_reindex(HashTable *ht, zend_bool only_integer_keys) {
 	Bucket *p;
 	uint nIndex;
 	ulong offset = 0;
@@ -492,8 +492,9 @@ ZEND_API void zend_hash_reindex(HashTable *ht) {
 
 	memset(ht->arBuckets, 0, ht->nTableSize * sizeof(Bucket *));
 	for (p = ht->pListHead; p != NULL; p = p->pListNext) {
-		if (p->nKeyLength == 0) {
+		if (!only_integer_keys || p->nKeyLength == 0) {
 			p->h = offset++;
+			p->nKeyLength = 0;
 		}
 
 		nIndex = p->h & ht->nTableMask;
@@ -1353,7 +1354,7 @@ ZEND_API void _zend_hash_splice(HashTable *ht, uint nDataSize, copy_ctor_func_t 
 		ZEND_HASH_IF_FULL_DO_RESIZE(ht);
 	}
 
-	zend_hash_reindex(ht);
+	zend_hash_reindex(ht, 1);
 }
 /* }}} */
 
@@ -1403,15 +1404,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	if (renumber) {
-		p = ht->pListHead;
-		i=0;
-		while (p != NULL) {
-			p->nKeyLength = 0;
-			p->h = i++;
-			p = p->pListNext;
-		}
-		ht->nNextFreeElement = i;
-		zend_hash_rehash(ht);
+		zend_hash_reindex(ht, 0);
 	}
 	return SUCCESS;
 }

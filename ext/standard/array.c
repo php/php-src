@@ -1786,13 +1786,7 @@ static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 	}
 	temp = hash->pListHead;
 	j = 0;
-	while (temp != NULL) {
-		temp->nKeyLength = 0;
-		temp->h = j++;
-		temp = temp->pListNext;
-	}
-	hash->nNextFreeElement = n_elems;
-	zend_hash_rehash(hash);
+	zend_hash_reindex(hash, 0);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	efree(elems);
@@ -1897,7 +1891,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 
 	/* If we did a shift... re-index like it did before */
 	if (!off_the_end) {
-		zend_hash_reindex(Z_ARRVAL_P(stack));
+		zend_hash_reindex(Z_ARRVAL_P(stack), 1);
 	} else if (!key_len && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
@@ -3848,15 +3842,7 @@ PHP_FUNCTION(array_multisort)
 			hash->pListTail = indirect[k][i];
 		}
 
-		p = hash->pListHead;
-		k = 0;
-		while (p != NULL) {
-			if (p->nKeyLength == 0)
-				p->h = k++;
-			p = p->pListNext;
-		}
-		hash->nNextFreeElement = array_size;
-		zend_hash_rehash(hash);
+		zend_hash_reindex(hash, 1);
 	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
