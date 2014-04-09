@@ -3530,7 +3530,7 @@ PHP_FUNCTION(mb_convert_kana)
    Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	zval *args, *stack, *var, *hash_entry, *zfrom_enc;
+	zval *args, *stack, *var, *hash_entry, *hash_entry_ptr, *zfrom_enc;
 	HashTable *target_hash;
 	mbfl_string string, result, *ret;
 	const mbfl_encoding *from_encoding, *to_encoding;
@@ -3605,6 +3605,10 @@ PHP_FUNCTION(mb_convert_variables)
 					if (target_hash != NULL) {
 						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
 							zend_hash_move_forward(target_hash);
+							if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
+								hash_entry = Z_INDIRECT_P(hash_entry);
+							}
+							ZVAL_DEREF(hash_entry);
 							if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
 								if (stack_level >= stack_max) {
 									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
@@ -3685,8 +3689,13 @@ detect_end:
 			if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
 				target_hash = HASH_OF(var);
 				if (target_hash != NULL) {
-					while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
+					while ((hash_entry_ptr = zend_hash_get_current_data(target_hash)) != NULL) {
 						zend_hash_move_forward(target_hash);
+						if (Z_TYPE_P(hash_entry_ptr) == IS_INDIRECT) {
+							hash_entry_ptr = Z_INDIRECT_P(hash_entry_ptr);
+						}
+						hash_entry = hash_entry_ptr;
+						ZVAL_DEREF(hash_entry);
 						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
@@ -3707,9 +3716,9 @@ detect_end:
 							string.len = Z_STRLEN_P(hash_entry);
 							ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 							if (ret != NULL) {
-								zval_ptr_dtor(hash_entry);
+								zval_ptr_dtor(hash_entry_ptr);
 								//???
-								ZVAL_STRINGL(hash_entry, (char *)ret->val, ret->len);
+								ZVAL_STRINGL(hash_entry_ptr, (char *)ret->val, ret->len);
 								efree(ret->val);
 							}
 						}
