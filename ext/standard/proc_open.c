@@ -958,7 +958,8 @@ PHP_FUNCTION(proc_open)
 					php_stream_to_zval(stream, &retfp);
 					add_index_zval(pipes, descriptors[i].index, &retfp);
 
-					proc->pipes[i] = Z_RES_P(&retfp);
+					proc->pipes[i] = Z_RES(retfp);
+					Z_ADDREF(retfp);
 				}
 				break;
 			default:
