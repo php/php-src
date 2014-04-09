@@ -1059,9 +1059,11 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		new_index_ptr.type = le_index_ptr;
 		
 		if (zend_hash_update_mem(&EG(regular_list), hashed_details, &new_index_ptr, sizeof(zend_resource)) == NULL) {
+			zval_ptr_dtor(return_value);
 			STR_RELEASE(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
 		}
+		Z_ADDREF_P(return_value);
 		MySG(num_links)++;
 	}
 
