@@ -597,8 +597,9 @@ ZEND_METHOD(Generator, __wakeup)
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
-	zval_ptr_dtor(&iterator->data);
 	generator->iterator = NULL;
+	zval_ptr_dtor(&iterator->data);
+	zend_iterator_dtor(iterator TSRMLS_CC);
 }
 /* }}} */
 
