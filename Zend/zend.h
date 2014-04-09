@@ -799,7 +799,9 @@ END_EXTERN_C()
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\
 		zval *_varptr = (varptr);						\
 		if (Z_ISREF_P(_varptr)) { 						\
-			ZVAL_DUP(_varptr, Z_REFVAL_P(_varptr)); 	\
+			zval tmp;									\
+			ZVAL_DUP(&tmp, Z_REFVAL_P(_varptr));		\
+			varptr = &tmp;								\
 		} else if (Z_REFCOUNTED_P(_varptr)) { 			\
 			Z_ADDREF_P(_varptr); 						\
 		}												\
