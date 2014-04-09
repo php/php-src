@@ -1160,7 +1160,9 @@ convert_to_array:
 //???			}
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
-			if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
+			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
+				ZVAL_NULL(result);
+			} else if (retval && Z_TYPE_P(retval) != IS_UNDEF) {
 				if (!Z_ISREF_P(retval)) {
 					if (Z_REFCOUNTED_P(retval) &&
 					    Z_REFCOUNT_P(retval) > 1) {
@@ -1182,7 +1184,7 @@ convert_to_array:
 //???				PZVAL_LOCK(retval);
 //???				ZVAL_COPY(result, retval);
 				if (result != retval) {
-					if (is_ref && retval != &EG(uninitialized_zval)) {
+					if (is_ref) {
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
 						ZVAL_COPY(result, retval);
 					} else {

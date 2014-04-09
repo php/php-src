@@ -428,7 +428,9 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1) 
 	 */
 	
-	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) && !Z_ISREF_P(ret)) {
+	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
+	    !Z_ISREF_P(ret) &&
+	    EXPECTED(ret != &EG(uninitialized_zval))) {
 		ZVAL_NEW_REF(ret, ret);
 	}
 
