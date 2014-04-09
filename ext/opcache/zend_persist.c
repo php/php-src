@@ -34,12 +34,23 @@
 	    _zend_shared_memdup((void*)p, size, 0 TSRMLS_CC)
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-# define zend_accel_store_string(str) \
-	zend_accel_store(str, sizeof(zend_string) + (str)->len)
+# define zend_accel_store_string(str) do { \
+		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
+		if (new_str) { \
+			str = new_str; \
+		} else { \
+	    	new_str = _zend_shared_memdup((void*)str, sizeof(zend_string) + (str)->len, 0 TSRMLS_CC); \
+	    	efree(str); \
+	    	str = new_str; \
+		} \
+    } while (0)
 # define zend_accel_memdup_string(str) \
 	zend_accel_memdup(str, sizeof(zend_string) + (str)->len)
-# define zend_accel_store_interned_string(str) \
-	(IS_ACCEL_INTERNED(str) ? str : zend_accel_store_string(str))
+# define zend_accel_store_interned_string(str) do { \
+		if (!IS_ACCEL_INTERNED(str)) { \
+			zend_accel_store_string(str); \
+		} \
+	} while (0)
 # define zend_accel_memdup_interned_string(str) \
 	(IS_ACCEL_INTERNED(str) ? str : zend_accel_memdup_string(str))
 #else

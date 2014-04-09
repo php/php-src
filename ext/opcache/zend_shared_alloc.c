@@ -348,7 +348,6 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 	memcpy(retval, source, size);
 	if (free_source) {
 		efree(source);
-//???		interned_efree((char*)source);
 	}
 	zend_shared_alloc_register_xlat_entry(source, retval);
 	return retval;
