@@ -81,6 +81,8 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 	var_hash->data[var_hash->used_slots++] = rval;
 }
 
+//???
+#if 0
 PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rval)
 {
 	var_entries *var_hash = (*var_hashx)->last_dtor;
@@ -104,6 +106,7 @@ PHPAPI void var_push_dtor_no_addref(php_unserialize_data_t *var_hashx, zval *rva
 
 	var_hash->data[var_hash->used_slots++] = rval;
 }
+#endif
 
 static int var_access(php_unserialize_data_t *var_hashx, long id, zval **store)
 {
@@ -483,9 +486,9 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 //???
 //???	if (rval == rval_ref) return 0;
 
-	if (!ZVAL_IS_UNDEF(rval)) {
-		var_push_dtor_no_addref(var_hash, rval);
-	}
+//???	if (!ZVAL_IS_UNDEF(rval)) {
+//???		var_push_dtor_no_addref(var_hash, rval);
+//???	}
 	ZVAL_COPY(rval, rval_ref);
 //???	Z_UNSET_ISREF_PP(rval);
 	
