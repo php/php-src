@@ -4007,8 +4007,9 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	if (OP1_TYPE == IS_CV &&
 	    OP2_TYPE == IS_UNUSED &&
 	    (opline->extended_value & ZEND_QUICK_SET)) {
-		zval_ptr_dtor(EX_VAR(opline->op1.var));
+	    ZVAL_COPY_VALUE(&tmp, EX_VAR(opline->op1.var));
 		ZVAL_UNDEF(EX_VAR(opline->op1.var));
+		zval_ptr_dtor(&tmp);
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
 	}
