@@ -360,15 +360,16 @@ fetch_dim_string:
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(offset), Z_LVAL_P(offset));
+		zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
+		index = Z_RES_P(offset)->handle;
+		goto num_index;
 	case IS_DOUBLE:
+		index = (long)Z_DVAL_P(offset);
+		goto num_index;
 	case IS_BOOL:
 	case IS_LONG:
-		if (Z_TYPE_P(offset) == IS_DOUBLE) {
-			index = (long)Z_DVAL_P(offset);
-		} else {
-			index = Z_LVAL_P(offset);
-		}
+		index = Z_LVAL_P(offset);
+num_index:
 		if ((retval = zend_hash_index_find(ht, index)) == NULL) {
 			switch (type) {
 				case BP_VAR_R:
