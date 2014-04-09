@@ -179,7 +179,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 						zend_try {
 							GC_REFCOUNT(object)++;
 							object->handlers->free_obj(object TSRMLS_CC);
-							GC_REFCOUNT(object)++;
+							GC_REFCOUNT(object)--;
 						} zend_catch {
 							failure = 1;
 						} zend_end_try();
