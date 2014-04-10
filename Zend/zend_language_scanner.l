@@ -847,6 +847,9 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 			zend_error_noreturn(E_COMPILE_ERROR, "Could not convert the script from the detected "
 					"encoding \"%s\" to a compatible encoding", zend_multibyte_get_encoding_name(LANG_SCNG(script_encoding)));
 		}
+		if (SCNG(script_filtered)) {
+			efree(SCNG(script_filtered));
+		}
 		SCNG(script_filtered) = new_yy_start;
 		SCNG(script_filtered_size) = length;
 	}
