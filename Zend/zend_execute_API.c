@@ -313,6 +313,14 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 	} zend_end_try();
 
 	zend_try {
+		zend_llist_destroy(&CG(open_files));
+	} zend_end_try();
+
+	zend_try {
+		zend_close_rsrc_list(&EG(regular_list) TSRMLS_CC);
+	} zend_end_try();
+
+	zend_try {
 		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);
 
 		zend_vm_stack_destroy(TSRMLS_C);
