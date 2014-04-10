@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Beta 1
+?? ??? 2014, PHP 5.6.0 Beta 2
+
+10 Apr 2014, PHP 5.6.0 Beta 1
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
@@ -16,6 +18,8 @@ PHP                                                                        NEWS
 - SPL:
   . Added feature #65545 (SplFileObject::fread()) (Tjerk)
   . Fixed bug #66834 (empty() does not work on classes that extend ArrayObject) (Tjerk)
+  . Fixed bug #66702 (RegexIterator::INVERT_MATCH does not invert). (Joshua
+    Thijssen)
 
 - cURL:
   . Fixed bug #66109 (Can't reset CURLOPT_CUSTOMREQUEST to default behaviour)
@@ -31,24 +35,32 @@ PHP                                                                        NEWS
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
 
 - Fileinfo:
+  . Fixed bug #66820 (out-of-bounds memory access in fileinfo)
+    (CVE-2014-2270). (Remi)
   . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
     expression). (CVE-2013-7345) (Remi)
-  . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
+  . Fixed bug #66987 (Memory corruption in fileinfo ext / bigendian).
     (Remi)
 
 
 - GD:
   . Fixed bug #66815 (imagecrop(): insufficient fix for NULL defer
     CVE-2013-7327). (Tomas Hoger, Remi).
+  . Fixed #66869 (Invalid 2nd argument crashes imageaffinematrixget) (Pierre)
   . Fixed bug #66887 (imagescale - poor quality of scaled image). (Remi)
   . Fixed bug #66890 (imagescale segfault). (Remi)
   . Fixed bug #66893 (imagescale ignore method argument). (Remi)
+
+- GMP:
+  . Fixed bug #66872 (invalid argument crashes gmp_testbit) (Pierre)
 
 - Hash:
   . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
     (Michael M Slusarz).
   . Implemented timing attack safe string comparison function
     (RFC: https://wiki.php.net/rfc/timing_attack). (Rouven Weßling)
+  . hash_pbkdf2() now works correctly if the $length argument is not specified.
+    (Nikita)
 
 - Intl:
   . Fixed bug #66873 (A reproductible crash in UConverter when given invalid
@@ -86,6 +98,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Added support for (*MARK) backtracking verbs. (Nikita)
 
+- PDO_firebird:
+  . Fixed Bug #66071 (memory corruption in error handling) (Popa)
+
 - PDO_pgsql:
   . Cleaned up code by increasing the requirements to libpq versions providing
     PQexecParams, PQprepare, PQescapeStringConn, PQescapeByteaConn. According
@@ -107,6 +122,9 @@ PHP                                                                        NEWS
     polling status constants. (Daniel Lowrey)
   . New pg_flush() and pg_consume_input() functions added to manually complete
     non-blocking reads/writes to underlying connection sockets. (Daniel Lowrey)
+
+- Session
+  . Remove session_gc() and session_serializer_name() wich were introduced in the first 5.6.0 alpha.
 
 - SimpleXML:
   . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
