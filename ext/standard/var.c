@@ -616,16 +616,25 @@ PHP_FUNCTION(var_export)
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC);
 
-static inline int php_add_var_hash(HashTable *var_hash, zval *var, zval *var_old TSRMLS_DC) /* {{{ */
+static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var_old TSRMLS_DC) /* {{{ */
 {
 	zval var_no, *zv;
 	char id[32], *p;
 	register int len;
+	zval *var = var_ptr;
 
+	if (Z_ISREF_P(var)) {
+		var = Z_REFVAL_P(var);
+	}
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
 				(long) Z_OBJ_P(var));
 		*(--p) = 'O';
+		len = id + sizeof(id) - 1 - p;
+	} else if (var_ptr != var) {
+		p = smart_str_print_long(id + sizeof(id) - 1,
+				(long) Z_REF_P(var));
+		*(--p) = 'R';
 		len = id + sizeof(id) - 1 - p;
 	} else {
 		p = smart_str_print_long(id + sizeof(id) - 1, (long) var);
@@ -634,7 +643,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, zval *var_old
 
 	if ((zv = zend_hash_str_find(var_hash, p, len)) != NULL) {
 		ZVAL_COPY_VALUE(var_old, zv);
-		if (!Z_ISREF_P(var)) {
+		if (var == var_ptr) {
 			/* we still need to bump up the counter, since non-refs will
 			 * be counted separately by unserializer */
 			ZVAL_LONG(&var_no, -1);
@@ -812,7 +821,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	ZVAL_UNDEF(&var_already);
 
 	if (var_hash &&
-		php_add_var_hash(var_hash, Z_ISREF_P(struc)? Z_REFVAL_P(struc) : struc, &var_already TSRMLS_CC) == FAILURE) {
+		php_add_var_hash(var_hash, struc, &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
 			smart_str_appendl(buf, "R:", 2);
 			smart_str_append_long(buf, Z_LVAL(var_already));
