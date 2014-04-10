@@ -1476,7 +1476,6 @@ found:
 						zend_std_call_getter(object, member, &rv TSRMLS_CC);
 						(*guard) &= ~IN_GET;
 						if (Z_TYPE(rv) != IS_UNDEF) {
-							if (Z_REFCOUNTED(rv)) Z_ADDREF(rv);
 							result = i_zend_is_true(&rv TSRMLS_CC);
 							zval_ptr_dtor(&rv);
 						} else {

@@ -1149,7 +1149,7 @@ ZEND_FUNCTION(method_exists)
 					&& memcmp(lcname->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) ? 1 : 0);
 					
 				STR_FREE(lcname);
-				STR_FREE(func->common.function_name);
+				STR_RELEASE(func->common.function_name);
 				efree(func);
 				return;
 			}
