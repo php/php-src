@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 2
 
+- mysqlnd:
+  . Added a new fetching mode to mysqlnd. (Andrey)
+
 10 Apr 2014, PHP 5.6.0 Beta 1
 
 - Core:
