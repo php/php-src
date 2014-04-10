@@ -282,6 +282,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
 
+		ZVAL_UNDEF(&key);
 		if (!php_var_unserialize(&key, p, max, NULL TSRMLS_CC)) {
 			zval_dtor(&key);
 			return 0;
