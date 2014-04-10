@@ -39,7 +39,7 @@ PHP                                                                        NEWS
     (CVE-2014-2270). (Remi)
   . Fixed bug #66946i (fileinfo: extensive backtracking in awk rule regular
     expression). (CVE-2013-7345) (Remi)
-  . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
+  . Fixed bug #66987 (Memory corruption in fileinfo ext / bigendian).
     (Remi)
 
 
