@@ -1,7 +1,3 @@
-dnl
-dnl $Id$
-dnl
-
 PHP_ARG_WITH(pdo-firebird,for Firebird support for PDO,
 [  --with-pdo-firebird[=DIR] PDO: Firebird support.  DIR is the Firebird base
                             install directory [/opt/firebird]])

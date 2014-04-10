@@ -1,7 +1,3 @@
-dnl
-dnl $Id$
-dnl
-
 PHP_ARG_WITH(interbase,for InterBase support,
 [  --with-interbase[=DIR]  Include InterBase support.  DIR is the InterBase base
                           install directory [/usr/interbase]])
