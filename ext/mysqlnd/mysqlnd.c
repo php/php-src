@@ -1111,7 +1111,8 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 						 const char * db, unsigned int db_len,
 						 unsigned int port,
 						 const char * socket_or_pipe,
-						 unsigned int mysql_flags
+						 unsigned int mysql_flags,
+						 unsigned int client_api_flags
 						 TSRMLS_DC)
 {
 	enum_func_status ret = FAIL;
@@ -1122,7 +1123,7 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 
 	if (!conn_handle) {
 		self_alloced = TRUE;
-		if (!(conn_handle = mysqlnd_init(FALSE))) {
+		if (!(conn_handle = mysqlnd_init(client_api_flags, FALSE))) {
 			/* OOM */
 			DBG_RETURN(NULL);
 		}
@@ -2570,6 +2571,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
+			unsigned int f = flags;
 			if (!conn->current_result) {
 				break;
 			}
@@ -2583,7 +2585,24 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
-			result = conn->current_result->m.store_result(conn->current_result, conn, 0 TSRMLS_CC);
+			/* overwrite */
+			if ((conn->m->get_client_api_capabilities(conn TSRMLS_CC) & MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA)) {
+				if (MYSQLND_G(fetch_data_copy)) {
+					f &= ~MYSQLND_STORE_NO_COPY;
+					f |= MYSQLND_STORE_COPY;
+				}
+			} else {
+				/* if for some reason PDO borks something */
+				if (!(f & (MYSQLND_STORE_NO_COPY | MYSQLND_STORE_COPY))) {
+					f |= MYSQLND_STORE_COPY;
+				}
+			}
+			if (!(f & (MYSQLND_STORE_NO_COPY | MYSQLND_STORE_COPY))) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Unknown fetch mode");
+				DBG_ERR("Unknown fetch mode");
+				break;				
+			}
+			result = conn->current_result->m.store_result(conn->current_result, conn, f TSRMLS_CC);
 			if (!result) {
 				conn->current_result->m.free_result(conn->current_result, TRUE TSRMLS_CC);
 			}
@@ -2890,6 +2909,32 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn
 /* }}} */
 
 
+/* {{{ mysqlnd_conn_data::negotiate_client_api_capabilities */
+static unsigned int
+MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities)(MYSQLND_CONN_DATA * const conn, const unsigned int flags TSRMLS_DC)
+{
+	unsigned int ret = 0;
+	DBG_ENTER("mysqlnd_conn_data::negotiate_client_api_capabilities");
+	if (conn) {
+		ret = conn->client_api_capabilities;
+		conn->client_api_capabilities = flags;
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::get_client_api_capabilities */
+static unsigned int
+MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_conn_data::get_client_api_capabilities");
+	DBG_RETURN(conn? conn->client_api_capabilities : 0);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_conn_data::local_tx_start */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC)
@@ -3018,7 +3063,10 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request),
 	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name),
 
-	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)
+	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d),
+
+	MYSQLND_METHOD(mysqlnd_conn_data, negotiate_client_api_capabilities),
+	MYSQLND_METHOD(mysqlnd_conn_data, get_client_api_capabilities)
 MYSQLND_CLASS_METHODS_END;
 
 
@@ -3097,11 +3145,14 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ _mysqlnd_init */
 PHPAPI MYSQLND *
-_mysqlnd_init(zend_bool persistent TSRMLS_DC)
+_mysqlnd_init(unsigned int flags, zend_bool persistent TSRMLS_DC)
 {
 	MYSQLND * ret;
 	DBG_ENTER("mysqlnd_init");
 	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_connection(persistent TSRMLS_CC);
+	if (ret && ret->data) {
+		ret->data->m->negotiate_client_api_capabilities(ret->data, flags TSRMLS_CC);
+	}
 	DBG_RETURN(ret);
 }
 /* }}} */
