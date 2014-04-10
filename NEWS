@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.0 Beta 1
+?? ??? 2014, PHP 5.6.0 Beta 2
+
+10 Apr 2014, PHP 5.6.0 Beta 1
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
