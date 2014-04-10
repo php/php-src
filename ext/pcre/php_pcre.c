@@ -577,6 +577,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 i, rc;
 	int				 subpats_order;		/* Order of subpattern matches */
 	int				 offset_capture;    /* Capture match offsets: yes/no */
+	unsigned char   *mark = NULL;       /* Target for MARK name */
+	zval            *marks = NULL;      /* Array of marks for PREG_PATTERN_ORDER */
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
@@ -619,6 +621,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	}
 	extra->match_limit = PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = PCRE_G(recursion_limit);
+#ifdef PCRE_EXTRA_MARK
+	extra->mark = &mark;
+	extra->flags |= PCRE_EXTRA_MARK;
+#endif
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
@@ -695,6 +701,14 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 													   offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 						}
+						/* Add MARK, if available */
+						if (mark) {
+							if (!marks) {
+								MAKE_STD_ZVAL(marks);
+								array_init(marks);
+							}
+							add_index_string(marks, matched - 1, (char *) mark, 1);
+						}
 						/*
 						 * If the number of captured subpatterns on this run is
 						 * less than the total possible number, pad the result
@@ -725,6 +739,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 													   offsets[(i<<1)+1] - offsets[i<<1], 1);
 							}
 						}
+						/* Add MARK, if available */
+						if (mark) {
+							add_assoc_string(result_set, "MARK", (char *) mark, 1);
+						}
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set, sizeof(zval *), NULL);
 					}
@@ -743,6 +761,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							add_next_index_stringl(subpats, (char *)stringlist[i],
 												   offsets[(i<<1)+1] - offsets[i<<1], 1);
 						}
+					}
+					/* Add MARK, if available */
+					if (mark) {
+						add_assoc_string(subpats, "MARK", (char *) mark, 1);
 					}
 				}
 
@@ -784,6 +806,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &match_sets[i], sizeof(zval *), NULL);
 		}
 		efree(match_sets);
+
+		if (marks) {
+			add_assoc_zval(subpats, "MARK", marks);
+		}
 	}
 	
 	efree(offsets);
@@ -855,7 +881,7 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static int preg_do_repl_func(zval *function, char *subject, int *offsets, char **subpat_names, int count, char **result TSRMLS_DC)
+static int preg_do_repl_func(zval *function, char *subject, int *offsets, char **subpat_names, int count, unsigned char *mark, char **result TSRMLS_DC)
 {
 	zval		*retval_ptr;		/* Function return value */
 	zval	   **args[1];			/* Argument to pass to function */
@@ -870,6 +896,9 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, char *
 			add_assoc_stringl(subpats, subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1], 1);
 		}
 		add_next_index_stringl(subpats, &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1], 1);
+	}
+	if (mark) {
+		add_assoc_string(subpats, "MARK", (char *) mark, 1);
 	}
 	args[0] = &subpats;
 
@@ -1032,6 +1061,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 					*eval_result,		/* Result of eval or custom function */
 					 walk_last;			/* Last walked character */
 	int				 rc;
+	unsigned char   *mark = NULL;       /* Target for MARK name */
 
 	if (extra == NULL) {
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
@@ -1039,6 +1069,10 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 	}
 	extra->match_limit = PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = PCRE_G(recursion_limit);
+#ifdef PCRE_EXTRA_MARK
+	extra->mark = &mark;
+	extra->flags |= PCRE_EXTRA_MARK;
+#endif
 
 	eval = pce->preg_options & PREG_REPLACE_EVAL;
 	if (is_callable_replace) {
@@ -1118,7 +1152,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 				new_len += eval_result_len;
 			} else if (is_callable_replace) {
 				/* Use custom function to get replacement string and its length. */
-				eval_result_len = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, &eval_result TSRMLS_CC);
+				eval_result_len = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark, &eval_result TSRMLS_CC);
 				new_len += eval_result_len;
 			} else { /* do regular substitution */
 				walk = replace;
@@ -1517,6 +1551,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	}
 	extra->match_limit = PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = PCRE_G(recursion_limit);
+#ifdef PCRE_EXTRA_MARK
+	extra->flags &= ~PCRE_EXTRA_MARK;
+#endif
 	
 	/* Initialize return value */
 	array_init(return_value);
@@ -1785,6 +1822,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	}
 	extra->match_limit = PCRE_G(backtrack_limit);
 	extra->match_limit_recursion = PCRE_G(recursion_limit);
+#ifdef PCRE_EXTRA_MARK
+	extra->flags &= ~PCRE_EXTRA_MARK;
+#endif
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_CAPTURECOUNT, &size_offsets);

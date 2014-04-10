@@ -731,6 +731,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size TSRMLS_CC);
+			if (toread == (size_t) -1) {
+				/* e.g. underlying read(2) returned -1 */
+				break;
+			}
 		} else {
 			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
@@ -1396,11 +1400,16 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 		p = php_stream_mmap_range(stream, php_stream_tell(stream), PHP_STREAM_MMAP_ALL, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			PHPWRITE(p, mapped);
+			do {
+				/* output functions return int, so pass in int max */
+				if (0 < (b = PHPWRITE(p, MIN(mapped - bcount, INT_MAX)))) {
+					bcount += b;
+				}
+			} while (b > 0 && mapped > bcount);
 
 			php_stream_mmap_unmap_ex(stream, mapped);
 
-			return mapped;
+			return bcount;
 		}
 	}
 

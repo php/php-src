@@ -5592,8 +5592,12 @@ PHP_FUNCTION(substr_compare)
 	}
 
 	if (ZEND_NUM_ARGS() >= 4 && len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than zero");
-		RETURN_FALSE;
+		if (len == 0) {
+			RETURN_LONG(0L);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The length must be greater than or equal to zero");
+			RETURN_FALSE;
+		}
 	}
 
 	if (offset < 0) {

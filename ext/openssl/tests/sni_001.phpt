@@ -89,7 +89,7 @@ do_http_test('https://bob.sni.velox.ch./', context('bob.sni.velox.ch'));
 echo "-- user supplied server name --\n";
 
 $context = context();
-stream_context_set_option($context, 'ssl', 'SNI_server_name', 'bob.sni.velox.ch');
+stream_context_set_option($context, 'ssl', 'peer_name', 'bob.sni.velox.ch');
 stream_context_set_option($context, 'http', 'header', b'Host: bob.sni.velox.ch');
 do_http_test('https://alice.sni.velox.ch/', $context);
 
@@ -110,7 +110,7 @@ do_ssl_test('ssl://mallory.sni.velox.ch:443', context('mallory.sni.velox.ch'));
 echo "-- raw SSL stream with user supplied sni --\n";
 
 $context = context('bob.sni.velox.ch');
-stream_context_set_option($context, 'ssl', 'SNI_server_name', 'bob.sni.velox.ch');
+stream_context_set_option($context, 'ssl', 'peer_name', 'bob.sni.velox.ch');
 
 do_ssl_test('ssl://mallory.sni.velox.ch:443', $context);
 
@@ -134,7 +134,7 @@ do_enable_crypto_test('tcp://mallory.sni.velox.ch:443', context());
 echo "-- stream_socket_enable_crypto with user supplied sni --\n";
 
 $context = context();
-stream_context_set_option($context, 'ssl', 'SNI_server_name', 'bob.sni.velox.ch');
+stream_context_set_option($context, 'ssl', 'peer_name', 'bob.sni.velox.ch');
 
 do_enable_crypto_test('tcp://mallory.sni.velox.ch:443', $context);
 
@@ -148,7 +148,7 @@ do_enable_crypto_test('tcp://mallory.sni.velox.ch:443', $context);
 echo "-- stream_socket_enable_crypto with long name --\n";
 
 $context = context();
-stream_context_set_option($context, 'ssl', 'SNI_server_name', str_repeat('a.', 500) . '.sni.velox.ch');
+stream_context_set_option($context, 'ssl', 'peer_name', str_repeat('a.', 500) . '.sni.velox.ch');
 
 do_enable_crypto_test('tcp://mallory.sni.velox.ch:443', $context);
 

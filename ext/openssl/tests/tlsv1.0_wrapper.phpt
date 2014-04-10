@@ -16,7 +16,7 @@ $serverCode = <<<'CODE'
     phpt_notify();
 
     for ($i=0; $i < 3; $i++) {
-        @stream_socket_accept($server, 1);
+        @stream_socket_accept($server, 3);
     }
 CODE;
 
@@ -29,13 +29,13 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    $client = stream_socket_client("tlsv1.0://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = stream_socket_client("tlsv1.0://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = @stream_socket_client("sslv3://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 
-    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
+    $client = @stream_socket_client("tlsv1.2://127.0.0.1:64321", $errno, $errstr, 3, $flags, $ctx);
     var_dump($client);
 CODE;
 

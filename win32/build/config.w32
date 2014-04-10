@@ -255,13 +255,11 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 // CFLAGS, LDFLAGS and BUILD_DIR are defined
 // Add compiler and link flags if PGO options are selected
 if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
-	ADD_FLAG('CFLAGS', "/GL /O2");
-	ADD_FLAG('LDFLAGS', "/LTCG:PGINSTRUMENT");
+	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 	DEFINE("PGOPGD_DIR", "$(BUILD_DIR)");
 }
 else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
-	ADD_FLAG('CFLAGS', "/GL /O2");
-	ADD_FLAG('LDFLAGS', "/LTCG:PGUPDATE");
+	ADD_FLAG("STATIC_EXT_CFLAGS", "/GL /O2");
 	DEFINE("PGOPGD_DIR", ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO));
 }
 
@@ -444,8 +442,37 @@ if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }
 
-ARG_ENABLE("static-analyze", "Enable the VC compiler static analyze", "no");
-if (PHP_STATIC_ANALYZE == "yes") {
+/* XXX add and implement clang keyword for clang analyzer */
+ARG_WITH("analyzer", "Enable static analyzer. Pass vs for Visual Studio, pvs for PVS-Studio", "no");
+if (PHP_ANALYZER == "vs") {
 	ADD_FLAG("CFLAGS", " /analyze ");
 	ADD_FLAG("CFLAGS", " /wd6308 ");
+} else if (PHP_ANALYZER == "pvs") {
+	var pvs_studio = false;
+
+	if (FSO.FileExists(PROGRAM_FILES + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
+		pvs_studio = PROGRAM_FILES + "\\PVS-Studio\\x86\\PVS-Studio.exe";
+	} else if (FSO.FileExists(PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe")) {
+		pvs_studio = PROGRAM_FILESx86 + "\\PVS-Studio\\x64\\PVS-Studio.exe";
+	}
+
+	if (!pvs_studio) {
+		WARNING("Couldn't find PVS-Studio binaries, static analyze was disabled");
+		PHP_ANALYZER = "no";
+	} else {
+		var pvscfg = FSO.CreateTextFile("PVS-Studio.conf", true);
+		DEFINE("PVS_STUDIO", pvs_studio);
+
+		pvscfg.WriteLine("exclude-path = " + VCINSTALLDIR);
+		if (FSO.FolderExists(PROGRAM_FILESx86 + "\\windows kits\\")) {
+			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILESx86 + "\\windows kits\\");
+		} else if (FSO.FolderExists(PROGRAM_FILES + "\\windows kits\\")) {
+			pvscfg.WriteLine("exclude-path = " + PROGRAM_FILES + "\\windows kits\\");
+		}
+		pvscfg.WriteLine("vcinstalldir = " + VCINSTALLDIR);
+		pvscfg.WriteLine("platform = " + (X64 ? 'x64' : 'Win32'));
+		pvscfg.WriteLine("preprocessor = visualcpp");
+		pvscfg.WriteLine("language = C");
+	}
 }
+

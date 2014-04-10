@@ -76,8 +76,8 @@ private void cvt_16(union VALUETYPE *, const struct magic *);
 private void cvt_32(union VALUETYPE *, const struct magic *);
 private void cvt_64(union VALUETYPE *, const struct magic *);
 
-/*#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) >= ((n) - (o))) */
-#define OFFSET_OOB(n, o, i)	(n < o + i)
+#define OFFSET_OOB(n, o, i)	((n) < (o) || (i) > ((n) - (o)))
+
 /*
  * softmagic - lookup one file in parsed, in-memory copy of database
  * Passed the name and FILE * of one file to be typed.
@@ -1733,10 +1733,18 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		ms->offset = soffset;
 		if (rv == 1) {
 			if ((ms->flags & (MAGIC_MIME|MAGIC_APPLE)) == 0 &&
-			    file_printf(ms, F(m->desc, "%u"), offset) == -1)
+			    file_printf(ms, m->desc, offset) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
 				return -1;
-			if (file_printf(ms, "%s", rbuf) == -1)
+			}
+			if (file_printf(ms, "%s", rbuf) == -1) {
+				if (rbuf) {
+					efree(rbuf);
+				}
 				return -1;
+			}
 		}
 		if (rbuf) {
 			efree(rbuf);

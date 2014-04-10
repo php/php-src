@@ -601,6 +601,34 @@ static sapi_post_entry php_post_entries[] = {
 ZEND_GET_MODULE(mbstring)
 #endif
 
+static char *get_internal_encoding(TSRMLS_D) {
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_input_encoding(TSRMLS_D) {
+	if (PG(input_encoding) && PG(input_encoding)[0]) {
+		return PG(input_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+static char *get_output_encoding(TSRMLS_D) {
+	if (PG(output_encoding) && PG(output_encoding)[0]) {
+		return PG(output_encoding);
+	} else if (SG(default_charset)) {
+		return SG(default_charset);
+	}
+	return "";
+}
+
+
 /* {{{ allocators */
 static void *_php_mb_allocators_malloc(unsigned int sz)
 {
@@ -1236,9 +1264,9 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 		if (MBSTRG(http_input_list)) {
 			pefree(MBSTRG(http_input_list), 1);
 		}
-		if (SUCCESS == php_mb_parse_encoding_list(PG(input_encoding), strlen(PG(input_encoding))+1, &list, &size, 1 TSRMLS_CC)) {
+		if (SUCCESS == php_mb_parse_encoding_list(get_input_encoding(TSRMLS_C), strlen(get_input_encoding(TSRMLS_C))+1, &list, &size, 1 TSRMLS_CC)) {
 			MBSTRG(http_input_list) = list;
-			MBSTRG(http_input_list_size) = 0;
+			MBSTRG(http_input_list_size) = size;
 			return SUCCESS;
 		}
 		MBSTRG(http_input_list) = NULL;
@@ -1256,6 +1284,10 @@ static PHP_INI_MH(OnUpdate_mbstring_http_input)
 	MBSTRG(http_input_list) = list;
 	MBSTRG(http_input_list_size) = size;
 
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_input is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1266,7 +1298,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	const mbfl_encoding *encoding;
 
 	if (new_value == NULL || new_value_length == 0) {
-		encoding = mbfl_name2encoding(PG(output_encoding));
+		encoding = mbfl_name2encoding(get_output_encoding(TSRMLS_C));
 		if (!encoding) {
 			MBSTRG(http_output_encoding) = &mbfl_encoding_pass;
 			MBSTRG(current_http_output_encoding) = &mbfl_encoding_pass;
@@ -1282,6 +1314,11 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output)
 	}
 	MBSTRG(http_output_encoding) = encoding;
 	MBSTRG(current_http_output_encoding) = encoding;
+
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.http_output is deprecated");
+	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1315,15 +1352,19 @@ int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, uint new_v
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
+	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+		php_error_docref("ref.mbstring" TSRMLS_CC, E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
+	}
+
 	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	}
-	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN
-			|| stage == PHP_INI_STAGE_RUNTIME) {
+
+	if (stage & (PHP_INI_STAGE_STARTUP | PHP_INI_STAGE_SHUTDOWN | PHP_INI_STAGE_RUNTIME)) {
 		if (new_value_length) {
 			return _php_mb_ini_mbstring_internal_encoding_set(new_value, new_value_length TSRMLS_CC);
 		} else {
-			return _php_mb_ini_mbstring_internal_encoding_set(PG(internal_encoding), strlen(PG(internal_encoding))+1 TSRMLS_CC);
+			return _php_mb_ini_mbstring_internal_encoding_set(get_internal_encoding(TSRMLS_C), strlen(get_internal_encoding(TSRMLS_C))+1 TSRMLS_CC);
 		}
 	} else {
 		/* the corresponding mbstring globals needs to be set according to the
