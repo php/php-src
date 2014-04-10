@@ -159,11 +159,12 @@ PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-PHPAPI void php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC) /* {{{ */
+PHPAPI zval* php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		zend_set_hash_symbol(state_val, name->val, name->len, Z_ISREF_P(state_val), 1, Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))));
+		return zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, state_val);
 	}
+	return NULL;
 }
 /* }}} */
 
@@ -924,11 +925,13 @@ PS_SERIALIZER_DECODE_FUNC(php_binary) /* {{{ */
 		}
 
 		if (has_value) {
-			ZVAL_NULL(&current);
+			ZVAL_UNDEF(&current);
 			if (php_var_unserialize(&current, (const unsigned char **) &p, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, &current, &var_hash  TSRMLS_CC);
+				zval *zv = php_set_session_var(name, &current, &var_hash  TSRMLS_CC);
+				var_replace(&var_hash, &current, zv);
+			} else {
+				zval_ptr_dtor(&current);
 			}
-			zval_ptr_dtor(&current);
 		}
 		PS_ADD_VARL(name);
 		STR_RELEASE(name);
@@ -978,7 +981,7 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 {
 	const char *p, *q;
 	const char *endptr = val + vallen;
-	zval stack, *current = NULL;
+	zval current;
 	int has_value;
 	int namelen;
 	zend_string *name;
@@ -988,7 +991,6 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 
 	p = val;
 
-	array_init(&stack);
 	while (p < endptr) {
 		zval *tmp;
 		q = p;
@@ -1013,12 +1015,12 @@ PS_SERIALIZER_DECODE_FUNC(php) /* {{{ */
 		}
 
 		if (has_value) {
-			zval dummy;
-			ZVAL_NULL(&dummy);
-			//??? hash table resize?
-			current = zend_hash_next_index_insert(Z_ARRVAL(stack), &dummy);
-			if (php_var_unserialize(current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
-				php_set_session_var(name, current, &var_hash TSRMLS_CC);
+			ZVAL_UNDEF(&current);
+			if (php_var_unserialize(&current, (const unsigned char **) &q, (const unsigned char *) endptr, &var_hash TSRMLS_CC)) {
+				zval *zv = php_set_session_var(name, &current, &var_hash TSRMLS_CC);
+				var_replace(&var_hash, &current, zv);
+			} else {
+				zval_ptr_dtor(&current);
 			}
 		}
 		PS_ADD_VARL(name);
@@ -1030,7 +1032,6 @@ skip:
 break_outer_loop:
 
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zval_ptr_dtor(&stack);
 
 	return SUCCESS;
 }
