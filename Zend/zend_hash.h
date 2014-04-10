@@ -229,7 +229,7 @@ ZEND_API zend_uint_t zend_hash_num_elements(const HashTable *ht);
 ZEND_API int zend_hash_rehash(HashTable *ht);
 ZEND_API void zend_hash_reindex(HashTable *ht, zend_bool only_integer_keys);
 
-ZEND_API void _zend_hash_splice(HashTable *ht, uint nDataSize, copy_ctor_func_t pCopyConstructor, uint offset, uint length, void **list, uint list_count, HashTable *removed ZEND_FILE_LINE_DC);
+ZEND_API void _zend_hash_splice(HashTable *ht, zend_uint_t nDataSize, copy_ctor_func_t pCopyConstructor, zend_uint_t offset, zend_size_t length, void **list, zend_size_t list_count, HashTable *removed ZEND_FILE_LINE_DC);
 #define zend_hash_splice(ht, nDataSize, pCopyConstructor, offset, length, list, list_count, removed) \
 	_zend_hash_splice(ht, nDataSize, pCopyConstructor, offset, length, list, list_count, removed ZEND_FILE_LINE_CC)
 

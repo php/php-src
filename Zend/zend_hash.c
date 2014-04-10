@@ -1294,9 +1294,9 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
  * are inserted in their place. The removed elements can be optionally collected into a hashtable.
  * This operation reindexes the hashtable, i.e. integer keys will be zero-based and sequential,
  * while string keys stay intact. The same applies to the elements inserted into the removed HT. */
-ZEND_API void _zend_hash_splice(HashTable *ht, uint nDataSize, copy_ctor_func_t pCopyConstructor, uint offset, uint length, void **list, uint list_count, HashTable *removed ZEND_FILE_LINE_DC) /* {{{ */
+ZEND_API void _zend_hash_splice(HashTable *ht, zend_uint_t nDataSize, copy_ctor_func_t pCopyConstructor, zend_uint_t offset, zend_size_t length, void **list, zend_size_t list_count, HashTable *removed ZEND_FILE_LINE_DC) /* {{{ */
 {
-	int pos;
+	zend_size_t pos;
 	Bucket *p;
 
 	IS_CONSISTENT(ht);
@@ -1332,7 +1332,7 @@ ZEND_API void _zend_hash_splice(HashTable *ht, uint nDataSize, copy_ctor_func_t 
 	}
 
 	if (list != NULL) {
-		int i;
+		zend_size_t i;
 		for (i = 0; i < list_count; i++) {
 			/* Add new element only to the global linked list, not the bucket list.
 			 * Also use key 0 for everything, as we'll reindex the hashtable anyways. */
