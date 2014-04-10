@@ -1909,15 +1909,22 @@ static PHP_FUNCTION(session_save_path)
    Return the current session id. If newid is given, the session id is replaced with newid */
 static PHP_FUNCTION(session_id)
 {
-	char *name = NULL;
+	zend_string *name = NULL;
 	int name_len, argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|S", &name) == FAILURE) {
 		return;
 	}
 
 	if (PS(id)) {
-		RETVAL_STR(STR_COPY(PS(id)));
+		//??? keep compatibility for "\0" characters
+		//??? see: ext/session/tests/session_id_error3.phpt
+		int len = strlen(PS(id)->val);
+		if (UNEXPECTED(len != PS(id)->len)) {
+			RETVAL_STR(STR_INIT(PS(id)->val, len, 0));
+		} else {
+			RETVAL_STR(STR_COPY(PS(id)));
+		}
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -1926,7 +1933,7 @@ static PHP_FUNCTION(session_id)
 		if (PS(id)) {
 			STR_RELEASE(PS(id));
 		}
-		PS(id) = STR_INIT(name, name_len, 0);
+		PS(id) = STR_COPY(name);
 	}
 }
 /* }}} */
