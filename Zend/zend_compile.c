@@ -1862,7 +1862,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic, zend_bool is_arrayof TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
@@ -1921,6 +1921,7 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 	cur_arg_info->pass_by_reference = pass_by_reference;
 	cur_arg_info->allow_null = 1;
 	cur_arg_info->is_variadic = is_variadic;
+	cur_arg_info->is_arrayof = is_arrayof;
 	cur_arg_info->class_name = NULL;
 	cur_arg_info->class_name_len = 0;
 
@@ -1934,16 +1935,20 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
 						cur_arg_info->allow_null = 1;
 					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY && Z_TYPE(initialization->u.constant) != IS_CONSTANT_ARRAY) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
+						if (cur_arg_info->is_arrayof) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array of array type hint can only be an array or NULL");
+						} else zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 					}
 				}
 			} else if (class_type->u.constant.type == IS_CALLABLE) {
 				cur_arg_info->type_hint = IS_CALLABLE;
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST || (cur_arg_info->is_arrayof && (Z_TYPE(initialization->u.constant) == IS_CONSTANT_ARRAY || Z_TYPE(initialization->u.constant) == IS_ARRAY))) {
 						cur_arg_info->allow_null = 1;
 					} else {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
+						if (cur_arg_info->is_arrayof) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array of callable type hint can only be an array or NULL");
+						} else zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
 				}
 			} else {
@@ -1955,13 +1960,19 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 				cur_arg_info->class_name = Z_STRVAL(class_type->u.constant);
 				cur_arg_info->class_name_len = Z_STRLEN(class_type->u.constant);
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST || (cur_arg_info->is_arrayof && (Z_TYPE(initialization->u.constant) == IS_CONSTANT_ARRAY || Z_TYPE(initialization->u.constant) == IS_ARRAY))) {
 						cur_arg_info->allow_null = 1;
 					} else {
-						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
+						if (cur_arg_info->is_arrayof) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with a array of class type hint can only be an array or NULL");
+						} else zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with a class type hint can only be NULL");
 					}
 				}
 			}
+		}
+	} else {
+		if (cur_arg_info->is_arrayof) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Array of type hints must specify a type");
 		}
 	}
 }
