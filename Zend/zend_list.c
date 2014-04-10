@@ -50,33 +50,40 @@ ZEND_API int _zend_list_delete(zend_resource *res TSRMLS_DC)
 	}
 }
 
+
+static void zend_resource_dtor(zend_resource *res TSRMLS_DC)
+{
+	zend_rsrc_list_dtors_entry *ld;
+	
+	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+	if (ld) {
+		switch (ld->type) {
+			case ZEND_RESOURCE_LIST_TYPE_STD:
+				if (ld->list_dtor) {
+					(ld->list_dtor)(res->ptr);
+				}
+				break;
+			case ZEND_RESOURCE_LIST_TYPE_EX:
+				if (ld->list_dtor_ex) {
+					ld->list_dtor_ex(res TSRMLS_CC);
+				}
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE()
+		}
+	} else {
+		zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+	}
+	res->ptr = NULL;
+	res->type = -1;
+}
+
+
 ZEND_API int _zend_list_close(zend_resource *res TSRMLS_DC)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		return zend_list_delete(res);
 	} else if (res->type >= 0) {
-		zend_rsrc_list_dtors_entry *ld;
-	
-		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
-		if (ld) {
-			switch (ld->type) {
-				case ZEND_RESOURCE_LIST_TYPE_STD:
-					if (ld->list_dtor) {
-						(ld->list_dtor)(res->ptr);
-					}
-					break;
-				case ZEND_RESOURCE_LIST_TYPE_EX:
-					if (ld->list_dtor_ex) {
-						ld->list_dtor_ex(res TSRMLS_CC);
-					}
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-		} else {
-			zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", res->type);
-		}
-		res->ptr = NULL;
-		res->type = -1;
+		zend_resource_dtor(res TSRMLS_CC);
 	}
 	return SUCCESS;
 }
@@ -157,27 +164,9 @@ void list_entry_destructor(zval *zv)
 	zend_resource *res = Z_RES_P(zv);
 
 	if (res->type >= 0) {
-		zend_rsrc_list_dtors_entry *ld;
 		TSRMLS_FETCH();
 	
-		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
-		if (ld) {
-			switch (ld->type) {
-				case ZEND_RESOURCE_LIST_TYPE_STD:
-					if (ld->list_dtor) {
-						(ld->list_dtor)(res->ptr);
-					}
-					break;
-				case ZEND_RESOURCE_LIST_TYPE_EX:
-					if (ld->list_dtor_ex) {
-						ld->list_dtor_ex(res TSRMLS_CC);
-					}
-					break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-		} else {
-			zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", res->type);
-		}
+		zend_resource_dtor(res TSRMLS_CC);
 	}
 	efree(res);
 }
@@ -188,23 +177,8 @@ void plist_entry_destructor(zval *zv)
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
 
-	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
-	if (ld) {
-		switch (ld->type) {
-			case ZEND_RESOURCE_LIST_TYPE_STD:
-				if (ld->plist_dtor) {
-					(ld->plist_dtor)(res->ptr);
-				}
-				break;
-			case ZEND_RESOURCE_LIST_TYPE_EX:
-				if (ld->plist_dtor_ex) {
-					ld->plist_dtor_ex(res TSRMLS_CC);
-				}
-				break;
-				EMPTY_SWITCH_DEFAULT_CASE()
-		}
-	} else {
-		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)", res->type);
+	if (res->type >= 0) {
+		zend_resource_dtor(res TSRMLS_CC);
 	}
 	free(res);
 }
@@ -223,6 +197,23 @@ int zend_init_rsrc_list(TSRMLS_D)
 int zend_init_rsrc_plist(TSRMLS_D)
 {
 	return zend_hash_init_ex(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1, 0);
+}
+
+
+static int zend_close_rsrc(zval *zv TSRMLS_DC)
+{
+	zend_resource *res = Z_PTR_P(zv);
+
+	if (res->type >= 0) {
+		zend_resource_dtor(res TSRMLS_CC);
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+
+void zend_close_rsrc_list(HashTable *ht TSRMLS_DC)
+{
+	zend_hash_reverse_apply(ht, zend_close_rsrc TSRMLS_CC);
 }
 
 
