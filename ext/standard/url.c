@@ -266,8 +266,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		p = s;
 	} else {
 		/* memrchr is a GNU specific extension
-		   Emulate for wide compatibility */
-		for(p = e; *p != ':' && p >= s; p--);
+		   Emulate for wide compatability */
+		for(p = e; p >= s && *p != ':'; p--);
 	}
 
 	if (p >= s && *p == ':') {

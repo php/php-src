@@ -468,22 +468,10 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.object_ptr = object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
-		if (ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(ctor_args);
-			Bucket *p;
-
-			fci.param_count = 0;
-			fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci.params[fci.param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci.param_count = 0;
-			fci.params = NULL;
-		}
+		fci.params = NULL;
 		fci.no_separation = 1;
+
+		zend_fcall_info_args(&fci, ctor_args TSRMLS_CC);
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;

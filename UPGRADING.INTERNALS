@@ -8,6 +8,7 @@ UPGRADE NOTES - PHP X.Y
   c. POST data handling
   d. Arginfo changes
   e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
+  f. empty strings are interned
 
 2. Build system changes
   a. Unix build system changes
@@ -114,6 +115,13 @@ UPGRADE NOTES - PHP X.Y
   e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
 
   Memory allocation is now managed by emalloc/efree instead of malloc/free.
+
+  f. empty strings are interned
+
+  String created using STR_EMPTY_ALLOC() are now interned.
+  convert_to_string use STR_EMPTY_ALLOC() for zval when IS_NULL.
+  STR_FREE() shoud be prefered as efree on such strings can raise memory corruption.
+
 
 ========================
 2. Build system changes

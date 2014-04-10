@@ -57,6 +57,8 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, long reason, zval *error TSRMLS_DC) {
+	zval_dtor(error);
+	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
 	switch (reason) {
 		case UCNV_UNASSIGNED:
@@ -66,7 +68,16 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 			php_converter_object *objval = (php_converter_object*)CONV_GET(zobj);
 			char chars[127];
 			int8_t chars_len = sizeof(chars);
-			UErrorCode error = U_ZERO_ERROR;
+			UErrorCode uerror = U_ZERO_ERROR;
+            if(!objval->src) {
+                php_converter_throw_failure(objval, U_INVALID_STATE_ERROR TSRMLS_CC, "Source Converter has not been initialized yet");
+				chars[0] = 0x1A;
+				chars[1] = 0;
+				chars_len = 1;
+                ZVAL_LONG(error, U_INVALID_STATE_ERROR);
+                RETVAL_STRINGL(chars, chars_len, 1);
+                return;
+            }
 
 			/* Yes, this is fairly wasteful at first glance,
 			 * but considering that the alternative is to store
@@ -75,18 +86,17 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 			 * I'd rather take the CPU hit here, than waste time
 			 * storing a value I'm unlikely to use.
 			 */
-			ucnv_getSubstChars(objval->src, chars, &chars_len, &error);
-			if (U_FAILURE(error)) {
-				THROW_UFAILURE(objval, "ucnv_getSubstChars", error);
+			ucnv_getSubstChars(objval->src, chars, &chars_len, &uerror);
+			if (U_FAILURE(uerror)) {
+				THROW_UFAILURE(objval, "ucnv_getSubstChars", uerror);
 				chars[0] = 0x1A;
 				chars[1] = 0;
 				chars_len = 1;
+            	ZVAL_LONG(error, uerror);
 			}
 			RETVAL_STRINGL(chars, chars_len, 1);
 		}
 	}
-	zval_dtor(error);
-	ZVAL_LONG(error, U_ZERO_ERROR);
 }
 /* }}} */
 

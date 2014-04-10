@@ -19,7 +19,7 @@ if ($f = fopen("/proc/meminfo","r")) {
 }
 
 if (empty($enough_free_ram)) {
-	die("need +3G free RAM");
+	die("skip need +3G free RAM");
 }
 ?>
 --FILE--

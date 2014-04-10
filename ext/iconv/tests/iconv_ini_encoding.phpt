@@ -3,6 +3,7 @@ Encoding INI test
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip mbstring not available'); ?>
 --INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 default_charset=ISO-8859-1
 internal_encoding=
 input_encoding=
