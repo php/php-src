@@ -13,7 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #65715 (php5embed.lib isn't provided anymore). (Anatol).
 
 - Fileinfo:
-  . Fixed bug #66987i (Memory corruption in fileinfo ext / bigendian).
+  . Fixed bug #66987 (Memory corruption in fileinfo ext / bigendian).
     (Remi)
 
 - mysqli:
