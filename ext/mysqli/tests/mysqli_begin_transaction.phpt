@@ -120,16 +120,7 @@ if (!have_innodb($link))
 ?>
 --EXPECTF--
 NULL
-<<<<<<< HEAD
-[017] [1792] %s
-[018] invalid_flag = %d [%d]%A
 
 Warning: mysqli_begin_transaction(): Invalid value for parameter flags (-1) in %s on line %d
 [019] [%d]%A
-[020] [%d]%A
-=======
-
-Warning: mysqli_begin_transaction(): Invalid value for parameter flags (-1) in %s on line %d
-[019] [%d]%A
->>>>>>> 3204ad5858a5abc50b11b8527d22c82eb07a80cc
 done!
