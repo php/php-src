@@ -351,9 +351,11 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
 		int i;
 		new->kind = ast->kind;
+		new->children = ast->children;
 		for (i = 0; i < ast->children; i++) {
 			(&new->u.child)[i] = zend_ast_copy((&ast->u.child)[i]);
 		}
+		return new;
 	}
 	return zend_ast_create_dynamic(ast->kind);
 }
