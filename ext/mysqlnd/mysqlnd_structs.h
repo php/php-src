@@ -1024,7 +1024,7 @@ struct st_mysqlnd_result_metadata
 	enum mysqlnd_buffered_type type;				\
 	void				* unused1;					\
 	void				* unused2;					\
-	void				* unused3;					\
+	void				* unused3
 
 	
 struct st_mysqlnd_buffered_result_parent
