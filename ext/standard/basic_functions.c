@@ -4031,7 +4031,9 @@ PHP_FUNCTION(getenv)
 	ptr = sapi_getenv(str, str_len TSRMLS_CC);
 	if (ptr) {
 //???		RETURN_STRING(ptr, 0);
-		RETURN_STRING(ptr);
+		RETVAL_STRING(ptr);
+		efree(ptr);
+		return;
 	}
 #ifdef PHP_WIN32
 	{
