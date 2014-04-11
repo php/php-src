@@ -254,7 +254,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			*result = *ast->u.val;
 			zval_copy_ctor(result);
 			if (IS_CONSTANT_TYPE(Z_TYPE_P(result))) {
-				zval_update_constant_ex(&result, (void *) 1, scope TSRMLS_CC);
+				zval_update_constant_ex(&result, 1, scope TSRMLS_CC);
 			}
 			break;
 		case ZEND_BOOL_AND:

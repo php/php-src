@@ -456,10 +456,9 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_P(p) |= IS_VISITED_CONSTANT
 
-ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_ex(zval **pp, zend_bool inline_change, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
 	zval *p = *pp;
-	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
 	zval const_value;
 	char *colon;
 
@@ -560,21 +559,21 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 }
 /* }}} */
 
-ZEND_API int zval_update_constant_inline_change(zval **pp, void *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, (void*)1, scope TSRMLS_CC);
+	return zval_update_constant_ex(pp, 1, scope TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zval_update_constant_no_inline_change(zval **pp, void *scope TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant_no_inline_change(zval **pp, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, (void*)0, scope TSRMLS_CC);
+	return zval_update_constant_ex(pp, 0, scope TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC) /* {{{ */
+ZEND_API int zval_update_constant(zval **pp, zend_bool inline_change TSRMLS_DC) /* {{{ */
 {
-	return zval_update_constant_ex(pp, arg, NULL TSRMLS_CC);
+	return zval_update_constant_ex(pp, inline_change, NULL TSRMLS_CC);
 }
 /* }}} */
 
