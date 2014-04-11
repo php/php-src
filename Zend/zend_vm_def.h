@@ -3152,14 +3152,17 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 
 	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else if (OP1_TYPE == IS_VAR &&
+		EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, varptr);
+		varptr = &tmp;
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 	} else {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-		if (OP1_TYPE != IS_VAR ||	
-		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
-			Z_ADDREF_P(varptr);
-		}
+		Z_ADDREF_P(varptr);
 	}
+
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	FREE_OP1_VAR_PTR();
