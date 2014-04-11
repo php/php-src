@@ -63,6 +63,27 @@ ZEND_API zend_ast* zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *o
 	return ast;
 }
 
+ZEND_API zend_ast* zend_ast_create_dynamic(uint kind)
+{
+	zend_ast *ast = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * 3); /* use 4 children as deafult */
+	ast->kind = kind;
+	ast->children = 0;
+	return ast;
+}
+
+ZEND_API void zend_ast_dynamic_add(zend_ast **ast, zend_ast *op)
+{
+	if ((*ast)->children >= 4 && (*ast)->children == ((*ast)->children & -(*ast)->children)) {
+		*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast*) * ((*ast)->children * 2 + 1));
+	}
+	(&(*ast)->u.child)[(*ast)->children++] = op;
+}
+
+ZEND_API void zend_ast_dynamic_shrink(zend_ast **ast)
+{
+	*ast = erealloc(*ast, sizeof(zend_ast) + sizeof(zend_ast*) * ((*ast)->children - 1));
+}
+
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
 {
 	int i;
@@ -284,6 +305,23 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			sub_function(result, &op1, &op2 TSRMLS_CC);
 			zval_dtor(&op2);
 			break;
+		case ZEND_INIT_ARRAY:
+			INIT_PZVAL(result);
+			array_init(result);
+			{
+				int i;
+				zend_bool has_key;
+				for (i = 0; i < ast->children; i+=2) {
+					zval *expr;
+					MAKE_STD_ZVAL(expr);
+					if ((has_key = !!(&ast->u.child)[i])) {
+						zend_ast_evaluate(&op1, (&ast->u.child)[i], scope TSRMLS_CC);
+					}
+					zend_ast_evaluate(expr, (&ast->u.child)[i+1], scope TSRMLS_CC);
+					zend_do_add_static_array_element(result, has_key?&op1:NULL, expr);
+				}
+			}
+			break;
 		default:
 			zend_error(E_ERROR, "Unsupported constant expression");
 	}
@@ -297,26 +335,15 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
 		zend_ast *copy = zend_ast_create_constant(ast->u.val);
 		zval_copy_ctor(copy->u.val);
 		return copy;
-	} else {
-		switch (ast->children) {
-			case 1:
-				return zend_ast_create_unary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]));
-			case 2:
-				return zend_ast_create_binary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]),
-					zend_ast_copy((&ast->u.child)[1]));
-			case 3:
-				return zend_ast_create_ternary(
-					ast->kind,
-					zend_ast_copy((&ast->u.child)[0]),
-					zend_ast_copy((&ast->u.child)[1]),
-					zend_ast_copy((&ast->u.child)[2]));
+	} else if (ast->children) {
+		zend_ast *new = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
+		int i;
+		new->kind = ast->kind;
+		for (i = 0; i < ast->children; i++) {
+			(&new->u.child)[i] = zend_ast_copy((&ast->u.child)[i]);
 		}
 	}
-	return NULL;
+	return zend_ast_create_dynamic(ast->kind);
 }
 
 ZEND_API void zend_ast_destroy(zend_ast *ast)
