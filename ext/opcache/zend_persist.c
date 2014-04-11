@@ -174,7 +174,9 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 			zend_accel_store_interned_string(z->value.str.val, z->value.str.len + 1);
 			break;
 		case IS_ARRAY:
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
 		case IS_CONSTANT_ARRAY:
+#endif
 			zend_accel_store(z->value.ht, sizeof(HashTable));
 			zend_hash_persist(z->value.ht, (zend_persist_func_t) zend_persist_zval_ptr, sizeof(zval**) TSRMLS_CC);
 			break;

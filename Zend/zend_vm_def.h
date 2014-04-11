@@ -5376,9 +5376,6 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		zval *tmp_ptr = &tmp;
 
 		ZVAL_COPY_VALUE(&tmp, val);
-		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_copy_ctor(&tmp);
-		}
 		INIT_PZVAL(&tmp);
 		zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
 		c.value = *tmp_ptr;

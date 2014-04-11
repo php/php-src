@@ -3463,7 +3463,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
 			case IS_ARRAY:
-			case IS_CONSTANT_ARRAY:
 			case IS_OBJECT:
 			case IS_RESOURCE:
 				zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");

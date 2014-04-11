@@ -160,7 +160,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 
 		case IS_RESOURCE:
 		case IS_CONSTANT:
-		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		default:
 			V_VT(v) = VT_NULL;
 			break;
