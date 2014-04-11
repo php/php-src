@@ -3,6 +3,7 @@ Test session_set_save_handler() : incomplete implementation
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+session.gc_probability=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

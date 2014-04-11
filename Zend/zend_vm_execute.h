@@ -12651,14 +12651,17 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else if (IS_VAR == IS_VAR &&
+		EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, varptr);
+		varptr = &tmp;
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 	} else {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-		if (IS_VAR != IS_VAR ||
-		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
-			Z_ADDREF_P(varptr);
-		}
+		Z_ADDREF_P(varptr);
 	}
+
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
@@ -30182,14 +30185,17 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+	} else if (IS_CV == IS_VAR &&
+		EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		zval tmp;
+		ZVAL_COPY_VALUE(&tmp, varptr);
+		varptr = &tmp;
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 	} else {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
-//??? don't increment refcount of overloaded element
-		if (IS_CV != IS_VAR ||
-		    EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT)) {
-			Z_ADDREF_P(varptr);
-		}
+		Z_ADDREF_P(varptr);
 	}
+
 	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	CHECK_EXCEPTION();

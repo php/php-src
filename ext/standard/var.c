@@ -633,7 +633,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var_ptr, zval *var
 		len = id + sizeof(id) - 1 - p;
 	} else if (var_ptr != var) {
 		p = smart_str_print_long(id + sizeof(id) - 1,
-				(long) Z_REF_P(var));
+				(long) Z_REF_P(var_ptr));
 		*(--p) = 'R';
 		len = id + sizeof(id) - 1 - p;
 	} else {
