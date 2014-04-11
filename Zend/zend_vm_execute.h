@@ -3971,8 +3971,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		retval = &EX_T(opline->result.var).tmp_var;
 		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	} else {
 		/* class constant */
 		zend_class_entry *ce;
@@ -3983,8 +3981,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 				value = CACHED_PTR(opline->op2.literal->cache_slot);
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			} else if (CACHED_PTR(opline->op1.literal->cache_slot)) {
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
@@ -4002,8 +3999,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			if ((value = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, ce)) != NULL) {
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			}
 		}
 
@@ -4028,10 +4024,13 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	}
+constant_fetch_end:
+	if (Z_TYPE(EX_T(opline->result.var).tmp_var) == IS_ARRAY) {
+		zend_error_noreturn(E_ERROR, "Arrays are not allowed in constants at run-time");
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -15921,8 +15920,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		retval = &EX_T(opline->result.var).tmp_var;
 		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	} else {
 		/* class constant */
 		zend_class_entry *ce;
@@ -15933,8 +15930,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 				value = CACHED_PTR(opline->op2.literal->cache_slot);
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			} else if (CACHED_PTR(opline->op1.literal->cache_slot)) {
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
@@ -15952,8 +15948,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			if ((value = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, ce)) != NULL) {
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			}
 		}
 
@@ -15978,10 +15973,13 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	}
+constant_fetch_end:
+	if (Z_TYPE(EX_T(opline->result.var).tmp_var) == IS_ARRAY) {
+		zend_error_noreturn(E_ERROR, "Arrays are not allowed in constants at run-time");
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25534,8 +25532,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		retval = &EX_T(opline->result.var).tmp_var;
 		ZVAL_COPY_VALUE(retval, &c->value);
 		zval_copy_ctor(retval);
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	} else {
 		/* class constant */
 		zend_class_entry *ce;
@@ -25546,8 +25542,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 				value = CACHED_PTR(opline->op2.literal->cache_slot);
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			} else if (CACHED_PTR(opline->op1.literal->cache_slot)) {
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
@@ -25565,8 +25560,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			if ((value = CACHED_POLYMORPHIC_PTR(opline->op2.literal->cache_slot, ce)) != NULL) {
 				ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 				zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				goto constant_fetch_end;
 			}
 		}
 
@@ -25591,10 +25585,13 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
 	}
+constant_fetch_end:
+	if (Z_TYPE(EX_T(opline->result.var).tmp_var) == IS_ARRAY) {
+		zend_error_noreturn(E_ERROR, "Arrays are not allowed in constants at run-time");
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

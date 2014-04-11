@@ -22,11 +22,9 @@ class Test
 
 $test = new Test();
 ?>
-===DONE===
 --EXPECTF--
 array (
   1 => 'first',
   2 => 'second',
   3 => 'third',
 )
-===DONE===

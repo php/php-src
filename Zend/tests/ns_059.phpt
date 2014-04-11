@@ -1,10 +1,11 @@
 --TEST--
 059: Constant arrays
---XFAIL--
-Actually it's hard to test where the array comes from (property, constant, ...)
 --FILE--
 <?php
 const C = array();
+
+var_dump(C);
+?>
 --EXPECTF--
-Fatal error: Arrays are not allowed as constants in %sns_059.php on line 2
+Fatal error: Arrays are not allowed in constants at run-time in %sns_059.php on line 4
 
