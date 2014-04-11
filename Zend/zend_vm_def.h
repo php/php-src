@@ -2395,7 +2395,7 @@ ZEND_VM_HANDLER(109, ZEND_FETCH_CLASS, ANY, CONST|TMP|VAR|UNUSED|CV)
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_op2;
-		zval *class_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zval *class_name = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 
 		if (OP2_TYPE == IS_CONST) {
 			if (CACHED_PTR(opline->op2.literal->cache_slot)) {
