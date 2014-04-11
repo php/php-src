@@ -862,7 +862,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* try to find if we already have this link in our persistent list */
 		if ((le = zend_hash_find_ptr(&EG(persistent_list), hashed_details)) == NULL) { /* we don't */
-			zend_resource new_le;
+			zval new_le;
 
 			if (MySG(max_links) != -1 && MySG(num_links) >= MySG(max_links)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too many open links (%ld)", MySG(num_links));
@@ -920,16 +920,17 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql_options(mysql->conn, MYSQL_OPT_LOCAL_INFILE, (char *)&MySG(allow_local_infile));
 
 			/* hash it up */
-			new_le.type = le_plink;
-			new_le.ptr = mysql;
+			ZVAL_NEW_PERSISTENT_RES(&new_le, -1, mysql, le_plink);
 			
 			/* avoid bogus memleak report */
 			phashed = STR_INIT(hashed_details->val, hashed_details->len, 1);
-			if (zend_hash_update_mem(&EG(persistent_list), phashed, &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_hash_update(&EG(persistent_list), phashed, &new_le) == NULL) {
+				STR_RELEASE(phashed);
 				free(mysql);
 				STR_RELEASE(hashed_details);
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
+			STR_RELEASE(phashed);
 			MySG(num_persistent)++;
 			MySG(num_links)++;
 		} else {  /* The link is in our list of persistent connections */
@@ -970,7 +971,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_plink);
 	} else { /* non persistent */
-		zend_resource *index_ptr, new_index_ptr;
+		zend_resource *index_ptr;
+		zval new_index_ptr;
 
 		/* first we check the hash for the hashed_details key.  if it exists,
 		 * it should point us to the right offset where the actual mysql link sits.
@@ -1055,10 +1057,8 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = Z_RES_P(return_value);
-		new_index_ptr.type = le_index_ptr;
-		
-		if (zend_hash_update_mem(&EG(regular_list), hashed_details, &new_index_ptr, sizeof(zend_resource)) == NULL) {
+		ZVAL_NEW_RES(&new_index_ptr, -1, Z_RES_P(return_value), le_index_ptr);		
+		if (zend_hash_update(&EG(regular_list), hashed_details, &new_index_ptr) == NULL) {
 			zval_ptr_dtor(return_value);
 			STR_RELEASE(hashed_details);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
