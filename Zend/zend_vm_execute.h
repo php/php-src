@@ -4309,9 +4309,6 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 		zval *tmp_ptr = &tmp;
 
 		ZVAL_COPY_VALUE(&tmp, val);
-		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_copy_ctor(&tmp);
-		}
 		INIT_PZVAL(&tmp);
 		zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
 		c.value = *tmp_ptr;
