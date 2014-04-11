@@ -3868,46 +3868,19 @@ PHP_FUNCTION(mb_decode_numericentity)
 		*pp = ' ';				\
 	}						\
 
-#define APPEND_ONE_CHAR(ch) do { \
-	if (token.a > 0) { \
-		smart_str_appendc(&token, ch); \
-	} else {\
-		token.len++; \
-	} \
-} while (0)
-
-#define SEPARATE_SMART_STR(str) do {\
-	if ((str)->a == 0) { \
-		char *tmp_ptr; \
-		(str)->a = 1; \
-		while ((str)->a < (str)->len) { \
-			(str)->a <<= 1; \
-		} \
-		tmp_ptr = emalloc((str)->a + 1); \
-		memcpy(tmp_ptr, (str)->c, (str)->len); \
-		(str)->c = tmp_ptr; \
-	} \
-} while (0)
-
-static void my_smart_str_dtor(smart_str *s)
-{
-	smart_str_free(s);
-}
-
 static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t str_len)
 {
-#if 0
-	//Smart str?
 	const char *ps;
 	size_t icnt;
 	int state = 0;
 	int crlf_state = -1;
-
-	smart_str token = {0};
-	smart_str fld_name = {0}, fld_val = {0};
+	char *token;
+	size_t token_pos;
+	zend_string *fld_name, *fld_val;
 
 	ps = str;
 	icnt = str_len;
+	fld_name = fld_val = NULL;
 
 	/*
 	 *             C o n t e n t - T y p e :   t e x t / h t m l \r\n
@@ -3924,15 +3897,15 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 		switch (*ps) {
 			case ':':
 				if (crlf_state == 1) {
-					smart_str_appendc(&token, '\r');
+					token_pos++;
 				}
 
 				if (state == 0 || state == 1) {
-					fld_name = token;
+					fld_name = STR_INIT(token, token_pos, 0);
 
 					state = 2;
 				} else {
-					smart_str_appendc(&token, *ps);
+					token_pos++;
 				}
 
 				crlf_state = 0;
@@ -3947,7 +3920,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 			case '\r':
 				if (crlf_state == 1) {
-					smart_str_appendc(&token, '\r');
+					token_pos++;
 				} else {
 					crlf_state = 1;
 				}
@@ -3957,7 +3930,6 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 				if (crlf_state == -1) {
 					if (state == 3) {
 						/* continuing from the previous line */
-						SEPARATE_SMART_STR(&token);
 						state = 4;
 					} else {
 						/* simply skipping this new line */
@@ -3965,10 +3937,10 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 					}
 				} else {
 					if (crlf_state == 1) {
-						smart_str_appendc(&token, '\r');
+						token_pos++;
 					}
 					if (state == 1 || state == 3) {
-						smart_str_appendc(&token, *ps);
+						token_pos++;
 					}
 				}
 				crlf_state = 0;
@@ -3977,17 +3949,15 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 			default:
 				switch (state) {
 					case 0:
-						token.c = (char *)ps;
-						token.len = 0;
-						token.a = 0;
+						token = (char*)ps;
+						token_pos = 0;
 						state = 1;
 						break;
 					
 					case 2:
 						if (crlf_state != -1) {
-							token.c = (char *)ps;
-							token.len = 0;
-							token.a = 0;
+							token = (char*)ps;
+							token_pos = 0;
 
 							state = 3;
 							break;
@@ -3996,41 +3966,39 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 					case 3:
 						if (crlf_state == -1) {
-							fld_val = token;
+							fld_val = STR_INIT(token, token_pos, 0);
 
-							if (fld_name.c != NULL && fld_val.c != NULL) {
+							if (fld_name != NULL && fld_val != NULL) {
+								zval val;
 								/* FIXME: some locale free implementation is
 								 * really required here,,, */
-								SEPARATE_SMART_STR(&fld_name);
-								php_strtoupper(fld_name.c, fld_name.len);
+								php_strtoupper(fld_name->val, fld_name->len);
+								ZVAL_STR(&val, fld_val);
 
-								zend_hash_str_update_mem(ht, (char *)fld_name.c, fld_name.len, &fld_val, sizeof(smart_str));
+								zend_hash_update(ht, fld_name, &val);
 
-								my_smart_str_dtor(&fld_name);
+								STR_RELEASE(fld_name);
 							}
 
-							memset(&fld_name, 0, sizeof(smart_str));
-							memset(&fld_val, 0, sizeof(smart_str));
-
-							token.c = (char *)ps;
-							token.len = 0;
-							token.a = 0;
+							fld_name = fld_val = NULL;
+							token = (char*)ps;
+							token_pos = 0;
 
 							state = 1;
 						}
 						break;
 
 					case 4:
-						APPEND_ONE_CHAR(' ');
+						token_pos++;
 						state = 3;
 						break;
 				}
 
 				if (crlf_state == 1) {
-					APPEND_ONE_CHAR('\r');
+					token_pos++;
 				}
 
-				APPEND_ONE_CHAR(*ps);
+				token_pos++;
 
 				crlf_state = 0;
 				break;
@@ -4039,29 +4007,27 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 	}
 out:
 	if (state == 2) {
-		token.c = "";
-		token.len = 0;
-		token.a = 0;
+		token = "";
+		token_pos = 0;
 
 		state = 3;
 	}
 	if (state == 3) {
-		fld_val = token;
+		fld_val = STR_INIT(token, 0, 0);
 
-		if (fld_name.c != NULL && fld_val.c != NULL) {
+		if (fld_name != NULL && fld_val != NULL) {
+			zval val;
 			/* FIXME: some locale free implementation is
 			 * really required here,,, */
-			SEPARATE_SMART_STR(&fld_name);
-			php_strtoupper(fld_name.c, fld_name.len);
+			php_strtoupper(fld_name->val, fld_name->len);
+			ZVAL_STR(&val, fld_val);
 
-			zend_hash_str_update_mem(ht, (char *)fld_name.c, fld_name.len, &fld_val, sizeof(smart_str));
+			zend_hash_update(ht, fld_name, &val);
 
-			my_smart_str_dtor(&fld_name);
+			STR_RELEASE(fld_name);
 		}
 	}
 	return state;
-#endif
-	return 0;
 }
 
 PHP_FUNCTION(mb_send_mail)
@@ -4095,7 +4061,7 @@ PHP_FUNCTION(mb_send_mail)
 	const mbfl_language *lang;
 	int err = 0;
 	HashTable ht_headers;
-	smart_str *s;
+	zval *s;
 	extern void mbfl_memory_device_unput(mbfl_memory_device *device);
 	char *pp, *ee;
 
@@ -4130,7 +4096,7 @@ PHP_FUNCTION(mb_send_mail)
 		MAIL_ASCIIZ_CHECK_MBSTRING(extra_cmd->val, extra_cmd->len);
 	}
 
-	zend_hash_init(&ht_headers, 0, NULL, (dtor_func_t) my_smart_str_dtor, 0);
+	zend_hash_init(&ht_headers, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (headers != NULL) {
 		_php_mbstr_parse_mail_headers(&ht_headers, headers, headers_len);
@@ -4141,11 +4107,7 @@ PHP_FUNCTION(mb_send_mail)
 		char *param_name;
 		char *charset = NULL;
 
-		// ????Fixeme
-		//SEPARATE_SMART_STR(s);
-		smart_str_0(s);
-
-		p = strchr(s->s->val, ';');
+		p = strchr(Z_STRVAL_P(s), ';');
 
 		if (p != NULL) {
 			/* skipping the padded spaces */
@@ -4177,10 +4139,8 @@ PHP_FUNCTION(mb_send_mail)
 
 	if ((s = zend_hash_str_find_ptr(&ht_headers, "CONTENT-TRANSFER-ENCODING", sizeof("CONTENT-TRANSFER-ENCODING") - 1))) {
 		enum mbfl_no_encoding _body_enc;
-		//???? FIXMESEPARATE_SMART_STR(s);
-		smart_str_0(s);
 
-		_body_enc = mbfl_name2no_encoding(s->s->val);
+		_body_enc = mbfl_name2no_encoding(Z_STRVAL_P(s));
 		switch (_body_enc) {
 			case mbfl_no_encoding_base64:
 			case mbfl_no_encoding_7bit:
@@ -4189,7 +4149,7 @@ PHP_FUNCTION(mb_send_mail)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported transfer encoding \"%s\" - will be regarded as 8bit", s->s->val); 
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported transfer encoding \"%s\" - will be regarded as 8bit", Z_STRVAL_P(s)); 
 				body_enc =	mbfl_no_encoding_8bit;
 				break;
 		}
@@ -4349,8 +4309,6 @@ PHP_FUNCTION(mb_send_mail)
 
 #undef SKIP_LONG_HEADER_SEP_MBSTRING
 #undef MAIL_ASCIIZ_CHECK_MBSTRING
-#undef APPEND_ONE_CHAR
-#undef SEPARATE_SMART_STR
 #undef PHP_MBSTR_MAIL_MIME_HEADER1
 #undef PHP_MBSTR_MAIL_MIME_HEADER2
 #undef PHP_MBSTR_MAIL_MIME_HEADER3
