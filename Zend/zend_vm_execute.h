@@ -2947,7 +2947,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
-	zval *array_ptr, *array_ref;
+	zval *array_ptr, *array_ref, iterator;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -3043,11 +3043,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zval iterator;
-
+			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
-			ZVAL_OBJ(array_ptr, &iter->std);
-
 		} else {
 			if (IS_CONST == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 
@@ -7931,7 +7928,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr, *array_ref;
+	zval *array_ptr, *array_ref, iterator;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -8027,11 +8024,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zval iterator;
-
+			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
-			ZVAL_OBJ(array_ptr, &iter->std);
-
 		} else {
 			if (IS_TMP_VAR == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 
@@ -12960,7 +12954,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr, *array_ref;
+	zval *array_ptr, *array_ref, iterator;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -13056,11 +13050,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval_ptr_dtor_nogc(free_op1.var);
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zval iterator;
-
+			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
-			ZVAL_OBJ(array_ptr, &iter->std);
-
 		} else {
 			if (IS_VAR == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
@@ -30482,7 +30473,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
-	zval *array_ptr, *array_ref;
+	zval *array_ptr, *array_ref, iterator;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -30578,11 +30569,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zval iterator;
-
+			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
-			ZVAL_OBJ(array_ptr, &iter->std);
-
 		} else {
 			if (IS_CV == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 

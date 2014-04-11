@@ -4212,7 +4212,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr, *array_ref;
+	zval *array_ptr, *array_ref, iterator;
 	HashTable *fe_ht;
 	zend_object_iterator *iter = NULL;
 	zend_class_entry *ce = NULL;
@@ -4308,11 +4308,8 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			FREE_OP1_IF_VAR();
 		}
 		if (iter && EXPECTED(EG(exception) == NULL)) {
-			zval iterator;
-
+			ZVAL_OBJ(&iterator, &iter->std);
 			array_ptr = array_ref = &iterator;
-			ZVAL_OBJ(array_ptr, &iter->std);
-
 		} else {
 			if (OP1_TYPE == IS_VAR && opline->extended_value & ZEND_FE_RESET_VARIABLE) {
 				FREE_OP1_VAR_PTR();
