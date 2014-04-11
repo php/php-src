@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
     (Anatol)
 
+- SQLite:
+  . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
+
 - XSL:
   . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
     when loaded with "file://"). (Anatol)
