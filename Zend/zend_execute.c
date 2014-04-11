@@ -1690,6 +1690,7 @@ static zval *zend_vm_stack_push_args_with_copy(int count TSRMLS_DC) /* {{{ */
 	ZVAL_LONG(EG(argument_stack)->top, count);
 	while (count-- > 0) {
 		zval *data = --p->top;
+		ZVAL_COPY_VALUE(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + count, data);
 
 		if (UNEXPECTED(p->top == ZEND_VM_STACK_ELEMETS(p))) {
 			zend_vm_stack r = p;
@@ -1698,7 +1699,6 @@ static zval *zend_vm_stack_push_args_with_copy(int count TSRMLS_DC) /* {{{ */
 			p = p->prev;
 			efree(r);
 		}
-		ZVAL_COPY_VALUE(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + count, data);
 	}
 	return EG(argument_stack)->top++;
 }
