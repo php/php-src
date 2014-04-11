@@ -1003,7 +1003,8 @@ static_scalar_value:
 ;
 
 static_operation:
-		static_scalar_value '+' static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_ADD, $1.u.ast, $3.u.ast); }
+		static_scalar_value '[' static_scalar_value ']' { $$.u.ast = zend_ast_create_binary(ZEND_FETCH_DIM_R, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '+' static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_ADD, $1.u.ast, $3.u.ast); }
 	|	static_scalar_value '-' static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_SUB, $1.u.ast, $3.u.ast); }
 	|	static_scalar_value '*' static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_MUL, $1.u.ast, $3.u.ast); }
 	|	static_scalar_value T_POW static_scalar_value { $$.u.ast = zend_ast_create_binary(ZEND_POW, $1.u.ast, $3.u.ast); }

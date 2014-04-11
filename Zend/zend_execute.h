@@ -360,6 +360,8 @@ ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_n
 ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
+ZEND_API void zend_fetch_dimension_by_zval(zval **result, zval *container, zval *dim TSRMLS_DC);
+
 #ifdef ZEND_WIN32
 void zend_init_timeout_thread(void);
 void zend_shutdown_timeout_thread(void);
