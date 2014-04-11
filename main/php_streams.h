@@ -255,8 +255,8 @@ END_EXTERN_C()
 # define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); }
 #endif
 
-#define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
-#define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval(xstr, pzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (pzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((pzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
