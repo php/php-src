@@ -209,6 +209,7 @@ static void _free_ereg_cache(zval *zv)
 {
 	reg_cache *rc = Z_PTR_P(zv);
 	regfree(&rc->preg);
+	free(rc);
 }
 
 #undef regfree
