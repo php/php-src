@@ -24,7 +24,7 @@ echo "*** Testing str_pad() function: with large value for for 'pad_length' argu
 
 //defining '$input' argument
 $input = "Test string";
-$pad_length = PHP_INT_MAX;
+$pad_length = PHP_INT_MAX - 20 + 1; /* sizeof(zend_string) is 20, 1 character is included in zend_string structure itself */
 var_dump( str_pad($input, $pad_length) );
 
 ?>
