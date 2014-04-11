@@ -221,7 +221,7 @@ typedef struct ps_serializer_struct {
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
 
 PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC);
-PHPAPI void php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
 PHPAPI zval *php_get_session_var(zend_string *name TSRMLS_DC);
 
 PHPAPI int php_session_register_module(ps_module *);

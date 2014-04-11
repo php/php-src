@@ -194,7 +194,7 @@ spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern
 	return (spl_SplObjectStorageElement*)zend_hash_find_ptr(&intern->storage, hash);
 } /* }}} */
 
-void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *obj, zval *inf TSRMLS_DC) /* {{{ */
+spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *obj, zval *inf TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorageElement *pelement, element;
 	zend_string *hash = spl_object_storage_get_hash(intern, this, obj TSRMLS_CC);
@@ -213,7 +213,7 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *o
 			ZVAL_NULL(&pelement->inf);
 		}
 		spl_object_storage_free_hash(intern, hash);
-		return;
+		return pelement;
 	}
 
 	ZVAL_COPY(&element.obj, obj);
@@ -222,8 +222,9 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *o
 	} else {
 		ZVAL_NULL(&element.inf);
 	}
-	zend_hash_update_mem(&intern->storage, hash, &element, sizeof(spl_SplObjectStorageElement));
+	pelement = zend_hash_update_mem(&intern->storage, hash, &element, sizeof(spl_SplObjectStorageElement));
 	spl_object_storage_free_hash(intern, hash);
+	return pelement;
 } /* }}} */
 
 int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *obj TSRMLS_DC) /* {{{ */
@@ -796,7 +797,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval entry, pmembers, pcount, inf;
+	spl_SplObjectStorageElement *element;
 	long count;
+	HashPosition pos;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
@@ -838,6 +841,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		if(*p != 'O' && *p != 'C' && *p != 'r') {
 			goto outexcept;
 		}
+		/* sore reference to allow cross-references between different elements */
 		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash TSRMLS_CC)) {
 			goto outexcept;
 		}
@@ -869,7 +873,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 				var_push_dtor(&var_hash, &pelement->obj);
 			}
 		} 
-		spl_object_storage_attach(intern, getThis(), &entry, &inf TSRMLS_CC);
+		element = spl_object_storage_attach(intern, getThis(), &entry, &inf TSRMLS_CC);
+		var_replace(&var_hash, &entry, &element->obj);
+		var_replace(&var_hash, &inf, &element->inf);
 		zval_ptr_dtor(&entry);
 		zval_ptr_dtor(&inf);
 	}

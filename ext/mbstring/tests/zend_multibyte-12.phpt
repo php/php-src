@@ -1,6 +1,8 @@
 --TEST--
 zend multibyte (12)
 --SKIPIF--
+--INI--
+zend.multibyte=On
 --FILE--
 <?php
 declare(encoding="ISO-8859-15");

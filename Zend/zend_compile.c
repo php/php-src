@@ -251,7 +251,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(declare_stack));
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
-	zend_llist_destroy(&CG(open_files));
 	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
 }
@@ -6864,12 +6863,16 @@ zend_bool zend_is_auto_global(zend_string *name TSRMLS_DC) /* {{{ */
 int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global auto_global;
+	int retval;
 
 	auto_global.name = zend_new_interned_string(name TSRMLS_CC);
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
 
-	return zend_hash_add_mem(CG(auto_globals), name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
+	retval = zend_hash_add_mem(CG(auto_globals), name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
+
+	STR_RELEASE(auto_global.name);
+	return retval;
 }
 /* }}} */
 

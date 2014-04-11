@@ -78,6 +78,8 @@ void zend_interned_strings_dtor(TSRMLS_D)
 	zend_hash_destroy(&CG(interned_strings));
 //???	free(CG(interned_strings).arData);
 //???	free(CG(interned_strings).arHash);
+#else
+	free(CG(empty_string));
 #endif
 }
 

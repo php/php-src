@@ -697,6 +697,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 		value = &tmp;
 	} else if (value_type == IS_CONST) {
 		ZVAL_DUP(&tmp, value);
+		value = &tmp;
 	} else if (Z_REFCOUNTED_P(value)) {
 		Z_ADDREF_P(value);
 	}
@@ -1107,6 +1108,7 @@ fetch_from_array:
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (type != BP_VAR_UNSET && UNEXPECTED(Z_STRLEN_P(container) == 0)) {
 convert_to_array:
+			zval_dtor(container);
 			array_init(container);
 			goto fetch_from_array;
 		}
