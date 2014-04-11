@@ -775,7 +775,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 		op_array = persistent_compile_file(&handle, ZEND_INCLUDE TSRMLS_CC);
 	} zend_catch {
 		EG(current_execute_data) = orig_execute_data;
-		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s" TSRMLS_CC, handle.filename);
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
 	} zend_end_try();
 
 	if(op_array != NULL) {
