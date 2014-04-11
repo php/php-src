@@ -174,11 +174,29 @@ void list_entry_destructor(zval *zv)
 void plist_entry_destructor(zval *zv)
 {
 	zend_resource *res = Z_RES_P(zv);
-	zend_rsrc_list_dtors_entry *ld;
-	TSRMLS_FETCH();
 
 	if (res->type >= 0) {
-		zend_resource_dtor(res TSRMLS_CC);
+		zend_rsrc_list_dtors_entry *ld;
+		TSRMLS_FETCH();
+	
+		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
+		if (ld) {
+			switch (ld->type) {
+				case ZEND_RESOURCE_LIST_TYPE_STD:
+					if (ld->plist_dtor) {
+						(ld->plist_dtor)(res->ptr);
+					}
+					break;
+				case ZEND_RESOURCE_LIST_TYPE_EX:
+					if (ld->plist_dtor_ex) {
+						ld->plist_dtor_ex(res TSRMLS_CC);
+					}
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE()
+			}
+		} else {
+			zend_error(E_WARNING,"Unknown list entry type (%d)", res->type);
+		}
 	}
 	free(res);
 }
