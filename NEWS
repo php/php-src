@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 2
 
+- Core:
+  . Fixed bug #66015 (Unexpected array indexing in class's static property). (Bob)
+
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
