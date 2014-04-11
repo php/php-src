@@ -1024,7 +1024,13 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 	call_user_call->num_args = 0;
 	call_user_call->scope = ce;
 	call_user_call->fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
-	call_user_call->function_name = STR_COPY(method_name);
+	//??? keep compatibility for "\0" characters
+	//??? see: Zend/tests/bug46238.phpt
+	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+		call_user_call->function_name = STR_INIT(method_name->val, strlen(method_name->val), 0);
+	} else {
+		call_user_call->function_name = STR_COPY(method_name);
+	}
 
 	return (union _zend_function *)call_user_call;
 }
@@ -1157,7 +1163,13 @@ static inline union _zend_function *zend_get_user_callstatic_function(zend_class
 	callstatic_user_call->num_args = 0;
 	callstatic_user_call->scope    = ce;
 	callstatic_user_call->fn_flags = ZEND_ACC_STATIC | ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER;
-	callstatic_user_call->function_name = STR_COPY(method_name);
+	//??? keep compatibility for "\0" characters
+	//??? see: Zend/tests/bug46238.phpt
+	if (UNEXPECTED(strlen(method_name->val) != method_name->len)) {
+		callstatic_user_call->function_name = STR_INIT(method_name->val, strlen(method_name->val), 0);
+	} else {
+		callstatic_user_call->function_name = STR_COPY(method_name);
+	}
 
 	return (zend_function *)callstatic_user_call;
 }
