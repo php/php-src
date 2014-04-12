@@ -593,7 +593,7 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 		Z_ADDREF_P(arr);
 		Z_ADDREF_P(argc);
 		zend_hash_update(&EG(symbol_table), "argv", sizeof("argv"), &arr, sizeof(zval *), NULL);
-		zend_hash_add(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
+		zend_hash_update(&EG(symbol_table), "argc", sizeof("argc"), &argc, sizeof(zval *), NULL);
 	} 
 	if (track_vars_array) {
 		Z_ADDREF_P(arr);
