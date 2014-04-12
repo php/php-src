@@ -289,6 +289,9 @@ PHPDBG_COMMAND(exec) /* {{{ */
 						PHPDBG_G(exec) = res;
 						PHPDBG_G(exec_len) = res_len;
 
+						*SG(request_info).argv = PHPDBG_G(exec);
+						php_hash_environment(TSRMLS_C);
+
 						phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 					} else {
 						phpdbg_notice("Execution context not changed");
@@ -578,6 +581,29 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		/* reset hit counters */
 		phpdbg_reset_breakpoints(TSRMLS_C);
+
+		if (param->type != EMPTY_PARAM) {
+			char **argv = emalloc(5 * sizeof(char *));
+			int argc = 0;
+			int i;
+			char *argv_str = strtok(input->string, " ");
+			while (argv_str) {
+				if (argc >= 4 && argc == (argc & -argc)) {
+					argv = erealloc(argv, (argc * 2 + 1) * sizeof(char *));
+				}
+				argv[++argc] = argv_str;
+				argv_str = strtok(0, " ");
+				argv[argc] = estrdup(argv[argc]);
+			}
+			argv[0] = SG(request_info).argv[0];
+			for (i = SG(request_info).argc; --i;) {
+				efree(SG(request_info).argv[i]);
+			}
+			efree(SG(request_info).argv);
+			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
+			SG(request_info).argc = argc;
+			php_hash_environment(TSRMLS_C);
+		}
 
 		zend_try {
 			php_output_activate(TSRMLS_C);
