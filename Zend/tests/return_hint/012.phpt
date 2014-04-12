@@ -5,7 +5,7 @@ Basic return hints callable and closures
 class foo {
 	public function bar() : callable {
 		$test = "one";
-		return function() use($test) : ?array {
+		return function() use($test) : array {
 			return array($test);
 		};
 	}

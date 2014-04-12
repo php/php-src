@@ -9,4 +9,4 @@ function test1() : array {
 test1()
 ?>
 --EXPECTF--
-Fatal error: the function test1 was expected to return array and returned string in %s on line %d
+Fatal error: the function test1 was expected to return an array and returned a string in %s on line %d

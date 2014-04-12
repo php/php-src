@@ -16,5 +16,6 @@ $qux = new qux();
 $qux->foo();
 ?>
 --EXPECTF--
-Fatal error: the function foo was expected to return foo and returned baz in %s on line %d
+Catchable fatal error: the function qux::foo was expected to return an object of class foo and returned an object of class baz in %s on line %d
+
 

@@ -102,6 +102,63 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
+ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *returned, const char *message TSRMLS_DC) {
+	char *scope = NULL;
+	char *expected = NULL;
+	char *got = NULL;
+	
+	if (function->common.scope) {
+		zend_spprintf(&scope, 0, "%s::%s", 
+			ZEND_FN_SCOPE_NAME(function),
+			function->common.function_name);
+	} else scope = estrdup(function->common.function_name);
+	
+	if (function->common.return_hint.type == IS_OBJECT) {
+		zend_spprintf(&expected, 0, "an object of class %s", function->common.return_hint.class_name);
+	} else switch (function->common.return_hint.type) {
+		case IS_ARRAY: {
+			zend_spprintf(&expected, 0, "an array");
+		} break;
+
+		default:
+			zend_spprintf(&expected, 0, "a %s", zend_get_type_by_const(function->common.return_hint.type));
+	}
+	
+	if (message) {
+		zend_error(type, "the function %s was expected to return %s, %s", scope, expected, message);
+		efree(scope);
+		efree(expected);	
+		return;
+	}
+
+	if (!returned) {
+		got = "nothing";
+	} else {
+		if (Z_TYPE_P(returned) == IS_OBJECT) {
+			zend_spprintf(&got, 0, "an object of class %s", Z_OBJCE_P(returned)->name);
+		} else switch (Z_TYPE_P(returned)) {
+			case IS_NULL:
+				got = estrdup("null");
+			break;
+
+			case IS_LONG:
+			case IS_ARRAY: {
+				zend_spprintf(&got, 0, "an %s", zend_zval_type_name(returned));
+			} break;
+			
+			default:
+				zend_spprintf(&got, 0, "a %s", zend_zval_type_name(returned));
+		}
+	}
+
+	zend_error(type, "the function %s was expected to return %s and returned %s", scope, expected, got);
+
+	efree(scope);
+	efree(expected);
+	if (returned)
+		efree(got);	
+}
+
 static void zend_push_function_call_entry(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
 	zend_function_call_entry fcall = { fbc };
@@ -1863,10 +1920,9 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ */
-void zend_do_function_return_hint(const znode *return_hint, zend_bool allow_null TSRMLS_DC) {
+void zend_do_function_return_hint(const znode *return_hint TSRMLS_DC) {
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
-		CG(active_op_array)->return_hint.allow_null = allow_null;
 		
 		if (return_hint->op_type == IS_CONST) {
 			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
@@ -2830,18 +2886,17 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	start_op_number = get_next_op_number(CG(active_op_array));
 
-	if (CG(active_op_array)->return_hint.used && expr) {
-		if (expr->op_type == IS_UNUSED && !CG(active_op_array)->return_hint.allow_null) {
-			zend_error(E_COMPILE_ERROR, "return hint error in %s", CG(active_op_array)->function_name);
-		} else {
-			if (expr->op_type == IS_CONST) {
-				if (Z_TYPE(expr->u.constant) & ~IS_CONSTANT_TYPE_MASK != CG(active_op_array)->return_hint.type) {
-					zend_error(E_COMPILE_ERROR, "return type mismatch");
-				}
+	if (CG(active_op_array)->return_hint.used &&
+		!(CG(active_op_array)->fn_flags & ZEND_ACC_ABSTRACT) && 
+		!(CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_HINT)) {
+		if (!expr || expr->op_type == IS_UNUSED) {
+			zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)CG(active_op_array), NULL, NULL TSRMLS_CC);
+		} else if (expr && expr->op_type == IS_CONST) {
+			if ((Z_TYPE(expr->u.constant) & ~IS_CONSTANT_TYPE_MASK) != CG(active_op_array)->return_hint.type) {
+				zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)CG(active_op_array), &expr->u.constant, NULL TSRMLS_CC);
 			}
-			
-			/* work out if we can do anything else */
 		}
+		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_RETURN_HINT;
 	}
 
 #ifdef ZTS
@@ -3562,10 +3617,6 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 		*(offset++) = ' ';
 		*(offset++) = ':';
 		*(offset++) = ' ';
-		
-		if (fptr->common.return_hint.allow_null) {
-			*(offset++) = '?';
-		}
 		
 		switch (fptr->common.return_hint.type) {
 			case IS_OBJECT:

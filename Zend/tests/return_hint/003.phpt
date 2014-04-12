@@ -1,13 +1,10 @@
 --TEST--
-Basic return hints at execution allowing null
+Basic return hints at compilation (constant scalar)
 --FILE--
 <?php
-function test1() : ?array {
-	return null;
+function test1() : array {
+	return 1;
 }
-
-var_dump(test1());
 ?>
---EXPECT--
-NULL
-
+--EXPECTF--
+Fatal error: the function test1 was expected to return an array and returned an integer in %s on line %d

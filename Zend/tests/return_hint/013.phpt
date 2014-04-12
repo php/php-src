@@ -15,5 +15,5 @@ $baz = new foo();
 var_dump($func=$baz->bar(), $func());
 ?>
 --EXPECTF--
-Fatal error: the function %s was expected to return array and returned null in %s on line %d
+Fatal error: the function %s was expected to return an array and returned null in %s on line %d
 

@@ -2851,48 +2851,32 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	if (EX(function_state).function->common.return_hint.used) {
 		zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
 
-		if (!retval_ptr || (!return_hint->allow_null && Z_TYPE_P(retval_ptr) == IS_NULL)) {
-			zend_error(E_ERROR,
-				"the function %s was expected to return %s and returned null", 
-				EX(function_state).function->common.function_name, 
-				(return_hint->type == IS_OBJECT) ? 
-					return_hint->class_name : zend_get_type_by_const(return_hint->type));
-		} else if (retval_ptr && (Z_TYPE_P(retval_ptr) != IS_NULL || !return_hint->allow_null)){
+		if (!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL) {
+			zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+		} else if (retval_ptr){
 			switch (return_hint->type) {
 				case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
-					zend_error(E_ERROR,
-						"the function %s was expected to return array and returned %s", 
-						EX(function_state).function->common.function_name, 
-						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 				} break;
 				
 				case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT || 
 					!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
-					zend_error(E_ERROR,
-						"the function %s was expected to return callable and returned %s", 
-						EX(function_state).function->common.function_name, 
-						zend_get_type_by_const(Z_TYPE_P(retval_ptr)));
+					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 				} break;
 				
 				case IS_OBJECT: {
 					zend_class_entry **ce = NULL;
 					
 					if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
-						zend_error(E_ERROR,
-							"the function %s was expected to return %s and returned %s", 
-							EX(function_state).function->common.function_name, return_hint->class_name, zend_zval_type_name(retval_ptr));
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 					}
 					
 					if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
-						zend_error(E_ERROR,
-							"the function %s was expected to return %s, the class could not be found", 
-							EX(function_state).function->common.function_name, return_hint->class_name);
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
 					}
 					
 					if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
-						zend_error(E_ERROR,
-							"the function %s was expected to return %s and returned %s", 
-							EX(function_state).function->common.function_name, return_hint->class_name, Z_OBJCE_P(retval_ptr)->name);
+						zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 					}
 				}
 			}

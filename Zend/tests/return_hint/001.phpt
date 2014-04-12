@@ -5,6 +5,6 @@ Basic return hints at compilation
 function test1() : array {
 
 }
-/* this is bad ... */
 ?>
---EXPECT--
+--EXPECTF--
+Fatal error: the function test1 was expected to return an array and returned nothing in %s on line %d

@@ -216,6 +216,8 @@ typedef struct _zend_try_catch_element {
 
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
+/* function has return hint */
+#define ZEND_ACC_HAS_RETURN_HINT        0x20000000
 
 char *zend_visibility_string(zend_uint fn_flags);
 
@@ -268,7 +270,6 @@ typedef struct _zend_return_hint {
 	zend_uchar type;
 	const char *class_name;
 	zend_uint class_name_len;
-	zend_bool allow_null;
 	zend_bool used;
 } zend_return_hint;
 
@@ -460,6 +461,7 @@ ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename TS
 ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
+ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *returned, const char *message TSRMLS_DC);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
 void zend_resolve_function_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC);
@@ -526,7 +528,7 @@ void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRM
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_function_return_hint(const znode *return_hint, zend_bool allow_null TSRMLS_DC);
+void zend_do_function_return_hint(const znode *return_hint TSRMLS_DC);
 void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);

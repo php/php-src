@@ -418,8 +418,7 @@ function_return_type:
 
 function_return_hint:
 		/* empty */                 { $$.op_type = IS_UNUSED; }
-	|  ':' function_return_type     { zend_do_function_return_hint(&$2, 0 TSRMLS_CC); }
-	|  ':' '?' function_return_type { zend_do_function_return_hint(&$3, 1 TSRMLS_CC); }
+	|  ':' function_return_type     { zend_do_function_return_hint(&$2 TSRMLS_CC); }
 ;
 
 unticked_function_declaration_statement:
