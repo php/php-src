@@ -29,14 +29,7 @@
 /**
  * Printer Forward Declarations
  */
-PHPDBG_BREAK(file);
-PHPDBG_BREAK(func);
-PHPDBG_BREAK(method);
-PHPDBG_BREAK(address);
 PHPDBG_BREAK(at);
-PHPDBG_BREAK(op);
-PHPDBG_BREAK(on);
-PHPDBG_BREAK(lineno);
 PHPDBG_BREAK(del);
 
 extern const phpdbg_command_t phpdbg_break_commands[];

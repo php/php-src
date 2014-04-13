@@ -13,6 +13,10 @@ class phpdbg {
     }
 }
 
+function mine() {
+	var_dump(func_get_args());
+}
+
 function test($x, $y = 0) {
 	$var = $x + 1;
 	$var += 2;

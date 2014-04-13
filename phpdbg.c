@@ -145,6 +145,7 @@ static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 		function TSRMLS_CC);
 } /* }}} */
 
+
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
@@ -273,28 +274,7 @@ static PHP_FUNCTION(phpdbg_break)
 		}
 
 		phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
-
-		switch (type) {
-			case METHOD_PARAM:
-				phpdbg_do_break_method(&param, NULL TSRMLS_CC);
-				break;
-
-			case FILE_PARAM:
-				phpdbg_do_break_file(&param, NULL TSRMLS_CC);
-				break;
-
-			case NUMERIC_PARAM:
-				phpdbg_do_break_lineno(&param, NULL TSRMLS_CC);
-				break;
-
-			case STR_PARAM:
-				phpdbg_do_break_func(&param, NULL TSRMLS_CC);
-				break;
-
-			default: zend_error(
-							 E_WARNING, "unrecognized parameter type %ld", type);
-		}
-
+		phpdbg_do_break(&param TSRMLS_CC);
 		phpdbg_clear_param(&param TSRMLS_CC);
 
 	} else if (EG(current_execute_data) && EG(active_op_array)) {
@@ -1203,7 +1183,16 @@ phpdbg_main:
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
-		php_request_startup(TSRMLS_C);
+		if (php_request_startup(TSRMLS_C) == SUCCESS) {;
+			int i;
+		
+			SG(request_info).argc = argc - php_optind + 1;		
+			SG(request_info).argv = emalloc(SG(request_info).argc * sizeof(char *));
+			for (i = SG(request_info).argc; --i;) {
+				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
+			}
+			SG(request_info).argv[i] = exec ? estrndup(exec, exec_len) : estrdup("");
+		}
 		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1238,8 +1227,7 @@ phpdbg_main:
 		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 
 		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(
-					exec TSRMLS_CC);
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
 			free(exec);
@@ -1287,7 +1275,7 @@ phpdbg_main:
 
 		if (run) {
 			/* no need to try{}, run does it ... */
-			PHPDBG_COMMAND_HANDLER(run)(NULL, NULL TSRMLS_CC);
+			PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
 			if (run > 1) {
 				/* if -r is on the command line more than once just quit */
 				goto phpdbg_out;
@@ -1359,6 +1347,16 @@ phpdbg_out:
 	}
 phpdbg_out:
 #endif
+	
+		{
+			int i;
+			/* free argv */
+			for (i = SG(request_info).argc; --i;) {
+				efree(SG(request_info).argv[i]);
+			}
+			efree(SG(request_info).argv);
+		}
+
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
 		zend_hash_clean(CG(auto_globals));

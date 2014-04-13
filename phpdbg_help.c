@@ -208,13 +208,13 @@ PHPDBG_COMMAND(help) /* {{{ */
 	phpdbg_command_t const *cmd;
 	int n;
 
-	if (param->type == EMPTY_PARAM) {
+	if (!param || param->type == EMPTY_PARAM) {
 		pretty_print(get_help("overview!" TSRMLS_CC) TSRMLS_CC);
 		return SUCCESS;
 	}
 
-	if (param->type == STR_PARAM) {
-	    n = get_command( param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
+	if (param && param->type == STR_PARAM) {
+	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
 
 		if (n==1) {
 			summary_print(cmd TSRMLS_CC);
@@ -240,7 +240,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 
 			if (n>0) {
 				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
-					return cmd->handler(param, NULL TSRMLS_CC);
+					return cmd->handler(param TSRMLS_CC);
 				} else {
 					pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
 					return SUCCESS;
@@ -248,8 +248,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 			}
 		}
 	}
- 
-	phpdbg_error("No help can be found for the subject \"%s\"", param->str);
+
 	return FAILURE;
 
 } /* }}} */
@@ -328,23 +327,23 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
-"  **clean**    clean the execution environment" CR
 "  **run**      attempt execution" CR
-"  **eval**     evaluate some code" CR
 "  **step**     Enable or disable per opcode stepping mode" CR
 "  **next**     continue execution" CR
 "  **until**    continue execution up to the given location" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
-"  **clear**    clear one or all breakpoints" CR CR
+"  **ev**       evaluate some code" CR
+"  **clear**    clear one or all breakpoints" CR
+"  **clean**    clean the execution environment" CR CR
 
 "**Miscellaneous**" CR
 "  **quiet**    silence some output" CR
 "  **set**      set the phpdbg configuration" CR
 "  **source**   execute a phpdbginit script" CR
 "  **register** register a phpdbginit function as a command alias" CR
-"  **shell**    shell a command" CR
+"  **sh**       shell a command" CR
 "  **quit**     exit phpdbg" CR CR
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
@@ -379,7 +378,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
-"  **-V**                          Print version number" CR CR
+"  **-V**                          Print version number" CR
+"  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
+"argument after it" CR CR
 
 "**Remote Console Mode**" CR CR
 
@@ -399,7 +400,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "overridden on the command line using the **-i** switch (see **help options** for a more "
 "details)." CR CR
 
-"Debugger scripts can also be executed using the **script** command." CR CR
+"Debugger scripts can also be executed using the **source** command." CR CR
 
 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
 "code. " CR CR 
@@ -416,7 +417,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"syntax", CR
-"All **phpdbg** commands are case sensitive.  Commands start with a keyword, and some (**break**, "
+"Commands start with a keyword, and some (**break**, "
 "**info**, **set**, **print** and **list**) may include a subcommand keyword.  All keywords are "
 "lower case but also have a single letter alias that may be used as an alternative to typing in the"
 "keyword in full.  Note some aliases are uppercase, and that keywords cannot be abbreviated other "
@@ -431,7 +432,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     *  **method#op**    a valid **Class::methodName** follow by # and an integer" CR
 "     *  **string**       a general string" CR
 "     *  **function**     a valid **Function name**" CR
-"     *  **File-line**    a valid **filename** follow by : and an integer" CR CR
+"     *  **file:line**    a valid **filename** follow by : and an integer" CR CR
 
 "In some cases the type of the argument enables the second keyword to be omitted." CR CR
 
@@ -444,27 +445,18 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     $P q" CR
 "     Quit the debugger" CR CR
 
-"     $P eval $total[2]" CR
-"     $P E $total[2]" CR
+"     $P ev $total[2]" CR
 "     Evaluate and print the variable $total[2] in the current stack frame" CR
 "    " CR
-"     $P break lineno 200" CR
+"     $P break 200" CR
 "     $P b my_source.php:200" CR
 "     Break at line 200 in the current source and in file **my_source.php**. " CR CR
 
-"     $P b A ClassX::get_args if $arg[0] == \"fred\"" CR
-"     $P b d 3" CR
+"     $P b @ ClassX::get_args if $arg[0] == \"fred\"" CR
+"     $P b ~ 3" CR
 "     Break at ClassX::get_args() if $arg[0] == \"fred\" and delete breakpoint 3" CR CR
 
 "**Examples of invalid commands**" CR
-"     $P break line 23" CR
-"     The command keyword is **lineno**; **line** is not allowed" CR CR
-
-"     $P NEXT" CR
-"     Commands are case sensitive.  The keyword is **next**" CR CR
-
-"     $P s on" CR
-"     **step** takes an integer argument **0** or **1**; on/off is not allowed." CR CR
 
 "     $P #This is a comment" CR
 "     Comments introduced by the **#** character are only allowed in **phpdbginit** script files."
@@ -501,83 +493,65 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "types:" CR CR
 
 "  **Target**   **Alias** **Purpose**" CR
-"  **file**     **F**     specify breakpoint by file:line" CR
-"  **lineno**   **l**     specify breakpoint by line of currently executing file" CR
-"  **func**     **f**     specify breakpoint by global function name" CR
-"  **method**   **m**     specify breakpoint by class::method" CR
-"  **address**  **a**     specify breakpoint by address" CR
-"  **op**       **O**     specify breakpoint by opcode" CR
-"  **on**       **o**     specify breakpoint by condition" CR
 "  **at**       **A**     specify breakpoint by location and condition" CR
 "  **del**      **d**     delete breakpoint by breakpoint identifier number" CR CR
 
-"The syntax of the target argument is dependent on the target type and in the case of address, "
-"file, func, line and method targets the target keyword or alias is optional and can be omitted." CR CR
-
-"**Break on** takes a string argument which must be a valid PHP expression." CR CR
-
-"**Break at** takes two arguments. The first is any valid target as per the file, lineno, func "
-"and address types.  The second is a valid PHP expression which will trigger the break in "
+"**Break at** takes two arguments. The first is any valid target. The second "
+"is a valid PHP expression which will trigger the break in "
 "execution, if evaluated as true in a boolean context at the specified target." CR CR
 
 "Note that breakpoints can also be disabled and re-enabled by the **set break** command." CR CR
 
 "**Examples**" CR CR
-"    $P break file test.php:100" CR
-"    $P b F test.php:100" CR
+"    $P break test.php:100" CR
 "    $P b test.php:100" CR
 "    Break execution at line 100 of test.php" CR CR
 
-"    $P break lineno 200" CR
-"    $P b l 200" CR
+"    $P break 200" CR
 "    $P b 200" CR
 "    Break execution at line 200 of the currently PHP script file" CR CR
 
-"    $P break func \\\\mynamespace\\\\my_function" CR
-"    $P b f \\\\mynamespace\\\\my_function" CR
+"    $P break \\\\mynamespace\\\\my_function" CR
 "    $P b \\\\mynamespace\\\\my_function" CR
 "    Break execution on entry to \\\\mynamespace\\\\my_function" CR CR
 
-"    $P break method classX::method" CR
-"    $P b m classX::method" CR
+"    $P break classX::method" CR
 "    $P b classX::method" CR
 "    Break execution on entry to classX::method" CR CR
 
-"    $P break address 0x7ff68f570e08" CR
-"    $P b a 0x7ff68f570e08" CR
+"    $P break 0x7ff68f570e08" CR
 "    $P b 0x7ff68f570e08" CR
 "    Break at the opline at the address 0x7ff68f570e08" CR CR
 
-"    $P break address my_function#14" CR
-"    $P b a my_function#14" CR
+"    $P break my_function#14" CR
 "    $P b my_function#14" CR
 "    Break at the opline #14 of the function my_function" CR CR
 
-"    $P break address \\\\my\\\\class::method#2" CR
-"    $P b a \\\\my\\\\class::method#2" CR
+"    $P break \\\\my\\\\class::method#2" CR
 "    $P b \\\\my\\\\class::method#2" CR
 "    Break at the opline #2 of the method \\\\my\\\\class::method" CR CR
 
-"    $P break address test.php#3" CR
-"    $P b a test.php#3" CR
-"    Break at the opline #3 of test.php" CR CR
+"    $P break test.php:#3" CR
+"    $P b test.php:#3" CR
+"    Break at opline #3 in test.php" CR CR
 
-"    $P break on $cnt > 10" CR
-"    $P b o $cnt > 10" CR
+"    $P break if $cnt > 10" CR
+"    $P b if $cnt > 10" CR
 "    Break when the condition ($cnt > 10) evaluates to true" CR CR
 
 "    $P break at phpdbg::isGreat if $opt == 'S'" CR
+"    $P break @ phpdbg::isGreat if $opt == 'S'" CR
 "    Break at any opcode in phpdbg::isGreat when the condition ($opt == 'S') is true" CR CR
 
 "    $P break at test.php:20 if !isset($x)" CR
 "    Break at every opcode on line 20 of test.php when the condition evaluates to true" CR CR
 
-"    $P break op ZEND_ADD" CR
-"    $P b O ZEND_ADD" CR
+"    $P break ZEND_ADD" CR
+"    $P b ZEND_ADD" CR
 "    Break on any occurence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
-"    $P b d 2" CR
+"    $P b ~ 2" CR
 "    Remove breakpoint 2" CR CR
 
 "Note: Conditional breaks are costly in terms of runtime overhead. Use them only when required "
@@ -618,25 +592,23 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "to compilation."
 },
 
-{"eval",
-"The **eval** command takes a string expression which it evaluates and then displays. It "
+{"ev",
+"The **ev** command takes a string expression which it evaluates and then displays. It "
 "evaluates in the context of the lowest (that is the executing) frame, unless this has first "
 "been explicitly changed by issuing a **frame** command. " CR CR
 
 "**Examples**" CR CR
-"    $P eval $variable" CR
-"    $P E $variable" CR
+"    $P ev $variable" CR
 "    Will print_r($variable) on the console, if it is defined" CR CR
 
-"    $P eval $variable = \"Hello phpdbg :)\"" CR
-"    $P E $variable = \"Hello phpdbg :)\"" CR
+"    $P ev $variable = \"Hello phpdbg :)\"" CR
 "    Will set $variable in the current scope" CR CR
 
-"Note that **eval** allows any valid PHP expression including assignments, function calls and "
+"Note that **ev** allows any valid PHP expression including assignments, function calls and "
 "other write statements.  This enables you to change the environment during execution, so care "
 "is needed here.  You can even call PHP functions which have breakpoints defined. " CR CR
 
-"Note: **eval** will always show the result, so do not prefix the code with **return**"
+"Note: **ev** will always show the result, so do not prefix the code with **return**"
 },
 
 {"exec",
@@ -809,21 +781,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "    Print the instructions for the current stack"
 },
 
-{"quiet",
-"Setting quietness on will stop the OPLINE output during execution" CR CR
-
-"**Examples**" CR CR
-"    $P quiet 1" CR
-"    $P Q 1" CR
-"    Will silence OPLINE output, while" CR CR
-
-"    $P quiet 0" CR
-"    $P Q 0" CR
-"    Will enable OPLINE output again" CR CR
-
-"Note: Quietness is disabled automatically while stepping"
-},
-
 {"register",
 //******* Needs a general explanation of the how registered functions work
 "Register any global function for use as a command in phpdbg console" CR CR
@@ -838,11 +795,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
-"or completion of the script"
+"or completion of the script. Add parameters you want to use as $argv"
 "**Examples**" CR CR
 "    $P run" CR
 "    $P r" CR
-"    Will cause execution of the context, if it is set." CR CR
+"    Will cause execution of the context, if it is set" CR CR
+"    $P r test" CR
+"    Will execute with $argv[1] == \"test\"" CR CR
 
 "Note that the execution context must be set. If not previously compiled, then the script will "
 "be compiled before execution." CR CR
@@ -856,11 +815,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "are as follows:" CR CR
 
 "   **Type**  **Alias**    **Purpose**" CR
-"   **prompt**   **p**     set the prompt  " CR
+"   **prompt**   **p**     set the prompt" CR
 "   **color**    **c**     set color  <element> <color>" CR
-"   **colors**   **C**     set colors on or off" CR
+"   **colors**   **C**     set colors <on|off>" CR
 "   **oplog**    **O**     set oplog output" CR
-"   **break**    **b**     set break **id** <on|off>" CR CR
+"   **break**    **b**     set break **id** <on|off>" CR
+"   **breaks**   **B**     set breaks <on|off>" CR
+"   **quiet**    **q**     set quiet <on|off>" CR CR
 
 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "
 "**cyan** and **black**.  All colours except **none** can be followed by an optional "
@@ -884,12 +845,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 //*********** check oplog syntax
 },
 
-{"shell",
+{"sh",
 "Direct access to shell commands saves having to switch windows/consoles" CR CR
 
 "**Examples**" CR CR
-"    $P shell ls /usr/src/php-src" CR
-"    $P - ls /usr/src/php-src" CR
+"    $P sh ls /usr/src/php-src" CR
 "    Will execute ls /usr/src/php-src, displaying the output in the console"
 //*********** what does this mean????Note: read only commands please!
 },
@@ -897,17 +857,21 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 {"source",
 "Sourcing a **phpdbginit** script during your debugging session might save some time." CR CR
 
-"The source command can also be used to export breakpoints to a phpdbginit file." CR CR
-
 "**Examples**" CR CR
 
 "    $P source /my/init" CR
-"    $P . /my/init" CR
+"    $P < /my/init" CR
 "    Will execute the phpdbginit file at /my/init" CR CR
+},
 
-"    $P source export /my/init" CR
-"    $P . export /my/init" CR
-"    Will export breakpoints to /my/init in phpdbginit file format"
+{"export",
+"Exporting breakpoints allows you to share, and or save your current debugging session" CR CR
+
+"**Examples**" CR CR
+
+"    $P export /my/exports" CR
+"    $P > /my/exports" CR
+"    Will export all breakpoints to /my/exports" CR CR
 },
 
 {"step",

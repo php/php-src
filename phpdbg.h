@@ -164,6 +164,7 @@
 #define PHPDBG_STDERR			2
 #define PHPDBG_IO_FDS 			3 /* }}} */
 
+
 /* {{{ structs */
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp[PHPDBG_BREAK_TABLES];           /* break points */
@@ -196,7 +197,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 
 	phpdbg_command_t *lcmd;                      /* last command */
-	phpdbg_param_t lparam;                       /* last param */
+	phpdbg_param_t    lparam;                    /* last param */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
