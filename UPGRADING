@@ -20,6 +20,21 @@ PHP 5.6 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  By fixing bug #66015 it is no longer possible to overwrite keys in static scalar
+  arrays. Quick example to illustrate:
+  class Test {
+       const FIRST = 1;
+       public $array = array(
+           self::FIRST => 'first',
+           'second',
+           'third'
+       );
+  }
+  Test::$array will have as expected three array keys (1, 2, 3) and no longer
+  two (0, 1). self::FIRST will no longer overwrite 'third' having key 1 then,
+  but will mark the beginning of indexing. 
+
 - JSON:
   json_decode() no longer accepts non-lowercase variants of lone JSON true,
   false or null values. For example, True or FALSE will now cause json_decode to
