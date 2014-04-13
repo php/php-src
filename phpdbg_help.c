@@ -334,7 +334,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
-"  **watch""    set a watchpoint on $variable" CR
+"  **watch**    set a watchpoint on $variable" CR
 "  **ev**       evaluate some code" CR
 "  **clear**    clear one or all breakpoints" CR
 "  **clean**    clean the execution environment" CR CR
@@ -907,7 +907,15 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 {"watch",
 "Sets watchpoints on variables as long as they are defined" CR
-"Passing no parameter to **watch**, lists all actually active watchpoints" CR
+"Passing no parameter to **watch**, lists all actually active watchpoints" CR CR
+
+"**Format for $variable**" CR CR
+"   **$var**      Variable $var" CR
+"   **$var[]**    All array elements of $var" CR
+"   **$var->**    All properties of $var" CR
+"   **$var->a**   Property $var->a" CR
+"   **$var[b]**   Array element with key b in array $var" CR CR
+
 "Subcommands of **watch**:" CR CR
 
 "   **Type**     **Alias**      **Purpose**" CR
@@ -924,11 +932,11 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "     $P watch" CR
 "     $array" CR CR
 
-"     $P w r $obj" CR
-"     Set recursive watchpoint on $obj" CR CR
+"     $P w r $obj->" CR
+"     Set recursive watchpoint on $obj->" CR CR
 
-"     $P w d $obj" CR
-"     Removed watchpoint $obj" CR CR
+"     $P w d $obj->a" CR
+"     Removed watchpoint $obj->a" CR CR
 
 "Technical note: If using this feature with a debugger, you will get many segmentation faults, each time when a memory page containing a watched address is hit." CR
 "                You then you can continue, phpdbg will remove the write protection, so that the program can continue." CR
