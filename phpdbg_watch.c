@@ -392,6 +392,8 @@ PHPDBG_WATCH(delete) /* {{{ */
 		case STR_PARAM:
 			if (phpdbg_delete_var_watchpoint(param->str, param->len TSRMLS_CC) == FAILURE) {
 				phpdbg_error("Nothing was deleted, no corresponding watchpoint found");
+			} else {
+				phpdbg_notice("Removed watchpoint %.*s", (int)param->len, param->str);
 			}
 			break;
 
@@ -409,7 +411,9 @@ PHPDBG_WATCH(recursive) /* {{{ */
 
 	switch (param->type) {
 		case STR_PARAM:
-			phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_recursive_watchpoint TSRMLS_CC);
+			if (phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_recursive_watchpoint TSRMLS_CC) != FAILURE) {
+				phpdbg_notice("Set recursive watchpoint on %.*s", (int)param->len, param->str);
+			}
 			break;
 
 		phpdbg_default_switch_case();
@@ -426,7 +430,9 @@ PHPDBG_WATCH(array) /* {{{ */
 
 	switch (param->type) {
 		case STR_PARAM:
-			phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_array_watchpoint TSRMLS_CC);
+			if (phpdbg_watchpoint_parse_input(param->str, param->len, EG(active_symbol_table), 0, phpdbg_create_array_watchpoint TSRMLS_CC) != FAILURE) {
+				phpdbg_notice("Set array watchpoint on %.*s", (int)param->len, param->str);
+			}
 			break;
 
 		phpdbg_default_switch_case();
@@ -460,7 +466,7 @@ void phpdbg_watch_HashTable_dtor(zval **zv) {
 
 int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
-		return SUCCESS;
+		return FAILURE;
 	}
 
 	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, phpdbg_create_watchpoint TSRMLS_CC);
@@ -468,7 +474,7 @@ int phpdbg_create_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 
 int phpdbg_delete_var_watchpoint(char *input, size_t len TSRMLS_DC) {
 	if (phpdbg_rebuild_symtable(TSRMLS_C) == FAILURE) {
-		return SUCCESS;
+		return FAILURE;
 	}
 
 	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, phpdbg_delete_watchpoint TSRMLS_CC);

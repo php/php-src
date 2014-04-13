@@ -1006,7 +1006,9 @@ PHPDBG_COMMAND(watch) /* {{{ */
 		phpdbg_list_watchpoints(TSRMLS_C);
 	} else switch (param->type) {
 		case STR_PARAM:
-			phpdbg_create_var_watchpoint(param->str, param->len TSRMLS_CC);
+			if (phpdbg_create_var_watchpoint(param->str, param->len TSRMLS_CC) != FAILURE) {
+				phpdbg_notice("Set watchpoint on %.*s", (int)param->len, param->str);
+			}
 			break;
 
 		phpdbg_default_switch_case();
