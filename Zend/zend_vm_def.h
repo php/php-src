@@ -4005,6 +4005,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	zval tmp, *varname;
 	HashTable *target_symbol_table;
 	zend_free_op free_op1;
+	zend_bool tmp_is_dup = 0;
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV &&
@@ -4023,8 +4024,10 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		ZVAL_DUP(&tmp, varname);
 		convert_to_string(&tmp);
 		varname = &tmp;
+		tmp_is_dup = 1;
 	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-		if (Z_REFCOUNTED_P(varname)) Z_ADDREF_P(varname);
+		ZVAL_COPY(&tmp, varname);
+		varname = &tmp;
 	}
 
 	if (OP2_TYPE != IS_UNUSED) {
@@ -4036,10 +4039,10 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			} else {
 				ce = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					if (OP1_TYPE != IS_CONST && varname == &tmp) {
+					if (OP1_TYPE != IS_CONST && tmp_is_dup) {
 						zval_dtor(&tmp);
 					} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-						zval_ptr_dtor(varname);
+						zval_ptr_dtor(&tmp);
 					}
 					FREE_OP1();
 					HANDLE_EXCEPTION();
@@ -4058,10 +4061,10 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
 	}
 
-	if (OP1_TYPE != IS_CONST && varname == &tmp) {
+	if (OP1_TYPE != IS_CONST && tmp_is_dup) {
 		zval_dtor(&tmp);
 	} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
-		zval_ptr_dtor(varname);
+		zval_ptr_dtor(&tmp);
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();
