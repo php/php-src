@@ -1,5 +1,5 @@
 --TEST--
-Bug #67064 ()
+Bug #67064 (Countable interface prevents using 2nd parameter ($mode) of count() function)
 --FILE--
 <?php
 class Counter implements Countable {
