@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
+- PDO:
+  . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
+    (Matteo)
+
 - SQLite:
   . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
 
