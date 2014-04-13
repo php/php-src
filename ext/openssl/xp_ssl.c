@@ -20,6 +20,10 @@
 
 /* $Id$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
