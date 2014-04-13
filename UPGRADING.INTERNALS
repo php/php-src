@@ -10,6 +10,8 @@ UPGRADE NOTES - PHP X.Y
   e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
   f. empty strings are interned
   g. Additional str_* APIs
+  h. Addition of zend_hash_reindex
+  i. Addition of zend_hash_splice
 
 2. Build system changes
   a. Unix build system changes
@@ -137,6 +139,48 @@ UPGRADE NOTES - PHP X.Y
       str_hash(str, len)         - INTERNED_HASH(str) if interned,
                                    zend_hash_func(str, len+1) otherwise
 
+  h. Addition of zend_hash_reindex
+
+  A zend_hash_reindex() function with the following prototype has been added:
+
+      void zend_hash_reindex(HashTable *ht, zend_bool only_integer_keys);
+
+  If only_integer_keys==0, this function will change all keys to be continuous,
+  zero-based integers in hash order. If only_integer_keys==1 the same will be
+  done only for keys that were already integers previously, while leaving
+  string keys alone.
+
+  i. Addition of zend_hash_splice
+
+  A zend_hash_splice() macro with the following prototype has been added:
+
+      void zend_hash_splice(
+          HashTable *ht, uint nDataSize, copy_ctor_func_t pCopyConstructor,
+          uint offset, uint length,
+          void **list, uint list_count, HashTable *removed
+      );
+
+  This function performs an in-place splice operation on a hashtable:
+
+  The elements between offset and offset+length are removed and the elements in
+  list[list_count] are inserted in their place. The removed elements can be
+  optionally collected into a hashtable.
+
+  This operation reindexes the hashtable, i.e. integer keys will be zero-based
+  and sequential, while string keys stay intact. The same applies to the
+  elements inserted into the removed HT.
+
+  As a side-effect of this addition the signature of the php_splice() function
+  changed:
+
+      void php_splice(
+          HashTable *ht, zend_uint offset, zend_uint length,
+          zval ***list, zend_uint list_count, HashTable *removed TSRMLS_DC
+      )
+  
+  This function now directly forwards to zend_hash_splice(), resets the
+  IAP of ht (for compatibility with the previous implementation) and resets
+  CVs if the passed hashtable is the global symbol table.
 
 ========================
 2. Build system changes
