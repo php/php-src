@@ -1120,12 +1120,13 @@ phpdbg_main:
 		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		int i;
+		
 		SG(request_info).argc = argc - php_optind + 1;		
 		SG(request_info).argv = emalloc(SG(request_info).argc * sizeof(char *));
 		for (i = SG(request_info).argc; --i;) {
 			SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 		}
-		SG(request_info).argv[php_optind - 1] = exec?exec:"";
+		SG(request_info).argv[i] = exec?exec:"";
 		
 		php_request_startup(TSRMLS_C);
 
