@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #66015 (Unexpected array indexing in class's static property). (Bob)
   . Added (constant) string/array dereferencing to static scalar expressions
     to complete the set; now possible thanks to bug #66015 being fixed. (Bob)
+  . Fixed bug #66568 (Update reflection information for unserialize() function).
+    (Ferenc)
 
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
