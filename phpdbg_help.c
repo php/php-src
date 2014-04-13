@@ -926,17 +926,20 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Note when **recursive** watchpoints are removed, watchpoints on all the children are removed too" CR CR
 
 "**Examples**" CR CR
+"     $P watch" CR
+"     List currently active watchpoints" CR CR
+
 "     $P watch $array" CR
+"     $P w $array" CR
 "     Set watchpoint on $array" CR CR
 
-"     $P watch (assuming we just have set a watchpoint on $array)" CR
-"     $array" CR CR
-
+"     $P watch recursive $obj->" CR
 "     $P w r $obj->" CR
 "     Set recursive watchpoint on $obj->" CR CR
 
+"     $P watch delete $obj->a" CR
 "     $P w d $obj->a" CR
-"     Removed watchpoint $obj->a" CR CR
+"     Remove watchpoint $obj->a" CR CR
 
 "Technical note: If using this feature with a debugger, you will get many segmentation faults, each time when a memory page containing a watched address is hit." CR
 "                You then you can continue, phpdbg will remove the write protection, so that the program can continue." CR
