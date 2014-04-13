@@ -1183,7 +1183,7 @@ phpdbg_main:
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
-		if (php_request_startup(TSRMLS_C) == SUCCESS) {;
+		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			int i;
 		
 			SG(request_info).argc = argc - php_optind + 1;		
