@@ -182,6 +182,13 @@ UPGRADE NOTES - PHP X.Y
   IAP of ht (for compatibility with the previous implementation) and resets
   CVs if the passed hashtable is the global symbol table.
 
+  j. An additional parameter is sent to Countable::count()
+
+  That parameter denotes the $mode passed to count; it shouldn't affect any
+  userland code, but any zend_parse_parameters() used with no arguments should
+  fail. Extensions which implement Countable internally, need to accept one
+  optional long as parameter.
+
 ========================
 2. Build system changes
 ========================

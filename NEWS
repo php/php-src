@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #66568 (Update reflection information for unserialize() function).
     (Ferenc)
   . Fixed bug #66660 (Composer.phar install/update fails). (Ferenc)
+  . Fixed bug #67064  (Countable interface prevents using 2nd parameter
+    ($mode) of count() function). (Bob)
 
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
