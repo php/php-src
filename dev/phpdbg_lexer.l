@@ -92,8 +92,8 @@ INPUT				[^\n]+
 	}
 	{ADDR}		{
 		phpdbg_init_param(yylval, ADDR_PARAM);
-		yylval->addr = strtoul(yytext, NULL, 10);
-		return T_ADDR; 
+		yylval->addr = strtoul(yytext, 0, 16);
+		return T_ADDR;
 	}
 	{OPCODE}	{
 		phpdbg_init_param(yylval, OP_PARAM);

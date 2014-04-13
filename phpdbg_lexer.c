@@ -943,8 +943,8 @@ YY_RULE_SETUP
 #line 93 "sapi/phpdbg/dev/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, ADDR_PARAM);
-		yylval->addr = strtoul(yytext, NULL, 10);
-		return T_ADDR; 
+		yylval->addr = strtoul(yytext, 0, 16);
+		return T_ADDR;
 	}
 	YY_BREAK
 case 12:
