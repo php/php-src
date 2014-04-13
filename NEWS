@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #67064  (Countable interface prevents using 2nd parameter
     ($mode) of count() function). (Bob)
 
+- Date:
+  . Fixed bug #66721 (__wakeup of DateTime segfaults when invalid object data is
+    supplied). (Boro Sitnikovski)
+
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
