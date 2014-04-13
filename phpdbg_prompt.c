@@ -356,7 +356,6 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 			if ((res_len != PHPDBG_G(exec_len)) || (memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
 
-<<<<<<< HEAD
 				if (PHPDBG_G(exec)) {
 					phpdbg_notice("Unsetting old execution context: %s", PHPDBG_G(exec));
 					efree(PHPDBG_G(exec));
@@ -367,21 +366,13 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				if (PHPDBG_G(ops)) {
 					phpdbg_notice("Destroying compiled opcodes");
 					phpdbg_clean(0 TSRMLS_CC);
-=======
-						*SG(request_info).argv = PHPDBG_G(exec);
-						php_hash_environment(TSRMLS_C);
-
-						phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-					} else {
-						phpdbg_notice("Execution context not changed");
-					}
-				} else {
-					phpdbg_error("Cannot use %s as execution context, not a valid file or symlink", param->str);
->>>>>>> 3db29ee43960a4e164244a55b0e2a4b23a112e49
 				}
 
 				PHPDBG_G(exec) = res;
 				PHPDBG_G(exec_len) = res_len;
+				
+				*SG(request_info).argv = PHPDBG_G(exec);
+				php_hash_environment(TSRMLS_C);
 
 				phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
 			} else {
