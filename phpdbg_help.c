@@ -923,13 +923,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "   **recursive**   **r**       Watches variable recursively and automatically adds watchpoints if some entry is added to an array/object" CR
 "   **delete**      **d**       Removes watchpoint" CR CR
 
-"Note when **recursive** watchpoints are removed, watchpoints on all the children are removed too"
+"Note when **recursive** watchpoints are removed, watchpoints on all the children are removed too" CR CR
 
 "**Examples**" CR CR
 "     $P watch $array" CR
 "     Set watchpoint on $array" CR CR
 
-"     $P watch" CR
+"     $P watch (assuming we just have set a watchpoint on $array)" CR
 "     $array" CR CR
 
 "     $P w r $obj->" CR
