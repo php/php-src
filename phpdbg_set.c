@@ -203,6 +203,8 @@ PHPDBG_SET(quiet) /* {{{ */
 				PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
 			} else PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
 		} break;
+		
+		phpdbg_default_switch_case();
 	}
 
 	return SUCCESS;

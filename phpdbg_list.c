@@ -54,7 +54,6 @@ PHPDBG_LIST(lines) /* {{{ */
 
 	switch (param->type) {
 		case NUMERIC_PARAM:
-			printf("list lines: %d\n", param->num);
 			phpdbg_list_file(phpdbg_current_file(TSRMLS_C),
 				(param->num < 0 ? 1 - param->num : param->num),
 				(param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C),
@@ -128,10 +127,8 @@ PHPDBG_LIST(class) /* {{{ */
 void phpdbg_list_file(const char *filename, long count, long offset, int highlight TSRMLS_DC) /* {{{ */
 {
 	struct stat st;
-	char *opened = NULL,
-		 *mem = NULL;
+	char *opened = NULL;
 	char buffer[8096] = {0,};
-	size_t buflen = 0L;
 	long line = 0;
 	
 	php_stream *stream = NULL;
@@ -148,18 +145,18 @@ void phpdbg_list_file(const char *filename, long count, long offset, int highlig
 		return;
 	}
 	
-	while ((buflen = php_stream_gets(stream, buffer, sizeof(buffer))) > 0L) {
+	while (php_stream_gets(stream, buffer, sizeof(buffer)) != NULL) {
 		++line;
 		
 		if (!offset || offset <= line) {
 			/* Without offset, or offset reached */
 			if (!highlight) {
-				phpdbg_write("%05u: %s", line, buffer);
+				phpdbg_write("%05ld: %s", line, buffer);
 			} else {
 				if (highlight != line) {
-					phpdbg_write(" %05u: %s", line, buffer);
+					phpdbg_write(" %05ld: %s", line, buffer);
 				} else {
-					phpdbg_write(">%05u: %s", line, buffer);
+					phpdbg_write(">%05ld: %s", line, buffer);
 				}
 			}
 		}

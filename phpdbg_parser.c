@@ -91,7 +91,6 @@ int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
     phpdbg_error("Parse Error: %s", msg);
     {
     	const phpdbg_param_t *top = stack;
-    	zend_ulong position  = 0L;
     	
     	while (top) {
     		phpdbg_param_debug(
@@ -99,6 +98,7 @@ int yyerror(phpdbg_param_t *stack, yyscan_t scanner, const char *msg) {
     		top = top->next;
     	}
     }
+    return 0;
 }
 
 /* Line 371 of yacc.c  */
