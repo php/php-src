@@ -33,6 +33,11 @@ PHP                                                                        NEWS
   . Fixed bug #53965 (<xsl:include> cannot find files with relative paths
     when loaded with "file://"). (Anatol)
 
+- Apache2 Handler SAPI:
+  . Fixed Apache log issue caused by APR's lack of support for %zu
+    (APR issue https://issues.apache.org/bugzilla/show_bug.cgi?id=56120).
+    (Jeff Trawick)
+
 ?? ??? 2014, PHP 5.5.11
 
 - Core:
