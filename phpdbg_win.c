@@ -21,26 +21,22 @@
 #include "zend.h"
 #include "phpdbg.h"
 
-phpdbg_btree phpdbg_memory_tree;
-
 int mprotect(void *addr, size_t size, int protection) {
 	int var;
 	return (int)VirtualProtect(addr, size, protection == (PROT_READ | PROT_WRITE) ? PAGE_READWRITE : PAGE_READONLY, &var);
 }
 
-size_t virtual_size(void *ptr) {
-	return (size_t)phpdbg_btree_find(&phpdbg_memory_tree, (zend_ulong)ptr)->ptr;
-}
-
 int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
 	CONTEXT *xc = xp->ContextRecord;
+
 	if(xr->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
 		TSRMLS_FETCH();
-		//printf("Watchpoint hit at: %p\n", xr->ExceptionInformation[1]);
+
 		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1] TSRMLS_CC) == SUCCESS) {
 			return EXCEPTION_CONTINUE_EXECUTION;
 		}
 	}
+
 	return EXCEPTION_CONTINUE_SEARCH;
 }
