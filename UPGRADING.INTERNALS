@@ -9,6 +9,7 @@ UPGRADE NOTES - PHP X.Y
   d. Arginfo changes
   e. tsrm_virtual_cwd.h moved to zend_virtual_cwd.h
   f. empty strings are interned
+  g. Additional str_* APIs
 
 2. Build system changes
   a. Unix build system changes
@@ -120,7 +121,21 @@ UPGRADE NOTES - PHP X.Y
 
   String created using STR_EMPTY_ALLOC() are now interned.
   convert_to_string use STR_EMPTY_ALLOC() for zval when IS_NULL.
-  STR_FREE() shoud be prefered as efree on such strings can raise memory corruption.
+  str_efree() shoud be preferred as efree() on such strings can cause memory
+  corruption.
+
+  g. Additional str_* APIs
+
+  In addition to the previously existing str_free() and str_efree() macros, the
+  following macros have been introduced to simplify dealing with potentially
+  interned strings:
+
+      str_efree_rel(str)         - efree_rel() if not interned
+      str_erealloc(str, new_len) - erealloc() or emalloc+memcpy if interned
+      str_estrndup(str, len)     - estrndup() if not interned
+      str_strndup(str, len)      - zend_strndup() if not interned
+      str_hash(str, len)         - INTERNED_HASH(str) if interned,
+                                   zend_hash_func(str, len+1) otherwise
 
 
 ========================
