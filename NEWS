@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     to complete the set; now possible thanks to bug #66015 being fixed. (Bob)
   . Fixed bug #66568 (Update reflection information for unserialize() function).
     (Ferenc)
+  . Fixed bug #66660 (Composer.phar install/update fails). (Ferenc)
 
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
