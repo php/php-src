@@ -46,7 +46,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(compile, "attempt compilation",                      'c', NULL, 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
-	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, 0),
+	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s"),
 	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0, NULL, "i"),
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
 	PHPDBG_COMMAND_D(finish,  "continue past the end of the stack",       'F', NULL, 0),
@@ -124,32 +124,32 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 						break;
 						
 						case METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s" 
-								TSRMLS_CC, next->method.class, next->method.name);
+							spprintf(&buffered, 0, "%s::%s",
+								next->method.class, next->method.name);
 							add_next_index_string(&params, buffered, 0);
 						break;
 						
 						case NUMERIC_METHOD_PARAM:
-							spprintf(&buffered, 0, "%s::%s#%ld" 
-								TSRMLS_CC, next->method.class, next->method.name, next->num);
+							spprintf(&buffered, 0, "%s::%s#%ld",
+								next->method.class, next->method.name, next->num);
 							add_next_index_string(&params, buffered, 0);
 						break;
 						
 						case NUMERIC_FUNCTION_PARAM:
-							spprintf(&buffered, 0, "%s#%ld" 
-								TSRMLS_CC, next->str, next->num);
+							spprintf(&buffered, 0, "%s#%ld",
+								next->str, next->num);
 							add_next_index_string(&params, buffered, 0);
 						break;
 							
 						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:%ld" 
-								TSRMLS_CC, next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:%ld", 
+								next->file.name, next->file.line);
 							add_next_index_string(&params, buffered, 0);
 						break;
 						
 						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#%ld" 
-								TSRMLS_CC, next->file.name, next->file.line);
+							spprintf(&buffered, 0, "%s:#%ld", 
+								next->file.name, next->file.line);
 							add_next_index_string(&params, buffered, 0);
 						break;
 						
@@ -646,12 +646,12 @@ PHPDBG_COMMAND(run) /* {{{ */
 		/* reset hit counters */
 		phpdbg_reset_breakpoints(TSRMLS_C);
 
-		if (param->type != EMPTY_PARAM) {
+		if (param && param->type != EMPTY_PARAM) {
 			char **argv = emalloc(5 * sizeof(char *));
 			int argc = 0;
 			int i;
-			char *argv_str = NULL;
-			printf("param->str: %s\n", param->str);
+			char *argv_str = strtok(param->str, " ");
+			
 			while (argv_str) {
 				if (argc >= 4 && argc == (argc & -argc)) {
 					argv = erealloc(argv, (argc * 2 + 1) * sizeof(char *));
@@ -667,6 +667,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			efree(SG(request_info).argv);
 			SG(request_info).argv = erealloc(argv, ++argc * sizeof(char *));
 			SG(request_info).argc = argc;
+			
 			php_hash_environment(TSRMLS_C);
 		}
 

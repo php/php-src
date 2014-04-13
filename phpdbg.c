@@ -1126,7 +1126,7 @@ phpdbg_main:
 		for (i = SG(request_info).argc; --i;) {
 			SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 		}
-		SG(request_info).argv[i] = exec?exec:"";
+		SG(request_info).argv[i] = exec ? estrndup(exec, exec_len) : estrdup("");
 		
 		php_request_startup(TSRMLS_C);
 
@@ -1172,8 +1172,7 @@ phpdbg_main:
 		PHPDBG_G(io)[PHPDBG_STDERR] = stderr;
 		
 		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(
-					exec TSRMLS_CC);
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
 			free(exec);
