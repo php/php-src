@@ -192,8 +192,6 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 {
 	struct stat sb;
 	
-	printf("try %s\n", init_file);
-	
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
 		if (fp) {
@@ -306,7 +304,7 @@ next_line:
 		if (free_init) {
 			free(init_file);
 		}
-	} else printf("failed to open %s\n", init_file);
+	}
 } /* }}} */
 
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC) /* {{{ */
