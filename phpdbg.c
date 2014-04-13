@@ -1119,8 +1119,16 @@ phpdbg_main:
 	phpdbg->ini_entries = ini_entries;
 		
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
-		php_request_startup(TSRMLS_C);
+		int i;
+		SG(request_info).argc = argc - php_optind + 1;		
+		SG(request_info).argv = emalloc(SG(request_info).argc * sizeof(char *));
+		for (i = SG(request_info).argc; --i;) {
+			SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
+		}
+		SG(request_info).argv[php_optind - 1] = exec?exec:"";
 		
+		php_request_startup(TSRMLS_C);
+
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
 #ifdef ZEND_SIGNALS
@@ -1268,6 +1276,12 @@ phpdbg_out:
 			goto phpdbg_interact;
 		}
 #endif
+
+		/* free argv */
+		for (i = SG(request_info).argc; --i;) {
+			efree(SG(request_info).argv[i]);
+		}
+		efree(SG(request_info).argv);
 
 #ifndef ZTS
 		/* force cleanup of auto and core globals */

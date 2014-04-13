@@ -378,7 +378,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
-"  **-V**                          Print version number" CR CR
+"  **-V**                          Print version number" CR
+"  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
+"argument after it" CR CR
 
 "**Remote Console Mode**" CR CR
 
@@ -793,11 +795,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 {"run",
 "Enter the vm, startinging execution. Execution will then continue until the next breakpoint "
-"or completion of the script"
+"or completion of the script. Add parameters you want to use as $argv"
 "**Examples**" CR CR
 "    $P run" CR
 "    $P r" CR
-"    Will cause execution of the context, if it is set." CR CR
+"    Will cause execution of the context, if it is set" CR CR
+"    $P r test" CR
+"    Will execute with $argv[1] == \"test\"" CR CR
 
 "Note that the execution context must be set. If not previously compiled, then the script will "
 "be compiled before execution." CR CR
