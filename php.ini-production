@@ -573,7 +573,7 @@ html_errors = On
 ; http://php.net/error-log
 ; Example:
 ;error_log = php_errors.log
-; Log errors to syslog (Event Log on NT, not valid in Windows 95).
+; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
 ;windows.show_crt_warning
@@ -1010,7 +1010,7 @@ mail.add_x_header = On
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
-; Log mail to syslog (Event Log on NT, not valid in Windows 95).
+; Log mail to syslog (Event Log on Windows).
 ;mail.log = syslog
 
 [SQL]
