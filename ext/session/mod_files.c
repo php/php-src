@@ -50,6 +50,12 @@
 
 #define FILE_PREFIX "sess_"
 
+#ifdef PHP_WIN32
+# ifndef O_NOFOLLOW
+#  define O_NOFOLLOW 0
+# endif
+#endif
+
 typedef struct {
 	int fd;
 	char *lastkey;
@@ -135,7 +141,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		}
 
 		data->lastkey = estrdup(key);
-                       
+
 		/* O_NOFOLLOW to prevent us from following evil symlinks */
 #ifdef O_NOFOLLOW
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
