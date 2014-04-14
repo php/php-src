@@ -2,13 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.4.29
 
+- Core:
+  . Fixed bug #65701 (copy() doesn't work when destination filename is created 
+    by tempnam()). (Boro Sitnikovski)
+  . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+
 - DOM:
   . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
     not only the subset). (Anatol)
-
-- Standard:
-  . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
-
 
 ?? ??? 2014, PHP 5.4.28
 
