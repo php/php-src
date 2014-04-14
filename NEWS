@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     UNIX sockets). (Mike)
   . Fixed bug #64604 (parse_url is inconsistent with specified port). 
     (Ingo Walz)
+  . Fixed bug #66171 (Symlinks and session handler allow open_basedir bypass).
+    (Jann Horn, Stas)
   . Fixed bug #66182 (exit in stream filter produces segfault). (Mike)
   . Fixed bug #66736 (fpassthru broken). (Mike)
   . Fixed bug #67024 (getimagesize should recognize BMP files with negative 
