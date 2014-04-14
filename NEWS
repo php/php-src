@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #67064  (Countable interface prevents using 2nd parameter
     ($mode) of count() function). (Bob)
 
+- cURL:
+  . Fixed bug #66562 (curl_exec returns differently than curl_multi_getcontent).
+    (Freek Lijten)
+
 - Date:
   . Fixed bug #66721 (__wakeup of DateTime segfaults when invalid object data is
     supplied). (Boro Sitnikovski)
