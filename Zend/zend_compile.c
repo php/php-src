@@ -7167,7 +7167,7 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 	}
 
 	if (CG(doc_comment)) {
-		efree(CG(doc_comment));
+		STR_RELEASE(CG(doc_comment));
 		CG(doc_comment) = NULL;
 	}
 }

@@ -451,8 +451,8 @@ static void zend_persist_property_info(zval *zv TSRMLS_DC)
 		} else {
 			if (!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(prop->doc_comment, prop->doc_comment);
-				STR_RELEASE(prop->doc_comment);
 			}
+			STR_RELEASE(prop->doc_comment);
 			prop->doc_comment = NULL;
 		}
 	}
