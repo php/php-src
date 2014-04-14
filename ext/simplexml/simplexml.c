@@ -1965,9 +1965,9 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 /* {{{ sxe_object_clone()
  */
 static zend_object *
-sxe_object_clone(zend_object *object TSRMLS_DC)
+sxe_object_clone(zval *object TSRMLS_DC)
 {
-	php_sxe_object *sxe = php_sxe_fetch_object(object);
+	php_sxe_object *sxe = Z_SXEOBJ_P(object);
 	php_sxe_object *clone;
 	xmlNodePtr nodep = NULL;
 	xmlDocPtr docp = NULL;
