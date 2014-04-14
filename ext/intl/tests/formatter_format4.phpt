@@ -1,9 +1,8 @@
 --TEST--
-numfmt_format() icu >= 52.1 && icu < 53.1
+numfmt_format() icu >= 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip for ICU >= 52.1'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') < 0) die('skip for ICU >= 53.1'); ?>
 --FILE--
 <?php
 
@@ -80,7 +79,7 @@ Locale is: en_US
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
-Bad formatter!
+'USD1,234,567.89'
 
 Locale is: ru_UA
 '1234567,89123457'
@@ -92,7 +91,7 @@ Locale is: ru_UA
 '1 234 567.?'
 '1 234 567'
 '#####.###'
-Bad formatter!
+'1 234 567,89 UAH'
 
 Locale is: de
 '1234567,89123457'
@@ -104,7 +103,7 @@ Locale is: de
 '1.234.567.?'
 '1.234.567'
 '#####.###'
-Bad formatter!
+'1.234.567,89 ¤¤'
 
 Locale is: fr
 '1234567,89123457'
@@ -116,7 +115,7 @@ Locale is: fr
 '1 234 567e'
 '1 234 567'
 '#####.###'
-Bad formatter!
+'1 234 567,89 ¤¤'
 
 Locale is: en_UK
 '1234567.89123457'
@@ -128,4 +127,4 @@ Locale is: en_UK
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
-Bad formatter!
+'¤¤1,234,567.89'
