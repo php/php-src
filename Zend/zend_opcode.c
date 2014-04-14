@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -489,17 +489,22 @@ static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_nu
 	zend_uint i;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].try_op > op_num) {
-			break;
-		}
-		if ((op_num >= op_array->try_catch_array[i].finally_op 
+		if ((op_num < op_array->try_catch_array[i].finally_op ||
+					op_num >= op_array->try_catch_array[i].finally_end)
+				&& (dst_num >= op_array->try_catch_array[i].finally_op &&
+					 dst_num <= op_array->try_catch_array[i].finally_end)) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
+			zend_error_noreturn(E_COMPILE_ERROR, "jump into a finally block is disallowed");
+		} else if ((op_num >= op_array->try_catch_array[i].finally_op 
 					&& op_num <= op_array->try_catch_array[i].finally_end)
 				&& (dst_num > op_array->try_catch_array[i].finally_end 
 					|| dst_num < op_array->try_catch_array[i].finally_op)) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
-			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+			zend_error_noreturn(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
 		}
 	} 
 }
@@ -541,11 +546,11 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 			while (i > 0) {
 				i--;
 				if (op_array->try_catch_array[i].finally_op &&
-				    op_num >= op_array->try_catch_array[i].try_op &&
-				    op_num < op_array->try_catch_array[i].finally_op - 1 &&
-				    (dst_num < op_array->try_catch_array[i].try_op ||
-				     dst_num > op_array->try_catch_array[i].finally_end)) {
-					
+					op_num >= op_array->try_catch_array[i].try_op &&
+					op_num < op_array->try_catch_array[i].finally_op - 1 &&
+					(dst_num < op_array->try_catch_array[i].try_op ||
+					 dst_num > op_array->try_catch_array[i].finally_end)) {
+
 					opline = get_next_op(op_array TSRMLS_CC);
 					opline->opcode = ZEND_FAST_CALL;
 					SET_UNUSED(opline->op1);
@@ -565,7 +570,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 			SET_UNUSED(opline->op2);
 			opline->op1.opline_num = start_op;
 
-		    break;
+			break;
 		}
 	}	
 }
@@ -710,7 +715,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 					if (opline->op1_type != IS_CONST || Z_TYPE_P(opline->op1.zv) != IS_NULL) {
 						CG(zend_lineno) = opline->lineno;
-						zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+						zend_error_noreturn(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
 					}
 
 					opline->opcode = ZEND_GENERATOR_RETURN;
@@ -762,6 +767,9 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_MUL:
 		case ZEND_ASSIGN_MUL:
 			return (binary_op_type) mul_function;
+			break;
+		case ZEND_POW:
+			return (binary_op_type) pow_function;
 			break;
 		case ZEND_DIV:
 		case ZEND_ASSIGN_DIV:

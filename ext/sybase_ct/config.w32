@@ -7,8 +7,11 @@ ARG_WITH("sybase-ct", "SYBASE_CT support", "no");
 if (PHP_SYBASE_CT != "no") {
 
 	if (CHECK_HEADER_ADD_INCLUDE("ctpublic.h", "CFLAGS_SYBASE_CT", PHP_PHP_BUILD + "\\sybase\\include;" + PHP_SYBASE_CT) &&
-			CHECK_LIB("libcs.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT) &&
-			CHECK_LIB("libct.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT)) {
+			(!X64 && CHECK_LIB("libsybcs.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT) &&
+			CHECK_LIB("libsybct.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT) ||
+			X64 && CHECK_LIB("libsybcs64.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT) &&
+			CHECK_LIB("libsybct64.lib", "sybase_ct", PHP_PHP_BUILD + "\\sybase\\lib;" + PHP_SYBASE_CT))
+		) {
 		EXTENSION('sybase_ct', 'php_sybase_ct.c');
 		AC_DEFINE('HAVE_SYBASE_CT', 1);
 	} else {

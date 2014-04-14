@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -360,6 +360,11 @@ ZEND_METHOD(error_exception, getSeverity)
 		}                                                               \
 	}
 
+
+#define TRACE_ARG_APPEND(vallen)								\
+	*str = (char*)erealloc(*str, *len + 1 + vallen);					\
+	memmove((*str) + *len - l_added + 1 + vallen, (*str) + *len - l_added + 1, l_added);
+
 /* }}} */
 
 static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
@@ -371,7 +376,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 	len = va_arg(args, int*);
 
 	/* the trivial way would be to do:
-	 * conver_to_string_ex(arg);
+	 * convert_to_string_ex(arg);
 	 * append it and kill the now tmp arg.
 	 * but that could cause some E_NOTICE and also damn long lines.
 	 */
@@ -394,8 +399,58 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 				l_added += 3 + 1;
 			}
 			while (--l_added) {
-				if ((*str)[*len - l_added] < 32) {
-					(*str)[*len - l_added] = '?';
+				unsigned char chr = (*str)[*len - l_added];
+				if (chr < 32 || chr == '\\' || chr > 126) {
+					(*str)[*len - l_added] = '\\';
+
+					switch (chr) {
+						case '\n':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 'n';
+							break;
+						case '\r':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 'r';
+							break;
+						case '\t':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 't';
+							break;
+						case '\f':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 'f';
+							break;
+						case '\v':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 'v';
+							break;
+#ifndef PHP_WIN32
+						case '\e':
+#else
+						case VK_ESCAPE:
+#endif
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = 'e';
+							break;
+						case '\\':
+							TRACE_ARG_APPEND(1);
+							(*str)[++(*len) - l_added] = '\\';
+							break;
+						default:
+							TRACE_ARG_APPEND(3);
+							(*str)[*len - l_added + 1] = 'x';
+							if ((chr >> 4) < 10) {
+								(*str)[*len - l_added + 2] = (chr >> 4) + '0';
+							} else {
+								(*str)[*len - l_added + 2] = (chr >> 4) + 'A' - 10;
+							}
+							if (chr % 16 < 10) {
+								(*str)[*len - l_added + 3] = chr % 16 + '0';
+							} else {
+								(*str)[*len - l_added + 3] = chr % 16 + 'A' - 10;
+							}
+							*len += 3;
+					}
 				}
 			}
 			break;
@@ -560,7 +615,7 @@ ZEND_METHOD(exception, getPrevious)
 	RETURN_ZVAL(previous, 1, 0);
 }
 
-int zend_spprintf(char **message, int max_len, char *format, ...) /* {{{ */
+int zend_spprintf(char **message, int max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	int len;
@@ -732,7 +787,7 @@ ZEND_API zend_class_entry *zend_get_error_exception(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC) /* {{{ */
+ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, const char *message, long code TSRMLS_DC) /* {{{ */
 {
 	zval *ex;
 
@@ -760,7 +815,7 @@ ZEND_API zval * zend_throw_exception(zend_class_entry *exception_ce, char *messa
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, char *format, ...) /* {{{ */
+ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long code TSRMLS_DC, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	char *message;
@@ -775,7 +830,7 @@ ZEND_API zval * zend_throw_exception_ex(zend_class_entry *exception_ce, long cod
 }
 /* }}} */
 
-ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, char *message, long code, int severity TSRMLS_DC) /* {{{ */
+ZEND_API zval * zend_throw_error_exception(zend_class_entry *exception_ce, const char *message, long code, int severity TSRMLS_DC) /* {{{ */
 {
 	zval *ex = zend_throw_exception(exception_ce, message, code TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, ex, "severity", sizeof("severity")-1, severity TSRMLS_CC);

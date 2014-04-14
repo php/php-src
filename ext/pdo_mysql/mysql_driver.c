@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@
 #include "zend_exceptions.h"
 
 #if defined(PDO_USE_MYSQLND)
-#	define pdo_mysql_init(persistent) mysqlnd_init(persistent)
+#	define pdo_mysql_init(persistent) mysqlnd_init(MYSQLND_CLIENT_NO_FLAG, persistent)
 #else
 #	define pdo_mysql_init(persistent) mysql_init(NULL)
 #endif
@@ -752,7 +752,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (mysqlnd_connect(H->server, host, dbh->username, dbh->password, password_len, dbname, dbname_len,
-						port, unix_socket, connect_opts TSRMLS_CC) == NULL) {
+						port, unix_socket, connect_opts, MYSQLND_CLIENT_NO_FLAG TSRMLS_CC) == NULL) {
 #else
 	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, connect_opts) == NULL) {
 #endif

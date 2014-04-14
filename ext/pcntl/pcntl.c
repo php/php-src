@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -499,7 +499,7 @@ PHP_MINIT_FUNCTION(pcntl)
 {
 	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
 	php_pcntl_register_errno_constants(INIT_FUNC_ARGS_PASSTHRU);
-	php_add_tick_function(pcntl_signal_dispatch);
+	php_add_tick_function(pcntl_signal_dispatch TSRMLS_CC);
 
 	return SUCCESS;
 }

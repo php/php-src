@@ -182,12 +182,12 @@ AC_TRY_RUN([
 
 main() {
 #if HAVE_CRYPT
-    char salt[30], answer[80];
-    
-    salt[0]='$'; salt[1]='6'; salt[2]='$'; salt[3]='$'; salt[4]='b'; salt[5]='a'; salt[6]='r'; salt[7]='\0';
+    char salt[21], answer[21+86];
+
+    strcpy(salt,"\$6\$rasmuslerdorf\$");
     strcpy(answer, salt);
-    strcpy(&answer[29],"$6$$QMXjqd7rHQZPQ1yHsXkQqC1FBzDiVfTHXL.LaeDAeVV.IzMaV9VU4MQ8kPuZa2SOP1A0RPm772EaFYjpEJtdu.");
-    exit (strcmp((char *)crypt("foo",salt),answer));
+    strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
+    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
@@ -211,12 +211,13 @@ AC_TRY_RUN([
 
 main() {
 #if HAVE_CRYPT
-    char salt[30], answer[80];
-    salt[0]='$'; salt[1]='5'; salt[2]='$'; salt[3]='$'; salt[4]='s'; salt[5]='a'; salt[6]='l'; salt[7]='t';  salt[8]='s'; salt[9]='t'; salt[10]='r'; salt[11]='i'; salt[12]='n'; salt[13]='g'; salt[14]='\0';    
-    strcat(salt,"");
+    char salt[21], answer[21+43];
+
+    strcpy(salt,"\$5\$rasmuslerdorf\$");
     strcpy(answer, salt);
-    strcpy(&answer[29], "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5");
-    exit (strcmp((char *)crypt("foo",salt),answer));
+    strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
+    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+
 #else
 	exit(0);
 #endif

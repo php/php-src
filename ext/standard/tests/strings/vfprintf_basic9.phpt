@@ -24,7 +24,7 @@ $arg2 = array(11,132);
 $arg3 = array(11,132,177);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_basic9.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

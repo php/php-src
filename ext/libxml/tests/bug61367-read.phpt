@@ -32,10 +32,10 @@ XML
 	}
 }
 
-var_dump(mkdir('test_bug_61367'));
-var_dump(mkdir('test_bug_61367/base'));
-var_dump(file_put_contents('test_bug_61367/bad', 'blah'));
-var_dump(chdir('test_bug_61367/base'));
+var_dump(mkdir('test_bug_61367-read'));
+var_dump(mkdir('test_bug_61367-read/base'));
+var_dump(file_put_contents('test_bug_61367-read/bad', 'blah'));
+var_dump(chdir('test_bug_61367-read/base'));
 
 stream_wrapper_register( 'exploit', 'StreamExploiter' );
 $s = fopen( 'exploit://', 'r' );
@@ -43,9 +43,9 @@ $s = fopen( 'exploit://', 'r' );
 ?>
 --CLEAN--
 <?php
-unlink('test_bug_61367/bad');
-rmdir('test_bug_61367/base');
-rmdir('test_bug_61367');
+unlink('test_bug_61367-read/bad');
+rmdir('test_bug_61367-read/base');
+rmdir('test_bug_61367-read');
 ?>
 --EXPECTF--
 bool(true)
@@ -53,7 +53,7 @@ bool(true)
 int(4)
 bool(true)
 
-Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "file:///%s/test_bug_61367/bad" in %s on line %d
+Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "file:///%s/test_bug_61367-read/bad" in %s on line %d
 
 Warning: DOMDocument::loadXML(): Failure to process entity file in Entity, line: 4 in %s on line %d
 

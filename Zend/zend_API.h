@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,16 +98,18 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_FE_END            { NULL, NULL, NULL, 0, 0 }
 
-#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, 0, pass_by_ref},
-#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, 0, pass_by_ref},
-#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_OBJECT, allow_null, pass_by_ref},
-#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, allow_null, pass_by_ref},
-#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, allow_null, pass_by_ref},
-#define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)	\
+#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_OBJECT, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) 					{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 1 },
+
+#define ZEND_BEGIN_ARG_INFO_EX(name, _unused, return_reference, required_num_args)	\
 	static const zend_arg_info name[] = {																		\
-		{ NULL, 0, NULL, required_num_args, 0, return_reference, pass_rest_by_reference},
-#define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)	\
-	ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, ZEND_RETURN_VALUE, -1)
+		{ NULL, 0, NULL, required_num_args, 0, return_reference, 0, 0 },
+#define ZEND_BEGIN_ARG_INFO(name, _unused)	\
+	ZEND_BEGIN_ARG_INFO_EX(name, 0, ZEND_RETURN_VALUE, -1)
 #define ZEND_END_ARG_INFO()		};
 
 /* Name macros */
@@ -195,6 +197,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__set = handle_propset;					\
 		class_container.__unset = handle_propunset;				\
 		class_container.__isset = handle_propisset;				\
+		class_container.__debugInfo = NULL;					\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
 		class_container.serialize = NULL;						\
@@ -264,7 +267,7 @@ ZEND_API int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, 
 
 ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 ZEND_API void zend_unregister_functions(const zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
-ZEND_API int zend_startup_module(zend_module_entry *module_entry);
+ZEND_API int zend_startup_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *module_entry TSRMLS_DC);
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC);
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -361,13 +361,7 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
 
-#if (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION < 10)
-	/* minimum PHP version ext/oci8/config.m4 accepts is 4.3.9 */
-	element_double = strtod(number, NULL);
-#else
-	/* zend_strtod was introduced in PHP 4.3.10 */
 	element_double = zend_strtod(number, NULL);
-#endif
 			
 	PHP_OCI_CALL_RETURN(errstatus, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
@@ -666,13 +660,7 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
 
-#if (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION < 10)
-	/* minimum PHP version ext/oci8/config.m4 accepts is 4.3.9 */
-	element_double = strtod(number, NULL);
-#else
-	/* zend_strtod was introduced in PHP 4.3.10 */
 	element_double = zend_strtod(number, NULL);
-#endif
 			
 	PHP_OCI_CALL_RETURN(errstatus, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 

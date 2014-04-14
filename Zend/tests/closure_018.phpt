@@ -21,8 +21,11 @@ var_dump($x = $test->test($y));
 var_dump($y, $x);
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Only variable references should be returned by reference in %sclosure_018.php on line 7
 int(4)
+
+Notice: Only variable references should be returned by reference in %sclosure_018.php on line 7
 int(16)
 int(16)
 int(16)

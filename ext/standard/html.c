@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,6 +83,18 @@
 
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
+
+/* {{{ get_default_charset
+ */
+static char *get_default_charset(TSRMLS_D) {
+	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
+		return PG(internal_encoding);
+	} else if (SG(default_charset) && SG(default_charset)[0] ) {
+		return SG(default_charset);
+	}
+	return NULL;
+}
+/* }}} */
 
 /* {{{ get_next_char
  */
@@ -1443,7 +1455,11 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		return;
 	}
 
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
+	}
 	replaced = php_escape_html_entities_ex(str, str_len, &new_len, all, (int) flags, hint_charset, double_encode TSRMLS_CC);
+
 	RETVAL_STRINGL(replaced, (int)new_len, 0);
 }
 /* }}} */
@@ -1505,7 +1521,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0;
+	int str_len, hint_charset_len;
 	size_t new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
@@ -1515,7 +1531,11 @@ PHP_FUNCTION(html_entity_decode)
 		return;
 	}
 
+	if (!hint_charset) {
+		hint_charset = get_default_charset(TSRMLS_C);
+	}
 	replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
+
 	if (replaced) {
 		RETURN_STRINGL(replaced, (int)new_len, 0);
 	}

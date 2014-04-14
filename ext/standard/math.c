@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -604,43 +604,7 @@ PHP_FUNCTION(pow)
 		return;
 	}
 
-	/* make sure we're dealing with numbers */
-	convert_scalar_to_number(zbase TSRMLS_CC);
-	convert_scalar_to_number(zexp TSRMLS_CC);
-
-	/* if both base and exponent were longs, we'll try to get a long out */
-	if (Z_TYPE_P(zbase) == IS_LONG && Z_TYPE_P(zexp) == IS_LONG && Z_LVAL_P(zexp) >= 0) {
-		long l1 = 1, l2 = Z_LVAL_P(zbase), i = Z_LVAL_P(zexp);
-		
-		if (i == 0) {
-			RETURN_LONG(1L);
-		} else if (l2 == 0) {
-			RETURN_LONG(0);
-		}
-
-		/* calculate pow(long,long) in O(log exp) operations, bail if overflow */
-		while (i >= 1) {
-			long overflow;
-			double dval = 0.0;
-
-			if (i % 2) {
-				--i;
-				ZEND_SIGNED_MULTIPLY_LONG(l1,l2,l1,dval,overflow);
-				if (overflow) RETURN_DOUBLE(dval * pow(l2,i));
-			} else {
-				i /= 2;
-				ZEND_SIGNED_MULTIPLY_LONG(l2,l2,l2,dval,overflow);
-				if (overflow) RETURN_DOUBLE((double)l1 * pow(dval,i));
-			}
-			if (i == 0) {
-				RETURN_LONG(l1);
-			}
-		}
-	}
-	convert_to_double(zbase);
-	convert_to_double(zexp);
-	
-	RETURN_DOUBLE(pow(Z_DVAL_P(zbase), Z_DVAL_P(zexp)));
+	pow_function(return_value, zbase, zexp TSRMLS_CC);
 }
 /* }}} */
 

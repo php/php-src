@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -196,7 +196,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen TSRMLS_DC) /* {{{ 
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn, string username, string passwd [, array options])
+/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -460,7 +460,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 	if (dbstmt_ce->constructor) {
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
-		zval *retval;
+		zval *retval = NULL;
 
 		fci.size = sizeof(zend_fcall_info);
 		fci.function_table = &dbstmt_ce->function_table;
@@ -468,22 +468,10 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fci.object_ptr = object;
 		fci.symbol_table = NULL;
 		fci.retval_ptr_ptr = &retval;
-		if (ctor_args) {
-			HashTable *ht = Z_ARRVAL_P(ctor_args);
-			Bucket *p;
-
-			fci.param_count = 0;
-			fci.params = safe_emalloc(sizeof(zval*), ht->nNumOfElements, 0);
-			p = ht->pListHead;
-			while (p != NULL) {
-				fci.params[fci.param_count++] = (zval**)p->pData;
-				p = p->pListNext;
-			}
-		} else {
-			fci.param_count = 0;
-			fci.params = NULL;
-		}
+		fci.params = NULL;
 		fci.no_separation = 1;
+
+		zend_fcall_info_args(&fci, ctor_args TSRMLS_CC);
 
 		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
@@ -495,7 +483,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 			zval_dtor(object);
 			ZVAL_NULL(object);
 			object = NULL; /* marks failure */
-		} else {
+		} else if (retval) {
 			zval_ptr_dtor(&retval);
 		}
 			
@@ -1226,7 +1214,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 /* }}} */
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, dsn)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, passwd)
@@ -1328,15 +1316,11 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 			} else {
 				ifunc->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				ifunc->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (funcs->arg_info[funcs->num_args].is_variadic) {
+				ifunc->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			ifunc->arg_info = NULL;

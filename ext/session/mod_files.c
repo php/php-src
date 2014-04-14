@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,6 +115,7 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
+    struct stat sbuf;
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -134,24 +135,28 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		}
 
 		data->lastkey = estrdup(key);
-
-		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
+                       
+        /* O_NOFOLLOW to prevent us from following evil symlinks */
+#ifdef O_NOFOLLOW
+        data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
+#else
+        /* Check to make sure that the opened file is not outside of allowable dirs. 
+           This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
+        if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
+            return;
+        }
+        data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
+#endif
 
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
-			/* check to make sure that the opened file is not a symlink, linking to data outside of allowable dirs */
-			if (PG(open_basedir)) {
-				struct stat sbuf;
-
-				if (fstat(data->fd, &sbuf)) {
-					close(data->fd);
-					return;
-				}
-				if (S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
-					close(data->fd);
-					return;
-				}
-			}
+            /* check that this session file was created by us or root – we
+               don't want to end up accepting the sessions of another webapp */
+            if (fstat(data->fd, &sbuf) || (sbuf.st_uid != 0 && sbuf.st_uid != getuid() && sbuf.st_uid != geteuid())) {
+				close(data->fd);
+				data->fd = -1;
+				return;
+            }
 #endif
 			flock(data->fd, LOCK_EX);
 
@@ -342,6 +347,7 @@ PS_READ_FUNC(files)
 			PS(send_cookie) = 1;
 		}
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 
 	ps_files_open(data, PS(id) TSRMLS_CC);

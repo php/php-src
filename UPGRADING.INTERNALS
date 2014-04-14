@@ -5,6 +5,8 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+  c. POST data handling
+  d. Arginfo changes
 
 2. Build system changes
   a. Unix build system changes
@@ -15,58 +17,11 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
 ========================
 
-  a. Addition of do_operation and compare object handlers
+  a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
 
-  Two new object handlers have been added:
-
-    do_operation:
-    typedef int (*zend_object_do_operation_t)(
-        zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC
-    );
-
-    compare:
-    typedef int (*zend_object_compare_zvals_t)(
-        zval *result, zval *op1, zval *op2 TSRMLS_DC
-    );
-
-  The first handler is used to overload arithmetic operations. The first
-  argument specifies the opcode of the operator, result is the target zval,
-  op1 the first operand and op2 the second operand. For unary operations
-  op2 is NULL. If the handler returns FAILURE PHP falls back to the default
-  behavior for the operation.
-
-  The second handler is used to perform comparison operations with
-  non-objects. The value written into result must be an IS_LONG with value
-  -1 (smaller), 0 (equal) or 1 (greater). The return value is a SUCCESS/FAILURE
-  return code. The difference between this handler and compare_objects is
-  that it will be triggered for comparisons with non-objects and objects of
-  different types. It takes precedence over compare_objects.
-
-  Further docs in the RFC: https://wiki.php.net/rfc/operator_overloading_gmp
-
-  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
-
-  The return_value_ptr argument to internal functions is now always set.
-  Previously it was only available for functions returning by-reference.
-  return_value_ptr can now be used to return zvals without copying them.
-  For this purpose two new macros are provided:
-
-      RETVAL_ZVAL_FAST(zv); /* analog to RETVAL_ZVAL(zv, 1, 0) */
-      RETURN_ZVAL_FAST(zv); /* analog to RETURN_ZVAL(zv, 1, 0) */
-
-  The macros behave similarly to the non-FAST variants with copy=1 and
-  dtor=0, but will try to return the zval without making a copy by utilizing
-  return_value_ptr.
 
 ========================
 2. Build system changes
 ========================
 
-  a. Unix build system changes
-    - The bison version check is now a blacklist instead of a whitelist.
-    - The bison binary can be specified through the YACC environment/configure
-      variable. Previously `bison` was assumed to be in $PATH. 
-
-  b. Windows build system changes
-    - 
   

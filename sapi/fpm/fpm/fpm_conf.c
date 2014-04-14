@@ -148,7 +148,11 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
+	{ "clear_env",                 &fpm_conf_set_boolean,     WPO(clear_env) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
+#ifdef HAVE_APPARMOR
+	{ "apparmor_hat",              &fpm_conf_set_string,      WPO(apparmor_hat) },
+#endif
 	{ 0, 0, 0 }
 };
 
@@ -603,6 +607,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
+	wp->config->clear_env = 1;
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -644,6 +649,9 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->chroot);
 	free(wpc->chdir);
 	free(wpc->security_limit_extensions);
+#ifdef HAVE_APPARMOR
+	free(wpc->apparmor_hat);
+#endif
 
 	for (kv = wpc->php_values; kv; kv = kv_next) {
 		kv_next = kv->next;
@@ -1600,6 +1608,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
+		zlog(ZLOG_NOTICE, "\tclear_env = %s",                  BOOL2STR(wp->config->clear_env));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {

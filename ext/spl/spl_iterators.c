@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -249,7 +249,7 @@ next_step:
 					}
 				}
 				if (retval) {
-					has_children = zend_is_true(retval);
+					has_children = zend_is_true(retval TSRMLS_CC);
 					zval_ptr_dtor(&retval);
 					if (has_children) {
 						if (object->max_depth == -1 || object->max_depth > object->level) {
@@ -1774,7 +1774,7 @@ static inline void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern T
 	while (spl_dual_it_fetch(intern, 1 TSRMLS_CC) == SUCCESS) {
 		zend_call_method_with_0_params(&zthis, intern->std.ce, NULL, "accept", &retval);
 		if (retval) {
-			if (zend_is_true(retval)) {
+			if (zend_is_true(retval TSRMLS_CC)) {
 				zval_ptr_dtor(&retval);
 				return;
 			}
@@ -2055,11 +2055,11 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	if (intern->u.regex.flags & REGIT_INVERTED) {
-		RETVAL_BOOL(Z_LVAL_P(return_value));
+		RETVAL_BOOL(! Z_LVAL_P(return_value));
 	}
 
 	if (use_copy) {
-		efree(subject);
+		str_efree(subject);
 	}
 } /* }}} */
 
@@ -2598,7 +2598,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 					return;
 				}
 			} else {
-				if (zend_is_true(retval)) {
+				if (zend_is_true(retval TSRMLS_CC)) {
 					zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &zchildren);
 					if (EG(exception)) {
 						if (zchildren) {
@@ -3573,7 +3573,7 @@ static int spl_iterator_func_apply(zend_object_iterator *iter, void *puser TSRML
 	apply_info->count++;
 	zend_fcall_info_call(&apply_info->fci, &apply_info->fcc, &retval, NULL TSRMLS_CC);
 	if (retval) {
-		result = zend_is_true(retval) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
+		result = zend_is_true(retval TSRMLS_CC) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_STOP;
 		zval_ptr_dtor(&retval);
 	} else {
 		result = ZEND_HASH_APPLY_STOP;
@@ -3692,6 +3692,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	REGISTER_SPL_SUB_CLASS_EX(RegexIterator, FilterIterator, spl_dual_it_new, spl_funcs_RegexIterator);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "USE_KEY",     REGIT_USE_KEY);
+	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "INVERT_MATCH",REGIT_INVERTED);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "MATCH",       REGIT_MODE_MATCH);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "GET_MATCH",   REGIT_MODE_GET_MATCH);
 	REGISTER_SPL_CLASS_CONST_LONG(RegexIterator, "ALL_MATCHES", REGIT_MODE_ALL_MATCHES);

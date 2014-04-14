@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,7 @@ static int php_embed_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void php_embed_flush(void *server_context)
+static void php_embed_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();

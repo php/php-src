@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,6 +63,28 @@ static const char *_php_source_op_to_string(enum source_op sop);
 static int _php_source_op_to_ipv4_op(enum source_op sop);
 #endif
 
+int php_string_to_if_index(const char *val, unsigned *out TSRMLS_DC)
+{
+#if HAVE_IF_NAMETOINDEX
+	unsigned int ind;
+
+	ind = if_nametoindex(val);
+	if (ind == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"no interface with name \"%s\" could be found", val);
+		return FAILURE;
+	} else {
+		*out = ind;
+		return SUCCESS;
+	}
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"this platform does not support looking up an interface by "
+			"name, an integer interface index must be supplied instead");
+	return FAILURE;
+#endif
+}
+
 static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 {
 	int ret;
@@ -78,30 +100,16 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 			ret = SUCCESS;
 		}
 	} else {
-#if HAVE_IF_NAMETOINDEX
-		unsigned int ind;
 		zval_add_ref(&val);
 		convert_to_string_ex(&val);
-		ind = if_nametoindex(Z_STRVAL_P(val));
-		if (ind == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"no interface with name \"%s\" could be found", Z_STRVAL_P(val));
-			ret = FAILURE;
-		} else {
-			*out = ind;
-			ret = SUCCESS;
-		}
+		ret = php_string_to_if_index(Z_STRVAL_P(val), out TSRMLS_CC);
 		zval_ptr_dtor(&val);
-#else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"this platform does not support looking up an interface by "
-				"name, an integer interface index must be supplied instead");
-		ret = FAILURE;
-#endif
 	}
 
 	return ret;
 }
+
+
 
 static int php_get_if_index_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, unsigned int *if_index TSRMLS_DC)

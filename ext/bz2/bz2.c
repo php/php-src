@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
+#include "main/php_network.h"
 
 /* for fileno() */
 #include <stdio.h>
@@ -245,7 +246,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
 	
 		if (stream) {
-			int fd;
+			php_socket_t fd;
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 				bz_file = BZ2_bzdopen(fd, mode);
 			}
@@ -394,7 +395,7 @@ static PHP_FUNCTION(bzopen)
 									NULL);
 	} else if (Z_TYPE_PP(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
-		int fd;
+		php_socket_t fd;
 		int stream_mode_len;
 
 		php_stream_from_zval(stream, file);

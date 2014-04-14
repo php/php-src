@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -43,14 +43,12 @@ typedef struct {
 	unsigned 	_reserved:31;
 	pdo_pgsql_error_info	einfo;
 	Oid 		pgoid;
-#if HAVE_PQPREPARE
 	/* The following two variables have the same purpose. Unfortunately we need
-	   to keep track of two different attributes having the same effect.
-	   It might be worth to deprecate the driver specific one soon. */
+	   to keep track of two different attributes having the same effect. */
 	int		emulate_prepares;
-	int		disable_native_prepares;
-#endif
-	unsigned int stmt_counter;
+	int		disable_native_prepares; /* deprecated since 5.6 */
+	int		disable_prepares;
+	unsigned int	stmt_counter;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -66,14 +64,12 @@ typedef struct {
 	int                     current_row;
 	pdo_pgsql_column        *cols;
 	char *cursor_name;
-#if HAVE_PQPREPARE
 	char *stmt_name;
 	char *query;
 	char **param_values;
 	int *param_lengths;
 	int *param_formats;
 	Oid *param_types;
-#endif
 	zend_bool is_prepared;
 } pdo_pgsql_stmt;
 
@@ -95,6 +91,7 @@ extern struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_DISABLE_PREPARES,
 };
 
 struct pdo_pgsql_lob_self {

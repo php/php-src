@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@ PCRE_UTF8_ERR18  Overlong 5-byte sequence (won't ever occur)
 PCRE_UTF8_ERR19  Overlong 6-byte sequence (won't ever occur)
 PCRE_UTF8_ERR20  Isolated 0x80 byte (not within UTF-8 character)
 PCRE_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
-PCRE_UTF8_ERR22  Non-character
+PCRE_UTF8_ERR22  Unused (was non-character)
 
 Arguments:
   string       points to the string
@@ -118,7 +118,6 @@ if (length < 0)
 for (p = string; length-- > 0; p++)
   {
   register pcre_uchar ab, c, d;
-  pcre_uint32 v = 0;
 
   c = *p;
   if (c < 128) continue;                /* ASCII character */
@@ -187,7 +186,6 @@ for (p = string; length-- > 0; p++)
       *erroroffset = (int)(p - string) - 2;
       return PCRE_UTF8_ERR14;
       }
-    v = ((c & 0x0f) << 12) | ((d & 0x3f) << 6) | (*p & 0x3f);
     break;
 
     /* 4-byte character. Check 3rd and 4th bytes for 0x80. Then check first 2
@@ -215,7 +213,6 @@ for (p = string; length-- > 0; p++)
       *erroroffset = (int)(p - string) - 3;
       return PCRE_UTF8_ERR13;
       }
-    v = ((c & 0x07) << 18) | ((d & 0x3f) << 12) | ((p[-1] & 0x3f) << 6) | (*p & 0x3f);
     break;
 
     /* 5-byte and 6-byte characters are not allowed by RFC 3629, and will be
@@ -289,14 +286,6 @@ for (p = string; length-- > 0; p++)
     {
     *erroroffset = (int)(p - string) - ab;
     return (ab == 4)? PCRE_UTF8_ERR11 : PCRE_UTF8_ERR12;
-    }
-
-  /* Reject non-characters. The pointer p is currently at the last byte of the
-  character. */
-  if ((v & 0xfffeu) == 0xfffeu || (v >= 0xfdd0 && v <= 0xfdef))
-    {
-    *erroroffset = (int)(p - string) - ab;
-    return PCRE_UTF8_ERR22;
     }
   }
 

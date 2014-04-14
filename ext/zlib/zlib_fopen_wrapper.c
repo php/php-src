@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,8 @@
 #include "php.h"
 #include "php_zlib.h"
 #include "fopen_wrappers.h"
+
+#include "main/php_network.h"
 
 struct php_gz_stream_data_t	{
 	gzFile gz_file;
@@ -129,7 +131,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	innerstream = php_stream_open_wrapper_ex(path, mode, STREAM_MUST_SEEK | options | STREAM_WILL_CAST, opened_path, context);
 	
 	if (innerstream) {
-		int fd;
+		php_socket_t fd;
 
 		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 			self = emalloc(sizeof(*self));

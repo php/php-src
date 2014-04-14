@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,6 +92,7 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	descriptor->charset_form = SQLCS_IMPLICIT;	/* default value */
 	descriptor->charset_id = connection->charset;
 	descriptor->is_open = 0;
+	descriptor->chunk_size = 0;
 
 	if (descriptor->type == OCI_DTYPE_LOB || descriptor->type == OCI_DTYPE_FILE) {
 		/* add Lobs & Files to hash. we'll flush them at the end */
@@ -165,11 +166,7 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_D
 
 /* {{{ php_oci_lob_callback()
    Append LOB portion to a memory buffer */
-#if defined(HAVE_OCI_LOB_READ2)
 sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp)
-#else
-sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
-#endif
 {
 	ub4 lenp = (ub4) len;
 	php_oci_lob_ctx *ctx = (php_oci_lob_ctx *)ctxp;
@@ -251,14 +248,9 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	int buffer_size = PHP_OCI_LOB_BUFFER_SIZE;
 	php_oci_lob_ctx ctx;
 	ub1 *bufp;
-#if defined(HAVE_OCI_LOB_READ2)
 	oraub8 bytes_read, offset = 0;
 	oraub8 requested_len = read_length; /* this is by default */
 	oraub8 chars_read = 0;
-#else
-	int bytes_read, offset = 0;
-	int requested_len = read_length; /* this is by default */
-#endif
 	int is_clob = 0;
 	sb4 bytes_per_char = 1;
 	sword errstatus;
@@ -336,7 +328,6 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	ctx.alloc_len = (requested_len + 1) * bytes_per_char;
 	*data = ecalloc(bytes_per_char, requested_len + 1);
 
-#ifdef HAVE_OCI_LOB_READ2
 	if (is_clob) {
 		chars_read = requested_len;
 		bytes_read = 0;
@@ -374,34 +365,6 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	} else {
 		offset = descriptor->lob_current_position + bytes_read;
 	}
-
-#else
-
-	bytes_read = requested_len;
-	buffer_size = (requested_len < buffer_size ) ? requested_len : buffer_size;		/* optimize buffer size */
-	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size TSRMLS_CC);	/* use chunk size */
-
-	bufp = (ub1 *) ecalloc(1, buffer_size);
-	PHP_OCI_CALL_RETURN(errstatus, OCILobRead,
-		(
-			 connection->svc,
-			 connection->err,
-			 descriptor->descriptor,
-			 &bytes_read,								 /* IN/OUT bytes toread/read */
-			 offset + 1,							 /* offset (starts with 1) */
-			 (dvoid *) bufp,
-			 (ub4) buffer_size,							 /* size of buffer */
-			 (dvoid *)&ctx,
-			 (OCICallbackLobRead) php_oci_lob_callback,				 /* callback... */
-			 (ub2) descriptor->charset_id,				/* The character set ID of the buffer data. */
-			 (ub1) descriptor->charset_form					   /* The character set form of the buffer data. */
-		)
-	);
-	
-	efree(bufp);
-	offset = descriptor->lob_current_position + bytes_read;
-
-#endif
 	
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -162,7 +162,7 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 
 		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
 		if (more) {
-			result = i_zend_is_true(more);
+			result = i_zend_is_true(more TSRMLS_CC);
 			zval_ptr_dtor(&more);
 			return result ? SUCCESS : FAILURE;
 		}

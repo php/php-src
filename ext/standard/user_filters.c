@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -179,6 +179,11 @@ php_stream_filter_status_t userfilter_filter(
 	zval *zclosing, *zconsumed, *zin, *zout, *zstream;
 	zval zpropname;
 	int call_result;
+
+	/* the userfilter object probably doesn't exist anymore */
+	if (CG(unclean_shutdown)) {
+		return ret;
+	}
 
 	if (FAILURE == zend_hash_find(Z_OBJPROP_P(obj), "stream", sizeof("stream"), (void**)&zstream)) {
 		/* Give the userfilter class a hook back to the stream */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -731,6 +731,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
 			toread = stream->ops->read(stream, buf, size TSRMLS_CC);
+			if (toread == (size_t) -1) {
+				/* e.g. underlying read(2) returned -1 */
+				break;
+			}
 		} else {
 			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
@@ -1396,11 +1400,16 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 		p = php_stream_mmap_range(stream, php_stream_tell(stream), PHP_STREAM_MMAP_ALL, PHP_STREAM_MAP_MODE_SHARED_READONLY, &mapped);
 
 		if (p) {
-			PHPWRITE(p, mapped);
+			do {
+				/* output functions return int, so pass in int max */
+				if (0 < (b = PHPWRITE(p, MIN(mapped - bcount, INT_MAX)))) {
+					bcount += b;
+				}
+			} while (b > 0 && mapped > bcount);
 
 			php_stream_mmap_unmap_ex(stream, mapped);
 
-			return mapped;
+			return bcount;
 		}
 	}
 
@@ -2148,10 +2157,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 /* }}} */
 
 /* {{{ context API */
-PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context)
+PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream_context *context TSRMLS_DC)
 {
 	php_stream_context *oldcontext = stream->context;
-	TSRMLS_FETCH();
 
 	stream->context = context;
 

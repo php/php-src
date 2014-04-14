@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -276,22 +276,21 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (unsigned int *)&new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (unsigned int *)&new_val_len TSRMLS_CC)) {
 		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }
 
 static void
-php_apache_sapi_flush(void *server_context)
+php_apache_sapi_flush(void *server_context TSRMLS_DC)
 {
 	php_struct *ctx;
 	request_rec *r;
-	TSRMLS_FETCH();
 
 	ctx = server_context;
 
@@ -670,7 +669,7 @@ zend_first_try {
 		}
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
-			apr_psprintf(ctx->r->pool, "%zu", zend_memory_peak_usage(1 TSRMLS_CC)));
+			apr_psprintf(ctx->r->pool, "%" APR_SIZE_T_FMT, zend_memory_peak_usage(1 TSRMLS_CC)));
 	}
 
 } zend_end_try();

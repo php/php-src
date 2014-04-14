@@ -206,6 +206,8 @@ ext/pdo_sqlite/sqlite3.h
 ext/pdo_sqlite/tests/*.db
 ext/pdo_sqlite/tests/*.tmp
 ext/phar/phar.phar
+ext/phar/phar.1
+ext/phar/phar.phar.1
 ext/pspell/tests/*.tmp
 ext/reflection/xml
 ext/reflection/html
@@ -237,12 +239,14 @@ sapi/apache/libphp5.module
 sapi/apache2handler/libphp5.module
 sapi/apache_hooks/libphp5.module
 sapi/cgi/php-cgi
+sapi/cgi/php-cgi.1
 sapi/cli/php.1
 sapi/fpm/php-fpm
 sapi/fpm/php-fpm.1
 sapi/fpm/init.d.php-fpm
 sapi/fpm/php-fpm.conf
 sapi/fpm/fpm/php-cgi
+sapi/phpdbg/phpdbg
 scripts/php-config
 scripts/phpize
 scripts/man1/*.1

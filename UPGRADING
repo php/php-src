@@ -20,6 +20,9 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- DBA
+  . dba_delete() now returns false if the key was not found for the inifile 
+    handler, too.
 
 ========================================
 2. New Features
@@ -35,17 +38,11 @@ PHP X.Y UPGRADE NOTES
 3. Deprecated Functionality
 ========================================
 
-- Incompatible context calls:
-  Instance calls from an incompatible context are now deprecated and issue
-  E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
 ========================================
 4. Changed Functions
 ========================================
 
-- cURL:
-  CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
-  do not work unless it is explicitly set to false.
 
 ========================================
 5. New Functions
@@ -66,21 +63,6 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
-- GMP:
-  The GMP extension now uses objects as the underlying data structure, rather
-  than resources. GMP instances now support dumping, serialization, cloning,
-  casts to primitive types and have overloaded operators.
-  (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
-
-- OCI8:
-  - Added Implicit Result Set support for Oracle Database 12c with a
-    new oci_get_implicit_resultset() function.
-  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
-    unnecessarily initiates an internal ROLLBACK during connection
-    close.
-  - Added DTrace probes enabled with PHP's generic --enable-dtrace
-  - The oci_internal_debug() function is now a no-op.
-  - The phpinfo() output format for OCI8 has changed.
 
 ========================================
 9. New Global Constants
@@ -96,9 +78,5 @@ PHP X.Y UPGRADE NOTES
 11. Other Changes
 ========================================
 
-- File upload:
-  Uploads equal or greater than 2GB in size are now accepted.
-
-- HTTP stream wrapper:
-  HTTP 1.1 requests now include a Connection: close header unless explicitly
-  overridden by setting a Connection header via the header context option.
+- Standard
+  . call_user_method() and call_user_method_array() no longer exists.

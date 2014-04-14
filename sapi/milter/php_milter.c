@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -860,10 +860,6 @@ static int sapi_milter_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_milter_flush(void *server_context)
-{
-}
-
 static void sapi_milter_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	php_register_variable ("SERVER_SOFTWARE", "Sendmail Milter", track_vars_array TSRMLS_CC);
@@ -906,7 +902,7 @@ static sapi_module_struct milter_sapi_module = {
 	NULL,							/* deactivate */
 
 	sapi_milter_ub_write,			/* unbuffered write */
-	sapi_milter_flush,				/* flush */
+	NULL,							/* flush */
 	NULL,							/* get uid */
 	NULL,							/* getenv */
 
@@ -1109,7 +1105,7 @@ int main(int argc, char *argv[])
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_output_teardown();
 				exit(1);
 				break;
@@ -1119,7 +1115,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(ap_php_optarg);
+				zend_load_extension(ap_php_optarg TSRMLS_CC);
 				break;
 
 			default:
