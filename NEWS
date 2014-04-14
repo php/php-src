@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #66721 (__wakeup of DateTime segfaults when invalid object data is
     supplied). (Boro Sitnikovski)
 
+- FPM:
+  . Fixed bug #66482 (unknown entry 'priority' in php-fpm.conf).
+
 - mysqlnd:
   . Added a new fetching mode to mysqlnd. (Andrey)
 
