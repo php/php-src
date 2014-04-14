@@ -1,8 +1,9 @@
 --TEST--
-locale_get_display_name() icu >= 51.2
+locale_get_display_name() icu >= 52.1 && icu < 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0 || version_compare(INTL_ICU_VERSION, '52.1') >= 0) die('skip for ICU >= 51.2 and < 52.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '52.1') < 0) die('skip for ICU >= 52.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
 --FILE--
 <?php
 
@@ -161,9 +162,9 @@ disp_locale=fr :  display_name=slovène #Italie, dialecte de Resia, [Dd]evise=eu
 disp_locale=de :  display_name=Slowenisch #Italien, (ROZAJ|Resianisch), Währung=Euro#
 -----------------
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
-disp_locale=en :  display_name=Ukrainian #Ukraine, CALIFORNIA, [Cc]urrency#
-disp_locale=fr :  display_name=ukrainien #Ukraine, CALIFORNIA, [Dd]evise#
-disp_locale=de :  display_name=Ukrainisch #Ukraine, CALIFORNIA, Währung#
+disp_locale=en :  display_name=
+disp_locale=fr :  display_name=
+disp_locale=de :  display_name=
 -----------------
 locale='root'
 disp_locale=en :  display_name=Root
