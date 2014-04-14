@@ -6,11 +6,12 @@ if (isset($include)) {
 $stdout = fopen("php://stdout", "w+");
 
 class phpdbg {
-    public function isGreat($greeting = null) {
-        printf(
-            "%s: %s\n", __METHOD__, $greeting);
-        return $this;
-    }
+	private $sprintf = "%s: %s\n";
+
+	public function isGreat($greeting = null) {
+		printf($this->sprintf, __METHOD__, $greeting);
+		return $this;
+	}
 }
 
 function mine() {

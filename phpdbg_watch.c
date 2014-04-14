@@ -631,9 +631,16 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 
 		/* Show to the user what changed and delete watchpoint upon removal */
 		if (memcmp(oldPtr, watch->addr.ptr, watch->size) != SUCCESS) {
-			PHPDBG_G(watchpoint_hit) = 1;
+			if (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS || (watch->type == WATCH_ON_ZVAL && memcmp(oldPtr, watch->addr.zv, sizeof(zvalue_value))) || (watch->type == WATCH_ON_HASHTABLE
+#if ZEND_DEBUG
+			    && !watch->addr.ht->inconsistent
+#endif
+			    && zend_hash_num_elements((HashTable *)oldPtr) != zend_hash_num_elements(watch->addr.ht))) {
+				PHPDBG_G(watchpoint_hit) = 1;
 
-			phpdbg_notice("Breaking on watchpoint %s", watch->str);
+				phpdbg_notice("Breaking on watchpoint %s", watch->str);
+			}
+
 			switch (watch->type) {
 				case WATCH_ON_ZVAL: {
 					int removed = ((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1);

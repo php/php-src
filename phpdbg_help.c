@@ -815,14 +815,15 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "The **set** command is used to configure how phpdbg looks and behaves.  Specific set commands "
 "are as follows:" CR CR
 
-"   **Type**  **Alias**    **Purpose**" CR
-"   **prompt**   **p**     set the prompt" CR
-"   **color**    **c**     set color  <element> <color>" CR
-"   **colors**   **C**     set colors <on|off>" CR
-"   **oplog**    **O**     set oplog output" CR
-"   **break**    **b**     set break **id** <on|off>" CR
-"   **breaks**   **B**     set breaks <on|off>" CR
-"   **quiet**    **q**     set quiet <on|off>" CR CR
+"   **Type**    **Alias**    **Purpose**" CR
+"   **prompt**     **p**     set the prompt" CR
+"   **color**      **c**     set color  <element> <color>" CR
+"   **colors**     **C**     set colors <on|off>" CR
+"   **oplog**      **O**     set oplog output" CR
+"   **break**      **b**     set break **id** <on|off>" CR
+"   **breaks**     **B**     set breaks <on|off>" CR
+"   **quiet**      **q**     set quiet <on|off>" CR
+"   **refcount**   **r**     set refcount <on|off> (refcount display upon hit watchpoint)" CR CR
 
 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "
 "**cyan** and **black**.  All colours except **none** can be followed by an optional "
