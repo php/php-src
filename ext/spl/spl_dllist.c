@@ -560,7 +560,7 @@ SPL_METHOD(SplDoublyLinkedList, push)
 		return;
 	}
 
-	SEPARATE_ARG_IF_REF(value);
+	SEPARATE_ZVAL_IF_REF(value);
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
@@ -580,7 +580,7 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 		return;
 	}
 
-	SEPARATE_ARG_IF_REF(value);
+	SEPARATE_ZVAL_IF_REF(value);
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_unshift(intern->llist, value TSRMLS_CC);
@@ -806,7 +806,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;
 	}
-	SEPARATE_ARG_IF_REF(value);
+	SEPARATE_ZVAL_IF_REF(value);
 
 	intern = Z_SPLDLLIST_P(getThis());
 
