@@ -1,9 +1,8 @@
 --TEST--
-locale_get_display_region() icu >= 4.8 && icu < 51.2
+locale_get_display_region() icu >= 51.2
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 
@@ -160,9 +159,9 @@ disp_locale=fr :  display_region=Chine
 disp_locale=de :  display_region=China
 -----------------
 locale='sr-Latn-CS'
-disp_locale=en :  display_region=Serbia [Aa]nd Montenegro
-disp_locale=fr :  display_region=Serbie-et-Monténégro
-disp_locale=de :  display_region=Serbien und Montenegro
+disp_locale=en :  display_region=Serbia
+disp_locale=fr :  display_region=Serbie
+disp_locale=de :  display_region=Serbien
 -----------------
 locale='sl-rozaj'
 disp_locale=en :  display_region=(ROZAJ)?
@@ -240,9 +239,9 @@ disp_locale=fr :  display_region=QM
 disp_locale=de :  display_region=QM
 -----------------
 locale='sr-Qaaa-CS'
-disp_locale=en :  display_region=Serbia [Aa]nd Montenegro
-disp_locale=fr :  display_region=Serbie-et-Monténégro
-disp_locale=de :  display_region=Serbien und Montenegro
+disp_locale=en :  display_region=Serbia
+disp_locale=fr :  display_region=Serbie
+disp_locale=de :  display_region=Serbien
 -----------------
 locale='en-US-u-islamCal'
 disp_locale=en :  display_region=United States

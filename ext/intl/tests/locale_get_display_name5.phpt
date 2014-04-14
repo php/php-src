@@ -1,9 +1,8 @@
 --TEST--
-locale_get_display_name() icu >= 4.8 && icu < 51.2
+locale_get_display_name() icu >= 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') < 0) die('skip for ICU >= 53.1'); ?>
 --FILE--
 <?php
 
@@ -147,24 +146,24 @@ disp_locale=fr :  display_name=i-tay
 disp_locale=de :  display_name=i-tay
 -----------------
 locale='sgn-BE-nl'
-disp_locale=en :  display_name=Sign Languages? #Belgium, NL#
-disp_locale=fr :  display_name=langues? des signes #Belgique, NL#
-disp_locale=de :  display_name=Gebärdensprache #Belgien, NL#
+disp_locale=en :  display_name=sgn #Belgium, NL#
+disp_locale=fr :  display_name=sgn #Belgique, NL#
+disp_locale=de :  display_name=sgn #Belgien, NL#
 -----------------
 locale='sgn-CH-de'
-disp_locale=en :  display_name=Sign Languages? #Switzerland, DE#
-disp_locale=fr :  display_name=langues? des signes #Suisse, DE#
-disp_locale=de :  display_name=Gebärdensprache #Schweiz, DE#
+disp_locale=en :  display_name=sgn #Switzerland, DE#
+disp_locale=fr :  display_name=sgn #Suisse, DE#
+disp_locale=de :  display_name=sgn #Schweiz, DE#
 -----------------
 locale='sl_IT_rozaj@currency=EUR'
 disp_locale=en :  display_name=Slovenian #Italy, Resian, [Cc]urrency=Euro#
-disp_locale=fr :  display_name=slovène #Italie, dialecte de Resia, Devise=euro#
+disp_locale=fr :  display_name=slovène #Italie, dialecte de Resia, [Dd]evise=euro#
 disp_locale=de :  display_name=Slowenisch #Italien, (ROZAJ|Resianisch), Währung=Euro#
 -----------------
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
-disp_locale=en :  display_name=Ukrainian #Ukraine, CALIFORNIA, [Cc]urrency#
-disp_locale=fr :  display_name=ukrainien #Ukraine, CALIFORNIA, Devise#
-disp_locale=de :  display_name=Ukrainisch #Ukraine, CALIFORNIA, Währung#
+disp_locale=en :  display_name=
+disp_locale=fr :  display_name=
+disp_locale=de :  display_name=
 -----------------
 locale='root'
 disp_locale=en :  display_name=Root
@@ -173,7 +172,7 @@ disp_locale=de :  display_name=[Rr]oot
 -----------------
 locale='uk@currency=EURO'
 disp_locale=en :  display_name=Ukrainian #[Cc]urrency=EURO#
-disp_locale=fr :  display_name=ukrainien #Devise=EURO#
+disp_locale=fr :  display_name=ukrainien #[Dd]evise=EURO#
 disp_locale=de :  display_name=Ukrainisch #Währung=EURO#
 -----------------
 locale='Hindi'
@@ -203,12 +202,12 @@ disp_locale=de :  display_name=i-enochian #Privatnutzung=i-enochian#
 -----------------
 locale='zh-Hant'
 disp_locale=en :  display_name=Chinese #Traditional#
-disp_locale=fr :  display_name=chinois #idéogrammes han (#variante traditionnelle#|traditionnels)#
+disp_locale=fr :  display_name=chinois #traditionnel#
 disp_locale=de :  display_name=Chinesisch #Traditionell#
 -----------------
 locale='zh-Hans'
 disp_locale=en :  display_name=Chinese #Simplified#
-disp_locale=fr :  display_name=chinois #idéogrammes han (#variante simplifiée#|simplifiés)#
+disp_locale=fr :  display_name=chinois #simplifié#
 disp_locale=de :  display_name=Chinesisch #Vereinfacht#
 -----------------
 locale='sr-Cyrl'
@@ -223,13 +222,13 @@ disp_locale=de :  display_name=Serbisch #Lateinisch#
 -----------------
 locale='zh-Hans-CN'
 disp_locale=en :  display_name=Chinese #Simplified, China#
-disp_locale=fr :  display_name=chinois #idéogrammes han (#variante simplifiée#|simplifiés), Chine#
+disp_locale=fr :  display_name=chinois #simplifié, Chine#
 disp_locale=de :  display_name=Chinesisch #Vereinfacht, China#
 -----------------
 locale='sr-Latn-CS'
-disp_locale=en :  display_name=Serbian #Latin, Serbia [aA]nd Montenegro#
-disp_locale=fr :  display_name=serbe #latin, Serbie-et-Monténégro#
-disp_locale=de :  display_name=Serbisch #Lateinisch, Serbien und Montenegro#
+disp_locale=en :  display_name=Serbian #Latin, Serbia#
+disp_locale=fr :  display_name=serbe #latin, Serbie#
+disp_locale=de :  display_name=Serbisch #Lateinisch, Serbien#
 -----------------
 locale='sl-rozaj'
 disp_locale=en :  display_name=Slovenian #Resian#
@@ -307,9 +306,9 @@ disp_locale=fr :  display_name=serbe #latin, QM#
 disp_locale=de :  display_name=Serbisch #Lateinisch, QM#
 -----------------
 locale='sr-Qaaa-CS'
-disp_locale=en :  display_name=Serbian #Qaaa, Serbia [aA]nd Montenegro#
-disp_locale=fr :  display_name=serbe #Qaaa, Serbie-et-Monténégro#
-disp_locale=de :  display_name=Serbisch #Qaaa, Serbien und Montenegro#
+disp_locale=en :  display_name=Serbian #Qaaa, Serbia#
+disp_locale=fr :  display_name=serbe #Qaaa, Serbie#
+disp_locale=de :  display_name=Serbisch #Qaaa, Serbien#
 -----------------
 locale='en-US-u-islamCal'
 disp_locale=en :  display_name=English #United States, attribute=islamcal#

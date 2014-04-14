@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_script()  icu >= 49
+locale_get_display_script()  icu >= 52.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '49') < 0 || version_compare(INTL_ICU_VERSION, '52.1') >= 0) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '52.1') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -135,12 +135,12 @@ disp_locale=de :  display_script=
 -----------------
 locale='zh-Hant'
 disp_locale=en :  display_script=Traditional Han
-disp_locale=fr :  display_script=chinois traditionnel
+disp_locale=fr :  display_script=sinogrammes traditionnels
 disp_locale=de :  display_script=Traditionelles Chinesisch
 -----------------
 locale='zh-Hans'
 disp_locale=en :  display_script=Simplified Han
-disp_locale=fr :  display_script=chinois simplifié
+disp_locale=fr :  display_script=sinogrammes simplifiés
 disp_locale=de :  display_script=Vereinfachtes Chinesisch
 -----------------
 locale='sr-Cyrl'
@@ -155,7 +155,7 @@ disp_locale=de :  display_script=Lateinisch
 -----------------
 locale='zh-Hans-CN'
 disp_locale=en :  display_script=Simplified Han
-disp_locale=fr :  display_script=chinois simplifié
+disp_locale=fr :  display_script=sinogrammes simplifiés
 disp_locale=de :  display_script=Vereinfachtes Chinesisch
 -----------------
 locale='sr-Latn-CS'

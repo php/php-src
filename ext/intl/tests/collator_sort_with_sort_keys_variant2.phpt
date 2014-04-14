@@ -2,7 +2,7 @@
 sort_with_sort_keys()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 
@@ -164,12 +164,12 @@ array (
 )
  Result: true
 
-Test 10.ca0e38a2e3147dd97070f2128f140934:
+Test 10.49056308afb2b800363c5baa735ed247:
 array (
-  0 => 'abc',
-  1 => 'ааа',
-  2 => 'абв',
-  3 => 'абг',
+  0 => 'ааа',
+  1 => 'абв',
+  2 => 'абг',
+  3 => 'abc',
 )
  Result: true
 

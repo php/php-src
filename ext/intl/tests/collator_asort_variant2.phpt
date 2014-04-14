@@ -2,7 +2,7 @@
 asort()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 
@@ -225,12 +225,12 @@ array (
 )
  Result: true
 
-Test 12.6eaea3fa21b3b7d006ca7dfa27d4e282:
+Test 12.e1f5cb037b564dce39ffbd0a61562d59:
 array (
   4 => '',
-  7 => 'd',
   1 => 'п',
   2 => 'пп',
+  7 => 'd',
 )
  Result: true
 
