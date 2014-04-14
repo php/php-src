@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #66482 (unknown entry 'priority' in php-fpm.conf).
 
+- JSON:
+  . Fixed bug #66021 (Blank line inside empty array/object when
+    JSON_PRETTY_PRINT is set). (Kevin Israel)
+
 - mysqli:
   . Fixed problem in mysqli_commit()/mysqli_rollback() with second parameter
     (extra comma) and third parameters (lack of escaping). (Andrey)
