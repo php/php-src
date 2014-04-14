@@ -4865,6 +4865,7 @@ PHP_FUNCTION(openssl_seal)
 
 	if (!EVP_EncryptInit(&ctx,cipher,NULL,NULL)) {
 		RETVAL_FALSE;
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4880,6 +4881,7 @@ PHP_FUNCTION(openssl_seal)
 	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
 		RETVAL_FALSE;
 		efree(buf);
+		EVP_CIPHER_CTX_cleanup(&ctx);
 		goto clean_exit;
 	}
 
@@ -4912,6 +4914,7 @@ PHP_FUNCTION(openssl_seal)
 		efree(buf);
 	}
 	RETVAL_LONG(len1 + len2);
+	EVP_CIPHER_CTX_cleanup(&ctx);
 
 clean_exit:
 	for (i=0; i<nkeys; i++) {
@@ -4926,7 +4929,6 @@ clean_exit:
 	efree(eksl);
 	efree(pkeys);
 	efree(key_resources);
-	EVP_CIPHER_CTX_cleanup(&ctx);
 }
 /* }}} */
 
