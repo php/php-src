@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug #66021 (Blank line inside empty array/object when
     JSON_PRETTY_PRINT is set). (Kevin Israel)
 
+- LDAP:
+  . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
+
 - SimpleXML:
   . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
     (Anatol)
