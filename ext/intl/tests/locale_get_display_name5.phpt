@@ -1,9 +1,8 @@
 --TEST--
-locale_get_display_name() icu >= 52.1 && icu < 53.1
+locale_get_display_name() icu >= 53.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '52.1') < 0) die('skip for ICU >= 52.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '53.1') >=  0) die('skip for ICU < 53.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '53.1') < 0) die('skip for ICU >= 53.1'); ?>
 --FILE--
 <?php
 
@@ -147,14 +146,14 @@ disp_locale=fr :  display_name=i-tay
 disp_locale=de :  display_name=i-tay
 -----------------
 locale='sgn-BE-nl'
-disp_locale=en :  display_name=Sign Languages? #Belgium, NL#
-disp_locale=fr :  display_name=langues? des signes #Belgique, NL#
-disp_locale=de :  display_name=Gebärdensprache #Belgien, NL#
+disp_locale=en :  display_name=sgn #Belgium, NL#
+disp_locale=fr :  display_name=sgn #Belgique, NL#
+disp_locale=de :  display_name=sgn #Belgien, NL#
 -----------------
 locale='sgn-CH-de'
-disp_locale=en :  display_name=Sign Languages? #Switzerland, DE#
-disp_locale=fr :  display_name=langues? des signes #Suisse, DE#
-disp_locale=de :  display_name=Gebärdensprache #Schweiz, DE#
+disp_locale=en :  display_name=sgn #Switzerland, DE#
+disp_locale=fr :  display_name=sgn #Suisse, DE#
+disp_locale=de :  display_name=sgn #Schweiz, DE#
 -----------------
 locale='sl_IT_rozaj@currency=EUR'
 disp_locale=en :  display_name=Slovenian #Italy, Resian, [Cc]urrency=Euro#
