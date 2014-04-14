@@ -30,6 +30,9 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
+#endif
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
