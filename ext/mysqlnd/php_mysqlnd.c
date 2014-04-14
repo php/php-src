@@ -111,7 +111,7 @@ mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 	MYSQLND_REVERSE_API **ext;
 
 	for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-	     zend_hash_get_current_data_ex(ht, (void **) &ext, &pos);
+	     zend_hash_get_current_data_ex(ht, (void **) &ext, &pos) == SUCCESS;
 	     zend_hash_move_forward_ex(ht, &pos)
 	) {
 		if (buffer->len) {
