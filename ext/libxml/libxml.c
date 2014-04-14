@@ -336,7 +336,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_stream_context_from_zval(&LIBXML(stream_context), 0);
+	context = php_stream_context_from_zval(ZVAL_IS_UNDEF(&LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
 	
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
 	if (isescaped) {
@@ -1050,13 +1050,13 @@ static PHP_FUNCTION(libxml_clear_errors)
 }
 /* }}} */
 
-PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC)
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC) /* {{{ */
 {
 	zend_bool old = LIBXML(entity_loader_disabled);
 
 	LIBXML(entity_loader_disabled) = disable;
 	return old;
-}
+} /* }}} */
 
 /* {{{ proto bool libxml_disable_entity_loader([boolean disable]) 
    Disable/Enable ability to load external entities */
