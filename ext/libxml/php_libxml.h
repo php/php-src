@@ -75,10 +75,10 @@ typedef struct _php_libxml_node_ptr {
 } php_libxml_node_ptr;
 
 typedef struct _php_libxml_node_object {
-	zend_object  std;
 	php_libxml_node_ptr *node;
 	php_libxml_ref_obj *document;
 	HashTable *properties;
+	zend_object  std;
 } php_libxml_node_object;
 
 typedef void * (*php_libxml_export_node) (zval *object TSRMLS_DC);
