@@ -35,9 +35,16 @@ PHP                                                                        NEWS
   . Fixed bug #66021 (Blank line inside empty array/object when
     JSON_PRETTY_PRINT is set). (Kevin Israel)
 
+- LDAP:
+  . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
+
 - mysqli:
   . Fixed problem in mysqli_commit()/mysqli_rollback() with second parameter
     (extra comma) and third parameters (lack of escaping). (Andrey)
+
+- OpenSSL:
+  . Fix bug #66942 (memory leak in openssl_seal()). (Chuan Ma)
+  . Fix bug #66952 (memory leak in openssl_open()). (Chuan Ma)
 
 - SimpleXML:
   . Fixed bug #66084 (simplexml_load_string() mangles empty node name)
