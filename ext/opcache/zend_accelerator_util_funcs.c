@@ -692,7 +692,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_hash_clone_prop_info(&ce->properties_info, &old_ce->properties_info, old_ce, ce TSRMLS_CC);
 
 	/* constants table */
-	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 0);
+	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
 
 	ce->name = STR_DUP(ce->name, 0);
 

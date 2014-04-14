@@ -165,7 +165,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 				ZVAL_INDIRECT(&new_prop, new_object->properties_table + (Z_INDIRECT_P(prop) - old_object->properties_table));
 			} else {
 				ZVAL_COPY_VALUE(&new_prop, prop);
-				zval_add_ref_unref(&new_prop);
+				zval_add_ref(&new_prop);
 			}
 			switch (zend_hash_get_current_key_ex(old_object->properties, &key, &num_key, 0, &pos)) {
 				case HASH_KEY_IS_STRING:

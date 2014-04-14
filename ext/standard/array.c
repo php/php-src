@@ -1081,23 +1081,21 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 				continue;
 			}
 		}
-		ZVAL_COPY(&args[0], zv);
 		if (recursive &&
-		    (Z_TYPE(args[0]) == IS_ARRAY ||
-		     (Z_ISREF(args[0]) && Z_TYPE_P(Z_REFVAL(args[0])) == IS_ARRAY))) {
+		    (Z_TYPE_P(zv) == IS_ARRAY ||
+		     (Z_ISREF_P(zv) && Z_TYPE_P(Z_REFVAL_P(zv)) == IS_ARRAY))) {
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
 			zend_fcall_info_cache orig_array_walk_fci_cache;
 
-			if (Z_ISREF(args[0])) {
-				thash = Z_ARRVAL_P(Z_REFVAL(args[0]));
+			if (Z_ISREF_P(zv)) {
+				thash = Z_ARRVAL_P(Z_REFVAL_P(zv));
 			} else {
-				SEPARATE_ZVAL(&args[0]);
-				thash = Z_ARRVAL(args[0]);
+				SEPARATE_ZVAL(zv);
+				thash = Z_ARRVAL_P(zv);
 			}
 			if (thash->nApplyCount > 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
-				zval_ptr_dtor(&args[0]);
 				if (userdata) {
 					zval_ptr_dtor(&args[2]);
 				}
@@ -1116,11 +1114,25 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			BG(array_walk_fci) = orig_array_walk_fci;
 			BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
 		} else {
+			int was_ref = Z_ISREF_P(zv);
+
+			ZVAL_COPY(&args[0], zv);
+
 			/* Allocate space for key */
 			zend_hash_get_current_key_zval(target_hash, &args[1]);
 
 			/* Call the userland function */
 			if (zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
+				if (!was_ref && Z_ISREF(args[0])) {
+					/* copy reference back */
+					zval garbage;
+
+					ZVAL_COPY_VALUE(&garbage, zv);
+					ZVAL_COPY_VALUE(zv, &args[0]);
+					zval_ptr_dtor(&garbage);
+				} else {
+					zval_ptr_dtor(&args[0]);
+				}
 				zval_ptr_dtor(&retval);
 			} else {
 				zval_ptr_dtor(&args[0]);
@@ -1132,7 +1144,6 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			}
 		}
 
-		zval_ptr_dtor(&args[0]);
 		if (Z_TYPE(args[1]) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			ZVAL_UNDEF(&args[1]);

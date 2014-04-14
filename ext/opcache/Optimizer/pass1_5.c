@@ -294,6 +294,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 					if ((c = zend_hash_find(&ce->constants_table,
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
+						ZVAL_DEREF(c);
 						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) { 
 							if (!zend_get_persistent_constant(Z_STR_P(c), &t, 1 TSRMLS_CC) ||
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {

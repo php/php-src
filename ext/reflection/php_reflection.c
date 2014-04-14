@@ -4010,7 +4010,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
 	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce TSRMLS_CC);
-	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, zval_add_ref);
+	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, zval_add_ref_unref);
 }
 /* }}} */
 

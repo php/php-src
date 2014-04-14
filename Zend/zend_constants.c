@@ -379,6 +379,8 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_error(E_ERROR, "Undefined class constant '%s::%s'", class_name->val, constant_name->val);
 				}
+			} else if (Z_ISREF_P(ret_constant)) {
+				ret_constant = Z_REFVAL_P(ret_constant);
 			}
 		} else if (!ce) {
 			retval = 0;

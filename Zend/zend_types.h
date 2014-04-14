@@ -568,6 +568,15 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
 
+#define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\
+		zend_reference *_ref = malloc(sizeof(zend_reference));	\
+		GC_REFCOUNT(_ref) = 1;									\
+		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		ZVAL_COPY_VALUE(&_ref->val, r);							\
+		Z_REF_P(z) = _ref;										\
+		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
+	} while (0)
+
 #define ZVAL_NEW_AST(z, a) do {									\
 		zval *__z = (z);										\
 		zend_ast_ref *_ast = emalloc(sizeof(zend_ast_ref));		\
