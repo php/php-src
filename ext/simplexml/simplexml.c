@@ -52,7 +52,6 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 #define SXE_METHOD(func) PHP_METHOD(simplexml_element, func)
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC);
-static zend_object *php_sxe_register_object(php_sxe_object * TSRMLS_DC);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRMLS_DC);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data TSRMLS_DC);
 static zval *sxe_get_value(zval *z TSRMLS_DC);
@@ -83,7 +82,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, SXE
 
 	php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
-	ZVAL_OBJ(value, php_sxe_register_object(subnode TSRMLS_CC));
+	ZVAL_OBJ(value, &subnode->zo);
 }
 /* }}} */
 
@@ -1019,7 +1018,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 		}
 		php_libxml_increment_node_ptr((php_libxml_node_object *)subnode, node, NULL TSRMLS_CC);
 
-		ZVAL_OBJ(value, php_sxe_register_object(subnode TSRMLS_CC));
+		ZVAL_OBJ(value, &subnode->zo);
 		/*zval_add_ref(value);*/
 	}
 }
@@ -2067,6 +2066,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
 	object_properties_init(&intern->zo, ce);
+	intern->zo.handlers = &sxe_object_handlers;
 
 	while (parent) {
 		if (parent == sxe_class_entry) {
@@ -2088,17 +2088,6 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_sxe_register_object
- */
-static zend_object *
-php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
-{
-	zend_objects_store_put(&intern->zo TSRMLS_CC);
-	intern->zo.handlers = &sxe_object_handlers;
-	return &intern->zo;
-}
-/* }}} */
-
 /* {{{ sxe_object_new()
  */
 PHP_SXE_API zend_object *
@@ -2107,7 +2096,7 @@ sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 	php_sxe_object    *intern;
 
 	intern = php_sxe_object_new(ce TSRMLS_CC);
-	return php_sxe_register_object(intern TSRMLS_CC);
+	return &intern->zo;
 }
 /* }}} */
 
@@ -2144,7 +2133,7 @@ PHP_FUNCTION(simplexml_load_file)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
-	ZVAL_OBJ(return_value, php_sxe_register_object(sxe TSRMLS_CC));
+	ZVAL_OBJ(return_value, &sxe->zo);
 }
 /* }}} */
 
@@ -2181,7 +2170,7 @@ PHP_FUNCTION(simplexml_load_string)
 	php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, docp TSRMLS_CC);
 	php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, xmlDocGetRootElement(docp), NULL TSRMLS_CC);
 
-	ZVAL_OBJ(return_value, php_sxe_register_object(sxe TSRMLS_CC));
+	ZVAL_OBJ(return_value, &sxe->zo);
 }
 /* }}} */
 
@@ -2295,6 +2284,7 @@ zend_object_iterator *php_sxe_get_iterator(zend_class_entry *ce, zval *object, i
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	iterator = emalloc(sizeof(php_sxe_iterator));
+	zend_iterator_init(&iterator->intern TSRMLS_CC);
 
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &php_sxe_iterator_funcs;
@@ -2312,8 +2302,6 @@ static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 	if (!ZVAL_IS_UNDEF(&iterator->intern.data)) {
 		zval_ptr_dtor(&iterator->intern.data);
 	}
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -2436,7 +2424,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		php_libxml_increment_doc_ref((php_libxml_node_object *)sxe, nodep->doc TSRMLS_CC);
 		php_libxml_increment_node_ptr((php_libxml_node_object *)sxe, nodep, NULL TSRMLS_CC);
 
-		ZVAL_OBJ(return_value, php_sxe_register_object(sxe TSRMLS_CC));
+		ZVAL_OBJ(return_value, &sxe->zo);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");
 		RETVAL_NULL();
