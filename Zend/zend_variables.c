@@ -161,6 +161,13 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_RESOURCE:
 			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
+		case IS_REFERENCE: {
+				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
+
+				zval_internal_ptr_dtor(&ref->val);
+				free(ref);
+				break;
+			}
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_BOOL:
@@ -185,6 +192,13 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_RESOURCE:
 			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
 			break;
+		case IS_REFERENCE: {
+				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
+
+				zval_internal_ptr_dtor(&ref->val);
+				free(ref);
+				break;
+			}
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_BOOL:
@@ -210,12 +224,7 @@ ZEND_API void zval_add_ref_unref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
 		if (Z_ISREF_P(p)) {
-			if (Z_REFCOUNT_P(p) == 1) {
-				zval *q = Z_REFVAL_P(p);
-				ZVAL_DUP(p, q);
-			} else {
-				Z_ADDREF_P(p);
-			}
+			ZVAL_DUP(p, Z_REFVAL_P(p));
 		} else {
 			Z_ADDREF_P(p);
 		}

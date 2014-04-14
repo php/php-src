@@ -3089,7 +3089,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 
 			ALLOC_HASHTABLE(op_array->static_variables);
 			zend_hash_init(op_array->static_variables, zend_hash_num_elements(static_variables), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(op_array->static_variables, static_variables, zval_add_ref_unref);
+			zend_hash_copy(op_array->static_variables, static_variables, zval_add_ref);
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
@@ -3743,6 +3743,27 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 	zval_add_ref
 #endif
 
+static int do_inherit_class_constant(zval *zv TSRMLS_DC, int num_args, va_list args, const zend_hash_key *hash_key) /* {{{ */
+{
+	zend_class_entry *ce = va_arg(args, zend_class_entry *);
+	zend_class_entry *parent_ce = va_arg(args, zend_class_entry *);
+
+	if (hash_key->key) {
+		if (!Z_ISREF_P(zv)) {
+			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+				ZVAL_NEW_PERSISTENT_REF(zv, zv);
+			} else {
+				ZVAL_NEW_REF(zv, zv);
+			}
+		}
+		if (zend_hash_add(&ce->constants_table, hash_key->key, zv)) {
+			Z_ADDREF_P(zv);
+		}
+	}
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
@@ -3846,7 +3867,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal_zval : zend_duplicate_property_info_zval), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
-	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, zval_property_ctor(parent_ce, ce), 0);
+	zend_hash_apply_with_arguments(&parent_ce->constants_table TSRMLS_CC, (apply_func_args_t)do_inherit_class_constant, 2, ce, parent_ce);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
 	do_inherit_parent_constructor(ce);
 
@@ -3865,14 +3886,9 @@ static zend_bool do_inherit_constant_check(HashTable *child_constants_table, con
 	zval *old_constant;
 
 	if ((old_constant = zend_hash_find(child_constants_table, hash_key->key)) != NULL) {
-//???	if (old_constant != parent_constant) {
-//??? see Zend/tests/errmsg_025.phpt
-		if ((Z_TYPE_P(old_constant) != Z_TYPE_P(parent_constant)) ||
-		    (Z_TYPE_P(old_constant) == IS_LONG && Z_LVAL_P(old_constant) != Z_LVAL_P(parent_constant)) ||
-		    (Z_TYPE_P(old_constant) == IS_BOOL && Z_LVAL_P(old_constant) != Z_LVAL_P(parent_constant)) ||
-		    (Z_TYPE_P(old_constant) == IS_DOUBLE && Z_DVAL_P(old_constant) != Z_DVAL_P(parent_constant)) ||
-		    (Z_TYPE_P(old_constant) == IS_STRING && Z_STR_P(old_constant) != Z_STR_P(parent_constant)) ||
-		    (Z_REFCOUNTED_P(old_constant) && Z_COUNTED_P(old_constant) != Z_COUNTED_P(parent_constant))) {
+		if (!Z_ISREF_P(old_constant) ||
+		    !Z_ISREF_P(parent_constant) ||
+		    Z_REFVAL_P(old_constant) != Z_REFVAL_P(parent_constant)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", hash_key->key->val, iface->name->val);
 		}
 		return 0;
@@ -3887,6 +3903,22 @@ static int do_interface_constant_check(zval *val TSRMLS_DC, int num_args, va_lis
 
 	do_inherit_constant_check(&(*iface)->constants_table, (const zval *) val, key, *iface);
 
+	return ZEND_HASH_APPLY_KEEP;
+}
+/* }}} */
+
+static int do_inherit_iface_constant(zval *zv TSRMLS_DC, int num_args, va_list args, const zend_hash_key *hash_key) /* {{{ */
+{
+	zend_class_entry *ce = va_arg(args, zend_class_entry *);
+	zend_class_entry *iface = va_arg(args, zend_class_entry *);
+
+	if (hash_key->key && do_inherit_constant_check(&ce->constants_table, zv, hash_key, iface)) {
+		if (!Z_ISREF_P(zv)) {
+			ZVAL_NEW_REF(zv, zv);
+		}
+		Z_ADDREF_P(zv);
+		zend_hash_update(&ce->constants_table, hash_key->key, zv);
+	}
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -3922,7 +3954,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		}
 		ce->interfaces[ce->num_interfaces++] = iface;
 
-		zend_hash_merge_ex(&ce->constants_table, &iface->constants_table, (copy_ctor_func_t) zval_add_ref, (merge_checker_func_t) do_inherit_constant_check, iface);
+		zend_hash_apply_with_arguments(&iface->constants_table TSRMLS_CC, (apply_func_args_t)do_inherit_iface_constant, 2, ce, iface);
 		zend_hash_merge_ex(&ce->function_table, &iface->function_table, do_inherit_method, (merge_checker_func_t) do_inherit_method_check, ce);
 
 		do_implement_interface(ce, iface TSRMLS_CC);
