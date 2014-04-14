@@ -400,8 +400,8 @@ static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*call
 		zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), NULL);
 	}
 
-	if (zend_is_auto_global(input, len TSRMLS_CC)) {
-		phpdbg_watchpoint_parse_input(input, len, &EG(symbol_table), 0, callback, 1 TSRMLS_CC);
+	if (zend_is_auto_global(input, len TSRMLS_CC) && phpdbg_watchpoint_parse_input(input, len, &EG(symbol_table), 0, callback, 1 TSRMLS_CC) != FAILURE) {
+		return SUCCESS;
 	}
 
 	return phpdbg_watchpoint_parse_input(input, len, EG(active_symbol_table), 0, callback, 0 TSRMLS_CC);
