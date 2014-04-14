@@ -612,6 +612,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 	if (GC_G(roots).next != &GC_G(roots)) {
 		gc_root_buffer *current, *orig_next_to_free;
 		zend_refcounted *p;
+		gc_root_buffer to_free;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -621,13 +622,28 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		gc_mark_roots(TSRMLS_C);
 		gc_scan_roots(TSRMLS_C);
 		count = gc_collect_roots(TSRMLS_C);
-
-		orig_next_to_free = GC_G(next_to_free);
 		GC_G(gc_active) = 0;
 
+		if (GC_G(to_free).next == &GC_G(to_free)) {
+			/* nothing to free */
+			return 0;
+		}
+
+		/* Copy global to_free list into local list */
+		to_free.next = GC_G(to_free).next;
+		to_free.prev = GC_G(to_free).prev;
+		to_free.next->prev = &to_free;
+		to_free.prev->next = &to_free;
+
+		/* Free global list */
+		GC_G(to_free).next = &GC_G(to_free);
+		GC_G(to_free).prev = &GC_G(to_free);
+
+		orig_next_to_free = GC_G(next_to_free);
+
 		/* First call destructors */
-		current = GC_G(to_free).next;
-		while (current != &GC_G(to_free)) {
+		current = to_free.next;
+		while (current != &to_free) {
 			p = current->ref;
 			GC_G(next_to_free) = current->next;
 			if (GC_TYPE(p) == IS_OBJECT) {
@@ -649,8 +665,8 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		}
 
 		/* Destroy zvals */
-		current = GC_G(to_free).next;
-		while (current != &GC_G(to_free)) {
+		current = to_free.next;
+		while (current != &to_free) {
 			p = current->ref;
 			GC_G(next_to_free) = current->next;
 			if (GC_TYPE(p) == IS_OBJECT) {
@@ -677,8 +693,8 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		}
 
 		/* Free objects */
-		current = GC_G(to_free).next;
-		while (current != &GC_G(to_free)) {
+		current = to_free.next;
+		while (current != &to_free) {
 			p = current->ref;
 			GC_G(next_to_free) = current->next;
 			if (GC_TYPE(p) == IS_OBJECT) {
