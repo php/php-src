@@ -38,5 +38,4 @@ mysqlnd.debug=d:t:O,/tmp/mysqlnd.trace
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_store_result(): Couldn't fetch mysqli in %s on line %d
 done!
