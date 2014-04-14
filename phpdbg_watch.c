@@ -616,14 +616,21 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 			switch (watch->type) {
 				case WATCH_ON_ZVAL: {
 					int removed = ((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc && !zend_symtable_exists(watch->parent_container, watch->name_in_parent, watch->name_in_parent_len + 1);
+					int show_value = memcmp(oldPtr, watch->addr.zv, sizeof(zvalue_value));
+					int show_ref = ((zval *)oldPtr)->refcount__gc != watch->addr.zv->refcount__gc || ((zval *)oldPtr)->is_ref__gc != watch->addr.zv->is_ref__gc;
 
-					phpdbg_write("Old value: ");
-					if ((Z_TYPE_P((zval *)oldPtr) == IS_ARRAY || Z_TYPE_P((zval *)oldPtr) == IS_OBJECT) && removed) {
-						phpdbg_write("Value inaccessible, HashTable already destroyed");
-					} else {
-						zend_print_flat_zval_r((zval *)oldPtr TSRMLS_CC);
+					if (removed || show_value) {
+						phpdbg_write("Old value: ");
+						if ((Z_TYPE_P((zval *)oldPtr) == IS_ARRAY || Z_TYPE_P((zval *)oldPtr) == IS_OBJECT) && removed) {
+							phpdbg_writeln("Value inaccessible, HashTable already destroyed");
+						} else {
+							zend_print_flat_zval_r((zval *)oldPtr TSRMLS_CC);
+							phpdbg_writeln("");
+						}
 					}
-					phpdbg_writeln("\nOld refcount: %d; Old is_ref: %d", ((zval *)oldPtr)->refcount__gc, ((zval *)oldPtr)->is_ref__gc);
+					if (removed || show_ref) {
+						phpdbg_writeln("Old refcount: %d; Old is_ref: %d", ((zval *)oldPtr)->refcount__gc, ((zval *)oldPtr)->is_ref__gc);
+					}
 
 					/* check if zval was removed */
 					if (removed) {
@@ -639,9 +646,14 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 						break;
 					}
 
-					phpdbg_write("New value: ");
-					zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
-					phpdbg_writeln("\nNew refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);
+					if (show_value) {
+						phpdbg_write("New value: ");
+						zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
+						phpdbg_writeln("");
+					}
+					if (show_ref) {
+						phpdbg_writeln("New refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);
+					}
 
 					if ((Z_TYPE_P(watch->addr.zv) == IS_ARRAY && Z_ARRVAL_P(watch->addr.zv) != Z_ARRVAL_P((zval *)oldPtr)) || (Z_TYPE_P(watch->addr.zv) != IS_OBJECT && Z_OBJ_HANDLE_P(watch->addr.zv) == Z_OBJ_HANDLE_P((zval *)oldPtr))) {
 						/* add new watchpoints if necessary */
