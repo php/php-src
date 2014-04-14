@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.6.0 Beta 2
 
 - Core:
+  . Fixed bug #64604 (parse_url is inconsistent with specified port).
+    (Ingo Walz)
   . Fixed bug #66015 (Unexpected array indexing in class's static property). (Bob)
   . Added (constant) string/array dereferencing to static scalar expressions
     to complete the set; now possible thanks to bug #66015 being fixed. (Bob)
