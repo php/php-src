@@ -1192,6 +1192,8 @@ phpdbg_main:
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
 			SG(request_info).argv[i] = exec ? estrndup(exec, exec_len) : estrdup("");
+
+			php_hash_environment(TSRMLS_C);
 		}
 		
 		/* do not install sigint handlers for remote consoles */

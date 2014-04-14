@@ -56,8 +56,8 @@ typedef enum {
 } phpdbg_watchtype;
 
 
-#define PHPDBG_WATCH_SIMPLE	0
-#define PHPDBG_WATCH_RECURSIVE	1
+#define PHPDBG_WATCH_SIMPLE	0x0
+#define PHPDBG_WATCH_RECURSIVE	0x1
 
 typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
 

@@ -70,7 +70,13 @@ array_walk($array, function (&$item) {
 		$item -= 1;
 });
 
-$obj = (object)["a" => 2, "b" => 5, "c" => 7];
+class testClass {
+	public $a = 2;
+	protected  $b = [1, 3];
+	private $c = 7;
+}
+
+$obj = new testClass;
 
 $test = $obj->a;
 
