@@ -2000,7 +2000,7 @@ sxe_object_clone(zend_object *object TSRMLS_DC)
 
 /* {{{ sxe_object_dtor()
  */
-static void sxe_object_dtor(void *object TSRMLS_DC)
+static void sxe_object_dtor(zend_object *object TSRMLS_DC)
 {
 	/* dtor required to cleanup iterator related data properly */
 	php_sxe_object *sxe;
@@ -2029,7 +2029,7 @@ static void sxe_object_dtor(void *object TSRMLS_DC)
 
 /* {{{ sxe_object_free_storage()
  */
-static void sxe_object_free_storage(void *object TSRMLS_DC)
+static void sxe_object_free_storage(zend_object *object TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 
@@ -2047,8 +2047,6 @@ static void sxe_object_free_storage(void *object TSRMLS_DC)
 		zend_hash_destroy(sxe->properties);
 		FREE_HASHTABLE(sxe->properties);
 	}
-
-	efree(sxe);
 }
 /* }}} */
 
@@ -2068,6 +2066,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 	intern->fptr_count = NULL;
 
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
+	object_properties_init(&intern->zo, ce);
 
 	while (parent) {
 		if (parent == sxe_class_entry) {
@@ -2077,7 +2076,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC)
 		parent = parent->parent;
 		inherited = 1;
 	}
-
+	
 	if (inherited) {
 		intern->fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
 		if (intern->fptr_count->common.scope == parent) {
@@ -2095,6 +2094,7 @@ static zend_object *
 php_sxe_register_object(php_sxe_object *intern TSRMLS_DC)
 {
 	zend_objects_store_put(&intern->zo TSRMLS_CC);
+	intern->zo.handlers = &sxe_object_handlers;
 	return &intern->zo;
 }
 /* }}} */
@@ -2578,6 +2578,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
 	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, zend_ce_traversable);
+	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
 	sxe_object_handlers.dtor_obj = sxe_object_dtor;
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
 	sxe_object_handlers.clone_obj = sxe_object_clone;
