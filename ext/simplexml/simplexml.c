@@ -457,7 +457,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 	int				new_value = 0;
 	long            cnt = 0;
 	int				retval = SUCCESS;
-	zval            tmp_zv, trim_zv, value_copy;
+	zval            tmp_zv, trim_zv, zval_copy;
 
 	sxe = Z_SXEOBJ_P(object);
 
@@ -535,7 +535,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
 					//???
-					value = sxe_get_value(value, value TSRMLS_CC);
+					value = sxe_get_value(value, &zval_copy TSRMLS_CC);
 					//INIT_PZVAL(value);
 					new_value = 1;
 					break;
@@ -656,9 +656,6 @@ next_iter:
 	}
 	if (pnewnode) {
 		*pnewnode = newnode;
-	}
-	if (value && value == &value_copy) {
-		zval_ptr_dtor(value);
 	}
 	if (new_value) {
 		zval_ptr_dtor(value);
@@ -816,9 +813,9 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 			}
 			if (node) {
 				exists = 1;
-                                if (check_empty == 1 &&
+				if (check_empty == 1 &&
 					(!node->children || (node->children->type == XML_TEXT_NODE && !node->children->next &&
-						(!node->children->content || !node->children->content[0] || !xmlStrcmp(node->children->content, "0")))) ) {
+					 (!node->children->content || !node->children->content[0] || !xmlStrcmp(node->children->content, "0")))) ) {
 					exists = 0;
 				}
 			}
