@@ -163,10 +163,6 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval TSRMLS
 	zend_call_method_with_1_params(object, ce, &ce->__get, ZEND_GET_FUNC_NAME, retval, member);
 
 	zval_ptr_dtor(member);
-
-//???	if (Z_REFCOUNTED_P(retval)) {
-//???		Z_DELREF_P(retval);
-//???	}
 }
 /* }}} */
 
@@ -481,25 +477,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 				retval = rv;
 				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					if (Z_REFCOUNTED_P(rv) && Z_REFCOUNT_P(rv) > 1) {
-
-						SEPARATE_ZVAL(rv);
-
-//???						if (Z_TYPE_P(rv) == IS_OBJECT ||
-//???						    Z_TYPE_P(rv) == IS_RESOURCE) {
-//???							Z_ADDREF_P(rv);
-//???						} else {
-//???							zval_copy_ctor(rv);
-//???							Z_SET_REFCOUNT_P(rv, 1);
-//???						}
-
-//???						zval *tmp = rv;
-//???
-//???						ALLOC_ZVAL(rv);
-//???						ZVAL_DUP(rv, tmp);
-//???						Z_UNSET_ISREF_P(rv);
-//???						Z_SET_REFCOUNT_P(rv, 0);
-					}
+					SEPARATE_ZVAL(rv);
 					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", zobj->ce->name->val, Z_STRVAL_P(member));
 					}
@@ -688,10 +666,6 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv TSR
 			}
 			return NULL;
 		}
-
-		/* Undo PZVAL_LOCK() */
-//???		if (Z_REFCOUNTED_P(rv)) Z_DELREF_P(rv);
-
 		return rv;
 	} else {
 		zend_error_noreturn(E_ERROR, "Cannot use object of type %s as array", ce->name->val);
@@ -1552,18 +1526,13 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					return FAILURE;
 				}
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
-//???					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
 						zval_ptr_dtor(readobj);
 					}
 					ZVAL_COPY_VALUE(writeobj, &retval);
-					if (Z_TYPE_P(writeobj) != type) {
-						convert_to_explicit_type(writeobj, type);
-					}
 					return SUCCESS;
 				} else {
 					zval_ptr_dtor(&retval);
-//???					INIT_PZVAL(writeobj);
 					if (readobj == writeobj) {
 						zval_ptr_dtor(readobj);
 					}

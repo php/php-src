@@ -522,7 +522,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						zend_string *s = STR_INIT(actual, actual_len, 0);
-//???						STR_RELEASE(Z_STR_P(p));
+						STR_RELEASE(Z_STR_P(p));
 						Z_STR_P(p) = s;
 						Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
 					}

@@ -553,7 +553,6 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			zval *ret = EX_VAR(opline->result.var);
 
 			ZVAL_NULL(ret);
-//???			ret->var.ptr_ptr = &ret->var.ptr;
 			Z_VAR_FLAGS_P(ret) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 
 			if (!zend_execute_internal) {
@@ -567,7 +566,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 				zval_ptr_dtor(ret);
 			}
 		} else if (RETURN_VALUE_USED(opline)) {
-//???			EX_T(opline->result.var).var.ptr = NULL;
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		zval *return_value = NULL;
@@ -578,7 +577,6 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			return_value = EX_VAR(opline->result.var);
 
 			ZVAL_NULL(return_value);
-//???			ret->var.ptr_ptr = &ret->var.ptr;
 			Z_VAR_FLAGS_P(return_value) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
 		}
 
@@ -622,7 +620,6 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 //???			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
 //???			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
 			Z_VAR_FLAGS_P(EX_VAR(opline->result.var)) = 0;
-//???			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
 		}
 	}
 
@@ -832,7 +829,6 @@ send_again:
 			}
 
 unpack_iter_dtor:
-//???			iter->funcs->dtor(iter TSRMLS_CC);
 			zend_iterator_dtor(iter TSRMLS_CC);
 			break;
 		}
@@ -2600,11 +2596,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 		if (IS_CONST == IS_VAR && !Z_ISREF_P(retval_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			    (Z_VAR_FLAGS_P(retval_ptr) & IS_VAR_RET_REF)) {
-//???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
-//???					ZVAL_DUP(EX(return_value), retval_ptr);
 					zval tmp;
 					ZVAL_DUP(&tmp, retval_ptr);
 					ZVAL_NEW_REF(EX(return_value), &tmp);
@@ -2744,7 +2738,6 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
-//???		Z_SET_ISREF_P(retval);
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -3569,8 +3562,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -4242,9 +4234,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 				 * not return by reference we throw a notice. */
 				if (IS_CONST == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -4256,17 +4246,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 			zval *value = opline->op1.zv;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CONST == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CONST == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CONST == IS_CV) {
@@ -4286,19 +4271,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CONST == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CONST == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -4306,7 +4290,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -4895,9 +4878,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_CONST == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -4909,17 +4890,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = opline->op1.zv;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CONST == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CONST == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CONST == IS_CV) {
@@ -4939,19 +4915,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CONST == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -4959,7 +4934,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -5326,8 +5300,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -5846,9 +5819,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_CONST == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -5860,17 +5831,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = opline->op1.zv;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CONST == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CONST == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CONST == IS_CV) {
@@ -5890,19 +5856,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+			zval_ptr_dtor_nogc(free_op2.var);
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CONST == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -5910,8 +5875,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
-		zval_ptr_dtor_nogc(free_op2.var);
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -6002,8 +5965,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -6507,9 +6469,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 				 * not return by reference we throw a notice. */
 				if (IS_CONST == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -6521,17 +6481,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 			zval *value = opline->op1.zv;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CONST == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CONST == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CONST == IS_CV) {
@@ -6551,19 +6506,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_UNUSED == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CONST == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -6571,7 +6525,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -7212,9 +7165,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 				 * not return by reference we throw a notice. */
 				if (IS_CONST == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -7226,17 +7177,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 			zval *value = opline->op1.zv;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CONST == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CONST == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CONST == IS_CV) {
@@ -7256,19 +7202,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CV == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CONST == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -7276,7 +7221,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -7588,11 +7532,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(retval_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			    (Z_VAR_FLAGS_P(retval_ptr) & IS_VAR_RET_REF)) {
-//???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
-//???					ZVAL_DUP(EX(return_value), retval_ptr);
 					zval tmp;
 					ZVAL_DUP(&tmp, retval_ptr);
 					ZVAL_NEW_REF(EX(return_value), &tmp);
@@ -7733,7 +7675,6 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
-//???		Z_SET_ISREF_P(retval);
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -8608,8 +8549,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -9142,9 +9082,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -9156,17 +9094,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!1) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_TMP_VAR == IS_CV) {
@@ -9186,19 +9119,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CONST == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -9206,7 +9138,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -9795,9 +9726,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 				 * not return by reference we throw a notice. */
 				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -9809,17 +9738,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!1) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_TMP_VAR == IS_CV) {
@@ -9839,19 +9763,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zval *key = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -9859,7 +9782,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -10226,8 +10148,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -10746,9 +10667,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 				 * not return by reference we throw a notice. */
 				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -10760,17 +10679,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!1) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_TMP_VAR == IS_CV) {
@@ -10790,19 +10704,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zval *key = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+			zval_ptr_dtor_nogc(free_op2.var);
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -10810,8 +10723,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
-		zval_ptr_dtor_nogc(free_op2.var);
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -10902,8 +10813,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -11275,9 +11185,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 				 * not return by reference we throw a notice. */
 				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -11289,17 +11197,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!1) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_TMP_VAR == IS_CV) {
@@ -11319,19 +11222,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_UNUSED == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -11339,7 +11241,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -11925,9 +11826,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				 * not return by reference we throw a notice. */
 				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -11939,17 +11838,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval *value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!1) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_TMP_VAR == IS_CV) {
@@ -11969,19 +11863,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CV == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_TMP_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -11989,7 +11882,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -12497,11 +12389,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		if (IS_VAR == IS_VAR && !Z_ISREF_P(retval_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			    (Z_VAR_FLAGS_P(retval_ptr) & IS_VAR_RET_REF)) {
-//???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
-//???					ZVAL_DUP(EX(return_value), retval_ptr);
 					zval tmp;
 					ZVAL_DUP(&tmp, retval_ptr);
 					ZVAL_NEW_REF(EX(return_value), &tmp);
@@ -12559,13 +12449,8 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_AR
 	varptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-//???		if (IS_VAR == IS_CV ||
-//???		    (IS_VAR == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
-			ZVAL_DUP(top, Z_REFVAL_P(varptr));
-			zval_ptr_dtor_nogc(free_op1.var);
-//???		} else {
-//???			varptr = Z_REFVAL_P(varptr);
-//???		}
+		ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		zval_ptr_dtor_nogc(free_op1.var);
 	} else {
 		if (IS_VAR == IS_CV) {
 			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
@@ -12769,7 +12654,6 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
-//???		Z_SET_ISREF_P(retval);
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -14288,8 +14172,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -15330,19 +15213,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CONST == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CONST == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -15636,9 +15511,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -15651,18 +15524,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
-
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 				zval_ptr_dtor_nogc(free_op1.var);
 			} else {
 				if (IS_VAR == IS_CV) {
@@ -15682,19 +15549,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CONST == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -15702,7 +15568,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -17335,19 +17200,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_TMP_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_TMP_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_dtor(free_op2.var);
-//???			}
+			zval_dtor(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -17563,9 +17420,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 				 * not return by reference we throw a notice. */
 				if (IS_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -17578,18 +17433,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
-
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 				zval_ptr_dtor_nogc(free_op1.var);
 			} else {
 				if (IS_VAR == IS_CV) {
@@ -17609,19 +17458,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zval *key = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -17629,7 +17477,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -18530,8 +18377,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -19545,19 +19391,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_ptr_dtor_nogc(free_op2.var);
-//???			}
+			zval_ptr_dtor_nogc(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -19852,9 +19690,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 				 * not return by reference we throw a notice. */
 				if (IS_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -19867,18 +19703,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
-
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 				zval_ptr_dtor_nogc(free_op1.var);
 			} else {
 				if (IS_VAR == IS_CV) {
@@ -19898,19 +19728,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zval *key = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+			zval_ptr_dtor_nogc(free_op2.var);
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -19918,8 +19747,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
-		zval_ptr_dtor_nogc(free_op2.var);
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -20363,8 +20190,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -21011,9 +20837,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 				 * not return by reference we throw a notice. */
 				if (IS_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -21026,18 +20850,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
-
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 				zval_ptr_dtor_nogc(free_op1.var);
 			} else {
 				if (IS_VAR == IS_CV) {
@@ -21057,19 +20875,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_UNUSED == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -21077,7 +20894,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -22764,19 +22580,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CV == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CV == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CV == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -22991,9 +22799,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				 * not return by reference we throw a notice. */
 				if (IS_VAR == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -23006,18 +22812,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval *value = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_VAR == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_VAR == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
-
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 				zval_ptr_dtor_nogc(free_op1.var);
 			} else {
 				if (IS_VAR == IS_CV) {
@@ -23037,19 +22837,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CV == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_VAR == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -23057,7 +22856,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -23133,7 +22931,6 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
-//???		Z_SET_ISREF_P(retval);
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -24176,19 +23973,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CONST == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CONST == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -24403,9 +24192,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 				 * not return by reference we throw a notice. */
 				if (IS_UNUSED == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -24417,17 +24204,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 			zval *value = NULL;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_UNUSED == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_UNUSED == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_UNUSED == IS_CV) {
@@ -24447,19 +24229,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CONST == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -24467,7 +24248,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -25421,19 +25201,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_TMP_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_TMP_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_dtor(free_op2.var);
-//???			}
+			zval_dtor(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -25649,9 +25421,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 				 * not return by reference we throw a notice. */
 				if (IS_UNUSED == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -25663,17 +25433,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			zval *value = NULL;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_UNUSED == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_UNUSED == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_UNUSED == IS_CV) {
@@ -25693,19 +25458,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		zval *key = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -25713,7 +25477,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -26667,19 +26430,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_ptr_dtor_nogc(free_op2.var);
-//???			}
+			zval_ptr_dtor_nogc(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -26895,9 +26650,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 				 * not return by reference we throw a notice. */
 				if (IS_UNUSED == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -26909,17 +26662,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			zval *value = NULL;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_UNUSED == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_UNUSED == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_UNUSED == IS_CV) {
@@ -26939,19 +26687,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		zval *key = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+			zval_ptr_dtor_nogc(free_op2.var);
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -26959,8 +26706,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
-		zval_ptr_dtor_nogc(free_op2.var);
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -27401,9 +27146,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 				 * not return by reference we throw a notice. */
 				if (IS_UNUSED == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -27415,17 +27158,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 			zval *value = NULL;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_UNUSED == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_UNUSED == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_UNUSED == IS_CV) {
@@ -27445,19 +27183,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_UNUSED == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -27465,7 +27202,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -28412,19 +28148,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CV == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CV == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CV == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -28639,9 +28367,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_UNUSED == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -28653,17 +28379,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = NULL;
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_UNUSED == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_UNUSED == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_UNUSED == IS_CV) {
@@ -28683,19 +28404,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CV == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_UNUSED == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -28703,7 +28423,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -29192,11 +28911,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 		if (IS_CV == IS_VAR && !Z_ISREF_P(retval_ptr)) {
 			if (opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			    (Z_VAR_FLAGS_P(retval_ptr) & IS_VAR_RET_REF)) {
-//???			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 			} else {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
-//???					ZVAL_DUP(EX(return_value), retval_ptr);
 					zval tmp;
 					ZVAL_DUP(&tmp, retval_ptr);
 					ZVAL_NEW_REF(EX(return_value), &tmp);
@@ -29253,13 +28970,8 @@ static int ZEND_FASTCALL zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARG
 	varptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (Z_ISREF_P(varptr)) {
-//???		if (IS_CV == IS_CV ||
-//???		    (IS_CV == IS_VAR && Z_REFCOUNT_P(varptr) > 2)) {
-			ZVAL_DUP(top, Z_REFVAL_P(varptr));
+		ZVAL_DUP(top, Z_REFVAL_P(varptr));
 
-//???		} else {
-//???			varptr = Z_REFVAL_P(varptr);
-//???		}
 	} else {
 		if (IS_CV == IS_CV) {
 			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
@@ -29451,7 +29163,6 @@ static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
-//???		Z_SET_ISREF_P(retval);
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -30827,8 +30538,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -31658,19 +31368,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CONST == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CONST == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -31964,9 +31666,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				 * not return by reference we throw a notice. */
 				if (IS_CV == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -31978,17 +31678,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CV == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CV == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CV == IS_CV) {
@@ -32008,19 +31703,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		zval *key = opline->op2.zv;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CONST == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CONST == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CV == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -32028,7 +31722,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -33545,19 +33238,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_TMP_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_TMP_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (1) {
-//????			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_dtor(free_op2.var);
-//???			}
+			zval_dtor(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -33773,9 +33458,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				 * not return by reference we throw a notice. */
 				if (IS_CV == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -33787,17 +33470,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CV == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CV == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CV == IS_CV) {
@@ -33817,19 +33495,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zval *key = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_TMP_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_TMP_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CV == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -33837,7 +33514,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -34737,8 +34413,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -35636,19 +35311,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_VAR == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_VAR == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
-				zval_ptr_dtor_nogc(free_op2.var);
-//???			}
+			zval_ptr_dtor_nogc(free_op2.var);
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -35943,9 +35610,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				 * not return by reference we throw a notice. */
 				if (IS_CV == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -35957,17 +35622,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CV == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CV == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CV == IS_CV) {
@@ -35987,19 +35647,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zval *key = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_VAR == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_VAR == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
+			zval_ptr_dtor_nogc(free_op2.var);
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CV == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -36007,8 +35666,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
-		zval_ptr_dtor_nogc(free_op2.var);
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -36451,8 +36108,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		/* GLOBAL or $$name variable may be an INDIRECT pointer to CV */
-		} else if (/* ??? (opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_STATIC &&*/
-			Z_TYPE_P(retval) == IS_INDIRECT) {
+		} else if (Z_TYPE_P(retval) == IS_INDIRECT) {
 			retval = Z_INDIRECT_P(retval);
 			if (Z_TYPE_P(retval) == IS_UNDEF) {
 				switch (type) {
@@ -36967,9 +36623,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 				 * not return by reference we throw a notice. */
 				if (IS_CV == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -36981,17 +36635,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 			zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CV == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CV == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CV == IS_CV) {
@@ -37011,19 +36660,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		zval *key = NULL;
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_UNUSED == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_UNUSED == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CV == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -37031,7 +36679,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;
@@ -38601,19 +38248,11 @@ num_index_dim:
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
 				zend_error_noreturn(E_ERROR, "Cannot use object as array");
 			}
-//???			if (0) {
-//????			if (IS_CV == IS_CONST) {
-//????				ZVAL_DUP(offset, offset);
-//????			} else if (IS_CV == IS_TMP_VAR) {
-//???				MAKE_REAL_ZVAL_PTR(offset);
+//???			if (IS_CV == IS_CONST) {
+//???				zval_copy_ctor(offset);
 //???			}
 			Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
-//???			if (0) {
-//????			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
-//???				zval_ptr_dtor(offset);
-//???			} else {
 
-//???			}
 			break;
 		case IS_STRING:
 		case IS_STR_OFFSET:
@@ -38828,9 +38467,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				 * not return by reference we throw a notice. */
 				if (IS_CV == IS_VAR && !Z_ISREF_P(value_ptr)
 				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
-				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))
-//???				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
-) {
+				         && (Z_VAR_FLAGS_P(value_ptr) & IS_VAR_RET_REF))) {
 					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 				} else {
 					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
@@ -38842,17 +38479,12 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			zval *value = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
 			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-				|| Z_ISREF_P(value)
-			) {
-//???				INIT_PZVAL_COPY(copy, value);
+			if (IS_CV == IS_CONST) {
+				ZVAL_DUP(&generator->value, value);
+			} else if (IS_CV == IS_TMP_VAR) {
 				ZVAL_COPY_VALUE(&generator->value, value);
-				if (Z_OPT_REFCOUNTED(generator->value)) Z_SET_REFCOUNT(generator->value, 1);
-
-				/* Temporary variables don't need ctor copying */
-				if (!0) {
-					zval_copy_ctor(&generator->value);
-				}
+            } else if (Z_ISREF_P(value)) {
+				ZVAL_DUP(&generator->value, Z_REFVAL_P(value));
 
 			} else {
 				if (IS_CV == IS_CV) {
@@ -38872,19 +38504,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zval *key = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (Z_ISREF_P(key) && Z_REFCOUNT_P(key) > 0)
-		) {
-//???			INIT_PZVAL_COPY(copy, key);
+		if (IS_CV == IS_CONST) {
+			ZVAL_DUP(&generator->key, key);
+		} else if (IS_CV == IS_TMP_VAR) {
 			ZVAL_COPY_VALUE(&generator->key, key);
-			if (Z_OPT_REFCOUNTED(generator->key)) Z_SET_REFCOUNT(generator->key, 1);
+		} else if (Z_ISREF_P(key)) {
+			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(&generator->key);
-			}
 		} else {
-			ZVAL_COPY(&generator->key, key);
+			if (IS_CV == IS_CV) {
+				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
+			}
+			ZVAL_COPY_VALUE(&generator->key, key);
 		}
 
 		if (Z_TYPE(generator->key) == IS_LONG
@@ -38892,7 +38523,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		) {
 			generator->largest_used_integer_key = Z_LVAL(generator->key);
 		}
-
 	} else {
 		/* If no key was specified we use auto-increment keys */
 		generator->largest_used_integer_key++;

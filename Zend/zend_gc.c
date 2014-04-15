@@ -374,9 +374,6 @@ static void gc_mark_roots(TSRMLS_D)
 	while (current != &GC_G(roots)) {
 		if (GC_GET_COLOR(GC_INFO(current->ref)) == GC_PURPLE) {
 			gc_mark_grey(current->ref TSRMLS_CC);
-//???		} else {
-//???			GC_SET_ADDRESS(GC_INFO(current->ref), 0);
-//???			GC_REMOVE_FROM_ROOTS(current);
 		}
 		current = current->next;
 	}
@@ -486,9 +483,6 @@ tail_call:
 		if (GC_TYPE(ref) == IS_OBJECT && EG(objects_store).object_buckets) {
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
-
-			/* PURPLE instead of BLACK to prevent buffering in nested gc calls */
-//???			GC_SET_PURPLE(GC_INFO(obj));
 
 			if (EXPECTED(IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle]) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
