@@ -361,7 +361,8 @@ try_again:
 		}																					\
 	} else {																				\
 		if (Z_OBJ_HT_P(op)->get) {															\
-			zval *newop = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);								\
+			zval rv;																		\
+			zval *newop = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);							\
 			if (Z_TYPE_P(newop) != IS_OBJECT) {												\
 				/* for safety - avoid loop */												\
 				zval_dtor(op);																\
@@ -1628,7 +1629,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				}
 				if (Z_TYPE_P(op1) == IS_OBJECT) {
 					if (Z_OBJ_HT_P(op1)->get) {
-						op_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
+						zval rv;
+						op_free = Z_OBJ_HT_P(op1)->get(op1, &rv TSRMLS_CC);
 						ret = compare_function(result, op_free, op2 TSRMLS_CC);
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
@@ -1646,7 +1648,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				}
 				if (Z_TYPE_P(op2) == IS_OBJECT) {
 					if (Z_OBJ_HT_P(op2)->get) {
-						op_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
+						zval rv;
+						op_free = Z_OBJ_HT_P(op2)->get(op2, &rv TSRMLS_CC);
 						ret = compare_function(result, op1, op_free TSRMLS_CC);
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;

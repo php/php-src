@@ -12080,7 +12080,8 @@ static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -12129,7 +12130,8 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -12180,7 +12182,8 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -12227,7 +12230,8 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -13760,12 +13764,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -13843,7 +13848,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(int (*b
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -13895,7 +13901,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -14116,12 +14123,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -14213,12 +14221,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -16184,12 +16193,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -16267,7 +16277,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(int (*bin
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -16319,7 +16330,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -16540,12 +16552,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -16637,12 +16650,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -18217,12 +18231,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -18300,7 +18315,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(int (*bin
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -18352,7 +18368,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -18573,12 +18590,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -18670,12 +18688,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -20337,12 +20356,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -20420,7 +20440,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(int (*
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -20472,7 +20493,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -21785,12 +21807,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -21868,7 +21891,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CV(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -21920,7 +21944,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -22141,12 +22166,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -22238,12 +22264,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -23682,12 +23709,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -23764,7 +23792,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(int 
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -23816,7 +23845,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -24037,12 +24067,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -24134,12 +24165,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -25113,12 +25145,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -25195,7 +25228,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(int (*
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -25247,7 +25281,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -25468,12 +25503,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -25565,12 +25601,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -26455,12 +26492,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -26537,7 +26575,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(int (*
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -26589,7 +26628,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -26810,12 +26850,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -26907,12 +26948,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -27798,12 +27840,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -27880,7 +27923,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(int
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -27932,7 +27976,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -28310,12 +28355,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -28392,7 +28438,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(int (*b
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -28444,7 +28491,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -28665,12 +28713,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -28762,12 +28811,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -29646,7 +29696,8 @@ static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -29694,7 +29745,8 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -29744,7 +29796,8 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -29790,7 +29843,8 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -31152,12 +31206,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -31234,7 +31289,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CONST(int (*bi
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -31286,7 +31342,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -31507,12 +31564,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -31604,12 +31662,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -33359,12 +33418,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -33441,7 +33501,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_TMP(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -33493,7 +33554,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -33714,12 +33776,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -33811,12 +33874,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -35271,12 +35335,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -35353,7 +35418,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_VAR(int (*bina
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -35405,7 +35471,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -35626,12 +35693,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -35723,12 +35791,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -37269,12 +37338,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -37351,7 +37421,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(int (*b
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -37403,7 +37474,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -38582,12 +38654,13 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -38664,7 +38737,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CV(int (*binar
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -38716,7 +38790,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -38937,12 +39012,13 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -39034,12 +39110,13 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);

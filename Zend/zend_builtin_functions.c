@@ -696,7 +696,8 @@ repeat:
 		case IS_OBJECT:
 			if (Z_TYPE(val_free) == IS_UNDEF) {
 				if (Z_OBJ_HT_P(val)->get) {
-					val = Z_OBJ_HT_P(val)->get(val TSRMLS_CC);
+					zval rv;
+					val = Z_OBJ_HT_P(val)->get(val, &rv TSRMLS_CC);
 					ZVAL_COPY_VALUE(&val_free, val);
 					goto repeat;
 				} else if (Z_OBJ_HT_P(val)->cast_object) {

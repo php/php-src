@@ -136,8 +136,9 @@ again:
 						break;
 					}
 				} else if (Z_OBJ_HT_P(op)->get) {
-					zval *tmp = Z_OBJ_HT_P(op)->get(op TSRMLS_CC);
-					if(Z_TYPE_P(tmp) != IS_OBJECT) {
+					zval rv;
+					zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);
+					if (Z_TYPE_P(tmp) != IS_OBJECT) {
 						/* for safety - avoid loop */
 						convert_to_boolean(tmp);
 						result = Z_LVAL_P(tmp);

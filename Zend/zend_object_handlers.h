@@ -59,7 +59,7 @@ typedef void (*zend_object_set_t)(zval *object, zval *value TSRMLS_DC);
 /* Used to get object value. Can be used when converting object value to
  * one of the basic types and when using scalar ops (like ++, +=) on the object
  */
-typedef zval* (*zend_object_get_t)(zval *object TSRMLS_DC);
+typedef zval* (*zend_object_get_t)(zval *object, zval *rv TSRMLS_DC);
 
 /* Used to check if a property of the object exists */
 /* param has_set_exists:

@@ -280,7 +280,8 @@ again:
 					zval_ptr_dtor(&val);
 				}
 				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
-					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
+					zval rv;
+					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr, &rv TSRMLS_CC);
 
 					Z_ADDREF_P(z);
 					if (Z_TYPE_P(z) != IS_OBJECT) {

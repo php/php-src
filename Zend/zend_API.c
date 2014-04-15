@@ -281,7 +281,8 @@ static int parse_arg_object_to_string(zval *arg, char **p, int *pl, int type TSR
 	}
 	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
 		int use_copy;
-		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg TSRMLS_CC);
+		zval rv;
+		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv TSRMLS_CC);
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);
@@ -321,7 +322,8 @@ static int parse_arg_object_to_str(zval *arg, zend_string **str, int type TSRMLS
 	}
 	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
 		int use_copy;
-		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg TSRMLS_CC);
+		zval rv;
+		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv TSRMLS_CC);
 		Z_ADDREF_P(z);
 		if(Z_TYPE_P(z) != IS_OBJECT) {
 			zval_dtor(arg);

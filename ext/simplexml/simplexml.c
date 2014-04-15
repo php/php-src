@@ -54,7 +54,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce TSRMLS_DC);
 static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data TSRMLS_DC);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data TSRMLS_DC);
-static zval *sxe_get_value(zval *z TSRMLS_DC);
+static zval *sxe_get_value(zval *z, zval *rv TSRMLS_DC);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
 static zval *php_sxe_iterator_current_data(zend_object_iterator *iter TSRMLS_DC);
@@ -528,19 +528,14 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 			case IS_BOOL:
 			case IS_DOUBLE:
 			case IS_NULL:
-				if (Z_REFCOUNT_P(value) > 1) {
-					value_copy = *value;
-					zval_copy_ctor(&value_copy);
-					value = &value_copy;
-				}
 				convert_to_string(value);
 				break;
 			case IS_STRING:
 				break;
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == sxe_class_entry) {
-					value = sxe_get_value(value TSRMLS_CC);
 					//???
+					value = sxe_get_value(value, value TSRMLS_CC);
 					//INIT_PZVAL(value);
 					new_value = 1;
 					break;
@@ -1913,23 +1908,14 @@ SXE_METHOD(count)
 }
 /* }}} */
 
-static zval *sxe_get_value(zval *z TSRMLS_DC) /* {{{ */
+static zval *sxe_get_value(zval *z, zval *rv TSRMLS_DC) /* {{{ */
 {
-#if 0
-	?????
-	zval *retval;
-
-	MAKE_STD_ZVAL(retval);
-
-	if (sxe_object_cast(z, retval, IS_STRING TSRMLS_CC) == FAILURE) {
+	if (sxe_object_cast(z, rv, IS_STRING TSRMLS_CC) == FAILURE) {
 		zend_error(E_ERROR, "Unable to cast node to string");
 		/* FIXME: Should not be fatal */
 	}
 
-	Z_SET_REFCOUNT_P(retval, 0);
-	return retval;
-#endif
-	return NULL;
+	return rv;
 }
 /* }}} */
 

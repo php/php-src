@@ -388,12 +388,13 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			}
 			if (z) {
 				if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
-					zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
 						zval_dtor(z);
 					}
-					z = value;
+					ZVAL_COPY_VALUE(z, value);
 				}
 //???				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 				SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -471,7 +472,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -523,7 +525,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
 	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
 		/* proxy object */
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(objval);
 		binary_op(objval, objval, value TSRMLS_CC);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
@@ -744,12 +747,13 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL), &rv TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
 			SEPARATE_ZVAL_IF_NOT_REF(z);
@@ -841,12 +845,13 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			zval z_copy;
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+				zval rv;
+				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
 					zval_dtor(z);
 				}
-				z = value;
+				ZVAL_COPY_VALUE(z, value);
 			}
 			ZVAL_DUP(retval, z);
 			ZVAL_DUP(&z_copy, z);
@@ -912,7 +917,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -961,7 +967,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -1012,7 +1019,8 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_increment_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
@@ -1059,7 +1067,8 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	   && Z_OBJ_HANDLER_P(var_ptr, get)
 	   && Z_OBJ_HANDLER_P(var_ptr, set)) {
 		/* proxy object */
-		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr TSRMLS_CC);
+		zval rv;
+		zval *val = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
 		Z_ADDREF_P(val);
 		fast_decrement_function(val);
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
