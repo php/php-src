@@ -1023,18 +1023,18 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 	char *why = NULL;
 	char *input = NULL;
 	phpdbg_param_t stack;
-	
+
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
 	input = phpdbg_read_input(NULL TSRMLS_CC);
-	
+
 	if (input) {
 		do {
 			yyscan_t scanner;
 			YY_BUFFER_STATE state;
 
 			phpdbg_init_param(&stack, STACK_PARAM);
-	
+
 			if (yylex_init(&scanner)) {
 				phpdbg_error(
 					"could not initialize scanner");
@@ -1042,7 +1042,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			}
 
 			state = yy_scan_string(input, scanner);
-	 		
+
 			if (yyparse(&stack, scanner) <= 0) {
 				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
@@ -1053,7 +1053,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 								}
 							}
 						}
-						
+
 						if (why) {
 							free(why);
 							why = NULL;
@@ -1099,14 +1099,13 @@ last:
 
 out:
 	if (input) {
+		phpdbg_stack_free(&stack);
 		phpdbg_destroy_input(&input TSRMLS_CC);
 	}
 
 	if (why) {
 		free(why);
 	}
-	
-	phpdbg_stack_free(&stack);
 
 	if (EG(in_execution)) {
 		phpdbg_restore_frame(TSRMLS_C);
