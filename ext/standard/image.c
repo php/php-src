@@ -30,6 +30,9 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
+#ifdef PHP_WIN32
+#include "win32/php_stdint.h"
+#endif
 
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
@@ -163,6 +166,7 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
+		result->height   =  abs((int32_t)result->height);
 		result->bits     =  (((unsigned int)dim[15]) <<  8) +  ((unsigned int)dim[14]);
 	} else {
 		return NULL;

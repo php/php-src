@@ -589,14 +589,11 @@ typedef int (*zend_write_func_t)(const char *str, zend_size_t str_length);
 #define IS_STRING	6
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
-#define IS_CONSTANT_ARRAY	9
-#define IS_CONSTANT_AST		10
-#define IS_CALLABLE	11
+#define IS_CONSTANT_AST	9
+#define IS_CALLABLE	10
 
-/* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f
 #define IS_CONSTANT_UNQUALIFIED		0x010
-#define IS_CONSTANT_INDEX			0x080
 #define IS_LEXICAL_VAR				0x020
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100

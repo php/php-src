@@ -2211,8 +2211,10 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 #else
 		switch (Z_TYPE_P(zvalue) & ~IS_CONSTANT_INDEX) {
 #endif
-			case IS_ARRAY:
-			case IS_CONSTANT_ARRAY: {
+#if ZEND_EXTENSION_API_NO <= PHP_5_5_API_NO
+			case IS_CONSTANT_ARRAY:
+#endif
+			case IS_ARRAY: {
 					TSRMLS_FETCH();
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO

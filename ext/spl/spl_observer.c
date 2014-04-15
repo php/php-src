@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_array.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_smart_str.h"
 #include "zend_interfaces.h"
@@ -623,11 +624,27 @@ SPL_METHOD(SplObjectStorage, contains)
 SPL_METHOD(SplObjectStorage, count)
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
-	if (zend_parse_parameters_none() == FAILURE) {
+	php_int_t mode = COUNT_NORMAL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &mode) == FAILURE) {
 		return;
 	}
-	
+
+	if (mode == COUNT_RECURSIVE) {
+		php_int_t ret = zend_hash_num_elements(&intern->storage);
+		HashPosition position;
+		zval *element;
+
+		for (zend_hash_internal_pointer_reset_ex(&intern->storage, &position);
+		     zend_hash_get_current_data_ex(&intern->storage, (void**) &element, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(&intern->storage, &position)) {
+			ret += php_count_recursive(element, mode TSRMLS_CC);
+		}
+
+		RETURN_INT(ret);
+		return;
+	}
+
 	RETURN_INT(zend_hash_num_elements(&intern->storage));
 } /* }}} */
 

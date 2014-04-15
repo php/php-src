@@ -1525,7 +1525,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	  We create always persistent, as if the user want to connecto
 	  to p:somehost, we can't convert the handle then
 	*/
-	if (!(mysql->mysql = mysql_init(TRUE)))
+	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, TRUE)))
 #endif
 	{
 		efree(mysql);
@@ -2617,7 +2617,7 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_store_result(object link)
+/* {{{ proto object mysqli_store_result(object link [, flags])
    Buffer result set on client */
 PHP_FUNCTION(mysqli_store_result)
 {
@@ -2625,13 +2625,19 @@ PHP_FUNCTION(mysqli_store_result)
 	MYSQL_RES		*result;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE	*mysqli_resource;
+	long flags = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &mysql_link, mysqli_link_class_entry, &flags) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
-	if (!(result = mysql_store_result(mysql->mysql))) {
+#if MYSQLI_USE_MYSQLND
+	result = flags & MYSQLI_STORE_RESULT_COPY_DATA? mysqlnd_store_result_ofs(mysql->mysql) : mysqlnd_store_result(mysql->mysql);
+#else
+	result = mysql_store_result(mysql->mysql);
+#endif
+	if (!result) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
 	}

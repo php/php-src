@@ -248,6 +248,8 @@ PHP_FUNCTION(curl_multi_getcontent)
 		smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
+
+        RETURN_EMPTY_STRING();
 }
 /* }}} */
 

@@ -64,9 +64,6 @@
 #define CASE_LOWER				0
 #define CASE_UPPER				1
 
-#define COUNT_NORMAL			0
-#define COUNT_RECURSIVE			1
-
 #define DIFF_NORMAL			1
 #define DIFF_KEY			2
 #define DIFF_ASSOC			6
@@ -274,7 +271,7 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-static php_int_t php_count_recursive(zval *array, php_int_t mode TSRMLS_DC) /* {{{ */
+PHPAPI php_int_t php_count_recursive(zval *array, php_int_t mode TSRMLS_DC) /* {{{ */
 {
 	php_int_t cnt = 0;
 	zval **element;
@@ -336,12 +333,17 @@ PHP_FUNCTION(count)
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
 			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
-				zend_call_method_with_0_params(&array, NULL, NULL, "count", &retval);
+				zval *mode_zv;
+				MAKE_STD_ZVAL(mode_zv);
+				ZVAL_INT(mode_zv, mode);
+				zend_call_method_with_1_params(&array, NULL, NULL, "count", &retval, mode_zv);
 				if (retval) {
 					convert_to_int_ex(&retval);
 					RETVAL_INT(Z_IVAL_P(retval));
 					zval_ptr_dtor(&retval);
 				}
+				zval_dtor(mode_zv);
+				efree(mode_zv);
 				return;
 			}
 #endif

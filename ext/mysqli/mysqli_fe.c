@@ -142,6 +142,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_rollback, 0, 0, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_store_result, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_store_result, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_change_user, 0, 0, 4)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 	ZEND_ARG_INFO(0, user)
@@ -498,7 +509,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_sqlstate,   							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_ssl_set,								arginfo_mysqli_ssl_set)
 	PHP_FE(mysqli_stat,									arginfo_mysqli_only_link)
-	PHP_FE(mysqli_store_result,							arginfo_mysqli_only_link)
+	PHP_FE(mysqli_store_result,							arginfo_mysqli_store_result)
 	PHP_FE(mysqli_thread_id,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_thread_safe,							arginfo_mysqli_no_params)
 	PHP_FE(mysqli_use_result,							arginfo_mysqli_only_link)
@@ -568,7 +579,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(ssl_set, mysqli_ssl_set, arginfo_class_mysqli_ssl_set)
 	PHP_FALIAS(stat, mysqli_stat, arginfo_mysqli_no_params)
 	PHP_FALIAS(stmt_init, mysqli_stmt_init, arginfo_mysqli_no_params)
-	PHP_FALIAS(store_result, mysqli_store_result, arginfo_mysqli_no_params)
+	PHP_FALIAS(store_result, mysqli_store_result, arginfo_class_store_result)
 	PHP_FALIAS(thread_safe, mysqli_thread_safe, arginfo_mysqli_no_params)
 	PHP_FALIAS(use_result, mysqli_use_result, arginfo_mysqli_no_params)
 	PHP_FALIAS(refresh,mysqli_refresh, arginfo_class_mysqli_refresh)
