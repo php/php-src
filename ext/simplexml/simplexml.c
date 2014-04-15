@@ -373,7 +373,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 	}
 
 	if (ZVAL_IS_UNDEF(rv)) {
-		return &EG(uninitialized_zval);
+		ZVAL_COPY_VALUE(rv, &EG(uninitialized_zval));
 	}
 
 	return rv;
