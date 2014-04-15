@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent 
     in its name). (PR #588) 
 
-?? ??? 2014, PHP 5.4.28
+01 May 2014, PHP 5.4.28
 
 - Core:
   . Fixed bug #61019 (Out of memory on command stream_get_contents). (Mike)
@@ -55,6 +55,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #66482 (unknown entry 'priority' in php-fpm.conf). 
+  . Fixed bug #67060 (sapi/fpm: possible privilege escalation due to insecure 
+    default configuration) (CVE-2014-0185). (Stas)
 
 - JSON:
   . Fixed bug #66021 (Blank line inside empty array/object when
