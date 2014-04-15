@@ -728,6 +728,10 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
+static void php_libxml_exports_dtor(zval *zv)
+{
+	free(Z_PTR_P(zv));
+}
 
 PHP_LIBXML_API void php_libxml_initialize(void)
 {
@@ -738,7 +742,7 @@ PHP_LIBXML_API void php_libxml_initialize(void)
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
 		xmlSetExternalEntityLoader(_php_libxml_pre_ext_ent_loader);
 
-		zend_hash_init(&php_libxml_exports, 0, NULL, NULL, 1);
+		zend_hash_init(&php_libxml_exports, 0, NULL, php_libxml_exports_dtor, 1);
 
 		_php_libxml_initialized = 1;
 	}
