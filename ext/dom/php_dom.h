@@ -84,12 +84,11 @@ typedef struct _dom_nnodemap_object {
 	xmlHashTable *ht;
 	xmlChar *local;
 	xmlChar *ns;
-	zval *baseobjptr;
 } dom_nnodemap_object;
 
 typedef struct {
-	zend_object_iterator     intern;
-	zval *curobj;
+	zend_object_iterator intern;
+	zval curobj;
 } php_dom_iterator;
 
 #include "dom_fe.h"
