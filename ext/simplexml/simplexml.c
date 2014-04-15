@@ -372,7 +372,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		zval_dtor(&tmp_zv);
 	}
 
-	if (ZVAL_IS_NULL(rv)) {
+	if (ZVAL_IS_UNDEF(rv)) {
 		return &EG(uninitialized_zval);
 	}
 
