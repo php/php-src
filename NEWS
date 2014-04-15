@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.5.13
+
+
 ?? ??? 2014, PHP 5.5.12
 - Core:
   . Fixed bug #61019 (Out of memory on command stream_get_contents). (Mike)
@@ -62,7 +65,7 @@ PHP                                                                        NEWS
     (APR issue https://issues.apache.org/bugzilla/show_bug.cgi?id=56120).
     (Jeff Trawick)
 
-?? ??? 2014, PHP 5.5.11
+03 Apr 2014, PHP 5.5.11
 
 - Core:
   . Allow zero length comparison in substr_compare() (Tjerk)
