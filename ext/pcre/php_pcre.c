@@ -1640,8 +1640,8 @@ static PHP_FUNCTION(preg_quote)
 	char	*in_str_end;    /* End of the input string */
 	int		 delim_len = 0;
 	char	*delim = NULL;	/* Additional delimiter argument */
-	char	*out_str,		/* Output string with quoted characters */
-		 	*p,				/* Iterator for input string */
+	zend_string	*out_str;	/* Output string with quoted characters */
+	char 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
 			 delim_char=0,	/* Delimiter character to be quoted */
 			 c;				/* Current character */
@@ -1667,10 +1667,10 @@ static PHP_FUNCTION(preg_quote)
 	
 	/* Allocate enough memory so that even if each character
 	   is quoted, we won't run out of room */
-	out_str = safe_emalloc(4, in_str_len, 1);
+	out_str = STR_SAFE_ALLOC(4, in_str_len, 0, 0);
 	
 	/* Go through the string and quote necessary characters */
-	for(p = in_str, q = out_str; p != in_str_end; p++) {
+	for (p = in_str, q = out_str->val; p != in_str_end; p++) {
 		c = *p;
 		switch(c) {
 			case '.':
@@ -1712,11 +1712,10 @@ static PHP_FUNCTION(preg_quote)
 		}
 	}
 	*q = '\0';
-	
+
 	/* Reallocate string and return it */
-//???	RETVAL_STRINGL(erealloc(out_str, q - out_str + 1), q - out_str, 0);
-	RETVAL_STRINGL(out_str, q - out_str);
-	efree(out_str);
+	out_str = STR_REALLOC(out_str, q - out_str->val, 0);
+	RETURN_STR(out_str);
 }
 /* }}} */
 
