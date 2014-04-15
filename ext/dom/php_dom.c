@@ -469,8 +469,8 @@ void *php_dom_export_node(zval *object TSRMLS_DC) /* {{{ */
 	php_libxml_node_object *intern;
 	xmlNodePtr nodep = NULL;
 
-	intern = (php_libxml_node_object *)zend_object_store_get_object(object TSRMLS_CC);
-	if (intern && intern->node) {
+	intern = Z_DOMOBJ_P(object);
+	if (intern->node) {
   		nodep = intern->node->node;
 	}
 
@@ -491,7 +491,7 @@ PHP_FUNCTION(dom_import_simplexml)
 		return;
 	}
 
-	nodeobj = (php_libxml_node_object *)zend_object_store_get_object(node TSRMLS_CC);
+	nodeobj = Z_DOMOBJ_P(node);
 	nodep = php_libxml_import_node(node TSRMLS_CC);
 
 	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {

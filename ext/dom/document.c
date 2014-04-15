@@ -280,7 +280,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-87CD092
 Since: 
 */
-int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_document_element_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	xmlNode *root;
@@ -306,7 +306,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-encoding
 Since: DOM Level 3
 */
-int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_encoding_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *encoding;
@@ -338,7 +338,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval TSMLRS_CC);
+	str = zval_get_string(newval TSRMLS_CC);
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -347,7 +347,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		if (docp->encoding != NULL) {
 			xmlFree((xmlChar *)docp->encoding);
 		}
-		docp->encoding = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
+		docp->encoding = xmlStrdup((const xmlChar *) str->val);
     } else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Document Encoding");
     }
@@ -363,10 +363,9 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-standalone
 Since: DOM Level 3
 */
-int dom_document_standalone_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_standalone_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlDoc *docp;
-	int standalone;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
@@ -375,47 +374,22 @@ int dom_document_standalone_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-	standalone = docp->standalone;
-	ZVAL_BOOL(*retval, standalone);
-
+	ZVAL_BOOL(retval, docp->standalone);
 	return SUCCESS;
 }
 
 int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	int standalone;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_long(newval);
-
-	standalone = Z_LVAL_P(newval);
-    if (standalone > 0) {
-        docp->standalone = 1;
-    }
-    else if (standalone < 0) {
-        docp->standalone = -1;
-    }
-    else {
-        docp->standalone = 0;
-    }
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
+	standalone = zval_get_long(newval TSRMLS_CC);
+	docp->standalone = ZEND_NORMALIZE_BOOL(standalone);
 
 	return SUCCESS;
 }
@@ -427,12 +401,10 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-version
 Since: DOM Level 3
 */
-int dom_document_version_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_version_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *version;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -440,12 +412,11 @@ int dom_document_version_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	version = (char *) docp->version;
-	ALLOC_ZVAL(*retval);
 
 	if (version != NULL) {
-		ZVAL_STRING(*retval, version, 1);
+		ZVAL_STRING(retval, version);
 	} else {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	}
 
 	return SUCCESS;
@@ -453,10 +424,8 @@ int dom_document_version_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	xmlDoc *docp;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
+	zend_string *str;
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -467,21 +436,11 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->version );
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	str = zval_get_string(newval TSRMLS_CC);
 
-	docp->version = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
+	docp->version = xmlStrdup((const xmlChar *) str->val);
 
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
-
+	STR_RELEASE(str);
 	return SUCCESS;
 }
 
@@ -492,39 +451,23 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-strictErrorChecking
 Since: DOM Level 3
 */
-int dom_document_strict_error_checking_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_strict_error_checking_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->stricterror);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->stricterror);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
 
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->stricterror = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->stricterror = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -535,39 +478,22 @@ int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRML
 /* {{{ formatOutput	boolean	
 readonly=no
 */
-int dom_document_format_output_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_format_output_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->formatoutput);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->formatoutput);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->formatoutput = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->formatoutput = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -577,39 +503,22 @@ int dom_document_format_output_write(dom_object *obj, zval *newval TSRMLS_DC)
 /* {{{ validateOnParse	boolean	
 readonly=no
 */
-int	dom_document_validate_on_parse_read(dom_object *obj, zval **retval TSRMLS_DC)
+int	dom_document_validate_on_parse_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->validateonparse);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->validateonparse);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->validateonparse = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->validateonparse = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -619,39 +528,22 @@ int dom_document_validate_on_parse_write(dom_object *obj, zval *newval TSRMLS_DC
 /* {{{ resolveExternals	boolean	
 readonly=no
 */
-int dom_document_resolve_externals_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_resolve_externals_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->resolveexternals);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->resolveexternals);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->resolveexternals = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->resolveexternals = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -661,39 +553,22 @@ int dom_document_resolve_externals_write(dom_object *obj, zval *newval TSRMLS_DC
 /* {{{ preserveWhiteSpace	boolean	
 readonly=no
 */
-int dom_document_preserve_whitespace_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_preserve_whitespace_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->preservewhitespace);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->preservewhitespace);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->preservewhitespace = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->preservewhitespace = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -703,39 +578,22 @@ int dom_document_preserve_whitespace_write(dom_object *obj, zval *newval TSRMLS_
 /* {{{ recover	boolean	
 readonly=no
 */
-int dom_document_recover_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_recover_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->recover);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->recover);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->recover = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->recover = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -745,39 +603,22 @@ int dom_document_recover_write(dom_object *obj, zval *newval TSRMLS_DC)
 /* {{{ substituteEntities	boolean	
 readonly=no
 */
-int dom_document_substitue_entities_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_substitue_entities_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	dom_doc_propsptr doc_prop;
-
-	ALLOC_ZVAL(*retval);
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		ZVAL_BOOL(*retval, doc_prop->substituteentities);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		ZVAL_BOOL(retval, doc_prop->substituteentities);
 	} else {
-		ZVAL_FALSE(*retval);
+		ZVAL_FALSE(retval);
 	}
 	return SUCCESS;
 }
 
 int dom_document_substitue_entities_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	dom_doc_propsptr doc_prop;
-
-	if(Z_REFCOUNT_P(newval) > 1) {
-		value_copy = *newval;
-		zval_copy_ctor(&value_copy);
-		newval = &value_copy;
-	}
-	convert_to_boolean(newval);
-
 	if (obj->document) {
-		doc_prop = dom_get_doc_props(obj->document);
-		doc_prop->substituteentities = Z_LVAL_P(newval);
-	}
-
-	if (newval == &value_copy) {
-		zval_dtor(newval);
+		dom_doc_propsptr doc_prop = dom_get_doc_props(obj->document);
+		doc_prop->substituteentities = zend_is_true(newval TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -789,24 +630,21 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-documentURI
 Since: DOM Level 3
 */
-int dom_document_document_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_document_uri_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *url;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
 	url = (char *) docp->URL;
 	if (url != NULL) {
-		ZVAL_STRING(*retval, url, 1);
+		ZVAL_STRING(retval, url);
 	} else {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	}
 
 	return SUCCESS;
@@ -814,10 +652,8 @@ int dom_document_document_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	xmlDoc *docp;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
+	zend_string *str;
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -828,21 +664,11 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->URL);
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	str = zval_get_string(newval TSRMLS_CC);
 
-	docp->URL = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
+	docp->URL = xmlStrdup((const xmlChar *) str->val);
 
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
-
+	STR_RELEASE(str);
 	return SUCCESS;
 }
 
@@ -853,10 +679,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-config
 Since: DOM Level 3
 */
-int dom_document_config_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_config_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -1128,7 +953,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
-	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL TSRMLS_CC);
 }
@@ -1337,7 +1162,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns)
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 	php_dom_create_interator(return_value, DOM_NODELIST TSRMLS_CC);
-	namednode = (dom_object *)zend_objects_get_address(return_value TSRMLS_CC);
+	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	nsuri = xmlCharStrndup(uri, uri_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, nsuri TSRMLS_CC);
@@ -1443,7 +1268,7 @@ PHP_METHOD(domdocument, __construct)
 		docp->encoding = (const xmlChar*)xmlStrdup(encoding);
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
 	if (intern != NULL) {
 		olddoc = (xmlDocPtr) dom_object_get_node(intern);
 		if (olddoc != NULL) {
@@ -1523,7 +1348,7 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source, int sourc
 	char *directory=NULL, resolved_path[MAXPATHLEN];
 
 	if (id != NULL) {
-		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		intern = Z_DOMOBJ_P(id);
 		document = intern->document;
 	}
 
@@ -1656,7 +1481,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 		RETURN_FALSE;
 
 	if (id != NULL) {
-		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		intern = Z_DOMOBJ_P(id);
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
@@ -1798,7 +1623,7 @@ PHP_FUNCTION(dom_document_savexml)
 			xmlBufferFree(buf);
 			RETURN_FALSE;
 		}
-		RETVAL_STRING(mem, 1);
+		RETVAL_STRING(mem);
 		xmlBufferFree(buf);
 	} else {
 		if (options & LIBXML_SAVE_NOEMPTYTAG) {
@@ -1813,7 +1638,7 @@ PHP_FUNCTION(dom_document_savexml)
 		if (!size) {
 			RETURN_FALSE;
 		}
-		RETVAL_STRINGL(mem, size, 1);
+		RETVAL_STRINGL(mem, size);
 		xmlFree(mem);
 	}
 }
@@ -2175,7 +2000,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 
 	if (id != NULL && instanceof_function(Z_OBJCE_P(id), dom_document_class_entry TSRMLS_CC)) {
-		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		intern = Z_DOMOBJ_P(id);
 		if (intern != NULL) {
 			docp = (xmlDocPtr) dom_object_get_node(intern);
 			doc_prop = NULL;
@@ -2320,7 +2145,7 @@ PHP_FUNCTION(dom_document_save_html)
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
-				RETVAL_STRINGL((const char*) mem, size, 1);
+				RETVAL_STRINGL((const char*) mem, size);
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error dumping HTML node");
@@ -2336,7 +2161,7 @@ PHP_FUNCTION(dom_document_save_html)
 		if (!size) {
 			RETVAL_FALSE;
 		} else {
-			RETVAL_STRINGL((const char*) mem, size, 1);
+			RETVAL_STRINGL((const char*) mem, size);
 		}
 		if (mem)
 			xmlFree(mem);
@@ -2353,47 +2178,22 @@ PHP_METHOD(domdocument, registerNodeClass)
 {
 	zval *id;
 	xmlDoc *docp;
-	char *baseclass = NULL, *extendedclass = NULL;
-	int baseclass_len = 0, extendedclass_len = 0;
-	zend_class_entry *basece = NULL, *ce = NULL;
+	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss!", &id, dom_document_class_entry, &baseclass, &baseclass_len, &extendedclass, &extendedclass_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OCs!", &id, dom_document_class_entry, &basece, &ce) == FAILURE) {
 		return;
-	}
-
-	if (baseclass_len) {
-		zend_class_entry **pce;
-		if (zend_lookup_class(baseclass, baseclass_len, &pce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", baseclass);
-			return;
-		}
-		basece = *pce;
-	}
-
-	if (basece == NULL || ! instanceof_function(basece, dom_node_class_entry TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from DOMNode.", baseclass);
-		return;
-	}
-
-	if (extendedclass_len) {
-		zend_class_entry **pce;
-		if (zend_lookup_class(extendedclass, extendedclass_len, &pce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s does not exist", extendedclass);
-		}
-		ce = *pce;
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece TSRMLS_CC)) {
-
 		DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
 		if (dom_set_doc_classmap(intern->document, basece, ce TSRMLS_CC) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be registered.", extendedclass);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be registered.", ce->name->val);
 		}
 		RETURN_TRUE;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from %s.", extendedclass, baseclass);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s is not derived from %s.", ce->name->val, basece->name->val);
 	}
 
 	RETURN_FALSE;
