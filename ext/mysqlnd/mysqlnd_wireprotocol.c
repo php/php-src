@@ -1761,7 +1761,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 /* {{{ php_mysqlnd_rowp_read_text_protocol_zval */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
 	enum_func_status ret;
@@ -1775,7 +1775,7 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 /* {{{ php_mysqlnd_rowp_read_text_protocol_c */
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									php_uint_t field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
 {
 	enum_func_status ret;
