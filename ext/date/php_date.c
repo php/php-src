@@ -2204,17 +2204,15 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
-				char *tmpstr = emalloc(sizeof("UTC+05:00"));
+				zend_string *tmpstr = STR_ALLOC(sizeof("UTC+05:00")-1, 0);
 				timelib_sll utc_offset = dateobj->time->z;
 
-				snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
+				tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
 					utc_offset > 0 ? '-' : '+',
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				// TODO: avoid reallocation ???
-				ZVAL_STRING(&zv, tmpstr);
-				efree(tmpstr);
+				ZVAL_STR(&zv, tmpstr);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
@@ -2299,16 +2297,14 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC) /*
 			ZVAL_STRING(&zv, tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			char *tmpstr = emalloc(sizeof("UTC+05:00"));
+			zend_string *tmpstr = STR_ALLOC(sizeof("UTC+05:00")-1, 0);
 
-			snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
+			tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
 			tzobj->tzi.utc_offset > 0 ? '-' : '+',
 			abs(tzobj->tzi.utc_offset / 60),
 			abs((tzobj->tzi.utc_offset % 60)));
 
-			// TODO: avoid reallocation ???
-			ZVAL_STRING(&zv, tmpstr);
-			efree(tmpstr);
+			ZVAL_STR(&zv, tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
@@ -3736,18 +3732,15 @@ PHP_FUNCTION(timezone_name_get)
 			RETURN_STRING(tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			char *tmpstr = emalloc(sizeof("UTC+05:00"));
+			zend_string *tmpstr = STR_ALLOC(sizeof("UTC+05:00")-1, 0);
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
 
-			snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
+			tmpstr->len = snprintf(tmpstr->val, sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset > 0 ? '-' : '+',
 				abs(utc_offset / 60),
 				abs((utc_offset % 60)));
 
-			// TODO: avoid reallocation ???
-			RETVAL_STRING(tmpstr);
-			efree(tmpstr);
-			return;
+			RETURN_STR(tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:

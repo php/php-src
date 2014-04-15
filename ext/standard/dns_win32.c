@@ -207,7 +207,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				DWORD i = 0;
 				DNS_TXT_DATA *data_txt = &pRec->Data.TXT;
 				DWORD count = data_txt->dwStringCount;
-				char *txt, *txt_dst;
+				zend_string *txt;
+				char *txt_dst;
 				long txt_len = 0;
 				zval *entries;
 
@@ -220,18 +221,16 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}
 
-				txt = ecalloc(txt_len * 2, 1);
-				txt_dst = txt;
+				txt = STR_SAFE_ALLOC(txt_len, 2, 0, 0);
+				txt_dst = txt->val;
 				for (i = 0; i < count; i++) {
 					int len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
 					add_next_index_stringl(entries, data_txt->pStringArray[i], len);
 					txt_dst += len;
 				}
-
-				// TODO: avoid reallocation ???
-				add_assoc_string(*subarray, "txt", txt);
-				efree(txt);
+				tct->len = txt_dst - txt->val;
+				add_assoc_str(*subarray, "txt", txt);
 				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;

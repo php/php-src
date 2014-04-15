@@ -83,7 +83,6 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	zend_string *res;
 	char *lc_pattern;
 
-	// TODO: overflow check???
 	res = STR_SAFE_ALLOC(Z_STRLEN_P(pattern), 2, 4, persistent);
 	t = res->val;
 

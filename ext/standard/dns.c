@@ -506,24 +506,24 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 			{
 				int ll = 0;
 				zval entries;
+				zend_string *tp;
 
 				add_assoc_string(subarray, "type", "TXT");
-				tp = emalloc(dlen + 1);
+				tp = STR_ALLOC(dlen, 0);
 				
 				array_init(&entries);
 				
 				while (ll < dlen) {
 					n = cp[ll];
-					memcpy(tp + ll , cp + ll + 1, n);
+					memcpy(tp->val + ll , cp + ll + 1, n);
 					add_next_index_stringl(&entries, (char*)cp + ll + 1, n);
 					ll = ll + n + 1;
 				}
-				tp[dlen] = '\0';
+				tp->val[dlen] = '\0';
+				tp->len = dlen;
 				cp += dlen;
 
-				// TODO: avoid reallocation ???
-				add_assoc_stringl(subarray, "txt", (char*)tp, (dlen>0)?dlen - 1:0);
-				efree(tp);
+				add_assoc_str(subarray, "txt", tp);
 				add_assoc_zval(subarray, "entries", &entries);
 			}
 			break;
