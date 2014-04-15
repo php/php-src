@@ -201,32 +201,6 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-//???
-#if 0
-ZEND_API zend_object *zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
-{
-	zend_object *obj, *new_object;
-//???	struct _store_object *obj;
-//???	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
-
-//???	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
-//???	if (obj->clone == NULL) {
-//???		zend_error(E_CORE_ERROR, "Trying to clone uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
-//???	}
-
-    obj = Z_OBJ_P(zobject);
-	new_object = obj->handlers->clone_obj(obj TSRMLS_CC);
-	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
-
-	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
-	retval.handlers = Z_OBJ_HT_P(zobject);
-	EG(objects_store).object_buckets[handle].bucket.obj.handlers = retval.handlers;
-
-	return retval;
-}
-#endif
-
 /* zend_object_store_set_object:
  * It is ONLY valid to call this function from within the constructor of an
  * overloaded object.  Its purpose is to set the object pointer for the object

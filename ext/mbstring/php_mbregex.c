@@ -749,7 +749,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			beg = regs->beg[i];
 			end = regs->end[i];
 			if (beg >= 0 && beg < end && end <= string_len) {
-				add_index_stringl(array, i, (char *)&str[beg], end - beg, 1);
+				add_index_stringl(array, i, (char *)&str[beg], end - beg);
 			} else {
 				add_index_bool(array, i, 0);
 			}
@@ -959,7 +959,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				
 				array_init(&subpats);
 				for (i = 0; i < regs->num_regs; i++) {
-					add_next_index_stringl(&subpats, string + regs->beg[i], regs->end[i] - regs->beg[i], 1);
+					add_next_index_stringl(&subpats, string + regs->beg[i], regs->end[i] - regs->beg[i]);
 				}				
 				
 				ZVAL_COPY_VALUE(&args[0], &subpats);
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(mb_split)
 		/* add it to the array */
 		if ((pos - (OnigUChar *)string) < end) {
 			if (beg < string_len && beg >= (chunk_pos - (OnigUChar *)string)) {
-				add_next_index_stringl(return_value, (char *)chunk_pos, ((OnigUChar *)(string + beg) - chunk_pos), 1);
+				add_next_index_stringl(return_value, (char *)chunk_pos, ((OnigUChar *)(string + beg) - chunk_pos));
 				--count;
 			} else {
 				err = -2;
@@ -1120,9 +1120,9 @@ PHP_FUNCTION(mb_split)
 	/* otherwise we just have one last element to add to the array */
 	n = ((OnigUChar *)(string + string_len) - chunk_pos);
 	if (n > 0) {
-		add_next_index_stringl(return_value, (char *)chunk_pos, n, 1);
+		add_next_index_stringl(return_value, (char *)chunk_pos, n);
 	} else {
-		add_next_index_stringl(return_value, "", 0, 1);
+		add_next_index_stringl(return_value, "", 0);
 	}
 }
 /* }}} */
@@ -1256,7 +1256,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				beg = MBREX(search_regs)->beg[i];
 				end = MBREX(search_regs)->end[i];
 				if (beg >= 0 && beg <= end && end <= len) {
-					add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
+					add_index_stringl(return_value, i, (char *)&str[beg], end - beg);
 				} else {
 					add_index_bool(return_value, i, 0);
 				}
@@ -1375,7 +1375,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 			beg = MBREX(search_regs)->beg[i];
 			end = MBREX(search_regs)->end[i];
 			if (beg >= 0 && beg <= end && end <= len) {
-				add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
+				add_index_stringl(return_value, i, (char *)&str[beg], end - beg);
 			} else {
 				add_index_bool(return_value, i, 0);
 			}

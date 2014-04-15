@@ -1440,7 +1440,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	}
 
 	if (return_output) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	} else {
 		zval_ptr_dtor(&retval);
 	}
@@ -1529,7 +1529,7 @@ ZEND_METHOD(reflection, export)
 	}
 
 	if (return_output) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	} else {
 		/* No need for _r variant, return of __toString should always be a string */
 		zend_print_zval(&retval, 0);
@@ -1552,30 +1552,30 @@ ZEND_METHOD(reflection, getModifierNames)
 	array_init(return_value);
 
 	if (modifiers & (ZEND_ACC_ABSTRACT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		add_next_index_stringl(return_value, "abstract", sizeof("abstract")-1, 1);
+		add_next_index_stringl(return_value, "abstract", sizeof("abstract")-1);
 	}
 	if (modifiers & (ZEND_ACC_FINAL | ZEND_ACC_FINAL_CLASS)) {
-		add_next_index_stringl(return_value, "final", sizeof("final")-1, 1);
+		add_next_index_stringl(return_value, "final", sizeof("final")-1);
 	}
 	if (modifiers & ZEND_ACC_IMPLICIT_PUBLIC) {
-		add_next_index_stringl(return_value, "public", sizeof("public")-1, 1);
+		add_next_index_stringl(return_value, "public", sizeof("public")-1);
 	}
 
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
-			add_next_index_stringl(return_value, "public", sizeof("public")-1, 1);
+			add_next_index_stringl(return_value, "public", sizeof("public")-1);
 			break;
 		case ZEND_ACC_PRIVATE:
-			add_next_index_stringl(return_value, "private", sizeof("private")-1, 1);
+			add_next_index_stringl(return_value, "private", sizeof("private")-1);
 			break;
 		case ZEND_ACC_PROTECTED:
-			add_next_index_stringl(return_value, "protected", sizeof("protected")-1, 1);
+			add_next_index_stringl(return_value, "protected", sizeof("protected")-1);
 			break;
 	}
 
 	if (modifiers & ZEND_ACC_STATIC) {
-		add_next_index_stringl(return_value, "static", sizeof("static")-1, 1);
+		add_next_index_stringl(return_value, "static", sizeof("static")-1);
 	}
 }
 /* }}} */
@@ -1928,7 +1928,7 @@ ZEND_METHOD(reflection_function, invoke)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -1994,7 +1994,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -2902,7 +2902,7 @@ ZEND_METHOD(reflection_method, invoke)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -3017,7 +3017,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -5292,7 +5292,7 @@ static int _addinientry(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 
 	if (number == ini_entry->module_number) {
 		if (ini_entry->value) {
-			add_assoc_stringl(retval, ini_entry->name, ini_entry->value, ini_entry->value_length, 1);
+			add_assoc_stringl(retval, ini_entry->name, ini_entry->value, ini_entry->value_length);
 		} else {
 			add_assoc_null(retval, ini_entry->name);
 		}

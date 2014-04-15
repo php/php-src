@@ -247,21 +247,21 @@ PHP_FUNCTION(readline_info)
 
 	if (!what) {
 		array_init(return_value);
-		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer),1);
+		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
 		add_assoc_long(return_value,"point",rl_point);
 		add_assoc_long(return_value,"end",rl_end);
 #ifdef HAVE_LIBREADLINE
 		add_assoc_long(return_value,"mark",rl_mark);
 		add_assoc_long(return_value,"done",rl_done);
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
-		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
-		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name),1);
+		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
+		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
-		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version),1);
-		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name),1);
+		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
+		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
 		add_assoc_long(return_value,"attempted_completion_over",rl_attempted_completion_over);
 	} else {
 		if (!strcasecmp(what,"line_buffer")) {
@@ -383,7 +383,7 @@ PHP_FUNCTION(readline_list_history)
 	if (history) {
 		int i;
 		for (i = 0; history[i]; i++) {
-			add_next_index_string(return_value,history[i]->line,1);
+			add_next_index_string(return_value,history[i]->line);
 		}
 	}
 }

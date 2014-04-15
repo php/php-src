@@ -248,7 +248,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
 		in = *(struct in_addr *) hp->h_addr_list[i];
-		add_next_index_string(return_value, inet_ntoa(in), 1);
+		add_next_index_string(return_value, inet_ntoa(in));
 	}
 }
 /* }}} */
@@ -446,60 +446,60 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 
 	array_init(subarray);
 
-	add_assoc_string(subarray, "host", name, 1);
-	add_assoc_string(subarray, "class", "IN", 1);
+	add_assoc_string(subarray, "host", name);
+	add_assoc_string(subarray, "class", "IN");
 	add_assoc_long(subarray, "ttl", ttl);
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) cp, (uint) dlen, 1);
+		add_assoc_stringl(subarray, "data", (char*) cp, (uint) dlen);
 		cp += dlen;
 		return cp;
 	}
 
 	switch (type) {
 		case DNS_T_A:
-			add_assoc_string(subarray, "type", "A", 1);
+			add_assoc_string(subarray, "type", "A");
 			snprintf(name, sizeof(name), "%d.%d.%d.%d", cp[0], cp[1], cp[2], cp[3]);
-			add_assoc_string(subarray, "ip", name, 1);
+			add_assoc_string(subarray, "ip", name);
 			cp += dlen;
 			break;
 		case DNS_T_MX:
-			add_assoc_string(subarray, "type", "MX", 1);
+			add_assoc_string(subarray, "type", "MX");
 			GETSHORT(n, cp);
 			add_assoc_long(subarray, "pri", n);
 			/* no break; */
 		case DNS_T_CNAME:
 			if (type == DNS_T_CNAME) {
-				add_assoc_string(subarray, "type", "CNAME", 1);
+				add_assoc_string(subarray, "type", "CNAME");
 			}
 			/* no break; */
 		case DNS_T_NS:
 			if (type == DNS_T_NS) {
-				add_assoc_string(subarray, "type", "NS", 1);
+				add_assoc_string(subarray, "type", "NS");
 			}
 			/* no break; */
 		case DNS_T_PTR:
 			if (type == DNS_T_PTR) {
-				add_assoc_string(subarray, "type", "PTR", 1);
+				add_assoc_string(subarray, "type", "PTR");
 			}
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
 			if (n < 0) {
 				return NULL;
 			}
 			cp += n;
-			add_assoc_string(subarray, "target", name, 1);
+			add_assoc_string(subarray, "target", name);
 			break;
 		case DNS_T_HINFO:
 			/* See RFC 1010 for values */
-			add_assoc_string(subarray, "type", "HINFO", 1);
+			add_assoc_string(subarray, "type", "HINFO");
 			n = *cp & 0xFF;
 			cp++;
-			add_assoc_stringl(subarray, "cpu", (char*)cp, n, 1);
+			add_assoc_stringl(subarray, "cpu", (char*)cp, n);
 			cp += n;
 			n = *cp & 0xFF;
 			cp++;
-			add_assoc_stringl(subarray, "os", (char*)cp, n, 1);
+			add_assoc_stringl(subarray, "os", (char*)cp, n);
 			cp += n;
 			break;
 		case DNS_T_TXT:
@@ -507,7 +507,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				int ll = 0;
 				zval entries;
 
-				add_assoc_string(subarray, "type", "TXT", 1);
+				add_assoc_string(subarray, "type", "TXT");
 				tp = emalloc(dlen + 1);
 				
 				array_init(&entries);
@@ -515,30 +515,32 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				while (ll < dlen) {
 					n = cp[ll];
 					memcpy(tp + ll , cp + ll + 1, n);
-					add_next_index_stringl(&entries, (char*)cp + ll + 1, n, 1);
+					add_next_index_stringl(&entries, (char*)cp + ll + 1, n);
 					ll = ll + n + 1;
 				}
 				tp[dlen] = '\0';
 				cp += dlen;
 
-				add_assoc_stringl(subarray, "txt", (char*)tp, (dlen>0)?dlen - 1:0, 0);
+				// TODO: avoid reallocation ???
+				add_assoc_stringl(subarray, "txt", (char*)tp, (dlen>0)?dlen - 1:0);
+				efree(tp);
 				add_assoc_zval(subarray, "entries", &entries);
 			}
 			break;
 		case DNS_T_SOA:
-			add_assoc_string(subarray, "type", "SOA", 1);
+			add_assoc_string(subarray, "type", "SOA");
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
 			if (n < 0) {
 				return NULL;
 			}
 			cp += n;
-			add_assoc_string(subarray, "mname", name, 1);
+			add_assoc_string(subarray, "mname", name);
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);
 			if (n < 0) {
 				return NULL;
 			}
 			cp += n;
-			add_assoc_string(subarray, "rname", name, 1);
+			add_assoc_string(subarray, "rname", name);
 			GETLONG(n, cp);
 			add_assoc_long(subarray, "serial", n);
 			GETLONG(n, cp);
@@ -580,12 +582,12 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				tp++;
 			}
 			tp[0] = '\0';
-			add_assoc_string(subarray, "type", "AAAA", 1);
-			add_assoc_string(subarray, "ipv6", name, 1);
+			add_assoc_string(subarray, "type", "AAAA");
+			add_assoc_string(subarray, "ipv6", name);
 			break;
 		case DNS_T_A6:
 			p = cp;
-			add_assoc_string(subarray, "type", "A6", 1);
+			add_assoc_string(subarray, "type", "A6");
 			n = ((int)cp[0]) & 0xFF;
 			cp++;
 			add_assoc_long(subarray, "masklen", n);
@@ -648,18 +650,18 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				tp++;
 			}
 			tp[0] = '\0';
-			add_assoc_string(subarray, "ipv6", name, 1);
+			add_assoc_string(subarray, "ipv6", name);
 			if (cp < p + dlen) {
 				n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
 				if (n < 0) {
 					return NULL;
 				}
 				cp += n;
-				add_assoc_string(subarray, "chain", name, 1);
+				add_assoc_string(subarray, "chain", name);
 			}
 			break;
 		case DNS_T_SRV:
-			add_assoc_string(subarray, "type", "SRV", 1);
+			add_assoc_string(subarray, "type", "SRV");
 			GETSHORT(n, cp);
 			add_assoc_long(subarray, "pri", n);
 			GETSHORT(n, cp);
@@ -671,29 +673,29 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				return NULL;
 			}
 			cp += n;
-			add_assoc_string(subarray, "target", name, 1);
+			add_assoc_string(subarray, "target", name);
 			break;
 		case DNS_T_NAPTR:
-			add_assoc_string(subarray, "type", "NAPTR", 1);
+			add_assoc_string(subarray, "type", "NAPTR");
 			GETSHORT(n, cp);
 			add_assoc_long(subarray, "order", n);
 			GETSHORT(n, cp);
 			add_assoc_long(subarray, "pref", n);
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(subarray, "flags", (char*)++cp, n, 1);
+			add_assoc_stringl(subarray, "flags", (char*)++cp, n);
 			cp += n;
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(subarray, "services", (char*)++cp, n, 1);
+			add_assoc_stringl(subarray, "services", (char*)++cp, n);
 			cp += n;
 			n = (cp[0] & 0xFF);
-			add_assoc_stringl(subarray, "regex", (char*)++cp, n, 1);
+			add_assoc_stringl(subarray, "regex", (char*)++cp, n);
 			cp += n;
 			n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) - 2);
 			if (n < 0) {
 				return NULL;
 			}
 			cp += n;
-			add_assoc_string(subarray, "replacement", name, 1);
+			add_assoc_string(subarray, "replacement", name);
 			break;
 		default:
 			zval_ptr_dtor(subarray);
@@ -1005,7 +1007,7 @@ PHP_FUNCTION(dns_get_mx)
 			RETURN_FALSE;
 		}
 		cp += i;
-		add_next_index_string(mx_list, buf, 1);
+		add_next_index_string(mx_list, buf);
 		if (weight_list) {
 			add_next_index_long(weight_list, weight);
 		}

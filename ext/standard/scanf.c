@@ -869,7 +869,7 @@ literal:
 //						Z_SET_REFCOUNT_P(current, refcount);
 //???						Z_SET_ISREF_PP(current);
 					} else {
-						add_index_stringl(return_value, objIndex++, string, end-string, 1);
+						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
 				}
 				string = end;
@@ -910,7 +910,7 @@ literal:
 						zval_dtor(Z_REFVAL_P(current));
 						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
 					} else {
-						add_index_stringl(return_value, objIndex++, string, end-string, 1);
+						add_index_stringl(return_value, objIndex++, string, end-string);
 					}
 				}
 				string = end;
@@ -931,7 +931,7 @@ literal:
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1, 1);
 					} else {
-						add_index_stringl(return_value, objIndex++, &sch, 1, 1);
+						add_index_stringl(return_value, objIndex++, &sch, 1);
 					}
 				}
 				break;
@@ -1064,7 +1064,7 @@ addToInt:
 							zval_dtor(Z_REFVAL_P(current));
 							ZVAL_STRING(Z_REFVAL_P(current), buf);
 						} else {
-							add_index_string(return_value, objIndex++, buf, 1);
+							add_index_string(return_value, objIndex++, buf);
 						}
 					} else {
 						if (numVars && objIndex >= argCount) {

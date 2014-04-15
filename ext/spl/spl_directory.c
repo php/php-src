@@ -2679,8 +2679,8 @@ SPL_METHOD(SplFileObject, getCsvControl)
 	enclosure[0] = intern->u.file.enclosure;
 	enclosure[1] = '\0';
 
-	add_next_index_string(return_value, delimiter, 1);
-	add_next_index_string(return_value, enclosure, 1);
+	add_next_index_string(return_value, delimiter);
+	add_next_index_string(return_value, enclosure);
 }
 /* }}} */
 

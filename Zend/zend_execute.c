@@ -675,9 +675,11 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 				}
 				Z_DELREF_P(object);
 			} else {
-#endif
 				zend_error(E_WARNING, "Creating default object from empty value");
-//???			}
+			}
+#else
+			zend_error(E_WARNING, "Creating default object from empty value");
+#endif
 			zval_dtor(object);
 			object_init(object);
 		} else {
@@ -904,7 +906,6 @@ static inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value TSRM
 				return variable_ptr;
 			} else {
 				if (Z_REFCOUNT_P(value) == 1) {
-//??? auto dereferencing
 					ZVAL_UNREF(value);
 					ZVAL_COPY(variable_ptr, value);
 				} else {
@@ -925,7 +926,6 @@ assign_simple:
 			} else if (is_ref != value) {
 assign_ref:
 				if (Z_REFCOUNT_P(value) == 1) {
-//??? auto dereferencing
 					ZVAL_UNREF(value);
 					ZVAL_COPY(variable_ptr, value);
 				} else {

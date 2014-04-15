@@ -114,7 +114,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 
 	if (einfo->errcode) {
 		add_next_index_long(info, einfo->errcode);
-		add_next_index_string(info, einfo->errmsg, 1);
+		add_next_index_string(info, einfo->errmsg);
 	}
 
 	return 1;
@@ -874,7 +874,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 			if (ret == -1) {
 				break; /* copy done */
 			} else if (ret > 0) { 
-				add_next_index_stringl(return_value, csv, ret, 1);
+				add_next_index_stringl(return_value, csv, ret);
 				PQfreemem(csv);
 			} else {
 				pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
@@ -1061,11 +1061,11 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	array_init(return_value);
 	if (result_type == PDO_FETCH_NUM || result_type == PDO_FETCH_BOTH) {
-		add_index_string(return_value, 0, pgsql_notify->relname, 1);
+		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
-		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
+		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 	}
 

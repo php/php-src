@@ -1475,7 +1475,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		efree(Z_REF(tmp));
 	}
 	if (!ZVAL_IS_UNDEF(&retval)) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 } /* }}} */
 

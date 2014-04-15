@@ -208,7 +208,7 @@ PHP_FUNCTION(password_get_info)
 	array_init(return_value);
 	
 	add_assoc_long(return_value, "algo", algo);
-	add_assoc_string(return_value, "algoName", algo_name, 1);
+	add_assoc_string(return_value, "algoName", algo_name);
 	add_assoc_zval(return_value, "options", &options);	
 }
 

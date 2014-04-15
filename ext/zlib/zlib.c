@@ -564,7 +564,7 @@ static PHP_FUNCTION(gzfile)
 	memset(buf, 0, sizeof(buf));
 	    
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
-		add_index_string(return_value, i++, buf, 1);
+		add_index_string(return_value, i++, buf);
 	}
 	php_stream_close(stream);
 }

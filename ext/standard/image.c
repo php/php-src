@@ -457,7 +457,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(info), markername, strlen(markername))) == NULL) {
 		/* XXX we onyl catch the 1st tag of it's kind! */
-		add_assoc_stringl(info, markername, buffer, length, 1);
+		add_assoc_stringl(info, markername, buffer, length);
 	}
 
 	efree(buffer);
@@ -1365,7 +1365,7 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		add_index_long(return_value, 1, result->height);
 		add_index_long(return_value, 2, itype);
 		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
-		add_index_string(return_value, 3, temp, 0);
+		add_index_string(return_value, 3, temp);
 
 		if (result->bits != 0) {
 			add_assoc_long(return_value, "bits", result->bits);
@@ -1373,7 +1373,7 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		if (result->channels != 0) {
 			add_assoc_long(return_value, "channels", result->channels);
 		}
-		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype), 1);
+		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype));
 		efree(result);
 	} else {
 		RETURN_FALSE;

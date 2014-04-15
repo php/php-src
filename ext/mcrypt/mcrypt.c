@@ -1004,7 +1004,7 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No algorithms found in module dir");
 	}
 	for (i = 0; i < count; i++) {
-		add_index_string(return_value, i, modules[i], 1);
+		add_index_string(return_value, i, modules[i]);
 	}
 	mcrypt_free_p(modules, count);
 }
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(mcrypt_list_modes)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No modes found in module dir");
 	}
 	for (i = 0; i < count; i++) {
-		add_index_string(return_value, i, modules[i], 1);
+		add_index_string(return_value, i, modules[i]);
 	}
 	mcrypt_free_p(modules, count);
 }

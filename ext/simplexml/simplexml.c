@@ -1417,7 +1417,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{
 {
 	char *prefix = SXE_NS_PREFIX(ns);
 	if (zend_hash_str_exists(Z_ARRVAL_P(return_value), prefix, strlen(prefix)) == 0) {
-		add_assoc_string(return_value, prefix, (char*)ns->href, 1);
+		add_assoc_string(return_value, prefix, (char*)ns->href);
 	}
 }
 /* }}} */

@@ -76,8 +76,6 @@ void zend_interned_strings_dtor(TSRMLS_D)
 {
 #ifndef ZTS
 	zend_hash_destroy(&CG(interned_strings));
-//???	free(CG(interned_strings).arData);
-//???	free(CG(interned_strings).arHash);
 #else
 	free(CG(empty_string));
 #endif
@@ -110,25 +108,8 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	}
 	
 	GC_REFCOUNT(str) = 1;
-//	str->gc.u.v.type = IS_INTERNED_STRING;
 	GC_FLAGS(str) |= IS_STR_INTERNED;
 
-//???	if (CG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength) >=
-//???	    CG(interned_strings_end)) {
-//???	    /* no memory */
-//???		return arKey;
-//???	}
-
-//???	info = (zend_string_info*) CG(interned_strings_top);
-//???	CG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(zend_string_info) + nKeyLength);
-
-//???	memcpy((char*)(info+1), arKey, nKeyLength);
-//???	if (free_src) {
-//???		efree((void *)arKey);
-//???	}
-//???	info->nKeyLength = nKeyLength;
-//???	info->h = h;
-	
 	if (CG(interned_strings).nNumUsed >= CG(interned_strings).nTableSize) {
 		if ((CG(interned_strings).nTableSize << 1) > 0) {	/* Let's double the table size */
 			Bucket *d = (Bucket *) perealloc_recoverable(CG(interned_strings).arData, (CG(interned_strings).nTableSize << 1) * sizeof(Bucket), CG(interned_strings).flags & HASH_FLAG_PERSISTENT);

@@ -1207,7 +1207,6 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 	int i;
 
 	if (class_type->default_properties_count) {
-//???		object->properties_table = emalloc(sizeof(zval*) * class_type->default_properties_count);
 		for (i = 0; i < class_type->default_properties_count; i++) {
 #if ZTS
 			ZVAL_DUP(&object->properties_table[i], &class_type->default_properties_table[i]);
@@ -1392,22 +1391,20 @@ ZEND_API int add_assoc_str_ex(zval *arg, const char *key, uint key_len, zend_str
 }
 /* }}} */
 
-ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, char *str, int duplicate) /* {{{ */
+ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, char *str) /* {{{ */
 {
 	zval *ret, tmp;
 	
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
 }
 /* }}} */
 
-ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, char *str, uint length) /* {{{ */
 {
 	zval *ret, tmp;
 	
-//???	ZVAL_STRINGL(tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1477,23 +1474,20 @@ ZEND_API int add_index_str(zval *arg, ulong index, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int duplicate) /* {{{ */
+ZEND_API int add_index_string(zval *arg, ulong index, const char *str) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
-ZEND_API int add_index_stringl(zval *arg, ulong index, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int add_index_stringl(zval *arg, ulong index, const char *str, uint length) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRINGL(tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
-
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp) ? SUCCESS : FAILURE;
 }
 /* }}} */
@@ -1558,21 +1552,19 @@ ZEND_API int add_next_index_str(zval *arg, zend_string *str) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_next_index_string(zval *arg, const char *str, int duplicate) /* {{{ */
+ZEND_API int add_next_index_string(zval *arg, const char *str) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRING(&tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
 }
 /* }}} */
 
-ZEND_API int add_next_index_stringl(zval *arg, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API int add_next_index_stringl(zval *arg, const char *str, uint length) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRINGL(&tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
 	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp) ? SUCCESS : FAILURE;
 }
@@ -1584,22 +1576,20 @@ ZEND_API int add_next_index_zval(zval *arg, zval *value) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str, int duplicate) /* {{{ */
+ZEND_API zval *add_get_assoc_string_ex(zval *arg, const char *key, uint key_len, const char *str) /* {{{ */
 {
 	zval tmp, *ret;
 
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret;
 }
 /* }}} */
 
-ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API zval *add_get_assoc_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length) /* {{{ */
 {
 	zval tmp, *ret;
 
-//???	ZVAL_STRING(tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret;
@@ -1628,27 +1618,24 @@ ZEND_API zval *add_get_index_str(zval *arg, ulong index, zend_string *str) /* {{
 {
 	zval tmp;
 
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STR(&tmp, str);
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
 }
 /* }}} */
 
-ZEND_API zval *add_get_index_string(zval *arg, ulong index, const char *str, int duplicate) /* {{{ */
+ZEND_API zval *add_get_index_string(zval *arg, ulong index, const char *str) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
 }
 /* }}} */
 
-ZEND_API zval *add_get_index_stringl(zval *arg, ulong index, const char *str, uint length, int duplicate) /* {{{ */
+ZEND_API zval *add_get_index_stringl(zval *arg, ulong index, const char *str, uint length) /* {{{ */
 {
 	zval tmp;
 
-//???	ZVAL_STRINGL(tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, &tmp);
 }
@@ -1762,12 +1749,11 @@ ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, do
 }
 /* }}} */
 
-ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, const char *str, int duplicate TSRMLS_DC) /* {{{ */
+ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, const char *str TSRMLS_DC) /* {{{ */
 {
 	zval tmp;
 	zval z_key;
 
-//???	ZVAL_STRING(tmp, str, duplicate);
 	ZVAL_STRING(&tmp, str);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
@@ -1777,12 +1763,11 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, co
 }
 /* }}} */
 
-ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length, int duplicate TSRMLS_DC) /* {{{ */
+ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, const char *str, uint length TSRMLS_DC) /* {{{ */
 {
 	zval tmp;
 	zval z_key;
 
-//???	ZVAL_STRINGL(tmp, str, length, duplicate);
 	ZVAL_STRINGL(&tmp, str, length);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);

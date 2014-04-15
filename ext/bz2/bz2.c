@@ -618,7 +618,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 			array_init(return_value);
 		
 			add_assoc_long  (return_value, "errno",  errnum);
-			add_assoc_string(return_value, "errstr", (char*)errstr, 1);
+			add_assoc_string(return_value, "errstr", (char*)errstr);
 			break;
 	}
 }

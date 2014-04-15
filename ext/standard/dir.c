@@ -237,7 +237,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_stringl(return_value, "path", dirname, dir_len, 1);
+		add_property_stringl(return_value, "path", dirname, dir_len);
 		add_property_resource(return_value, "handle", dirp->res);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
@@ -534,7 +534,7 @@ no_results:
 				continue;
 			}
 		}
-		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip);
 	}
 
 	globfree(&globbuf);

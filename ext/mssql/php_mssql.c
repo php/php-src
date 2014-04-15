@@ -1538,11 +1538,11 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				data_len = Z_STRLEN(result->data[result->cur_row][i]);
 
 				if (result_type & MSSQL_NUM) {
-					add_index_stringl(return_value, i, data, data_len, 1);
+					add_index_stringl(return_value, i, data, data_len);
 				}
 				
 				if (result_type & MSSQL_ASSOC) {
-					add_assoc_stringl(return_value, result->fields[i].name, data, data_len, 1);
+					add_assoc_stringl(return_value, result->fields[i].name, data, data_len);
 				}
 			}
 			else if (Z_TYPE(result->data[result->cur_row][i]) == IS_LONG) {
@@ -1718,11 +1718,11 @@ PHP_FUNCTION(mssql_fetch_field)
 
 	object_init(return_value);
 
-	add_property_string(return_value, "name",result->fields[field_offset].name, 1);
+	add_property_string(return_value, "name",result->fields[field_offset].name);
 	add_property_long(return_value, "max_length",result->fields[field_offset].max_length);
-	add_property_string(return_value, "column_source",result->fields[field_offset].column_source, 1);
+	add_property_string(return_value, "column_source",result->fields[field_offset].column_source);
 	add_property_long(return_value, "numeric", result->fields[field_offset].numeric);
-	add_property_string(return_value, "type", php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])), 1);
+	add_property_string(return_value, "type", php_mssql_get_field_name(Z_TYPE(result->fields[field_offset])));
 }
 /* }}} */
 

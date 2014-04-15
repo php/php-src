@@ -168,7 +168,7 @@ struct _zend_array {
 
 struct _zend_object {
 	zend_refcounted   gc;
-	zend_uint         handle; //??? may be removed?
+	zend_uint         handle; // TODO: may be removed ???
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -178,7 +178,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	long              handle; //??? may be removed?
+	long              handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
@@ -218,12 +218,8 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
 }
 
-//???
-#if 0
-# define Z_TYPE(zval)				(zval).u1.v.type
-#else
-# define Z_TYPE(zval)				zval_get_type(&(zval))
-#endif
+/* we should never set just Z_TYPE, we should set Z_TYPE_INFO */
+#define Z_TYPE(zval)				zval_get_type(&(zval))
 #define Z_TYPE_P(zval_p)			Z_TYPE(*(zval_p))
 
 #define Z_TYPE_FLAGS(zval)			(zval).u1.v.type_flags

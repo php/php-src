@@ -1062,11 +1062,11 @@ PHP_FUNCTION(dba_key_split)
 	}
 	array_init(return_value);
 	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
-		add_next_index_stringl(return_value, key+1, name - (key + 1), 1);
-		add_next_index_stringl(return_value, name+1, key_len - (name - key + 1), 1);
+		add_next_index_stringl(return_value, key+1, name - (key + 1));
+		add_next_index_stringl(return_value, name+1, key_len - (name - key + 1));
 	} else {
-		add_next_index_stringl(return_value, "", 0, 1);
-		add_next_index_stringl(return_value, key, key_len, 1);
+		add_next_index_stringl(return_value, "", 0);
+		add_next_index_stringl(return_value, key, key_len);
 	}
 }
 /* }}} */
@@ -1215,9 +1215,12 @@ PHP_FUNCTION(dba_handlers)
 
 	for(hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
-			add_assoc_string(return_value, hptr->name, hptr->info(hptr, NULL TSRMLS_CC), 0);
+			// TODO: avoid reallocation ???
+			char *str = hptr->info(hptr, NULL TSRMLS_CC);
+			add_assoc_string(return_value, hptr->name, str);
+			efree(str);
 		} else {
-			add_next_index_string(return_value, hptr->name, 1);
+			add_next_index_string(return_value, hptr->name);
 		}
  	}
 }
@@ -1244,7 +1247,7 @@ PHP_FUNCTION(dba_list)
 		}
 		if (Z_TYPE_P(le) == le_db || Z_TYPE_P(le) == le_pdb) {
 			info = (dba_info *)(le->ptr);
-			add_index_string(return_value, i, info->path, 1);
+			add_index_string(return_value, i, info->path);
 		}
 	}
 }

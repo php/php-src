@@ -296,33 +296,33 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_v
 
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_NULL:
-			add_assoc_string(return_value, "native_type", "null", 1);
+			add_assoc_string(return_value, "native_type", "null");
 			break;
 
 		case SQLITE_FLOAT:
-			add_assoc_string(return_value, "native_type", "double", 1);
+			add_assoc_string(return_value, "native_type", "double");
 			break;
 
 		case SQLITE_BLOB:
-			add_next_index_string(flags, "blob", 1);
+			add_next_index_string(flags, "blob");
 		case SQLITE_TEXT:
-			add_assoc_string(return_value, "native_type", "string", 1);
+			add_assoc_string(return_value, "native_type", "string");
 			break;
 
 		case SQLITE_INTEGER:
-			add_assoc_string(return_value, "native_type", "integer", 1);
+			add_assoc_string(return_value, "native_type", "integer");
 			break;
 	}
 
 	str = sqlite3_column_decltype(S->stmt, colno);
 	if (str) {
-		add_assoc_string(return_value, "sqlite:decl_type", (char *)str, 1);
+		add_assoc_string(return_value, "sqlite:decl_type", (char *)str);
 	}
 
 #ifdef SQLITE_ENABLE_COLUMN_METADATA
 	str = sqlite3_column_table_name(S->stmt, colno);
 	if (str) {
-		add_assoc_string(return_value, "table", (char *)str, 1);
+		add_assoc_string(return_value, "table", (char *)str);
 	}
 #endif
 

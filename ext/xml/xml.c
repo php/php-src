@@ -792,7 +792,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				att = _xml_decode_tag(parser, attributes[0]);
 				val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
 
-				add_assoc_stringl(args[2], att, val, val_len, 0);
+				// TODO: avoid reallocation ???
+				add_assoc_stringl(args[2], att, val, val_len);
+				efree(val);
 
 				attributes += 2;
 
@@ -817,8 +819,8 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 
 				_xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-				add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset,1); /* cast to avoid gcc-warning */
-				add_assoc_string(tag,"type","open",1);
+				add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(tag,"type","open");
 				add_assoc_long(tag,"level",parser->level);
 
 				parser->ltags[parser->level-1] = estrdup(tag_name);
@@ -830,7 +832,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 					att = _xml_decode_tag(parser, attributes[0]);
 					val = xml_utf8_decode(attributes[1], strlen(attributes[1]), &val_len, parser->target_encoding);
 
-					add_assoc_stringl(atr,att,val,val_len,0);
+					// TODO: avoid reallocation ???
+					add_assoc_stringl(atr,att,val,val_len);
+					efree(val);
 
 					atcnt++;
 					attributes += 2;
@@ -880,7 +884,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			zval *tag;
 
 			if (parser->lastwasopen) {
-				add_assoc_string(*(parser->ctag),"type","complete",1);
+				add_assoc_string(*(parser->ctag),"type","complete");
 			} else {
 				MAKE_STD_ZVAL(tag);
 
@@ -888,8 +892,8 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 				  
 				_xml_add_to_info(parser,((char *) tag_name) + parser->toffset);
 
-				add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset,1); /* cast to avoid gcc-warning */
-				add_assoc_string(tag,"type","close",1);
+				add_assoc_string(tag,"tag",((char *) tag_name) + parser->toffset); /* cast to avoid gcc-warning */
+				add_assoc_string(tag,"type","close");
 				add_assoc_long(tag,"level",parser->level);
 				  
 				zend_hash_next_index_insert(Z_ARRVAL_P(parser->data),&tag,sizeof(zval*),NULL);
@@ -959,7 +963,9 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 						Z_STRLEN_PP(myval) += decoded_len;
 						efree(decoded_value);
 					} else {
-						add_assoc_string(*(parser->ctag),"value",decoded_value,0);
+						// TODO: avoid reallocation ???
+						add_assoc_string(*(parser->ctag),"value",decoded_value);
+						efree(decoded_value);
 					}
 					
 				} else {
@@ -991,9 +997,11 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 
 						_xml_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
 
-						add_assoc_string(tag,"tag",parser->ltags[parser->level-1] + parser->toffset,1);
-						add_assoc_string(tag,"value",decoded_value,0);
-						add_assoc_string(tag,"type","cdata",1);
+						add_assoc_string(tag,"tag",parser->ltags[parser->level-1] + parser->toffset);
+						// TODO: avoid reallocation ???
+						add_assoc_string(tag,"value",decoded_value);
+						efree(decoded_value);
+						add_assoc_string(tag,"type","cdata");
 						add_assoc_long(tag,"level",parser->level);
 
 						zend_hash_next_index_insert(Z_ARRVAL_P(parser->data),&tag,sizeof(zval*),NULL);

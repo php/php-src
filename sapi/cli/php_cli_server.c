@@ -493,7 +493,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	while ((value = zend_hash_get_current_data_ptr_ex(headers, &pos)) != NULL) {
 		zend_hash_get_current_key_ex(headers, &key, NULL, 0, &pos);
 //???
-		add_assoc_string_ex(return_value, key->val, key->len, value, 1);
+		add_assoc_string_ex(return_value, key->val, key->len, value);
 		zend_hash_move_forward_ex(headers, &pos);
 	}
 }
@@ -519,7 +519,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, len, p, h->header_len - (p - h->header), 1);
+				add_assoc_stringl_ex(return_value, s, len, p, h->header_len - (p - h->header));
 				free_alloca(s, use_heap);
 			}
 		}

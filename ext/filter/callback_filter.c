@@ -41,7 +41,8 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	if (status == SUCCESS && retval_ptr != NULL) {
 		if (retval_ptr != value) {
 			zval_dtor(value);
-			COPY_PZVAL_TO_ZVAL(*value, retval_ptr);
+			ZVAL_COPY_VALUE(value, retval_ptr);
+//???			COPY_PZVAL_TO_ZVAL(*value, retval_ptr);
 		} else {
 			zval_ptr_dtor(&retval_ptr);
 		}

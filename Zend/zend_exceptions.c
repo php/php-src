@@ -448,10 +448,6 @@ static int _build_trace_args(zval *arg TSRMLS_DC, int num_args, va_list args, ze
 			class_name = zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC);
 
 			TRACE_APPEND_STRL(class_name->val, class_name->len);
-//???			if(!dup) {
-//???				efree((char*)class_name);
-//???			}
-
 			TRACE_APPEND_STR("), ");
 			break;
 		}
@@ -652,7 +648,7 @@ ZEND_METHOD(exception, __toString)
 	 * the result in uncaught exception handlers without memleaks. */
 	zend_update_property_string(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
 
-//???	RETURN_STRINGL(str, len, 0);
+	// TODO: avoid reallocation ???
 	RETVAL_STRINGL(str, len);
 	efree(str);
 }

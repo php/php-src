@@ -1918,18 +1918,18 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 
 	array_init(return_value);
 
-	add_index_stringl(return_value, 0, var->sqlname, var->sqlname_length, 1);
-	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length, 1);
+	add_index_stringl(return_value, 0, var->sqlname, var->sqlname_length);
+	add_assoc_stringl(return_value, "name", var->sqlname, var->sqlname_length);
 
-	add_index_stringl(return_value, 1, var->aliasname, var->aliasname_length, 1);
-	add_assoc_stringl(return_value, "alias", var->aliasname, var->aliasname_length, 1);
+	add_index_stringl(return_value, 1, var->aliasname, var->aliasname_length);
+	add_assoc_stringl(return_value, "alias", var->aliasname, var->aliasname_length);
 
-	add_index_stringl(return_value, 2, var->relname, var->relname_length, 1);
-	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length, 1);
+	add_index_stringl(return_value, 2, var->relname, var->relname_length);
+	add_assoc_stringl(return_value, "relation", var->relname, var->relname_length);
 
 	len = slprintf(buf, 16, "%d", var->sqllen);
-	add_index_stringl(return_value, 3, buf, len, 1);
-	add_assoc_stringl(return_value, "length", buf, len, 1);
+	add_index_stringl(return_value, 3, buf, len);
+	add_assoc_stringl(return_value, "length", buf, len);
 
 	if (var->sqlscale < 0) {
 		unsigned short precision = 0;
@@ -1947,8 +1947,8 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 				break;
 		}
 		len = slprintf(buf, 16, "NUMERIC(%d,%d)", precision, -var->sqlscale);
-		add_index_stringl(return_value, 4, s, len, 1);
-		add_assoc_stringl(return_value, "type", s, len, 1);
+		add_index_stringl(return_value, 4, s, len);
+		add_assoc_stringl(return_value, "type", s, len);
 	} else {
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
@@ -1992,8 +1992,8 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 				s = "QUAD";
 				break;
 		}
-		add_index_string(return_value, 4, s, 1);
-		add_assoc_string(return_value, "type", s, 1);
+		add_index_string(return_value, 4, s);
+		add_assoc_string(return_value, "type", s);
 	}
 }
 /* }}} */

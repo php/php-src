@@ -111,7 +111,7 @@ PHP_FUNCTION(pdo_drivers)
 
 	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
-		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len, 1);
+		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len);
 		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
 	}
 }

@@ -583,11 +583,6 @@ ZEND_API void free_estring(char **str_p);
 ZEND_API void free_string_zval(zval *zv);
 END_EXTERN_C()
 
-/* FIXME: Check if we can save if (ptr) too */
-
-//???#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
-//???#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
-
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
 #define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
@@ -680,18 +675,6 @@ END_EXTERN_C()
 		}												\
 	} while (0)
 
-//??? this macro should be used to get argument value passed by referebce
-//??? unfortunately it's not always work as expected
-#if 0
-#define ZVAL_DEREF_REF(z) do {							\
-		ZEND_ASSERT(Z_ISREF_P(z));						\
-		(z) = Z_REFVAL_P(z);							\
-	} while (0)
-#else
-#define ZVAL_DEREF_REF(z)								\
-	ZVAL_DEREF(z)
-#endif
-
 #define ZVAL_DUP_DEREF(z, v)							\
 	do {												\
 		zval *__z1 = (z);								\
@@ -708,14 +691,6 @@ END_EXTERN_C()
 		ref = Z_REF_P(_z);								\
 		ZVAL_COPY_VALUE(_z, &ref->val);					\
 		efree(ref);										\
-	} while (0)
-
-// TODO: invalud ???
-#define INIT_PZVAL_COPY(z, v)							\
-	do {												\
-		ZVAL_COPY_VALUE(z, v);							\
-		Z_SET_REFCOUNT_P(z, 1);							\
-		Z_UNSET_ISREF_P(z);								\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
@@ -768,33 +743,6 @@ END_EXTERN_C()
 			}											\
 		}												\
 	} while (0)
-
-
-// TODO: remove ???
-#define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
-	ZVAL_COPY_VALUE(&(zv), (pzv));			\
-	if (Z_OPT_REFCOUNTED_P(pzv)) {			\
-		if (Z_REFCOUNT_P(pzv)>1) {			\
-			zval_copy_ctor(&(zv));			\
-			Z_DELREF_P((pzv));				\
-		}									\
-	}										\
-
-// TODO: remove ???
-#define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
-	int is_ref, refcount;						\
-												\
-	SEPARATE_ZVAL_IF_NOT_REF(ppzv_dest);		\
-	is_ref = Z_ISREF_PP(ppzv_dest);				\
-	refcount = Z_REFCOUNT_PP(ppzv_dest);		\
-	zval_dtor(*ppzv_dest);						\
-	ZVAL_COPY_VALUE(*ppzv_dest, pzv_src);		\
-	if (copy) {                                 \
-		zval_opt_copy_ctor(*ppzv_dest);			\
-    }		                                    \
-	Z_SET_ISREF_TO_PP(ppzv_dest, is_ref);		\
-	Z_SET_REFCOUNT_PP(ppzv_dest, refcount);		\
-}
 
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\
 		zval *_varptr = (varptr);						\

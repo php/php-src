@@ -242,7 +242,7 @@ again:
 		}
 		case IS_BOOL:
 			if (Z_LVAL_P(expr)) {
-				// TODO: ??? use interned string
+				// TODO: use interned string ???
 				ZVAL_NEW_STR(expr_copy, STR_INIT("1", 1, 0));
 			} else {
 				TSRMLS_FETCH();
@@ -259,7 +259,7 @@ again:
 			break;
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			// TODO: ??? use interned string
+			// TODO: use interned string ???
 			ZVAL_NEW_STR(expr_copy, STR_INIT("Array", sizeof("Array") - 1, 0));
 			break;
 		case IS_OBJECT:

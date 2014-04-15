@@ -618,10 +618,10 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 			i += l;
 			strcpy(&buf[i++], " ");
 		}
-		add_next_index_string(info, buf, 1);
+		add_next_index_string(info, buf);
 	} else if (H->last_app_error) {
 		add_next_index_long(info, -999);
-		add_next_index_string(info, const_cast(H->last_app_error),1);
+		add_next_index_string(info, const_cast(H->last_app_error));
 	}
 	return 1;
 }

@@ -1215,7 +1215,7 @@ PHP_FUNCTION(realpath_cache_get)
 				add_assoc_double(&entry, "key", (double)bucket->key);
 			}
 			add_assoc_bool(&entry, "is_dir", bucket->is_dir);
-			add_assoc_stringl(&entry, "realpath", bucket->realpath, bucket->realpath_len, 1);
+			add_assoc_stringl(&entry, "realpath", bucket->realpath, bucket->realpath_len);
 			add_assoc_long(&entry, "expires", bucket->expires);
 #ifdef PHP_WIN32
 			add_assoc_bool(&entry, "is_rvalid", bucket->is_rvalid);

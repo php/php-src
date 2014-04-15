@@ -277,7 +277,9 @@ PHP_FUNCTION( transliterator_list_ids )
 		}
 		else
 		{
-			add_next_index_stringl( return_value, el_char, el_len, 0 );
+		    // TODO: avoid reallocation ???
+			add_next_index_stringl( return_value, el_char, el_len);
+			efree(el_char);
 		}
 	}
 	uenum_close( en );

@@ -549,7 +549,7 @@ static void php_converter_resolve_callback(zval *zobj,
 	array_init(&caller);
 	Z_ADDREF_P(zobj);
 	add_index_zval(&caller, 0, zobj);
-	add_index_string(&caller, 1, callback_name, 1);
+	add_index_string(&caller, 1, callback_name);
 	if (zend_fcall_info_init(&caller, 0, finfo, fcache, NULL, &errstr TSRMLS_CC) == FAILURE) {
 		php_converter_throw_failure(objval, U_INTERNAL_PROGRAM_ERROR TSRMLS_CC, "Error setting converter callback: %s", errstr);
 	}
@@ -913,7 +913,7 @@ static PHP_METHOD(UConverter, getAvailable) {
 	array_init(return_value);
 	for(i = 0; i < count; i++) {
 		const char *name = ucnv_getAvailableName(i);
-		add_next_index_string(return_value, name, 1);
+		add_next_index_string(return_value, name);
 	}
 }
 /* }}} */
@@ -952,7 +952,7 @@ static PHP_METHOD(UConverter, getAliases) {
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
-		add_next_index_string(return_value, alias, 1);
+		add_next_index_string(return_value, alias);
 	}
 }
 /* }}} */
@@ -980,7 +980,7 @@ static PHP_METHOD(UConverter, getStandards) {
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
-		add_next_index_string(return_value, name, 1);
+		add_next_index_string(return_value, name);
 	}
 }
 /* }}} */

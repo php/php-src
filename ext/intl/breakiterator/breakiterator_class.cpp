@@ -165,7 +165,7 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp TSRMLS
 	}
 
 	add_assoc_string_ex(&zv, "type", sizeof("type"),
-			const_cast<char*>(typeid(*biter).name()), 1);
+			const_cast<char*>(typeid(*biter).name()));
 
 	return Z_ARRVAL(zv);
 }

@@ -585,7 +585,7 @@ ZEND_FUNCTION(each)
 		return;
 	}
 
-	ZVAL_DEREF_REF(array);
+	ZVAL_DEREF(array);
 	target_hash = HASH_OF(array);
 	if (!target_hash) {
 		zend_error(E_WARNING,"Variable passed to each() is not an array or object");
@@ -609,7 +609,6 @@ ZEND_FUNCTION(each)
 	/* add value elements */
 	if (Z_ISREF_P(entry)) {
 		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
-//???		if (Z_REFCOUNTED(tmp)) Z_SET_REFCOUNT(tmp, 0);
 		entry = &tmp;
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
@@ -1863,14 +1862,14 @@ static int add_extension_info(zval *item, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(item);
-	add_next_index_string(name_array, module->name, 1);
+	add_next_index_string(name_array, module->name);
 	return 0;
 }
 
 static int add_zendext_info(zend_extension *ext, void *arg TSRMLS_DC)
 {
 	zval *name_array = (zval *)arg;
-	add_next_index_string(name_array, ext->name, 1);
+	add_next_index_string(name_array, ext->name);
 	return 0;
 }
 
@@ -2140,7 +2139,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 			if (build_filename_arg && include_filename) {
 				array_init(&arg_array);
-				add_next_index_string(&arg_array, (char*)include_filename, 1);
+				add_next_index_string(&arg_array, (char*)include_filename);
 			}
 			call_type = NULL;
 		}
@@ -2225,7 +2224,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		if (skip->op_array) {
 			filename = skip->op_array->filename->val;
 			lineno = skip->opline->lineno;
-			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename, 1);
+			add_assoc_string_ex(&stack_frame, "file", sizeof("file")-1, (char*)filename);
 			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
@@ -2263,7 +2262,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				 NULL);
 
 		if (function_name) {
-			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name, 1);
+			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
 
 			if (ptr->object) {
 				if (ptr->function_state.function->common.scope) {
@@ -2280,10 +2279,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					Z_ADDREF(object);
 				}
 
-				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->", 1);
+				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "->");
 			} else if (ptr->function_state.function->common.scope) {
 				add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, STR_COPY(ptr->function_state.function->common.scope->name));
-				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "::", 1);
+				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "::");
 			}
 
 			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 && 
@@ -2337,11 +2336,11 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 
-				add_next_index_string(&arg_array, (char*)include_filename, 1);
+				add_next_index_string(&arg_array, (char*)include_filename);
 				add_assoc_zval_ex(&stack_frame, "args", sizeof("args")-1, &arg_array);
 			}
 
-			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name, 1);
+			add_assoc_string_ex(&stack_frame, "function", sizeof("function")-1, (char*)function_name);
 		}
 
 		add_next_index_zval(return_value, &stack_frame);

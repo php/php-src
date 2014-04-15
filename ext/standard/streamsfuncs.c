@@ -501,11 +501,11 @@ PHP_FUNCTION(stream_get_meta_data)
 		add_assoc_zval(return_value, "wrapper_data", &stream->wrapperdata);
 	}
 	if (stream->wrapper) {
-		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label, 1);
+		add_assoc_string(return_value, "wrapper_type", (char *)stream->wrapper->wops->label);
 	}
-	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label, 1);
+	add_assoc_string(return_value, "stream_type", (char *)stream->ops->label);
 
-	add_assoc_string(return_value, "mode", stream->mode, 1);
+	add_assoc_string(return_value, "mode", stream->mode);
 
 #if 0	/* TODO: needs updating for new filter API */
 	if (stream->filterhead) {
@@ -515,7 +515,7 @@ PHP_FUNCTION(stream_get_meta_data)
 		array_init(newval);
 
 		for (filter = stream->filterhead; filter != NULL; filter = filter->next) {
-			add_next_index_string(newval, (char *)filter->fops->label, 1);
+			add_next_index_string(newval, (char *)filter->fops->label);
 		}
 
 		add_assoc_zval(return_value, "filters", newval);
@@ -526,7 +526,7 @@ PHP_FUNCTION(stream_get_meta_data)
 
 	add_assoc_bool(return_value, "seekable", (stream->ops->seek) && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0);
 	if (stream->orig_path) {
-		add_assoc_string(return_value, "uri", stream->orig_path, 1);
+		add_assoc_string(return_value, "uri", stream->orig_path);
 	}
 
 	if (!php_stream_populate_meta_data(stream, return_value)) {

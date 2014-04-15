@@ -27,26 +27,6 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 
-//???typedef union _temp_variable {
-//???	zval tmp_var;
-//???	struct {
-//???		zval **ptr_ptr;
-//???		zval *ptr;
-//???		zend_bool fcall_returned_reference;
-//???	} var;
-//???	struct {
-//???		zval **ptr_ptr; /* shared with var.ptr_ptr */
-//???		zval *str;
-//???		zend_uint offset;
-//???	} str_offset;
-//???	struct {
-//???		zval **ptr_ptr; /* shared with var.ptr_ptr */
-//???		zval *ptr;      /* shared with var.ptr */
-//???		HashPointer fe_pos;
-//???	} fe;
-//???	zend_class_entry *class_entry;
-//???} temp_variable;
-
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
@@ -77,12 +57,6 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_CC);
 		} else {
-//???			if (Z_REFCOUNT_P(zval_ptr) == 1 && Z_ISREF_P(zval_ptr)) {
-				/* convert reference to regular value */
-//???				zend_reference *ref = Z_REF_P(zval_ptr);
-//???				ZVAL_COPY_VALUE(zval_ptr, &ref->val);
-//???				efree_rel(ref);
-//???			}
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
 		}
 	}

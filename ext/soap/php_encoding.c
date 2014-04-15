@@ -2962,9 +2962,9 @@ static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data TSRMLS_DC)
 		add_property_zval(soapvar, "enc_value", ret);
 		parse_namespace(type_name, &cptype, &ns);
 		nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns));
-		add_property_string(soapvar, "enc_stype", cptype, 1);
+		add_property_string(soapvar, "enc_stype", cptype);
 		if (nsptr) {
-			add_property_string(soapvar, "enc_ns", (char*)nsptr->href, 1);
+			add_property_string(soapvar, "enc_ns", (char*)nsptr->href);
 		}
 		efree(cptype);
 		if (ns) {efree(ns);}

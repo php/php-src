@@ -724,7 +724,9 @@ PHP_FUNCTION( locale_get_keywords )
         		RETURN_FALSE;
 			}
 
-       		add_assoc_stringl( return_value, (char *)kw_key, kw_value , kw_value_len, 0);
+			// TODO: avoid reallocation ???
+       		add_assoc_stringl( return_value, (char *)kw_key, kw_value , kw_value_len);
+       		efree(kw_value);
 		} /* end of while */
 
 	} /* end of if e!=NULL */
@@ -1047,11 +1049,11 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 			}
 			cur_key_name = (char*)ecalloc( 25,  25);
 			sprintf( cur_key_name , "%s%d", key_name , cnt++);	
-			add_assoc_string( hash_arr, cur_key_name , token ,TRUE );
+			add_assoc_string( hash_arr, cur_key_name , token);
 			/* tokenize on the "_" or "-" and stop  at singleton if any */
 			while( (token = php_strtok_r(NULL , DELIMITER , &last_ptr)) && (strlen(token)>1) ){
 				sprintf( cur_key_name , "%s%d", key_name , cnt++);	
-				add_assoc_string( hash_arr, cur_key_name , token , TRUE );
+				add_assoc_string( hash_arr, cur_key_name , token);
 			}
 /*
 			if( strcmp(key_name, LOC_PRIVATE_TAG) == 0 ){
@@ -1060,7 +1062,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 		}
 	} else {
 		if( result == 1 ){
-			add_assoc_string( hash_arr, key_name , key_value , TRUE );
+			add_assoc_string( hash_arr, key_name , key_value);
 			cur_result = 1;
 		}
 	}
@@ -1107,7 +1109,7 @@ PHP_FUNCTION(locale_parse)
 
 	grOffset =  findOffset( LOC_GRANDFATHERED , loc_name );
 	if( grOffset >= 0 ){
-		add_assoc_string( return_value , LOC_GRANDFATHERED_LANG_TAG , estrdup(loc_name) ,FALSE );
+		add_assoc_string( return_value , LOC_GRANDFATHERED_LANG_TAG , loc_name);
 	}
 	else{
 		/* Not grandfathered */
@@ -1164,10 +1166,10 @@ PHP_FUNCTION(locale_get_all_variants)
 		if( result > 0 && variant){
 			/* Tokenize on the "_" or "-" */
 			token = php_strtok_r( variant , DELIMITER , &saved_ptr);	
-			add_next_index_stringl( return_value, token , strlen(token) ,TRUE );
+			add_next_index_stringl( return_value, token , strlen(token));
 			/* tokenize on the "_" or "-" and stop  at singleton if any	*/
 			while( (token = php_strtok_r(NULL , DELIMITER, &saved_ptr)) && (strlen(token)>1) ){
- 				add_next_index_stringl( return_value, token , strlen(token) ,TRUE );
+ 				add_next_index_stringl( return_value, token , strlen(token));
 			}
 		}
 		if( variant ){

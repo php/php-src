@@ -681,7 +681,7 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 					case 'A': {
@@ -707,7 +707,7 @@ PHP_FUNCTION(unpack)
 								break;
 						}
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len + 1);
 						break;
 					}
 					/* New option added for Z to remain in-line with the Perl implementation */
@@ -731,7 +731,7 @@ PHP_FUNCTION(unpack)
 						}
 						len = s;
 
-						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						add_assoc_stringl(return_value, n, &input[inputpos], len);
 						break;
 					}
 
@@ -774,7 +774,7 @@ PHP_FUNCTION(unpack)
 						}
 
 						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len, 1);
+						add_assoc_stringl(return_value, n, buf, len);
 						efree(buf);
 						break;
 					}

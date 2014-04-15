@@ -338,7 +338,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 //???	Z_SET_ISREF_P(obj);
 
 	/* filtername */
-	add_property_string(&obj, "filtername", (char*)filtername, 1);
+	add_property_string(&obj, "filtername", (char*)filtername);
 	
 	/* and the parameters, if any */
 	if (filterparams) {
@@ -419,7 +419,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		add_property_zval(return_value, "bucket", &zbucket);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&zbucket);
-		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
+		add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
 		add_property_long(return_value, "datalen", bucket->buflen);
 	}
 }
@@ -520,7 +520,7 @@ PHP_FUNCTION(stream_bucket_new)
 	add_property_zval(return_value, "bucket", &zbucket);
 	/* add_property_zval increments the refcount which is unwanted here */
 	zval_ptr_dtor(&zbucket);
-	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen, 1);
+	add_property_stringl(return_value, "data", bucket->buf, bucket->buflen);
 	add_property_long(return_value, "datalen", bucket->buflen);
 }
 /* }}} */

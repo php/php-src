@@ -517,7 +517,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 			str = asctime(ta);
 			len = strlen(str);
 			if (len > 0 && str[len - 1] == '\n') len--;
-			add_assoc_stringl(&persistent_script_report, "last_used", str, len, 1);
+			add_assoc_stringl(&persistent_script_report, "last_used", str, len);
 			add_assoc_long(&persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
 			if (ZCG(accel_directives).validate_timestamps) {
 				add_assoc_long(&persistent_script_report, "timestamp", (long)script->timestamp);
@@ -597,7 +597,7 @@ static ZEND_FUNCTION(opcache_get_status)
 
 static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value TSRMLS_DC)
 {
-	add_next_index_stringl(return_value, p->path, p->path_length, 1);
+	add_next_index_stringl(return_value, p->path, p->path_length);
 	return 0;
 }
 
@@ -639,10 +639,10 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	add_assoc_long(&directives, 	 "opcache.consistency_checks",     ZCG(accel_directives).consistency_checks);
 	add_assoc_long(&directives, 	 "opcache.force_restart_timeout",  ZCG(accel_directives).force_restart_timeout);
 	add_assoc_long(&directives, 	 "opcache.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
-	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model), 1);
-	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename), 1);
+	add_assoc_string(&directives, "opcache.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model));
+	add_assoc_string(&directives, "opcache.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename));
 	add_assoc_long(&directives,   "opcache.max_file_size",          ZCG(accel_directives).max_file_size);
-	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log), 1);
+	add_assoc_string(&directives, "opcache.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log));
 
 	add_assoc_bool(&directives,   "opcache.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(&directives,   "opcache.save_comments",          ZCG(accel_directives).save_comments);
@@ -655,8 +655,8 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	/*version */
 	array_init(&version);
-	add_assoc_string(&version, "version", ACCELERATOR_VERSION, 1);
-	add_assoc_string(&version, "opcache_product_name", ACCELERATOR_PRODUCT_NAME, 1);
+	add_assoc_string(&version, "version", ACCELERATOR_VERSION);
+	add_assoc_string(&version, "opcache_product_name", ACCELERATOR_PRODUCT_NAME);
 	add_assoc_zval(return_value, "version", &version);
 
 	/* blacklist */

@@ -290,7 +290,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(param[0], *argv, 1);
+		add_next_index_string(param[0], *argv);
 		argv++;
 	}
 
@@ -330,7 +330,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(param[0], *argv, 1);
+		add_next_index_string(param[0], *argv);
 		argv++;
 	}
 

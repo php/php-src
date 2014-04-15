@@ -648,16 +648,16 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			if (zend_hash_find(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, (void**)&data) == SUCCESS) {
 				if (Z_TYPE_PP(data) == IS_ARRAY) {
 					subentries = *data;
-					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+					add_next_index_stringl(subentries, (char *)to_add, to_add_len);
 				} else if (Z_TYPE_PP(data) == IS_STRING) {
 					MAKE_STD_ZVAL(subentries);
 					array_init(subentries);
-					add_next_index_stringl(subentries, Z_STRVAL_PP(data), Z_STRLEN_PP(data), 1);
-					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+					add_next_index_stringl(subentries, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+					add_next_index_stringl(subentries, (char *)to_add, to_add_len);
 					zend_hash_update(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, &subentries, sizeof(zval*), NULL);
 				}
 			} else {
-				add_assoc_stringl(subitem, sname, (char *)to_add, to_add_len, 1);
+				add_assoc_stringl(subitem, sname, (char *)to_add, to_add_len);
 			}
 		}
 	}
@@ -669,7 +669,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 
 static void add_assoc_asn1_string(zval * val, char * key, ASN1_STRING * str) /* {{{ */
 {
-	add_assoc_stringl(val, key, (char *)str->data, str->length, 1);
+	add_assoc_stringl(val, key, (char *)str->data, str->length);
 }
 /* }}} */
 
@@ -1932,7 +1932,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	array_init(return_value);
 
 	if (cert->name) {
-		add_assoc_string(return_value, "name", cert->name, 1);
+		add_assoc_string(return_value, "name", cert->name);
 	}
 /*	add_assoc_bool(return_value, "valid", cert->valid); */
 
@@ -1941,13 +1941,13 @@ PHP_FUNCTION(openssl_x509_parse)
 	{
 		char buf[32];
 		snprintf(buf, sizeof(buf), "%08lx", X509_subject_name_hash(cert));
-		add_assoc_string(return_value, "hash", buf, 1);
+		add_assoc_string(return_value, "hash", buf);
 	}
 	
 	add_assoc_name_entry(return_value, "issuer", 		X509_get_issuer_name(cert), useshortnames TSRMLS_CC);
 	add_assoc_long(return_value, "version", 			X509_get_version(cert));
 
-	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert)), 1); 
+	add_assoc_string(return_value, "serialNumber", i2s_ASN1_INTEGER(NULL, X509_get_serialNumber(cert))); 
 
 	add_assoc_asn1_string(return_value, "validFrom", 	X509_get_notBefore(cert));
 	add_assoc_asn1_string(return_value, "validTo", 		X509_get_notAfter(cert));
@@ -1957,12 +1957,12 @@ PHP_FUNCTION(openssl_x509_parse)
 
 	tmpstr = (char *)X509_alias_get0(cert, NULL);
 	if (tmpstr) {
-		add_assoc_string(return_value, "alias", tmpstr, 1);
+		add_assoc_string(return_value, "alias", tmpstr);
 	}
 /*
 	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
-	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
-	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
+	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)));
+	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)));
 */
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
@@ -1988,7 +1988,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		add_index_bool(subsub, 1, purpset);
 
 		pname = useshortnames ? X509_PURPOSE_get0_sname(purp) : X509_PURPOSE_get0_name(purp);
-		add_index_string(subsub, 2, pname, 1);
+		add_index_string(subsub, 2, pname);
 
 		/* NOTE: if purpset > 1 then it's a warning - we should mention it ? */
 
@@ -2014,7 +2014,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		if (nid == NID_subject_alt_name) {
 			if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
 				BIO_get_mem_ptr(bio_out, &bio_buf);
-				add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
+				add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
 				zval_dtor(return_value);
 				if (certresource == -1 && cert) {
@@ -2026,7 +2026,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		}
 		else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
 			BIO_get_mem_ptr(bio_out, &bio_buf);
-			add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
+			add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length);
 		} else {
 			add_assoc_asn1_string(subitem, extname, X509_EXTENSION_get_data(extension));
 		}
@@ -3468,7 +3468,9 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey TSRMLS_DC)
 			char *str = emalloc(len + 1);								\
 			BN_bn2bin(pkey->pkey._type->_name, (unsigned char*)str);	\
 			str[len] = 0;                                           	\
-			add_assoc_stringl(_type, #_name, str, len, 0);				\
+			/* TODO: avoid reallocation ??? */							\
+			add_assoc_stringl(_type, #_name, str, len);					\
+			efree(str);													\
 		}																\
 	} while (0)
 
@@ -3792,7 +3794,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 	array_init(return_value);
 	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
-	add_assoc_stringl(return_value, "key", pbio, pbio_len, 1);
+	add_assoc_stringl(return_value, "key", pbio, pbio_len);
 	/*TODO: Use the real values once the openssl constants are used 
 	 * See the enum at the top of this file
 	 */
@@ -4828,7 +4830,8 @@ PHP_FUNCTION(openssl_seal)
 		array_init(ekeys);
 		for (i=0; i<nkeys; i++) {
 			eks[i][eksl[i]] = '\0';
-			add_next_index_stringl(ekeys, erealloc(eks[i], eksl[i] + 1), eksl[i], 0);
+			add_next_index_stringl(ekeys, eks[i], eksl[i]);
+			efree(eks[i]);
 			eks[i] = NULL;
 		}
 #if 0
@@ -5243,14 +5246,14 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 
 static void openssl_add_method_or_alias(const OBJ_NAME *name, void *arg) /* {{{ */
 {
-	add_next_index_string((zval*)arg, (char*)name->name, 1);
+	add_next_index_string((zval*)arg, (char*)name->name);
 }
 /* }}} */
 
 static void openssl_add_method(const OBJ_NAME *name, void *arg) /* {{{ */
 {
 	if (name->alias == 0) {
-		add_next_index_string((zval*)arg, (char*)name->name, 1);
+		add_next_index_string((zval*)arg, (char*)name->name);
 	}
 }
 /* }}} */

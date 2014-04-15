@@ -589,7 +589,7 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 		add_assoc_null_ex(ctxzv, #memb, sizeof(#memb) - 1); \
 	} else { \
 		add_assoc_string_ex(ctxzv, #memb, sizeof(#memb - 1), \
-				(char *)context->memb, 1); \
+				(char *)context->memb); \
 	}
 	
 	ADD_NULL_OR_STRING_KEY(directory)
@@ -982,14 +982,14 @@ static PHP_FUNCTION(libxml_get_last_error)
 		add_property_long(return_value, "code", error->code);
 		add_property_long(return_value, "column", error->int2);
 		if (error->message) {
-			add_property_string(return_value, "message", error->message, 1);
+			add_property_string(return_value, "message", error->message);
 		} else {
-			add_property_stringl(return_value, "message", "", 0, 1);
+			add_property_stringl(return_value, "message", "", 0);
 		}
 		if (error->file) {
-			add_property_string(return_value, "file", error->file, 1);
+			add_property_string(return_value, "file", error->file);
 		} else {
-			add_property_stringl(return_value, "file", "", 0, 1);
+			add_property_stringl(return_value, "file", "", 0);
 		}
 		add_property_long(return_value, "line", error->line);
 	} else {
@@ -1021,14 +1021,14 @@ static PHP_FUNCTION(libxml_get_errors)
 			add_property_long(&z_error, "code", error->code);
 			add_property_long(&z_error, "column", error->int2);
 			if (error->message) {
-				add_property_string(&z_error, "message", error->message, 1);
+				add_property_string(&z_error, "message", error->message);
 			} else {
-				add_property_stringl(&z_error, "message", "", 0, 1);
+				add_property_stringl(&z_error, "message", "", 0);
 			}
 			if (error->file) {
-				add_property_string(&z_error, "file", error->file, 1);
+				add_property_string(&z_error, "file", error->file);
 			} else {
-				add_property_stringl(&z_error, "file", "", 0, 1);
+				add_property_stringl(&z_error, "file", "", 0);
 			}
 			add_property_long(&z_error, "line", error->line);
 			add_next_index_zval(return_value, &z_error);

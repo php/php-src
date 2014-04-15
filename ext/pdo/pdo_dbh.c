@@ -86,7 +86,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		MAKE_STD_ZVAL(info);
 		array_init(info);
 
-		add_next_index_string(info, *pdo_err, 1);
+		add_next_index_string(info, *pdo_err);
 		add_next_index_long(info, 0);
 
 		zend_update_property(pdo_ex, ex, "errorInfo", sizeof("errorInfo")-1, info TSRMLS_CC);
@@ -128,7 +128,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{
 		MAKE_STD_ZVAL(info);
 		array_init(info);
 
-		add_next_index_string(info, *pdo_err, 1);
+		add_next_index_string(info, *pdo_err);
 		
 		if (dbh->methods->fetch_err(dbh, stmt, info TSRMLS_CC)) {
 			zval **item;
@@ -919,7 +919,7 @@ static PHP_METHOD(PDO, getAttribute)
 
 		case PDO_ATTR_STATEMENT_CLASS:
 			array_init(return_value);
-			add_next_index_string(return_value, dbh->def_stmt_ce->name, 1);
+			add_next_index_string(return_value, dbh->def_stmt_ce->name);
 			if (dbh->def_stmt_ctor_args) {
 				Z_ADDREF_P(dbh->def_stmt_ctor_args);
 				add_next_index_zval(return_value, dbh->def_stmt_ctor_args);
@@ -1055,9 +1055,9 @@ static PHP_METHOD(PDO, errorInfo)
 	array_init(return_value);
 
 	if (dbh->query_stmt) {
-		add_next_index_string(return_value, dbh->query_stmt->error_code, 1);
+		add_next_index_string(return_value, dbh->query_stmt->error_code);
 	} else {
-		add_next_index_string(return_value, dbh->error_code, 1);
+		add_next_index_string(return_value, dbh->error_code);
 	}
 
 	if (dbh->methods->fetch_err) {
@@ -1220,7 +1220,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 
 	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
-		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len, 1);
+		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len);
 		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
 	}
 }

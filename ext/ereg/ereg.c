@@ -352,7 +352,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	match_len = 1;
 
 	if (array) {
-		ZVAL_DEREF_REF(array);
+		ZVAL_DEREF(array);
 	}
 
 	if (array && err != REG_NOMATCH) {
@@ -368,7 +368,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			start = subs[i].rm_so;
 			end = subs[i].rm_eo;
 			if (start != -1 && end > 0 && start < string_len && end < string_len && start < end) {
-				add_index_stringl(array, i, string+start, end-start, 1);
+				add_index_stringl(array, i, string+start, end-start);
 			} else {
 				add_index_bool(array, i, 0);
 			}
@@ -664,7 +664,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	while ((count == -1 || count > 1) && !(err = regexec(&re, strp, 1, subs, 0))) {
 		if (subs[0].rm_so == 0 && subs[0].rm_eo) {
 			/* match is at start of string, return empty string */
-			add_next_index_stringl(return_value, "", 0, 1);
+			add_next_index_stringl(return_value, "", 0);
 			/* skip ahead the length of the regex match */
 			strp += subs[0].rm_eo;
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {
@@ -683,7 +683,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			size = subs[0].rm_so;
 		
 			/* add it to the array */
-			add_next_index_stringl(return_value, strp, size, 1);
+			add_next_index_stringl(return_value, strp, size);
 
 			/* point at our new starting point */
 			strp = strp + subs[0].rm_eo;
@@ -708,7 +708,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	/* otherwise we just have one last element to add to the array */
 	size = endp - strp;
 	
-	add_next_index_stringl(return_value, strp, size, 1);
+	add_next_index_stringl(return_value, strp, size);
 
 	regfree(&re);
 }

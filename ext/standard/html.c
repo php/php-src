@@ -1546,7 +1546,7 @@ static inline void write_s3row_data(
 		size_t l = r->data.ent.entity_len;
 		memcpy(&entity[1], r->data.ent.entity, l);
 		entity[l + 1] = ';';
-		add_assoc_stringl_ex(arr, key, written_k1, entity, l + 2, 1);
+		add_assoc_stringl_ex(arr, key, written_k1, entity, l + 2);
 	} else {
 		unsigned i,
 			     num_entries;
@@ -1556,7 +1556,7 @@ static inline void write_s3row_data(
 			size_t l = mcpr[0].leading_entry.default_entity_len;
 			memcpy(&entity[1], mcpr[0].leading_entry.default_entity, l);
 			entity[l + 1] = ';';
-			add_assoc_stringl_ex(arr, key, written_k1, entity, l + 2, 1);
+			add_assoc_stringl_ex(arr, key, written_k1, entity, l + 2);
 		}
 		num_entries = mcpr[0].leading_entry.size;
 		for (i = 1; i <= num_entries; i++) {
@@ -1579,7 +1579,7 @@ static inline void write_s3row_data(
 			memcpy(&entity[1], mcpr[i].normal_entry.entity, l);
 			entity[l + 1] = ';';
 			entity[l + 1] = '\0';
-			add_assoc_stringl_ex(arr, key, written_k1 + written_k2, entity, l + 1, 1);
+			add_assoc_stringl_ex(arr, key, written_k1 + written_k2, entity, l + 1);
 		}
 	}
 }

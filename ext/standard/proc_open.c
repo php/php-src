@@ -343,7 +343,7 @@ PHP_FUNCTION(proc_get_status)
 
 	array_init(return_value);
 
-	add_assoc_string(return_value, "command", proc->command, 1);
+	add_assoc_string(return_value, "command", proc->command);
 	add_assoc_long(return_value, "pid", (long) proc->child);
 
 #ifdef PHP_WIN32
@@ -899,7 +899,7 @@ PHP_FUNCTION(proc_open)
 	proc->env = env;
 
 	if (pipes != NULL) {
-		ZVAL_DEREF_REF(pipes);
+		ZVAL_DEREF(pipes);
 		zval_dtor(pipes);
 	} 
 

@@ -4766,8 +4766,8 @@ PHP_FUNCTION(error_get_last)
 	if (PG(last_error_message)) {
 		array_init(return_value);
 		add_assoc_long_ex(return_value, "type", sizeof("type")-1, PG(last_error_type));
-		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message), 1);
-		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-", 1 );
+		add_assoc_string_ex(return_value, "message", sizeof("message")-1, PG(last_error_message));
+		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
 }
@@ -4788,7 +4788,7 @@ PHP_FUNCTION(call_user_func)
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -4809,7 +4809,7 @@ PHP_FUNCTION(call_user_func_array)
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 
 	zend_fcall_info_args_clear(&fci, 1);
@@ -4842,7 +4842,7 @@ PHP_FUNCTION(call_user_method)
 
 	if (call_user_function_ex(EG(function_table), object, callback, &retval, n_params, params, 0, NULL TSRMLS_CC) == SUCCESS) {
 		if (Z_TYPE(retval) != IS_UNDEF) {
-			COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+			ZVAL_COPY_VALUE(return_value, &retval);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_P(callback));
@@ -4888,7 +4888,7 @@ PHP_FUNCTION(call_user_method_array)
 
 	if (call_user_function_ex(EG(function_table), object, callback, &retval, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS) {
 		if (Z_TYPE(retval) != IS_UNDEF) {
-			COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+			ZVAL_COPY_VALUE(return_value, &retval);
 		}
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call %s()", Z_STRVAL_P(callback));
@@ -4922,7 +4922,7 @@ PHP_FUNCTION(forward_static_call)
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 }
 /* }}} */
@@ -4948,7 +4948,7 @@ PHP_FUNCTION(forward_static_call_array)
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		COPY_PZVAL_TO_ZVAL(*return_value, &retval);
+		ZVAL_COPY_VALUE(return_value, &retval);
 	}
 
 	zend_fcall_info_args_clear(&fci, 1);
@@ -5359,15 +5359,15 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			array_init(&option);
 
 			if (ini_entry->orig_value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length, 1);
+				add_assoc_stringl(&option, "global_value", ini_entry->orig_value, ini_entry->orig_value_length);
 			} else if (ini_entry->value) {
-				add_assoc_stringl(&option, "global_value", ini_entry->value, ini_entry->value_length, 1);
+				add_assoc_stringl(&option, "global_value", ini_entry->value, ini_entry->value_length);
 			} else {
 				add_assoc_null(&option, "global_value");
 			}
 
 			if (ini_entry->value) {
-				add_assoc_stringl(&option, "local_value", ini_entry->value, ini_entry->value_length, 1);
+				add_assoc_stringl(&option, "local_value", ini_entry->value, ini_entry->value_length);
 			} else {
 				add_assoc_null(&option, "local_value");
 			}
@@ -5377,7 +5377,7 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			add_assoc_zval_ex(ini_array, ini_entry->name, ini_entry->name_length, &option);
 		} else {
 			if (ini_entry->value) {
-				add_assoc_stringl(ini_array, ini_entry->name, ini_entry->value, ini_entry->value_length, 1);
+				add_assoc_stringl(ini_array, ini_entry->name, ini_entry->value, ini_entry->value_length);
 			} else {
 				add_assoc_null(ini_array, ini_entry->name);
 			}

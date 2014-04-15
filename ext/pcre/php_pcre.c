@@ -507,7 +507,7 @@ static inline void add_offset_pair(zval *result, char *str, int len, int offset,
 	array_init(&match_pair);
 
 	/* Add (match, offset) to the return value */
-	add_next_index_stringl(&match_pair, str, len, 1);
+	add_next_index_stringl(&match_pair, str, len);
 	add_next_index_long(&match_pair, offset);
 	
 	if (name) {
@@ -540,7 +540,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	}
 
 	if (subpats) {
-		ZVAL_DEREF_REF(subpats);
+		ZVAL_DEREF(subpats);
 	}
 	php_pcre_match_impl(pce, subject, subject_len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
@@ -682,7 +682,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 												offsets[(i<<1)+1] - offsets[i<<1], offsets[i<<1], NULL);
 							} else {
 								add_next_index_stringl(&match_sets[i], (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1], 1);
+													   offsets[(i<<1)+1] - offsets[i<<1]);
 							}
 						}
 						/*
@@ -692,7 +692,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						 */
 						if (count < num_subpats) {
 							for (; i < num_subpats; i++) {
-								add_next_index_string(&match_sets[i], "", 1);
+								add_next_index_string(&match_sets[i], "");
 							}
 						}
 					} else {
@@ -707,10 +707,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 							} else {
 								if (subpat_names[i]) {
 									add_assoc_stringl(&result_set, subpat_names[i], (char *)stringlist[i],
-														   offsets[(i<<1)+1] - offsets[i<<1], 1);
+														   offsets[(i<<1)+1] - offsets[i<<1]);
 								}
 								add_next_index_stringl(&result_set, (char *)stringlist[i],
-													   offsets[(i<<1)+1] - offsets[i<<1], 1);
+													   offsets[(i<<1)+1] - offsets[i<<1]);
 							}
 						}
 						/* And add it to the output array */
@@ -726,10 +726,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							if (subpat_names[i]) {
 								add_assoc_stringl(subpats, subpat_names[i], (char *)stringlist[i],
-												  offsets[(i<<1)+1] - offsets[i<<1], 1);
+												  offsets[(i<<1)+1] - offsets[i<<1]);
 							}
 							add_next_index_stringl(subpats, (char *)stringlist[i],
-												   offsets[(i<<1)+1] - offsets[i<<1], 1);
+												   offsets[(i<<1)+1] - offsets[i<<1]);
 						}
 					}
 				}
@@ -853,9 +853,9 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, char *
 	array_init(&args[0]);
 	for (i = 0; i < count; i++) {
 		if (subpat_names[i]) {
-			add_assoc_stringl(&args[0], subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1], 1);
+			add_assoc_stringl(&args[0], subpat_names[i], &subject[offsets[i<<1]] , offsets[(i<<1)+1] - offsets[i<<1]);
 		}
-		add_next_index_stringl(&args[0], &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1], 1);
+		add_next_index_stringl(&args[0], &subject[offsets[i<<1]], offsets[(i<<1)+1] - offsets[i<<1]);
 	}
 
 	if (call_user_function_ex(EG(function_table), NULL, function, &retval, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -1403,7 +1403,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 		}
 	}
 	if (ZEND_NUM_ARGS() > 4) {
-		ZVAL_DEREF_REF(zcount);
+		ZVAL_DEREF(zcount);
 		zval_dtor(zcount);
 		ZVAL_LONG(zcount, replace_count);
 	}
@@ -1541,7 +1541,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 				} else {
 					/* Add the piece to the return value */
 					add_next_index_stringl(return_value, last_match,
-								   	   &subject[offsets[0]]-last_match, 1);
+								   	   &subject[offsets[0]]-last_match);
 				}
 
 				/* One less left to do */
@@ -1563,7 +1563,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 						} else {
 							add_next_index_stringl(return_value,
 												   &subject[offsets[i<<1]],
-												   match_len, 1);
+												   match_len);
 						}
 					}
 				}
@@ -1622,7 +1622,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL);
 		} else {
 			/* Add the last piece to the return value */
-			add_next_index_stringl(return_value, last_match, subject + subject_len - last_match, 1);
+			add_next_index_stringl(return_value, last_match, subject + subject_len - last_match);
 		}
 	}
 

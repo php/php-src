@@ -1981,9 +1981,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 					case TAG_FMT_SBYTE:
 					case TAG_FMT_UNDEFINED:
 						if (!info_value->s) {
-							add_assoc_stringl(tmpi, name, "", 0, 1);
+							add_assoc_stringl(tmpi, name, "", 0);
 						} else {
-							add_assoc_stringl(tmpi, name, info_value->s, info_data->length, 1);
+							add_assoc_stringl(tmpi, name, info_value->s, info_data->length);
 						}
 						break;
 
@@ -1992,9 +1992,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 							val = "";
 						}
 						if (section_index==SECTION_COMMENT) {
-							add_index_string(tmpi, idx++, val, 1);
+							add_index_string(tmpi, idx++, val);
 						} else {
-							add_assoc_string(tmpi, name, val, 1);
+							add_assoc_string(tmpi, name, val);
 						}
 						break;
 
@@ -2039,9 +2039,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_URATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->ur.num, info_value->ur.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer, 1);
+										add_assoc_string(tmpi, name, buffer);
 									} else {
-										add_index_string(array, ap, buffer, 1);
+										add_index_string(array, ap, buffer);
 									}
 									break;
 
@@ -2065,9 +2065,9 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 								case TAG_FMT_SRATIONAL:
 									snprintf(buffer, sizeof(buffer), "%i/%i", info_value->sr.num, info_value->sr.den);
 									if (l==1) {
-										add_assoc_string(tmpi, name, buffer, 1);
+										add_assoc_string(tmpi, name, buffer);
 									} else {
-										add_index_string(array, ap, buffer, 1);
+										add_index_string(array, ap, buffer);
 									}
 									break;
 

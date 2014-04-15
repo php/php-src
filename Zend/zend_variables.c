@@ -33,7 +33,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
-//???				CHECK_ZVAL_STRING_REL(zvalue);
+				CHECK_ZVAL_STRING_REL(str);
 				STR_RELEASE(str);
 				break;
 			}
@@ -94,7 +94,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT: {
 				zend_string *str = (zend_string*)p;
-//???				CHECK_ZVAL_STRING_REL(zvalue);
+				CHECK_ZVAL_STRING_REL(str);
 				STR_FREE(str);
 				break;
 			}
@@ -151,7 +151,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			CHECK_ZVAL_STRING_REL(zvalue);
+			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			STR_RELEASE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
@@ -182,7 +182,7 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			CHECK_ZVAL_STRING_REL(zvalue);
+			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			STR_FREE(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
@@ -211,7 +211,6 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 ZEND_API void zval_add_ref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
-//???: autoconversion from reverence to ordinal value
 		if (Z_ISREF_P(p) && Z_REFCOUNT_P(p) == 1) {
 			ZVAL_DUP(p, Z_REFVAL_P(p));
 		} else {
@@ -236,7 +235,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	switch (Z_TYPE_P(zvalue)) {
 		case IS_CONSTANT:
 		case IS_STRING:
-			CHECK_ZVAL_STRING_REL(zvalue);
+			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			Z_STR_P(zvalue) = STR_DUP(Z_STR_P(zvalue), 0);
 			break;
 		case IS_ARRAY:

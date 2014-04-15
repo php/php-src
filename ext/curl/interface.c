@@ -156,7 +156,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
 #define CAAL(s, v) add_assoc_long_ex(return_value, s, sizeof(s), (long) v);
 #define CAAD(s, v) add_assoc_double_ex(return_value, s, sizeof(s), (double) v);
-#define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) (v ? v : ""), 1);
+#define CAAS(s, v) add_assoc_string_ex(return_value, s, sizeof(s), (char *) (v ? v : ""));
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s), (zval *) v);
 
 #if defined(PHP_WIN32) || defined(__GNUC__)
@@ -1758,7 +1758,7 @@ PHP_FUNCTION(curl_version)
 		array_init(protocol_list);
 
 		while (*p != NULL) {
-			add_next_index_string(protocol_list, *p, 1);
+			add_next_index_string(protocol_list, *p);
 			p++;
 		}
 		CAAZ("protocols", protocol_list);
@@ -1822,7 +1822,7 @@ static void split_certinfo(char *string, zval *hash)
 			if(tmp) {
 				*tmp = '\0';
 				val = tmp+1;
-				add_assoc_string(hash, key, val, 1);
+				add_assoc_string(hash, key, val);
 			}
 			s = split+2;
 		} while(split);
@@ -1863,7 +1863,7 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 						split_certinfo(&slist->data[len+1], hash);
 						add_assoc_zval(certhash, s, hash);
 					} else {
-						add_assoc_string(certhash, s, &slist->data[len+1], 1);
+						add_assoc_string(certhash, s, &slist->data[len+1]);
 					}
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not extract hash key from certificate info");
@@ -3167,7 +3167,7 @@ PHP_FUNCTION(curl_getinfo)
 						array_init(return_value);
 						if (curl_easy_getinfo(ch->cp, option, &slist) == CURLE_OK) {
 							while (slist) {
-								add_next_index_string(return_value, slist->data, 1);
+								add_next_index_string(return_value, slist->data);
 								slist = slist->next;
 							}
 							curl_slist_free_all(slist);

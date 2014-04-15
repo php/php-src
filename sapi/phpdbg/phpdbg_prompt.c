@@ -98,7 +98,7 @@ static inline int phpdbg_call_register(phpdbg_input_t *input TSRMLS_DC) /* {{{ *
 				add_next_index_stringl(
 					&params,
 					input->argv[param+1]->string,
-					input->argv[param+1]->length, 1);
+					input->argv[param+1]->length);
 
 				phpdbg_debug(
 					"created param[%d] from argv[%d]: %s",

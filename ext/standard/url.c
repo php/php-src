@@ -427,21 +427,21 @@ PHP_FUNCTION(parse_url)
 
     /* add the various elements to the array */
 	if (resource->scheme != NULL)
-		add_assoc_string(return_value, "scheme", resource->scheme, 1);
+		add_assoc_string(return_value, "scheme", resource->scheme);
 	if (resource->host != NULL)
-		add_assoc_string(return_value, "host", resource->host, 1);
+		add_assoc_string(return_value, "host", resource->host);
 	if (resource->port != 0)
 		add_assoc_long(return_value, "port", resource->port);
 	if (resource->user != NULL)
-		add_assoc_string(return_value, "user", resource->user, 1);
+		add_assoc_string(return_value, "user", resource->user);
 	if (resource->pass != NULL)
-		add_assoc_string(return_value, "pass", resource->pass, 1);
+		add_assoc_string(return_value, "pass", resource->pass);
 	if (resource->path != NULL)
-		add_assoc_string(return_value, "path", resource->path, 1);
+		add_assoc_string(return_value, "path", resource->path);
 	if (resource->query != NULL)
-		add_assoc_string(return_value, "query", resource->query, 1);
+		add_assoc_string(return_value, "query", resource->query);
 	if (resource->fragment != NULL)
-		add_assoc_string(return_value, "fragment", resource->fragment, 1);
+		add_assoc_string(return_value, "fragment", resource->fragment);
 done:	
 	php_url_free(resource);
 }
@@ -748,10 +748,10 @@ no_name_header:
 				}
 
 				if ((prev_val = zend_hash_str_find(HASH_OF(return_value), Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr)))) == NULL) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))), 1);
+					add_assoc_stringl_ex(return_value, Z_STRVAL_P(hdr), (p - Z_STRVAL_P(hdr) + 1), s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(prev_val);
-					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))), 1);
+					add_next_index_stringl(prev_val, s, (Z_STRLEN_P(hdr) - (s - Z_STRVAL_P(hdr))));
 				}
 
 				*p = c;

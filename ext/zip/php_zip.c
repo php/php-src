@@ -437,7 +437,7 @@ static int php_zip_parse_options(zval *options, long *remove_all_path,
 #define RETURN_SB(sb) \
 	{ \
 		array_init(return_value); \
-		add_ascii_assoc_string(return_value, "name", (char *)(sb)->name, 1); \
+		add_ascii_assoc_string(return_value, "name", (char *)(sb)->name); \
 		add_ascii_assoc_long(return_value, "index", (long) (sb)->index); \
 		add_ascii_assoc_long(return_value, "crc", (long) (sb)->crc); \
 		add_ascii_assoc_long(return_value, "size", (long) (sb)->size); \
@@ -620,7 +620,7 @@ int php_zip_glob(char *pattern, int pattern_len, long flags, zval *return_value 
 				continue;
 			}
 		}
-		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
+		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip);
 	}
 
 	globfree(&globbuf);
@@ -722,7 +722,7 @@ int php_zip_pcre(char *regexp, int regexp_len, char *path, int path_len, zval *r
 				continue;
 			}
 
-			add_next_index_string(return_value, fullpath, 1);
+			add_next_index_string(return_value, fullpath);
 			efree(namelist[i]);
 		}
 		efree(namelist);

@@ -1804,7 +1804,7 @@ PHP_FUNCTION(mb_http_input)
 				size_t i;
 				array_init(return_value);
 				for (i = 0; i < n; i++) {
-					add_next_index_string(return_value, (*entry)->name, 1);
+					add_next_index_string(return_value, (*entry)->name);
 					entry++;
 				}
 				retname = 0;
@@ -1902,7 +1902,7 @@ PHP_FUNCTION(mb_detect_order)
 		const mbfl_encoding **entry = MBSTRG(current_detect_order_list);
 		array_init(return_value);
 		for (i = 0; i < n; i++) {
-			add_next_index_string(return_value, (*entry)->name, 1);
+			add_next_index_string(return_value, (*entry)->name);
 			entry++;
 		}
 	} else {
@@ -3300,7 +3300,7 @@ PHP_FUNCTION(mb_list_encodings)
 	i = 0;
 	encodings = mbfl_get_supported_encodings();
 	while ((encoding = encodings[i++]) != NULL) {
-		add_next_index_string(return_value, (char *) encoding->name, 1);
+		add_next_index_string(return_value, (char *) encoding->name);
 	}
 }
 /* }}} */
@@ -3327,7 +3327,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 	if (encoding->aliases != NULL) {
 		const char **alias;
 		for (alias = *encoding->aliases; *alias; ++alias) {
-			add_next_index_string(return_value, (char *)*alias, 1);
+			add_next_index_string(return_value, (char *)*alias);
 		}
 	}
 }
@@ -4334,16 +4334,16 @@ PHP_FUNCTION(mb_get_info)
 	if (!typ || !strcasecmp("all", typ)) {
 		array_init(return_value);
 		if (MBSTRG(current_internal_encoding)) {
-			add_assoc_string(return_value, "internal_encoding", (char *)MBSTRG(current_internal_encoding)->name, 1);
+			add_assoc_string(return_value, "internal_encoding", (char *)MBSTRG(current_internal_encoding)->name);
 		}
 		if (MBSTRG(http_input_identify)) {
-			add_assoc_string(return_value, "http_input", (char *)MBSTRG(http_input_identify)->name, 1);
+			add_assoc_string(return_value, "http_input", (char *)MBSTRG(http_input_identify)->name);
 		}
 		if (MBSTRG(current_http_output_encoding)) {
-			add_assoc_string(return_value, "http_output", (char *)MBSTRG(current_http_output_encoding)->name, 1);
+			add_assoc_string(return_value, "http_output", (char *)MBSTRG(current_http_output_encoding)->name);
 		}
 		if ((name = (char *)zend_ini_string("mbstring.http_output_conv_mimetypes", sizeof("mbstring.http_output_conv_mimetypes") - 1, 0)) != NULL) {
-			add_assoc_string(return_value, "http_output_conv_mimetypes", name, 1);
+			add_assoc_string(return_value, "http_output_conv_mimetypes", name);
 		}
 		add_assoc_long(return_value, "func_overload", MBSTRG(func_overload));
 		if (MBSTRG(func_overload)){
@@ -4351,33 +4351,33 @@ PHP_FUNCTION(mb_get_info)
 			array_init(&row1);
 			while (over_func->type > 0) {
 				if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
-					add_assoc_string(&row1, over_func->orig_func, over_func->ovld_func, 1);
+					add_assoc_string(&row1, over_func->orig_func, over_func->ovld_func);
 				}
 				over_func++;
 			}
 			add_assoc_zval(return_value, "func_overload_list", &row1);
 		} else {
-			add_assoc_string(return_value, "func_overload_list", "no overload", 1);
+			add_assoc_string(return_value, "func_overload_list", "no overload");
  		}
 		if (lang != NULL) {
 			if ((name = (char *)mbfl_no_encoding2name(lang->mail_charset)) != NULL) {
-				add_assoc_string(return_value, "mail_charset", name, 1);
+				add_assoc_string(return_value, "mail_charset", name);
 			}
 			if ((name = (char *)mbfl_no_encoding2name(lang->mail_header_encoding)) != NULL) {
-				add_assoc_string(return_value, "mail_header_encoding", name, 1);
+				add_assoc_string(return_value, "mail_header_encoding", name);
 			}
 			if ((name = (char *)mbfl_no_encoding2name(lang->mail_body_encoding)) != NULL) {
-				add_assoc_string(return_value, "mail_body_encoding", name, 1);
+				add_assoc_string(return_value, "mail_body_encoding", name);
 			}
 		}
 		add_assoc_long(return_value, "illegal_chars", MBSTRG(illegalchars));
 		if (MBSTRG(encoding_translation)) {
-			add_assoc_string(return_value, "encoding_translation", "On", 1);
+			add_assoc_string(return_value, "encoding_translation", "On");
 		} else {
-			add_assoc_string(return_value, "encoding_translation", "Off", 1);
+			add_assoc_string(return_value, "encoding_translation", "Off");
 		}
 		if ((name = (char *)mbfl_no_language2name(MBSTRG(language))) != NULL) {
-			add_assoc_string(return_value, "language", name, 1);
+			add_assoc_string(return_value, "language", name);
 		}		
 		n = MBSTRG(current_detect_order_list_size);
 		entry = MBSTRG(current_detect_order_list);
@@ -4385,24 +4385,24 @@ PHP_FUNCTION(mb_get_info)
 			size_t i;
 			array_init(&row2);
 			for (i = 0; i < n; i++) {
-				add_next_index_string(&row2, (*entry)->name, 1);
+				add_next_index_string(&row2, (*entry)->name);
 				entry++;
 			}
 			add_assoc_zval(return_value, "detect_order", &row2);
 		}
 		if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			add_assoc_string(return_value, "substitute_character", "none", 1);
+			add_assoc_string(return_value, "substitute_character", "none");
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG) {
-			add_assoc_string(return_value, "substitute_character", "long", 1);
+			add_assoc_string(return_value, "substitute_character", "long");
 		} else if (MBSTRG(current_filter_illegal_mode) == MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY) {
-			add_assoc_string(return_value, "substitute_character", "entity", 1);
+			add_assoc_string(return_value, "substitute_character", "entity");
 		} else {
 			add_assoc_long(return_value, "substitute_character", MBSTRG(current_filter_illegal_substchar));
 		}
 		if (MBSTRG(strict_detection)) {
-			add_assoc_string(return_value, "strict_detection", "On", 1);
+			add_assoc_string(return_value, "strict_detection", "On");
 		} else {
-			add_assoc_string(return_value, "strict_detection", "Off", 1);
+			add_assoc_string(return_value, "strict_detection", "Off");
 		}
 	} else if (!strcasecmp("internal_encoding", typ)) {
 		if (MBSTRG(current_internal_encoding)) {
@@ -4428,7 +4428,7 @@ PHP_FUNCTION(mb_get_info)
 				array_init(return_value);
 				while (over_func->type > 0) {
 					if ((MBSTRG(func_overload) & over_func->type) == over_func->type ) {
-						add_assoc_string(return_value, over_func->orig_func, over_func->ovld_func, 1);
+						add_assoc_string(return_value, over_func->orig_func, over_func->ovld_func);
 					}
 					over_func++;
 				}
@@ -4466,7 +4466,7 @@ PHP_FUNCTION(mb_get_info)
 			size_t i;
 			array_init(return_value);
 			for (i = 0; i < n; i++) {
-				add_next_index_string(return_value, (*entry)->name, 1);
+				add_next_index_string(return_value, (*entry)->name);
 				entry++;
 			}
 		}

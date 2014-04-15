@@ -354,7 +354,7 @@ PHP_FUNCTION(iptcparse)
 			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
 		} 
 			
-		add_next_index_stringl(element, buffer+inx, len, 1);
+		add_next_index_stringl(element, buffer+inx, len);
 		inx += len;
 		tagsfound++;
 	}

@@ -1807,8 +1807,8 @@ PHP_FUNCTION(getdate)
 	add_assoc_long(return_value, "mon", ts->m);
 	add_assoc_long(return_value, "year", ts->y);
 	add_assoc_long(return_value, "yday", timelib_day_of_year(ts->y, ts->m, ts->d));
-	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d), 1);
-	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1], 1);
+	add_assoc_string(return_value, "weekday", php_date_full_day_name(ts->y, ts->m, ts->d));
+	add_assoc_string(return_value, "month", mon_full_names[ts->m - 1]);
 	add_index_long(return_value, 0, timestamp);
 
 	timelib_time_dtor(ts);
@@ -2826,14 +2826,14 @@ static void zval_from_error_container(zval *z, timelib_error_container *error) /
 	add_assoc_long(z, "warning_count", error->warning_count);
 	array_init(&element);
 	for (i = 0; i < error->warning_count; i++) {
-		add_index_string(&element, error->warning_messages[i].position, error->warning_messages[i].message, 1);
+		add_index_string(&element, error->warning_messages[i].position, error->warning_messages[i].message);
 	}
 	add_assoc_zval(z, "warnings", &element);
 
 	add_assoc_long(z, "error_count", error->error_count);
 	array_init(&element);
 	for (i = 0; i < error->error_count; i++) {
-		add_index_string(&element, error->error_messages[i].position, error->error_messages[i].message, 1);
+		add_index_string(&element, error->error_messages[i].position, error->error_messages[i].message);
 	}
 	add_assoc_zval(z, "errors", &element);
 } /* }}} */
@@ -2891,16 +2891,16 @@ void php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAMETERS, timelib_time *
 				break;
 			case TIMELIB_ZONETYPE_ID:
 				if (parsed_time->tz_abbr) {
-					add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+					add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr);
 				}
 				if (parsed_time->tz_info) {
-					add_assoc_string(return_value, "tz_id", parsed_time->tz_info->name, 1);
+					add_assoc_string(return_value, "tz_id", parsed_time->tz_info->name);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
 				PHP_DATE_PARSE_DATE_SET_TIME_ELEMENT(zone, z);
 				add_assoc_bool(return_value, "is_dst", parsed_time->dst);
-				add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr, 1);
+				add_assoc_string(return_value, "tz_abbr", parsed_time->tz_abbr);
 				break;
 		}
 	}
@@ -3840,7 +3840,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, timestamp_begin, 0 TSRMLS_CC)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[0].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[0].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx], 1); \
+		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[0].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
 #define add(i,ts) \
@@ -3849,7 +3849,7 @@ PHP_FUNCTION(timezone_transitions_get)
 		add_assoc_str(&element, "time", php_format_date(DATE_FORMAT_ISO8601, 13, ts, 0 TSRMLS_CC)); \
 		add_assoc_long(&element, "offset", tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].offset); \
 		add_assoc_bool(&element, "isdst",  tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].isdst); \
-		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx], 1); \
+		add_assoc_string(&element, "abbr", &tzobj->tzi.tz->timezone_abbr[tzobj->tzi.tz->type[tzobj->tzi.tz->trans_idx[i]].abbr_idx]); \
 		add_next_index_zval(return_value, &element);
 
 #define add_last() add(tzobj->tzi.tz->timecnt - 1, timestamp_begin)
@@ -3913,10 +3913,10 @@ PHP_FUNCTION(timezone_location_get)
 	}
 
 	array_init(return_value);
-	add_assoc_string(return_value, "country_code", tzobj->tzi.tz->location.country_code, 1);
+	add_assoc_string(return_value, "country_code", tzobj->tzi.tz->location.country_code);
 	add_assoc_double(return_value, "latitude", tzobj->tzi.tz->location.latitude);
 	add_assoc_double(return_value, "longitude", tzobj->tzi.tz->location.longitude);
-	add_assoc_string(return_value, "comments", tzobj->tzi.tz->location.comments, 1);
+	add_assoc_string(return_value, "comments", tzobj->tzi.tz->location.comments);
 }
 /* }}} */
 
@@ -4454,10 +4454,10 @@ PHP_FUNCTION(timezone_identifiers_list)
 	for (i = 0; i < item_count; ++i) {
 		if (what == PHP_DATE_TIMEZONE_PER_COUNTRY) {
 			if (tzdb->data[table[i].pos + 5] == option[0] && tzdb->data[table[i].pos + 6] == option[1]) {
-				add_next_index_string(return_value, table[i].id, 1);
+				add_next_index_string(return_value, table[i].id);
 			}
 		} else if (what == PHP_DATE_TIMEZONE_GROUP_ALL_W_BC || (check_id_allowed(table[i].id, what) && (tzdb->data[table[i].pos + 4] == '\1'))) {
-			add_next_index_string(return_value, table[i].id, 1);
+			add_next_index_string(return_value, table[i].id);
 		}
 	};
 }
@@ -4492,7 +4492,7 @@ PHP_FUNCTION(timezone_abbreviations_list)
 		add_assoc_bool(&element, "dst", entry->type);
 		add_assoc_long(&element, "offset", entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_assoc_string(&element, "timezone_id", entry->full_tz_name, 1);
+			add_assoc_string(&element, "timezone_id", entry->full_tz_name);
 		} else {
 			add_assoc_null(&element, "timezone_id");
 		}

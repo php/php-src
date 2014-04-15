@@ -1361,14 +1361,14 @@ PHP_FUNCTION(gd_info)
 
 	array_init(return_value);
 
-	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING, 1);
+	add_assoc_string(return_value, "GD Version", PHP_GD_VERSION_STRING);
 
 #ifdef ENABLE_GD_TTF
 	add_assoc_bool(return_value, "FreeType Support", 1);
 #if HAVE_LIBFREETYPE
-	add_assoc_string(return_value, "FreeType Linkage", "with freetype", 1);
+	add_assoc_string(return_value, "FreeType Linkage", "with freetype");
 #else
-	add_assoc_string(return_value, "FreeType Linkage", "with unknown library", 1);
+	add_assoc_string(return_value, "FreeType Linkage", "with unknown library");
 #endif
 #else
 	add_assoc_bool(return_value, "FreeType Support", 0);

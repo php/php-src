@@ -240,7 +240,7 @@ PHP_METHOD(sqlite3, version)
 
 	array_init(return_value);
 
-	add_assoc_string(return_value, "versionString", (char*)sqlite3_libversion(), 1);
+	add_assoc_string(return_value, "versionString", (char*)sqlite3_libversion());
 	add_assoc_long(return_value, "versionNumber", sqlite3_libversion_number());
 
 	return;

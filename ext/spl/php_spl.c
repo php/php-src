@@ -721,7 +721,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	if (!EG(autoload_func)) {
 		if ((fptr = zend_hash_str_find_ptr(EG(function_table), ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1))) {
 			array_init(return_value);
-			add_next_index_stringl(return_value, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1, 1);
+			add_next_index_stringl(return_value, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1);
 			return;
 		}
 		RETURN_FALSE;

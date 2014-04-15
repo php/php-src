@@ -75,7 +75,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 			continue;
 		}
 
-		add_next_index_string(mx_list, pRec->Data.MX.pNameExchange, 1);
+		add_next_index_string(mx_list, pRec->Data.MX.pNameExchange);
 		if (weight_list) {
 			add_next_index_long(weight_list, srv->wPriority);
 		}
@@ -157,13 +157,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 	ALLOC_INIT_ZVAL(*subarray);
 	array_init(*subarray);
 
-	add_assoc_string(*subarray, "host", pRec->pName, 1);
-	add_assoc_string(*subarray, "class", "IN", 1);
+	add_assoc_string(*subarray, "host", pRec->pName);
+	add_assoc_string(*subarray, "class", "IN");
 	add_assoc_long(*subarray, "ttl", ttl);
 
 	if (raw) {
 		add_assoc_long(*subarray, "type", type);
-		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength, 1);
+		add_assoc_stringl(*subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength);
 		return;
 	}
 
@@ -171,33 +171,33 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 		case DNS_TYPE_A: {
 			IN_ADDR ipaddr;
 			ipaddr.S_un.S_addr = (pRec->Data.A.IpAddress);
-			add_assoc_string(*subarray, "type", "A", 1);
-			add_assoc_string(*subarray, "ip", inet_ntoa(ipaddr), 1);
+			add_assoc_string(*subarray, "type", "A");
+			add_assoc_string(*subarray, "ip", inet_ntoa(ipaddr));
 			break;
 		}
 
 		case DNS_TYPE_MX:
-			add_assoc_string(*subarray, "type", "MX", 1);
+			add_assoc_string(*subarray, "type", "MX");
 			add_assoc_long(*subarray, "pri", pRec->Data.Srv.wPriority);
 			/* no break; */
 
 		case DNS_TYPE_CNAME:
 			if (type == DNS_TYPE_CNAME) {
-				add_assoc_string(*subarray, "type", "CNAME", 1);
+				add_assoc_string(*subarray, "type", "CNAME");
 			}
 			/* no break; */
 
 		case DNS_TYPE_NS:
 			if (type == DNS_TYPE_NS) {
-				add_assoc_string(*subarray, "type", "NS", 1);
+				add_assoc_string(*subarray, "type", "NS");
 			}
 			/* no break; */
 
 		case DNS_TYPE_PTR:
 			if (type == DNS_TYPE_PTR) {
-				add_assoc_string(*subarray, "type", "PTR", 1);
+				add_assoc_string(*subarray, "type", "PTR");
 			}
-			add_assoc_string(*subarray, "target", pRec->Data.MX.pNameExchange, 1);
+			add_assoc_string(*subarray, "target", pRec->Data.MX.pNameExchange);
 			break;
 
 		/* Not available on windows, the query is possible but there is no DNS_HINFO_DATA structure */
@@ -211,7 +211,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				long txt_len = 0;
 				zval *entries;
 
-				add_assoc_string(*subarray, "type", "TXT", 1);
+				add_assoc_string(*subarray, "type", "TXT");
 				
 				ALLOC_INIT_ZVAL(entries);
 				array_init(entries);
@@ -225,11 +225,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				for (i = 0; i < count; i++) {
 					int len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
-					add_next_index_stringl(entries, data_txt->pStringArray[i], len, 1);
+					add_next_index_stringl(entries, data_txt->pStringArray[i], len);
 					txt_dst += len;
 				}
 
-				add_assoc_string(*subarray, "txt", txt, 0);
+				// TODO: avoid reallocation ???
+				add_assoc_string(*subarray, "txt", txt);
+				efree(txt);
 				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;
@@ -238,10 +240,10 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 			{
 				DNS_SOA_DATA *data_soa = &pRec->Data.Soa;
 
-				add_assoc_string(*subarray, "type", "SOA", 1);
+				add_assoc_string(*subarray, "type", "SOA");
 
-				add_assoc_string(*subarray, "mname", data_soa->pNamePrimaryServer, 1);
-				add_assoc_string(*subarray, "rname", data_soa->pNameAdministrator, 1);
+				add_assoc_string(*subarray, "mname", data_soa->pNamePrimaryServer);
+				add_assoc_string(*subarray, "rname", data_soa->pNameAdministrator);
 				add_assoc_long(*subarray, "serial", data_soa->dwSerialNo);
 				add_assoc_long(*subarray, "refresh", data_soa->dwRefresh);
 				add_assoc_long(*subarray, "retry", data_soa->dwRetry);
@@ -294,8 +296,8 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				}
 				tp[0] = '\0';
 
-				add_assoc_string(*subarray, "type", "AAAA", 1);
-				add_assoc_string(*subarray, "ipv6", buf, 1);
+				add_assoc_string(*subarray, "type", "AAAA");
+				add_assoc_string(*subarray, "ipv6", buf);
 			}
 			break;
 
@@ -309,11 +311,11 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 			{
 				DNS_SRV_DATA *data_srv = &pRec->Data.Srv;
 
-				add_assoc_string(*subarray, "type", "SRV", 1);
+				add_assoc_string(*subarray, "type", "SRV");
 				add_assoc_long(*subarray, "pri", data_srv->wPriority);
 				add_assoc_long(*subarray, "weight", data_srv->wWeight);
 				add_assoc_long(*subarray, "port", data_srv->wPort);
-				add_assoc_string(*subarray, "target", data_srv->pNameTarget, 1);
+				add_assoc_string(*subarray, "target", data_srv->pNameTarget);
 			}
 			break;
 
@@ -322,13 +324,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 			{
 				DNS_NAPTR_DATA * data_naptr = &pRec->Data.Naptr;
 
-				add_assoc_string(*subarray, "type", "NAPTR", 1);
+				add_assoc_string(*subarray, "type", "NAPTR");
 				add_assoc_long(*subarray, "order", data_naptr->wOrder);
 				add_assoc_long(*subarray, "pref", data_naptr->wPreference);
-				add_assoc_string(*subarray, "flags", data_naptr->pFlags, 1);
-				add_assoc_string(*subarray, "services", data_naptr->pService, 1);
-				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression, 1);
-				add_assoc_string(*subarray, "replacement", data_naptr->pReplacement, 1);
+				add_assoc_string(*subarray, "flags", data_naptr->pFlags);
+				add_assoc_string(*subarray, "services", data_naptr->pService);
+				add_assoc_string(*subarray, "regex", data_naptr->pRegularExpression);
+				add_assoc_string(*subarray, "replacement", data_naptr->pReplacement);
 			}
 			break;
 #endif

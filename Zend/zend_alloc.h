@@ -136,9 +136,6 @@ inline static void * __zend_realloc(void *p, size_t len)
 #define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-//???#define safe_estrdup(ptr)  ((ptr)?(estrdup(ptr)):STR_EMPTY_ALLOC())
-//???#define safe_estrndup(ptr, len) ((ptr)?(estrndup((ptr), (len))):STR_EMPTY_ALLOC())
-
 ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC);
 
 ZEND_API void start_memory_manager(TSRMLS_D);

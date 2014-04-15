@@ -245,7 +245,6 @@ try_again:
 				(op) = &(holder);											\
 				break;														\
 			case IS_RESOURCE:												\
-			    /* ??? delete old resource ??? */							\
 				ZVAL_LONG(&(holder), Z_RES_HANDLE_P(op));					\
 				(op) = &(holder);											\
 				break;														\
@@ -291,7 +290,6 @@ try_again:
 				ZVAL_LONG(&(holder), Z_LVAL_P(op));					\
 				break;												\
 			case IS_RESOURCE:										\
-			    /* ??? delete old resource ??? */					\
 				ZVAL_LONG(&holder, Z_RES_HANDLE_P(op));				\
 				break;												\
 			default:												\
@@ -590,19 +588,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 
 ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-//???	double dval;
-//???	switch (Z_TYPE_P(op)) {
-//???		case IS_DOUBLE: {
-//???			TSRMLS_FETCH();
-//???			dval = Z_DVAL_P(op);
-//???			Z_STRLEN_P(op) = zend_spprintf((char**)&Z_STRVAL_P(op), 0, "%.*H", (int) EG(precision), dval);
-//???			/* %H already handles removing trailing zeros from the fractional part, yay */
-//???			break;
-//???		}
-//???		default:
-			_convert_to_string(op ZEND_FILE_LINE_CC);
-//???	}
-//???	Z_TYPE_P(op) = IS_STRING;
+	_convert_to_string(op ZEND_FILE_LINE_CC);
 }
 /* }}} */
 
@@ -681,7 +667,6 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		default:
-			//??? op is set to be IS_STRING below. 
 			zval_dtor(op);
 			ZVAL_BOOL(op, 0);
 			break;
@@ -1753,9 +1738,12 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			ZVAL_BOOL(result, Z_DVAL_P(op1) == Z_DVAL_P(op2));
 			break;
 		case IS_STRING:
-// TODO: interned strings ???
-			ZVAL_BOOL(result, (Z_STRLEN_P(op1) == Z_STRLEN_P(op2))
-				&& (!memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1))));
+			if (Z_STR_P(op1) == Z_STR_P(op2)) {
+				ZVAL_BOOL(result, 1);
+			} else {
+				ZVAL_BOOL(result, (Z_STRLEN_P(op1) == Z_STRLEN_P(op2))
+					&& (!memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1))));
+			}
 			break;
 		case IS_ARRAY:
 			ZVAL_BOOL(result, Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||

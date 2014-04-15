@@ -605,7 +605,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 		goto done;
 	}
 
-	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0), 1);
+	add_assoc_string(return_value, "native_type", PQgetvalue(res, 0, 0));
 done:
 	PQclear(res);		
 	return 1;

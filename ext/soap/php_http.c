@@ -849,7 +849,7 @@ try_again:
 		smart_str_0(&soap_headers);
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
 		    Z_LVAL_PP(trace) > 0) {
-			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.c, soap_headers.len, 1);
+			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.c, soap_headers.len);
 		}
 		smart_str_appendl(&soap_headers, request, request_size);
 		smart_str_0(&soap_headers);
@@ -894,7 +894,7 @@ try_again:
 
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
 		    Z_LVAL_PP(trace) > 0) {
-			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size, 1);
+			add_property_stringl(this_ptr, "__last_response_headers", http_headers, http_header_size);
 		}
 
 		/* Check to see what HTTP status was sent */
@@ -970,7 +970,7 @@ try_again:
 
 			ALLOC_INIT_ZVAL(zcookie);
 			array_init(zcookie);
-			add_index_stringl(zcookie, 0, eqpos + 1, cookie_len, 1);
+			add_index_stringl(zcookie, 0, eqpos + 1, cookie_len);
 
 			if (sempos != NULL) {
 				char *options = cookie + cookie_len+1;
@@ -979,10 +979,10 @@ try_again:
 					sempos = strstr(options, ";");
 					if (strstr(options,"path=") == options) {
 						eqpos = options + sizeof("path=")-1;
-						add_index_stringl(zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+						add_index_stringl(zcookie, 1, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"domain=") == options) {
 						eqpos = options + sizeof("domain=")-1;
-						add_index_stringl(zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos), 1);
+						add_index_stringl(zcookie, 2, eqpos, sempos?(sempos-eqpos):strlen(eqpos));
 					} else if (strstr(options,"secure") == options) {
 						add_index_bool(zcookie, 3, 1);
 					}
@@ -997,11 +997,11 @@ try_again:
 				char *t = phpurl->path?phpurl->path:"/";
 				char *c = strrchr(t, '/');
 				if (c) {
-					add_index_stringl(zcookie, 1, t, c-t, 1);
+					add_index_stringl(zcookie, 1, t, c-t);
 				}
 			}
 			if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 2)) {
-				add_index_string(zcookie, 2, phpurl->host, 1);
+				add_index_string(zcookie, 2, phpurl->host);
 			}
 
 			add_assoc_zval_ex(*cookies, name.c, name.len+1, zcookie);
@@ -1173,7 +1173,7 @@ try_again:
 						ALLOC_INIT_ZVAL(digest);
 						array_init(digest);
 					}
-					add_assoc_string(digest, name, val ,1);
+					add_assoc_string(digest, name, val);
 				}
 			}
 

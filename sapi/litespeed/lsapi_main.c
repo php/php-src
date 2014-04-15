@@ -1092,7 +1092,7 @@ zend_module_entry litespeed_module_entry = {
 static int add_associate_array( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
-    add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue, 1 );
+    add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue);
     return 1;
 }
 
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(litespeed_response_headers)
                 headerBuf[len] = 0;
                 if ( len ) {
                     while( isspace(*++p));
-                    add_assoc_string_ex(return_value, headerBuf, len+1, p, 1 );
+                    add_assoc_string_ex(return_value, headerBuf, len+1, p);
                 }
             }
         }
@@ -1166,10 +1166,10 @@ PHP_FUNCTION(apache_get_modules)
         WRONG_PARAM_COUNT;
     }
     array_init(return_value);
-    add_next_index_string(return_value, "mod_rewrite", 1);
-    add_next_index_string(return_value, "mod_mime", 1);
-    add_next_index_string(return_value, "mod_headers", 1);
-    add_next_index_string(return_value, "mod_expires", 1);
+    add_next_index_string(return_value, "mod_rewrite");
+    add_next_index_string(return_value, "mod_mime");
+    add_next_index_string(return_value, "mod_headers");
+    add_next_index_string(return_value, "mod_expires");
 }
 /* }}} */
 

@@ -480,9 +480,9 @@ PHP_FUNCTION(get_meta_tags)
 				/* For BC */
 				php_strtolower(name, strlen(name));
 				if (have_content) {
-					add_assoc_string(return_value, name, value, 1);
+					add_assoc_string(return_value, name, value);
 				} else {
-					add_assoc_string(return_value, name, "", 1);
+					add_assoc_string(return_value, name, "");
 				}
 
 				efree(name);
@@ -763,7 +763,7 @@ PHP_FUNCTION(file)
 			do {
 				p++;
 parse_eol:
-				add_index_stringl(return_value, i++, s, p-s, 1);
+				add_index_stringl(return_value, i++, s, p-s);
 				s = p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		} else {
@@ -776,7 +776,7 @@ parse_eol:
 					s = ++p;
 					continue;
 				}
-				add_index_stringl(return_value, i++, s, p-s-windows_eol, 1);
+				add_index_stringl(return_value, i++, s, p-s-windows_eol);
 				s = ++p;
 			} while ((p = memchr(p, eol_marker, (e-p))));
 		}
@@ -2277,7 +2277,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 
 		/* 3. Now pass our field back to php */
 		*comp_end = '\0';
-		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
+		add_next_index_stringl(return_value, temp, comp_end - temp);
 	} while (inc_len > 0);
 
 out:

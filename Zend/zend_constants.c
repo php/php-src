@@ -483,7 +483,6 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 #endif
 
 	if (!(c->flags & CONST_CS)) {
-//???		/* keep in mind that c->name_len already contains the '\0' */
 		lowercase_name = STR_ALLOC(c->name->len, c->flags & CONST_PERSISTENT);
 		zend_str_tolower_copy(lowercase_name->val, c->name->val, c->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
@@ -508,7 +507,6 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
 		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")-1
 			&& memcmp(name->val, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {
-//???			name++;
 		}
 		zend_error(E_NOTICE,"Constant %s already defined", name->val);
 		STR_RELEASE(c->name);

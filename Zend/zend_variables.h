@@ -95,7 +95,6 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zvalue);
 #endif
 
 ZEND_API void zval_add_ref(zval *p);
-//??? previously references become regular values when refcount became 1
 ZEND_API void zval_add_ref_unref(zval *p);
 
 END_EXTERN_C()

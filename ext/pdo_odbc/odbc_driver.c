@@ -49,8 +49,10 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 				einfo->file, einfo->line);
 
 	add_next_index_long(info, einfo->last_error);
-	add_next_index_string(info, message, 0);
-	add_next_index_string(info, einfo->last_state, 1);
+	// TODO: avoid reallocation ???
+	add_next_index_string(info, message);
+	efree(message);
+	add_next_index_string(info, einfo->last_state);
 
 	return 1;
 }

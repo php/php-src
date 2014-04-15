@@ -1159,7 +1159,7 @@ static int php_output_stack_apply_list(void *h, void *z)
 	php_output_handler *handler = *(php_output_handler **) h;
 	zval *array = (zval *) z;
 
-	add_next_index_stringl(array, handler->name, handler->name_len, 1);
+	add_next_index_stringl(array, handler->name, handler->name_len);
 	return 0;
 }
 /* }}} */
@@ -1183,7 +1183,7 @@ static inline zval *php_output_handler_status(php_output_handler *handler, zval 
 	ZEND_ASSERT(entry != NULL);
 
 	array_init(entry);
-	add_assoc_stringl(entry, "name", handler->name, handler->name_len, 1);
+	add_assoc_stringl(entry, "name", handler->name, handler->name_len);
 	add_assoc_long(entry, "type", (long) (handler->flags & 0xf));
 	add_assoc_long(entry, "flags", (long) handler->flags);
 	add_assoc_long(entry, "level", (long) handler->level);

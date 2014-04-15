@@ -120,7 +120,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
-				add_next_index_stringl(array, buf, bufl, 1);
+				add_next_index_stringl(array, buf, bufl);
 			}
 			b = buf;
 		}
@@ -134,7 +134,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 					buf[bufl] = '\0';
 				}
 				if (type == 2) {
-					add_next_index_stringl(array, buf, bufl, 1);
+					add_next_index_stringl(array, buf, bufl);
 				}
 			}
 

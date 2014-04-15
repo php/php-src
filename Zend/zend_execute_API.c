@@ -465,12 +465,6 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 		Z_DELREF_P(zval_ptr);
 		if (Z_REFCOUNT_P(zval_ptr) == 0) {
 			_zval_internal_dtor_for_ptr(zval_ptr ZEND_FILE_LINE_CC);
-//???		} else if (Z_REFCOUNT_P(zval_ptr) == 1) {		
-//???			if (Z_ISREF_P(zval_ptr)) {
-//???				zend_reference *ref = Z_REF_P(zval_ptr);
-//???				ZVAL_COPY_VALUE(zval_ptr, Z_REFVAL_P(zval_ptr));
-//???				efree(ref);
-//???			}
 		}
 	}
 }
@@ -484,20 +478,18 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 
 #include "../TSRM/tsrm_strtok_r.h"
 
-#define IS_VISITED_CONSTANT			0x080 //??? IS_CONSTANT_INDEX
+#define IS_VISITED_CONSTANT			0x080
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
 
 static void zval_deep_copy(zval *p)
 {
-	zval value;
-
-	ZVAL_DUP(&value, p);
-//???	Z_TYPE(value) &= ~IS_CONSTANT_INDEX;
-//???	zval_copy_ctor(&value);
-//???	Z_TYPE(value) = Z_TYPE_P(p);
-	ZVAL_COPY_VALUE(p, &value);
+//???	zval value;
+//???
+//???	ZVAL_DUP(&value, p);
+//???	ZVAL_COPY_VALUE(p, &value);
+	zval_copy_ctor(p);
 }
 
 ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
@@ -1200,7 +1192,7 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 		CG(interactive) = orig_interactive;
 		if (Z_TYPE(local_retval) != IS_UNDEF) {
 			if (retval_ptr) {
-				COPY_PZVAL_TO_ZVAL(*retval_ptr, &local_retval);
+				ZVAL_COPY_VALUE(retval_ptr, &local_retval);
 			} else {
 				zval_ptr_dtor(&local_retval);
 			}

@@ -311,7 +311,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	if (U_FAILURE(uec)) {
 		return Z_ARRVAL(zv);
 	}
-	add_assoc_stringl_ex(&zv, "id", sizeof("id"), str, str_len, 0);
+	// TODO: avoid reallocation ???
+	add_assoc_stringl_ex(&zv, "id", sizeof("id"), str, str_len);
+	efree(str);
 
 	int32_t rawOffset, dstOffset;
 	UDate now = Calendar::getNow();

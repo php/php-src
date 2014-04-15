@@ -2355,9 +2355,9 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 
 					elem = &new_elem;
 				}
-				add_next_index_stringl(*elem, header_value, header_value_len, 1);
+				add_next_index_stringl(*elem, header_value, header_value_len);
 			} else {
-				add_assoc_stringl_ex(return_value, header_name, header_name_len, header_value, header_value_len, 1);
+				add_assoc_stringl_ex(return_value, header_name, header_name_len, header_value, header_value_len);
 			}
 		}
 		encoded_str_len -= next_pos - encoded_str;
@@ -2451,9 +2451,9 @@ PHP_FUNCTION(iconv_get_encoding)
 
 	if (!strcasecmp("all", type)) {
 		array_init(return_value);
-		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding), 1);
-		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding), 1);
-		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding), 1);
+		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding));
+		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding));
+		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding));
 	} else if (!strcasecmp("input_encoding", type)) {
 		RETVAL_STRING(ICONVG(input_encoding), 1);
 	} else if (!strcasecmp("output_encoding", type)) {

@@ -1718,7 +1718,7 @@ static PHP_METHOD(PDOStatement, errorInfo)
 	}
 
 	array_init(return_value);
-	add_next_index_string(return_value, stmt->error_code, 1);
+	add_next_index_string(return_value, stmt->error_code);
 
 	if (stmt->dbh->methods->fetch_err) {
 		stmt->dbh->methods->fetch_err(stmt->dbh, stmt, return_value TSRMLS_CC);
@@ -1861,7 +1861,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 
 	/* add stock items */
 	col = &stmt->columns[colno];
-	add_assoc_string(return_value, "name", col->name, 1);
+	add_assoc_string(return_value, "name", col->name);
 	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
 	add_assoc_long(return_value, "precision", col->precision);
 	if (col->param_type != PDO_PARAM_ZVAL) {

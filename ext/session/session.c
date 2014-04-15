@@ -154,7 +154,7 @@ PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC) /* {{{ */
 		zval empty_var;
 
 		ZVAL_NULL(&empty_var);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name->val, name->len, &empty_var, 1, 0);
+		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, &empty_var);
 	}
 }
 /* }}} */
@@ -183,7 +183,6 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 	zend_string *var_name = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
 	/* Unconditionally destroy existing array -- possible dirty data */
 	zend_delete_global_variable(var_name TSRMLS_CC);
-	STR_RELEASE(var_name);
 
 	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));
@@ -191,8 +190,9 @@ static void php_session_track_init(TSRMLS_D) /* {{{ */
 
 	array_init(&session_vars);
 	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
-
-	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
+	Z_ADDREF_P(&PS(http_session_vars));
+	zend_hash_update_ind(&EG(symbol_table).ht, var_name, &PS(http_session_vars));
+	STR_RELEASE(var_name);
 }
 /* }}} */
 
@@ -844,6 +844,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	const char *endptr = val + vallen;
 	zval session_vars;
 	php_unserialize_data_t var_hash;
+	zend_string *var_name = STR_INIT("_SESSION", sizeof("_SESSION") - 1, 0);
 
 	ZVAL_NULL(&session_vars);
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
@@ -856,7 +857,9 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 		array_init(&session_vars);
 	} 
 	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
-	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION") - 1, &PS(http_session_vars), 2, 1);
+	Z_ADDREF_P(&PS(http_session_vars));
+	zend_hash_update_ind(&EG(symbol_table).ht, var_name, &PS(http_session_vars));
+	STR_RELEASE(var_name);
 	return SUCCESS;
 }
 /* }}} */
@@ -1648,8 +1651,8 @@ static PHP_FUNCTION(session_get_cookie_params)
 	array_init(return_value);
 
 	add_assoc_long(return_value, "lifetime", PS(cookie_lifetime));
-	add_assoc_string(return_value, "path", PS(cookie_path), 1);
-	add_assoc_string(return_value, "domain", PS(cookie_domain), 1);
+	add_assoc_string(return_value, "path", PS(cookie_path));
+	add_assoc_string(return_value, "domain", PS(cookie_domain));
 	add_assoc_bool(return_value, "secure", PS(cookie_secure));
 	add_assoc_bool(return_value, "httponly", PS(cookie_httponly));
 }
@@ -2650,7 +2653,8 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
 		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
-		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s->val, progress->key.s->len, &progress->data, 2, 0);
+		if (Z_REFCOUNTED(progress->data)) Z_ADDREF(progress->data);
+		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s, &progress->data);
 	}
 	php_session_flush(TSRMLS_C);
 } /* }}} */
@@ -2761,8 +2765,8 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			array_init(&progress->current_file);
 
 			/* Each uploaded file has its own array. Trying to make it close to $_FILES entries. */
-			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name, 1);
-			add_assoc_string_ex(&progress->current_file, "name", sizeof("name") - 1, *data->filename, 1);
+			add_assoc_string_ex(&progress->current_file, "field_name", sizeof("field_name") - 1, data->name);
+			add_assoc_string_ex(&progress->current_file, "name", sizeof("name") - 1, *data->filename);
 			add_assoc_null_ex(&progress->current_file, "tmp_name", sizeof("tmp_name") - 1);
 			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, 0);
 
@@ -2799,7 +2803,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			}
 			
 			if (data->temp_filename) {
-				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename, 1);
+				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename);
 			}
 
 			add_assoc_long_ex(&progress->current_file, "error", sizeof("error") - 1, data->cancel_upload);

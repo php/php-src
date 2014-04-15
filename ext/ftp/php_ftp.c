@@ -673,7 +673,7 @@ PHP_FUNCTION(ftp_nlist)
 
 	array_init(return_value);
 	for (ptr = nlist; *ptr; ptr++) {
-		add_next_index_string(return_value, *ptr, 1);
+		add_next_index_string(return_value, *ptr);
 	}
 	efree(nlist);
 }
@@ -702,7 +702,7 @@ PHP_FUNCTION(ftp_rawlist)
 
 	array_init(return_value);
 	for (ptr = llist; *ptr; ptr++) {
-		add_next_index_string(return_value, *ptr, 1);
+		add_next_index_string(return_value, *ptr);
 	}
 	efree(llist);
 }

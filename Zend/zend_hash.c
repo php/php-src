@@ -159,7 +159,6 @@ ZEND_API void zend_hash_to_packed(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->flags |= HASH_FLAG_PACKED;
-//???	pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
 	ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
 	ht->arHash = (zend_uint*)&uninitialized_bucket;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -1034,7 +1033,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 		if (setTargetPointer && source->nInternalPointer == idx) {
 			target->nInternalPointer = INVALID_IDX;
 		}
-//???
+		/* INDIRECT element may point to UNDEF-ined slots */
 		data = &p->val;
 		if (Z_TYPE_P(data) == IS_INDIRECT) {
 			data = Z_INDIRECT_P(data);
@@ -1614,7 +1613,6 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 	} else {
 		if (renumber) {
 			ht->flags |= HASH_FLAG_PACKED;
-//???			pefree(ht->arHash, ht->flags & HASH_FLAG_PERSISTENT);
 			ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
 			ht->arHash = (zend_uint*)&uninitialized_bucket;
 		} else {

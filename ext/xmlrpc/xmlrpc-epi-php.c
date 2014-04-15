@@ -326,14 +326,14 @@ static int add_double(zval* list, char* id, double num) {
 	else   return add_next_index_double(list, num);
 }
 
-static int add_string(zval* list, char* id, char* string, int duplicate) {
-	if(id) return add_assoc_string(list, id, string, duplicate);
-	else   return add_next_index_string(list, string, duplicate);
+static int add_string(zval* list, char* id, char* string) {
+	if(id) return add_assoc_string(list, id, string);
+	else   return add_next_index_string(list, string);
 }
 
-static int add_stringl(zval* list, char* id, char* string, uint length, int duplicate) {
-	if(id) return add_assoc_stringl(list, id, string, length, duplicate);
-	else   return add_next_index_stringl(list, string, length, duplicate);
+static int add_stringl(zval* list, char* id, char* string, uint length) {
+	if(id) return add_assoc_stringl(list, id, string, length);
+	else   return add_next_index_stringl(list, string, length);
 }
 
 #endif

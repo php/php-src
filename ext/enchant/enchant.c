@@ -186,9 +186,9 @@ enumerate_providers_fn (const char * const name,
 	MAKE_STD_ZVAL(tmp_array);
 	array_init(tmp_array);
 
-	add_assoc_string(tmp_array, "name", (char *)name, 1);
-	add_assoc_string(tmp_array, "desc", (char *)desc, 1);
-	add_assoc_string(tmp_array, "file", (char *)file, 1);
+	add_assoc_string(tmp_array, "name", (char *)name);
+	add_assoc_string(tmp_array, "desc", (char *)desc);
+	add_assoc_string(tmp_array, "file", (char *)file);
 
 	if (Z_TYPE_P(zdesc)!=IS_ARRAY) {
 		array_init(zdesc);
@@ -207,10 +207,10 @@ describe_dict_fn (const char * const lang,
 {
 	zval *zdesc = (zval *) ud;
 	array_init(zdesc);
-	add_assoc_string(zdesc, "lang", (char *)lang, 1);
-	add_assoc_string(zdesc, "name", (char *)name, 1);
-	add_assoc_string(zdesc, "desc", (char *)desc, 1);
-	add_assoc_string(zdesc, "file", (char *)file, 1);
+	add_assoc_string(zdesc, "lang", (char *)lang);
+	add_assoc_string(zdesc, "name", (char *)name);
+	add_assoc_string(zdesc, "desc", (char *)desc);
+	add_assoc_string(zdesc, "file", (char *)file);
 }
 /* }}} */
 
@@ -223,10 +223,10 @@ static void php_enchant_list_dicts_fn( const char * const lang_tag,
 
 	MAKE_STD_ZVAL(tmp_array);
 	array_init(tmp_array);
-	add_assoc_string(tmp_array, "lang_tag", (char *)lang_tag, 1);
-	add_assoc_string(tmp_array, "provider_name", (char *)provider_name, 1);
-	add_assoc_string(tmp_array, "provider_desc", (char *)provider_desc, 1);
-	add_assoc_string(tmp_array, "provider_file", (char *)provider_file, 1);
+	add_assoc_string(tmp_array, "lang_tag", (char *)lang_tag);
+	add_assoc_string(tmp_array, "provider_name", (char *)provider_name);
+	add_assoc_string(tmp_array, "provider_desc", (char *)provider_desc);
+	add_assoc_string(tmp_array, "provider_file", (char *)provider_file);
 
 	if (Z_TYPE_P(zdesc) != IS_ARRAY) {
 		array_init(zdesc);
@@ -749,7 +749,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 		if (suggs && n_sugg) {
 			int i;
 			for (i = 0; i < n_sugg; i++) {
-				add_next_index_string(sugg, suggs[i], 1);
+				add_next_index_string(sugg, suggs[i]);
 			}
 			enchant_dict_free_suggestions(pdict->pdict, suggs);
 		}
@@ -805,7 +805,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 
 		array_init(return_value);
 		for (i = 0; i < n_sugg; i++) {
-			add_next_index_string(return_value, suggs[i], 1);
+			add_next_index_string(return_value, suggs[i]);
 		}
 
 		enchant_dict_free_suggestions(pdict->pdict, suggs);

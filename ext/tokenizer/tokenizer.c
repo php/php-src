@@ -138,11 +138,11 @@ static void tokenize(zval *return_value TSRMLS_DC)
 					CG(increment_lineno) = 0;
 				}
 			}
-			add_next_index_stringl(&keyword, (char *)zendtext, zendleng, 1);
+			add_next_index_stringl(&keyword, (char *)zendtext, zendleng);
 			add_next_index_long(&keyword, token_line);
 			add_next_index_zval(return_value, &keyword);
 		} else {
-			add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
+			add_next_index_stringl(return_value, (char *)zendtext, zendleng);
 		}
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
@@ -159,7 +159,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 				if (zendcursor != zendlimit) {
 					array_init(&keyword);
 					add_next_index_long(&keyword, T_INLINE_HTML);
-					add_next_index_stringl(&keyword, (char *)zendcursor, zendlimit - zendcursor, 1);
+					add_next_index_stringl(&keyword, (char *)zendcursor, zendlimit - zendcursor);
 					add_next_index_long(&keyword, token_line);
 					add_next_index_zval(return_value, &keyword);
 				}

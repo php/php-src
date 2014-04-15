@@ -1688,7 +1688,7 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; ch >= *high; ch -= (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				add_next_index_stringl(return_value, (const char *)&ch, 1);
 				if (((signed int)ch - lstep) < 0) {
 					break;
 				}
@@ -1701,13 +1701,13 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			for (; ch <= *high; ch += (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				add_next_index_stringl(return_value, (const char *)&ch, 1);
 				if (((signed int)ch + lstep) > 255) {
 					break;
 				}
 			}
 		} else {
-			add_next_index_stringl(return_value, (const char *)low, 1, 1);
+			add_next_index_stringl(return_value, (const char *)low, 1);
 		}
 
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
