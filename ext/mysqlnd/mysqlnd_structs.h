@@ -1009,15 +1009,15 @@ struct st_mysqlnd_result_metadata
 	uint64_t			initialized_rows;			\
 													\
 	/*  Column lengths of current row - both buffered and unbuffered. For buffered results it duplicates the data found in **data */ \
-	unsigned long		*lengths;					\
+	php_uint_t		*lengths;					\
 													\
 	MYSQLND_MEMORY_POOL	*result_set_memory_pool;	\
 													\
-	unsigned int		references;					\
+	php_uint_t		references;					\
 													\
 	MYSQLND_ERROR_INFO	error_info;					\
 													\
-	unsigned int		field_count;				\
+	php_uint_t		field_count;				\
 	zend_bool			ps;							\
 	zend_bool			persistent;					\
 	struct st_mysqlnd_result_buffered_methods m;	\
