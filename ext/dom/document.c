@@ -2181,7 +2181,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 	zend_class_entry *basece = dom_node_class_entry, *ce = NULL;
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OCs!", &id, dom_document_class_entry, &basece, &ce) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OCC!", &id, dom_document_class_entry, &basece, &ce) == FAILURE) {
 		return;
 	}
 

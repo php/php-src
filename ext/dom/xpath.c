@@ -346,7 +346,8 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 	dom_nnodemap_object *mapptr;
 
 	mapptr = (dom_nnodemap_object *)intern->ptr;
-	mapptr->baseobjptr = baseobj;
+	Z_ADDREF_P(baseobj);
+	mapptr->baseobj = Z_OBJ_P(baseobj);
 	mapptr->nodetype = DOM_NODESET;
 
 }

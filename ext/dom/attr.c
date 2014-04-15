@@ -85,13 +85,11 @@ PHP_METHOD(domattr, __construct)
 		RETURN_FALSE;
 	}
 
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern TSRMLS_CC);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern TSRMLS_CC);
 }
 
 /* }}} end DOMAttr::__construct */
@@ -175,7 +173,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	str = zval_get_string(newval TSRMLS_CC);
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, str->val, str->len + 1);
 
 	STR_RELEASE(str);
 	return SUCCESS;
