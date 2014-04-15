@@ -1080,7 +1080,7 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 						int ret;
 						zend_class_entry *old_scope = *scope;
 						*scope = prop_info->ce;
-						ret = zval_update_constant(pp, (void*)1 TSRMLS_CC);
+						ret = zval_update_constant(pp, 1 TSRMLS_CC);
 						*scope = old_scope;
 						return ret;
 					}
@@ -1089,7 +1089,7 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 			} while (ce);
 
 		}
-		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
+		return zval_update_constant(pp, 1 TSRMLS_CC);
 	}
 	return 0;
 }
@@ -1103,7 +1103,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		int i;
 
 		*scope = class_type;
-		zend_hash_apply_with_argument(&class_type->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
+		zend_hash_apply_with_argument(&class_type->constants_table, (apply_func_arg_t) zval_update_constant, (void *)1 TSRMLS_CC);
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (class_type->default_properties_table[i]) {
@@ -3471,7 +3471,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, ze
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
 			case IS_ARRAY:
-			case IS_CONSTANT_ARRAY:
 			case IS_OBJECT:
 			case IS_RESOURCE:
 				zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");

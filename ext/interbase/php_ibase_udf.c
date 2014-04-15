@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 /**
 * This UDF library adds the ability to call PHP functions from SQL
 * statements. Because of SQL's strong typing, you will have to declare

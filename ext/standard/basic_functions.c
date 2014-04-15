@@ -945,11 +945,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_scandir, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ dns.c */
 ZEND_BEGIN_ARG_INFO(arginfo_gethostbyaddr, 0)
 	ZEND_ARG_INFO(0, ip_address)
@@ -2639,7 +2634,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_serialize, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_unserialize, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_unserialize, 0, 0, 1)
 	ZEND_ARG_INFO(0, variable_representation)
 	ZEND_ARG_INFO(1, consumed)
 ZEND_END_ARG_INFO()
