@@ -51,7 +51,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-203510337
 Since: 
 */
-int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_nodelist_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	dom_nnodemap_object *objmap;
 	xmlNodePtr nodep, curnode;
@@ -91,8 +91,7 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 		}
 	}
 
-	MAKE_STD_ZVAL(*retval);
-	ZVAL_LONG(*retval, count);
+	ZVAL_LONG(retval, count);
 	return SUCCESS;
 }
 
@@ -113,15 +112,13 @@ PHP_FUNCTION(dom_nodelist_item)
 	dom_nnodemap_object *objmap;
 	xmlNodePtr nodep, curnode;
 	int count = 0;
-	HashTable *nodeht;
-	zval **entry;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_nodelist_class_entry, &index) == FAILURE) {
 		return;
 	}
 
 	if (index >= 0) {
-		intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+		intern = Z_DOMOBJ_P(id);
 
 		objmap = (dom_nnodemap_object *)intern->ptr;
 		if (objmap != NULL) {
@@ -133,10 +130,10 @@ PHP_FUNCTION(dom_nodelist_item)
 				}
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
-					nodeht = HASH_OF(objmap->baseobjptr);
-					if (zend_hash_index_find(nodeht, index, (void **) &entry)==SUCCESS) {
-						*return_value = **entry;
-						zval_copy_ctor(return_value);
+					HashTable *nodeht = HASH_OF(objmap->baseobjptr);
+					zval *entry = zend_hash_index_find(nodeht, index);
+					if (entry) {
+						ZVAL_COPY(return_value, entry);
 						return;
 					}
 				} else if (objmap->baseobj) {

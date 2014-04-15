@@ -77,7 +77,7 @@ PHP_METHOD(domentityreference, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {

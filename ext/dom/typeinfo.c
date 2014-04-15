@@ -46,10 +46,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeName
 Since: 
 */
-int dom_typeinfo_type_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_name_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -60,10 +59,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeNamespace
 Since: 
 */
-int dom_typeinfo_type_namespace_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_namespace_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 

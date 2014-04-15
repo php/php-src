@@ -71,14 +71,12 @@ PHP_METHOD(domcdatasection, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 	}
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 }
 /* }}} end DOMCdataSection::__construct */
 
