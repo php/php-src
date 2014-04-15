@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed memory corruption in openssl_x509_parse() (CVE-2013-6420).
     (Stefan Esser).
 
+- FPM:
+  . Fixed bug #67060 (sapi/fpm: possible privilege escalation due to insecure
+    default configuration) (CVE-2014-0185). (Stas)
+
 11 Jul 2013, PHP 5.3.27
 
 - Core:
