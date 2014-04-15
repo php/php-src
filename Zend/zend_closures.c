@@ -90,28 +90,16 @@ ZEND_METHOD(Closure, bind)
 		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
 			ce = NULL;
 		} else {
-			zend_string *class_name;
-			zval tmp_zval;
-
-			ZVAL_UNDEF(&tmp_zval);
-			if (Z_TYPE_P(scope_arg) == IS_STRING) {
-				class_name = Z_STR_P(scope_arg);
-			} else {
-				ZVAL_DUP(&tmp_zval, scope_arg);
-				convert_to_string(&tmp_zval);
-				class_name = Z_STR(tmp_zval);
-			}
-
+			zend_string *class_name = zval_get_string(scope_arg TSRMLS_CC);
 			if ((class_name->len == sizeof("static") - 1) &&
 				(memcmp("static", class_name->val, sizeof("static") - 1) == 0)) {
 				ce = closure->func.common.scope;
-			}
-			else if ((ce = zend_lookup_class_ex(class_name, NULL, 1 TSRMLS_CC)) == NULL) {
+			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1 TSRMLS_CC)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", class_name->val);
-				zval_dtor(&tmp_zval);
+				STR_RELEASE(class_name);
 				RETURN_NULL();
 			}
-			zval_dtor(&tmp_zval);
+			STR_RELEASE(class_name);
 		}
 	} else { /* scope argument not given; do not change the scope by default */
 		ce = closure->func.common.scope;

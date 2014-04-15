@@ -161,7 +161,7 @@ int dom_attr_value_read(dom_object *obj, zval *retval TSRMLS_DC)
 
 int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
+	zend_string *str;
 	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
 	if (attrp == NULL) {
@@ -173,18 +173,11 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
 
-	if (Z_TYPE_P(newval) != IS_STRING) {
-		ZVAL_DUP(&value_copy, newval);
-		newval = &value_copy;
-		convert_to_string(newval);
-	}
+	str = zval_get_string(newval TSRMLS_CC);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
-
+	STR_RELEASE(str);
 	return SUCCESS;
 }
 

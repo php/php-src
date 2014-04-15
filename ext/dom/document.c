@@ -330,7 +330,7 @@ int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	zval value_copy;
+	zend_string *str;
 	xmlCharEncodingHandlerPtr handler;
 
 	if (docp == NULL) {
@@ -338,15 +338,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	// TODO: Stopped here
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	str = zval_get_string(newval TSMLRS_CC);
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -360,10 +352,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Document Encoding");
     }
 
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
-
+	STR_RELEASE(str);
 	return SUCCESS;
 }
 

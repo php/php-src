@@ -305,23 +305,15 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_r
 static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
-	zval tmp_member;
+	zend_string *member_str = zval_get_string(member TSRMLS_CC);
 	zval *retval = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
-	}
-
-	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, Z_STR_P(member))) {
+	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->get_property_ptr_ptr(object, member, type, key TSRMLS_CC);
 	}
 
-	if (member == &tmp_member) {
-		zval_dtor(member);
-	}
+	STR_RELEASE(member_str);
 	return retval;
 }
 /* }}} */
@@ -330,18 +322,12 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, cons
 zval *dom_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
-	zval tmp_member;
+	zend_string *member_str = zval_get_string(member TSRMLS_CC);
 	zval *retval;
 	dom_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
-	}
-
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
 	} else if (instanceof_function(obj->std.ce, dom_node_class_entry TSRMLS_CC)) {
 		php_error(E_WARNING, "Couldn't fetch %s. Node no longer exists", obj->std.ce->name->val);
 	}
@@ -358,9 +344,7 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 		retval = std_hnd->read_property(object, member, type, key, rv TSRMLS_CC);
 	}
 
-	if (member == &tmp_member) {
-		zval_dtor(member);
-	}
+	STR_RELEASE(member_str);
 	return retval;
 }
 /* }}} */
@@ -369,17 +353,11 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 void dom_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
-	zval tmp_member;
+	zend_string *member_str = zval_get_string(member TSRMLS_CC);
 	dom_prop_handler *hnd = NULL;
 
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
-	}
-
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
 	}
 	if (hnd) {
 		hnd->write_func(obj, value TSRMLS_CC);
@@ -388,9 +366,7 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
-	if (member == &tmp_member) {
-		zval_dtor(member);
-	}
+	STR_RELEASE(member_str);
 }
 /* }}} */
 
@@ -398,18 +374,12 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 static int dom_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
-	zval tmp_member;
+	zend_string *member_str = zval_get_string(member TSRMLS_CC);
 	dom_prop_handler *hnd = NULL;
-	int retval=0;
-
-	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
-		member = &tmp_member;
-	}
+	int retval = 0;
 
 	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, Z_STR_P(member));
+		hnd = zend_hash_find_ptr(obj->prop_handler, member_str);
 	}
 	if (hnd) {
 		zval tmp;
@@ -429,9 +399,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 		retval = std_hnd->has_property(object, member, check_empty, key TSRMLS_CC);
 	}
 
-	if (member == &tmp_member) {
-		zval_dtor(member);
-	}
+	STR_RELEASE(member_str);
 	return retval;
 }
 /* }}} */
