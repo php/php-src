@@ -55,7 +55,6 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 /* {{{ proto void DOMAttr::__construct(string name, [string value]); */
 PHP_METHOD(domattr, __construct)
 {
-
 	zval *id;
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
@@ -71,7 +70,7 @@ PHP_METHOD(domattr, __construct)
 	}
 
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
@@ -102,7 +101,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
 Since: 
 */
-int dom_attr_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_attr_name_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlAttrPtr attrp;
 
@@ -113,8 +112,7 @@ int dom_attr_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, (char *) (attrp->name), 1);
+	ZVAL_STRING(retval, (char *) attrp->name);
 
 	return SUCCESS;
 }
@@ -126,11 +124,10 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
 Since: 
 */
-int dom_attr_specified_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_attr_specified_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	/* TODO */
-	ALLOC_ZVAL(*retval);
-	ZVAL_TRUE(*retval);
+	ZVAL_TRUE(retval);
 	return SUCCESS;
 }
 
@@ -141,26 +138,21 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
 Since: 
 */
-int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_attr_value_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlAttrPtr attrp;
+	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 	xmlChar *content;
-
-	attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
 	if (attrp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-
-	
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(*retval, content, 1);
+		ZVAL_STRING(retval, content);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_STRING(retval);
 	}
 
 	return SUCCESS;
@@ -170,9 +162,7 @@ int dom_attr_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	zval value_copy;
-	xmlAttrPtr attrp;
-
-	attrp = (xmlAttrPtr) dom_object_get_node(obj);
+	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
 	if (attrp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -183,12 +173,9 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
+	if (Z_TYPE_P(newval) != IS_STRING) {
+		ZVAL_DUP(&value_copy, newval);
+		newval = &value_copy;
 		convert_to_string(newval);
 	}
 
@@ -208,10 +195,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
 Since: DOM Level 2
 */
-int dom_attr_owner_element_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_attr_owner_element_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	xmlNodePtr nodep, nodeparent;
-	int ret;
 
 	nodep = dom_object_get_node(obj);
 
@@ -220,18 +206,13 @@ int dom_attr_owner_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-
 	nodeparent = nodep->parent;
 	if (!nodeparent) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,  "Cannot create required DOM object");
-		return FAILURE;
-	}
+	php_dom_create_object(nodeparent, retval, obj TSRMLS_CC);
 	return SUCCESS;
 
 }
@@ -243,11 +224,10 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
 Since: DOM Level 3
 */
-int dom_attr_schema_type_info_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_attr_schema_type_info_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not yet implemented");
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 

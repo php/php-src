@@ -240,33 +240,24 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-B63ED1A31
 Since: 
 */
-int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_doctype_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	xmlDtdPtr dtdptr;
-	int ret;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-
 	dtdptr = xmlGetIntSubset(docp);
 	if (!dtdptr) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) dtdptr, &ret, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
-		return FAILURE;
-	}
+	php_dom_create_object((xmlNodePtr) dtdptr, retval, obj TSRMLS_CC);
 	return SUCCESS;
-	
 }
 
 /* }}} */
@@ -276,9 +267,8 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1B793EBA
 Since: 
 */
-int dom_document_implementation_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_document_implementation_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
 	php_dom_create_implementation(retval TSRMLS_CC);
 	return SUCCESS;
 }
@@ -292,29 +282,21 @@ Since:
 */
 int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	xmlNode *root;
-	int ret;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-
 	root = xmlDocGetRootElement(docp);
 	if (!root) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(root, &ret, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
-		return FAILURE;
-	}
+	php_dom_create_object(root, retval, obj TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -326,10 +308,8 @@ Since: DOM Level 3
 */
 int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
-	xmlDoc *docp;
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	char *encoding;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
@@ -337,12 +317,11 @@ int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	encoding = (char *) docp->encoding;
-	ALLOC_ZVAL(*retval);
 
 	if (encoding != NULL) {
-		ZVAL_STRING(*retval, encoding, 1);
+		ZVAL_STRING(retval, encoding);
 	} else {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	}
 
 	return SUCCESS;
@@ -350,17 +329,16 @@ int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	zval value_copy;
-	xmlDoc *docp;
 	xmlCharEncodingHandlerPtr handler;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	if (docp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
+	// TODO: Stopped here
 	if (newval->type != IS_STRING) {
 		if(Z_REFCOUNT_P(newval) > 1) {
 			value_copy = *newval;
