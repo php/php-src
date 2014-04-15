@@ -1276,8 +1276,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
 		if (len > maxlen - 40) { /* maxlen can never be smaller than 128 */
-//???			replaced = safe_erealloc(replaced, maxlen , 1, 128 + 1);
-			replaced = STR_REALLOC(replaced, maxlen + 128, 0);
+			replaced = STR_SAFE_REALLOC(replaced, maxlen, 1, 128, 0);
 			maxlen += 128;
 		}
 
@@ -1409,8 +1408,7 @@ encode_amp:
 				/* at this point maxlen - len >= 40 */
 				if (maxlen - len < ent_len + 2 /* & and ; */) {
 					/* ent_len < oldlen, which is certainly <= SIZE_MAX/2 */
-//???					replaced = safe_erealloc(replaced, maxlen, 1, ent_len + 128 + 1);
-					replaced = STR_REALLOC(replaced, maxlen + ent_len + 128, 0);
+					replaced = STR_SAFE_REALLOC(replaced, maxlen, 1, ent_len + 128, 0);
 					maxlen += ent_len + 128;
 				}
 				replaced->val[len++] = '&';

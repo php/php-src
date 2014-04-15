@@ -4030,7 +4030,7 @@ PHP_FUNCTION(getenv)
 	/* SAPI method returns an emalloc()'d string */
 	ptr = sapi_getenv(str, str_len TSRMLS_CC);
 	if (ptr) {
-//???		RETURN_STRING(ptr, 0);
+		// TODO: avoid realocation ???
 		RETVAL_STRING(ptr);
 		efree(ptr);
 		return;

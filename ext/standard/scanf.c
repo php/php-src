@@ -866,7 +866,7 @@ literal:
 						current = &args[objIndex++];
 						zval_dtor(Z_REFVAL_P(current));
 						ZVAL_STRINGL(Z_REFVAL_P(current), string, end-string);
-//						Z_SET_REFCOUNT_P(current, refcount);
+//???						Z_SET_REFCOUNT_P(current, refcount);
 //???						Z_SET_ISREF_PP(current);
 					} else {
 						add_index_stringl(return_value, objIndex++, string, end-string);

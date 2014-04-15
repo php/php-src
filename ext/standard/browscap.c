@@ -84,8 +84,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	char *lc_pattern;
 
 	// TODO: overflow check???
-//???	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 5, persistent);
-	res = STR_ALLOC(Z_STRLEN_P(pattern) * 2 + 5, persistent);
+	res = STR_SAFE_ALLOC(Z_STRLEN_P(pattern), 2, 4, persistent);
 	t = res->val;
 
 	lc_pattern = zend_str_tolower_dup(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
@@ -436,8 +435,8 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 static void browscap_zval_copy_ctor(zval *p) /* {{{ */
 {
 	zval_copy_ctor(p);
-//???	INIT_PZVAL(p);
-} /* }}} */
+}
+/* }}} */
 
 /* {{{ proto mixed get_browser([string browser_name [, bool return_array]])
    Get information about the capabilities of a browser. If browser_name is omitted or null, HTTP_USER_AGENT is used. Returns an object by default; if return_array is true, returns an array. */

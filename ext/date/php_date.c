@@ -2212,7 +2212,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-//???				ZVAL_STRING(zv, tmpstr, 0);
+				// TODO: avoid reallocation ???
 				ZVAL_STRING(&zv, tmpstr);
 				efree(tmpstr);
 				}
@@ -2306,7 +2306,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC) /*
 			abs(tzobj->tzi.utc_offset / 60),
 			abs((tzobj->tzi.utc_offset % 60)));
 
-//???			ZVAL_STRING(zv, tmpstr, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRING(&zv, tmpstr);
 			efree(tmpstr);
 			}
@@ -3744,7 +3744,7 @@ PHP_FUNCTION(timezone_name_get)
 				abs(utc_offset / 60),
 				abs((utc_offset % 60)));
 
-//???			RETURN_STRING(tmpstr, 0);
+			// TODO: avoid reallocation ???
 			RETVAL_STRING(tmpstr);
 			efree(tmpstr);
 			return;
@@ -4003,8 +4003,6 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 		return retval;
 	} while(0);
 
-//???	ALLOC_INIT_ZVAL(retval);
-//???	Z_SET_REFCOUNT_P(retval, 0);
 	retval = rv;
 
 	if (value != -99999) {
@@ -4622,7 +4620,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 	switch (retformat) {
 		case SUNFUNCS_RET_STRING:
 			spprintf(&retstr, 0, "%02d:%02d", (int) N, (int) (60 * (N - (int) N)));
-//???			RETURN_STRINGL(retstr, 5, 0);
+			// TODO: avoid reallocation ???
 			RETVAL_STRINGL(retstr, 5);
 			efree(retstr);
 			return;

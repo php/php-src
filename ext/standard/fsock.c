@@ -100,7 +100,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-//???			ZVAL_STRING(zerrstr, errstr, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRING(zerrstr, errstr);
 			efree(errstr);
 		} else if (!zerrstr && errstr) {

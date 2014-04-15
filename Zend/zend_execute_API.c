@@ -483,15 +483,6 @@ ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 #define Z_REAL_TYPE_P(p)			(Z_TYPE_P(p) & ~IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
 
-static void zval_deep_copy(zval *p)
-{
-//???	zval value;
-//???
-//???	ZVAL_DUP(&value, p);
-//???	ZVAL_COPY_VALUE(p, &value);
-	zval_copy_ctor(p);
-}
-
 ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope TSRMLS_DC) /* {{{ */
 {
 	zend_bool inline_change = (zend_bool) (zend_uintptr_t) arg;
@@ -502,15 +493,10 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		zend_error(E_ERROR, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
-//???		zend_uchar is_ref;
 
 		SEPARATE_ZVAL_IF_NOT_REF(p);
-
 		MARK_CONSTANT_VISITED(p);
-
 		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
-//???		is_ref = Z_ISREF_P(p);
-
 		if (!zend_get_constant_ex(Z_STRVAL_P(p), Z_STRLEN_P(p), &const_value, scope, Z_CONST_FLAGS_P(p) TSRMLS_CC)) {
 			char *actual = Z_STRVAL_P(p);
 
@@ -524,7 +510,6 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 					STR_RELEASE(Z_STR_P(p));
 					Z_STR_P(p) = tmp;
 				} else {
-//???					Z_STRVAL_P(p) = colon + 1;
 					Z_STR_P(p) = STR_INIT(colon + 1, len, 0);
 				}
 				Z_TYPE_FLAGS_P(p) = IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE;
@@ -581,7 +566,6 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 		}
 
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
-//???		Z_SET_ISREF_TO_P(p, is_ref);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval *element, new_val;
 		zend_string *str_index;
@@ -595,7 +579,7 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 			HashTable *ht = Z_ARRVAL_P(p);
 			ZVAL_NEW_ARR(p);
 			zend_hash_init(Z_ARRVAL_P(p), zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(Z_ARRVAL_P(p), ht, zval_deep_copy);
+			zend_hash_copy(Z_ARRVAL_P(p), ht, ZVAL_COPY_CTOR);
 		}
 
 		/* First go over the array and see if there are any constant indices */
@@ -616,7 +600,6 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 				zend_ast_evaluate(&const_value, ast->ast, scope TSRMLS_CC);
 				zend_ast_destroy(ast->ast);
 				efree(ast);
-//???
 			} else if (!zend_get_constant_ex(str_index->val, str_index->len, &const_value, scope, GC_FLAGS(str_index) & ~(IS_STR_PERSISTENT | IS_STR_INTERNED |IS_STR_PERMANENT) TSRMLS_CC)) {
 				char *actual, *str;
 				const char *save = str_index->val;
@@ -657,9 +640,6 @@ ZEND_API int zval_update_constant_ex(zval *p, void *arg, zend_class_entry *scope
 
 			if (Z_REFCOUNTED_P(element) && Z_REFCOUNT_P(element) > 1) {
 				ZVAL_DUP(&new_val, element);
-
-				/* preserve this bit for inheritance */
-//???				Z_TYPE_P(element) |= IS_CONSTANT_INDEX;
 				zval_ptr_dtor(element);
 				ZVAL_COPY_VALUE(element, &new_val);
 			}
@@ -990,7 +970,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			fci_cache->initialized = 0;
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
-//???		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
+		ZVAL_NULL(fci->retval);
 
 		/* Not sure what should be done here if it's a static method */
 		if (fci->object) {

@@ -1243,7 +1243,6 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	}
 
 	/* FIXME: This might need to be changed to STR_EMPTY_ALLOC(). Check if this zval could be dtor()'ed somehow */
-//???	ZVAL_STRINGL(&empty_replace, "", 0, 0);
 	ZVAL_EMPTY_STRING(&empty_replace);
 	
 	/* If regex is an array */

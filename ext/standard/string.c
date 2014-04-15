@@ -132,8 +132,7 @@ static zend_string *php_bin2hex(const unsigned char *old, const size_t oldlen)
 	zend_string *result;
 	size_t i, j;
 
-//???	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
-	result = STR_ALLOC(oldlen * 2 * sizeof(char), 0);
+	result = STR_SAFE_ALLOC(oldlen, 2 * sizeof(char), 0, 0);
 
 	for (i = j = 0; i < oldlen; i++) {
 		result->val[j++] = hexconvtab[old[i] >> 4];
@@ -277,8 +276,9 @@ PHP_FUNCTION(hex2bin)
 		RETURN_FALSE;
 	}
 
-//???	RETURN_STRINGL(result, newlen, 0);
-	RETURN_STRINGL(result, newlen);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL(result, newlen);
+	efree(result);
 }
 /* }}} */
 
@@ -3566,8 +3566,12 @@ PHPAPI int php_char_to_str_ex(char *str, uint len, char from, char *to, int to_l
 		return 0;
 	}
 
-	ZVAL_NEW_STR(result, STR_ALLOC(len + (char_count * (to_len - 1)), 0));
-	target = Z_STRVAL_P(result); //??? = target = safe_emalloc(char_count, to_len, len + 1);
+	if (to_len > 0) {
+		ZVAL_NEW_STR(result, STR_SAFE_ALLOC(char_count, to_len - 1, len, 0));
+	} else {
+		ZVAL_NEW_STR(result, STR_ALLOC(len - char_count, 0));
+	}
+	target = Z_STRVAL_P(result);
 
 	if (case_sensitivity) {
 		char *p = str, *e = p + len, *s = str;
@@ -4265,13 +4269,12 @@ PHP_FUNCTION(nl2br)
    Strips HTML and PHP tags from a string */
 PHP_FUNCTION(strip_tags)
 {
-	char *buf;
+	zend_string *buf;
 	char *str;
 	zval *allow=NULL;
 	char *allowed_tags=NULL;
 	int allowed_tags_len=0;
 	int str_len;
-	size_t retval_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &str, &str_len, &allow) == FAILURE) {
 		return;
@@ -4284,11 +4287,9 @@ PHP_FUNCTION(strip_tags)
 		allowed_tags_len = Z_STRLEN_P(allow);
 	}
 
-	buf = estrndup(str, str_len);
-	retval_len = php_strip_tags_ex(buf, str_len, NULL, allowed_tags, allowed_tags_len, 0);
-//???	RETURN_STRINGL(buf, retval_len, 0);
-	RETVAL_STRINGL(buf, retval_len);
-	efree(buf);
+	buf = STR_INIT(str, str_len, 0);
+	buf->len = php_strip_tags_ex(buf->val, str_len, NULL, allowed_tags, allowed_tags_len, 0);
+	RETURN_STR(buf);
 }
 /* }}} */
 
@@ -4852,9 +4853,8 @@ PHP_FUNCTION(str_repeat)
 		RETURN_EMPTY_STRING();
 
 	/* Initialize the result string */
+	result = STR_SAFE_ALLOC(input_len, mult, 0, 0);
 	result_len = input_len * mult;
-//???	result = (char *)safe_emalloc(input_len, mult, 1);
-	result = STR_ALLOC(result_len, 0);
 
 	/* Heavy optimization for situations where input string is 1 byte long */
 	if (input_len == 1) {

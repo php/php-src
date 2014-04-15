@@ -281,7 +281,6 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 		/* Merge equal constants */
 		j = 0; cache_slots = 0;
 		zend_hash_init(&hash, 16, NULL, NULL, 0);
-//???		hash.flags |= HASH_FLAG_BIG_DATA;
 		map = (int*)ecalloc(op_array->last_literal, sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
 			if (!info[i].flags) {

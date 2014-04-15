@@ -39,7 +39,7 @@ void free_zend_constant(zval *zv)
 	if (c->name) {
 		STR_RELEASE(c->name);
 	}
-	free(c);
+	pefree(c, c->flags & CONST_PERSISTENT);
 }
 
 
@@ -47,20 +47,17 @@ static void copy_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	Z_PTR_P(zv) = malloc(sizeof(zend_constant)/*, c->flags & CONST_PERSISTENT*/);
+	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
 	c = Z_PTR_P(zv);
-//???	c->name = STR_DUP(c->name, c->flags & CONST_PERSISTENT);
 	c->name = STR_COPY(c->name);
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_copy_ctor(&c->value);
 	} else {
-//??? internal_copy_ctor needed
 		if (Z_TYPE(c->value) == IS_STRING) {
 			Z_STR(c->value) = STR_DUP(Z_STR(c->value), 1);
 		}
-
 	}
 }
 
@@ -213,7 +210,6 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 {
 	zend_constant c;
 	
-//???	ZVAL_STRINGL(&c.value, strval, strlen, 0);
 	ZVAL_NEW_STR(&c.value, STR_INIT(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
 	c.name = STR_INIT(name, name_len, flags & CONST_PERSISTENT);
@@ -247,7 +243,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 			memcpy(const_name->val, "\0__CLASS__", sizeof("\0__CLASS__")-1);
 			zend_str_tolower_copy(const_name->val + sizeof("\0__CLASS__")-1, EG(scope)->name->val, EG(scope)->name->len);
 			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = malloc(sizeof(zend_constant));
+				c = emalloc(sizeof(zend_constant));
 				memset(c, 0, sizeof(zend_constant));
 				ZVAL_STR(&c->value, STR_COPY(EG(scope)->name));
 				zend_hash_add_ptr(EG(zend_constants), const_name, c);
@@ -256,7 +252,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 		} else {
 			zend_string *const_name = STR_INIT("\0__CLASS__", sizeof("\0__CLASS__")-1, 0);
 			if ((c = zend_hash_find_ptr(EG(zend_constants), const_name)) == NULL) {
-				c = malloc(sizeof(zend_constant));
+				c = emalloc(sizeof(zend_constant));
 				memset(c, 0, sizeof(zend_constant));
 				ZVAL_EMPTY_STRING(&c->value);
 				zend_hash_add_ptr(EG(zend_constants), const_name, c);
@@ -472,6 +468,19 @@ zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRM
 	return c;
 }
 
+static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
+{
+	void *ret;
+	zend_constant *copy = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
+
+	memcpy(copy, c, sizeof(zend_constant));
+	ret = zend_hash_add_ptr(ht, key, copy);
+	if (!ret) {
+		pefree(copy, c->flags & CONST_PERSISTENT);
+	}
+	return ret;
+}
+
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 {
 	zend_string *lowercase_name = NULL;
@@ -502,7 +511,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
 	if ((c->name->len == sizeof("__COMPILER_HALT_OFFSET__")-1
 		&& !memcmp(name->val, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
-		|| zend_hash_add_mem(EG(zend_constants), name, c, sizeof(zend_constant)) == NULL) {
+		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL) {
 		
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
 		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")-1

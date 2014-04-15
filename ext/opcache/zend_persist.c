@@ -170,12 +170,6 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 	}
 }
 
-static void zend_protect_zval(zval *z TSRMLS_DC)
-{
-//???	PZ_SET_ISREF_P(z);
-//???	PZ_SET_REFCOUNT_P(z, 2);
-}
-
 static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_script* main_persistent_script TSRMLS_DC)
 {
 	zend_op *persist_ptr;
@@ -233,7 +227,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			op_array->literals = p;
 			while (p < end) {
 				zend_persist_zval(&p->constant TSRMLS_CC);
-				zend_protect_zval(&p->constant TSRMLS_CC);
 				p++;
 			}
 			efree(orig_literals);
@@ -255,7 +248,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
 #else
 				zend_persist_zval(&opline->op1.u.constant TSRMLS_CC);
-				zend_protect_zval(&opline->op1.u.constant TSRMLS_CC);
 #endif
 			}
 			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
@@ -263,7 +255,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
 #else
 				zend_persist_zval(&opline->op2.u.constant TSRMLS_CC);
-				zend_protect_zval(&opline->op2.u.constant TSRMLS_CC);
 #endif
 			}
 

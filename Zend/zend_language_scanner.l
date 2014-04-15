@@ -863,7 +863,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 }
 
 
-//??? use zend_string saving memalloc
+// TODO: avoid reallocation ???
 # define zend_copy_value(zendlval, yytext, yyleng) \
 	if (SCNG(output_filter)) { \
 		size_t sz = 0; \
@@ -874,6 +874,15 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 	} else { \
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
+
+// TODO: some extensions might need content, but we don't copy it intentional ???
+#if 0
+# define DUMMY_STRINGL(zendlval, yytext, yyleng) \
+	ZVAL_STRINGL(zendlval, yytext, yyleng)
+#else
+# define DUMMY_STRINGL(zendlval, yytext, yyleng) \
+	ZVAL_EMPTY_STRING(zendlval)
+#endif
 
 static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quote_type TSRMLS_DC)
 {
@@ -988,7 +997,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		unsigned char *str;
-		//??? use zend_string saving memalloc
+		// TODO: avoid realocation ???
 		s = Z_STRVAL_P(zendlval);
 		SCNG(output_filter)(&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
 		zval_ptr_dtor(zendlval);
@@ -1184,8 +1193,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1708,8 +1716,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng);
-//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
 }
@@ -1717,8 +1724,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%=" {
 	if (CG(asp_tags)) {
-//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG_WITH_ECHO;
 	} else {
@@ -1728,8 +1734,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?=" {
-//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG_WITH_ECHO;
 }
@@ -1737,8 +1742,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<%" {
 	if (CG(asp_tags)) {
-//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1748,8 +1752,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
-//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_EMPTY_STRING(zendlval); /* tricky way, no copying intentional */
+	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_OPEN_TAG;
@@ -1758,8 +1761,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
-//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_EMPTY_STRING(zendlval); /* tricky way, no copying intentional */
+		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		BEGIN(ST_IN_SCRIPTING);
 		return T_OPEN_TAG;
 	} else {
@@ -1814,7 +1816,7 @@ inline_html:
 		int readsize;
 		char *s = NULL;
 		size_t sz = 0;
-		//??? use zend_string saving memalloc
+		// TODO: avoid reallocation ???
 		readsize = SCNG(output_filter)((unsigned char **)&s, &sz, (unsigned char *)yytext, (size_t)yyleng TSRMLS_CC);
 		ZVAL_STRINGL(zendlval, s, sz);
 		efree(s);
@@ -1944,8 +1946,7 @@ inline_html:
 }
 
 <ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">"){NEWLINE}? {
-//???	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+	DUMMY_STRINGL(zendlval, yytext, yyleng);
 	BEGIN(INITIAL);
 	return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 }
@@ -1954,8 +1955,7 @@ inline_html:
 <ST_IN_SCRIPTING>"%>"{NEWLINE}? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
-//???		ZVAL_STRINGL(zendlval, yytext, yyleng);
-		ZVAL_EMPTY_STRING(zendlval); /* tricky way to no copying - intentional */ 
+		DUMMY_STRINGL(zendlval, yytext, yyleng);
 		return T_CLOSE_TAG;  /* implicit ';' at php-end tag */
 	} else {
 		yyless(1);
@@ -2024,7 +2024,7 @@ inline_html:
 		size_t sz = 0;
 		char *str = NULL;
 		s = Z_STRVAL_P(zendlval);
-		//??? use zend_string saving memalloc
+		// TODO: avoid reallocation ???
 		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval) TSRMLS_CC);
 		ZVAL_STRINGL(zendlval, str, sz);
 		efree(s);

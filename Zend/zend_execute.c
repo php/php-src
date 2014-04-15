@@ -1155,11 +1155,6 @@ convert_to_array:
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		} else {
-//???			if (dim_type == IS_TMP_VAR) {
-//???				zval *orig = dim;
-//???				MAKE_REAL_ZVAL_PTR(dim);
-//???				ZVAL_NULL(orig);
-//???			}
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
 			if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
@@ -1182,9 +1177,6 @@ convert_to_array:
 						zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ce->name->val);
 					}
 				}
-//???				AI_SET_PTR(result, retval);
-//???				PZVAL_LOCK(retval);
-//???				ZVAL_COPY(result, retval);
 				if (result != retval) {
 					if (is_ref) {
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(retval);
@@ -1196,9 +1188,6 @@ convert_to_array:
 			} else {
 				ZVAL_INDIRECT(result, &EG(error_zval));
 			}
-//???			if (dim_type == IS_TMP_VAR) {
-//???				zval_ptr_dtor(dim);
-//???			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_NULL)) {
 		if (container == &EG(error_zval)) {
@@ -1302,11 +1291,6 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		} else {
-//???			if (dim_type == IS_TMP_VAR) {
-//???				zval *orig = dim;
-//???				MAKE_REAL_ZVAL_PTR(dim);
-//???				ZVAL_NULL(orig);
-//???			}
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
 			if (result) {
@@ -1318,9 +1302,6 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 					ZVAL_NULL(result);
 				}
 			}
-//???			if (dim_type == IS_TMP_VAR) {
-//???				zval_ptr_dtor(dim);
-//???			}
 		}
 	} else {
 		ZVAL_NULL(result);

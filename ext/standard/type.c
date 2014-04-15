@@ -392,7 +392,7 @@ PHP_FUNCTION(is_callable)
 		}
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
-		//??? is it necessary to be consistent with old PHP
+		//??? is it necessary to be consistent with old PHP ("\0" support)
 		name->len = strlen(name->val);
 		ZVAL_STR(callable_name, name);
 	} else {

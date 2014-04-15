@@ -1335,8 +1335,9 @@ PHP_FUNCTION(mysql_stat)
 		RETURN_STRING(stat);
 #else
 	if (mysqlnd_stat(mysql->conn, &stat, &stat_len) == PASS) {
-		//???? memleak
-		RETURN_STRINGL(stat, stat_len);
+		// TODO: avoid reallocation ???
+		RETVAL_STRINGL(stat, stat_len);
+		efree(stat);
 #endif
 	} else {
 		RETURN_FALSE;

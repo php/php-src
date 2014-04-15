@@ -329,9 +329,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 		p = ZCSG(interned_strings).arData + idx;
 		if ((p->h == h) && (p->key->len == str->len)) {
 			if (!memcmp(p->key->val, str->val, str->len)) {
-//???				if (free_src) {
-					STR_RELEASE(str);
-//???				}
+				STR_RELEASE(str);
 				return p->key;
 			}
 		}
@@ -366,11 +364,7 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC)
 	ZVAL_STR(&p->val, p->key);
 	Z_NEXT(p->val) = ZCSG(interned_strings).arHash[nIndex];
 	ZCSG(interned_strings).arHash[nIndex] = idx;
-
-//???	if (free_src) {
-		STR_RELEASE(str);
-//???	}
-
+	STR_RELEASE(str);
 	return p->key;
 #else
 	return str;
@@ -2231,9 +2225,6 @@ static void accel_fast_zval_dtor(zval *zvalue)
 				{
 					TSRMLS_FETCH();
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-//???					GC_REMOVE_FROM_BUFFER(Z_OBJ_P(zvalue));
-#endif
 					OBJ_RELEASE(Z_OBJ_P(zvalue));
 				}
 				break;

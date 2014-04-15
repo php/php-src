@@ -24,7 +24,7 @@
 
 #include "ZendAccelerator.h"
 
-#if 1 //???ZEND_EXTENSION_API_NO > PHP_5_6_X_API_NO
+#if 1 // TODO: remove support for old PHP versions ???
 # define VAR_NUM(v) EX_VAR_TO_NUM(v)
 # define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_VAR_NUM_2(0, v))
 #elif ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO

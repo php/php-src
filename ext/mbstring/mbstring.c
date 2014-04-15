@@ -2172,7 +2172,7 @@ PHP_FUNCTION(mb_output_handler)
 	} 
  	/* get the converter output, and return it */
  	mbfl_buffer_converter_result(MBSTRG(outconv), &result);
-	//????
+	// TODO: avoid reallocation ???
  	RETVAL_STRINGL((char *)result.val, result.len);		/* the string is already strdup()'ed */
 	efree(result.val);
  
@@ -2476,7 +2476,7 @@ PHP_FUNCTION(mb_strstr)
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
-				//???
+				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
 				efree(ret->val);
 			} else {
@@ -2486,7 +2486,7 @@ PHP_FUNCTION(mb_strstr)
 			len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
-				//????
+				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
 				efree(ret->val);
 			} else {
@@ -2540,7 +2540,7 @@ PHP_FUNCTION(mb_strrchr)
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
 			if (ret != NULL) {
-				//????
+				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
 				efree(ret->val);
 			} else {
@@ -2550,7 +2550,7 @@ PHP_FUNCTION(mb_strrchr)
 			len = (mblen - n);
 			ret = mbfl_substr(&haystack, &result, n, len);
 			if (ret != NULL) {
-				//????
+				// TODO: avoid reallocation ???
 				RETVAL_STRINGL((char *)ret->val, ret->len);
 				efree(ret->val);
 			} else {
@@ -2606,7 +2606,7 @@ PHP_FUNCTION(mb_stristr)
 	if (part) {
 		ret = mbfl_substr(&haystack, &result, 0, n);
 		if (ret != NULL) {
-			//????
+			// TODO: avoid reallocation ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		} else {
@@ -2616,7 +2616,7 @@ PHP_FUNCTION(mb_stristr)
 		len = (mblen - n);
 		ret = mbfl_substr(&haystack, &result, n, len);
 		if (ret != NULL) {
-			//????
+			// TODO: avoid reallocaton ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		} else {
@@ -2663,7 +2663,7 @@ PHP_FUNCTION(mb_strrichr)
 	if (part) {
 		ret = mbfl_substr(&haystack, &result, 0, n);
 		if (ret != NULL) {
-			//???
+			// TODO: avoid reallocation ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		} else {
@@ -2673,7 +2673,7 @@ PHP_FUNCTION(mb_strrichr)
 		len = (mblen - n);
 		ret = mbfl_substr(&haystack, &result, n, len);
 		if (ret != NULL) {
-			//????
+			// TODO: avoid reallocation ???
 			RETVAL_STRINGL((char *)ret->val, ret->len);
 			efree(ret->val);
 		} else {
@@ -2798,7 +2798,7 @@ PHP_FUNCTION(mb_substr)
 		RETURN_FALSE;
 	}
 
-	//????
+	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
@@ -2867,7 +2867,7 @@ PHP_FUNCTION(mb_strcut)
 		RETURN_FALSE;
 	}
 
-	//????
+	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
@@ -2961,7 +2961,7 @@ PHP_FUNCTION(mb_strimwidth)
 	if (ret == NULL) {
 		RETURN_FALSE;
 	}
-	//????
+	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
 }
@@ -3117,8 +3117,8 @@ PHP_FUNCTION(mb_convert_encoding)
 	/* new encoding */
 	ret = php_mb_convert_encoding(arg_str, str_len, arg_new, _from_encodings, &size TSRMLS_CC);
 	if (ret != NULL) {
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(ret, size);		/* the string is already strdup()'ed */
-		//???
 		efree(ret);
 	} else {
 		RETVAL_FALSE;
@@ -3150,8 +3150,8 @@ PHP_FUNCTION(mb_convert_case)
 	newstr = php_unicode_convert_case(case_mode, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(newstr, ret_len);
-		//???
 		efree(newstr);
 	}	
 }
@@ -3175,7 +3175,7 @@ PHP_FUNCTION(mb_strtoupper)
 	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
-		//???
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(newstr, ret_len);
 		efree(newstr);
 		return;
@@ -3202,7 +3202,7 @@ PHP_FUNCTION(mb_strtolower)
 	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, (size_t) str_len, &ret_len, from_encoding TSRMLS_CC);
 
 	if (newstr) {
-		//???
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(newstr, ret_len);
 		efree(newstr);
 		return;
@@ -3383,7 +3383,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, indent);
 	if (ret != NULL) {
-		//?????
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
 		efree(ret->val);
 	} else {
@@ -3409,7 +3409,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding)->no_encoding);
 	if (ret != NULL) {
-		//????
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
 		efree(ret->val);
 	} else {
@@ -3514,7 +3514,7 @@ PHP_FUNCTION(mb_convert_kana)
 
 	ret = mbfl_ja_jp_hantozen(&string, &result, opt);
 	if (ret != NULL) {
-		//???
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL((char *)ret->val, ret->len);		/* the string is already strdup()'ed */
 		efree(ret->val);
 	} else {
@@ -3716,7 +3716,7 @@ detect_end:
 							ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 							if (ret != NULL) {
 								zval_ptr_dtor(hash_entry_ptr);
-								//???
+								// TODO: avoid reallocation ???
 								ZVAL_STRINGL(hash_entry_ptr, (char *)ret->val, ret->len);
 								efree(ret->val);
 							}
@@ -3729,7 +3729,7 @@ detect_end:
 				ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
 				if (ret != NULL) {
 					zval_ptr_dtor(var);
-					//????
+					// TODO: avoid reallocation ???
 					ZVAL_STRINGL(var, (char *)ret->val, ret->len);
 					efree(ret->val);
 				}
@@ -3820,7 +3820,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type);
 	if (ret != NULL) {
-		//???
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL((char *)ret->val, ret->len);
 		efree(ret->val);
 	} else {

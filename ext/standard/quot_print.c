@@ -152,8 +152,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 	char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
-//???	ret = safe_emalloc(3, length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1), 1);
-	ret = STR_ALLOC(3 * (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0);
+	ret = STR_SAFE_ALLOC(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
 	d = (unsigned char*)ret->val;
 
 	while (length--) {

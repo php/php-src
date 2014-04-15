@@ -156,7 +156,7 @@ PHP_FUNCTION(stream_socket_client)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-//???			ZVAL_STRING(zerrstr, errstr, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRING(zerrstr, errstr);
 			efree(errstr);
 		} else if (errstr) {
@@ -224,8 +224,9 @@ PHP_FUNCTION(stream_socket_server)
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
-//???			ZVAL_STRING(zerrstr, errstr, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRING(zerrstr, errstr);
+			efree(errstr);
 		} else if (errstr) {
 			efree(errstr);
 		}
@@ -283,8 +284,9 @@ PHP_FUNCTION(stream_socket_accept)
 				TSRMLS_CC) && clistream) {
 
 		if (peername) {
-//???			ZVAL_STRINGL(zpeername, peername, peername_len, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRINGL(zpeername, peername, peername_len);
+			efree(peername);
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
@@ -322,8 +324,9 @@ PHP_FUNCTION(stream_socket_get_name)
 		RETURN_FALSE;
 	}
 
-//???	RETURN_STRINGL(name, name_len, 0);
-	RETURN_STRINGL(name, name_len);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL(name, name_len);
+	efree(name);
 }
 /* }}} */
 
@@ -394,8 +397,9 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	if (recvd >= 0) {
 		if (zremote) {
-//???			ZVAL_STRINGL(zremote, remote_addr, remote_addr_len, 0);
+			// TODO: avoid reallocation ???
 			ZVAL_STRINGL(zremote, remote_addr, remote_addr_len);
+			efree(remote_addr);
 		}
 		read_buf->val[recvd] = '\0';
 		read_buf->len = recvd;
@@ -1537,7 +1541,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 	resolved_path = zend_resolve_path(filename, filename_len TSRMLS_CC);
 
 	if (resolved_path) {
-//???		RETURN_STRING(resolved_path, 0);
+		// TODO: avoid reallocation ???
 		RETVAL_STRING(resolved_path);
 		efree(resolved_path);
 		return;

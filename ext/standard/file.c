@@ -822,10 +822,8 @@ PHP_FUNCTION(tempnam)
 
 	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1 TSRMLS_CC)) >= 0) {
 		close(fd);
-//???		RETVAL_STRING(opened_path, 0);
+		// TODO: avoid reallocation ???
 		RETVAL_STRING(opened_path);
-		//??? temporary fixed the memory leak, I've tried to make opened_path a zend_string
-		//but too too many places need to be changed.... let's keep it simple for now
 		efree(opened_path);
 	}
 	STR_RELEASE(p);
@@ -1116,7 +1114,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	retval_len = php_strip_tags(retval, actual_len, &stream->fgetss_state, allowed_tags, allowed_tags_len);
 
-//???	RETURN_STRINGL(retval, retval_len, 0);
+	// TODO: avoid reallocation ???
 	RETVAL_STRINGL(retval, retval_len);
 	efree(retval);
 }

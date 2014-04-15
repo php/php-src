@@ -44,10 +44,12 @@ END_EXTERN_C()
 #define STR_ADDREF(s)					zend_str_addref(s)
 #define STR_DELREF(s)					zend_str_delref(s)
 #define STR_ALLOC(len, persistent)		zend_str_alloc(len, persistent)
+#define STR_SAFE_ALLOC(n, m, l, p)		zend_str_safe_alloc(n, m, l, p)
 #define STR_INIT(str, len, persistent)	zend_str_init(str, len, persistent)
 #define STR_COPY(s)						zend_str_copy(s)
 #define STR_DUP(s, persistent)			zend_str_dup(s, persistent)
 #define STR_REALLOC(s, len, persistent)	zend_str_realloc(s, len, persistent)
+#define STR_SAFE_REALLOC(s, n, m, l, p)	zend_str_safe_realloc(s, n, m, l, p)
 #define STR_FREE(s)						zend_str_free(s)
 #define STR_RELEASE(s)					zend_str_release(s)
 #define STR_EMPTY_ALLOC()				CG(empty_string)
@@ -107,6 +109,24 @@ static zend_always_inline zend_string *zend_str_alloc(int len, int persistent)
 	return ret;
 }
 
+static zend_always_inline zend_string *zend_str_safe_alloc(size_t n, size_t m, size_t l, int persistent)
+{
+	zend_string *ret = safe_pemalloc(n, m, sizeof(zend_string) + l - 1, persistent);
+
+	GC_REFCOUNT(ret) = 1;
+#if 1
+	/* optimized single assignment */
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
+#else
+	GC_TYPE(ret) = IS_STRING;
+	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
+	GC_INFO(ret) = 0;
+#endif
+	ret->h = 0;
+	ret->len = (n * m) + l;
+	return ret;
+}
+
 static zend_always_inline zend_string *zend_str_init(const char *str, int len, int persistent)
 {
 	zend_string *ret = STR_ALLOC(len, persistent);
@@ -147,6 +167,25 @@ static zend_always_inline zend_string *zend_str_realloc(zend_string *s, int len,
 	} else {
 		ret = STR_ALLOC(len, persistent);
 		memcpy(ret->val, s->val, (len > s->len ? s->len : len) + 1);
+		STR_DELREF(s);
+	}
+	return ret;
+}
+
+static zend_always_inline zend_string *zend_str_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, int persistent)
+{
+	zend_string *ret;
+
+	if (IS_INTERNED(s)) {
+		ret = STR_SAFE_ALLOC(n, m, l, persistent);
+		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
+	} else if (STR_REFCOUNT(s) == 1) {
+		ret = safe_perealloc(s, n, m, sizeof(zend_string) + l - 1, persistent);
+		ret->len = (n * m) + l;
+		STR_FORGET_HASH_VAL(ret);
+	} else {
+		ret = STR_SAFE_ALLOC(n, m, l, persistent);
+		memcpy(ret->val, s->val, ((n * m) + l > s->len ? s->len : ((n * m) + l)) + 1);
 		STR_DELREF(s);
 	}
 	return ret;

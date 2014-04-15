@@ -732,7 +732,6 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			int use_copy;
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, precv->op2.zv);
-//???			INIT_PZVAL(zv);
 			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
 			if (Z_TYPE(zv) == IS_BOOL) {
 				if (Z_LVAL(zv)) {
@@ -1377,8 +1376,6 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 		ZVAL_COPY_VALUE(&params[0], argument_ptr);
 		ZVAL_COPY_VALUE(&params[1], argument2_ptr);
 	}
-
-//???	INIT_PZVAL(&output);
 
 	/* Create object */
 	if (object_and_properties_init(&reflector, ce_ptr, NULL) == FAILURE) {
@@ -2585,11 +2582,11 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	}
 
 	ZVAL_COPY_VALUE(return_value, precv->op2.zv);
-//???	INIT_PZVAL(return_value);
-	if (!Z_CONSTANT_P(return_value)) {
+	if (Z_CONSTANT_P(return_value)) {
+		zval_update_constant_ex(return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
+	} else {
 		zval_copy_ctor(return_value);
 	}
-	zval_update_constant_ex(return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
 }
 /* }}} */
 
@@ -3377,7 +3374,6 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* copy: enforce read only access */
 		ZVAL_DUP(&prop_copy, prop);
-//???		INIT_PZVAL(prop_copy);
 
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
@@ -4956,7 +4952,6 @@ ZEND_METHOD(reflection_property, getValue)
 			/* Bails out */
 		}
 		ZVAL_DUP(return_value, &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]);
-//??? 		INIT_PZVAL(return_value);
 	} else {
 		const char *class_name, *prop_name;
 

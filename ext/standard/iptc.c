@@ -285,8 +285,9 @@ PHP_FUNCTION(iptcembed)
 	fclose(fp);
 
 	if (spool < 2) {
-//???		RETVAL_STRINGL(spoolbuf, poi - spoolbuf, 0);
+		// TODO: avoid reallocation ???
 		RETVAL_STRINGL(spoolbuf, poi - spoolbuf);
+		efree(spoolbuf);
 	} else {
 		RETURN_TRUE;
 	}

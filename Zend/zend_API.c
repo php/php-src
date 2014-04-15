@@ -741,8 +741,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
-//??? 'Z' iz not supported anymore and should be replaced with 'z'
 		case 'Z':
+			/* 'Z' iz not supported anymore and should be replaced with 'z' */
 			ZEND_ASSERT(c != 'Z');
 		default:
 			return "unknown";

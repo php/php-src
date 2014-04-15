@@ -354,9 +354,6 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-#if ZEND_DEBUG
-//???	ht->inconsistent = 0;
-#endif
 	ht->flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->arData = NULL;
 	ht->arHash = NULL;
@@ -430,9 +427,6 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-#if ZEND_DEBUG
-//???	ht->inconsistent = 0;
-#endif
 	ht->flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 	ht->nApplyCount = 0;
@@ -531,9 +525,6 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = zend_destroy_property_info;
-#if ZEND_DEBUG
-//???	ht->inconsistent = 0;
-#endif
 	ht->flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 	ht->nApplyCount = 0;

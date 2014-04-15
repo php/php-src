@@ -193,7 +193,7 @@ again:
 			break;
 		}
 		case IS_REFERENCE:
-//??? hide references with refcount==1 (for compatibility)
+			//??? hide references with refcount==1 (for compatibility)
 			if (Z_REFCOUNT_P(struc) > 1) {
 				is_ref = 1;
 			}
@@ -359,7 +359,7 @@ head_done:
 		break;
 	}
 	case IS_REFERENCE:
-//??? hide references with refcount==1 (for compatibility)
+		//??? hide references with refcount==1 (for compatibility)
 		if (Z_REFCOUNT_P(struc) > 1) {
 			is_ref = 1;
 		}
