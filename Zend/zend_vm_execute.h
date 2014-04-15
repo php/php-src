@@ -14665,7 +14665,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset  = opline->op2.zv;
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -16947,7 +16947,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAN
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset  = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -19132,7 +19132,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAN
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -22561,7 +22561,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -32105,7 +32105,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset  = opline->op2.zv;
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -34170,7 +34170,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset  = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -36234,7 +36234,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset  = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
@@ -39406,7 +39406,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 	offset  = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
 	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT) ||
