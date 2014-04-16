@@ -152,6 +152,10 @@ parameter
 		$$.str = $2.str;
 		$$.len = $2.len;
 	}
+	| T_RUN			{
+		$$.type = RUN_PARAM;
+		$$.len = 0;
+	}
 	| T_OPCODE								{ $$ = $1; }
 	| T_ADDR								{ $$ = $1; }
 	| T_LITERAL								{ $$ = $1; }

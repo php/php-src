@@ -222,6 +222,7 @@ void yyfree (void * ,yyscan_t yyscanner );
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define RAW 1
+#define NORMAL 2
 
 #endif
 
@@ -335,9 +336,9 @@ extern int yylex \
 #undef YY_DECL
 #endif
 
-#line 117 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
+#line 131 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 
 
-#line 342 "sapi/phpdbg/phpdbg_lexer.h"
+#line 343 "sapi/phpdbg/phpdbg_lexer.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */
