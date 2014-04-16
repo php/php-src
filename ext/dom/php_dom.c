@@ -111,6 +111,10 @@ typedef struct _dom_prop_handler {
 	dom_write_t write_func;
 } dom_prop_handler;
 
+static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
+	return &dom_object_handlers;
+}
+
 /* {{{ int dom_node_is_read_only(xmlNodePtr node) */
 int dom_node_is_read_only(xmlNodePtr node) {
 	switch (node->type) {
@@ -507,31 +511,36 @@ PHP_FUNCTION(dom_import_simplexml)
 }
 /* }}} */
 
-zend_object *dom_objects_store_clone_obj(zval *zobject TSRMLS_DC) /* {{{ */
+static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy TSRMLS_DC);
+
+static zend_object *dom_objects_store_clone_obj(zval *zobject TSRMLS_DC) /* {{{ */
 {
-	ZEND_ASSERT(0);
-	/*void *new_object;
-	dom_object *intern;
-	dom_object *old_object;
-	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+	dom_object *intern = Z_DOMOBJ_P(zobject);
+	dom_object *clone = dom_objects_set_class(intern->std.ce, 0 TSRMLS_CC);
 
-	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
+	clone->std.handlers = dom_get_obj_handlers(TSRMLS_C);
+	zend_objects_clone_members(&clone->std, &intern->std TSRMLS_CC);
 
-	if (obj->clone == NULL) {
-		php_error(E_ERROR, "Trying to clone an uncloneable object of class %s", Z_OBJCE_P(zobject)->name);
+	if (instanceof_function(intern->std.ce, dom_node_class_entry TSRMLS_CC)) {
+		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
+		if (node != NULL) {
+			xmlNodePtr cloned_node = xmlDocCopyNode(node, node->doc, 1);
+			if (cloned_node != NULL) {
+				/* If we cloned a document then we must create new doc proxy */
+				if (cloned_node->doc == node->doc) {
+					clone->document = intern->document;
+				}
+				php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc TSRMLS_CC);
+				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone TSRMLS_CC);
+				if (intern->document != clone->document) {
+					dom_copy_doc_props(intern->document, clone->document);
+				}
+			}
+
+		}
 	}
 
-	obj->clone(obj->object, &new_object TSRMLS_CC);
-
-	retval.handle = zend_objects_store_put(new_object, obj->dtor, obj->free_storage, obj->clone TSRMLS_CC);
-	intern = (dom_object *) new_object;
-	intern->handle = retval.handle;
-	retval.handlers = Z_OBJ_HT_P(zobject);
-
-	old_object = (dom_object *) obj->object;
-	zend_objects_clone_members(&intern->std, retval, &old_object->std, intern->handle TSRMLS_CC);
-
-	return retval;*/
+	return &clone->std;
 }
 /* }}} */
 
@@ -558,10 +567,6 @@ static const zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
 	PHP_FE_END
 };
-
-static zend_object_handlers* dom_get_obj_handlers(TSRMLS_D) {
-	return &dom_object_handlers;
-}
 
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
@@ -590,6 +595,7 @@ ZEND_GET_MODULE(dom)
 
 void dom_objects_free_storage(zend_object *object TSRMLS_DC);
 void dom_nnodemap_objects_free_storage(zend_object *object TSRMLS_DC);
+static zend_object *dom_objects_store_clone_obj(zval *zobject TSRMLS_DC);
 static void dom_nnodemap_object_dtor(zend_object *object TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
 void dom_xpath_objects_free_storage(zend_object *object TSRMLS_DC);
@@ -603,6 +609,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
+	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
@@ -1088,39 +1095,6 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	}
 
 	return intern;
-}
-/* }}} */
-
-/* {{{ dom_objects_clone */
-void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
-{
-	dom_object *intern = (dom_object *) object;
-	dom_object *clone;
-	xmlNodePtr node;
-	xmlNodePtr cloned_node;
-
-	clone = dom_objects_set_class(intern->std.ce, 0 TSRMLS_CC);
-
-	if (instanceof_function(intern->std.ce, dom_node_class_entry TSRMLS_CC)) {
-		node = (xmlNodePtr)dom_object_get_node((dom_object *) object);
-		if (node != NULL) {
-			cloned_node = xmlDocCopyNode(node, node->doc, 1);
-			if (cloned_node != NULL) {
-				/* If we cloned a document then we must create new doc proxy */
-				if (cloned_node->doc == node->doc) {
-					clone->document = intern->document;
-				}
-				php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc TSRMLS_CC);
-				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, (void *)clone TSRMLS_CC);
-				if (intern->document != clone->document) {
-					dom_copy_doc_props(intern->document, clone->document);
-				}
-			}
-
-		}
-	}
-
-	*object_clone = (void *) clone;
 }
 /* }}} */
 
