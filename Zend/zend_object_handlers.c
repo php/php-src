@@ -464,13 +464,12 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	if (zobj->ce->__get) {
 		long *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_GET)) {
+			zval tmp_object;
+
 			/* have getter - try with it! */
-			Z_ADDREF_P(object);
-			if (Z_ISREF_P(object)) {
-				SEPARATE_ZVAL(object);
-			}
+			ZVAL_COPY(&tmp_object, object);
 			*guard |= IN_GET; /* prevent circular getting */
-			zend_std_call_getter(object, member, rv TSRMLS_CC);
+			zend_std_call_getter(&tmp_object, member, rv TSRMLS_CC);
 			*guard &= ~IN_GET;
 
 			if (Z_TYPE_P(rv) != IS_UNDEF) {
@@ -485,11 +484,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 			} else {
 				retval = &EG(uninitialized_zval);
 			}
-			if (EXPECTED(retval != object)) {
-				zval_ptr_dtor(object);
-			} else {
-				Z_DELREF_P(object);
-			}
+//???			if (EXPECTED(retval != object)) {
+			zval_ptr_dtor(&tmp_object);
+//???			} else {
+//???				Z_DELREF_P(object);
+//???			}
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
@@ -590,16 +589,15 @@ found:
 		long *guard = zend_get_property_guard(zobj, property_info, member);
 
 	    if (!((*guard) & IN_SET)) {
-			Z_ADDREF_P(object);
-			if (Z_ISREF_P(object)) {
-				SEPARATE_ZVAL(object);
-			}
+			zval tmp_object;
+
+			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
+			if (zend_std_call_setter(&tmp_object, member, value TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
 			}
 			(*guard) &= ~IN_SET;
-			zval_ptr_dtor(object);
+			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(property_info != NULL)) {
 			goto write_std_property;
 		} else {
@@ -830,15 +828,14 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	if (zobj->ce->__unset) {
 		long *guard = zend_get_property_guard(zobj, property_info, member);
 		if (!((*guard) & IN_UNSET)) {
+			zval tmp_object;
+
 			/* have unseter - try with it! */
-			Z_ADDREF_P(object);
-			if (Z_ISREF_P(object)) {
-				SEPARATE_ZVAL(object);
-			}
+			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
-			zend_std_call_unsetter(object, member TSRMLS_CC);
+			zend_std_call_unsetter(&tmp_object, member TSRMLS_CC);
 			(*guard) &= ~IN_UNSET;
-			zval_ptr_dtor(object);
+			zval_ptr_dtor(&tmp_object);
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
@@ -1443,15 +1440,13 @@ found:
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
+			zval tmp_object;
 
 			/* have issetter - try with it! */
-			Z_ADDREF_P(object);
-			if (Z_ISREF_P(object)) {
-				SEPARATE_ZVAL(object);
-			}
+			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
 			ZVAL_UNDEF(&rv);
-			zend_std_call_issetter(object, member, &rv TSRMLS_CC);
+			zend_std_call_issetter(&tmp_object, member, &rv TSRMLS_CC);
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv TSRMLS_CC);
 				zval_ptr_dtor(&rv);
@@ -1459,7 +1454,7 @@ found:
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
 						ZVAL_UNDEF(&rv);
-						zend_std_call_getter(object, member, &rv TSRMLS_CC);
+						zend_std_call_getter(&tmp_object, member, &rv TSRMLS_CC);
 						(*guard) &= ~IN_GET;
 						if (Z_TYPE(rv) != IS_UNDEF) {
 							result = i_zend_is_true(&rv TSRMLS_CC);
@@ -1473,7 +1468,7 @@ found:
 				}
 			}
 			(*guard) &= ~IN_ISSET;
-			zval_ptr_dtor(object);
+			zval_ptr_dtor(&tmp_object);
 		}
 	}
 
