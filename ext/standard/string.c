@@ -4283,12 +4283,23 @@ PHP_FUNCTION(strip_tags)
 	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
 	if (allow != NULL) {
 		convert_to_string_ex(allow);
-		allowed_tags = Z_STRVAL_P(allow);
-		allowed_tags_len = Z_STRLEN_P(allow);
+// TODO: reimplement to avoid reallocation ???
+		if (IS_INTERNED(Z_STR_P(allow))) {
+			allowed_tags = estrndup(Z_STRVAL_P(allow), Z_STRLEN_P(allow));
+			allowed_tags_len = Z_STRLEN_P(allow);
+		} else {
+			allowed_tags = Z_STRVAL_P(allow);
+			allowed_tags_len = Z_STRLEN_P(allow);
+		}
 	}
 
 	buf = STR_INIT(str, str_len, 0);
 	buf->len = php_strip_tags_ex(buf->val, str_len, NULL, allowed_tags, allowed_tags_len, 0);
+
+// TODO: reimplement to avoid reallocation ???
+	if (allow && IS_INTERNED(Z_STR_P(allow))) {
+		efree(allowed_tags);
+	}
 	RETURN_STR(buf);
 }
 /* }}} */
