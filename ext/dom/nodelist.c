@@ -64,9 +64,7 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 			count = xmlHashSize(objmap->ht);
 		} else {
 			if (objmap->nodetype == DOM_NODESET) {
-				zval obj;
-				ZVAL_OBJ(&obj, &objmap->baseobj->std);
-				nodeht = HASH_OF(&obj);
+				nodeht = HASH_OF(&objmap->baseobj_zv);
 				count = zend_hash_num_elements(nodeht);
 			} else {
 				nodep = dom_object_get_node(objmap->baseobj);
@@ -132,9 +130,7 @@ PHP_FUNCTION(dom_nodelist_item)
 				}
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
-					zval obj;
-					ZVAL_OBJ(&obj, &objmap->baseobj->std);
-					HashTable *nodeht = HASH_OF(&obj);
+					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
 					zval *entry = zend_hash_index_find(nodeht, index);
 					if (entry) {
 						ZVAL_COPY(return_value, entry);

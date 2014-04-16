@@ -73,6 +73,9 @@ zend_class_entry *dom_namespace_node_class_entry;
 
 zend_object_handlers dom_object_handlers;
 zend_object_handlers dom_nnodemap_object_handlers;
+#if defined(LIBXML_XPATH_ENABLED)
+zend_object_handlers dom_xpath_object_handlers;
+#endif
 
 static HashTable classes;
 /* {{{ prop handler tables */
@@ -588,6 +591,9 @@ ZEND_GET_MODULE(dom)
 void dom_objects_free_storage(zend_object *object TSRMLS_DC);
 void dom_nnodemap_objects_free_storage(zend_object *object TSRMLS_DC);
 static void dom_nnodemap_object_dtor(zend_object *object TSRMLS_DC);
+#if defined(LIBXML_XPATH_ENABLED)
+void dom_xpath_objects_free_storage(zend_object *object TSRMLS_DC);
+#endif
 
 /* {{{ PHP_MINIT_FUNCTION(dom) */
 PHP_MINIT_FUNCTION(dom)
@@ -835,6 +841,10 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_DOM_CLASS(ce, "DOMStringExtend", NULL, php_dom_string_extend_class_functions, dom_string_extend_class_entry);
 
 #if defined(LIBXML_XPATH_ENABLED)
+	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, std);
+	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
+
 	INIT_CLASS_ENTRY(ce, "DOMXPath", php_dom_xpath_class_functions);
 	ce.create_object = dom_xpath_objects_new;
 	dom_xpath_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
@@ -997,9 +1007,9 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 
 #if defined(LIBXML_XPATH_ENABLED)
 /* {{{ dom_xpath_objects_free_storage */
-void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
+void dom_xpath_objects_free_storage(zend_object *object TSRMLS_DC)
 {
-	dom_xpath_object *intern = (dom_xpath_object *)object;
+	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
@@ -1018,8 +1028,6 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 		zend_hash_destroy(intern->node_list);
 		FREE_HASHTABLE(intern->node_list);
 	}
-
-	efree(object);
 }
 /* }}} */
 #endif
@@ -1052,9 +1060,9 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 {
 	dom_nnodemap_object *mapptr = (dom_nnodemap_object *) intern->ptr;
 
-	if (basenode) {
-		GC_REFCOUNT(&basenode->std)++;
-	}
+	//??? if (basenode)
+	ZVAL_OBJ(&mapptr->baseobj_zv, &basenode->std);
+	Z_ADDREF(mapptr->baseobj_zv);
 
 	mapptr->baseobj = basenode;
 	mapptr->nodetype = ntype;
@@ -1066,12 +1074,9 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry *base_class;
-	size_t dom_object_size = instanceof_function(class_type, dom_xpath_class_entry TSRMLS_CC)
-		? sizeof(dom_xpath_object) : sizeof(dom_object);
-	dom_object *intern = ecalloc(1, dom_object_size + sizeof(zval) * (class_type->default_properties_count - 1));
+	dom_object *intern = ecalloc(1, sizeof(dom_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 
-	base_class = class_type;
+	zend_class_entry *base_class = class_type;
 	while (base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
 		base_class = base_class->parent;
 	}
@@ -1133,14 +1138,16 @@ zend_object *dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* {{{ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
-	dom_xpath_object *intern = (dom_xpath_object *) dom_objects_set_class(class_type, 1 TSRMLS_CC);
-	intern->registerPhpFunctions = 0;
-	intern->node_list = NULL;
+	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);
 	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	intern->std.handlers = dom_get_obj_handlers(TSRMLS_C);
+	intern->prop_handler = &dom_xpath_prop_handlers;
+	intern->std.handlers = &dom_xpath_object_handlers;
+
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
 }
@@ -1162,8 +1169,8 @@ static void dom_nnodemap_object_dtor(zend_object *object TSRMLS_DC) /* {{{ */
 		if (objmap->ns) {
 			xmlFree(objmap->ns);
 		}
-		if (objmap->baseobj) {
-			OBJ_RELEASE(&objmap->baseobj->std);
+		if (!ZVAL_IS_UNDEF(&objmap->baseobj_zv)) {
+			zval_ptr_dtor(&objmap->baseobj_zv);
 		}
 		efree(objmap);
 		intern->ptr = NULL;
@@ -1189,6 +1196,7 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_DC) /*
 	intern = dom_objects_set_class(class_type, 1 TSRMLS_CC);
 	intern->ptr = emalloc(sizeof(dom_nnodemap_object));
 	objmap = (dom_nnodemap_object *)intern->ptr;
+	ZVAL_UNDEF(&objmap->baseobj_zv);
 	objmap->baseobj = NULL;
 	objmap->nodetype = 0;
 	objmap->ht = NULL;

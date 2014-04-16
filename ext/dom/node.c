@@ -1729,8 +1729,8 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 					zend_string *prefix;
 					ulong idx;
 
-					if (zend_hash_get_current_key_ex(Z_ARRVAL_P(tmp), 
-						&prefix, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
+					if (zend_hash_get_current_key(Z_ARRVAL_P(tmp), 
+						&prefix, &idx, 0) == HASH_KEY_IS_STRING) {
 						xmlXPathRegisterNs(ctxp, prefix->val, Z_STRVAL_P(tmpns));
 					}
 				}
