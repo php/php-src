@@ -1084,7 +1084,8 @@ ZEND_FUNCTION(get_class_methods)
 
 			/* Do not display old-style inherited constructors */
 			if (zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, 0, &pos) != HASH_KEY_IS_STRING) {
-				ZVAL_STR(&method_name, STR_COPY(mptr->common.function_name));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+				ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
 				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
@@ -1097,7 +1098,8 @@ ZEND_FUNCTION(get_class_methods)
 					ZVAL_STR(&method_name, STR_COPY(zend_find_alias_name(mptr->common.scope, key)));
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 				} else {
-					ZVAL_STR(&method_name, STR_COPY(mptr->common.function_name));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+					ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 				}
 			}
@@ -2240,7 +2242,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}				    
 				if (prev->op_array) {
-					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_COPY(prev->op_array->filename));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_DUP(prev->op_array->filename, 0));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
 					break;
 				}
@@ -2431,7 +2434,8 @@ ZEND_FUNCTION(get_extension_funcs)
 				array_init(return_value);
 				array = 1;
 			}
-			add_next_index_str(return_value, STR_COPY(zif->common.function_name));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+			add_next_index_str(return_value, STR_DUP(zif->common.function_name, 0));
 		}
 		zend_hash_move_forward_ex(CG(function_table), &iterator);
 	}
