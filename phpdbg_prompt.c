@@ -265,13 +265,13 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						if (yyparse(&stack, scanner) <= 0) {
 							switch (phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 								case FAILURE:
-									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+//									if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 										if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
 											phpdbg_error(
 												"Unrecognized command in %s:%d: %s, %s!", 
 												init_file, line, input, why);
 										}
-									}
+//									}
 								break;
 							}
 						}
@@ -1046,13 +1046,13 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			if (yyparse(&stack, scanner) <= 0) {
 				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
-						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+//						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 							if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
 								if (why) {
 									phpdbg_error("%s", why);
 								}
 							}
-						}
+//						}
 
 						if (why) {
 							free(why);
@@ -1254,7 +1254,7 @@ zend_vm_enter:
 		); \
 	} \
 	\
-	do { \
+/*	do { */\
 		switch (phpdbg_interactive(TSRMLS_C)) { \
 			case PHPDBG_LEAVE: \
 			case PHPDBG_FINISH: \
@@ -1263,7 +1263,7 @@ zend_vm_enter:
 				goto next; \
 			} \
 		} \
-	} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)); \
+/*	} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)); */\
 } while (0)
 
 		/* allow conditional breakpoints and
