@@ -5326,7 +5326,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 			ZVAL_DUP(&generator->key, Z_REFVAL_P(key));
 			FREE_OP2_IF_VAR();
 		} else {
-			if (OP1_TYPE == IS_CV) {
+			if (OP2_TYPE == IS_CV) {
 				if (Z_REFCOUNTED_P(key)) Z_ADDREF_P(key);
 			}
 			ZVAL_COPY_VALUE(&generator->key, key);

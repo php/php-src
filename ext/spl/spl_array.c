@@ -1243,6 +1243,7 @@ SPL_METHOD(Array, getIteratorClass)
 		return;
 	}
 
+	STR_ADDREF(intern->ce_get_iterator->name);
 	RETURN_STR(intern->ce_get_iterator->name);
 }
 /* }}} */

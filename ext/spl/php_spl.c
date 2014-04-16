@@ -385,6 +385,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 	if (SPL_G(autoload_extensions) == NULL) {
 		RETURN_STRINGL(SPL_DEFAULT_FILE_EXTENSIONS, sizeof(SPL_DEFAULT_FILE_EXTENSIONS) - 1);
 	} else {
+		STR_ADDREF(SPL_G(autoload_extensions));
 		RETURN_STR(SPL_G(autoload_extensions));
 	}
 } /* }}} */

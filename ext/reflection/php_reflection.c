@@ -1932,7 +1932,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 static int _zval_array_to_c_array(zval *arg, zval **params TSRMLS_DC) /* {{{ */
 {
-	ZVAL_COPY_VALUE((*params), arg);
+	ZVAL_COPY((*params), arg);
 	(*params)++;
 	return ZEND_HASH_APPLY_KEEP;
 } /* }}} */
@@ -1944,7 +1944,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	zval retval;
 	zval *params;
 	int result;
-	int argc;
+	int i, argc;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
@@ -1982,6 +1982,9 @@ ZEND_METHOD(reflection_function, invokeArgs)
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
+	for (i = 0; i < argc; i++) {
+		zval_ptr_dtor(&params[i]);
+	}
 	efree(params);
 
 	if (result == FAILURE) {
@@ -2913,7 +2916,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	zval *object;
 	reflection_object *intern;
 	zend_function *mptr;
-	int argc;
+	int i, argc;
 	int result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -3005,6 +3008,9 @@ ZEND_METHOD(reflection_method, invokeArgs)
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
+	for (i = 0; i < argc; i++) {
+		zval_ptr_dtor(&params[i]);
+	}
 	efree(params);
 
 	if (result == FAILURE) {
@@ -4192,7 +4198,7 @@ ZEND_METHOD(reflection_class, newInstance)
 	/* Run the constructor if there is one */
 	if (constructor) {
 		zval *params = NULL;
-		int num_args = 0;
+		int ret, i, num_args = 0;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
@@ -4205,6 +4211,10 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
 			zval_dtor(return_value);
 			RETURN_FALSE;
+		}
+
+		for (i = 0; i < num_args; i++) {
+			if (Z_REFCOUNTED(params[i])) Z_ADDREF(params[i]);
 		}
 
 		fci.size = sizeof(fci);
@@ -4223,16 +4233,15 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
-		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			if (!ZVAL_IS_UNDEF(&retval)) {
-				zval_ptr_dtor(&retval);
-			}
+		ret = zend_call_function(&fci, &fcc TSRMLS_CC);
+		zval_ptr_dtor(&retval);
+		for (i = 0; i < num_args; i++) {
+			zval_ptr_dtor(&params[i]);
+		}
+		if (ret == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
-		}
-		if (!ZVAL_IS_UNDEF(&retval)) {
-			zval_ptr_dtor(&retval);
 		}
 	} else if (ZEND_NUM_ARGS()) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
@@ -4265,7 +4274,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	zval retval;
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
-	int argc = 0;
+	int ret, i, argc = 0;
 	HashTable *args;
 	zend_function *constructor;
 
@@ -4322,18 +4331,19 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
-		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			if (params) {
-				efree(params);
+		ret = zend_call_function(&fci, &fcc TSRMLS_CC);
+		zval_ptr_dtor(&retval);
+		if (params) {
+			for (i = 0; i < argc; i++) {
+				zval_ptr_dtor(&params[i]);
 			}
+			efree(params);
+		}
+		if (ret == FAILURE) {
 			zval_ptr_dtor(&retval);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
-		}
-		zval_ptr_dtor(&retval);
-		if (params) {
-			efree(params);
 		}
 	} else if (argc) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
