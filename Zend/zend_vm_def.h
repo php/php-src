@@ -3726,6 +3726,18 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	expr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	if (Z_TYPE_P(expr) == opline->extended_value) {
+		ZVAL_COPY_VALUE(result, expr);
+		if (OP1_TYPE == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
+		} else if (OP1_TYPE == IS_CONST) {
+			zval_opt_copy_ctor(result);
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	if (opline->extended_value != IS_STRING) {
 		ZVAL_COPY_VALUE(result, expr);
 		if (!IS_OP1_TMP_FREE()) {
@@ -3733,7 +3745,6 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 
-ZEND_VM_C_LABEL(cast_again):
 	switch (opline->extended_value) {
 		case IS_NULL:
 			convert_to_null(result);
@@ -3770,10 +3781,6 @@ ZEND_VM_C_LABEL(cast_again):
 			break;
 		case IS_OBJECT:
 			convert_to_object(result);
-			break;
-		case IS_REFERENCE:
-			result = Z_REFVAL_P(result);
-			ZEND_VM_C_GOTO(cast_again);
 			break;
 	}
 	FREE_OP1_IF_VAR();
