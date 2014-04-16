@@ -1823,7 +1823,7 @@ static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 	for (j = 0; j < n_elems; j++) {
 		p = hash->arData + j;
 		if (p->key && !IS_INTERNED(p->key)) {
-			pefree((char*)p->key, hash->flags & HASH_FLAG_PERSISTENT);
+			STR_RELEASE(p->key);
 		}
 		p->h = j;
 		p->key = NULL;

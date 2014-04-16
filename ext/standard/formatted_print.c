@@ -393,23 +393,23 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	if (use_array) {
 		int i = 1;
 		zval *zv;
-		zval array;
+		zval *array;
 
 		z_format = &args[format_offset];
-		ZVAL_DUP(&array, &args[1 + format_offset]);
-		convert_to_array_ex(&array);
+		array = &args[1 + format_offset];
+		SEPARATE_ZVAL(array);
+		convert_to_array_ex(array);
 		
-		argc = 1 + zend_hash_num_elements(Z_ARRVAL(array));
+		argc = 1 + zend_hash_num_elements(Z_ARRVAL_P(array));
 		newargs = (zval *)safe_emalloc(argc, sizeof(zval), 0);
 		ZVAL_COPY_VALUE(&newargs[0], z_format);
 		
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL(array));
-			 (zv = zend_hash_get_current_data(Z_ARRVAL(array))) != NULL;
-			 zend_hash_move_forward(Z_ARRVAL(array))) {
+		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(array));
+			 (zv = zend_hash_get_current_data(Z_ARRVAL_P(array))) != NULL;
+			 zend_hash_move_forward(Z_ARRVAL_P(array))) {
 			ZVAL_COPY_VALUE(&newargs[i], zv);
 			i++;
 		}
-		zval_dtor(&array);
 		args = newargs;
 		format_offset = 0;
 	}

@@ -2262,7 +2262,7 @@ static void spl_dual_it_free_storage(zend_object *_object TSRMLS_DC)
 		}
 	}
 
-	//???zend_object_std_dtor(&object->std TSRMLS_CC);
+	zend_object_std_dtor(&object->std TSRMLS_CC);
 }
 /* }}} */
 

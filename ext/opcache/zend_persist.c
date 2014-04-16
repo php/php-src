@@ -37,10 +37,11 @@
 # define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
+			STR_RELEASE(str); \
 			str = new_str; \
 		} else { \
 	    	new_str = _zend_shared_memdup((void*)str, sizeof(zend_string) + (str)->len, 0 TSRMLS_CC); \
-	    	efree(str); \
+			STR_RELEASE(str); \
 	    	str = new_str; \
 		} \
     } while (0)
@@ -172,6 +173,7 @@ static void zend_persist_zval(zval *z TSRMLS_DC)
 
 static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_script* main_persistent_script TSRMLS_DC)
 {
+	int already_stored = 0;
 	zend_op *persist_ptr;
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 	int has_jmp = 0;
@@ -193,11 +195,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 	op_array->refcount = NULL;
 
-	if (op_array->filename) {
-		/* do not free! PHP has centralized filename storage, compiler will free it */
-		op_array->filename = zend_accel_memdup_string(op_array->filename);
-	}
-
 	if (main_persistent_script) {
 		zend_bool orig_in_execution = EG(in_execution);
 		zend_op_array *orig_op_array = EG(active_op_array);
@@ -215,10 +212,20 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		EG(in_execution) = orig_in_execution;
 	}
 
+	if (op_array->static_variables) {
+		zend_hash_persist(op_array->static_variables, zend_persist_zval TSRMLS_CC);
+		zend_accel_store(op_array->static_variables, sizeof(HashTable));
+	}
+
+	if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
+		already_stored = 1;
+	}
+
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (op_array->literals) {
-		orig_literals = zend_shared_alloc_get_xlat_entry(op_array->literals);
-		if (orig_literals) {
+		if (already_stored) {
+			orig_literals = zend_shared_alloc_get_xlat_entry(op_array->literals);
+			ZEND_ASSERT(orig_literals != NULL);
 			op_array->literals = orig_literals;
 		} else {
 			zend_literal *p = zend_accel_memdup(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
@@ -234,7 +241,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 #endif
 
-	if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->opcodes))) {
+	if (already_stored) {
+		persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
+		ZEND_ASSERT(persist_ptr != NULL);
 		op_array->opcodes = persist_ptr;
 	} else {
 		zend_op *new_opcodes = zend_accel_memdup(op_array->opcodes, sizeof(zend_op) * op_array->last);
@@ -340,18 +349,26 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #endif
 	}
 
-	if (op_array->function_name) {
+	if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
 		zend_string *new_name;
-		if ((new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name))) {
+		if (already_stored) {
+			new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
+			ZEND_ASSERT(new_name != NULL);
 			op_array->function_name = new_name;
 		} else {
-			zend_accel_store_interned_string(op_array->function_name);
+			zend_accel_store_string(op_array->function_name);
 		}
 	}
 
+	if (op_array->filename) {
+		/* do not free! PHP has centralized filename storage, compiler will free it */
+		op_array->filename = zend_accel_memdup_string(op_array->filename);
+	}
+
 	if (op_array->arg_info) {
-		zend_arg_info *new_ptr;
-		if ((new_ptr = zend_shared_alloc_get_xlat_entry(op_array->arg_info))) {
+		if (already_stored) {
+			zend_arg_info *new_ptr = zend_shared_alloc_get_xlat_entry(op_array->arg_info);
+			ZEND_ASSERT(new_ptr != NULL);
 			op_array->arg_info = new_ptr;
 		} else {
 			zend_uint i;
@@ -374,11 +391,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_accel_store(op_array->brk_cont_array, sizeof(zend_brk_cont_element) * op_array->last_brk_cont);
 	}
 
-	if (op_array->static_variables) {
-		zend_hash_persist(op_array->static_variables, zend_persist_zval TSRMLS_CC);
-		zend_accel_store(op_array->static_variables, sizeof(HashTable));
-	}
-
 	if (op_array->scope) {
 		op_array->scope = zend_shared_alloc_get_xlat_entry(op_array->scope);
 	}
@@ -387,8 +399,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		if (ZCG(accel_directives).save_comments) {
 			zend_accel_store_string(op_array->doc_comment);
 		} else {
-			if (!zend_shared_alloc_get_xlat_entry(op_array->doc_comment)) {
-				zend_shared_alloc_register_xlat_entry(op_array->doc_comment, op_array->doc_comment);
+			if (!already_stored) {
 				STR_RELEASE(op_array->doc_comment);
 			}
 			op_array->doc_comment = NULL;
@@ -400,7 +411,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->vars) {
-		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->vars))) {
+		if (already_stored) {
+			persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->vars);
+			ZEND_ASSERT(persist_ptr != NULL);
 			op_array->vars = (zend_string**)persist_ptr;
 		} else {
 			int i;

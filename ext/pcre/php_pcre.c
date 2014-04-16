@@ -1783,10 +1783,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	/* Go through the input array */
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
 	while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(input))) != NULL) {
-		zval subject, *ref_entry = NULL;
+		zval subject, *ref_entry = entry;
 		
 		if (Z_ISREF_P(entry)) {
-			ref_entry = entry;
 			entry = Z_REFVAL_P(entry);
 		}
 
@@ -1814,22 +1813,19 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
 
-			if (ref_entry) {
+			if (Z_REFCOUNTED_P(ref_entry)) {
 			   	Z_ADDREF_P(ref_entry);
-				entry = ref_entry;
-			} else if (Z_REFCOUNTED_P(entry)) {
-			   	Z_ADDREF_P(entry);
 			}
 
 			/* Add to return array */
 			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
 			{
 				case HASH_KEY_IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key, entry);
+					zend_hash_update(Z_ARRVAL_P(return_value), string_key, ref_entry);
 					break;
 
 				case HASH_KEY_IS_LONG:
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, ref_entry);
 					break;
 			}
 		}
