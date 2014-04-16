@@ -645,7 +645,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 		/* reset hit counters */
 		phpdbg_reset_breakpoints(TSRMLS_C);
 
-		if (param && param->type != EMPTY_PARAM) {
+		if (param && param->type != EMPTY_PARAM && param->len != 0) {
 			char **argv = emalloc(5 * sizeof(char *));
 			int argc = 0;
 			int i;
