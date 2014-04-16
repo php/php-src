@@ -610,11 +610,13 @@ ZEND_FUNCTION(each)
 	if (Z_ISREF_P(entry)) {
 		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
 		entry = &tmp;
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+	} else {
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	}
 	zend_hash_index_update(Z_ARRVAL_P(return_value), 1, entry);
-	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
-	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 
 	/* add the key elements */
 	switch (zend_hash_get_current_key(target_hash, &key, &num_key, 0)) {
