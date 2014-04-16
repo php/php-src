@@ -161,6 +161,10 @@ PHP 5.6 UPGRADE NOTES
 - Support for FPM workers changing the apparmor profile through the pool configuration.
   (https://wiki.php.net/rfc/fpm_change_hat)
 
+- Support for several XML MIME types in the built-in CLI server. For static
+  files with extensions .xml, .xsl, .xsd the Content-Type header
+  application/xml is now sent automatically.
+
 ========================================
 3. Deprecated Functionality
 ========================================
