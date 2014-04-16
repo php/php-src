@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.0 Beta 2
 
+- CLI server:
+  . Fixed bug #67079 (Missing MIME types for XML/XSL files). (Anatol)
+
 - Core:
   . Fixed bug #64604 (parse_url is inconsistent with specified port).
     (Ingo Walz)
