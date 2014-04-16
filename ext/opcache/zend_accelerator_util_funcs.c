@@ -241,6 +241,24 @@ static void zend_destroy_property_info(zval *zv)
 	efree(property_info);
 }
 
+static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
+{
+	zend_string *ret;
+
+	if (IS_INTERNED(str)) {		
+		ret = str;
+	} else if (STR_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
+		ret = STR_DUP(str, 0);
+		GC_FLAGS(ret) = GC_FLAGS(str);
+		if (STR_REFCOUNT(str) > 1) {
+			accel_xlat_set(str, ret);
+		}
+	} else {
+		STR_ADDREF(ret);
+	}
+	return ret;
+}
+
 static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 {
 	void *ptr;
@@ -252,19 +270,7 @@ static inline void zend_clone_zval(zval *src, int bind TSRMLS_DC)
 #endif
 		case IS_STRING:
 	    case IS_CONSTANT:
-			if (!IS_INTERNED(Z_STR_P(src))) {
-				if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_STR_P(src))) != NULL) {
-					Z_STR_P(src) = ptr;
-				} else {
-					zend_string *old = Z_STR_P(src);
-
-					Z_STR_P(src) = STR_DUP(old, 0);
-					Z_STR_P(src)->gc = old->gc;
-					if (bind && Z_REFCOUNT_P(src) > 1) {
-						accel_xlat_set(old, Z_STR_P(src));
-					}
-				}
-			}
+			Z_STR_P(src) = zend_clone_str(Z_STR_P(src) TSRMLS_CC);
 			break;
 		case IS_ARRAY:
 	    case IS_CONSTANT_ARRAY:
@@ -402,7 +408,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 		if (!p->key) {
 			q->key = NULL;
 		} else {
-			q->key = STR_DUP(p->key, 0);
+			q->key = zend_clone_str(p->key TSRMLS_CC);
 			GC_FLAGS(q->key) = GC_FLAGS(p->key);
 		}
 
@@ -474,7 +480,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		if (!p->key) {
 			q->key = NULL;
 		} else {
-			q->key = STR_DUP(p->key, 0);
+			q->key = zend_clone_str(p->key TSRMLS_CC);
 		}
 
 		/* Copy data */
@@ -572,7 +578,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		if (!p->key) {
 			q->key = NULL;
 		} else {
-			q->key = STR_DUP(p->key, 0);
+			q->key = zend_clone_str(p->key TSRMLS_CC);
 		}
 
 		/* Copy data */
@@ -581,7 +587,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		*prop_info = *(zend_property_info*)Z_PTR(p->val);
 
 		/* Copy constructor */
-		prop_info->name = STR_DUP(prop_info->name, 0);
+		prop_info->name = zend_clone_str(prop_info->name TSRMLS_CC);
 		if (prop_info->doc_comment) {
 			if (ZCG(accel_directives).load_comments) {
 				prop_info->doc_comment = STR_DUP(prop_info->doc_comment, 0);
@@ -685,7 +691,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	/* constants table */
 	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
 
-	ce->name = STR_DUP(ce->name, 0);
+	ce->name = zend_clone_str(ce->name TSRMLS_CC);
 
 	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
@@ -748,17 +754,17 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 			if (trait_aliases[i]->trait_method) {
 				if (trait_aliases[i]->trait_method->method_name) {
 					trait_aliases[i]->trait_method->method_name =
-						STR_DUP(trait_aliases[i]->trait_method->method_name, 0);
+						zend_clone_str(trait_aliases[i]->trait_method->method_name TSRMLS_CC);
 				}
 				if (trait_aliases[i]->trait_method->class_name) {
 					trait_aliases[i]->trait_method->class_name =
-						STR_DUP(trait_aliases[i]->trait_method->class_name, 0);
+						zend_clone_str(trait_aliases[i]->trait_method->class_name TSRMLS_CC);
 				}
 			}
 
 			if (trait_aliases[i]->alias) {
 				trait_aliases[i]->alias =
-					STR_DUP(trait_aliases[i]->alias, 0);
+					zend_clone_str(trait_aliases[i]->alias TSRMLS_CC);
 			}
 			i++;
 		}
@@ -782,9 +788,9 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 			memcpy(trait_precedences[i]->trait_method, ce->trait_precedences[i]->trait_method, sizeof(zend_trait_method_reference));
 
 			trait_precedences[i]->trait_method->method_name =
-				STR_DUP(trait_precedences[i]->trait_method->method_name, 0);
+				zend_clone_str(trait_precedences[i]->trait_method->method_name TSRMLS_CC);
 			trait_precedences[i]->trait_method->class_name =
-				STR_DUP(trait_precedences[i]->trait_method->class_name, 0);
+				zend_clone_str(trait_precedences[i]->trait_method->class_name TSRMLS_CC);
 
 			if (trait_precedences[i]->exclude_from_classes) {
 				zend_string **exclude_from_classes;
@@ -797,7 +803,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 				j = 0;
 				while (trait_precedences[i]->exclude_from_classes[j].class_name) {
 					exclude_from_classes[j] =
-						STR_DUP(trait_precedences[i]->exclude_from_classes[j].class_name, 0);
+						zend_clone_str(trait_precedences[i]->exclude_from_classes[j].class_name TSRMLS_CC);
 					j++;
 				}
 				exclude_from_classes[j] = NULL;
@@ -957,11 +963,11 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	*op_array = persistent_script->main_op_array;
 
 	if (from_shared_memory) {
+		zend_hash_init(&ZCG(bind_hash), 10, NULL, NULL, 0);
+
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
-			zend_hash_init(&ZCG(bind_hash), 10, NULL, NULL, 0);
 			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, (unique_copy_ctor_func_t) zend_class_copy_ctor TSRMLS_CC);
-			zend_hash_destroy(&ZCG(bind_hash));
 		}
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
@@ -983,6 +989,8 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			}
 			STR_RELEASE(name);
 		}
+
+		zend_hash_destroy(&ZCG(bind_hash));
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 		if ((int)persistent_script->early_binding != -1) {
