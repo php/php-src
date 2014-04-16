@@ -312,6 +312,9 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "xls", "application/vnd.ms-excel" },
 	{ "xlsx", "application/vnd.ms-excel" },
 	{ "zip", "application/x-zip-compressed" },
+	{ "xml", "application/xml" },
+	{ "xsl", "application/xml" },
+	{ "xsd", "application/xml" },
 	{ NULL, NULL }
 };
 
