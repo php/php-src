@@ -1800,7 +1800,8 @@ ZEND_METHOD(reflection_function, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION) {
-		RETURN_STR(STR_COPY(fptr->op_array.filename));
+// TODO: we have to duplicate it, becaise it may be in opcache SHM ???
+		RETURN_STR(STR_DUP(fptr->op_array.filename, 0));
 	}
 	RETURN_FALSE;
 }
@@ -1854,7 +1855,8 @@ ZEND_METHOD(reflection_function, getDocComment)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
-		RETURN_STR(STR_COPY(fptr->op_array.doc_comment));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+		RETURN_STR(STR_DUP(fptr->op_array.doc_comment, 0));
 	}
 	RETURN_FALSE;
 }
@@ -3566,7 +3568,8 @@ ZEND_METHOD(reflection_class, getFileName)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if (ce->type == ZEND_USER_CLASS) {
-		RETURN_STR(STR_COPY(ce->info.user.filename));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+		RETURN_STR(STR_DUP(ce->info.user.filename, 0));
 	}
 	RETURN_FALSE;
 }
