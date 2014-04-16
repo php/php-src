@@ -159,7 +159,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 								node->parent = nsparent;
 								node->ns = curns;
 							}
-							php_dom_create_object(node, &child, (dom_object *)intern TSRMLS_CC);
+							php_dom_create_object(node, &child, &intern->dom TSRMLS_CC);
 							add_next_index_zval(&fci.params[i], &child);
 						}
 					}
@@ -277,9 +277,9 @@ PHP_METHOD(domxpath, __construct)
 
 	intern = Z_XPATHOBJ_P(id);
 	if (intern != NULL) {
-		oldctx = (xmlXPathContextPtr)intern->ptr;
+		oldctx = (xmlXPathContextPtr)intern->dom.ptr;
 		if (oldctx != NULL) {
-			php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
+			php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom TSRMLS_CC);
 			xmlXPathFreeContext(oldctx);
 		}
 
@@ -290,10 +290,10 @@ PHP_METHOD(domxpath, __construct)
 					   (const xmlChar *) "http://php.net/xpath",
 					   dom_xpath_ext_function_object_php);
 
-		intern->ptr = ctx;
+		intern->dom.ptr = ctx;
 		ctx->userData = (void *)intern;
-		intern->document = docobj->document;
-		php_libxml_increment_doc_ref((php_libxml_node_object *)intern, docp TSRMLS_CC);
+		intern->dom.document = docobj->document;
+		php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp TSRMLS_CC);
 	}
 }
 /* }}} end DOMXPath::__construct */
@@ -328,7 +328,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 
 	intern = Z_XPATHOBJ_P(id);
 
-	ctxp = (xmlXPathContextPtr) intern->ptr;
+	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
@@ -370,7 +370,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	intern = Z_XPATHOBJ_P(id);
 
-	ctxp = (xmlXPathContextPtr) intern->ptr;
+	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
 	if (ctxp == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid XPath Context");
 		RETURN_FALSE;
@@ -463,7 +463,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						node->parent = nsparent;
 						node->ns = curns;
 					}
-					php_dom_create_object(node, &child, (dom_object *)intern TSRMLS_CC);
+					php_dom_create_object(node, &child, &intern->dom TSRMLS_CC);
 					add_next_index_zval(&retval, &child);
 				}
 			}

@@ -68,17 +68,15 @@ extern zend_module_entry dom_module_entry;
 #define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct _dom_xpath_object {
-	void *ptr;
-	php_libxml_ref_obj *document;
-	HashTable *prop_handler;
 	int registerPhpFunctions;
 	HashTable *registered_phpfunctions;
 	HashTable *node_list;
-	zend_object std;
+	dom_object dom;
 } dom_xpath_object;
 
 static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
-	return (dom_xpath_object*)((char*)(obj) - XtOffsetOf(dom_xpath_object, std));
+	return (dom_xpath_object*)((char*)(obj)
+		- XtOffsetOf(dom_xpath_object, dom) - XtOffsetOf(dom_object, std));
 }
 
 #define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))

@@ -842,7 +842,7 @@ PHP_MINIT_FUNCTION(dom)
 
 #if defined(LIBXML_XPATH_ENABLED)
 	memcpy(&dom_xpath_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
-	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, std);
+	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
 
 	INIT_CLASS_ENTRY(ce, "DOMXPath", php_dom_xpath_class_functions);
@@ -1011,12 +1011,11 @@ void dom_xpath_objects_free_storage(zend_object *object TSRMLS_DC)
 {
 	dom_xpath_object *intern = php_xpath_obj_from_obj(object);
 
-	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	zend_object_std_dtor(&intern->dom.std TSRMLS_CC);
 
-	if (intern->ptr != NULL) {
-		xmlXPathFreeContext((xmlXPathContextPtr) intern->ptr);
-		php_libxml_decrement_doc_ref((php_libxml_node_object *) intern TSRMLS_CC);
-		intern->ptr = NULL;
+	if (intern->dom.ptr != NULL) {
+		xmlXPathFreeContext((xmlXPathContextPtr) intern->dom.ptr);
+		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom TSRMLS_CC);
 	}
 
 	if (intern->registered_phpfunctions) {
@@ -1143,13 +1142,13 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);
 	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
 
-	intern->prop_handler = &dom_xpath_prop_handlers;
-	intern->std.handlers = &dom_xpath_object_handlers;
+	intern->dom.prop_handler = &dom_xpath_prop_handlers;
+	intern->dom.std.handlers = &dom_xpath_object_handlers;
 
-	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	object_properties_init(&intern->std, class_type);
+	zend_object_std_init(&intern->dom.std, class_type TSRMLS_CC);
+	object_properties_init(&intern->dom.std, class_type);
 
-	return &intern->std;
+	return &intern->dom.std;
 }
 /* }}} */
 #endif
