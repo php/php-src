@@ -85,6 +85,10 @@ PHP 5.5 UPGRADE NOTES
   configure this. The service can now use Type=notify in the systemd
   unit file. (Remi)
 
+- Support for several XML MIME types in the built-in CLI server. For static
+  files with extensions .xml, .xsl, .xsd the Content-Type header
+  application/xml is now sent automatically.
+
 ========================================
 3. Deprecated Functionality
 ========================================
