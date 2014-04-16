@@ -45,7 +45,8 @@ typedef enum {
 	SHELL_PARAM,
 	COND_PARAM,
 	OP_PARAM,
-	ORIG_PARAM
+	ORIG_PARAM,
+	RUN_PARAM
 } phpdbg_param_type;
 
 typedef struct _phpdbg_param phpdbg_param_t;

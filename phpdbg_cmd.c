@@ -762,6 +762,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC)
 	switch (top->type) {
 		case EVAL_PARAM:
 			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
+
+		case RUN_PARAM:
+			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
 		
 		case SHELL_PARAM:
 			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);

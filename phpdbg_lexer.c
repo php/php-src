@@ -9,7 +9,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 37
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -47,6 +47,7 @@ typedef int16_t flex_int16_t;
 typedef uint16_t flex_uint16_t;
 typedef int32_t flex_int32_t;
 typedef uint32_t flex_uint32_t;
+typedef uint64_t flex_uint64_t;
 #else
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
@@ -54,6 +55,7 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
+#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -83,8 +85,6 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
-
-#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -326,7 +326,7 @@ void yyfree (void * ,yyscan_t yyscanner );
 
 /* Begin user sect3 */
 
-#define yywrap(yyscanner) 1
+#define yywrap(n) 1
 #define YY_SKIP_YYWRAP
 
 typedef unsigned char YY_CHAR;
@@ -345,13 +345,13 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
  */
 #define YY_DO_BEFORE_ACTION \
 	yyg->yytext_ptr = yy_bp; \
-	yyleng = (size_t) (yy_cp - yy_bp); \
+	yyleng = (yy_size_t) (yy_cp - yy_bp); \
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 16
-#define YY_END_OF_BUFFER 17
+#define YY_NUM_RULES 17
+#define YY_END_OF_BUFFER 18
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -359,15 +359,16 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static yyconst flex_int16_t yy_accept[70] =
+static yyconst flex_int16_t yy_accept[73] =
     {   0,
-        0,    0,    0,    0,   17,   13,   15,    2,   10,   10,
-        4,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-       13,   14,   14,   13,    0,   15,   10,   13,    3,   13,
-       13,    5,   13,    7,    9,   13,    8,    6,   13,   13,
-       13,   14,   14,    0,   11,   13,   13,   13,    9,   13,
-        8,   13,    1,   13,   13,   13,    8,   13,   13,   13,
-        9,   13,   13,   13,   12,   13,    8,    9,    0
+        0,    0,    0,    0,   18,   14,   16,    2,   11,   11,
+        4,   14,   14,   14,   14,   14,   14,   14,    8,   14,
+       14,   14,   14,   15,   15,   14,    0,   16,   11,   14,
+        3,   14,   14,   14,    5,   14,    7,   10,   14,    9,
+       14,    6,   14,   14,   14,   15,   15,    0,   12,   14,
+       14,   14,   14,    8,   14,   14,    0,   14,   14,   14,
+       14,   14,    0,   14,   14,   14,    1,   13,   14,   14,
+       14,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -378,14 +379,14 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    2,    1,    1,    4,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    5,    6,    7,    8,    8,
         8,    8,    8,    8,    8,    8,    8,    9,    1,    1,
-        1,    1,    1,    1,   10,   11,   12,   13,   14,   15,
-       16,   17,   18,   16,   16,   19,   16,   20,   21,   16,
-       16,   22,   23,   24,   25,   26,   16,   16,   27,   28,
-        1,    1,    1,    1,   29,    1,   30,   31,   12,   32,
+        1,    1,    1,    1,   10,   10,   10,   11,   12,   10,
+       13,   13,   13,   13,   13,   13,   13,   14,   13,   13,
+       13,   13,   13,   13,   13,   13,   13,   13,   13,   15,
+        1,    1,    1,    1,   16,    1,   17,   18,   10,   19,
 
-       33,   34,   16,   35,   36,   16,   16,   37,   16,   38,
-       39,   16,   16,   40,   41,   42,   43,   44,   16,   45,
-       46,   47,    1,    1,    1,    1,    1,    1,    1,    1,
+       20,   21,   13,   22,   23,   13,   13,   24,   13,   25,
+       26,   13,   13,   27,   28,   29,   30,   31,   13,   32,
+       33,   34,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -402,107 +403,96 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[48] =
+static yyconst flex_int32_t yy_meta[35] =
     {   0,
-        1,    2,    3,    2,    1,    1,    1,    1,    1,    1,
+        1,    2,    3,    2,    1,    1,    1,    1,    4,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1
+        1,    1,    1,    1
     } ;
 
-static yyconst flex_int16_t yy_base[74] =
+static yyconst flex_int16_t yy_base[78] =
     {   0,
-        0,    0,   46,   48,  213,  198,   50,  238,   49,   54,
-      197,   46,   51,   56,   58,   59,   63,   67,   65,   61,
-       76,    0,  101,  187,  186,  104,  103,  106,  238,  118,
-      113,  182,  115,  178,  176,  116,  171,  148,  117,  121,
-      126,    0,  126,  142,    0,  123,  136,  140,   91,  142,
-       87,  145,  238,  157,  146,  160,   84,  161,  152,  164,
-       82,  193,  170,  163,  203,  173,   79,   72,  238,  232,
-       78,  235,   68
+        0,    0,   33,   35,  163,  153,   37,  198,   36,   41,
+      152,   42,   33,   38,   43,   44,   46,   49,   48,   53,
+       50,   59,   62,    0,   64,  151,  142,   78,   78,   81,
+      198,   94,   67,   87,  138,   85,  136,  135,   96,  133,
+       88,  130,   97,   98,  103,    0,  108,    0,    0,  105,
+      106,  111,  109,  113,  110,  112,   75,  116,  115,  125,
+      126,  127,   58,  149,  129,  131,  198,  165,  132,  150,
+      158,  198,  181,  185,  189,   60,  193
     } ;
 
-static yyconst flex_int16_t yy_def[74] =
+static yyconst flex_int16_t yy_def[78] =
     {   0,
-       69,    1,   70,   70,   69,   71,   69,   69,   71,   71,
-       69,   71,   71,   71,   71,   71,   71,   71,   71,   71,
-       71,   72,   72,   71,   69,   69,   71,   71,   69,   71,
-       71,   71,   71,   71,   71,   71,   71,   71,   71,   71,
-       71,   72,   72,   69,   28,   71,   71,   71,   71,   71,
-       71,   71,   69,   71,   71,   71,   71,   71,   71,   71,
-       71,   73,   71,   71,   73,   71,   71,   71,    0,   69,
-       69,   69,   69
+       72,    1,   73,   73,   72,   74,   72,   72,   74,   74,
+       72,   74,   74,   74,   74,   74,   74,   74,   74,   74,
+       74,   74,   74,   75,   75,   74,   72,   72,   74,   74,
+       72,   74,   74,   74,   74,   74,   74,   74,   74,   74,
+       74,   74,   74,   74,   74,   75,   75,   76,   30,   74,
+       74,   74,   74,   74,   74,   74,   76,   74,   74,   74,
+       74,   74,   72,   77,   74,   74,   72,   77,   74,   74,
+       74,    0,   72,   72,   72,   72,   72
     } ;
 
-static yyconst flex_int16_t yy_nxt[286] =
+static yyconst flex_int16_t yy_nxt[233] =
     {   0,
         6,    7,    7,    8,    9,    6,   10,    9,   11,    6,
-        6,    6,   12,   13,   14,    6,    6,   15,    6,   16,
-       17,    6,   18,   19,    6,    6,   20,   21,    6,    6,
-        6,   12,   13,   14,    6,   15,    6,   16,   17,    6,
-       18,   19,    6,    6,    6,   20,   21,   23,    7,   23,
-        7,   26,   26,   27,   25,   27,   27,   25,   27,   25,
-       27,   27,   25,   30,   25,   33,   25,   25,   65,   25,
-       31,   25,   34,   25,   40,   25,   32,   36,   24,   35,
-       25,   30,   37,   38,   25,   33,   39,   25,   31,   41,
-       25,   34,   25,   40,   32,   25,   36,   35,   28,   25,
+        6,    6,    6,    6,   12,    6,    6,    6,   13,   14,
+       15,    6,   16,    6,   17,   18,   19,   20,   21,    6,
+        6,    6,   22,   23,   25,    7,   25,    7,   28,   28,
+       29,   27,   29,   29,   27,   29,   27,   29,   29,   27,
+       27,   27,   27,   32,   27,   33,   27,   27,   27,   36,
+       57,   27,   34,   67,   37,   47,   28,   27,   35,   39,
+       27,   38,   30,   40,   42,   27,   43,   41,   44,   28,
+       28,   45,   29,   63,   29,   29,   27,   49,   49,   27,
+       49,   49,   49,   27,   51,   27,   27,   49,   49,   49,
 
-       37,   38,   43,   26,   39,   26,   26,   27,   41,   27,
-       27,   25,   45,   45,   25,   45,   45,   45,   45,   45,
-       45,   25,   47,   25,   25,   25,   25,   43,   26,   25,
-       49,   25,   54,   48,   25,   45,   45,   45,   45,   45,
-       46,   50,   47,   51,   25,   52,   55,   53,   25,   49,
-       25,   48,   54,   25,   25,   57,   25,   58,   46,   50,
-       25,   51,   56,   52,   60,   25,   55,   59,   25,   25,
-       63,   25,   25,   61,   57,   67,   58,   64,   25,   25,
-       56,   25,   60,   66,   25,   68,   25,   59,   63,   62,
-       25,   44,   61,   24,   67,   25,   64,   24,   24,   24,
+       49,   49,   27,   52,   27,   27,   27,   50,   53,   47,
+       28,   27,   54,   27,   27,   58,   38,   27,   27,   27,
+       27,   27,   59,   27,   27,   40,   55,   56,   60,   40,
+       62,   64,   65,   27,   27,   27,   61,   27,   27,   27,
+       27,   27,   64,   27,   27,   38,   27,   48,   66,   26,
+       70,   71,   69,   26,   26,   26,   26,   27,   27,   27,
+       31,   27,   72,   72,   26,   26,   27,   72,   40,   26,
+       26,   26,   26,   27,   72,   72,   38,   72,   72,   72,
+       26,   24,   24,   24,   24,   26,   72,   72,   26,   46,
+       46,   72,   46,   68,   72,   72,   68,    5,   72,   72,
 
-       24,   25,   66,   24,   68,   29,   25,   24,   24,   24,
-       24,   25,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   24,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   24,   22,   22,   22,   42,   42,    5,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72
     } ;
 
-static yyconst flex_int16_t yy_chk[286] =
+static yyconst flex_int16_t yy_chk[233] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    3,    3,    4,
-        4,    7,    7,    9,   12,    9,    9,    9,   10,   13,
-       10,   10,   10,   12,   14,   14,   15,   16,   73,   20,
-       13,   17,   15,   19,   20,   18,   13,   17,   71,   16,
-       68,   12,   17,   18,   21,   14,   19,   67,   13,   21,
-       61,   15,   57,   20,   13,   51,   17,   16,   10,   49,
+        1,    1,    1,    1,    3,    3,    4,    4,    7,    7,
+        9,   13,    9,    9,    9,   10,   14,   10,   10,   10,
+       12,   15,   16,   12,   17,   13,   19,   18,   21,   15,
+       76,   20,   14,   63,   16,   25,   25,   22,   14,   18,
+       23,   17,   10,   18,   20,   33,   21,   19,   22,   28,
+       28,   23,   29,   57,   29,   29,   29,   30,   30,   30,
+       30,   30,   30,   36,   33,   34,   41,   30,   30,   30,
 
-       17,   18,   23,   23,   19,   26,   26,   27,   21,   27,
-       27,   27,   28,   28,   28,   28,   28,   28,   28,   28,
-       28,   31,   31,   33,   36,   39,   30,   43,   43,   40,
-       36,   46,   46,   33,   41,   28,   28,   28,   28,   28,
-       30,   39,   31,   40,   47,   41,   47,   44,   48,   36,
-       50,   33,   46,   52,   55,   50,   38,   52,   30,   39,
-       59,   40,   48,   41,   55,   54,   47,   54,   56,   58,
-       59,   64,   60,   56,   50,   64,   52,   60,   63,   37,
-       48,   66,   55,   63,   35,   66,   34,   54,   59,   58,
-       32,   25,   56,   62,   64,   24,   60,   62,   62,   62,
+       30,   30,   32,   34,   39,   43,   44,   32,   36,   47,
+       47,   45,   41,   50,   51,   50,   39,   53,   55,   52,
+       56,   54,   51,   59,   58,   44,   43,   45,   52,   55,
+       56,   58,   59,   60,   61,   62,   53,   65,   42,   66,
+       69,   40,   62,   38,   37,   61,   35,   27,   60,   64,
+       66,   69,   65,   64,   64,   64,   64,   64,   70,   26,
+       11,    6,    5,    0,   64,   68,   71,    0,   70,   68,
+       68,   68,   68,   68,    0,    0,   71,    0,    0,    0,
+       68,   73,   73,   73,   73,   74,    0,    0,   74,   75,
+       75,    0,   75,   77,    0,    0,   77,   72,   72,   72,
 
-       62,   62,   63,   65,   66,   11,    6,   65,   65,   65,
-       65,   65,    5,    0,    0,    0,    0,    0,    0,    0,
-        0,   62,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,   65,   70,   70,   70,   72,   72,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69,   69,   69,   69,   69,   69,
-       69,   69,   69,   69,   69
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72,   72,   72,   72,   72,   72,   72,   72,   72,
+       72,   72
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -512,8 +502,8 @@ static yyconst flex_int16_t yy_chk[286] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "sapi/phpdbg/dev/phpdbg_lexer.l"
-#line 2 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 1 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
+#line 2 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
  
 /*
  * phpdbg_lexer.l
@@ -524,21 +514,10 @@ static yyconst flex_int16_t yy_chk[286] =
 #define YYSTYPE phpdbg_param_t
 
 #include "phpdbg_parser.h"
-#include <stdio.h>
-#include <string.h>
 
-static inline void phpdbg_append_string(phpdbg_param_t *param, const char *string, size_t length TSRMLS_DC) {
-	if (!param->str) {
-		param->str = malloc(length+1);
-	} else param->str = realloc(param->str, param->len + (length+1));
-	
-	memcpy(&param->str[param->len], string, length);
-	param->len += length;
-	param->str[param->len] = 0;
-}
  
 #define YY_NO_UNISTD_H 1
-#line 542 "sapi/phpdbg/phpdbg_lexer.c"
+#line 521 "sapi/phpdbg/phpdbg_lexer.c"
 
 #define INITIAL 0
 #define RAW 1
@@ -630,10 +609,6 @@ int yyget_lineno (yyscan_t yyscanner );
 
 void yyset_lineno (int line_number ,yyscan_t yyscanner );
 
-int yyget_column  (yyscan_t yyscanner );
-
-void yyset_column (int column_no ,yyscan_t yyscanner );
-
 YYSTYPE * yyget_lval (yyscan_t yyscanner );
 
 void yyset_lval (YYSTYPE * yylval_param ,yyscan_t yyscanner );
@@ -680,7 +655,7 @@ static int input (yyscan_t yyscanner );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
+#define ECHO fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -691,7 +666,7 @@ static int input (yyscan_t yyscanner );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		size_t n; \
+		yy_size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -776,9 +751,9 @@ YY_DECL
 	register int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-#line 52 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 43 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 
-#line 782 "sapi/phpdbg/phpdbg_lexer.c"
+#line 757 "sapi/phpdbg/phpdbg_lexer.c"
 
     yylval = yylval_param;
 
@@ -833,13 +808,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 70 )
+				if ( yy_current_state >= 73 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 69 );
+		while ( yy_current_state != 72 );
 		yy_cp = yyg->yy_last_accepting_cpos;
 		yy_current_state = yyg->yy_last_accepting_state;
 
@@ -861,7 +836,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 54 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 45 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
@@ -871,22 +846,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 60 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 51 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 { return T_POUND;  }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 61 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 52 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 { return T_DCOLON; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 62 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 53 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 { return T_COLON;  }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 63 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 54 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -895,7 +870,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 68 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 59 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -904,7 +879,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 73 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 64 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		BEGIN(RAW);
 		phpdbg_init_param(yylval, EMPTY_PARAM);
@@ -913,43 +888,52 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 78 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 69 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
+{
+		BEGIN(RAW);
+		phpdbg_init_param(yylval, EMPTY_PARAM);
+		return T_RUN;
+	}
+	YY_BREAK
+case 9:
+YY_RULE_SETUP
+#line 74 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 1;		
 		return T_TRUTHY;
 	}
 	YY_BREAK
-case 9:
+case 10:
 YY_RULE_SETUP
-#line 83 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 79 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = 0;
 		return T_FALSY;
 	}
 	YY_BREAK
-case 10:
+case 11:
 YY_RULE_SETUP
-#line 88 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 84 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, NUMERIC_PARAM);
 		yylval->num = atoi(yytext);
 		return T_DIGITS;
 	}
 	YY_BREAK
-case 11:
+case 12:
 YY_RULE_SETUP
-#line 93 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 89 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, ADDR_PARAM);
 		yylval->addr = strtoul(yytext, 0, 16);
 		return T_ADDR;
 	}
 	YY_BREAK
-case 12:
+case 13:
 YY_RULE_SETUP
-#line 98 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 94 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, OP_PARAM);
 		yylval->str = strndup(yytext, yyleng);
@@ -957,9 +941,9 @@ YY_RULE_SETUP
 		return T_OPCODE;
 	}
 	YY_BREAK
-case 13:
+case 14:
 YY_RULE_SETUP
-#line 104 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 100 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 		phpdbg_init_param(yylval, STR_PARAM);
 		yylval->str = strndup(yytext, yyleng);
@@ -968,9 +952,9 @@ YY_RULE_SETUP
 	}
 	YY_BREAK
 
-case 14:
+case 15:
 YY_RULE_SETUP
-#line 112 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 108 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 {
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = strndup(yytext, yyleng);
@@ -979,18 +963,18 @@ YY_RULE_SETUP
 	return T_INPUT;
 }
 	YY_BREAK
-case 15:
-/* rule 15 can match eol */
+case 16:
+/* rule 16 can match eol */
 YY_RULE_SETUP
-#line 120 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 116 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 { /* ignore whitespace */ }
 	YY_BREAK
-case 16:
+case 17:
 YY_RULE_SETUP
-#line 121 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 117 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 994 "sapi/phpdbg/phpdbg_lexer.c"
+#line 978 "sapi/phpdbg/phpdbg_lexer.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(RAW):
 	yyterminate();
@@ -1186,7 +1170,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
 
 			int yy_c_buf_p_offset =
 				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
@@ -1286,7 +1270,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 70 )
+			if ( yy_current_state >= 73 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -1315,13 +1299,12 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 70 )
+		if ( yy_current_state >= 73 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 69);
+	yy_is_jam = (yy_current_state == 72);
 
-	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
@@ -1412,7 +1395,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap(yyscanner ) )
-						return EOF;
+						return 0;
 
 					if ( ! yyg->yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
@@ -1761,8 +1744,8 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr , yyscan_t yyscanner)
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param yybytes the byte buffer to scan
- * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
+ * @param bytes the byte buffer to scan
+ * @param len the number of bytes in the buffer pointed to by @a bytes.
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
@@ -1770,8 +1753,7 @@ YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len 
 {
 	YY_BUFFER_STATE b;
 	char *buf;
-	yy_size_t n;
-	yy_size_t i;
+	yy_size_t n, i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -1917,7 +1899,7 @@ void yyset_lineno (int  line_number , yyscan_t yyscanner)
 
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "yyset_lineno called with no buffer" );
+           yy_fatal_error( "yyset_lineno called with no buffer" , yyscanner); 
     
     yylineno = line_number;
 }
@@ -1932,7 +1914,7 @@ void yyset_column (int  column_no , yyscan_t yyscanner)
 
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
-           YY_FATAL_ERROR( "yyset_column called with no buffer" );
+           yy_fatal_error( "yyset_column called with no buffer" , yyscanner); 
     
     yycolumn = column_no;
 }
@@ -2156,7 +2138,7 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 121 "sapi/phpdbg/dev/phpdbg_lexer.l"
+#line 117 "/var/root/php-src/sapi/phpdbg/phpdbg_lexer.l"
 
 
 
