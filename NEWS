@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #66721 (__wakeup of DateTime segfaults when invalid object data is
     supplied). (Boro Sitnikovski)
 
+- DOM:
+  . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
+    not only the subset). (Anatol)
+
 - Fileinfo:
   . Fixed bug #66907 (Solaris 10 is missing strcasestr and needs substitute).
     (Anatol)
