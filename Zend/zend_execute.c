@@ -51,7 +51,9 @@
 typedef int (*incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, ex, should_free, type) _get_zval_ptr(op_type, node, ex, should_free, type TSRMLS_CC)
+#define get_zval_ptr_deref(op_type, node, ex, should_free, type) _get_zval_ptr_deref(op_type, node, ex, should_free, type TSRMLS_CC)
 #define get_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type TSRMLS_CC)
+#define get_zval_ptr_ptr_undef(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type TSRMLS_CC)
 #define get_obj_zval_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr(op_type, node, ex, should_free, type TSRMLS_CC)
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type TSRMLS_CC)
 
@@ -434,6 +436,19 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_
 	}
 }
 
+static inline zval *_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+{
+	zval *ret;
+
+	if (op_type == IS_CV) {
+		should_free->var = NULL;
+		return _get_zval_ptr_cv(execute_data, node->var, type TSRMLS_CC);
+	} else /* if (op_type == IS_VAR) */ {
+		ZEND_ASSERT(op_type == IS_VAR);
+		return _get_zval_ptr_ptr_var(node->var, execute_data, should_free TSRMLS_CC);
+	}
+}
+
 static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
 {
 	if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
@@ -455,6 +470,19 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_exec
 		}
 	}
 	return get_zval_ptr(op_type, op, execute_data, should_free, type);
+}
+
+static inline zval *_get_obj_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+{
+	if (op_type == IS_UNUSED) {
+		if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
+			should_free->var = NULL;
+			return &EG(This);
+		} else {
+			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
+		}
+	}
+	return get_zval_ptr_ptr(op_type, node, execute_data, should_free, type);
 }
 
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr TSRMLS_DC)

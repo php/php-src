@@ -942,7 +942,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
-							out($f,"#define ZEND_VM_ENTER()    ZEND_VM_CONTINUE()\n");
+							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
@@ -974,7 +974,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define LOAD_REGS()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
-							out($f,"#define ZEND_VM_ENTER()    ZEND_VM_CONTINUE()\n");
+							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
