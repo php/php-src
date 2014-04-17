@@ -1,22 +1,27 @@
 --TEST--
-Basic return hints covariance
+Return type where none previously existed
+
 --FILE--
 <?php
-class foo {}
-class bar extends foo {}
-class baz {}
 
-class qux extends baz {
-	public function foo() : foo {
-		return new bar();
-	}
+class Comment {
 }
 
-$qux = new qux();
-var_dump($qux->foo());
-?>
+class CommentsIterator extends ArrayIterator implements Iterator {
+    function current() : Comment {
+        return parent::current();
+    }
+}
+
+
+$comments = new CommentsIterator([
+    new Comment
+]);
+
+foreach ($comments as $comment) {
+    var_dump($comment);
+}
 --EXPECTF--
-object(bar)#%d (%d) {
+object(Comment)#%d (%d) {
 }
-
 
