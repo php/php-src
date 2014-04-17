@@ -1851,6 +1851,21 @@ ZEND_METHOD(reflection_function, getEndLine)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::hasReturnHint()
+   Checks for the presence of a return hint */
+ZEND_METHOD(reflection_function, hasReturnHint)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_BOOL(fptr->common.return_hint.used);
+}
+/* }}} */
+
 /* {{{ proto public string ReflectionFunction::getDocComment()
    Returns the doc comment for this function */
 ZEND_METHOD(reflection_function, getDocComment)
@@ -5735,6 +5750,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, hasReturnHint, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)
