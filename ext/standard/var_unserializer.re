@@ -400,7 +400,12 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 	
-	object_init_ex(*rval, ce);
+	if (ce->unserialize == NULL) {
+		object_init_ex(*rval, ce);
+	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, elements, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+		return 0;
+	}
+
 	return elements;
 }
 
@@ -411,6 +416,10 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 {
 	zval *retval_ptr = NULL;
 	zval fname;
+
+	if (Z_TYPE_PP(rval) != IS_OBJECT) {
+		return 0;
+	}
 
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, Z_OBJPROP_PP(rval), elements, 1)) {
 		return 0;
