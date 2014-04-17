@@ -3,9 +3,7 @@ Return type where none previously existed
 
 --FILE--
 <?php
-
-class Comment {
-}
+class Comment {}
 
 class CommentsIterator extends ArrayIterator implements Iterator {
     function current() : Comment {
@@ -13,11 +11,7 @@ class CommentsIterator extends ArrayIterator implements Iterator {
     }
 }
 
-
-$comments = new CommentsIterator([
-    new Comment
-]);
-
+$comments = new CommentsIterator([new Comment]);
 foreach ($comments as $comment) {
     var_dump($comment);
 }
