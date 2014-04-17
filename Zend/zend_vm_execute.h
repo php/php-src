@@ -2751,17 +2751,21 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval *expr;
+	zval *expr, *expr_ptr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	expr = opline->op1.zv;
+	expr = expr_ptr = opline->op1.zv;
+	if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
+		ZVAL_DEREF(expr);
+	}
 	if (Z_TYPE_P(expr) == opline->extended_value) {
 		ZVAL_COPY_VALUE(result, expr);
-		if (IS_CONST == IS_CV) {
-			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-		} else if (IS_CONST == IS_CONST) {
+		if (IS_CONST == IS_CONST || expr != expr_ptr) {
 			zval_opt_copy_ctor(result);
+
+		} else if (IS_CONST == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 		}
 
 		CHECK_EXCEPTION();
@@ -7695,17 +7699,21 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr;
+	zval *expr, *expr_ptr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	expr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	expr = expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
+		ZVAL_DEREF(expr);
+	}
 	if (Z_TYPE_P(expr) == opline->extended_value) {
 		ZVAL_COPY_VALUE(result, expr);
-		if (IS_TMP_VAR == IS_CV) {
-			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-		} else if (IS_TMP_VAR == IS_CONST) {
+		if (IS_TMP_VAR == IS_CONST || expr != expr_ptr) {
 			zval_opt_copy_ctor(result);
+
+		} else if (IS_TMP_VAR == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 		}
 
 		CHECK_EXCEPTION();
@@ -12681,17 +12689,21 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr;
+	zval *expr, *expr_ptr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	expr = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	expr = expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
+		ZVAL_DEREF(expr);
+	}
 	if (Z_TYPE_P(expr) == opline->extended_value) {
 		ZVAL_COPY_VALUE(result, expr);
-		if (IS_VAR == IS_CV) {
-			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-		} else if (IS_VAR == IS_CONST) {
+		if (IS_VAR == IS_CONST || expr != expr_ptr) {
 			zval_opt_copy_ctor(result);
+			zval_ptr_dtor_nogc(free_op1.var);
+		} else if (IS_VAR == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 		}
 
 		CHECK_EXCEPTION();
@@ -29197,17 +29209,21 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval *expr;
+	zval *expr, *expr_ptr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	expr = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	expr = expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
+	if (IS_CV == IS_VAR || IS_CV == IS_CV) {
+		ZVAL_DEREF(expr);
+	}
 	if (Z_TYPE_P(expr) == opline->extended_value) {
 		ZVAL_COPY_VALUE(result, expr);
-		if (IS_CV == IS_CV) {
-			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-		} else if (IS_CV == IS_CONST) {
+		if (IS_CV == IS_CONST || expr != expr_ptr) {
 			zval_opt_copy_ctor(result);
+
+		} else if (IS_CV == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 		}
 
 		CHECK_EXCEPTION();

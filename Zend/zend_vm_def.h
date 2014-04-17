@@ -3721,17 +3721,21 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *expr;
+	zval *expr, *expr_ptr;
 	zval *result = EX_VAR(opline->result.var);
 
 	SAVE_OPLINE();
-	expr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	expr = expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
+		ZVAL_DEREF(expr);
+	}
 	if (Z_TYPE_P(expr) == opline->extended_value) {
 		ZVAL_COPY_VALUE(result, expr);
-		if (OP1_TYPE == IS_CV) {
-			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
-		} else if (OP1_TYPE == IS_CONST) {
+		if (OP1_TYPE == IS_CONST || expr != expr_ptr) {
 			zval_opt_copy_ctor(result);
+			FREE_OP1_IF_VAR();
+		} else if (OP1_TYPE == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 		}
 
 		CHECK_EXCEPTION();
