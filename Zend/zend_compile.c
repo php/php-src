@@ -1920,7 +1920,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ */
-void zend_do_function_return_hint(const znode *return_hint TSRMLS_DC) {
+void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
 		
@@ -1930,7 +1930,6 @@ void zend_do_function_return_hint(const znode *return_hint TSRMLS_DC) {
 				CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
 				CG(active_op_array)->return_hint.class_name = zend_new_interned_string
 					(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
-				zval_dtor((zval*)&return_hint->u.constant);
 			} else {
 				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
 			}
@@ -1939,7 +1938,6 @@ void zend_do_function_return_hint(const znode *return_hint TSRMLS_DC) {
 			CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
 			CG(active_op_array)->return_hint.class_name = zend_new_interned_string
 				(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
-			zval_dtor((zval*)&return_hint->u.constant);
 		}
 	}
 } /* }}} */
