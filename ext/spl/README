@@ -4,4 +4,4 @@ code in the file spl.php or in the corresponding .inc file in the examples
 subdirectory. Based on the internal implementations or the files in the 
 examples subdirectory there are also some .php files to experiment with.
 
-For more information look at: http://php.net/~helly/php/ext/spl
+For more information look at: http://php.net/manual/en/book.spl.php
