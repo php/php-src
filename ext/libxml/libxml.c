@@ -589,7 +589,7 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	if (context->memb == NULL) { \
 		add_assoc_null_ex(ctxzv, #memb, sizeof(#memb) - 1); \
 	} else { \
-		add_assoc_string_ex(ctxzv, #memb, sizeof(#memb - 1), \
+		add_assoc_string_ex(ctxzv, #memb, sizeof(#memb) - 1, \
 				(char *)context->memb); \
 	}
 	
