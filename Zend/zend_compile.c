@@ -31,7 +31,7 @@
 #include "zend_language_scanner.h"
 
 #define CONSTANT_EX(op_array, op) \
-	(op_array)->literals[op].constant
+	(op_array)->literals[op]
 
 #define CONSTANT(op) \
 	CONSTANT_EX(CG(active_op_array), op)
@@ -61,7 +61,7 @@
 	} while (0)
 
 #define GET_CACHE_SLOT(literal) do { \
-		CG(active_op_array)->literals[literal].cache_slot = CG(active_op_array)->last_cache_slot++; \
+		Z_CACHE_SLOT(CG(active_op_array)->literals[literal]) = CG(active_op_array)->last_cache_slot++; \
 		if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) && CG(active_op_array)->run_time_cache) { \
 			CG(active_op_array)->run_time_cache = erealloc(CG(active_op_array)->run_time_cache, CG(active_op_array)->last_cache_slot * sizeof(void*)); \
 			CG(active_op_array)->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL; \
@@ -71,7 +71,7 @@
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
 
 #define GET_POLYMORPHIC_CACHE_SLOT(literal) do { \
-		CG(active_op_array)->literals[literal].cache_slot = CG(active_op_array)->last_cache_slot; \
+		Z_CACHE_SLOT(CG(active_op_array)->literals[literal]) = CG(active_op_array)->last_cache_slot; \
 		CG(active_op_array)->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE; \
 		if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) && CG(active_op_array)->run_time_cache) { \
 			CG(active_op_array)->run_time_cache = erealloc(CG(active_op_array)->run_time_cache, CG(active_op_array)->last_cache_slot * sizeof(void*)); \
@@ -81,10 +81,10 @@
 	} while (0)
 
 #define FREE_POLYMORPHIC_CACHE_SLOT(literal) do { \
-		if (CG(active_op_array)->literals[literal].cache_slot != -1 && \
-		    CG(active_op_array)->literals[literal].cache_slot == \
+		if (Z_CACHE_SLOT(CG(active_op_array)->literals[literal]) != -1 && \
+		    Z_CACHE_SLOT(CG(active_op_array)->literals[literal]) == \
 		    CG(active_op_array)->last_cache_slot - POLYMORPHIC_CACHE_SLOT_SIZE) { \
-			CG(active_op_array)->literals[literal].cache_slot = -1; \
+			Z_CACHE_SLOT(CG(active_op_array)->literals[literal]) = -1; \
 			CG(active_op_array)->last_cache_slot -= POLYMORPHIC_CACHE_SLOT_SIZE; \
 		} \
 	} while (0)
@@ -350,7 +350,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int li
 		}
 	}
 	ZVAL_COPY_VALUE(&CONSTANT_EX(op_array, literal_position), zv);
-	op_array->literals[literal_position].cache_slot = -1;
+	Z_CACHE_SLOT(op_array->literals[literal_position]) = -1;
 }
 /* }}} */
 
@@ -365,7 +365,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC) /* {{{ *
 		while (i >= CG(context).literals_size) {
 			CG(context).literals_size += 16; /* FIXME */
 		}
-		op_array->literals = (zend_literal*)erealloc(op_array->literals, CG(context).literals_size * sizeof(zend_literal));
+		op_array->literals = (zval*)erealloc(op_array->literals, CG(context).literals_size * sizeof(zval));
 	}
 	zend_insert_literal(op_array, zv, i TSRMLS_CC);
 	return i;
@@ -378,7 +378,7 @@ int zend_append_individual_literal(zend_op_array *op_array, const zval *zv TSRML
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
-	op_array->literals = (zend_literal*)erealloc(op_array->literals, (i + 1) * sizeof(zend_literal));
+	op_array->literals = (zval*)erealloc(op_array->literals, (i + 1) * sizeof(zval));
 	zend_insert_literal(op_array, zv, i TSRMLS_CC);
 	return i;
 }
@@ -391,8 +391,8 @@ int zend_add_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 	zval c;
 
 	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1].constant == zv &&
-	    op_array->literals[op_array->last_literal - 1].cache_slot == -1) {
+	    &op_array->literals[op_array->last_literal - 1] == zv &&
+	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
 		/* we already have function name as last literal (do nothing) */
 		ret = op_array->last_literal - 1;
 	} else {
@@ -417,8 +417,8 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 	zval c;
 
 	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1].constant == zv &&
-	    op_array->literals[op_array->last_literal - 1].cache_slot == -1) {
+	    &op_array->literals[op_array->last_literal - 1] == zv &&
+	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
 		/* we already have function name as last literal (do nothing) */
 		ret = op_array->last_literal - 1;
 	} else {
@@ -452,8 +452,8 @@ int zend_add_class_name_literal(zend_op_array *op_array, const zval *zv TSRMLS_D
 	zval c;
 
 	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1].constant == zv &&
-	    op_array->literals[op_array->last_literal - 1].cache_slot == -1) {
+	    &op_array->literals[op_array->last_literal - 1] == zv &&
+	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
 		/* we already have function name as last literal (do nothing) */
 		ret = op_array->last_literal - 1;
 	} else {
@@ -486,8 +486,8 @@ int zend_add_const_name_literal(zend_op_array *op_array, const zval *zv, int unq
 	zval c;
 
 	if (op_array->last_literal > 0 &&
-	    &op_array->literals[op_array->last_literal - 1].constant == zv &&
-	    op_array->literals[op_array->last_literal - 1].cache_slot == -1) {
+	    &op_array->literals[op_array->last_literal - 1] == zv &&
+	    Z_CACHE_SLOT(op_array->literals[op_array->last_literal - 1]) == -1) {
 		/* we already have function name as last literal (do nothing) */
 		ret = op_array->last_literal - 1;
 	} else {

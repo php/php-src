@@ -663,7 +663,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, zend_uint a
 	}
 }
 
-static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, const zend_literal *key TSRMLS_DC)
+static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, znode_op *value_op, const zend_execute_data *execute_data, int opcode, zend_uint cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
@@ -744,7 +744,7 @@ static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *p
 			FREE_OP(free_value);
 			return;
 		}
-		Z_OBJ_HT_P(object)->write_property(object, property_name, value, key TSRMLS_CC);
+		Z_OBJ_HT_P(object)->write_property(object, property_name, value, cache_slot TSRMLS_CC);
 	} else {
 		/* Note:  property_name in this case is really the array index! */
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
@@ -1346,7 +1346,7 @@ static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result,
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS TSRMLS_CC);
 }
 
-static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, const zend_literal *key, int type, int is_ref TSRMLS_DC)
+static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, zend_uint cache_slot, int type, int is_ref TSRMLS_DC)
 {
 	zval *container = container_ptr;
 
@@ -1374,10 +1374,10 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 	}
 
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
-		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, key TSRMLS_CC);
+		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, cache_slot TSRMLS_CC);
 		if (NULL == ptr) {
 			if (Z_OBJ_HT_P(container)->read_property &&
-				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key, result TSRMLS_CC)) != NULL) {
+				(ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result TSRMLS_CC)) != NULL) {
 				if (ptr != result) {
 					if (is_ref && ptr != &EG(uninitialized_zval)) {
 						SEPARATE_ZVAL_TO_MAKE_IS_REF(ptr);
@@ -1398,7 +1398,7 @@ static void zend_fetch_property_address(zval *result, zval *container_ptr, zval 
 			}
 		}
 	} else if (Z_OBJ_HT_P(container)->read_property) {
-		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, key, result TSRMLS_CC);
+		zval *ptr = Z_OBJ_HT_P(container)->read_property(container, prop_ptr, type, cache_slot, result TSRMLS_CC);
 		if (ptr != result) {
 			if (is_ref && ptr != &EG(uninitialized_zval)) {
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(ptr);

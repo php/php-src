@@ -653,7 +653,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 }
 /* }}} */
 
-zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend_string *method, const struct _zend_literal *key TSRMLS_DC) /* {{{ */
+zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend_string *method, const zval *key TSRMLS_DC) /* {{{ */
 {
 	spl_filesystem_object *fsobj = spl_filesystem_from_obj(*object);
 	

@@ -310,7 +310,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_r
 }
 /* }}} */
 
-static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
 	zend_string *member_str = zval_get_string(member TSRMLS_CC);
@@ -318,7 +318,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, cons
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, key TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot TSRMLS_CC);
 	}
 
 	STR_RELEASE(member_str);
@@ -327,7 +327,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, cons
 /* }}} */
 
 /* {{{ dom_read_property */
-zval *dom_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC)
+zval *dom_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
 	zend_string *member_str = zval_get_string(member TSRMLS_CC);
@@ -349,7 +349,7 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 		}
 	} else {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, key, rv TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, cache_slot, rv TSRMLS_CC);
 	}
 
 	STR_RELEASE(member_str);
@@ -358,7 +358,7 @@ zval *dom_read_property(zval *object, zval *member, int type, const zend_literal
 /* }}} */
 
 /* {{{ dom_write_property */
-void dom_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
+void dom_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
 	zend_string *member_str = zval_get_string(member TSRMLS_CC);
@@ -371,7 +371,7 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 		hnd->write_func(obj, value TSRMLS_CC);
 	} else {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, key TSRMLS_CC);
+		std_hnd->write_property(object, member, value, cache_slot TSRMLS_CC);
 	}
 
 	STR_RELEASE(member_str);
@@ -379,7 +379,7 @@ void dom_write_property(zval *object, zval *member, zval *value, const zend_lite
 /* }}} */
 
 /* {{{ dom_property_exists */
-static int dom_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
+static int dom_property_exists(zval *object, zval *member, int check_empty, zend_uint cache_slot TSRMLS_DC)
 {
 	dom_object *obj = Z_DOMOBJ_P(object);
 	zend_string *member_str = zval_get_string(member TSRMLS_CC);
@@ -404,7 +404,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, cons
 		}
 	} else {
 		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty, key TSRMLS_CC);
+		retval = std_hnd->has_property(object, member, check_empty, cache_slot TSRMLS_CC);
 	}
 
 	STR_RELEASE(member_str);
@@ -437,7 +437,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 	ZVAL_STRING(&object_value, "(object value omitted)");
 
 	for (zend_hash_internal_pointer_reset_ex(prop_handlers, &pos);
-			entry = zend_hash_get_current_data_ptr_ex(prop_handlers, &pos);
+			(entry = zend_hash_get_current_data_ptr_ex(prop_handlers, &pos)) != NULL;
 			zend_hash_move_forward_ex(prop_handlers, &pos)) {
 		zval value;
 		zend_string *string_key;

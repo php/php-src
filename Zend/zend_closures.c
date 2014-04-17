@@ -152,7 +152,7 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zend_function *zend_closure_get_method(zend_object **object, zend_string *method, const zval *key TSRMLS_DC) /* {{{ */
 {
 	zend_string *lc_name;
 
@@ -169,27 +169,27 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 }
 /* }}} */
 
-static zval *zend_closure_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC) /* {{{ */
+static zval *zend_closure_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return &EG(uninitialized_zval);
 }
 /* }}} */
 
-static void zend_closure_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void zend_closure_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }
 /* }}} */
 
-static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
 }
 /* }}} */
 
-static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
+static int zend_closure_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	if (has_set_exists != 2) {
 		ZEND_CLOSURE_PROPERTY_ERROR();
@@ -198,7 +198,7 @@ static int zend_closure_has_property(zval *object, zval *member, int has_set_exi
 }
 /* }}} */
 
-static void zend_closure_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void zend_closure_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 }

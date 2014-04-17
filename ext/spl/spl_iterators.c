@@ -828,7 +828,7 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 	}
 } /* }}} */
 
-static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_string *method, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_string *method, const zval *key TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
 	spl_recursive_it_object *object = spl_recursive_it_from_obj(*zobject);
@@ -1272,7 +1272,7 @@ static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_
 }
 #endif
 
-static union _zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_dual_it_get_method(zend_object **object, zend_string *method, const zval *key TSRMLS_DC)
 {
 	union _zend_function *function_handler;
 	spl_dual_it_object   *intern;

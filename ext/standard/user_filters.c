@@ -248,7 +248,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, -1 TSRMLS_CC);
 	zval_ptr_dtor(&zpropname);
 
 	zval_ptr_dtor(&args[3]);

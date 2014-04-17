@@ -1005,7 +1005,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_literal *key, int use_autoload TSRMLS_DC) /* {{{ */
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
 	zval args[1];
@@ -1016,7 +1016,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_li
 	zend_fcall_info_cache fcall_cache;
 
 	if (key) {
-		lc_name = Z_STR(key->constant);
+		lc_name = Z_STR_P(key);
 	} else {
 		if (name == NULL || !name->len) {
 			return NULL;
@@ -1248,10 +1248,10 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 
 	while (opline<end) {
 		if (opline->op1_type == IS_CONST) {
-			opline->op1.zv = &CG(active_op_array)->literals[opline->op1.constant].constant;
+			opline->op1.zv = &CG(active_op_array)->literals[opline->op1.constant];
 		}
 		if (opline->op2_type == IS_CONST) {
-			opline->op2.zv = &CG(active_op_array)->literals[opline->op2.constant].constant;
+			opline->op2.zv = &CG(active_op_array)->literals[opline->op2.constant];
 		}
 		switch (opline->opcode) {
 			case ZEND_GOTO:
@@ -1560,7 +1560,7 @@ check_fetch_type:
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;

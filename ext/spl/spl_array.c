@@ -845,35 +845,35 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 }
 /* }}} */
 
-static zval *spl_array_read_property(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC) /* {{{ */
+static zval *spl_array_read_property(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
+		&& !std_object_handlers.has_property(object, member, 2, cache_slot TSRMLS_CC)) {
 		return spl_array_read_dimension(object, member, type, rv TSRMLS_CC);
 	}
-	return std_object_handlers.read_property(object, member, type, key, rv TSRMLS_CC);
+	return std_object_handlers.read_property(object, member, type, cache_slot, rv TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void spl_array_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-	&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
+	&& !std_object_handlers.has_property(object, member, 2, cache_slot TSRMLS_CC)) {
 		spl_array_write_dimension(object, member, value TSRMLS_CC);
 		return;
 	}
-	std_object_handlers.write_property(object, member, value, key TSRMLS_CC);
+	std_object_handlers.write_property(object, member, value, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
+		&& !std_object_handlers.has_property(object, member, 2, cache_slot TSRMLS_CC)) {
 		return spl_array_get_dimension_ptr(1, object, member, type TSRMLS_CC);
 	}
 	//!!! FIXME
@@ -881,28 +881,28 @@ static zval *spl_array_get_property_ptr_ptr(zval *object, zval *member, int type
 	return NULL;
 } /* }}} */
 
-static int spl_array_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
+static int spl_array_has_property(zval *object, zval *member, int has_set_exists, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
+		&& !std_object_handlers.has_property(object, member, 2, cache_slot TSRMLS_CC)) {
 		return spl_array_has_dimension(object, member, has_set_exists TSRMLS_CC);
 	}
-	return std_object_handlers.has_property(object, member, has_set_exists, key TSRMLS_CC);
+	return std_object_handlers.has_property(object, member, has_set_exists, cache_slot TSRMLS_CC);
 } /* }}} */
 
-static void spl_array_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void spl_array_unset_property(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if ((intern->ar_flags & SPL_ARRAY_ARRAY_AS_PROPS) != 0
-		&& !std_object_handlers.has_property(object, member, 2, key TSRMLS_CC)) {
+		&& !std_object_handlers.has_property(object, member, 2, cache_slot TSRMLS_CC)) {
 		spl_array_unset_dimension(object, member TSRMLS_CC);
 		spl_array_rewind(intern TSRMLS_CC); /* because deletion might invalidate position */
 		return;
 	}
-	std_object_handlers.unset_property(object, member, key TSRMLS_CC);
+	std_object_handlers.unset_property(object, member, cache_slot TSRMLS_CC);
 } /* }}} */
 
 static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */

@@ -1205,7 +1205,7 @@ ZEND_FUNCTION(property_exists)
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
 		Z_OBJ_HANDLER_P(object, has_property) && 
-		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, 0 TSRMLS_CC)) {
+		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, -1 TSRMLS_CC)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;

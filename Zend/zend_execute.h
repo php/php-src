@@ -41,7 +41,7 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC);
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_literal *key, int use_autoload TSRMLS_DC);
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
@@ -302,7 +302,7 @@ ZEND_API void zend_set_timeout(long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type TSRMLS_DC);
-ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zend_literal *key, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32

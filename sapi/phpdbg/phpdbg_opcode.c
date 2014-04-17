@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
+static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zval *literal TSRMLS_DC) /* {{{ */
 {
 	int iter = 0;
 
@@ -64,7 +64,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint
 		} break;
 
 		case IS_CONST:
-			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->literal TSRMLS_CC));
+			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->zv TSRMLS_CC));
 		break;
 
 		case IS_UNUSED:

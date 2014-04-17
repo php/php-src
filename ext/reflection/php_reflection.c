@@ -44,7 +44,7 @@
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
 		ZVAL_STRINGL(&member, name, sizeof(name)-1); \
-		zend_std_write_property(object, &member, value, NULL TSRMLS_CC); \
+		zend_std_write_property(object, &member, value, -1 TSRMLS_CC); \
 		if (Z_REFCOUNTED_P(value)) Z_DELREF_P(value); \
 		zval_ptr_dtor(&member); \
 	} while (0)
@@ -3430,7 +3430,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	prop = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
+	prop = zend_std_get_static_property(ce, name, 1, -1 TSRMLS_CC);
 	if (!prop) {
 		if (def_value) {
 			RETURN_ZVAL(def_value, 1, 0);
@@ -3463,7 +3463,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce TSRMLS_CC);
-	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
+	variable_ptr = zend_std_get_static_property(ce, name, 1, -1 TSRMLS_CC);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
@@ -3816,7 +3816,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF && Z_OBJ_HANDLER(intern->obj, has_property)) {
 			ZVAL_STR(&property, STR_COPY(name));
-			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, 0 TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, -1 TSRMLS_CC)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
@@ -6068,7 +6068,7 @@ const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 static zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
-static void _reflection_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
+static void _reflection_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))
@@ -6080,7 +6080,7 @@ static void _reflection_write_property(zval *object, zval *member, zval *value, 
 	}
 	else
 	{
-		zend_std_obj_handlers->write_property(object, member, value, key TSRMLS_CC);
+		zend_std_obj_handlers->write_property(object, member, value, cache_slot TSRMLS_CC);
 	}
 }
 /* }}} */

@@ -274,7 +274,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						ce = op_array->scope;
 					} else { 
 						if ((ce = zend_hash_find_ptr(EG(class_table), 
-								Z_STR(op_array->literals[opline->op1.constant + 1].constant))) == NULL ||
+								Z_STR(op_array->literals[opline->op1.constant + 1]))) == NULL ||
 								(ce->type == ZEND_INTERNAL_CLASS &&
 								 ce->info.internal.module->type != MODULE_PERSISTENT) ||
 								(ce->type == ZEND_USER_CLASS &&

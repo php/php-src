@@ -270,7 +270,7 @@ ZEND_API void zend_object_proxy_set(zval *property, zval *value TSRMLS_DC)
 	zend_proxy_object *probj = (zend_proxy_object*)Z_OBJ_P(property);
 
 	if (Z_OBJ_HT(probj->object) && Z_OBJ_HT(probj->object)->write_property) {
-		Z_OBJ_HT(probj->object)->write_property(&probj->object, &probj->property, value, 0 TSRMLS_CC);
+		Z_OBJ_HT(probj->object)->write_property(&probj->object, &probj->property, value, -1 TSRMLS_CC);
 	} else {
 		zend_error(E_WARNING, "Cannot write property of object - no write handler defined");
 	}
@@ -281,7 +281,7 @@ ZEND_API zval* zend_object_proxy_get(zval *property TSRMLS_DC)
 	zend_proxy_object *probj = (zend_proxy_object*)Z_OBJ_P(property);
 
 	if (Z_OBJ_HT(probj->object) && Z_OBJ_HT(probj->object)->read_property) {
-		return Z_OBJ_HT(probj->object)->read_property(&probj->object, &probj->property, BP_VAR_R, 0, NULL TSRMLS_CC);
+		return Z_OBJ_HT(probj->object)->read_property(&probj->object, &probj->property, BP_VAR_R, -1, NULL TSRMLS_CC);
 	} else {
 		zend_error(E_WARNING, "Cannot read property of object - no read handler defined");
 	}

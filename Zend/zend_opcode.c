@@ -364,8 +364,8 @@ void zend_class_add_ref(zval *zv)
 
 ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_literal *literal = op_array->literals;
-	zend_literal *end;
+	zval *literal = op_array->literals;
+	zval *end;
 	zend_uint i;
 
 	if (op_array->static_variables) {
@@ -395,7 +395,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	if (literal) {
 	 	end = literal + op_array->last_literal;
 	 	while (literal < end) {
-			zval_dtor(&literal->constant);
+			zval_dtor(literal);
 			literal++;
 		}
 		efree(op_array->literals);
@@ -638,7 +638,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				int nest_levels, array_offset;
 				zend_brk_cont_element *jmp_to;
 
-				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant].constant);
+				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant]);
 				array_offset = opline->op1.opline_num;
 				do {
 					jmp_to = &op_array->brk_cont_array[array_offset];
@@ -650,9 +650,9 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 				break;
 			}
 			case ZEND_GOTO:
-				if (Z_TYPE(op_array->literals[opline->op2.constant].constant) != IS_LONG) {
+				if (Z_TYPE(op_array->literals[opline->op2.constant]) != IS_LONG) {
 					zend_uint num = opline->op2.constant;
-					opline->op2.zv = &op_array->literals[opline->op2.constant].constant;
+					opline->op2.zv = &op_array->literals[opline->op2.constant];
 					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
 					opline->op2.constant = num;					
 				}
@@ -695,19 +695,19 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		CG(context).opcodes_size = op_array->last;
 	}
 	if (!(op_array->fn_flags & ZEND_ACC_INTERACTIVE) && CG(context).literals_size != op_array->last_literal) {
-		op_array->literals = (zend_literal*)erealloc(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
+		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
-			opline->op1.zv = &op_array->literals[opline->op1.constant].constant;
+			opline->op1.zv = &op_array->literals[opline->op1.constant];
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op1.var = (zend_uint)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
-			opline->op2.zv = &op_array->literals[opline->op2.constant].constant;
+			opline->op2.zv = &op_array->literals[opline->op2.constant];
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op2.var = (zend_uint)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op2.var);
 		}

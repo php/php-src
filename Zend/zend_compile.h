@@ -65,11 +65,6 @@ typedef struct _zend_compiler_context {
 	HashTable *labels;
 } zend_compiler_context;
 
-typedef struct _zend_literal {
-	zval       constant;
-	zend_uint  cache_slot;
-} zend_literal;
-
 typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
@@ -78,7 +73,6 @@ typedef union _znode_op {
 	zend_uint      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
-	zend_literal  *literal;
 	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
@@ -294,7 +288,7 @@ struct _zend_op_array {
 	zend_string *doc_comment;
 	zend_uint early_binding; /* the linked list of delayed declarations */
 
-	zend_literal *literals;
+	zval *literals;
 	int last_literal;
 
 	void **run_time_cache;

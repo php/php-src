@@ -440,28 +440,28 @@ finish:
 	return zend_get_constant(name, name_len, result TSRMLS_CC);
 }
 
-zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC)
+zend_constant *zend_quick_get_constant(const zval *key, ulong flags TSRMLS_DC)
 {
 	zend_constant *c;
 
-	if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR(key->constant))) == NULL) {
+	if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL) {
 		key++;
-		if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR(key->constant))) == NULL ||
+		if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL ||
 		    (c->flags & CONST_CS) != 0) {
 			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
 				key++;
-				if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR(key->constant))) == NULL) {
+				if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL) {
 				    key++;
-					if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR(key->constant))) == NULL ||
+					if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL ||
 					    (c->flags & CONST_CS) != 0) {
 
 						key--;
-						c = zend_get_special_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant) TSRMLS_CC);
+						c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key) TSRMLS_CC);
 					}
 				}
 			} else {
 				key--;
-				c = zend_get_special_constant(Z_STRVAL(key->constant), Z_STRLEN(key->constant) TSRMLS_CC);
+				c = zend_get_special_constant(Z_STRVAL_P(key), Z_STRLEN_P(key) TSRMLS_CC);
 			}
 		}
 	}
