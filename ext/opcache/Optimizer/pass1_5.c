@@ -102,7 +102,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 
-				replace_tmp_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
+				if (opline->result_type == IS_TMP_VAR) {
+					replace_tmp_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
+				} else /* if (opline->result_type == IS_VAR) */ {
+					replace_var_by_const(op_array, opline + 1, tv, &res TSRMLS_CC);
+				}
 			} else if (opline->extended_value == IS_BOOL) {
 				/* T = CAST(X, IS_BOOL) => T = BOOL(X) */
 				opline->opcode = ZEND_BOOL;
