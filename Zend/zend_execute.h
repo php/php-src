@@ -346,20 +346,37 @@ void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC);
 void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 
 #define CACHED_PTR(num) \
-	EG(active_op_array)->run_time_cache[(num)]
+	EX(run_time_cache)[(num)]
 
 #define CACHE_PTR(num, ptr) do { \
-		EG(active_op_array)->run_time_cache[(num)] = (ptr); \
+		EX(run_time_cache)[(num)] = (ptr); \
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR(num, ce) \
-	((EG(active_op_array)->run_time_cache[(num)] == (ce)) ? \
-		EG(active_op_array)->run_time_cache[(num) + 1] : \
+	((EX(run_time_cache)[(num)] == (ce)) ? \
+		EX(run_time_cache)[(num) + 1] : \
 		NULL)
 
 #define CACHE_POLYMORPHIC_PTR(num, ce, ptr) do { \
-		EG(active_op_array)->run_time_cache[(num)] = (ce); \
-		EG(active_op_array)->run_time_cache[(num) + 1] = (ptr); \
+		EX(run_time_cache)[(num)] = (ce); \
+		EX(run_time_cache)[(num) + 1] = (ptr); \
+	} while (0)
+
+#define CACHED_PTR_EX(op_array, num) \
+	(op_array)->run_time_cache[(num)]
+
+#define CACHE_PTR_EX(op_array, num, ptr) do { \
+		(op_array)->run_time_cache[(num)] = (ptr); \
+	} while (0)
+
+#define CACHED_POLYMORPHIC_PTR_EX(op_array, num, ce) \
+	(((op_array)->run_time_cache[(num)] == (ce)) ? \
+		(op_array)->run_time_cache[(num) + 1] : \
+		NULL)
+
+#define CACHE_POLYMORPHIC_PTR_EX(op_array, num, ce, ptr) do { \
+		(op_array)->run_time_cache[(num)] = (ce); \
+		(op_array)->run_time_cache[(num) + 1] = (ptr); \
 	} while (0)
 
 END_EXTERN_C()

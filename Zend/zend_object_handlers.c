@@ -271,7 +271,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 
-	if (cache_slot != -1 && (property_info = CACHED_POLYMORPHIC_PTR(cache_slot, ce)) != NULL) {
+	if (cache_slot != -1 && (property_info = CACHED_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce)) != NULL) {
 		return property_info;
 	}
 
@@ -303,7 +303,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 					}
 					if (cache_slot != -1) {
-						CACHE_POLYMORPHIC_PTR(cache_slot, ce, property_info);
+						CACHE_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce, property_info);
 					}
 					return property_info;
 				}
@@ -319,7 +319,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		&& (scope_property_info = zend_hash_find_ptr(&EG(scope)->properties_info, member)) != NULL
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
 		if (cache_slot != -1) {
-			CACHE_POLYMORPHIC_PTR(cache_slot, ce, scope_property_info);
+			CACHE_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce, scope_property_info);
 		}
 		return scope_property_info;
 	} else if (property_info) {
@@ -332,7 +332,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		} else {
 			/* fall through, return property_info... */
 			if (cache_slot != -1) {
-				CACHE_POLYMORPHIC_PTR(cache_slot, ce, property_info);
+				CACHE_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce, property_info);
 			}
 		}
 	} else {
@@ -1242,7 +1242,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 	zend_property_info *property_info;
 
 	if (UNEXPECTED(cache_slot == -1) ||
-	    (property_info = CACHED_POLYMORPHIC_PTR(cache_slot, ce)) == NULL) {
+	    (property_info = CACHED_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce)) == NULL) {
 
 		if (UNEXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, property_name)) == NULL)) {
 			if (!silent) {
@@ -1268,7 +1268,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		zend_update_class_constants(ce TSRMLS_CC);
 
 		if (EXPECTED(cache_slot != -1)) {
-			CACHE_POLYMORPHIC_PTR(cache_slot, ce, property_info);
+			CACHE_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce, property_info);
 		}
 	}
 

@@ -368,6 +368,7 @@ typedef struct _call_slot {
 
 struct _zend_execute_data {
 	struct _zend_op *opline;
+	void **run_time_cache;
 	zend_function_state function_state;
 	zend_op_array *op_array;
 	zend_object *object;

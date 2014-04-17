@@ -1657,6 +1657,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
+	EX(run_time_cache) = op_array->run_time_cache;
 
 	if (EG(active_symbol_table)) {
 		zend_attach_symbol_table(TSRMLS_C);
