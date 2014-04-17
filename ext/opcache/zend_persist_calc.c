@@ -218,7 +218,6 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 		}
 	}
 	
-	ADD_DUP_SIZE(&op_array->return_hint, sizeof(zend_return_hint));
 	if (op_array->return_hint.used && op_array->return_hint.type == IS_OBJECT) {
 		ADD_INTERNED_STRING(op_array->return_hint.class_name, op_array->return_hint.class_name_len + 1);
 	}
