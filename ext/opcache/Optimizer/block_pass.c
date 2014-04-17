@@ -785,20 +785,23 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          * IS_EQ(FALSE, X)     => BOOL_NOT(X)
          * IS_NOT_EQ(TRUE, X)  => BOOL_NOT(X)
          * IS_NOT_EQ(FALSE, X) => BOOL(X)
+         * CASE(TRUE, X)       => BOOL(X)
+         * CASE(FALSE, X)      => BOOL_NOT(X)
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
-			opline->opcode == ZEND_IS_NOT_EQUAL) {
+			opline->opcode == ZEND_IS_NOT_EQUAL ||
+			opline->opcode == ZEND_CASE) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 					   Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				SET_UNUSED(opline->op2);
 			}
