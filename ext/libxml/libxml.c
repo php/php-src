@@ -1152,7 +1152,7 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		if ((export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name))  == SUCCESS) {
+		if ((export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name))) {
 			node = export_hnd->export_func(object TSRMLS_CC);
 		}
 	}
