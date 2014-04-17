@@ -59,6 +59,9 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
 
+- Standard:
+  . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
+
 - Apache2 Handler SAPI:
   . Fixed Apache log issue caused by APR's lack of support for %zu
     (APR issue https://issues.apache.org/bugzilla/show_bug.cgi?id=56120).
