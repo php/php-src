@@ -2588,31 +2588,31 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 static inline void zend_return_hint_check(zend_execute_data *execute_data, zval *retval_ptr TSRMLS_DC) {
 	zend_return_hint *return_hint = &EX(function_state).function->common.return_hint;
 
-	if (!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL) {
+	if (UNEXPECTED(!retval_ptr || Z_TYPE_P(retval_ptr) == IS_NULL)) {
 		zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 	} else if (retval_ptr){
 		switch (return_hint->type) {
-			case IS_ARRAY: if (Z_TYPE_P(retval_ptr) != IS_ARRAY) {
+			case IS_ARRAY: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_ARRAY)) {
 				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 			} break;
 
-			case IS_CALLABLE: if (Z_TYPE_P(retval_ptr) != IS_OBJECT ||
-				!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC)) {
+			case IS_CALLABLE: if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT ||
+				!zend_is_callable_ex(retval_ptr, NULL, IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL, NULL TSRMLS_CC))) {
 				zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 			} break;
 
 			case IS_OBJECT: {
 				zend_class_entry **ce = NULL;
 
-				if (Z_TYPE_P(retval_ptr) != IS_OBJECT) {
+				if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 				}
 
-				if (zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS) {
+				if (UNEXPECTED(zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
 				}
 
-				if (!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC)) {
+				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC))) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
 				}
 			}
@@ -2629,8 +2629,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	SAVE_OPLINE();
 	retval_ptr = opline->op1.zv;
 
-	if (EX(function_state).function->common.return_hint.used)
+	if (EX(function_state).function->common.return_hint.used) {
 		zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 
@@ -2683,8 +2684,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 
 			retval_ptr = opline->op1.zv;
 
-			if (EX(function_state).function->common.return_hint.used)
+			if (EX(function_state).function->common.return_hint.used) {
 				zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+			}
 
 			if (!EG(return_value_ptr_ptr)) {
 				if (IS_CONST == IS_TMP_VAR) {
@@ -2709,8 +2711,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 
 		retval_ptr_ptr = NULL;
 
-		if (EX(function_state).function->common.return_hint.used)
+		if (EX(function_state).function->common.return_hint.used) {
 			zend_return_hint_check(execute_data, *retval_ptr_ptr TSRMLS_CC);
+		}
 
 		if (IS_CONST == IS_VAR && UNEXPECTED(retval_ptr_ptr == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
@@ -7998,8 +8001,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (EX(function_state).function->common.return_hint.used)
+	if (EX(function_state).function->common.return_hint.used) {
 		zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 		zval_dtor(free_op1.var);
@@ -8052,8 +8056,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 
 			retval_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-			if (EX(function_state).function->common.return_hint.used)
+			if (EX(function_state).function->common.return_hint.used) {
 				zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+			}
 
 			if (!EG(return_value_ptr_ptr)) {
 				if (IS_TMP_VAR == IS_TMP_VAR) {
@@ -8078,8 +8083,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 
 		retval_ptr_ptr = NULL;
 
-		if (EX(function_state).function->common.return_hint.used)
+		if (EX(function_state).function->common.return_hint.used) {
 			zend_return_hint_check(execute_data, *retval_ptr_ptr TSRMLS_CC);
+		}
 
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(retval_ptr_ptr == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
@@ -13267,8 +13273,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (EX(function_state).function->common.return_hint.used)
+	if (EX(function_state).function->common.return_hint.used) {
 		zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 		zval_ptr_dtor_nogc(&free_op1.var);
@@ -13321,8 +13328,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 			retval_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-			if (EX(function_state).function->common.return_hint.used)
+			if (EX(function_state).function->common.return_hint.used) {
 				zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+			}
 
 			if (!EG(return_value_ptr_ptr)) {
 				if (IS_VAR == IS_TMP_VAR) {
@@ -13347,8 +13355,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 		retval_ptr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-		if (EX(function_state).function->common.return_hint.used)
+		if (EX(function_state).function->common.return_hint.used) {
 			zend_return_hint_check(execute_data, *retval_ptr_ptr TSRMLS_CC);
+		}
 
 		if (IS_VAR == IS_VAR && UNEXPECTED(retval_ptr_ptr == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
@@ -30891,8 +30900,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (EX(function_state).function->common.return_hint.used)
+	if (EX(function_state).function->common.return_hint.used) {
 		zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+	}
 
 	if (!EG(return_value_ptr_ptr)) {
 
@@ -30945,8 +30955,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 			retval_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
-			if (EX(function_state).function->common.return_hint.used)
+			if (EX(function_state).function->common.return_hint.used) {
 				zend_return_hint_check(execute_data, retval_ptr TSRMLS_CC);
+			}
 
 			if (!EG(return_value_ptr_ptr)) {
 				if (IS_CV == IS_TMP_VAR) {
@@ -30971,8 +30982,9 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 		retval_ptr_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 
-		if (EX(function_state).function->common.return_hint.used)
+		if (EX(function_state).function->common.return_hint.used) {
 			zend_return_hint_check(execute_data, *retval_ptr_ptr TSRMLS_CC);
+		}
 
 		if (IS_CV == IS_VAR && UNEXPECTED(retval_ptr_ptr == NULL)) {
 			zend_error_noreturn(E_ERROR, "Cannot return string offsets by reference");
