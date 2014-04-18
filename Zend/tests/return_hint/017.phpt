@@ -6,28 +6,19 @@ Fully qualified classes in trait return types
 
 namespace FooSpace;
 
-use ArrayIterator;
-
 trait Fooable {
-    function foo(array $data): \Iterator {
-        return new ArrayIterator($data);
+    function foo(): \Iterator {
+        return new \EmptyIterator();
     }
 }
 
 class Foo {
-
     use Fooable;
-
-
 }
 
 $foo = new Foo;
 var_dump($foo->foo([]));
 
-
 --EXPECTF--
-object(ArrayIterator)#%d (%d) {
-  ["storage":"ArrayIterator":private]=>
-  array(0) {
-  }
+object(EmptyIterator)#%d (%d) {
 }
