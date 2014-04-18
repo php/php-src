@@ -34,9 +34,8 @@ Stack trace:
 
 exception 'Exception' with message 'Unserialization of 'Generator' is not allowed' in %s:%d
 Stack trace:
-#0 [internal function]: Generator->__wakeup()
-#1 %s(%d): unserialize('O:9:"Generator"...')
-#2 {main}
+#0 %s(%d): unserialize('O:9:"Generator"...')
+#1 {main}
 
 exception 'Exception' with message 'Unserialization of 'Generator' is not allowed' in %s:%d
 Stack trace:
