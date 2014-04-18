@@ -1,5 +1,5 @@
 --TEST--
-Full qualified classes in trait return types
+Fully qualified classes in trait return types
 
 --FILE--
 <?php
@@ -26,3 +26,8 @@ var_dump($foo->foo([]));
 
 
 --EXPECTF--
+object(ArrayIterator)#%d (%d) {
+  ["storage":"ArrayIterator":private]=>
+  array(0) {
+  }
+}
