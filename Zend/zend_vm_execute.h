@@ -386,8 +386,9 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
 
-	if ((nested && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) ||
-	    EG(active_symbol_table) == &EG(symbol_table)) {
+	if ((EX(prev_execute_data) && EX(prev_execute_data)->opline
+	     && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL)
+	    || EG(active_symbol_table) == &EG(symbol_table)) {
 		zend_detach_symbol_table(TSRMLS_C);
 	}
 
@@ -2929,6 +2930,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);
 		}
+
+		zend_attach_symbol_table(TSRMLS_C);
 
 		EX(function_state).function = (zend_function *) EX(op_array);
 
@@ -7877,6 +7880,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);
 		}
+
+		zend_attach_symbol_table(TSRMLS_C);
 
 		EX(function_state).function = (zend_function *) EX(op_array);
 
@@ -12867,6 +12872,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);
 		}
+
+		zend_attach_symbol_table(TSRMLS_C);
 
 		EX(function_state).function = (zend_function *) EX(op_array);
 
@@ -29387,6 +29394,8 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);
 		}
+
+		zend_attach_symbol_table(TSRMLS_C);
 
 		EX(function_state).function = (zend_function *) EX(op_array);
 
