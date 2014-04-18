@@ -6,8 +6,7 @@ Bug #67072 Echoing unserialized "SplFileObject" crash
 ?>
 ===DONE==
 --EXPECTF--
-Fatal error: Uncaught exception 'Exception' with message 'Unserialization of 'SplFileObject' is not allowed' in %sbug67072.php:2
-Stack trace:
-#0 %sbug67072.php(2): unserialize('O:13:"SplFileOb...')
-#1 {main}
-  thrown in %sbug67072.php on line 2
+Warning: Erroneous data format for unserializing 'SplFileObject' in %sbug67072.php on line %d
+
+Notice: unserialize(): Error at offset 24 of 64 bytes in %sbug67072.php on line %d
+===DONE==
