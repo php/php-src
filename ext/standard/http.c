@@ -33,7 +33,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 {
 	zend_string *key = NULL;
 	char *newprefix, *p, *prop_name;
-	int arg_sep_len, key_type, newprefix_len, prop_len;
+	int arg_sep_len, newprefix_len, prop_len;
 	ulong idx;
 	zval *zdata = NULL, copyzval;
 
@@ -54,10 +54,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	for (zend_hash_internal_pointer_reset(ht);
-		(key_type = zend_hash_get_current_key(ht, &key, &idx, 0)) != HASH_KEY_NON_EXISTENT;
-		zend_hash_move_forward(ht)
-	) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, idx, key, zdata) {
 		/* handling for private & protected object properties */
 		if (key) {
 			if (key->val[0] == '\0' && type != NULL) {
@@ -78,18 +75,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			prop_len = 0;
 		}
 
-		if ((zdata = zend_hash_get_current_data(ht)) == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
-			return FAILURE;
-		}
-		if (Z_TYPE_P(zdata) == IS_INDIRECT) {
-			zdata = Z_INDIRECT_P(zdata);
-			if (Z_TYPE_P(zdata) == IS_UNDEF) {
-				continue;
-			}
-		}
 		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
-			if (key_type == HASH_KEY_IS_STRING) {
+			if (key) {
 				zend_string *ekey;
 				if (enc_type == PHP_QUERY_RFC3986) {
 					ekey = php_raw_url_encode(prop_name, prop_len);
@@ -160,7 +147,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			}
 			/* Simple key=value */
 			smart_str_appendl(formstr, key_prefix, key_prefix_len);
-			if (key_type == HASH_KEY_IS_STRING) {
+			if (key) {
 				zend_string *ekey;
 				if (enc_type == PHP_QUERY_RFC3986) {
 					ekey = php_raw_url_encode(prop_name, prop_len);
@@ -230,7 +217,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					}
 			}
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
 }

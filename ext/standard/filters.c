@@ -258,17 +258,14 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 	
 	if (filterparams != NULL) {
 		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
-			HashPosition pos;
 			zval *tmp;
 
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(filterparams), &pos);
-			while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(filterparams), &pos)) != NULL) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
 				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
-				zend_hash_move_forward_ex(Z_ARRVAL_P(filterparams), &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);
 		} else {
 			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */

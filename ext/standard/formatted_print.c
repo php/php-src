@@ -404,12 +404,10 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 		newargs = (zval *)safe_emalloc(argc, sizeof(zval), 0);
 		ZVAL_COPY_VALUE(&newargs[0], z_format);
 		
-		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(array));
-			 (zv = zend_hash_get_current_data(Z_ARRVAL_P(array))) != NULL;
-			 zend_hash_move_forward(Z_ARRVAL_P(array))) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), zv) {
 			ZVAL_COPY_VALUE(&newargs[i], zv);
 			i++;
-		}
+		} ZEND_HASH_FOREACH_END();
 		args = newargs;
 		format_offset = 0;
 	}

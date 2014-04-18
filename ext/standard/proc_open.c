@@ -85,7 +85,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	uint cnt, l, sizeenv=0, el_len;
 	ulong num_key;
 	HashTable *target_hash;
-	HashPosition pos;
 
 	memset(&env, 0, sizeof(env));
 
@@ -109,10 +108,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	}
 
 	/* first, we have to get the size of all the elements in the hash */
-	for (zend_hash_internal_pointer_reset_ex(target_hash, &pos);
-			(element = zend_hash_get_current_data_ex(target_hash, &pos)) != NULL;
-			zend_hash_move_forward_ex(target_hash, &pos)) {
-
+	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
 		convert_to_string_ex(element);
 		el_len = Z_STRLEN_P(element);
 		if (el_len == 0) {
@@ -121,25 +117,20 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 
 		sizeenv += el_len+1;
 
-		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &num_key, 0, &pos)) {
-			case HASH_KEY_IS_STRING:
-				if (string_key->len == 0) {
-					continue;
-				}
-				sizeenv += string_key->len + 2;
-				break;
+		if (string_key) {
+			if (string_key->len == 0) {
+				continue;
+			}
+			sizeenv += string_key->len + 2;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 #ifndef PHP_WIN32
 	ep = env.envarray = (char **) pecalloc(cnt + 1, sizeof(char *), is_persistent);
 #endif
 	p = env.envp = (char *) pecalloc(sizeenv + 4, 1, is_persistent);
 
-	for (zend_hash_internal_pointer_reset_ex(target_hash, &pos);
-			(element = zend_hash_get_current_data_ex(target_hash, &pos)) != NULL;
-			zend_hash_move_forward_ex(target_hash, &pos)) {
-
+	ZEND_HASH_FOREACH_KEY_VAL(target_hash, num_key, string_key, element) {
 		convert_to_string_ex(element);
 		el_len = Z_STRLEN_P(element);
 
@@ -148,39 +139,33 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 		}
 
 		data = Z_STRVAL_P(element);
-		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &num_key, 0, &pos)) {
-			case HASH_KEY_IS_STRING:
-				if (string_key->len == 0) {
-					continue;
-				}
 
-				l = string_key->len + el_len + 2;
-				memcpy(p, string_key->val, string_key->len);
-				strncat(p, "=", 1);
-				strncat(p, data, el_len);
+		if (string_key) {
+			if (string_key->len == 0) {
+				continue;
+			}
+
+			l = string_key->len + el_len + 2;
+			memcpy(p, string_key->val, string_key->len);
+			strncat(p, "=", 1);
+			strncat(p, data, el_len);
 
 #ifndef PHP_WIN32
-				*ep = p;
-				++ep;
+			*ep = p;
+			++ep;
 #endif
-				p += l;
-				break;
-			case HASH_KEY_IS_LONG:
-				memcpy(p,data,el_len);
+			p += l;
+		} else {
+			memcpy(p,data,el_len);
 #ifndef PHP_WIN32
-				*ep = p;
-				++ep;
+			*ep = p;
+			++ep;
 #endif
-				p += el_len + 1;
-				break;
-			case HASH_KEY_NON_EXISTENT:
-				break;
+			p += el_len + 1;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	assert((uint)(p - env.envp) <= sizeenv);
-
-	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
 
 	return env;
 }
@@ -442,7 +427,8 @@ PHP_FUNCTION(proc_open)
 	int ndesc = 0;
 	int i;
 	zval *descitem = NULL;
-	HashPosition pos;
+	zend_string *str_index;
+	ulong nindex;
 	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
@@ -519,14 +505,8 @@ PHP_FUNCTION(proc_open)
 #endif
 
 	/* walk the descriptor spec and set up files/pipes */
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(descriptorspec), &pos);
-	while ((descitem = zend_hash_get_current_data_ex(Z_ARRVAL_P(descriptorspec), &pos)) != NULL) {
-		zend_string *str_index;
-		ulong nindex;
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(descriptorspec), nindex, str_index, descitem) {
 		zval *ztype;
-
-		str_index = NULL;
-		zend_hash_get_current_key_ex(Z_ARRVAL_P(descriptorspec), &str_index, &nindex, 0, &pos);
 
 		if (str_index) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "descriptor spec must be an integer indexed array");
@@ -685,10 +665,9 @@ PHP_FUNCTION(proc_open)
 			}
 		}
 
-		zend_hash_move_forward_ex(Z_ARRVAL_P(descriptorspec), &pos);
 		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS)
 			break;
-	}
+	} ZEND_HASH_FOREACH_END();
 
 #ifdef PHP_WIN32
 	if (cwd == NULL) {

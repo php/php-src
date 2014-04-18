@@ -71,16 +71,13 @@
 ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
-		HashPosition pos;
 		zend_property_info *prop_info;
 		zend_class_entry *ce = zobj->ce;
 
 		ALLOC_HASHTABLE(zobj->properties);
 		zend_hash_init(zobj->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (ce->default_properties_count) {
-			for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-			     (prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL;
-			     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    prop_info->offset >= 0 &&
@@ -90,12 +87,10 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					ZVAL_INDIRECT(&zv, &zobj->properties_table[prop_info->offset]);
 					zend_hash_add(zobj->properties, prop_info->name, &zv);
 				}
-			}
+			} ZEND_HASH_FOREACH_END();
 			while (ce->parent && ce->parent->default_properties_count) {
 				ce = ce->parent;
-				for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-				     (prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL;
-				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 					if (prop_info->ce == ce &&
 					    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
@@ -106,7 +101,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 						ZVAL_INDIRECT(&zv, &zobj->properties_table[prop_info->offset]);
 						zend_hash_add(zobj->properties, prop_info->name, &zv);
 					}
-				}
+				} ZEND_HASH_FOREACH_END();
 			}
 		}
 	}

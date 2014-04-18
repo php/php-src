@@ -1250,14 +1250,12 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 		/* Duplicate subject string for repeated replacement */
 		subject_value = STR_INIT(Z_STRVAL_P(subject), Z_STRLEN_P(subject), 0);
 		
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(regex));
-
 		replace_value = replace;
 		if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace)
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
 
 		/* For each entry in the regex array, get the entry */
-		while ((regex_entry = zend_hash_get_current_data(Z_ARRVAL_P(regex))) != NULL) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(regex), regex_entry) {
 			/* Make sure we're dealing with strings. */	
 			convert_to_string_ex(regex_entry);
 		
@@ -1293,8 +1291,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 				return NULL;
 			}
 
-			zend_hash_move_forward(Z_ARRVAL_P(regex));
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		zval_ptr_dtor(&tmp_subject);
 		return subject_value;
@@ -1365,32 +1362,24 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(subject));
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
 			old_replace_count = replace_count;
 			if ((result = php_replace_in_subject(regex, replace, subject_entry, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
 				if (!is_filter || replace_count > old_replace_count) {
 					/* Add to return array */
-					switch(zend_hash_get_current_key(Z_ARRVAL_P(subject), &string_key, &num_key, 0))
-					{
-					case HASH_KEY_IS_STRING:
+					if (string_key) {
 						add_assoc_str_ex(return_value, string_key->val, string_key->len, result);
-						break;
-
-					case HASH_KEY_IS_LONG:
+					} else {
 						add_index_str(return_value, num_key, result);
-						break;
 					}
 				} else {
 					STR_FREE(result);
 				}
 			}
-		
-			zend_hash_move_forward(Z_ARRVAL_P(subject));
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {	/* if subject is not an array */
 		old_replace_count = replace_count;
 		if ((result = php_replace_in_subject(regex, replace, subject, limit_val, is_callable_replace, &replace_count TSRMLS_CC)) != NULL) {
@@ -1781,8 +1770,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 	/* Go through the input array */
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
-	while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(input))) != NULL) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zval subject, *ref_entry = entry;
 		
 		if (Z_ISREF_P(entry)) {
@@ -1818,15 +1806,10 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			}
 
 			/* Add to return array */
-			switch (zend_hash_get_current_key(Z_ARRVAL_P(input), &string_key, &num_key, 0))
-			{
-				case HASH_KEY_IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key, ref_entry);
-					break;
-
-				case HASH_KEY_IS_LONG:
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, ref_entry);
-					break;
+			if (string_key) {
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, ref_entry);
+			} else {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, ref_entry);
 			}
 		}
 
@@ -1834,9 +1817,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 			zval_dtor(&subject);
 		}
 
-		zend_hash_move_forward(Z_ARRVAL_P(input));
-	}
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(input));
+	} ZEND_HASH_FOREACH_END();
+
 	/* Clean up */
 	efree(offsets);
 }

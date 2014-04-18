@@ -533,6 +533,106 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 #define zend_hash_get_current_data_ptr(ht) \
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
+#define ZEND_HASH_FOREACH_VAL(_ht, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_val = &_p->val;
+
+#define ZEND_HASH_FOREACH_VAL_IND(_ht, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		zval *_z; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			_z = &_p->val; \
+			if (Z_TYPE_P(_z) == IS_INDIRECT) { \
+				_z = Z_INDIRECT_P(_z); \
+			} \
+			if (Z_TYPE_P(_z) == IS_UNDEF) continue; \
+			_val = _z;
+
+#define ZEND_HASH_FOREACH_PTR(_ht, _ptr) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_ptr = Z_PTR(_p->val);
+
+#define ZEND_HASH_FOREACH_KEY(_ht, _h, _key) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+		
+#define ZEND_HASH_FOREACH_KEY_VAL(_ht, _h, _key, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+			_val = &_p->val;
+
+#define ZEND_HASH_FOREACH_KEY_VAL(_ht, _h, _key, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+			_val = &_p->val;
+
+#define ZEND_HASH_FOREACH_KEY_VAL_IND(_ht, _h, _key, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		zval *_z; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			_z = &_p->val; \
+			if (Z_TYPE_P(_z) == IS_INDIRECT) { \
+				_z = Z_INDIRECT_P(_z); \
+			} \
+			if (Z_TYPE_P(_z) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+			_val = _z;
+
+#define ZEND_HASH_FOREACH_KEY_PTR(_ht, _h, _key, _ptr) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
+			_p = (_ht)->arData + _idx; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+			_ptr = Z_PTR(_p->val);
+
+
+#define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(_ht, _h, _key, _val) do { \
+		uint _idx; \
+		Bucket *_p; \
+		for (_idx = (_ht)->nNumUsed; _idx > 0; _idx--) { \
+			_p = (_ht)->arData + _idx - 1; \
+			if (Z_TYPE(_p->val) == IS_UNDEF) continue; \
+			_h = _p->h; \
+			_key = _p->key; \
+			_val = &_p->val;
+
+#define ZEND_HASH_FOREACH_END() \
+		} \
+	} while (0)
+	
+
+
 #endif							/* ZEND_HASH_H */
 
 /*

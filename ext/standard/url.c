@@ -694,7 +694,6 @@ PHP_FUNCTION(get_headers)
 	php_stream_context *context;
 	php_stream *stream;
 	zval *prev_val, *hdr = NULL, *h;
-	HashPosition pos;
 	HashTable *hashT;
 	long format = 0;
                 
@@ -726,10 +725,8 @@ PHP_FUNCTION(get_headers)
 		hashT = HASH_OF(&stream->wrapperdata);
 	}
 
-	zend_hash_internal_pointer_reset_ex(hashT, &pos);
-	while ((hdr = zend_hash_get_current_data_ex(hashT, &pos)) != NULL) {
-		if (!hdr || Z_TYPE_P(hdr) != IS_STRING) {
-			zend_hash_move_forward_ex(hashT, &pos);
+	ZEND_HASH_FOREACH_VAL(hashT, hdr) {
+		if (Z_TYPE_P(hdr) != IS_STRING) {
 			continue;
 		}
 		if (!format) {
@@ -759,8 +756,7 @@ no_name_header:
 				goto no_name_header;
 			}
 		}
-		zend_hash_move_forward_ex(hashT, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	php_stream_close(stream);
 }

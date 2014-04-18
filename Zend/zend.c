@@ -142,12 +142,10 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 	}
 	ZEND_PUTS_EX("(\n");
 	indent += PRINT_ZVAL_INDENT;
-	zend_hash_internal_pointer_reset_ex(ht, &iterator);
-	while ((tmp = zend_hash_get_current_data_ex(ht, &iterator)) != NULL) {
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, string_key, tmp) {
 		if (Z_TYPE_P(tmp) == IS_INDIRECT) {
 			tmp = Z_INDIRECT_P(tmp);
 			if (Z_TYPE_P(tmp) == IS_UNDEF) {
-				zend_hash_move_forward_ex(ht, &iterator);
 				continue;
 			}
 		}
@@ -155,40 +153,34 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			ZEND_PUTS_EX(" ");
 		}
 		ZEND_PUTS_EX("[");
-		switch (zend_hash_get_current_key_ex(ht, &string_key, &num_key, 0, &iterator)) {
-			case HASH_KEY_IS_STRING:
-				if (is_object) {
-					const char *prop_name, *class_name;
-					int prop_len;
-					int mangled = zend_unmangle_property_name_ex(string_key->val, string_key->len, &class_name, &prop_name, &prop_len);
+		if (string_key) {
+			if (is_object) {
+				const char *prop_name, *class_name;
+				int prop_len;
+				int mangled = zend_unmangle_property_name_ex(string_key->val, string_key->len, &class_name, &prop_name, &prop_len);
 
-					ZEND_WRITE_EX(prop_name, prop_len);
-					if (class_name && mangled == SUCCESS) {
-						if (class_name[0]=='*') {
-							ZEND_PUTS_EX(":protected");
-						} else {
-							ZEND_PUTS_EX(":");
-							ZEND_PUTS_EX(class_name);
-							ZEND_PUTS_EX(":private");
-						}
+				ZEND_WRITE_EX(prop_name, prop_len);
+				if (class_name && mangled == SUCCESS) {
+					if (class_name[0]=='*') {
+						ZEND_PUTS_EX(":protected");
+					} else {
+						ZEND_PUTS_EX(":");
+						ZEND_PUTS_EX(class_name);
+						ZEND_PUTS_EX(":private");
 					}
-				} else {
-					ZEND_WRITE_EX(string_key->val, string_key->len);
 				}
-				break;
-			case HASH_KEY_IS_LONG:
-				{
-					char key[25];
-					snprintf(key, sizeof(key), "%ld", num_key);
-					ZEND_PUTS_EX(key);
-				}
-				break;
+			} else {
+				ZEND_WRITE_EX(string_key->val, string_key->len);
+			}
+		} else {
+			char key[25];
+			snprintf(key, sizeof(key), "%ld", num_key);
+			ZEND_PUTS_EX(key);
 		}
 		ZEND_PUTS_EX("] => ");
 		zend_print_zval_r_ex(write_func, tmp, indent+PRINT_ZVAL_INDENT TSRMLS_CC);
 		ZEND_PUTS_EX("\n");
-		zend_hash_move_forward_ex(ht, &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 	indent -= PRINT_ZVAL_INDENT;
 	for (i = 0; i < indent; i++) {
 		ZEND_PUTS_EX(" ");
@@ -205,24 +197,19 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 	ulong num_key;
 	int i = 0;
 
-	zend_hash_internal_pointer_reset_ex(ht, &iterator);
-	while ((tmp = zend_hash_get_current_data_ex(ht, &iterator)) != NULL) {
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, string_key, tmp) {
 		if (i++ > 0) {
 			ZEND_PUTS(",");
 		}
 		ZEND_PUTS("[");
-		switch (zend_hash_get_current_key_ex(ht, &string_key, &num_key, 0, &iterator)) {
-			case HASH_KEY_IS_STRING:
-				ZEND_WRITE(string_key->val, string_key->len);
-				break;
-			case HASH_KEY_IS_LONG:
-				zend_printf("%ld", num_key);
-				break;
+		if (string_key) {
+			ZEND_WRITE(string_key->val, string_key->len);
+		} else {
+			zend_printf("%ld", num_key);
 		}
 		ZEND_PUTS("] => ");
 		zend_print_flat_zval_r(tmp TSRMLS_CC);
-		zend_hash_move_forward_ex(ht, &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

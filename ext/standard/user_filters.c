@@ -543,12 +543,11 @@ PHP_FUNCTION(stream_get_filters)
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash) {
-		for(zend_hash_internal_pointer_reset(filters_hash);
-			(key_flags = zend_hash_get_current_key(filters_hash, &filter_name, &num_key, 0)) != HASH_KEY_NON_EXISTENT;
-			zend_hash_move_forward(filters_hash))
-				if (key_flags == HASH_KEY_IS_STRING) {
-					add_next_index_str(return_value, STR_COPY(filter_name));
-				}
+		ZEND_HASH_FOREACH_VAL(filters_hash, key_flags) {
+			if (key_flags == HASH_KEY_IS_STRING) {
+				add_next_index_str(return_value, STR_COPY(filter_name));
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }

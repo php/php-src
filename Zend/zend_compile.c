@@ -3847,9 +3847,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
-	for (zend_hash_internal_pointer_reset(&ce->properties_info);
-	(property_info = zend_hash_get_current_data_ptr(&ce->properties_info)) != NULL;
-	zend_hash_move_forward(&ce->properties_info)) {
+	ZEND_HASH_FOREACH_PTR(&ce->properties_info, property_info) {
 		if (property_info->ce == ce) {
 			if (property_info->flags & ZEND_ACC_STATIC) {
 				property_info->offset += parent_ce->default_static_members_count;
@@ -3857,7 +3855,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 				property_info->offset += parent_ce->default_properties_count;
 			}
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_merge_ex(&ce->properties_info, &parent_ce->properties_info, (ce->type & ZEND_INTERNAL_CLASS ? zend_duplicate_property_info_internal_zval : zend_duplicate_property_info_zval), (merge_checker_func_t) do_inherit_property_access_check, ce);
 
@@ -4430,9 +4428,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	 * - if compatible, then strict notice
 	 */
 	for (i = 0; i < ce->num_traits; i++) {
-		for (zend_hash_internal_pointer_reset(&ce->traits[i]->properties_info);
-			 (property_info = zend_hash_get_current_data_ptr(&ce->traits[i]->properties_info)) != NULL;
-			 zend_hash_move_forward(&ce->traits[i]->properties_info)) {
+		ZEND_HASH_FOREACH_PTR(&ce->traits[i]->properties_info, property_info) {
 			/* first get the unmangeld name if necessary,
 			 * then check whether the property is already there
 			 */
@@ -4507,7 +4503,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 									 prop_value, flags,
 								     doc_comment TSRMLS_CC);
 			STR_RELEASE(prop_name);
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */

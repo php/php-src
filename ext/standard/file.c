@@ -647,10 +647,8 @@ PHP_FUNCTION(file_put_contents)
 			if (zend_hash_num_elements(Z_ARRVAL_P(data))) {
 				int bytes_written;
 				zval *tmp;
-				HashPosition pos;
 
-				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
-				while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(data), &pos)) != NULL) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
 					if (Z_TYPE_P(tmp) != IS_STRING) {
 						SEPARATE_ZVAL(tmp);
 						convert_to_string(tmp);
@@ -668,8 +666,7 @@ PHP_FUNCTION(file_put_contents)
 							break;
 						}
 					}
-					zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
-				}
+				} ZEND_HASH_FOREACH_END();
 			}
 			break;
 
@@ -1882,11 +1879,9 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 	int count, i = 0, ret;
 	zval *field_tmp = NULL, field;
 	smart_str csvline = {0};
-	HashPosition pos;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(fields), &pos);
-	while ((field_tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(fields), &pos)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
 		ZVAL_COPY_VALUE(&field, field_tmp);
 
 		if (Z_TYPE(field) != IS_STRING) {
@@ -1927,12 +1922,10 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		zend_hash_move_forward_ex(Z_ARRVAL_P(fields), &pos);
-
 		if (Z_TYPE_P(field_tmp) != IS_STRING) {
 			zval_dtor(&field);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');
 	smart_str_0(&csvline);

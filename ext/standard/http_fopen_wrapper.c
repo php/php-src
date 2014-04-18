@@ -237,12 +237,9 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			char *s, *p;
 
 			if (Z_TYPE_P(tmpzval) == IS_ARRAY) {
-				HashPosition pos;
 				zval *tmpheader = NULL;
 
-				for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(tmpzval), &pos);
-					NULL != (tmpheader = zend_hash_get_current_data_ex(Z_ARRVAL_P(tmpzval), &pos));
-					zend_hash_move_forward_ex(Z_ARRVAL_P(tmpzval), &pos)) {
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 					if (Z_TYPE_P(tmpheader) == IS_STRING) {
 						s = Z_STRVAL_P(tmpheader);
 						do {
@@ -266,7 +263,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 							while (*s == '\r' || *s == '\n') s++;
 						} while (*s != 0);
 					}
-				}
+				} ZEND_HASH_FOREACH_END();
 			} else if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
 				s = Z_STRVAL_P(tmpzval);
 				do {
@@ -423,19 +420,15 @@ finish:
 		tmp = NULL;
 		
 		if (Z_TYPE_P(tmpzval) == IS_ARRAY) {
-			HashPosition pos;
 			zval *tmpheader = NULL;
 			smart_str tmpstr = {0};
 
-			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(tmpzval), &pos);
-				NULL != (tmpheader = zend_hash_get_current_data_ex(Z_ARRVAL_P(tmpzval), &pos));
-				zend_hash_move_forward_ex(Z_ARRVAL_P(tmpzval), &pos)
-			) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 				if (Z_TYPE_P(tmpheader) == IS_STRING) {
 					smart_str_appendl(&tmpstr, Z_STRVAL_P(tmpheader), Z_STRLEN_P(tmpheader));
 					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
 				}
-			}
+			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tmpstr);
 			/* Remove newlines and spaces from start and end. there's at least one extra \r\n at the end that needs to go. */
 			if (tmpstr.s) {

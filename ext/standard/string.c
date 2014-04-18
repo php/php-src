@@ -1121,7 +1121,6 @@ PHP_FUNCTION(explode)
 PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 {
 	zval          *tmp;
-	HashPosition   pos;
 	smart_str      implstr = {0};
 	int            numelems, i = 0;
 	zval tmp_val;
@@ -1133,9 +1132,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 		RETURN_EMPTY_STRING();
 	}
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos);
-
-	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), &pos)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
 again:
 		switch (Z_TYPE_P(tmp)) {
 			case IS_STRING:
@@ -1191,8 +1188,8 @@ again:
 		if (++i != numelems) {
 			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
 		}
-		zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
+
 	smart_str_0(&implstr);
 
 	if (implstr.s) {
@@ -2871,56 +2868,49 @@ static void php_strtr_free_strp(void *strp)
 static PATNREPL *php_strtr_array_prepare_repls(int slen, HashTable *pats, zend_llist **allocs, int *outsize)
 {
 	PATNREPL		*patterns;
-	HashPosition	hpos;
 	zval			*entry;
 	int				num_pats = zend_hash_num_elements(pats),
-					i;
+					i = 0;
+	zend_string	   *string_key;
+	ulong	        num_key;
 
 	patterns = safe_emalloc(num_pats, sizeof(*patterns), 0);
 	*allocs = emalloc(sizeof **allocs);
 	zend_llist_init(*allocs, sizeof(zend_string*), &php_strtr_free_strp, 0);
 
-	for (i = 0, zend_hash_internal_pointer_reset_ex(pats, &hpos);
-			(entry = zend_hash_get_current_data_ex(pats, &hpos)) != NULL;
-			zend_hash_move_forward_ex(pats, &hpos)) {
-		zend_string	*string_key;
-		ulong	num_key;
+	ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, string_key, entry) {
 		zval	tzv;
 
-		switch (zend_hash_get_current_key_ex(pats, &string_key, &num_key, 0, &hpos)) {
-		case HASH_KEY_IS_LONG: {
+		if (!string_key) {
 			char buf[MAX_LENGTH_OF_LONG];
 			int len = snprintf(buf, sizeof(buf), "%ld", num_key);
 			string_key = STR_INIT(buf, len, 0);
 			zend_llist_add_element(*allocs, &string_key);
-			/* break missing intentionally */
-		   }
-		case HASH_KEY_IS_STRING:
-			if (string_key->len == 0) { /* empty string given as pattern */
-				efree(patterns);
-				zend_llist_destroy(*allocs);
-				efree(*allocs);
-				*allocs = NULL;
-				return NULL;
-			}
-			if (string_key->len > slen) { /* this pattern can never match */
-				continue;
-			}
-
-			if (Z_TYPE_P(entry) != IS_STRING) {
-				ZVAL_DUP(&tzv, entry);
-				convert_to_string(&tzv);
-				entry = &tzv;
-				zend_llist_add_element(*allocs, &Z_STR_P(entry));
-			}
-
-			S(&patterns[i].pat) = string_key->val;
-			L(&patterns[i].pat) = string_key->len;
-			S(&patterns[i].repl) = Z_STRVAL_P(entry);
-			L(&patterns[i].repl) = Z_STRLEN_P(entry);
-			i++;
 		}
-	}
+		if (string_key->len == 0) { /* empty string given as pattern */
+			efree(patterns);
+			zend_llist_destroy(*allocs);
+			efree(*allocs);
+			*allocs = NULL;
+			return NULL;
+		}
+		if (string_key->len > slen) { /* this pattern can never match */
+			continue;
+		}
+
+		if (Z_TYPE_P(entry) != IS_STRING) {
+			ZVAL_DUP(&tzv, entry);
+			convert_to_string(&tzv);
+			entry = &tzv;
+			zend_llist_add_element(*allocs, &Z_STR_P(entry));
+		}
+
+		S(&patterns[i].pat) = string_key->val;
+		L(&patterns[i].pat) = string_key->len;
+		S(&patterns[i].repl) = Z_STRVAL_P(entry);
+		L(&patterns[i].repl) = Z_STRLEN_P(entry);
+		i++;
+	} ZEND_HASH_FOREACH_END();
 
 	*outsize = i;
 	return patterns;

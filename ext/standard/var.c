@@ -717,27 +717,18 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_string *key;
 		zval *d, *name;
 		ulong index;
-		HashPosition pos;
 		int i;
 		zval nval, *nvalp;
-		HashTable *propers;
+		HashTable *propers, *ht;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
-
-		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
-			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, &index, 0, &pos);
-
-			if (i == HASH_KEY_NON_EXISTENT) {
-				break;
-			}
-
+		ht = HASH_OF(retval_ptr);
+		ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, name) {
 			if (incomplete_class && strcmp(key->val, MAGIC_MEMBER) == 0) {
 				continue;
 			}
-			name = zend_hash_get_current_data_ex(HASH_OF(retval_ptr), &pos);
 
 			if (Z_TYPE_P(name) != IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
@@ -802,7 +793,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 					php_var_serialize_intern(buf, nvalp, var_hash TSRMLS_CC);
 				}
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, '}');
 }
@@ -954,32 +945,17 @@ again:
 				zend_string *key;
 				zval *data;
 				ulong index;
-				HashPosition pos;
 
-				zend_hash_internal_pointer_reset_ex(myht, &pos);
-				for (;; zend_hash_move_forward_ex(myht, &pos)) {
-					data = zend_hash_get_current_data_ex(myht, &pos);
-					if (!data) {
-						break;
-					} else if (Z_TYPE_P(data) == IS_INDIRECT) {
-						data = Z_INDIRECT_P(data);
-						if (Z_TYPE_P(data) == IS_UNDEF) {
-							continue;
-						}
-					}
+				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
 
-					i = zend_hash_get_current_key_ex(myht, &key, &index, 0, &pos);
 					if (incomplete_class && strcmp(key->val, MAGIC_MEMBER) == 0) {
 						continue;
 					}
 
-					switch (i) {
-						case HASH_KEY_IS_LONG:
-							php_var_serialize_long(buf, index);
-							break;
-						case HASH_KEY_IS_STRING:
-							php_var_serialize_string(buf, key->val, key->len);
-							break;
+					if (!key) {
+						php_var_serialize_long(buf, index);
+					} else {
+						php_var_serialize_string(buf, key->val, key->len);
 					}
 
 					/* we should still add element even if it's not OK,
@@ -997,7 +973,7 @@ again:
 							Z_ARRVAL_P(data)->nApplyCount--;
 						}
 					}
-				}
+				} ZEND_HASH_FOREACH_END();
 			}
 			smart_str_appendc(buf, '}');
 			return;
