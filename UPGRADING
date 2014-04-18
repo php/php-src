@@ -350,6 +350,9 @@ PHP 5.4 UPGRADE NOTES
 - Since 5.4.7, ctor is always called when new user stream wrapper object is created.
   Before, it was called only when stream_open was called.
 
+- Manipulated serialization strings for objects implementing Serializable by
+  replacing "C:" with "O:" at the start will now produce an error.
+
 ==============================
 5. Changes to existing classes
 ==============================

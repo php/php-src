@@ -12,6 +12,7 @@ UPGRADE NOTES - PHP X.Y
   g. leak_variable
   h. API Signature changes
   i. new TSRM function expand_filepath_with_mode
+  j. unserialization of manipulated object strings
 
 2. Build system changes
   a. Unix build system changes
@@ -188,6 +189,20 @@ it increments the refcounts of those objects instead.
   i. 
   PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, const char *relative_to, size_t relative_to_len, int realpath_mode TSRMLS_DC);
   expand_filepath_with_mode lets define how realpath will behave, using one of the existing mode: CWD_EXPAND , CWD_FILEPATH or CWD_REALPATH.
+
+  j.
+  Strings requiring unserialization of objects are now explicitly checked
+  whether the object they contain implements the Serializable interface.
+  This solves the situation where manipulated strings could be passed for
+  objects using Serializable to disallow serialization. An object
+  implementing Serializable will always start with "C:" in the serialized
+  string, all other objects are represented with starting "O:". Objects
+  implementing Serializable to disable serialization using 
+  zend_class_unserialize_deny and zend_class_serialize_deny, when
+  instantiated from the serializer with a manipulated "O:" string at the
+  start, will most likely be defectively initialized. This is now
+  fixed at the appropriate place by checking for the presence of the
+  serialize callback in the class entry.
 
 ========================
 2. Build system changes
