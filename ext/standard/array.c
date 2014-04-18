@@ -1975,21 +1975,34 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	/* Get the first or last value and copy it into the return value */
 	if (off_the_end) {
 		zend_hash_internal_pointer_end(Z_ARRVAL_P(stack));
+		while (1) {
+			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
+			if (!val) {
+				return;
+			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
+				val = Z_INDIRECT_P(val);
+				if (Z_TYPE_P(val) == IS_UNDEF) {
+					zend_hash_move_backwards(Z_ARRVAL_P(stack));
+					continue;
+				}
+			}
+			break;
+		}
 	} else {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-	}
-	while (1) {
-		val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
-		if (!val) {
-			return;
-		} else if (Z_TYPE_P(val) == IS_INDIRECT) {
-			val = Z_INDIRECT_P(val);
-			if (Z_TYPE_P(val) == IS_UNDEF) {
-				zend_hash_move_forward(Z_ARRVAL_P(stack));
-				continue;
+		while (1) {
+			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
+			if (!val) {
+				return;
+			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
+				val = Z_INDIRECT_P(val);
+				if (Z_TYPE_P(val) == IS_UNDEF) {
+					zend_hash_move_forward(Z_ARRVAL_P(stack));
+					continue;
+				}
 			}
+			break;
 		}
-		break;
 	}
 	RETVAL_ZVAL_FAST(val);
 

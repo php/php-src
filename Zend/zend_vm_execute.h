@@ -720,19 +720,14 @@ send_again:
 	switch (Z_TYPE_P(args)) {
 		case IS_ARRAY: {
 			HashTable *ht = Z_ARRVAL_P(args);
-			HashPosition pos;
 			zval *arg;
+			zend_string *name;
+			zend_ulong index;
 
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
 
-			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
-			     (arg = zend_hash_get_current_data_ex(ht, &pos)) != NULL;
-			     zend_hash_move_forward_ex(ht, &pos), ++arg_num
-			) {
-				zend_string *name;
-				zend_ulong index;
-
-				if (zend_hash_get_current_key_ex(ht, &name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+			ZEND_HASH_FOREACH_KEY_VAL(ht, index, name, arg) {
+				if (name) {
 					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
 					FREE_OP(free_op1);
 					CHECK_EXCEPTION();
@@ -750,7 +745,9 @@ send_again:
 
 				zend_vm_stack_push(arg TSRMLS_CC);
 				EX(call)->num_additional_args++;
-			}
+				arg_num++;
+			} ZEND_HASH_FOREACH_END();
+
 			break;
 		}
 		case IS_OBJECT: {
