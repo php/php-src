@@ -1751,9 +1751,8 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
 
-	if ((EX(prev_execute_data) && EX(prev_execute_data)->opline
-	     && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL)
-	    || EG(active_symbol_table) == &EG(symbol_table)) {
+	if ((nested && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) ||
+	    EG(active_symbol_table) == &EG(symbol_table)) {
 		zend_detach_symbol_table(TSRMLS_C);
 	}
 	
@@ -3900,8 +3899,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);
 		}
-
-		zend_attach_symbol_table(TSRMLS_C);
 
 		EX(function_state).function = (zend_function *) EX(op_array);
 
