@@ -520,8 +520,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, int name_lengt
 ZEND_API int zend_delete_global_variable(zend_string *name TSRMLS_DC);
 
 ZEND_API void zend_rebuild_symbol_table(TSRMLS_D);
-ZEND_API void zend_attach_symbol_table(TSRMLS_D);
-ZEND_API void zend_detach_symbol_table(TSRMLS_D);
+ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data);
+ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS_DC);
 ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int force TSRMLS_DC);
 

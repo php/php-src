@@ -935,12 +935,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			zend_execute(EG(active_op_array), fci->retval TSRMLS_CC);
 		}
 
+		EG(active_op_array) = original_op_array;
+		EG(opline_ptr) = original_opline_ptr;
 		if (!fci->symbol_table && EG(active_symbol_table)) {
 			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		EG(active_symbol_table) = calling_symbol_table;
-		EG(active_op_array) = original_op_array;
-		EG(opline_ptr) = original_opline_ptr;
 	} else if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (EX(function_state).function->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
 		ZVAL_NULL(fci->retval);
@@ -1695,12 +1695,11 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_attach_symbol_table(TSRMLS_D) /* {{{ */
+ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
 	int i;
-	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = execute_data->op_array;
-	HashTable *ht = &EG(active_symbol_table)->ht;
+	HashTable *ht = &execute_data->symbol_table->ht;
 	
 	/* copy real values from symbol table into CV slots and create
 	   INDIRECT references to CV in symbol table  */
@@ -1727,12 +1726,11 @@ ZEND_API void zend_attach_symbol_table(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_detach_symbol_table(TSRMLS_D) /* {{{ */
+ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data) /* {{{ */
 {
 	int i;
-	zend_execute_data *execute_data = EG(current_execute_data);
 	zend_op_array *op_array = execute_data->op_array;
-	HashTable *ht = &EG(active_symbol_table)->ht;
+	HashTable *ht = &execute_data->symbol_table->ht;
 	
 	/* copy real values from CV slots into symbol table */
 	for (i = 0; i < op_array->last_var; i++) {

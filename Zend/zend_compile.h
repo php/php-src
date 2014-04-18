@@ -366,6 +366,13 @@ typedef struct _call_slot {
 	zend_bool          is_ctor_result_used;
 } call_slot;
 
+typedef enum _vm_frame_kind {
+	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
+	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
+	VM_FRAME_TOP_FUNCTION,		/* direct VM call to function from external C code */
+	VM_FRAME_TOP_CODE			/* direct VM call to "main" code from external C code */
+} vm_frame_kind;
+
 struct _zend_execute_data {
 	struct _zend_op *opline;
 	void **run_time_cache;
@@ -375,7 +382,7 @@ struct _zend_execute_data {
 	zend_array *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval old_error_reporting;
-	zend_bool nested;
+	vm_frame_kind frame_kind;
 	zval *return_value;
 	// TODO: simplify call sequence and remove current_* and call_* ???
 	zend_class_entry *current_scope;

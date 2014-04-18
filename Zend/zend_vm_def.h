@@ -1748,96 +1748,103 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 {
-	zend_bool nested = EX(nested);
-	zend_op_array *op_array = EX(op_array);
+	vm_frame_kind frame_kind = EX(frame_kind);
 
-	if ((nested && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL) ||
-	    EG(active_symbol_table) == &EG(symbol_table)) {
-		zend_detach_symbol_table(TSRMLS_C);
-	}
-	
 	EG(current_execute_data) = EX(prev_execute_data);
-	EG(opline_ptr) = NULL;
-	
-	if (EG(active_symbol_table) != &EG(symbol_table)) {
+
+	if (frame_kind == VM_FRAME_NESTED_FUNCTION) {
 		i_free_compiled_variables(execute_data TSRMLS_CC);
-	}
-
-	zend_vm_stack_free((char*)execute_data TSRMLS_CC);
-
-	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
-		zval_ptr_dtor((zval*)op_array->prototype);
-	}
-
-	if (nested) {
-		execute_data = EG(current_execute_data);
-	}
-	if (nested) {
-		USE_OPLINE
-
-		LOAD_REGS();
-		LOAD_OPLINE();
-		if (UNEXPECTED(opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
-
-			zend_attach_symbol_table(TSRMLS_C);
-
-			EX(function_state).function = (zend_function *) EX(op_array);
-			EX(function_state).arguments = NULL;
-
-			EG(opline_ptr) = &EX(opline);
-			EG(active_op_array) = EX(op_array);
-			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				zend_throw_exception_internal(NULL TSRMLS_CC);
-				HANDLE_EXCEPTION_LEAVE();
-			}
-
-			ZEND_VM_INC_OPCODE();
-			ZEND_VM_LEAVE();
-		} else {
-			EG(opline_ptr) = &EX(opline);
-			EG(active_op_array) = EX(op_array);
-			if (EG(active_symbol_table)) {
-				zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
-			}
-			EG(active_symbol_table) = EX(symbol_table);
-
-			EX(function_state).function = (zend_function *) EX(op_array);
-			EX(function_state).arguments = NULL;
-
-			if (Z_OBJ(EG(This))) {
-				if (UNEXPECTED(EG(exception) != NULL) && EX(call)->is_ctor_call) {
-					if (EX(call)->is_ctor_result_used) {
-						Z_DELREF(EG(This));
-					}
-					if (Z_REFCOUNT(EG(This)) == 1) {
-						zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
-					}
-				}
-				zval_ptr_dtor(&EG(This));
-			}
-			Z_OBJ(EG(This)) = EX(current_this);
-			EG(scope) = EX(current_scope);
-			EG(called_scope) = EX(current_called_scope);
-
-			EX(call)--;
-
-			zend_vm_stack_clear_multiple(1 TSRMLS_CC);
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				zend_throw_exception_internal(NULL TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					zval_ptr_dtor(EX_VAR(opline->result.var));
-				}
-				HANDLE_EXCEPTION_LEAVE();
-			}
-
-			ZEND_VM_INC_OPCODE();
-			ZEND_VM_LEAVE();
+		if (UNEXPECTED(EX(symbol_table) != NULL)) {
+			zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
 		}
-	}
-	ZEND_VM_RETURN();
+		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(op_array)->prototype) {
+			zval_ptr_dtor((zval*)EX(op_array)->prototype);
+		}
+		zend_vm_stack_free((char*)execute_data TSRMLS_CC);
+
+		execute_data = EG(current_execute_data);
+		EG(opline_ptr) = &EX(opline);
+		EG(active_op_array) = EX(op_array);
+		EG(active_symbol_table) = EX(symbol_table);
+
+		EX(function_state).function = (zend_function *) EX(op_array);
+		EX(function_state).arguments = NULL;
+
+		if (Z_OBJ(EG(This))) {
+			if (UNEXPECTED(EG(exception) != NULL) && EX(call)->is_ctor_call) {
+				if (EX(call)->is_ctor_result_used) {
+					Z_DELREF(EG(This));
+				}
+				if (Z_REFCOUNT(EG(This)) == 1) {
+					zend_object_store_ctor_failed(Z_OBJ(EG(This)) TSRMLS_CC);
+				}
+			}
+			zval_ptr_dtor(&EG(This));
+		}
+		Z_OBJ(EG(This)) = EX(current_this);
+		EG(scope) = EX(current_scope);
+		EG(called_scope) = EX(current_called_scope);
+
+		EX(call)--;
+
+		zend_vm_stack_clear_multiple(1 TSRMLS_CC);
+
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_op *opline = EX(opline);
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				zval_ptr_dtor(EX_VAR(opline->result.var));
+			}
+			HANDLE_EXCEPTION_LEAVE();
+		}
+
+		ZEND_VM_INC_OPCODE();
+		ZEND_VM_LEAVE();
+	} else if (frame_kind == VM_FRAME_NESTED_CODE) {
+		zend_detach_symbol_table(execute_data);
+		destroy_op_array(EX(op_array) TSRMLS_CC);
+		efree(EX(op_array));
+		zend_vm_stack_free((char*)execute_data TSRMLS_CC);
+
+		execute_data = EG(current_execute_data);
+		zend_attach_symbol_table(execute_data);
+		EX(function_state).function = (zend_function *) EX(op_array);
+		EX(function_state).arguments = NULL;
+		EG(opline_ptr) = &EX(opline);
+		EG(active_op_array) = EX(op_array);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_throw_exception_internal(NULL TSRMLS_CC);
+			HANDLE_EXCEPTION_LEAVE();
+		}
+
+		ZEND_VM_INC_OPCODE();
+		ZEND_VM_LEAVE();
+	} else {
+		if (frame_kind == VM_FRAME_TOP_FUNCTION) {
+			i_free_compiled_variables(execute_data TSRMLS_CC);
+		} else /* if (frame_kind == VM_FRAME_TOP_CODE) */ {
+			zend_array *symbol_table = EX(symbol_table);
+			zend_execute_data *old_execute_data;
+
+			zend_detach_symbol_table(execute_data);
+			old_execute_data = EX(prev_execute_data);
+			while (old_execute_data) {
+				if (old_execute_data->op_array) {
+					if (old_execute_data->symbol_table == symbol_table) {
+						zend_attach_symbol_table(old_execute_data);
+					}
+					break;
+				}
+				old_execute_data = old_execute_data->prev_execute_data;
+			}
+		}
+		if ((EX(op_array)->fn_flags & ZEND_ACC_CLOSURE) && EX(op_array)->prototype) {
+			zval_ptr_dtor((zval*)EX(op_array)->prototype);
+		}
+		zend_vm_stack_free((char*)execute_data TSRMLS_CC);
+		EG(opline_ptr) = NULL;
+		ZEND_VM_RETURN();
+	}		
 }
 
 ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
@@ -1951,7 +1958,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			}
 		} else if (EXPECTED(zend_execute_ex == execute_ex)) {
 			if (EXPECTED(EG(exception) == NULL)) {
-				i_create_execute_data_from_op_array(EG(active_op_array), return_value, 1 TSRMLS_CC);
+				i_create_execute_data_from_op_array(EG(active_op_array), return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
 				ZEND_VM_ENTER();
 			}
 		} else {
@@ -1960,7 +1967,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 		EG(opline_ptr) = &EX(opline);
 		EG(active_op_array) = EX(op_array);
-		if (EG(active_symbol_table)) {
+		if (UNEXPECTED(EG(active_symbol_table) != NULL)) {
 			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		EG(active_symbol_table) = EX(symbol_table);
@@ -3894,7 +3901,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		}
 
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
-		    i_create_execute_data_from_op_array(new_op_array, return_value, 1 TSRMLS_CC);
+		    i_create_execute_data_from_op_array(new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
 			ZEND_VM_ENTER();
 		} else {
 			zend_execute(new_op_array, return_value TSRMLS_CC);

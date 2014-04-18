@@ -1560,7 +1560,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  */
 
-static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data;
 
@@ -1650,7 +1650,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	EX(symbol_table) = EG(active_symbol_table);
 	EX(call) = NULL;
 	EG(current_execute_data) = execute_data;
-	EX(nested) = nested;
+	EX(frame_kind) = frame_kind;
 	EX(delayed_exception) = NULL;
 	EX(return_value) = return_value;
 
@@ -1659,8 +1659,8 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	}
 	EX(run_time_cache) = op_array->run_time_cache;
 
-	if (EG(active_symbol_table)) {
-		zend_attach_symbol_table(TSRMLS_C);
+	if (EX(symbol_table)) {
+		zend_attach_symbol_table(execute_data);
 	}
 
 	if (op_array->this_var != -1 && Z_OBJ(EG(This))) {
@@ -1677,9 +1677,9 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 }
 /* }}} */
 
-ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
-	return i_create_execute_data_from_op_array(op_array, return_value, nested TSRMLS_CC);
+	return i_create_execute_data_from_op_array(op_array, return_value, frame_kind TSRMLS_CC);
 }
 /* }}} */
 
