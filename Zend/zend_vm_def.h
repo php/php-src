@@ -1751,9 +1751,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
 
-	if ((EX(prev_execute_data) && EX(prev_execute_data)->opline
-	     && EX(prev_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL)
-	    || EG(active_symbol_table) == &EG(symbol_table)) {
+	if (EX(symbol_table) != NULL) {
 		zend_detach_symbol_table(TSRMLS_C);
 	}
 	
