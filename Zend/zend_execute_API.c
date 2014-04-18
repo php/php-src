@@ -1181,10 +1181,6 @@ ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *s
 			}
 		}
 
-		if (EG(current_execute_data)) {
-			zend_attach_symbol_table(TSRMLS_C);
-		}
-
 		EG(no_extensions)=0;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
