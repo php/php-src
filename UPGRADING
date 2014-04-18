@@ -235,6 +235,10 @@ PHP 5.6 UPGRADE NOTES
     . pg_send_query()
     . pg_send_query_params()
 
+- unserialize:
+  Manipulated serialization strings for objects implementing Serializable by
+  replacing "C:" with "O:" at the start will now produce an error.
+
 ========================================
 5. New Functions
 ========================================
