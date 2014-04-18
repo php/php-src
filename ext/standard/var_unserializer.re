@@ -400,9 +400,12 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 
 	(*p) += 2;
 	
-	if (ce->unserialize == NULL) {
+	if (ce->serialize == NULL) {
 		object_init_ex(*rval, ce);
-	} else if (ce->unserialize(rval, ce, (const unsigned char*)*p, elements, (zend_unserialize_data *)var_hash TSRMLS_CC) != SUCCESS) {
+	} else {
+		/* If this class implements Serializable, it should not land here but in object_custom(). The passed string
+		obviously doesn't descend from the regular serializer. */
+		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ce->name);
 		return 0;
 	}
 
