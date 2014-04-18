@@ -2177,7 +2177,6 @@ PHP_FUNCTION(array_slice)
 			 pos;			/* Current position in the array */
 	zend_string *string_key;
 	ulong num_key;
-	HashPosition hpos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
 		return;
@@ -2218,33 +2217,28 @@ PHP_FUNCTION(array_slice)
 
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &hpos);
-	while (pos < offset && (entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(input), &hpos)) != NULL) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
-	}
+		if (pos <= offset) {
+			continue;
+		}
+		if (pos > offset + length) {
+			break;
+		}
 
-	/* Copy elements from input array to the one that's returned */
-	while (pos < offset + length && (entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(input), &hpos)) != NULL) {
-
+		/* Copy elements from input array to the one that's returned */
 		zval_add_ref(entry);
 
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &num_key, 0, &hpos)) {
-			case HASH_KEY_IS_STRING:
-				zend_hash_update(Z_ARRVAL_P(return_value), string_key, entry);
-				break;
-
-			case HASH_KEY_IS_LONG:
-				if (preserve_keys) {
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
-				} else {
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry);
-				}
-				break;
+		if (string_key) {
+			zend_hash_update(Z_ARRVAL_P(return_value), string_key, entry);
+		} else {
+			if (preserve_keys) {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
+			} else {
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry);
+			}
 		}
-		pos++;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &hpos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

@@ -3816,8 +3816,6 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 		/* Duplicate subject string for repeated replacement */
 		ZVAL_DUP(result, subject);
 
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(search));
-
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(replace));
 		} else {
@@ -3827,12 +3825,11 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 		}
 
 		/* For each entry in the search array, get the entry */
-		while ((search_entry = zend_hash_get_current_data(Z_ARRVAL_P(search))) != NULL) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
 			SEPARATE_ZVAL(search_entry);
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
-				zend_hash_move_forward(Z_ARRVAL_P(search));
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				}
@@ -3881,9 +3878,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 				zval_ptr_dtor(&tmp_subject);
 				return;
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(search));
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		if (Z_STRLEN_P(search) == 1) {
 			php_char_to_str_ex(Z_STRVAL_P(subject),
