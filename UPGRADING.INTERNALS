@@ -216,5 +216,8 @@ UPGRADE NOTES - PHP X.Y
       variable. Previously `bison` was assumed to be in $PATH. 
 
   b. Windows build system changes
-    - 
-  
+    - The configure option --enable-static-analyze isn't available anymore.
+      The new option was introduced --with-analyzer.
+    - It is possible to disable PGO for single extensions, to do that
+      define a global variable PHP_MYMODULE_PGO evaluating to false
+      inside config.w32
