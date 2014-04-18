@@ -1920,13 +1920,9 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ */
-void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {
-	znode tmp;
-					
+void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {			
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
-
-		memset(&tmp, 0, sizeof(znode));
 
 		if (return_hint->op_type == IS_CONST) {
 			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
