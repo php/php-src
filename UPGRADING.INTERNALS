@@ -8,6 +8,7 @@ UPGRADE NOTES - PHP X.Y
   c. Lowercasing and locales
   d. zend_qsort_r
   e. get_current_key
+  f. unserialization of manipulated object strings
 
 2. Build system changes
   a. Unix build system changes
@@ -107,6 +108,21 @@ The signature of the get_current_key iteration handler has been changed to:
 void (*get_current_key)(zend_object_iterator *iter, zval *key TSRMLS_DC);
 
 The key should be written into the zval* using the ZVAL_* macros.
+
+	f. unserialization of manipulated object strings
+
+Strings requiring unserialization of objects are now explicitly checked
+whether the object they contain implements the Serializable interface.
+This solves the situation where manipulated strings could be passed for
+objects using Serializable to disallow serialization. An object
+implementing Serializable will always start with "C:" in the serialized
+string, all other objects are represented with starting "O:". Objects
+implementing Serializable to disable serialization using
+zend_class_unserialize_deny and zend_class_serialize_deny, when
+instantiated from the serializer with a manipulated "O:" string at the
+start, will most likely be defectively initialized. This is now
+fixed at the appropriate place by checking for the presence of the
+serialize callback in the class entry.
 
 ========================
 2. Build system changes

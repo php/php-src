@@ -193,6 +193,9 @@ PHP 5.5 UPGRADE NOTES
 - Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
   specify escape char.
 
+- Manipulated serialization strings for objects implementing Serializable by
+  replacing "C:" with "O:" at the start will now produce an error.
+
 ========================================
 5. New Functions
 ========================================
