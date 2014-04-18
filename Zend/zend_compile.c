@@ -1945,19 +1945,6 @@ void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {
 			} else {
 				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
 			}
-		} else {
-			if (CG(current_namespace)) {
-				tmp.op_type = IS_CONST;
-				tmp.u.constant = *CG(current_namespace);
-				zval_copy_ctor(&tmp.u.constant);
-				zend_do_build_namespace_name(&tmp, &tmp, return_hint TSRMLS_CC);
-				*return_hint = tmp;
-			}
-
-			CG(active_op_array)->return_hint.type = IS_OBJECT;
-			CG(active_op_array)->return_hint.class_name_len = Z_STRLEN(return_hint->u.constant);
-			CG(active_op_array)->return_hint.class_name = zend_new_interned_string
-				(Z_STRVAL(return_hint->u.constant), Z_STRLEN(return_hint->u.constant)+1, 1 TSRMLS_CC);
 		}
 	}
 } /* }}} */
