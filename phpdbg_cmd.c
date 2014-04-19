@@ -516,21 +516,24 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 /* {{{ */
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) {
 	phpdbg_param_t *next = calloc(1, sizeof(phpdbg_param_t));
-	
+
 	if (!next)
 		return;
-	
+
 	*(next) = *(param);
+
+	next->next = NULL;
 
 	if (stack->top == NULL) {
 		stack->top = next;
+		next->top = NULL;
 		stack->next = next;
 	} else {
 		stack->top->next = next;
 		next->top = stack->top;
 		stack->top = next;
 	}
-	
+
 	stack->len++;
 } /* }}} */
 
@@ -759,6 +762,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC)
 	switch (top->type) {
 		case EVAL_PARAM:
 			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
+
+		case RUN_PARAM:
+			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
 		
 		case SHELL_PARAM:
 			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);

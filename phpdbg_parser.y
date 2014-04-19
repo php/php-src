@@ -53,6 +53,7 @@ typedef void* yyscan_t;
 %parse-param { yyscan_t scanner }
 
 %token T_EVAL	 	"eval"
+%token T_RUN	 	"run"
 %token T_SHELL		"shell"
 %token T_IF			"if (condition)"
 %token T_TRUTHY		"truthy (true, on, yes or enabled)"
@@ -145,6 +146,15 @@ parameter
 		$$.type = SHELL_PARAM; 
 		$$.str = $2.str;
 		$$.len = $2.len;
+	}
+	| T_RUN T_INPUT						{ 	
+		$$.type = RUN_PARAM; 
+		$$.str = $2.str;
+		$$.len = $2.len;
+	}
+	| T_RUN			{
+		$$.type = RUN_PARAM;
+		$$.len = 0;
 	}
 	| T_OPCODE								{ $$ = $1; }
 	| T_ADDR								{ $$ = $1; }

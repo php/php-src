@@ -34,12 +34,13 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s"),
 #ifndef _WIN32
 	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss"),
-	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",			 'C', set_colors,       NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b"),
 #endif
 	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s"),
 	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b"),
 	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b"),
 	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b"),
 	PHPDBG_END_COMMAND
 };
 
@@ -195,18 +196,37 @@ PHPDBG_SET(oplog) /* {{{ */
 PHPDBG_SET(quiet) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("Quietness %s",
-			PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
-	} else switch (param->type) {	
+		phpdbg_writeln("Quietness %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+	} else switch (param->type) {
 		case NUMERIC_PARAM: {
 			if (param->num) {
 				PHPDBG_G(flags) |= PHPDBG_IS_QUIET;
-			} else PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+			} else {
+				PHPDBG_G(flags) &= ~PHPDBG_IS_QUIET;
+			}
 		} break;
-		
+
 		phpdbg_default_switch_case();
 	}
 
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_SET(refcount) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("Showing refcounts on watchpoints %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+	} else switch (param->type) {
+		case NUMERIC_PARAM: {
+			if (param->num) {
+				PHPDBG_G(flags) |= PHPDBG_SHOW_REFCOUNTS;
+			} else {
+				PHPDBG_G(flags) &= ~PHPDBG_SHOW_REFCOUNTS;
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */

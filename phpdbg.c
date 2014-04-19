@@ -1191,7 +1191,13 @@ phpdbg_main:
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
 			SG(request_info).argv[i] = exec ? estrndup(exec, exec_len) : estrdup("");
+
+			php_hash_environment(TSRMLS_C);
 		}
+
+		/* make sure to turn off buffer for ev command */
+		php_output_activate(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
 		
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */

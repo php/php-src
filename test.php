@@ -6,11 +6,12 @@ if (isset($include)) {
 $stdout = fopen("php://stdout", "w+");
 
 class phpdbg {
-    public function isGreat($greeting = null) {
-        printf(
-            "%s: %s\n", __METHOD__, $greeting);
-        return $this;
-    }
+	private $sprintf = "%s: %s\n";
+
+	public function isGreat($greeting = null) {
+		printf($this->sprintf, __METHOD__, $greeting);
+		return $this;
+	}
 }
 
 function mine() {
@@ -70,7 +71,13 @@ array_walk($array, function (&$item) {
 		$item -= 1;
 });
 
-$obj = (object)["a" => 2, "b" => 5, "c" => 7];
+class testClass {
+	public $a = 2;
+	protected  $b = [1, 3];
+	private $c = 7;
+}
+
+$obj = new testClass;
 
 $test = $obj->a;
 
