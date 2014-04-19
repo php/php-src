@@ -322,9 +322,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **print**    print argument " CR
 "  **frame**    select a stack frame and print a stack frame summary" CR CR
 
-"**Compilation**" CR
-"  **compile**  compile a PHP source" CR CR
-
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
 "  **run**      attempt execution" CR
@@ -580,19 +577,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Note: if all breakpoints are cleared, then the PHP script will run until normal completion."
 },
 
-{"compile",
-"The execution context may be pre-compiled before execution to provide an opportunity to "
-"inspect the generated opcode output.  The execution context must be defined before the compile "
-"command can be used.  Use the command **exec** to set the execution context." CR CR
-
-"**Examples**" CR CR
-"    $P compile" CR
-"    $P c" CR CR
-
-"Note: Then that it is usually necessary to issue a **clean** command to reset the environment prior "
-"to compilation."
-},
-
 {"ev",
 "The **ev** command takes a string expression which it evaluates and then displays. It "
 "evaluates in the context of the lowest (that is the executing) frame, unless this has first "
@@ -615,7 +599,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 {"exec",
 "The **exec** command sets the execution context, that is the script to be executed.  The " 
 "execution context must be defined either by executing the **exec** command or by using the "
-"**-e** command line option before the script can be compiled or run." CR CR
+"**-e** command line option." CR CR
 
 "Note that the **exec** command also can be used to replace a previously defined execution "
 "context." CR CR

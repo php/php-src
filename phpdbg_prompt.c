@@ -43,7 +43,6 @@ int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
-	PHPDBG_COMMAND_D(compile, "attempt compilation",                      'c', NULL, 0),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
 	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s"),
@@ -376,6 +375,7 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				php_hash_environment(TSRMLS_C);
 
 				phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
+				phpdbg_compile(TSRMLS_C);
 			} else {
 				phpdbg_notice("Execution context not changed");
 			}
@@ -391,6 +391,11 @@ PHPDBG_COMMAND(exec) /* {{{ */
 int phpdbg_compile(TSRMLS_D) /* {{{ */
 {
 	zend_file_handle fh;
+
+	if (!PHPDBG_G(exec)) {
+		phpdbg_error("No execution context");
+		return SUCCESS;
+	}
 
 	if (EG(in_execution)) {
 		phpdbg_error("Cannot compile while in execution");
@@ -412,25 +417,6 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 	}
 
 	return FAILURE;
-} /* }}} */
-
-PHPDBG_COMMAND(compile) /* {{{ */
-{
-	if (!PHPDBG_G(exec)) {
-		phpdbg_error("No execution context");
-		return SUCCESS;
-	}
-
-	if (!EG(in_execution)) {
-		if (PHPDBG_G(ops)) {
-			phpdbg_error("Destroying previously compiled opcodes");
-			phpdbg_clean(0 TSRMLS_CC);
-		}
-	}
-
-	phpdbg_compile(TSRMLS_C);
-
-	return SUCCESS;
 } /* }}} */
 
 PHPDBG_COMMAND(step) /* {{{ */

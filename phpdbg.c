@@ -1260,8 +1260,9 @@ phpdbg_main:
 			phpdbg_welcome((cleaning > 0) TSRMLS_CC);
 		}
 
+		/* auto compile */
 		if (PHPDBG_G(exec)) {
-			PHPDBG_COMMAND_HANDLER(compile)(NULL TSRMLS_CC);
+			phpdbg_compile(TSRMLS_C);
 		}
 
 		/* initialize from file */
