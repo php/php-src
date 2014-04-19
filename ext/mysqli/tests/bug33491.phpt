@@ -1,7 +1,7 @@
 --TEST--
 Bug #33491 (extended mysqli class crashes when result is not object)
 --INI--
-error_reporting=4095
+error_reporting=4096
 --SKIPIF--
 <?php 
 require_once('skipif.inc'); 
