@@ -2463,7 +2463,26 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+
+		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		FREE_OP2();
+		FREE_OP1_IF_VAR();
+		CHECK_EXCEPTION();
+
+		/* Skip over arguments until fcall opcode, return NULL */
+		do {
+			ZEND_VM_INC_OPCODE();
+			opline++;
+		} while (ZEND_DO_FCALL_BY_NAME != opline->opcode);
+
+		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
+		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
+		Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
+		Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
+		EX_T(opline->result.var).var.fcall_returned_reference = 0;
+		EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
+		ZEND_VM_NEXT_OPCODE();
+		return;
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
