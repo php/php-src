@@ -9,6 +9,6 @@ function answer(): int {
 }
 
 --EXPECTF--
-Fatal error: the function answer was expected to return an object of class int and returned an integer in %s on line 4
+Fatal error: the function answer was expected to return an object of class int and returned an integer in %s on line %d
 
 

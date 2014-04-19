@@ -9,6 +9,6 @@ function foo(): bar {
 }
 
 --EXPECTF--
-Fatal error: the function foo was expected to return an object of class bar and returned null in %s on line 4
+Fatal error: the function foo was expected to return an object of class bar and returned null in %s on line %d
 
 

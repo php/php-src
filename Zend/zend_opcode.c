@@ -726,6 +726,17 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 					}
 
 					opline->opcode = ZEND_GENERATOR_RETURN;
+				} else if (op_array->return_hint.used &&
+					!(op_array->fn_flags & ZEND_ACC_ABSTRACT) &&
+					!(op_array->fn_flags & ZEND_ACC_HAS_RETURN_HINT)) {
+					if (opline->op1_type == IS_UNUSED) {
+						zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)op_array, NULL, NULL TSRMLS_CC);
+					} else if (opline->op1_type == IS_CONST) {
+						if ((Z_TYPE_P(opline->op1.zv) & ~IS_CONSTANT_TYPE_MASK) != op_array->return_hint.type) {
+							zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)op_array, opline->op1.zv, NULL TSRMLS_CC);
+						}
+					}
+					op_array->fn_flags |= ZEND_ACC_HAS_RETURN_HINT;
 				}
 				break;
 		}

@@ -10,7 +10,7 @@ function get_config(): array {
 
 
 --EXPECTF--
-Fatal error: the function get_config was expected to return an array and returned an integer in %s on line 4
+Fatal error: the function get_config was expected to return an array and returned an integer in %s on line %d
 
 
 

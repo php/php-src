@@ -2883,19 +2883,6 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	start_op_number = get_next_op_number(CG(active_op_array));
 
-	if (CG(active_op_array)->return_hint.used &&
-		!(CG(active_op_array)->fn_flags & ZEND_ACC_ABSTRACT) && 
-		!(CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_HINT)) {
-		if (!expr || expr->op_type == IS_UNUSED) {
-			zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)CG(active_op_array), NULL, NULL TSRMLS_CC);
-		} else if (expr && expr->op_type == IS_CONST) {
-			if ((Z_TYPE(expr->u.constant) & ~IS_CONSTANT_TYPE_MASK) != CG(active_op_array)->return_hint.type) {
-				zend_return_hint_error(E_COMPILE_ERROR, (zend_function*)CG(active_op_array), &expr->u.constant, NULL TSRMLS_CC);
-			}
-		}
-		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_RETURN_HINT;
-	}
-
 #ifdef ZTS
 	zend_stack_apply_with_argument(&CG(switch_cond_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_switch_expr TSRMLS_CC);
 	zend_stack_apply_with_argument(&CG(foreach_copy_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_foreach_copy TSRMLS_CC);
