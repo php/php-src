@@ -929,7 +929,6 @@ phpdbg_main:
 	step = 0;
 	sapi_name = NULL;
 
-
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
@@ -1253,6 +1252,10 @@ phpdbg_main:
 		if (show_banner) {
 			/* print blurb */
 			phpdbg_welcome((cleaning > 0) TSRMLS_CC);
+		}
+
+		if (PHPDBG_G(exec)) {
+			PHPDBG_COMMAND_HANDLER(compile)(NULL TSRMLS_CC);
 		}
 
 		/* initialize from file */
