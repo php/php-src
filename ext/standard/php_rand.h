@@ -27,6 +27,7 @@
 
 #include <stdlib.h>
 #include "basic_functions.h"
+#include "php_lcg.h"
 
 /* System Rand functions */
 #ifndef RAND_MAX
