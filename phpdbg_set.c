@@ -36,6 +36,7 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss"),
 	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b"),
 #endif
+	PHPDBG_SET_COMMAND_D(step,         "usage: set oplog  [<on|off]",             's', set_step,         NULL, "|b"),
 	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s"),
 	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b"),
 	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b"),
@@ -96,6 +97,20 @@ PHPDBG_SET(breaks) /* {{{ */
 			phpdbg_error(
 				"set break used incorrectly: set break [id] <on|off>");
 	}
+
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_SET(step) /* {{{ */
+{
+	if (param->num) {
+		PHPDBG_G(flags) |= PHPDBG_IS_OPLINE_STEPPING;
+	} else {
+		PHPDBG_G(flags) &= ~PHPDBG_IS_OPLINE_STEPPING;
+	}
+
+	phpdbg_notice("Stepping opcode-by-opcode %s",
+		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
 
 	return SUCCESS;
 } /* }}} */

@@ -318,30 +318,29 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "**Information**" CR
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
-"  **help**     provide help on a topic" CR
-"  **print**    print argument " CR
-"  **frame**    select a stack frame and print a stack frame summary" CR CR
+"  **print**    show opcodes " CR
+"  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **help**     provide help on a topic" CR CR
 
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
 "  **run**      attempt execution" CR
 "  **step**     continue execution until other line is reached" CR
-"  **next**     continue execution" CR
+"  **continue** continue execution" CR
 "  **until**    continue execution up to the given location" CR
 "  **finish**   continue up to end of the current execution frame" CR
 "  **leave**    continue up to end of the current execution frame and halt after the calling instruction" CR
 "  **break**    set a breakpoint at the specified target" CR
 "  **watch**    set a watchpoint on $variable" CR
-"  **ev**       evaluate some code" CR
 "  **clear**    clear one or all breakpoints" CR
 "  **clean**    clean the execution environment" CR CR
 
 "**Miscellaneous**" CR
-"  **quiet**    silence some output" CR
 "  **set**      set the phpdbg configuration" CR
 "  **source**   execute a phpdbginit script" CR
 "  **register** register a phpdbginit function as a command alias" CR
 "  **sh**       shell a command" CR
+"  **ev**       evaluate some code" CR
 "  **quit**     exit phpdbg" CR CR
 
 "Type **help <command>** or (**help alias**) to get detailed help on any of the above commands, "
@@ -714,12 +713,12 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 //*********** what is the difference between n and s ???
-{"next",
-"The **next** command causes control to be passed back to the vm, continuing execution.  The next "
-"opline will be executed if **step 1** is set.  Otherwise execution will continue to the next "
+{"continue",
+"The **continue** command causes control to be passed back to the vm, continuing execution.  The next "
+"opline will be executed if **step** is set **on**.  Otherwise execution will continue to the next "
 "breakpoint or script completion" CR CR
 
-"Note **next** will trigger a \"not running\" error if not executing."
+"Note **continue** will trigger a \"not running\" error if not executing."
 },
 
 {"print",
@@ -807,6 +806,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "   **break**      **b**     set break **id** <on|off>" CR
 "   **breaks**     **B**     set breaks <on|off>" CR
 "   **quiet**      **q**     set quiet <on|off>" CR
+"   **step**       **s**     step opcode-by-opcode <on|off>" CR
 "   **refcount**   **r**     set refcount <on|off> (refcount display upon hit watchpoint)" CR CR
 
 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "

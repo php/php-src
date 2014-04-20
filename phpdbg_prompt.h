@@ -30,9 +30,8 @@ void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
-PHPDBG_COMMAND(compile);
 PHPDBG_COMMAND(step);
-PHPDBG_COMMAND(next);
+PHPDBG_COMMAND(continue);
 PHPDBG_COMMAND(run);
 PHPDBG_COMMAND(ev);
 PHPDBG_COMMAND(until);
