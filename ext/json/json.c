@@ -424,9 +424,10 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
 					if (strchr(tmp, '.') == NULL) {
 						char *ntmp = (char *)emalloc(l + 3);
-						strcpy(ntmp, tmp);
-						strcat(ntmp, ".0");
-						len += 2;
+						memcpy(ntmp, tmp, len);
+						memcpy(ntmp + l, ".0", sizeof(".0"));
+						l += 2;
+						ntmp[l] = '\0';
 						efree(tmp);
 						tmp = ntmp;
 					}
@@ -640,9 +641,10 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 					len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
 					if (strchr(d, '.') == NULL) {
 						char *nd = (char *)emalloc(len + 3);
-						strcpy(nd, d);
-						strcat(nd, ".0");
+						memcpy(nd, d, len);
+						memcpy(nd + len, ".0", sizeof(".0"));
 						len += 2;
+						nd[len] = '\0';
 						efree(d);
 						d = nd;
 					}
