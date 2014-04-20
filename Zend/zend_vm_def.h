@@ -2860,14 +2860,17 @@ static inline void zend_return_hint_check(zend_execute_data *execute_data, zval 
 				
 				if (UNEXPECTED(Z_TYPE_P(retval_ptr) != IS_OBJECT)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+					break;
 				}
 				
 				if (UNEXPECTED(zend_lookup_class(return_hint->class_name, return_hint->class_name_len, &ce TSRMLS_CC) != SUCCESS)) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, NULL, "the class could not be found" TSRMLS_CC);
+					break;
 				}
 				
 				if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(retval_ptr), *ce TSRMLS_CC))) {
 					zend_return_hint_error(E_RECOVERABLE_ERROR, EX(function_state).function, retval_ptr, NULL TSRMLS_CC);
+					break;
 				}
 			}
 		}
