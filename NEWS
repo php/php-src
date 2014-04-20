@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #67081 (DOMDocumentType->internalSubset returns entire DOCTYPE tag,
     not only the subset). (Anatol)
 
+- FPM:
+  . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
+    (Julio Pintos)
+
 ?? ??? 2014, PHP 5.5.12
 - Core:
   . Fixed bug #61019 (Out of memory on command stream_get_contents). (Mike)
