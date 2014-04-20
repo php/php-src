@@ -173,6 +173,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
+	zend_uint last_line;                         /* last executed line */
 
 #ifndef _WIN32
 	struct sigaction old_sigsegv_signal;         /* segv signal handler */

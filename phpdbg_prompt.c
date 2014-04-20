@@ -1325,10 +1325,10 @@ zend_vm_enter:
 		{
 			phpdbg_breakbase_t *brake;
 
-			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) &&
-				(brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))) {
-				phpdbg_hit_breakpoint(
-					brake, 1 TSRMLS_CC);
+			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK)
+			    && (brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))
+			    && (brake->type != PHPDBG_BREAK_FILE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
+				phpdbg_hit_breakpoint(brake, 1 TSRMLS_CC);
 				DO_INTERACTIVE();
 			}
 		}
@@ -1344,6 +1344,8 @@ next:
 			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
 			DO_INTERACTIVE();
 		}
+
+		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
