@@ -801,13 +801,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "   **Type**    **Alias**    **Purpose**" CR
 "   **prompt**     **p**     set the prompt" CR
 "   **color**      **c**     set color  <element> <color>" CR
-"   **colors**     **C**     set colors <on|off>" CR
-"   **oplog**      **O**     set oplog output" CR
+"   **colors**     **C**     set colors [<on|off>]" CR
+"   **oplog**      **O**     set oplog [output]" CR
 "   **break**      **b**     set break **id** <on|off>" CR
-"   **breaks**     **B**     set breaks <on|off>" CR
-"   **quiet**      **q**     set quiet <on|off>" CR
-"   **step**       **s**     step opcode-by-opcode <on|off>" CR
-"   **refcount**   **r**     set refcount <on|off> (refcount display upon hit watchpoint)" CR CR
+"   **breaks**     **B**     set breaks [<on|off>]" CR
+"   **quiet**      **q**     set quiet [<on|off>]" CR
+"   **stepping**   **s**     set stepping [<opcode|line>]" CR
+"   **refcount**   **r**     set refcount [<on|off>] " CR CR
 
 "Valid colors are **none**, **white**, **red**, **green**, **yellow**, **blue**, **purple**, "
 "**cyan** and **black**.  All colours except **none** can be followed by an optional "
@@ -825,6 +825,9 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "     $P S c error red-bold" CR
 "     Use red bold for errors" CR CR
+
+"     $P S refcount on" CR
+"     Enable refcount display when hitting watchpoints" CR CR
 
 "     $P S b 4 off" CR
 "     Temporarily disable breakpoint 4.  This can be subsequently reenabled by a **s b 4 on**." CR

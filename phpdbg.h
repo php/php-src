@@ -121,7 +121,7 @@
 #define PHPDBG_IN_EVAL                (1<<11)
 
 #define PHPDBG_IS_STEPPING            (1<<12)
-#define PHPDBG_IS_OPLINE_STEPPING     (1<<13)
+#define PHPDBG_STEP_OPCODE            (1<<13)
 #define PHPDBG_IS_QUIET               (1<<14)
 #define PHPDBG_IS_QUITTING            (1<<15)
 #define PHPDBG_IS_COLOURED            (1<<16)

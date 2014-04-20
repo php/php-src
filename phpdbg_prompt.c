@@ -1307,7 +1307,7 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
-		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && execute_data->opline->lineno != PHPDBG_G(last_line)) {
+		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && (PHPDBG_G(flags) & PHPDBG_STEP_OPCODE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
 			DO_INTERACTIVE();
 		}

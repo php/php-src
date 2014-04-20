@@ -26,7 +26,6 @@
 #define PHPDBG_SET(name) PHPDBG_COMMAND(set_##name)
 
 PHPDBG_SET(prompt);
-PHPDBG_SET(step);
 #ifndef _WIN32
 PHPDBG_SET(color);
 PHPDBG_SET(colors);
@@ -35,6 +34,7 @@ PHPDBG_SET(oplog);
 PHPDBG_SET(break);
 PHPDBG_SET(breaks);
 PHPDBG_SET(quiet);
+PHPDBG_SET(stepping);
 PHPDBG_SET(refcount);
 
 extern const phpdbg_command_t phpdbg_set_commands[];
