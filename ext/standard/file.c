@@ -1660,7 +1660,7 @@ PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_cont
 		return FAILURE;
 	}
 
-	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET, &dest_s, ctx)) {
+	switch (php_stream_stat_path_ex(dest, PHP_STREAM_URL_STAT_QUIET | PHP_STREAM_URL_STAT_NOCACHE, &dest_s, ctx)) {
 		case -1:
 			/* non-statable stream */
 			goto safe_to_copy;
