@@ -325,7 +325,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "**Starting and Stopping Execution**" CR
 "  **exec**     set execution context" CR
 "  **run**      attempt execution" CR
-"  **step**     Enable or disable per opcode stepping mode" CR
+"  **step**     continue execution until other line is reached" CR
 "  **next**     continue execution" CR
 "  **until**    continue execution up to the given location" CR
 "  **finish**   continue up to end of the current execution frame" CR
@@ -861,20 +861,12 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"step",
-"You can enable and disable **stepping** mode at the phpdbg prompt during execution.  When "
-"stepping mode is enabled, execution will be step through opcode by opcode." CR CR
+"Execute opcodes until beginning on next line" CR CR
 
 "**Examples**" CR CR
-"    $P step 1" CR
-"    $P s 1" CR
-"    Will enable stepping" CR CR
 
-"While stepping is enabled you are presented with an interactive prompt after the execution of "
-"each opcode." CR CR
-
-"Note that when executing the **finish** and **leave** commands, and oplines within the current "
-"execution frame will be skipped in line with the command behaviour. Stepping will resume on exit "
-"from the current frame." 
+"    $P s" CR
+"    Will continue and break again in the next encountered line" CR CR
 },
 
 {"until",
