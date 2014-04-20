@@ -375,7 +375,10 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				php_hash_environment(TSRMLS_C);
 
 				phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-				phpdbg_compile(TSRMLS_C);
+
+				if (phpdbg_compile(TSRMLS_C) == FAILURE) {
+					phpdbg_error("Failed to compile %s", PHPDBG_G(exec));
+				}
 			} else {
 				phpdbg_notice("Execution context not changed");
 			}
