@@ -44,7 +44,7 @@ int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
 	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
-	PHPDBG_COMMAND_D(next,    "continue execution",                       'n', NULL, 0),
+	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s"),
 	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0, NULL, "i"),
 	PHPDBG_COMMAND_D(until,   "continue past the current line",           'u', NULL, 0),
@@ -433,7 +433,7 @@ PHPDBG_COMMAND(step) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_COMMAND(next) /* {{{ */
+PHPDBG_COMMAND(continue) /* {{{ */
 {
 	return PHPDBG_NEXT;
 } /* }}} */
