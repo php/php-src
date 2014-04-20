@@ -40,6 +40,7 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b"),
 	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b"),
 	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(stepping,     "usage: set stepping [<line|op>]",         's', set_stepping,     NULL, "|s"),
 	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b"),
 	PHPDBG_END_COMMAND
 };
@@ -196,7 +197,8 @@ PHPDBG_SET(oplog) /* {{{ */
 PHPDBG_SET(quiet) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("Quietness %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+		phpdbg_writeln("Quietness %s", 
+			PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
 	} else switch (param->type) {
 		case NUMERIC_PARAM: {
 			if (param->num) {
@@ -212,10 +214,34 @@ PHPDBG_SET(quiet) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_SET(stepping) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_writeln("Stepping %s",
+			PHPDBG_G(flags) & PHPDBG_STEP_OPCODE ? "opcode" : "line");
+	} else switch (param->type) {
+		case STR_PARAM: {	
+			if ((param->len == sizeof("opcode")-1) &&
+				(memcmp(param->str, "opcode", sizeof("opcode")) == SUCCESS)) {
+				PHPDBG_G(flags) |= PHPDBG_STEP_OPCODE;
+			} else if ((param->len == sizeof("line")-1) &&
+				(memcmp(param->str, "line", sizeof("line")) == SUCCESS)) {
+				PHPDBG_G(flags) &= ~PHPDBG_STEP_OPCODE;
+			} else {
+				phpdbg_error("usage set stepping [<opcode|line>]");
+			}
+		} break;
+
+		phpdbg_default_switch_case();
+	}
+
+	return SUCCESS;
+} /* }}} */
+
 PHPDBG_SET(refcount) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("Showing refcounts on watchpoints %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
+		phpdbg_writeln("Refcount %s", PHPDBG_G(flags) & PHPDBG_IS_QUIET ? "on" : "off");
 	} else switch (param->type) {
 		case NUMERIC_PARAM: {
 			if (param->num) {

@@ -1230,6 +1230,7 @@ zend_vm_enter:
 #endif
 
 #define DO_INTERACTIVE() do { \
+	PHPDBG_G(lline) = zend_get_executed_lineno(TSRMLS_C);\
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
 		phpdbg_list_file( \
 			zend_get_executed_filename(TSRMLS_C), \
@@ -1331,7 +1332,10 @@ zend_vm_enter:
 		}
 
 		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
-			DO_INTERACTIVE();
+			if ((PHPDBG_G(flags) & PHPDBG_STEP_OPCODE) || 
+				(execute_data->opline->lineno != PHPDBG_G(lline))) {
+				DO_INTERACTIVE();	
+			}
 		}
 
 next:

@@ -34,6 +34,7 @@ PHPDBG_SET(oplog);
 PHPDBG_SET(break);
 PHPDBG_SET(breaks);
 PHPDBG_SET(quiet);
+PHPDBG_SET(stepping);
 PHPDBG_SET(refcount);
 
 extern const phpdbg_command_t phpdbg_set_commands[];

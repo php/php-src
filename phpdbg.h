@@ -140,6 +140,7 @@
 #define PHPDBG_IS_DISCONNECTED        (1<<27)
 
 #define PHPDBG_SHOW_REFCOUNTS         (1<<28)
+#define PHPDBG_STEP_OPCODE			  (1<<29)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
 #define PHPDBG_BP_RESOLVE_MASK		  (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
@@ -200,6 +201,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	phpdbg_command_t *lcmd;                      /* last command */
 	phpdbg_param_t    lparam;                    /* last param */
+	zend_ulong        lline;                     /* last line */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
