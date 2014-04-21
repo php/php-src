@@ -1920,7 +1920,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ */
-void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {			
+void zend_do_function_return_hint(znode *return_hint, zend_bool return_reference TSRMLS_DC) {			
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
 
@@ -1936,6 +1936,9 @@ void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {
 				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
 			}
 		}
+		
+		if (return_reference)
+			CG(active_op_array)->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
 } /* }}} */
 

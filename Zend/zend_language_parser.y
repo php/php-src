@@ -417,8 +417,8 @@ function_return_type:
 ;
 
 function_return_hint:
-		/* empty */                 { $$.op_type = IS_UNUSED; }
-	|  ':' function_return_type     { zend_do_function_return_hint(&$2 TSRMLS_CC); }
+		/* empty */                              { $$.op_type = IS_UNUSED; }
+	|  ':' is_reference function_return_type     { zend_do_function_return_hint(&$3, $2.op_type TSRMLS_CC); }
 ;
 
 unticked_function_declaration_statement:
