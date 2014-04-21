@@ -552,7 +552,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	struct pdo_column_data *col = &stmt->columns[colno];
 	RETCODE rc;
 	SWORD	colnamelen;
-	SDWORD	colsize;
+	SQLULEN	colsize;
 	SQLLEN displaysize;
 
 	rc = SQLDescribeCol(S->stmt, colno+1, S->cols[colno].colname,

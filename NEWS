@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64604 (parse_url is inconsistent with specified port).
     (Ingo Walz)
+  . Fixed bug #65701 (copy() doesn't work when destination filename is created
+    by tempnam()). (Boro Sitnikovski)
   . Fixed bug #66015 (Unexpected array indexing in class's static property). (Bob)
   . Added (constant) string/array dereferencing to static scalar expressions
     to complete the set; now possible thanks to bug #66015 being fixed. (Bob)
@@ -18,6 +20,7 @@ PHP                                                                        NEWS
     height). (Gabor Buella)
   . Fixed bug #67064  (Countable interface prevents using 2nd parameter
     ($mode) of count() function). (Bob)
+  . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
 
 - cURL:
   . Fixed bug #66562 (curl_exec returns differently than curl_multi_getcontent).
@@ -37,6 +40,8 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #66482 (unknown entry 'priority' in php-fpm.conf).
+  . Fixed bug #66908 (php-fpm reload leaks epoll_create() file descriptor).
+    (Julio Pintos)
 
 - JSON:
   . Fixed bug #66021 (Blank line inside empty array/object when
@@ -56,11 +61,15 @@ PHP                                                                        NEWS
   . Fixed bug #66604 ('pdo/php_pdo_error.h' not copied to the include dir).
     (Matteo)
 
+- PDO-ODBC:
+  . Fixed bug #50444 (PDO-ODBC changes for 64-bit). 
+
+- Phar:
+  . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent
+    in its name). (PR #588)
+
 - SQLite:
   . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
-
-- Standard:
-  . Fixed bug #67072 (Echoing unserialized "SplFileObject" crash). (Anatol)
 
 - Apache2 Handler SAPI:
   . Fixed Apache log issue caused by APR's lack of support for %zu
