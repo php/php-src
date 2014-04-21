@@ -2400,7 +2400,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 		}
 	} else {
 string_cmp:
-		Z_LVAL_P(result) = zend_binary_zval_strcmp(s1, s2);
+		Z_LVAL_P(result) = zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
 		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_LVAL_P(result)));
 	}
 }
