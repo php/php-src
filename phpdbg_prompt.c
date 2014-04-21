@@ -43,7 +43,7 @@ int yyparse(phpdbg_param_t *stack, yyscan_t scanner);
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,    "set execution context",                    'e', NULL, "s"),
-	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, "b"),
+	PHPDBG_COMMAND_D(step,    "step through execution",                   's', NULL, 0),
 	PHPDBG_COMMAND_D(continue,"continue execution",                       'c', NULL, 0),
 	PHPDBG_COMMAND_D(run,     "attempt execution",                        'r', NULL, "|s"),
 	PHPDBG_COMMAND_D(ev,      "evaluate some code",                        0, NULL, "i"),
@@ -375,7 +375,10 @@ PHPDBG_COMMAND(exec) /* {{{ */
 				php_hash_environment(TSRMLS_C);
 
 				phpdbg_notice("Set execution context: %s", PHPDBG_G(exec));
-				phpdbg_compile(TSRMLS_C);
+
+				if (phpdbg_compile(TSRMLS_C) == FAILURE) {
+					phpdbg_error("Failed to compile %s", PHPDBG_G(exec));
+				}
 			} else {
 				phpdbg_notice("Execution context not changed");
 			}
@@ -421,16 +424,9 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 PHPDBG_COMMAND(step) /* {{{ */
 {
-	if (param->num) {
-		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
-	} else {
-		PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
-	}
+	PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 
-	phpdbg_notice("Stepping %s",
-		(PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-
-	return SUCCESS;
+	return PHPDBG_NEXT;
 } /* }}} */
 
 PHPDBG_COMMAND(continue) /* {{{ */
@@ -1230,7 +1226,6 @@ zend_vm_enter:
 #endif
 
 #define DO_INTERACTIVE() do { \
-	PHPDBG_G(lline) = zend_get_executed_lineno(TSRMLS_C);\
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \
 		phpdbg_list_file( \
 			zend_get_executed_filename(TSRMLS_C), \
@@ -1312,6 +1307,11 @@ zend_vm_enter:
 		phpdbg_print_opline_ex(
 			execute_data, &vars, 0 TSRMLS_CC);
 
+		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING && (PHPDBG_G(flags) & PHPDBG_STEP_OPCODE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
+			PHPDBG_G(flags) &= ~PHPDBG_IS_STEPPING;
+			DO_INTERACTIVE();
+		}
+
 		/* check if some watchpoint was hit */
 		{
 			if (phpdbg_print_changed_zvals(TSRMLS_C) == SUCCESS) {
@@ -1323,18 +1323,11 @@ zend_vm_enter:
 		{
 			phpdbg_breakbase_t *brake;
 
-			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK) &&
-				(brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))) {
-				phpdbg_hit_breakpoint(
-					brake, 1 TSRMLS_CC);
+			if ((PHPDBG_G(flags) & PHPDBG_BP_MASK)
+			    && (brake = phpdbg_find_breakpoint(execute_data TSRMLS_CC))
+			    && (brake->type != PHPDBG_BREAK_FILE || execute_data->opline->lineno != PHPDBG_G(last_line))) {
+				phpdbg_hit_breakpoint(brake, 1 TSRMLS_CC);
 				DO_INTERACTIVE();
-			}
-		}
-
-		if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
-			if ((PHPDBG_G(flags) & PHPDBG_STEP_OPCODE) || 
-				(execute_data->opline->lineno != PHPDBG_G(lline))) {
-				DO_INTERACTIVE();	
 			}
 		}
 
@@ -1345,6 +1338,8 @@ next:
 			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
 			DO_INTERACTIVE();
 		}
+
+		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
