@@ -135,27 +135,27 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
 							fprintf(handle,
-								"break file %s:%lu\n",
+								"break %s:%lu\n",
 								((phpdbg_breakfile_t*)brake)->filename,
 								((phpdbg_breakfile_t*)brake)->line);
 						} break;
 
 						case PHPDBG_BREAK_SYM: {
 							fprintf(handle,
-								"break func %s\n",
+								"break %s\n",
 								((phpdbg_breaksymbol_t*)brake)->symbol);
 						} break;
 
 						case PHPDBG_BREAK_METHOD: {
 							fprintf(handle,
-								"break method %s::%s\n",
+								"break %s::%s\n",
 								((phpdbg_breakmethod_t*)brake)->class_name,
 								((phpdbg_breakmethod_t*)brake)->func_name);
 						} break;
 
 						case PHPDBG_BREAK_METHOD_OPLINE: {
 							fprintf(handle,
-								"break address %s::%s#%ld\n",
+								"break %s::%s#%ld\n",
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
@@ -163,21 +163,21 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 
 						case PHPDBG_BREAK_FUNCTION_OPLINE: {
 							fprintf(handle,
-								"break address %s#%ld\n",
+								"break %s#%ld\n",
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
 							fprintf(handle,
-								"break address %s:%ld\n",
+								"break %s:#%ld\n",
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_OPCODE: {
 							fprintf(handle,
-								"break op %s\n",
+								"break %s\n",
 								((phpdbg_breakop_t*)brake)->name);
 						} break;
 
@@ -209,7 +209,7 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 								}
 							} else {
 								fprintf(
-									handle, "break on %s\n", conditional->code);
+									handle, "break if %s\n", conditional->code);
 							}
 						} break;
 					}
@@ -221,14 +221,20 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 
 PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
-	struct stat sb;
-
-	if (VCWD_STAT(path, &sb) != FAILURE) {
-		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
+	php_stream_statbuf ssb;
+	char realpath[MAXPATHLEN];
+	
+	if (php_stream_stat_path(path, &ssb) != FAILURE) {
+		if (ssb.sb.st_mode & (S_IFREG|S_IFLNK)) {
 			HashTable *broken;
 			phpdbg_breakfile_t new_break;
-			size_t path_len = strlen(path);
-
+			size_t path_len = 0L;
+			
+			if (VCWD_REALPATH(path, realpath)) {
+				path = realpath;
+			}
+			path_len = strlen(path);
+			
 			if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],
 				path, path_len, (void**)&broken) == FAILURE) {
 				HashTable breaks;
@@ -324,9 +330,9 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char 
 		PHPDBG_BREAK_MAPPING(new_break.id, class_table);
 	} else {
 		phpdbg_notice("Breakpoint exists at %s::%s", class_name, func_name);
-    }
+	}
 
-    efree(lcname);
+	efree(lcname);
 } /* }}} */
 
 PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
@@ -355,7 +361,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	phpdbg_breakline_t opline_break;
-	if (op_array->last < brake->opline_num) {
+	if (op_array->last <= brake->opline_num) {
 		if (brake->class_name == NULL) {
 			phpdbg_error("There are only %d oplines in function %s (breaking at opline %ld impossible)", op_array->last, brake->func_name, brake->opline_num);
 		} else if (brake->func_name == NULL) {
@@ -760,56 +766,26 @@ PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_l
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
-	if (input->argc > 3 && phpdbg_argv_is(2, "if")) {
-		phpdbg_breakcond_t new_break;
-		phpdbg_param_t new_param;
-
-		zend_ulong expr_hash = 0L;
-		size_t expr_len;
-		const char *join = strstr(input->string, "if");
-		const char *expr = (join) + sizeof("if");
-
-		expr_len = strlen(expr);
-		expr = phpdbg_trim(expr, expr_len, &expr_len);
-		expr_hash = zend_inline_hash_func(expr, expr_len);
-
-		{
-			/* get a clean parameter from input string */
-			size_t sparam_len = 0L;
-			char *sparam = input->string;
-
-			sparam[
-				strstr(input->string, " ") - input->string] = 0;
-			sparam_len = strlen(sparam);
-
-			switch (phpdbg_parse_param(sparam, sparam_len, &new_param TSRMLS_CC)) {
-				case EMPTY_PARAM:
-				case NUMERIC_PARAM:
-					phpdbg_clear_param(
-						&new_param TSRMLS_CC);
-					goto usage;
-
-				default: { /* do nothing */ } break;
-			}
-
-			expr_hash += phpdbg_hash_param(&new_param TSRMLS_CC);
-		}
-
-		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], expr_hash)) {
+	phpdbg_breakcond_t new_break;
+	phpdbg_param_t *condition;
+	zend_ulong hash = 0L;
+	
+	if (param->next) {
+		condition = param->next;
+		hash = zend_inline_hash_func(condition->str, condition->len);
+		
+		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
 			phpdbg_create_conditional_break(
-				&new_break, &new_param, expr, expr_len, expr_hash TSRMLS_CC);
+				&new_break, param, 
+					condition->str, condition->len, hash TSRMLS_CC);
 		} else {
 			phpdbg_notice(
-				"Conditional break %s exists at the specified location", expr);
-		}
-
-		phpdbg_clear_param(&new_param TSRMLS_CC);
-	} else {
-usage:
-		phpdbg_error("usage: break at <func|method|file:line|address> if <expression>");
+				"Conditional break %s exists at the specified location", condition->str);
+		}	
 	}
+	
 } /* }}} */
 
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
@@ -992,7 +968,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 
 	for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position);
 	     zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], (void*)&bp, &position) == SUCCESS;
-             zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
+	     zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], &position)) {
 		zval *retval = NULL;
 		int orig_interactive = CG(interactive);
 		zval **orig_retval = EG(return_value_ptr_ptr);
