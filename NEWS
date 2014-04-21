@@ -64,6 +64,10 @@ PHP                                                                        NEWS
 - PDO-ODBC:
   . Fixed bug #50444 (PDO-ODBC changes for 64-bit). 
 
+- Phar:
+  . Fix bug #64498 ($phar->buildFromDirectory can't compress file with an accent
+    in its name). (PR #588)
+
 - SQLite:
   . Fixed bug #66967 (Updated bundled libsqlite to 3.8.4.3). (Anatol)
 
