@@ -711,11 +711,13 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "populate these tables for a given execution context."
 },
 
-//*********** what is the difference between n and s ???
 {"continue",
-"The **continue** command causes control to be passed back to the vm, continuing execution.  The next "
-"opline will be executed if **step** is set **on**.  Otherwise execution will continue to the next "
-"breakpoint or script completion" CR CR
+"Continue with execution after hitting a break or watchpoint" CR CR
+
+"**Examples**" CR CR
+"    $P continue" CR
+"    $P c" CR
+"    Continue executing until the next break or watchpoint" CR CR
 
 "Note **continue** will trigger a \"not running\" error if not executing."
 },
@@ -863,7 +865,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"step",
-"Execute opcodes until beginning on next line" CR CR
+"Execute opcodes until next line" CR CR
 
 "**Examples**" CR CR
 

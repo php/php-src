@@ -424,7 +424,9 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 PHPDBG_COMMAND(step) /* {{{ */
 {
-	PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	if (EG(in_execution)) {
+		PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
+	}
 
 	return PHPDBG_NEXT;
 } /* }}} */
