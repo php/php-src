@@ -2273,7 +2273,7 @@ PHP_FUNCTION(substr_replace)
 	int argc = ZEND_NUM_ARGS();
 	zend_string *result;
 
-	HashPosition pos_str, pos_from, pos_repl, pos_len;
+	HashPosition pos_from, pos_repl, pos_len;
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzz|z", &str, &repl, &from, &len) == FAILURE) {
@@ -2399,8 +2399,7 @@ PHP_FUNCTION(substr_replace)
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(repl), &pos_repl);
 		}
 
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(str), &pos_str);
-		while ((tmp_str = zend_hash_get_current_data_ex(Z_ARRVAL_P(str), &pos_str)) != NULL) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(str), num_index, str_index, tmp_str) {
 			zval *orig_str;
 			zval dummy;
 
@@ -2542,8 +2541,11 @@ PHP_FUNCTION(substr_replace)
 
 			result->val[result->len] = '\0';
 
-			if (zend_hash_get_current_key_ex(Z_ARRVAL_P(str), &str_index, &num_index, 0, &pos_str) == HASH_KEY_IS_STRING) {
-				add_assoc_str_ex(return_value, str_index->val, str_index->len, result);
+			if (str_index) {
+				zval tmp;
+
+				ZVAL_STR(&tmp, result);
+				zend_symtable_update(Z_ARRVAL_P(return_value), str_index, &tmp);
 			} else {
 				add_index_str(return_value, num_index, result);
 			}
@@ -2553,8 +2555,7 @@ PHP_FUNCTION(substr_replace)
 			} else {
 //???			Z_SET_ISREF_TO_P(orig_str, was_ref);
 			}
-			zend_hash_move_forward_ex(Z_ARRVAL_P(str), &pos_str);
-		} /*while*/
+		} ZEND_HASH_FOREACH_END();
 	} /* if */
 }
 /* }}} */
@@ -3932,30 +3933,22 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	/* if subject is an array */
 	if (Z_TYPE_P(subject) == IS_ARRAY) {
 		array_init(return_value);
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(subject));
 
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
-		while ((subject_entry = zend_hash_get_current_data(Z_ARRVAL_P(subject))) != NULL) {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
 			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
 				php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 			} else {
 				ZVAL_COPY(&result, subject_entry);
 			}
 			/* Add to return array */
-			switch (zend_hash_get_current_key(Z_ARRVAL_P(subject), &string_key,
-												&num_key, 0)) {
-				case HASH_KEY_IS_STRING:
-					zend_hash_update(Z_ARRVAL_P(return_value), string_key, &result);
-					break;
-
-				case HASH_KEY_IS_LONG:
-					add_index_zval(return_value, num_key, &result);
-					break;
+			if (string_key) {
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, &result);
+			} else {
+				add_index_zval(return_value, num_key, &result);
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(subject));
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {	/* if subject is not an array */
 		php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL TSRMLS_CC);
 	}
