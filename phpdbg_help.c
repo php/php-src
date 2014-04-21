@@ -361,7 +361,6 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
 "  **-q**                          Supress welcome banner" CR
-"  **-e**      **-e**mytest.php        Set execution context" CR
 "  **-v**                          Enable oplog output" CR
 "  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR

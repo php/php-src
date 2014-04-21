@@ -569,7 +569,6 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'z', 1, "load zend_extension"},
 	/* phpdbg options */
 	{'q', 0, "no banner"},
-	{'e', 1, "exec"},
 	{'v', 0, "disable quietness"},
 	{'s', 0, "enable stepping"},
 	{'b', 0, "boring colours"},
@@ -983,16 +982,6 @@ phpdbg_main:
 
 			/* begin phpdbg options */
 
-			case 'e': { /* set execution context */
-				exec_len = strlen(php_optarg);
-				if (exec_len) {
-					if (exec) {
-						free(exec);
-					}
-					exec = strdup(php_optarg);
-				}
-			} break;
-
 			case 'S': { /* set SAPI name */
 				if (sapi_name) {
 					free(sapi_name);
@@ -1082,6 +1071,19 @@ phpdbg_main:
 				return 0;
 			} break;
 		}
+	}
+	
+	/* set exec if present on command line */
+	if ((argc > php_optind) && (strcmp(argv[php_optind-1],"--") != SUCCESS))
+	{
+		exec_len = strlen(argv[php_optind]);
+		if (exec_len) {
+			if (exec) {
+				free(exec);
+			}
+			exec = strdup(argv[php_optind]);
+		}
+		php_optind++;
 	}
 
 #ifndef _WIN32
