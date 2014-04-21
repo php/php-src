@@ -1216,31 +1216,43 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 	ulong num_idx;
 	zend_string *str_idx;
 	zend_bool strict = 0;		/* strict comparison or not */
-	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za|b", &value, &array, &strict) == FAILURE) {
 		return;
 	}
 
 	if (strict) {
-		is_equal_func = is_identical_function;
-	}
-
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-		is_equal_func(&res, value, entry TSRMLS_CC);
-		if (Z_LVAL(res)) {
-			if (behavior == 0) {
-				RETURN_TRUE;
-			} else {
-				if (str_idx) {
-					RETVAL_STR(STR_COPY(str_idx));
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			is_identical_function(&res, value, entry TSRMLS_CC);
+			if (Z_LVAL(res)) {
+				if (behavior == 0) {
+					RETURN_TRUE;
 				} else {
-					RETVAL_LONG(num_idx);
+					if (str_idx) {
+						RETVAL_STR(STR_COPY(str_idx));
+					} else {
+						RETVAL_LONG(num_idx);
+					}
+					return;
 				}
-				return;
 			}
-		}
-	} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			if (fast_equal_function(&res, value, entry TSRMLS_CC)) {
+				if (behavior == 0) {
+					RETURN_TRUE;
+				} else {
+					if (str_idx) {
+						RETVAL_STR(STR_COPY(str_idx));
+					} else {
+						RETVAL_LONG(num_idx);
+					}
+					return;
+				}
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	RETURN_FALSE;
 }
