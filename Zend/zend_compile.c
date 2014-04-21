@@ -3704,14 +3704,14 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		
 		if (!child->common.return_hint.used) {
 			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-			zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type missing", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type missing", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
 			efree(method_prototype);
 			return;
 		}
 		
 		if (child->common.return_hint.type != parent->common.return_hint.type) {
 			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-			zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type mismatch", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type mismatch", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
 			efree(method_prototype);
 			return;
 		}
@@ -3721,7 +3721,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			
 			if (zend_lookup_class(child->common.return_hint.class_name, child->common.return_hint.class_name_len, &cce TSRMLS_CC) != SUCCESS) {
 				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s declares return type %s, which could not be found", 
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
 					ZEND_FN_SCOPE_NAME(child), child->common.function_name, child->common.return_hint.class_name);
 				efree(method_prototype);
 				return;
@@ -3729,7 +3729,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			
 			if (zend_lookup_class(parent->common.return_hint.class_name, parent->common.return_hint.class_name_len, &pce TSRMLS_CC) != SUCCESS) {
 				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s declares return type %s, which could not be found", 
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s declares return type %s, which could not be found", 
 					ZEND_FN_SCOPE_NAME(parent), parent->common.function_name, parent->common.return_hint.class_name);
 				efree(method_prototype);
 				return;
@@ -3737,7 +3737,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			
 			if (!instanceof_function(*cce, *pce TSRMLS_CC)) {
 				char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
-				zend_error(E_COMPILE_ERROR, "Delcaration of %s::%s should be compatible with %s, return type mismatch", 
+				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type mismatch", 
 					ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
 				efree(method_prototype);
 				return;
