@@ -875,7 +875,7 @@ ZEND_API double zval_get_double(zval *op TSRMLS_DC) /* {{{ */
 			{
 				zval tmp;
 				ZVAL_DUP(&tmp, op);
-				convert_object_to_type(op, IS_DOUBLE, convert_to_double);
+				convert_object_to_type(&tmp, IS_DOUBLE, convert_to_double);
 
 				if (Z_TYPE(tmp) == IS_DOUBLE) {
 					return Z_DVAL(tmp);
@@ -901,7 +901,7 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 		case IS_STRING:
 			return STR_COPY(Z_STR_P(op));
 		case IS_BOOL:
-			if (Z_LVAL_P(op)) {
+			if (Z_BVAL_P(op)) {
 				return STR_INIT("1", 1, 0);
 			} else {
 				return STR_EMPTY_ALLOC();
@@ -932,17 +932,27 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 			return STR_INIT("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
 			zval tmp;
-			ZVAL_DUP(&tmp, op);
-			convert_object_to_type(op, IS_STRING, convert_to_string);
-
-			if (Z_TYPE(tmp) == IS_STRING) {
-				return Z_STR(tmp);
-			} else {
-				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name->val);
-				zval_dtor(&tmp);
-				return STR_INIT("Object", sizeof("Object")-1, 0);
+			//???if (zend_std_cast_object_tostring(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
+			//???	return Z_STR(tmp);
+			//???}
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
+					return Z_STR(tmp);
+				}
+			} else if (Z_OBJ_HT_P(op)->get) {
+				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp TSRMLS_CC);
+				if (Z_TYPE_P(z) != IS_OBJECT) {
+					zend_string *str = zval_get_string(z TSRMLS_CC);
+					zval_ptr_dtor(z);
+					return str;
+				}
+				zval_ptr_dtor(z);
 			}
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name->val);
+			return STR_EMPTY_ALLOC();
 		}
+		case IS_REFERENCE:
+			return zval_get_string(Z_REFVAL_P(op));
 		default:
 			//??? original code returns bool(0)
 			return STR_EMPTY_ALLOC();
