@@ -920,7 +920,7 @@ PHPDBG_COMMAND(quit) /* {{{ */
 		zend_bailout();
 	}
 
-	return SUCCESS;
+	return PHPDBG_NEXT;
 } /* }}} */
 
 PHPDBG_COMMAND(clean) /* {{{ */
@@ -1048,7 +1048,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 					case PHPDBG_FINISH:
 					case PHPDBG_UNTIL:
 					case PHPDBG_NEXT: {
-						if (!EG(in_execution)) {
+						if (!EG(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 							phpdbg_error("Not running");
 						}
 						goto out;
