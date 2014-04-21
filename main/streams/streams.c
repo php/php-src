@@ -1648,14 +1648,11 @@ int php_init_stream_wrappers(int module_number TSRMLS_DC)
 	/* Filters are cleaned up by the streams they're attached to */
 	le_stream_filter = zend_register_list_destructors_ex(NULL, NULL, "stream filter", module_number);
 
-	return (
-			zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS
-			&&
-			zend_hash_init(php_get_stream_filters_hash_global(), 0, NULL, NULL, 1) == SUCCESS
-			&&
-			zend_hash_init(php_stream_xport_get_hash(), 0, NULL, NULL, 1) == SUCCESS
-			&&
-			php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
+	zend_hash_init(&url_stream_wrappers_hash, 8, NULL, NULL, 1);
+	zend_hash_init(php_get_stream_filters_hash_global(), 8, NULL, NULL, 1);
+	zend_hash_init(php_stream_xport_get_hash(), 8, NULL, NULL, 1);
+
+	return (php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
 			&&
 			php_stream_xport_register("udp", php_stream_generic_socket_factory TSRMLS_CC) == SUCCESS
 #if defined(AF_UNIX) && !(defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE))

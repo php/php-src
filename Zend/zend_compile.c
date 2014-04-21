@@ -213,7 +213,7 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(current_import) = NULL;
 	CG(current_import_function) = NULL;
 	CG(current_import_const) = NULL;
-	zend_hash_init(&CG(const_filenames), 0, NULL, NULL, 0);
+	zend_hash_init(&CG(const_filenames), 8, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
@@ -235,7 +235,7 @@ void init_compiler(TSRMLS_D) /* {{{ */
 	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
-	zend_hash_init(&CG(filenames_table), 5, NULL, free_string_zval, 0);
+	zend_hash_init(&CG(filenames_table), 8, NULL, free_string_zval, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
 }
@@ -2364,7 +2364,7 @@ void zend_do_label(znode *label TSRMLS_DC) /* {{{ */
 
 	if (!CG(context).labels) {
 		ALLOC_HASHTABLE(CG(context).labels);
-		zend_hash_init(CG(context).labels, 4, NULL, ptr_dtor, 0);
+		zend_hash_init(CG(context).labels, 8, NULL, ptr_dtor, 0);
 	}
 
 	dest.brk_cont = CG(context).current_brk_cont;
@@ -4066,7 +4066,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 				}
 			} else {
 				ALLOC_HASHTABLE(*overriden);
-				zend_hash_init_ex(*overriden, 2, NULL, ptr_dtor, 0, 0);
+				zend_hash_init_ex(*overriden, 8, NULL, ptr_dtor, 0, 0);
 			}
 			fn = zend_hash_update_mem(*overriden, key, fn, sizeof(zend_function));
 			return;
@@ -4371,7 +4371,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 			HashTable exclude_table;
 
 			/* TODO: revisit this start size, may be its not optimal */
-			zend_hash_init_ex(&exclude_table, 2, NULL, NULL, 0, 0);
+			zend_hash_init_ex(&exclude_table, 8, NULL, NULL, 0, 0);
 
 			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
 
@@ -6115,7 +6115,7 @@ void zend_do_fetch_static_variable(znode *varname, const znode *static_assignmen
 			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
 		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
-		zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(varname->u.constant), &tmp);
 
@@ -6933,9 +6933,9 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	zend_hash_init_ex(&ce->properties_info, 0, NULL, (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
-	zend_hash_init_ex(&ce->constants_table, 0, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
-	zend_hash_init_ex(&ce->function_table, 0, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
+	zend_hash_init_ex(&ce->constants_table, 8, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
+	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 #ifdef ZTS
@@ -7136,7 +7136,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 
 	if (!CG(current_import)) {
 		CG(current_import) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import), 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(CG(current_import), 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
 	ZVAL_ZVAL(&ns, &ns_name->u.constant, 0, 0);
@@ -7299,7 +7299,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 {
 	if (!CG(current_import_function)) {
 		CG(current_import_function) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(CG(current_import_function), 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
 	zend_do_use_non_class(ns_name, new_name, is_global, 1, 0, CG(current_import_function), CG(function_table) TSRMLS_CC);
@@ -7310,7 +7310,7 @@ void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC)
 {
 	if (!CG(current_import_const)) {
 		CG(current_import_const) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(CG(current_import_const), 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
 	zend_do_use_non_class(ns_name, new_name, is_global, 0, 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);

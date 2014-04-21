@@ -292,9 +292,9 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 
 	if (closure->debug_info == NULL) {
 		ALLOC_HASHTABLE(closure->debug_info);
-		zend_hash_init(closure->debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(closure->debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
-	if (closure->debug_info->nApplyCount == 0) {
+	if (closure->debug_info->u.v.nApplyCount == 0) {
 		if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 			HashTable *static_variables = closure->func.op_array.static_variables;
 			array_init(&val);

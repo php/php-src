@@ -137,9 +137,9 @@ static void reverse_conflict_dtor(zval *zv)
 PHPAPI void php_output_startup(void)
 {
 	ZEND_INIT_MODULE_GLOBALS(output, php_output_init_globals, NULL);
-	zend_hash_init(&php_output_handler_aliases, 0, NULL, NULL, 1);
-	zend_hash_init(&php_output_handler_conflicts, 0, NULL, NULL, 1);
-	zend_hash_init(&php_output_handler_reverse_conflicts, 0, NULL, reverse_conflict_dtor, 1);
+	zend_hash_init(&php_output_handler_aliases, 8, NULL, NULL, 1);
+	zend_hash_init(&php_output_handler_conflicts, 8, NULL, NULL, 1);
+	zend_hash_init(&php_output_handler_reverse_conflicts, 8, NULL, reverse_conflict_dtor, 1);
 	php_output_direct = php_output_stdout;
 }
 /* }}} */
@@ -636,7 +636,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 	if (SUCCESS == (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
 		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
-		zend_hash_init(&rev, 1, NULL, NULL, 1);
+		zend_hash_init(&rev, 8, NULL, NULL, 1);
 		if (SUCCESS != zend_hash_next_index_insert_ptr(&rev, check_func)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;

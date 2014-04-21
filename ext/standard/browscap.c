@@ -139,7 +139,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg TSRMLS_DC) /* {{{ */
 {
 	browser_data *bdata = arg;
-	int persistent = bdata->htab->flags & HASH_FLAG_PERSISTENT;
+	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
 	
 	if (!arg1) {
 		return;
@@ -232,14 +232,10 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		return FAILURE;
 	}
 
-	if (zend_hash_init_ex(browdata->htab, 0, NULL,
+	zend_hash_init_ex(browdata->htab, 0, NULL,
 			(dtor_func_t) (persistent?browscap_entry_dtor_persistent
 									 :browscap_entry_dtor_request),
-			persistent, 0) == FAILURE) {
-		pefree(browdata->htab, persistent);
-		browdata->htab = NULL;
-		return FAILURE;
-	}
+			persistent, 0);
 
 	fh.handle.fp = VCWD_FOPEN(filename, "r");
 	fh.opened_path = NULL;

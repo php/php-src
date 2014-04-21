@@ -683,7 +683,7 @@ static void convert_scalar_to_array(zval *op, int type TSRMLS_DC) /* {{{ */
 	switch (type) {
 		case IS_ARRAY:
 			ZVAL_NEW_ARR(op);
-			zend_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_index_update(Z_ARRVAL_P(op), 0, &entry);
 			break;
 		case IS_OBJECT:
@@ -707,7 +707,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 				zval arr;
 
 				ZVAL_NEW_ARR(&arr);
-				zend_hash_init(Z_ARRVAL(arr), 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_init(Z_ARRVAL(arr), 8, NULL, ZVAL_PTR_DTOR, 0);
 				if (Z_OBJCE_P(op) == zend_ce_closure) {
 					convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
 					if (Z_TYPE_P(op) == IS_ARRAY) {
@@ -733,7 +733,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 			break;
 		case IS_NULL:
 			ZVAL_NEW_ARR(op);
-			zend_hash_init(Z_ARRVAL_P(op), 0, NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
 			break;
 		default:
 			convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);

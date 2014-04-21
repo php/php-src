@@ -158,8 +158,15 @@ typedef struct _HashTable {
 	zend_uint        *arHash;
 	dtor_func_t       pDestructor;
 	zend_uint         nInternalPointer; 
-	zend_uchar        flags;
-	zend_uchar        nApplyCount;
+	union {
+		struct {
+			ZEND_ENDIAN_LOHI_3(
+				zend_uchar    flags,
+				zend_uchar    nApplyCount,
+				zend_ushort   reserve)
+		} v;
+		zend_uint flags;
+	} u;
 } HashTable;
 
 struct _zend_array {

@@ -2351,7 +2351,7 @@ static void zend_accel_fast_shutdown(TSRMLS_D)
 			} zend_end_try();
 			EG(symbol_table).ht.pDestructor = old_destructor;
 		}
-		zend_hash_init(&EG(symbol_table).ht, 0, NULL, NULL, 0);
+		zend_hash_init(&EG(symbol_table).ht, 8, NULL, NULL, 0);
 		old_destructor = EG(function_table)->pDestructor;
 		EG(function_table)->pDestructor = NULL;
 		zend_hash_reverse_apply(EG(function_table), (apply_func_t) accel_clean_non_persistent_function TSRMLS_CC);

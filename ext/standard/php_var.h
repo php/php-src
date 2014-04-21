@@ -59,7 +59,7 @@ do  { \
 	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */ \
 	if (BG(serialize_lock) || !BG(serialize).level) { \
 		ALLOC_HASHTABLE(var_hash_ptr); \
-		zend_hash_init((var_hash_ptr), 10, NULL, NULL, 0); \
+		zend_hash_init((var_hash_ptr), 16, NULL, NULL, 0); \
 		if (!BG(serialize_lock)) { \
 			BG(serialize).var_hash = (void *)(var_hash_ptr); \
 			BG(serialize).level = 1; \

@@ -234,7 +234,7 @@ static void print_modules(TSRMLS_D)
 {
 	HashTable sorted_registry;
 
-	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
+	zend_hash_init(&sorted_registry, 64, NULL, NULL, 1);
 //???	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
@@ -756,7 +756,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		new_entry = pemalloc(sizeof(user_config_cache_entry), 1);
 		new_entry->expires = 0;
 		new_entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(new_entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+		zend_hash_init(new_entry->user_config, 8, NULL, (dtor_func_t) config_zval_dtor, 1);
 		entry = zend_hash_str_update_ptr(&CGIG(user_config_cache), path, path_len, new_entry);
 	}
 
@@ -1475,7 +1475,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 #ifdef PHP_WIN32
 	php_cgi_globals->impersonate = 0;
 #endif
-	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals->user_config_cache, 8, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
 }
 /* }}} */
 

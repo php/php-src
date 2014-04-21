@@ -578,7 +578,7 @@ PHP_FUNCTION(stream_filter_register)
 
 	if (!BG(user_filter_map)) {
 		BG(user_filter_map) = (HashTable*) emalloc(sizeof(HashTable));
-		zend_hash_init(BG(user_filter_map), 5, NULL, (dtor_func_t) filter_item_dtor, 0);
+		zend_hash_init(BG(user_filter_map), 8, NULL, (dtor_func_t) filter_item_dtor, 0);
 	}
 
 	fdat = ecalloc(1, sizeof(struct php_user_filter_data));

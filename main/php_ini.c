@@ -262,7 +262,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 				/* If option not found in hash or is not an array -> create array, otherwise add to existing array */
 				if ((find_arr = zend_hash_find(active_hash, Z_STR_P(arg1))) == NULL || Z_TYPE_P(find_arr) != IS_ARRAY) {
 					ZVAL_NEW_PERSISTENT_ARR(&option_arr);
-					zend_hash_init(Z_ARRVAL(option_arr), 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+					zend_hash_init(Z_ARRVAL(option_arr), 8, NULL, (dtor_func_t) config_zval_dtor, 1);
 					find_arr = zend_hash_update(active_hash, Z_STR_P(arg1), &option_arr);
 				}
 
@@ -329,7 +329,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 						zval section_arr;
 
 						ZVAL_NEW_PERSISTENT_ARR(&section_arr);
-						zend_hash_init(Z_ARRVAL(section_arr), 0, NULL, (dtor_func_t) config_zval_dtor, 1);
+						zend_hash_init(Z_ARRVAL(section_arr), 8, NULL, (dtor_func_t) config_zval_dtor, 1);
 						entry = zend_hash_str_update(target_hash, key, key_len, &section_arr);
 					}
 					active_ini_hash = Z_ARRVAL_P(entry);
@@ -385,9 +385,7 @@ int php_init_config(TSRMLS_D)
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
 
-	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) config_zval_dtor, 1) == FAILURE) {
-		return FAILURE;
-	}
+	zend_hash_init(&configuration_hash, 8, NULL, (dtor_func_t) config_zval_dtor, 1);
 
 	if (sapi_module.ini_defaults) {
 		sapi_module.ini_defaults(&configuration_hash);

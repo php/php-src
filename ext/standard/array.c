@@ -274,7 +274,7 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 	zval *element;
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		if (Z_ARRVAL_P(array)->nApplyCount > 1) {
+		if (Z_ARRVAL_P(array)->u.v.nApplyCount > 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 			return 0;
 		}
@@ -282,10 +282,10 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 		cnt = zend_hash_num_elements(Z_ARRVAL_P(array));
 		if (mode == COUNT_RECURSIVE) {
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
-				Z_ARRVAL_P(array)->nApplyCount++;
+				Z_ARRVAL_P(array)->u.v.nApplyCount++;
 				ZVAL_DEREF(element);
 				cnt += php_count_recursive(element, COUNT_RECURSIVE TSRMLS_CC);
-				Z_ARRVAL_P(array)->nApplyCount--;
+				Z_ARRVAL_P(array)->u.v.nApplyCount--;
 			} ZEND_HASH_FOREACH_END();
 		}
 	}
@@ -1089,7 +1089,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 				SEPARATE_ZVAL(zv);
 				thash = Z_ARRVAL_P(zv);
 			}
-			if (thash->nApplyCount > 1) {
+			if (thash->u.v.nApplyCount > 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 				if (userdata) {
 					zval_ptr_dtor(&args[2]);
@@ -1101,9 +1101,9 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			orig_array_walk_fci = BG(array_walk_fci);
 			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-			thash->nApplyCount++;
+			thash->u.v.nApplyCount++;
 			php_array_walk(thash, userdata, recursive TSRMLS_CC);
-			thash->nApplyCount--;
+			thash->u.v.nApplyCount--;
 
 			/* restore the fcall info and cache */
 			BG(array_walk_fci) = orig_array_walk_fci;
@@ -1475,17 +1475,17 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
-		if ((Z_ARRVAL_P(entry)->nApplyCount > 1)) {
+		if ((Z_ARRVAL_P(entry)->u.v.nApplyCount > 1)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 			return;
 		}
 
-		Z_ARRVAL_P(entry)->nApplyCount++;
+		Z_ARRVAL_P(entry)->u.v.nApplyCount++;
 
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(entry), value_ptr) {
 			php_compact_var(eg_active_symbol_table, return_value, value_ptr TSRMLS_CC);
 		} ZEND_HASH_FOREACH_END();
-		Z_ARRVAL_P(entry)->nApplyCount--;
+		Z_ARRVAL_P(entry)->u.v.nApplyCount--;
 	}
 }
 /* }}} */
@@ -1797,7 +1797,7 @@ static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 		p->key = NULL;
 	}
 	hash->nNextFreeElement = n_elems;
-	if (!(hash->flags & HASH_FLAG_PACKED)) {
+	if (!(hash->u.flags & HASH_FLAG_PACKED)) {
 		zend_hash_to_packed(hash);
 	}
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -2037,7 +2037,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		}
 		Z_ARRVAL_P(stack)->nNextFreeElement = k;
 		if (should_rehash) {
-			if (Z_ARRVAL_P(stack)->flags & HASH_FLAG_PACKED) {
+			if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
 				zend_hash_packed_to_hash(Z_ARRVAL_P(stack));
 			} else {
 				zend_hash_rehash(Z_ARRVAL_P(stack));
@@ -2272,7 +2272,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 				ZVAL_DEREF(src_zval);
 				ZVAL_DEREF(dest_zval);
 				thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
-				if ((thash && thash->nApplyCount > 1) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
+				if ((thash && thash->u.v.nApplyCount > 1) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 					return 0;
 				}
@@ -2303,16 +2303,16 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 				}
 				if (Z_TYPE_P(src_zval) == IS_ARRAY) {
 					if (thash) {
-						thash->nApplyCount++;
+						thash->u.v.nApplyCount++;
 					}
 					if (!php_array_merge(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval), recursive TSRMLS_CC)) {
 						if (thash) {
-							thash->nApplyCount--;
+							thash->u.v.nApplyCount--;
 						}
 						return 0;
 					}
 					if (thash) {
-						thash->nApplyCount--;
+						thash->u.v.nApplyCount--;
 					}
 				} else {
 					if (Z_REFCOUNTED_P(src_entry)) {
@@ -2377,24 +2377,24 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src TSRMLS_DC
 
 		dest_zval = dest_entry;
 		ZVAL_DEREF(dest_zval);
-		if (Z_ARRVAL_P(dest_zval)->nApplyCount > 1 ||
-		    Z_ARRVAL_P(src_zval)->nApplyCount > 1 ||
+		if (Z_ARRVAL_P(dest_zval)->u.v.nApplyCount > 1 ||
+		    Z_ARRVAL_P(src_zval)->u.v.nApplyCount > 1 ||
 		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 			return 0;
 		}
 		SEPARATE_ZVAL(dest_zval);
-		Z_ARRVAL_P(dest_zval)->nApplyCount++;
-		Z_ARRVAL_P(src_zval)->nApplyCount++;
+		Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
+		Z_ARRVAL_P(src_zval)->u.v.nApplyCount++;
 		
 
 		if (!php_array_replace_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval) TSRMLS_CC)) {
-			Z_ARRVAL_P(dest_zval)->nApplyCount--;
-			Z_ARRVAL_P(src_zval)->nApplyCount--;
+			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount--;
+			Z_ARRVAL_P(src_zval)->u.v.nApplyCount--;
 			return 0;
 		}
-		Z_ARRVAL_P(dest_zval)->nApplyCount--;
-		Z_ARRVAL_P(src_zval)->nApplyCount--;
+		Z_ARRVAL_P(dest_zval)->u.v.nApplyCount--;
+		Z_ARRVAL_P(src_zval)->u.v.nApplyCount--;
 	} ZEND_HASH_FOREACH_END();
 
 	return 1;
@@ -2883,7 +2883,7 @@ PHP_FUNCTION(array_unique)
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->flags & HASH_FLAG_PERSISTENT);
+	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
 	if (!arTmp) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
@@ -2922,7 +2922,7 @@ PHP_FUNCTION(array_unique)
 			}
 		}
 	}
-	pefree(arTmp, Z_ARRVAL_P(array)->flags & HASH_FLAG_PERSISTENT);
+	pefree(arTmp, Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
 }
 /* }}} */
 
@@ -3215,7 +3215,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			goto out;
 		}
 		hash = Z_ARRVAL(args[i]);
-		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->flags & HASH_FLAG_PERSISTENT);
+		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->u.flags & HASH_FLAG_PERSISTENT);
 		if (!list) {
 			PHP_ARRAY_CMP_FUNC_RESTORE();
 
@@ -3352,7 +3352,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 out:
 	for (i = 0; i < arr_argc; i++) {
 		hash = Z_ARRVAL(args[i]);
-		pefree(lists[i], hash->flags & HASH_FLAG_PERSISTENT);
+		pefree(lists[i], hash->u.flags & HASH_FLAG_PERSISTENT);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -3635,7 +3635,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			goto out;
 		}
 		hash = Z_ARRVAL(args[i]);
-		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->flags & HASH_FLAG_PERSISTENT);
+		list = (Bucket *) pemalloc((hash->nNumOfElements + 1) * sizeof(Bucket), hash->u.flags & HASH_FLAG_PERSISTENT);
 		if (!list) {
 			PHP_ARRAY_CMP_FUNC_RESTORE();
 
@@ -3768,7 +3768,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 out:
 	for (i = 0; i < arr_argc; i++) {
 		hash = Z_ARRVAL(args[i]);
-		pefree(lists[i], hash->flags & HASH_FLAG_PERSISTENT);
+		pefree(lists[i], hash->u.flags & HASH_FLAG_PERSISTENT);
 	}
 
 	PHP_ARRAY_CMP_FUNC_RESTORE();
@@ -4033,7 +4033,7 @@ PHP_FUNCTION(array_multisort)
 
 		}
 		hash->nNextFreeElement = array_size;
-		if (!(hash->flags & HASH_FLAG_PACKED)) {
+		if (!(hash->u.flags & HASH_FLAG_PACKED)) {
 			zend_hash_to_packed(hash);
 		}
 	}

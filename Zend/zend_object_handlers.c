@@ -75,7 +75,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		zend_class_entry *ce = zobj->ce;
 
 		ALLOC_HASHTABLE(zobj->properties);
-		zend_hash_init(zobj->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(zobj->properties, 8, NULL, ZVAL_PTR_DTOR, 0);
 		if (ce->default_properties_count) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
@@ -399,7 +399,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
-		zend_hash_init(zobj->guards, 0, NULL, NULL, 0);
+		zend_hash_init(zobj->guards, 8, NULL, NULL, 0);
 	} else if ((guard = zend_hash_find(zobj->guards, property_info->name)) != NULL) {
 		if (str) {
 			STR_RELEASE(str);

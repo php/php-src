@@ -160,13 +160,13 @@ void init_executor(TSRMLS_D) /* {{{ */
 	ZVAL_LONG(&tmp, 0);
 	zend_vm_stack_push(&tmp TSRMLS_CC);
 
-	zend_hash_init(&EG(symbol_table).ht, 50, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&EG(symbol_table).ht, 64, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
 	EG(opline_ptr) = NULL;
 
-	zend_hash_init(&EG(included_files), 5, NULL, NULL, 0);
+	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
 
@@ -1082,7 +1082,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	
 	if (EG(in_autoload) == NULL) {
 		ALLOC_HASHTABLE(EG(in_autoload));
-		zend_hash_init(EG(in_autoload), 0, NULL, NULL, 0);
+		zend_hash_init(EG(in_autoload), 8, NULL, NULL, 0);
 	}
 
 	if (zend_hash_add_empty_element(EG(in_autoload), lc_name) == NULL) {

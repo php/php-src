@@ -77,12 +77,12 @@ zend_persistent_script* create_persistent_script(void)
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
 	memset(persistent_script, 0, sizeof(zend_persistent_script));
 
-	zend_hash_init(&persistent_script->function_table, 100, NULL, (dtor_func_t) zend_accel_destroy_zend_function, 0);
+	zend_hash_init(&persistent_script->function_table, 128, NULL, (dtor_func_t) zend_accel_destroy_zend_function, 0);
 	/* class_table is usually destroyed by free_persistent_script() that
 	 * overrides destructor. ZEND_CLASS_DTOR may be used by standard
 	 * PHP compiler
 	 */
-	zend_hash_init(&persistent_script->class_table, 10, NULL, ZEND_CLASS_DTOR, 0);
+	zend_hash_init(&persistent_script->class_table, 16, NULL, ZEND_CLASS_DTOR, 0);
 
 	return persistent_script;
 }
@@ -95,7 +95,7 @@ static int compact_hash_table(HashTable *ht)
 	Bucket *d;
 	Bucket *p;
 
-	if (!ht->nNumOfElements || (ht->flags & HASH_FLAG_PACKED)) {
+	if (!ht->nNumOfElements || (ht->u.flags & HASH_FLAG_PACKED)) {
 		/* Empty tables don't allocate space for Buckets */
 		return 1;
 	}
@@ -115,7 +115,7 @@ static int compact_hash_table(HashTable *ht)
 		return 1;
 	}
 
-	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(zend_uint)), ht->flags & HASH_FLAG_PERSISTENT);
+	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(zend_uint)), ht->u.flags & HASH_FLAG_PERSISTENT);
 	if (!d) {
 		return 0;
 	}
@@ -128,7 +128,7 @@ static int compact_hash_table(HashTable *ht)
 	}
 	ht->nNumUsed = j;
 
-	pefree(ht->arData, ht->flags & HASH_FLAG_PERSISTENT);
+	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 
 	ht->arData = d;
 	ht->arHash = (zend_uint *)(d + nSize);
@@ -360,11 +360,10 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->arData = NULL;
 	ht->arHash = NULL;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
-	ht->nApplyCount = 0;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
@@ -373,8 +372,8 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	}
 #endif
 
-	if (source->flags & HASH_FLAG_PACKED) {
-		ht->flags |= HASH_FLAG_PACKED;
+	if (source->u.flags & HASH_FLAG_PACKED) {
+		ht->u.flags |= HASH_FLAG_PACKED;
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {
@@ -389,7 +388,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 		nIndex = p->h & ht->nTableMask;
 
 		/* Insert into hash collision list */
-		if (source->flags & HASH_FLAG_PACKED) {
+		if (source->u.flags & HASH_FLAG_PACKED) {
 			Bucket *r = ht->arData + ht->nNumUsed;
 			q = ht->arData + p->h;
 			while (r != q) {
@@ -432,9 +431,8 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
-	ht->nApplyCount = 0;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
@@ -443,8 +441,8 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	}
 #endif
 
-	if (source->flags & HASH_FLAG_PACKED) {
-		ht->flags |= HASH_FLAG_PACKED;
+	if (source->u.flags & HASH_FLAG_PACKED) {
+		ht->u.flags |= HASH_FLAG_PACKED;
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {
@@ -460,7 +458,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		nIndex = p->h & ht->nTableMask;
 
 		/* Insert into hash collision list */
-		if (source->flags & HASH_FLAG_PACKED) {
+		if (source->u.flags & HASH_FLAG_PACKED) {
 			Bucket *r = ht->arData + ht->nNumUsed;
 			q = ht->arData + p->h;
 			while (r != q) {
@@ -530,9 +528,8 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = zend_destroy_property_info;
-	ht->flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
-	ht->nApplyCount = 0;
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (!ht->nTableMask) {
@@ -541,9 +538,9 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	}
 #endif
 
-	if (source->flags & HASH_FLAG_PACKED) {
+	if (source->u.flags & HASH_FLAG_PACKED) {
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * sizeof(Bucket));
-		ht->flags |= HASH_FLAG_PACKED;
+		ht->u.flags |= HASH_FLAG_PACKED;
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {
 		ht->arData = (Bucket *) emalloc(ht->nTableSize * (sizeof(Bucket) + sizeof(zend_uint)));
@@ -558,7 +555,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		nIndex = p->h & ht->nTableMask;
 
 		/* Insert into hash collision list */
-		if (source->flags & HASH_FLAG_PACKED) {
+		if (source->u.flags & HASH_FLAG_PACKED) {
 			Bucket *r = ht->arData + ht->nNumUsed;
 			q = ht->arData + p->h;
 			while (r != q) {

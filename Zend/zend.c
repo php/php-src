@@ -345,14 +345,14 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
-			if (++Z_ARRVAL_P(expr)->nApplyCount>1) {
+			if (++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				Z_ARRVAL_P(expr)->nApplyCount--;
+				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 				return;
 			}
 			print_flat_hash(Z_ARRVAL_P(expr) TSRMLS_CC);
 			ZEND_PUTS(")");
-			Z_ARRVAL_P(expr)->nApplyCount--;
+			Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 			break;
 		case IS_OBJECT:
 		{
@@ -374,13 +374,13 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 				properties = Z_OBJPROP_P(expr);
 			}
 			if (properties) {
-				if (++properties->nApplyCount>1) {
+				if (++properties->u.v.nApplyCount>1) {
 					ZEND_PUTS(" *RECURSION*");
-					properties->nApplyCount--;
+					properties->u.v.nApplyCount--;
 					return;
 				}
 				print_flat_hash(properties TSRMLS_CC);
-				properties->nApplyCount--;
+				properties->u.v.nApplyCount--;
 			}
 			ZEND_PUTS(")");
 			break;
@@ -404,13 +404,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS_EX("Array\n");
-			if (++Z_ARRVAL_P(expr)->nApplyCount>1) {
+			if (++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
 				ZEND_PUTS_EX(" *RECURSION*");
-				Z_ARRVAL_P(expr)->nApplyCount--;
+				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 				return;
 			}
 			print_hash(write_func, Z_ARRVAL_P(expr), indent, 0 TSRMLS_CC);
-			Z_ARRVAL_P(expr)->nApplyCount--;
+			Z_ARRVAL_P(expr)->u.v.nApplyCount--;
 			break;
 		case IS_OBJECT:
 			{
@@ -433,13 +433,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
 				}
-				if (++properties->nApplyCount>1) {
+				if (++properties->u.v.nApplyCount>1) {
 					ZEND_PUTS_EX(" *RECURSION*");
-					properties->nApplyCount--;
+					properties->u.v.nApplyCount--;
 					return;
 				}
 				print_hash(write_func, properties, indent, 1 TSRMLS_CC);
-				properties->nApplyCount--;
+				properties->u.v.nApplyCount--;
 				if (is_temp) {
 					zend_hash_destroy(properties);
 					efree(properties);
@@ -516,11 +516,11 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->compiled_filename = NULL;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(compiler_globals->function_table, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_hash_init_ex(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->function_table, global_function_table, function_copy_ctor);
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init_ex(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(compiler_globals->class_table, 64, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref);
 
 	zend_set_default_compile_time_values(TSRMLS_C);
@@ -723,12 +723,12 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CONSTANTS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 
-	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
-	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 1024, NULL, ZEND_FUNCTION_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 64, NULL, ZEND_CLASS_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_AUTO_GLOBALS_TABLE, 8, NULL, auto_global_dtor, 1, 0);
-	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 20, NULL, ZEND_CONSTANT_DTOR, 1, 0);
+	zend_hash_init_ex(GLOBAL_CONSTANTS_TABLE, 128, NULL, ZEND_CONSTANT_DTOR, 1, 0);
 
-	zend_hash_init_ex(&module_registry, 50, NULL, module_destructor_zval, 1, 0);
+	zend_hash_init_ex(&module_registry, 32, NULL, module_destructor_zval, 1, 0);
 	zend_init_rsrc_list_dtors();
 
 #ifdef ZTS

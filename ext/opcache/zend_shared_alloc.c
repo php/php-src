@@ -402,7 +402,7 @@ void zend_shared_alloc_lock(TSRMLS_D)
 	 * won't be taken from space which is freed by efree in memdup.
 	 * Otherwise it leads to false matches in memdup check.
 	 */
-	zend_hash_init(&xlat_table, 100, NULL, NULL, 1);
+	zend_hash_init(&xlat_table, 128, NULL, NULL, 1);
 }
 
 void zend_shared_alloc_unlock(TSRMLS_D)
