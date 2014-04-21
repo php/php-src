@@ -396,13 +396,6 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
-//???						if (!Z_STR(op_array->literals[j].hash_value) {
-//???							if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
-//???								op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
-//???							} else {
-//???								op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
-//???							}
-//???						}
 						if (LITERAL_NUM_SLOTS(info[i].flags)) {
 							Z_CACHE_SLOT(op_array->literals[j]) = cache_slots;
 							cache_slots += LITERAL_NUM_SLOTS(info[i].flags);
@@ -412,13 +405,6 @@ static void optimizer_compact_literals(zend_op_array *op_array TSRMLS_DC)
 						while (n > 1) {
 							i++;
 							if (i != j) op_array->literals[j] = op_array->literals[i];
-//???							if (!op_array->literals[j].hash_value) {
-//???								if (IS_INTERNED(Z_STRVAL(op_array->literals[j].constant))) {
-//???									op_array->literals[j].hash_value = INTERNED_HASH(Z_STRVAL(op_array->literals[j].constant));
-//???								} else {
-//???									op_array->literals[j].hash_value = zend_hash_func(Z_STRVAL(op_array->literals[j].constant), Z_STRLEN(op_array->literals[j].constant)+1);
-//???								}
-//???							}
 							j++;
 							n--;
 						}

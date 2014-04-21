@@ -479,11 +479,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, zend_uint cac
 			} else {
 				retval = &EG(uninitialized_zval);
 			}
-//???			if (EXPECTED(retval != object)) {
 			zval_ptr_dtor(&tmp_object);
-//???			} else {
-//???				Z_DELREF_P(object);
-//???			}
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {

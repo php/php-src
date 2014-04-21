@@ -4974,11 +4974,6 @@ ZEND_METHOD(reflection_property, getValue)
 		zend_unmangle_property_name(ref->prop.name->val, ref->prop.name->len, &class_name, &prop_name);
 		member_p = zend_read_property(ref->ce, object, prop_name, strlen(prop_name), 1 TSRMLS_CC);
 		ZVAL_DUP(return_value, member_p);
-//???
-		if (member_p != &EG(uninitialized_zval)) {
-			zval_add_ref(member_p);
-			zval_ptr_dtor(member_p);
-		}
 	}
 }
 /* }}} */
