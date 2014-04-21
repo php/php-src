@@ -13759,7 +13759,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(int (*b
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -13812,7 +13811,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -16053,7 +16051,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(int (*bin
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -16106,7 +16103,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -17962,7 +17958,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(int (*bin
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -18015,7 +18010,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -19955,7 +19949,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(int (*
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -20008,7 +20001,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -21378,7 +21370,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CV(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -21431,7 +21422,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -23143,7 +23133,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(int 
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -23196,7 +23185,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -24456,7 +24444,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(int (*
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -24509,7 +24496,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -25685,7 +25671,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(int (*
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -25738,7 +25723,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -26913,7 +26897,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(int
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -26966,7 +26949,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -27409,7 +27391,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(int (*b
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -27462,7 +27443,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -30137,7 +30117,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CONST(int (*bi
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -30190,7 +30169,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -32218,7 +32196,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_TMP(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -32271,7 +32248,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -34010,7 +33986,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_VAR(int (*bina
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -34063,7 +34038,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -35885,7 +35859,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(int (*b
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -35938,7 +35911,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -37174,7 +37146,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CV(int (*binar
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -37227,7 +37198,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 

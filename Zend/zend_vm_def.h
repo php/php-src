@@ -470,7 +470,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_dim_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
@@ -523,7 +522,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
 		zval_ptr_dtor(objval);
 	} else {
-	    ZVAL_DEREF(var_ptr);
 		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 	}
 
