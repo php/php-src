@@ -1529,7 +1529,7 @@ ZEND_METHOD(reflection, export)
 		ZVAL_COPY_VALUE(return_value, &retval);
 	} else {
 		/* No need for _r variant, return of __toString should always be a string */
-		zend_print_zval(&retval, 0);
+		zend_print_zval(&retval, 0 TSRMLS_CC);
 		zend_printf("\n");
 		zval_ptr_dtor(&retval);
 	}

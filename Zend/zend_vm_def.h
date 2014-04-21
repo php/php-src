@@ -1064,7 +1064,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	z = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	zend_print_variable(z);
+	zend_print_variable(z TSRMLS_CC);
 
 	FREE_OP1();
 	CHECK_EXCEPTION();
@@ -4636,7 +4636,7 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMP|VAR|UNUSED|CV, ANY)
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 		FREE_OP1();
 	}
