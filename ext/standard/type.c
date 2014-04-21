@@ -195,21 +195,12 @@ PHP_FUNCTION(boolval)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
-	zval *num, *tmp;
-	zval expr_copy;
-	int use_copy;
-
+	zval *num;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
 		return;
 	}
 
-	zend_make_printable_zval(num, &expr_copy, &use_copy);
-	if (use_copy) {
-		tmp = &expr_copy;
-		RETVAL_ZVAL(tmp, 0, 0);
-	} else {
-		RETVAL_ZVAL(num, 1, 0);
-	}
+	RETVAL_STR(zval_get_string(num));
 }
 /* }}} */
 

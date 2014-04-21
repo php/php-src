@@ -370,6 +370,7 @@ ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint 
 ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
 ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strcasecmp_l(const char *s1, uint len1, const char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);

@@ -3478,8 +3478,7 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 						}
 					}
 					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-						zval zv, zv_copy;
-						int use_copy;
+						zval zv;
 
 						ZVAL_DUP(&zv, precv->op2.zv);
 						zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
@@ -3509,13 +3508,11 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 							memcpy(offset, "Array", 5);
 							offset += 5;
 						} else {
-							zend_make_printable_zval(&zv, &zv_copy, &use_copy);
-							REALLOC_BUF_IF_EXCEED(buf, offset, length, Z_STRLEN(zv_copy));
-							memcpy(offset, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
-							offset += Z_STRLEN(zv_copy);
-							if (use_copy) {
-								zval_dtor(&zv_copy);
-							}
+							zend_string *str = zval_get_string(&zv);
+							REALLOC_BUF_IF_EXCEED(buf, offset, length, str->len);
+							memcpy(offset, str->val, str->len);
+							offset += str->len;
+							STR_RELEASE(str);
 						}
 						zval_ptr_dtor(&zv);
 					}

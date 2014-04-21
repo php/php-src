@@ -655,23 +655,13 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 /* {{{ _const_string */
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
 {
-	char *type;
-	zval value_copy;
-	int use_copy;
-
-	type = zend_zval_type_name(value);
-
-	zend_make_printable_zval(value, &value_copy, &use_copy);
-	if (use_copy) {
-		value = &value_copy;
-	}
+	char *type = zend_zval_type_name(value);
+	zend_string *value_str = zval_get_string(value TSRMLS_CC);
 
 	string_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-					indent, type, name, Z_STRVAL_P(value));
+					indent, type, name, value_str->val);
 
-	if (use_copy) {
-		zval_dtor(value);
-	}
+	STR_RELEASE(value_str);
 }
 /* }}} */
 
@@ -728,8 +718,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-			zval zv, zv_copy;
-			int use_copy;
+			zval zv;
 			string_write(str, " = ", sizeof(" = ")-1);
 			ZVAL_DUP(&zv, precv->op2.zv);
 			zval_update_constant_ex(&zv, (void*)1, fptr->common.scope TSRMLS_CC);
@@ -751,11 +740,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			} else if (Z_TYPE(zv) == IS_ARRAY) {
 				string_write(str, "Array", sizeof("Array")-1);
 			} else {
-				zend_make_printable_zval(&zv, &zv_copy, &use_copy);
-				string_write(str, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
-				if (use_copy) {
-					zval_dtor(&zv_copy);
-				}
+				zend_string *zv_str = zval_get_string(&zv);
+				string_write(str, zv_str->val, zv_str->len);
+				STR_RELEASE(zv_str);
 			}
 			zval_ptr_dtor(&zv);
 		}

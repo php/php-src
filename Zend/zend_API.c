@@ -3289,12 +3289,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 
 		default:
 			if (callable_name) {
-				zval expr_copy;
-				int use_copy;
-
-				zend_make_printable_zval(callable, &expr_copy, &use_copy);
-				*callable_name = STR_COPY(Z_STR(expr_copy));
-				zval_dtor(&expr_copy);
+				*callable_name = zval_get_string(callable);
 			}
 			if (error) zend_spprintf(error, 0, "no array or string given");
 			return 0;
