@@ -858,6 +858,27 @@ readline:
 #endif
 	}
 
+	if (buffer && isspace(*buffer)) {
+		char *trimmed = buffer;
+		while (isspace(*trimmed))
+			trimmed++;
+
+		trimmed = estrdup(trimmed);
+		efree(buffer);
+		buffer = trimmed;
+	}
+
+	if (buffer && strlen(buffer)) {
+		if (PHPDBG_G(buffer)) {
+			efree(PHPDBG_G(buffer));
+		}
+		PHPDBG_G(buffer) = estrdup(buffer);
+	} else {
+		if (PHPDBG_G(buffer)) {
+			buffer = estrdup(PHPDBG_G(buffer));
+		}
+	}
+	
 	return buffer;
 } /* }}} */
 

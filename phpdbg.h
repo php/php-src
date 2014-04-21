@@ -199,9 +199,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
-
-	phpdbg_command_t *lcmd;                      /* last command */
-	phpdbg_param_t    lparam;                    /* last param */
+	char *buffer;                                /* buffer */
 
 	zend_ulong flags;                            /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */

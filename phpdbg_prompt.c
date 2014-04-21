@@ -1028,13 +1028,13 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			if (yyparse(&stack, scanner) <= 0) {
 				switch (ret = phpdbg_stack_execute(&stack, &why TSRMLS_CC)) {
 					case FAILURE:
-//						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 							if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
 								if (why) {
 									phpdbg_error("%s", why);
 								}
 							}
-//						}
+						}
 
 						if (why) {
 							free(why);
@@ -1066,17 +1066,6 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 			phpdbg_destroy_input(&input TSRMLS_CC);
 
 		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
-
-		if (!input)
-			goto last;
-
-	} else {
-last:
-		if (PHPDBG_G(lcmd)) {
-			ret = PHPDBG_G(lcmd)->handler(
-					&PHPDBG_G(lparam) TSRMLS_CC);
-			goto out;
-		}
 	}
 
 out:

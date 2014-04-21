@@ -61,16 +61,15 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 
 	pg->exec = NULL;
 	pg->exec_len = 0;
+	pg->buffer = NULL;
 	pg->ops = NULL;
 	pg->vmret = 0;
 	pg->bp_count = 0;
-	pg->lcmd = NULL;
 	pg->flags = PHPDBG_DEFAULT_FLAGS;
 	pg->oplog = NULL;
 	pg->io[PHPDBG_STDIN] = NULL;
 	pg->io[PHPDBG_STDOUT] = NULL;
 	pg->io[PHPDBG_STDERR] = NULL;
-	memset(&pg->lparam, 0, sizeof(phpdbg_param_t));
 	pg->frame.num = 0;
 } /* }}} */
 
@@ -184,6 +183,11 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
+	if (PHPDBG_G(buffer)) {
+		efree(PHPDBG_G(buffer));
+		PHPDBG_G(buffer) = NULL;
+	}
+	
 	if (PHPDBG_G(exec)) {
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
