@@ -990,7 +990,7 @@ static void zend_extension_fcall_end_handler(const zend_extension *extension, ze
 }
 
 
-static inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
+static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type TSRMLS_DC)
 {
 	HashTable *ht;
 
