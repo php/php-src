@@ -90,7 +90,7 @@ ZEND_METHOD(Closure, bind)
 		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
 			ce = NULL;
 		} else {
-			zend_string *class_name = zval_get_string(scope_arg TSRMLS_CC);
+			zend_string *class_name = zval_get_string(scope_arg);
 			if ((class_name->len == sizeof("static") - 1) &&
 				(memcmp("static", class_name->val, sizeof("static") - 1) == 0)) {
 				ce = closure->func.common.scope;

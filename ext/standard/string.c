@@ -4956,8 +4956,8 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1 TSRMLS_CC),
-				*str2 = zval_get_string(op2 TSRMLS_CC);
+	zend_string *str1 = zval_get_string(op1);
+	zend_string *str2 = zval_get_string(op2);
 
 	ZVAL_LONG(result, strnatcmp_ex(str1->val, str1->len, str2->val, str2->len, case_insensitive));
 

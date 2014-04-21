@@ -559,7 +559,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 			switch (format[inpos]) {
 				case 's': {
-					zend_string *str = zval_get_string(&tmp TSRMLS_CC);
+					zend_string *str = zval_get_string(&tmp);
 					php_sprintf_appendstring(&result, &outpos,
 											 str->val,
 											 width, precision, padding,

@@ -893,8 +893,9 @@ ZEND_API double zval_get_double(zval *op TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
+ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC) /* {{{ */
 {
+try_again:
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			return STR_EMPTY_ALLOC();
@@ -907,18 +908,18 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 				return STR_EMPTY_ALLOC();
 			}
 		case IS_RESOURCE: {
-			char *str;
-			int len = zend_spprintf(&str, 0, "Resource id #%ld", Z_RES_HANDLE_P(op));
-			zend_string *retval = STR_INIT(str, len, 0);
-			efree(str);
-			return retval;
+			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
+			int len;
+
+			len = snprintf(buf, sizeof(buf), "Resource id #%ld", Z_RES_HANDLE_P(op));
+			return STR_INIT(buf, len, 0);
 		}
 		case IS_LONG: {
-			char *str;
-			int len = zend_spprintf(&str, 0, "%ld", Z_LVAL_P(op));
-			zend_string *retval = STR_INIT(str, len, 0);
-			efree(str);
-			return retval;
+			char buf[MAX_LENGTH_OF_LONG + 1];
+			int len;
+
+			len = snprintf(buf, sizeof(buf), "%ld", Z_LVAL_P(op));
+			return STR_INIT(buf, len, 0);
 		}
 		case IS_DOUBLE: {
 			char *str;
@@ -942,7 +943,7 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 			} else if (Z_OBJ_HT_P(op)->get) {
 				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp TSRMLS_CC);
 				if (Z_TYPE_P(z) != IS_OBJECT) {
-					zend_string *str = zval_get_string(z TSRMLS_CC);
+					zend_string *str = zval_get_string(z);
 					zval_ptr_dtor(z);
 					return str;
 				}
@@ -952,7 +953,8 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 			return STR_EMPTY_ALLOC();
 		}
 		case IS_REFERENCE:
-			return zval_get_string(Z_REFVAL_P(op));
+			op = Z_REFVAL_P(op);
+			goto try_again;
 		default:
 			//??? original code returns bool(0)
 			return STR_EMPTY_ALLOC();
@@ -1557,8 +1559,8 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 
 ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1 TSRMLS_CC),
-				*str2 = zval_get_string(op2 TSRMLS_CC);
+	zend_string *str1 = zval_get_string(op1);
+	zend_string *str2 = zval_get_string(op2);
 
 	if (case_insensitive) {
 		ZVAL_LONG(result, zend_binary_strcasecmp_l(str1->val, str1->len, str2->val, str1->len));
@@ -1587,8 +1589,8 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSR
 #if HAVE_STRCOLL
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1 TSRMLS_CC),
-				*str2 = zval_get_string(op2 TSRMLS_CC);
+	zend_string *str1 = zval_get_string(op1);
+	zend_string *str2 = zval_get_string(op2);
 
 	ZVAL_LONG(result, strcoll(str1->val, str2->val));
 

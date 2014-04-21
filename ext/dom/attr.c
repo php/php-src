@@ -171,7 +171,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		node_list_unlink(attrp->children TSRMLS_CC);
 	}
 
-	str = zval_get_string(newval TSRMLS_CC);
+	str = zval_get_string(newval);
 
 	xmlNodeSetContentLen((xmlNodePtr) attrp, str->val, str->len + 1);
 

@@ -339,7 +339,10 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
 ZEND_API long zval_get_long(zval *op TSRMLS_DC);
 ZEND_API double zval_get_double(zval *op TSRMLS_DC);
-ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC);
+ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
+
+#define zval_get_string(op) ((Z_TYPE_P(op) == IS_STRING) ? \
+	STR_COPY(Z_STR_P(op)) : _zval_get_string_func((op) TSRMLS_CC))
 
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);

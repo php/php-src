@@ -106,7 +106,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval TSRMLS_CC);
+	str = zval_get_string(newval);
 
 	xmlNodeSetContentLen(nodep, str->val, str->len + 1);
 
