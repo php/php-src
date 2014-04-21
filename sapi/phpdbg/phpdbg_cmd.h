@@ -23,8 +23,6 @@
 
 #include "TSRM.h"
 
-typedef struct _phpdbg_command_t phpdbg_command_t;
-
 /* {{{ Command and Parameter */
 enum {
 	NO_ARG = 0,
@@ -36,24 +34,23 @@ typedef enum {
 	EMPTY_PARAM = 0,
 	ADDR_PARAM,
 	FILE_PARAM,
+	NUMERIC_FILE_PARAM,
 	METHOD_PARAM,
 	STR_PARAM,
 	NUMERIC_PARAM,
 	NUMERIC_FUNCTION_PARAM,
-	NUMERIC_METHOD_PARAM
+	NUMERIC_METHOD_PARAM,
+	STACK_PARAM,
+	EVAL_PARAM,
+	SHELL_PARAM,
+	COND_PARAM,
+	OP_PARAM,
+	ORIG_PARAM,
+	RUN_PARAM
 } phpdbg_param_type;
 
-typedef struct _phpdbg_input_t phpdbg_input_t;
-
-struct _phpdbg_input_t {
-	char * const *start;
-	char *string;
-	size_t length;
-	phpdbg_input_t **argv;
-	int argc;
-};
-
-typedef struct _phpdbg_param {
+typedef struct _phpdbg_param phpdbg_param_t;
+struct _phpdbg_param {
 	phpdbg_param_type type;
 	long num;
 	zend_ulong addr;
@@ -67,10 +64,31 @@ typedef struct _phpdbg_param {
 	} method;
 	char *str;
 	size_t len;
-} phpdbg_param_t;
+	phpdbg_param_t *next;
+	phpdbg_param_t *top;
+};
 
-typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*, const phpdbg_input_t* TSRMLS_DC);
+#define phpdbg_init_param(v, t) do{ \
+	(v)->type = (t); \
+	(v)->addr = 0; \
+	(v)->num = 0; \
+	(v)->file.name = NULL; \
+	(v)->file.line = 0; \
+	(v)->method.class = NULL; \
+	(v)->method.name = NULL; \
+	(v)->str = NULL; \
+	(v)->len = 0; \
+	(v)->next = NULL; \
+	(v)->top = NULL; \
+} while(0)
 
+#ifndef YYSTYPE
+#define YYSTYPE phpdbg_param_t
+#endif
+
+typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t* TSRMLS_DC);
+
+typedef struct _phpdbg_command_t phpdbg_command_t;
 struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
 	size_t name_len;                    /* Command name length */
@@ -79,7 +97,8 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char arg_type;                      /* Accept args? */
+	char *args;							/* Argument Spec */
+	const phpdbg_command_t *parent;		/* Parent Command */							
 };
 /* }}} */
 
@@ -95,35 +114,29 @@ typedef struct {
 } phpdbg_frame_t;
 /* }}} */
 
-
-
 /*
 * Workflow:
-* 1) read input
-*	input takes the line from console, creates argc/argv
-* 2) parse parameters into suitable types based on arg_type
-*	takes input from 1) and arg_type and creates parameters
-* 3) do command
-*	executes commands
-* 4) destroy parameters
-*	cleans up what was allocated by creation of parameters
-* 5) destroy input
-*	cleans up what was allocated by creation of input
+* 1) the lexer/parser creates a stack of commands and arguments from input
+* 2) the commands at the top of the stack are resolved sensibly using aliases, abbreviations and case insensitive matching
+* 3) the remaining arguments in the stack are verified (optionally) against the handlers declared argument specification
+* 4) the handler is called passing the top of the stack as the only parameter
+* 5) the stack is destroyed upon return from the handler
 */
 
 /*
 * Input Management
 */
-PHPDBG_API phpdbg_input_t* phpdbg_read_input(char *buffered TSRMLS_DC);
-PHPDBG_API void phpdbg_destroy_input(phpdbg_input_t** TSRMLS_DC);
+PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC);
+PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
 
-/*
-* Argument Management
-*/
-PHPDBG_API phpdbg_input_t** phpdbg_read_argv(char *buffer, int *argc TSRMLS_DC);
-PHPDBG_API void phpdbg_destroy_argv(phpdbg_input_t **argv, int argc TSRMLS_DC);
-#define phpdbg_argv_is(n, s) \
-	(memcmp(input->argv[n]->string, s, input->argv[n]->length) == SUCCESS)
+/**
+ * Stack Management
+ */
+PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
+PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC);
+PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*
 * Parameter Management
@@ -135,28 +148,27 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_par
 PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t * TSRMLS_DC);
 PHPDBG_API const char* phpdbg_get_param_type(const phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC);
-
-/*
-* Command Executor
-*/
-PHPDBG_API int phpdbg_do_cmd(const phpdbg_command_t*, phpdbg_input_t* TSRMLS_DC);
+PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg);
 
 /**
  * Command Declarators
  */
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
-#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, has_args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, has_args}
+#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent}
 
-#define PHPDBG_COMMAND_D(name, tip, alias, children, has_args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, has_args}
+#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL}
 
-#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param, const phpdbg_input_t *input TSRMLS_DC)
+#define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL}
 
-#define PHPDBG_COMMAND_ARGS param, input TSRMLS_CC
+#define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param TSRMLS_DC)
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0'}
+#define PHPDBG_COMMAND_ARGS param TSRMLS_CC
+
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', NULL}
 
 /*
 * Default Switch Case
