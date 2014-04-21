@@ -46,60 +46,69 @@ loop:
 #line 47 "ext/phar/phar_path_check.c"
 {
 	YYCTYPE yych;
+	unsigned int yyaccept = 0;
 
 	if ((YYLIMIT - YYCURSOR) < 4) YYFILL(4);
 	yych = *YYCURSOR;
-	if (yych <= '.') {
-		if (yych <= '\n') {
-			if (yych <= 0x00) goto yy13;
-			if (yych <= '\t') goto yy10;
-			goto yy12;
+	if (yych <= '>') {
+		if (yych <= 0x19) {
+			if (yych <= 0x00) goto yy16;
+			if (yych == '\n') goto yy15;
+			goto yy14;
 		} else {
-			if (yych <= 0x19) goto yy10;
-			if (yych == '*') goto yy6;
-			goto yy15;
+			if (yych <= '*') {
+				if (yych <= ')') goto yy18;
+				goto yy6;
+			} else {
+				if (yych != '/') goto yy18;
+			}
 		}
 	} else {
-		if (yych <= '?') {
-			if (yych <= '/') goto yy2;
-			if (yych <= '>') goto yy15;
-			goto yy8;
-		} else {
+		if (yych <= 0x7F) {
+			if (yych <= '?') goto yy8;
 			if (yych == '\\') goto yy4;
-			if (yych <= 0x7F) goto yy15;
-			goto yy10;
+			goto yy18;
+		} else {
+			if (yych <= 0xDF) {
+				if (yych <= 0xBF) goto yy14;
+				goto yy10;
+			} else {
+				if (yych <= 0xEF) goto yy12;
+				if (yych <= 0xF7) goto yy13;
+				goto yy14;
+			}
 		}
 	}
-yy2:
+	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych <= '-') goto yy3;
-	if (yych <= '.') goto yy16;
-	if (yych <= '/') goto yy18;
+	if (yych <= '.') goto yy29;
+	if (yych <= '/') goto yy30;
 yy3:
-#line 93 "ext/phar/phar_path_check.re"
+#line 105 "ext/phar/phar_path_check.re"
 	{
 			goto loop;
 		}
-#line 84 "ext/phar/phar_path_check.c"
+#line 93 "ext/phar/phar_path_check.c"
 yy4:
 	++YYCURSOR;
-#line 60 "ext/phar/phar_path_check.re"
+#line 63 "ext/phar/phar_path_check.re"
 	{
 			*error = "back-slash";
 			return pcr_err_back_slash;
 		}
-#line 92 "ext/phar/phar_path_check.c"
+#line 101 "ext/phar/phar_path_check.c"
 yy6:
 	++YYCURSOR;
-#line 64 "ext/phar/phar_path_check.re"
+#line 67 "ext/phar/phar_path_check.re"
 	{
 			*error = "star";
 			return pcr_err_star;
 		}
-#line 100 "ext/phar/phar_path_check.c"
+#line 109 "ext/phar/phar_path_check.c"
 yy8:
 	++YYCURSOR;
-#line 68 "ext/phar/phar_path_check.re"
+#line 71 "ext/phar/phar_path_check.re"
 	{
 			if (**s == '/') {
 				(*s)++;
@@ -108,22 +117,39 @@ yy8:
 			*error = NULL;
 			return pcr_use_query;
 		}
-#line 112 "ext/phar/phar_path_check.c"
+#line 121 "ext/phar/phar_path_check.c"
 yy10:
 	++YYCURSOR;
+	if ((yych = *YYCURSOR) <= 0x7F) goto yy11;
+	if (yych <= 0xBF) goto yy27;
 yy11:
-#line 76 "ext/phar/phar_path_check.re"
+#line 88 "ext/phar/phar_path_check.re"
 	{
 			*error ="illegal character";
 			return pcr_err_illegal_char;
 		}
-#line 121 "ext/phar/phar_path_check.c"
+#line 132 "ext/phar/phar_path_check.c"
 yy12:
-	yych = *++YYCURSOR;
+	yyaccept = 1;
+	yych = *(YYMARKER = ++YYCURSOR);
+	if (yych <= 0x7F) goto yy11;
+	if (yych <= 0xBF) goto yy24;
 	goto yy11;
 yy13:
+	yyaccept = 1;
+	yych = *(YYMARKER = ++YYCURSOR);
+	if (yych <= 0x7F) goto yy11;
+	if (yych <= 0xBF) goto yy19;
+	goto yy11;
+yy14:
+	yych = *++YYCURSOR;
+	goto yy11;
+yy15:
+	yych = *++YYCURSOR;
+	goto yy11;
+yy16:
 	++YYCURSOR;
-#line 80 "ext/phar/phar_path_check.re"
+#line 92 "ext/phar/phar_path_check.re"
 	{
 			if (**s == '/') {
 				(*s)++;
@@ -137,49 +163,85 @@ yy13:
 			*error = NULL;
 			return pcr_is_ok;
 		}
-#line 141 "ext/phar/phar_path_check.c"
-yy15:
-	yych = *++YYCURSOR;
-	goto yy3;
-yy16:
-	yych = *++YYCURSOR;
-	if (yych <= 0x00) goto yy21;
-	if (yych <= '-') goto yy17;
-	if (yych <= '.') goto yy20;
-	if (yych <= '/') goto yy21;
-yy17:
-	YYCURSOR = YYMARKER;
-	goto yy3;
+#line 167 "ext/phar/phar_path_check.c"
 yy18:
+	yych = *++YYCURSOR;
+	goto yy3;
+yy19:
+	yych = *++YYCURSOR;
+	if (yych <= 0x7F) goto yy20;
+	if (yych <= 0xBF) goto yy21;
+yy20:
+	YYCURSOR = YYMARKER;
+	if (yyaccept <= 0) {
+		goto yy3;
+	} else {
+		goto yy11;
+	}
+yy21:
+	yych = *++YYCURSOR;
+	if (yych <= 0x7F) goto yy20;
+	if (yych >= 0xC0) goto yy20;
 	++YYCURSOR;
-#line 48 "ext/phar/phar_path_check.re"
+#line 85 "ext/phar/phar_path_check.re"
+	{
+			goto loop;
+	}
+#line 191 "ext/phar/phar_path_check.c"
+yy24:
+	yych = *++YYCURSOR;
+	if (yych <= 0x7F) goto yy20;
+	if (yych >= 0xC0) goto yy20;
+	++YYCURSOR;
+#line 82 "ext/phar/phar_path_check.re"
+	{
+			goto loop;
+	}
+#line 201 "ext/phar/phar_path_check.c"
+yy27:
+	++YYCURSOR;
+#line 79 "ext/phar/phar_path_check.re"
+	{
+			goto loop;
+	}
+#line 208 "ext/phar/phar_path_check.c"
+yy29:
+	yych = *++YYCURSOR;
+	if (yych <= 0x00) goto yy33;
+	if (yych <= '-') goto yy20;
+	if (yych <= '.') goto yy32;
+	if (yych <= '/') goto yy33;
+	goto yy20;
+yy30:
+	++YYCURSOR;
+#line 51 "ext/phar/phar_path_check.re"
 	{
 			*error = "double slash";
 			return pcr_err_double_slash;
 		}
-#line 161 "ext/phar/phar_path_check.c"
-yy20:
+#line 223 "ext/phar/phar_path_check.c"
+yy32:
 	yych = *++YYCURSOR;
-	if (yych <= 0x00) goto yy23;
-	if (yych == '/') goto yy23;
-	goto yy17;
-yy21:
+	if (yych <= 0x00) goto yy35;
+	if (yych == '/') goto yy35;
+	goto yy20;
+yy33:
 	++YYCURSOR;
-#line 56 "ext/phar/phar_path_check.re"
+#line 59 "ext/phar/phar_path_check.re"
 	{
 			*error = "current directory reference";
 			return pcr_err_curr_dir;
 		}
-#line 174 "ext/phar/phar_path_check.c"
-yy23:
+#line 236 "ext/phar/phar_path_check.c"
+yy35:
 	++YYCURSOR;
-#line 52 "ext/phar/phar_path_check.re"
+#line 55 "ext/phar/phar_path_check.re"
 	{
 			*error = "upper directory reference";
 			return pcr_err_up_dir;
 		}
-#line 182 "ext/phar/phar_path_check.c"
+#line 244 "ext/phar/phar_path_check.c"
 }
-#line 96 "ext/phar/phar_path_check.re"
+#line 108 "ext/phar/phar_path_check.re"
 
 }
