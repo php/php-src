@@ -9,7 +9,7 @@ interface bar {
 
 class qux implements bar {
 	public function foo(array &$in) : &array {
-		return null;
+		return $nothing;
 	}
 }
 
@@ -18,7 +18,7 @@ $qux = new qux();
 var_dump($qux->foo($array));
 ?>
 --EXPECTF--
-Fatal error: the function qux::foo was expected to return an array and returned null in %s on line %d
+Catchable fatal error: the function qux::foo was expected to return an array and returned null in %s on line %d
 
 
 
