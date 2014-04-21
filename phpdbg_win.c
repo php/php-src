@@ -4,7 +4,7 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_01.txt                                  |
@@ -18,24 +18,25 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#include "zend.h"
+#include "phpdbg.h"
 
-#include "TSRM.h"
-#include "phpdbg_cmd.h"
+int mprotect(void *addr, size_t size, int protection) {
+	int var;
+	return (int)VirtualProtect(addr, size, protection == (PROT_READ | PROT_WRITE) ? PAGE_READWRITE : PAGE_READONLY, &var);
+}
 
-#define PHPDBG_LIST(name)         PHPDBG_COMMAND(list_##name)
-#define PHPDBG_LIST_HANDLER(name) PHPDBG_COMMAND_HANDLER(list_##name)
+int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
+	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
+	CONTEXT *xc = xp->ContextRecord;
 
-PHPDBG_LIST(lines);
-PHPDBG_LIST(class);
-PHPDBG_LIST(method);
-PHPDBG_LIST(func);
+	if(xr->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
+		TSRMLS_FETCH();
 
-void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
-void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, long, long, int TSRMLS_DC);
+		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1] TSRMLS_CC) == SUCCESS) {
+			return EXCEPTION_CONTINUE_EXECUTION;
+		}
+	}
 
-extern const phpdbg_command_t phpdbg_list_commands[];
-
-#endif /* PHPDBG_LIST_H */
+	return EXCEPTION_CONTINUE_SEARCH;
+}

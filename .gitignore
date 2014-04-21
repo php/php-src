@@ -1,5 +1,7 @@
 .libs/
-./phpdbg
+phpdbg
 *.lo
 *.o
 build
+phpdbg_parser.c
+phpdbg_parser.h
