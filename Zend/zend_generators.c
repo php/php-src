@@ -287,7 +287,7 @@ ZEND_API void zend_generator_create_zval(zend_op_array *op_array, zval *return_v
 	opline_ptr = EG(opline_ptr);
 	current_symbol_table = EG(active_symbol_table);
 	EG(active_symbol_table) = NULL;
-	execute_data = zend_create_execute_data_from_op_array(op_array, return_value, 0 TSRMLS_CC);
+	execute_data = zend_create_execute_data_from_op_array(op_array, return_value, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
 	EG(active_symbol_table) = current_symbol_table;
 	EG(current_execute_data) = current_execute_data;
 	EG(opline_ptr) = opline_ptr;

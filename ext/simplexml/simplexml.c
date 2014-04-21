@@ -382,7 +382,7 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 
 /* {{{ sxe_property_read()
  */
-static zval *sxe_property_read(zval *object, zval *member, int type, const zend_literal *key, zval *rv TSRMLS_DC)
+static zval *sxe_property_read(zval *object, zval *member, int type, zend_uint cache_slot, zval *rv TSRMLS_DC)
 {
 	return sxe_prop_dim_read(object, member, 1, 0, type, rv TSRMLS_CC);
 }
@@ -666,7 +666,7 @@ next_iter:
 
 /* {{{ sxe_property_write()
  */
-static void sxe_property_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
+static void sxe_property_write(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
 {
 	sxe_prop_dim_write(object, member, value, 1, 0, NULL TSRMLS_CC);
 }
@@ -680,7 +680,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *sxe_property_get_adr(zval *object, zval *member, int fetch_type, zend_uint cache_slot TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -832,7 +832,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 
 /* {{{ sxe_property_exists()
  */
-static int sxe_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
+static int sxe_property_exists(zval *object, zval *member, int check_empty, zend_uint cache_slot TSRMLS_DC)
 {
 	return sxe_prop_dim_exists(object, member, check_empty, 1, 0 TSRMLS_CC);
 }
@@ -957,7 +957,7 @@ next_iter:
 
 /* {{{ sxe_property_delete()
  */
-static void sxe_property_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
+static void sxe_property_delete(zval *object, zval *member, zend_uint cache_slot TSRMLS_DC)
 {
 	sxe_prop_dim_delete(object, member, 1, 0 TSRMLS_CC);
 }
@@ -971,7 +971,7 @@ static void sxe_dimension_delete(zval *object, zval *offset TSRMLS_DC)
 }
 /* }}} */
 
-static inline zend_string * sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine) /* {{{ */
+static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine TSRMLS_DC) /* {{{ */
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
 	zend_string *res;
@@ -1085,7 +1085,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{
 			test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
 			while (attr) {
 				if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) && match_ns(sxe, (xmlNodePtr)attr, sxe->iter.nsprefix, sxe->iter.isprefix)) {
-					ZVAL_STR(&value, sxe_xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1));
+					ZVAL_STR(&value, sxe_xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, attr->children, 1 TSRMLS_CC));
 					namelen = xmlStrlen(attr->name);
 					if (ZVAL_IS_UNDEF(&zattr)) {
 						array_init(&zattr);
@@ -1103,7 +1103,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{
 
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
-			ZVAL_STR(&value, sxe_xmlNodeListGetString(node->doc, node->children, 1));
+			ZVAL_STR(&value, sxe_xmlNodeListGetString(node->doc, node->children, 1 TSRMLS_CC));
 			zend_hash_next_index_insert(rv, &value);
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
@@ -1128,7 +1128,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{{
 					const xmlChar *cur = node->content;
 					
 					if (*cur != 0) {
-						ZVAL_STR(&value, sxe_xmlNodeListGetString(node->doc, node, 1));
+						ZVAL_STR(&value, sxe_xmlNodeListGetString(node->doc, node, 1 TSRMLS_CC));
 						zend_hash_next_index_insert(rv, &value);
 					}
 					goto next_iter;
@@ -2384,7 +2384,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		return;
 	}
 
-	object = (php_libxml_node_object *)Z_SXEOBJ_P(node);
+	object = (php_libxml_node_object *) ((char *) Z_OBJ_P(node) - Z_OBJ_HT_P(node)->offset);
 
 	nodep = php_libxml_import_node(node TSRMLS_CC);
 

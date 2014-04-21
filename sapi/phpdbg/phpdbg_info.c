@@ -212,10 +212,10 @@ PHPDBG_INFO(literal) /* {{{ */
 		}
 
 		while (literal < ops->last_literal) {
-			if (Z_TYPE(ops->literals[literal].constant) != IS_NULL) {
+			if (Z_TYPE(ops->literals[literal]) != IS_NULL) {
 				phpdbg_write("|-------- C%u -------> [", literal);
 				zend_print_zval(
-					&ops->literals[literal].constant, 0);
+					&ops->literals[literal], 0);
 				phpdbg_write("]");
 				phpdbg_writeln(EMPTY);
 			}

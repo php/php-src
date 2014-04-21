@@ -683,7 +683,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
 		/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
 		if ((opline->opcode == ZEND_ECHO || opline->opcode == ZEND_PRINT) &&
-			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+			ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR) &&
 			VAR_SOURCE(opline->op1) &&
 			VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
 			VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {
@@ -785,20 +785,23 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
          * IS_EQ(FALSE, X)     => BOOL_NOT(X)
          * IS_NOT_EQ(TRUE, X)  => BOOL_NOT(X)
          * IS_NOT_EQ(FALSE, X) => BOOL(X)
+         * CASE(TRUE, X)       => BOOL(X)
+         * CASE(FALSE, X)      => BOOL_NOT(X)
          */
 		if (opline->opcode == ZEND_IS_EQUAL ||
-			opline->opcode == ZEND_IS_NOT_EQUAL) {
+			opline->opcode == ZEND_IS_NOT_EQUAL ||
+			opline->opcode == ZEND_CASE) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP1_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				COPY_NODE(opline->op1, opline->op2);
 				SET_UNUSED(opline->op2);
 			} else if (ZEND_OP2_TYPE(opline) == IS_CONST &&
 					   Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_BOOL) {
 				opline->opcode =
-					((opline->opcode == ZEND_IS_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
+					((opline->opcode != ZEND_IS_NOT_EQUAL) == Z_LVAL(ZEND_OP2_LITERAL(opline)))?
 					ZEND_BOOL : ZEND_BOOL_NOT;
 				SET_UNUSED(opline->op2);
 			}
@@ -1118,6 +1121,10 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode = ZEND_CONCAT;
 			literal_dtor(&ZEND_OP2_LITERAL(src)); /* will take care of empty_string too */
 			MAKE_NOP(src);
+//??? This optimization can't work anymore because ADD_VAR returns IS_TMP_VAR
+//??? and ZEND_CAST returns IS_VAR.
+//??? BTW: it wan't used for long time, because we don't use INIT_STRING
+#if 0
 		} else if (opline->opcode == ZEND_ADD_VAR &&
 					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 					VAR_SOURCE(opline->op1) &&
@@ -1130,11 +1137,12 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(src);
 			opline->opcode = ZEND_CAST;
 			opline->extended_value = IS_STRING;
+#endif
 		} else if ((opline->opcode == ZEND_ADD_STRING ||
 					opline->opcode == ZEND_ADD_CHAR ||
 					opline->opcode == ZEND_ADD_VAR ||
 					opline->opcode == ZEND_CONCAT) &&
-					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
+					ZEND_OP1_TYPE(opline) == (IS_TMP_VAR|IS_VAR) &&
 					VAR_SOURCE(opline->op1) &&
 					VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
 					VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {

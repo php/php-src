@@ -75,7 +75,7 @@ ZEND_API void zend_register_string_constant(const char *name, uint name_len, cha
 ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC);
 ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
-zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC);
+zend_constant *zend_quick_get_constant(const zval *key, ulong flags TSRMLS_DC);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant

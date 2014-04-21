@@ -35,13 +35,13 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_pt
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
-ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC);
+ZEND_API zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC);
-ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zend_literal *key, int use_autoload TSRMLS_DC);
+ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
@@ -302,7 +302,7 @@ ZEND_API void zend_set_timeout(long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
 ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, int fetch_type TSRMLS_DC);
-ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zend_literal *key, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, const zval *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32
@@ -346,20 +346,37 @@ void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC);
 void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 
 #define CACHED_PTR(num) \
-	EG(active_op_array)->run_time_cache[(num)]
+	EX(run_time_cache)[(num)]
 
 #define CACHE_PTR(num, ptr) do { \
-		EG(active_op_array)->run_time_cache[(num)] = (ptr); \
+		EX(run_time_cache)[(num)] = (ptr); \
 	} while (0)
 
 #define CACHED_POLYMORPHIC_PTR(num, ce) \
-	((EG(active_op_array)->run_time_cache[(num)] == (ce)) ? \
-		EG(active_op_array)->run_time_cache[(num) + 1] : \
+	((EX(run_time_cache)[(num)] == (ce)) ? \
+		EX(run_time_cache)[(num) + 1] : \
 		NULL)
 
 #define CACHE_POLYMORPHIC_PTR(num, ce, ptr) do { \
-		EG(active_op_array)->run_time_cache[(num)] = (ce); \
-		EG(active_op_array)->run_time_cache[(num) + 1] = (ptr); \
+		EX(run_time_cache)[(num)] = (ce); \
+		EX(run_time_cache)[(num) + 1] = (ptr); \
+	} while (0)
+
+#define CACHED_PTR_EX(op_array, num) \
+	(op_array)->run_time_cache[(num)]
+
+#define CACHE_PTR_EX(op_array, num, ptr) do { \
+		(op_array)->run_time_cache[(num)] = (ptr); \
+	} while (0)
+
+#define CACHED_POLYMORPHIC_PTR_EX(op_array, num, ce) \
+	(((op_array)->run_time_cache[(num)] == (ce)) ? \
+		(op_array)->run_time_cache[(num) + 1] : \
+		NULL)
+
+#define CACHE_POLYMORPHIC_PTR_EX(op_array, num, ce, ptr) do { \
+		(op_array)->run_time_cache[(num)] = (ce); \
+		(op_array)->run_time_cache[(num) + 1] = (ptr); \
 	} while (0)
 
 END_EXTERN_C()

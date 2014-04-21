@@ -248,7 +248,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, -1 TSRMLS_CC);
 	zval_ptr_dtor(&zpropname);
 
 	zval_ptr_dtor(&args[3]);
@@ -543,12 +543,11 @@ PHP_FUNCTION(stream_get_filters)
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash) {
-		for(zend_hash_internal_pointer_reset(filters_hash);
-			(key_flags = zend_hash_get_current_key(filters_hash, &filter_name, &num_key, 0)) != HASH_KEY_NON_EXISTENT;
-			zend_hash_move_forward(filters_hash))
-				if (key_flags == HASH_KEY_IS_STRING) {
-					add_next_index_str(return_value, STR_COPY(filter_name));
-				}
+		ZEND_HASH_FOREACH_VAL(filters_hash, key_flags) {
+			if (key_flags == HASH_KEY_IS_STRING) {
+				add_next_index_str(return_value, STR_COPY(filter_name));
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }

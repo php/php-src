@@ -315,15 +315,12 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 ZEND_API int zend_fetch_list_dtor_id(const char *type_name)
 {
 	zend_rsrc_list_dtors_entry *lde;
-	HashPosition pos;
 
-	zend_hash_internal_pointer_reset_ex(&list_destructors, &pos);
-	while ((lde = zend_hash_get_current_data_ptr_ex(&list_destructors, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&list_destructors, lde) {
 		if (lde->type_name && (strcmp(type_name, lde->type_name) == 0)) {
 			return lde->resource_id;
 		}
-		zend_hash_move_forward_ex(&list_destructors, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	return 0;
 }

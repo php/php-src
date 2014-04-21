@@ -156,7 +156,6 @@ static uint zend_persist_zval_calc(zval *z TSRMLS_DC)
 
 static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_op *opline, *end;
 	START_SIZE();
 
 	if (op_array->type != ZEND_USER_FUNCTION) {
@@ -181,11 +180,11 @@ static uint zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (op_array->literals) {
-		zend_literal *p = op_array->literals;
-		zend_literal *end = p + op_array->last_literal;
-		ADD_DUP_SIZE(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
+		zval *p = op_array->literals;
+		zval *end = p + op_array->last_literal;
+		ADD_DUP_SIZE(op_array->literals, sizeof(zval) * op_array->last_literal);
 		while (p < end) {
-			ADD_SIZE(zend_persist_zval_calc(&p->constant TSRMLS_CC));
+			ADD_SIZE(zend_persist_zval_calc(p TSRMLS_CC));
 			p++;
 		}
 	}

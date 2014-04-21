@@ -351,11 +351,11 @@ zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC);
 # define ZEND_OP1_TYPE(opline)		(opline)->op1_type
 # define ZEND_OP1(opline)			(opline)->op1
 # define ZEND_OP1_CONST(opline)		(*(opline)->op1.zv)
-# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant].constant
+# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant]
 # define ZEND_OP2_TYPE(opline)		(opline)->op2_type
 # define ZEND_OP2(opline)			(opline)->op2
 # define ZEND_OP2_CONST(opline)		(*(opline)->op2.zv)
-# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant].constant
+# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant]
 # define ZEND_DONE_PASS_TWO(op_array)	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0)
 # define ZEND_CE_FILENAME(ce)			(ce)->info.user.filename
 # define ZEND_CE_DOC_COMMENT(ce)        (ce)->info.user.doc_comment

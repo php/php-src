@@ -903,16 +903,12 @@ ZEND_FUNCTION(is_a)
 /* {{{ add_class_vars */
 static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
 {
-	HashPosition pos;
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
 	ulong num_index;
 
-	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-	while ((prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
-		zend_hash_get_current_key_ex(&ce->properties_info, &key, &num_index, 0, &pos);
-		zend_hash_move_forward_ex(&ce->properties_info, &pos);
+	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
 		     prop_info->ce != EG(scope)) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -944,7 +940,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -980,7 +976,6 @@ ZEND_FUNCTION(get_object_vars)
 	zval *obj;
 	zval *value;
 	HashTable *properties;
-	HashPosition pos;
 	zend_string *key;
 	const char *prop_name, *class_name;
 	uint prop_len;
@@ -1005,17 +1000,8 @@ ZEND_FUNCTION(get_object_vars)
 
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(properties, &pos);
-
-	while ((value = zend_hash_get_current_data_ex(properties, &pos)) != NULL) {
-		if (Z_TYPE_P(value) == IS_INDIRECT) {
-			value = Z_INDIRECT_P(value);
-			if (Z_TYPE_P(value) == IS_UNDEF) {
-				zend_hash_move_forward_ex(properties, &pos);
-				continue;
-			}
-		}
-		if (zend_hash_get_current_key_ex(properties, &key, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(properties, num_index, key, value) {
+		if (key) {
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
 				/* Not separating references */
 				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
@@ -1027,8 +1013,7 @@ ZEND_FUNCTION(get_object_vars)
 				}
 			}
 		}
-		zend_hash_move_forward_ex(properties, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1047,8 +1032,9 @@ ZEND_FUNCTION(get_class_methods)
 	zval *klass;
 	zval method_name;
 	zend_class_entry *ce = NULL;
-	HashPosition pos;
 	zend_function *mptr;
+	zend_string *key;
+	ulong num_index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &klass) == FAILURE) {
 		return;
@@ -1069,22 +1055,21 @@ ZEND_FUNCTION(get_class_methods)
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
-	while ((mptr = zend_hash_get_current_data_ptr_ex(&ce->function_table, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_KEY_PTR(&ce->function_table, num_index, key, mptr) {
+
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC) 
 		 || (EG(scope) &&
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
 		       zend_check_protected(mptr->common.scope, EG(scope)))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 		       EG(scope) == mptr->common.scope)))) {
-			zend_string *key;
-			ulong num_index;
 			uint len = mptr->common.function_name->len;
 
 			/* Do not display old-style inherited constructors */
-			if (zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, 0, &pos) != HASH_KEY_IS_STRING) {
-				ZVAL_STR(&method_name, STR_COPY(mptr->common.function_name));
+			if (!key) {
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+				ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
 				zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 			} else if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
 			    mptr->common.scope == ce ||
@@ -1097,13 +1082,13 @@ ZEND_FUNCTION(get_class_methods)
 					ZVAL_STR(&method_name, STR_COPY(zend_find_alias_name(mptr->common.scope, key)));
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 				} else {
-					ZVAL_STR(&method_name, STR_COPY(mptr->common.function_name));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+					ZVAL_STR(&method_name, STR_DUP(mptr->common.function_name, 0));
 					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &method_name);
 				}
 			}
 		}
-		zend_hash_move_forward_ex(&ce->function_table, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1203,7 +1188,7 @@ ZEND_FUNCTION(property_exists)
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
 		Z_OBJ_HANDLER_P(object, has_property) && 
-		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, 0 TSRMLS_CC)) {
+		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, -1 TSRMLS_CC)) {
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
@@ -1441,17 +1426,18 @@ ZEND_FUNCTION(crash)
 ZEND_FUNCTION(get_included_files)
 {
 	zend_string *entry;
+	ulong num_idx;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset(&EG(included_files));
-	while (zend_hash_get_current_key(&EG(included_files), &entry, NULL, 0) == HASH_KEY_IS_STRING) {
-		add_next_index_str(return_value, STR_COPY(entry));
-		zend_hash_move_forward(&EG(included_files));
-	}
+	ZEND_HASH_FOREACH_KEY(&EG(included_files), num_idx, entry) {
+		if (entry) {
+			add_next_index_str(return_value, STR_COPY(entry));
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1926,7 +1912,6 @@ ZEND_FUNCTION(get_defined_constants)
 	array_init(return_value);
 
 	if (categorize) {
-		HashPosition pos;
 		zend_constant *val;
 		int module_number;
 		zval *modules;
@@ -1938,28 +1923,25 @@ ZEND_FUNCTION(get_defined_constants)
 		module_names = emalloc((zend_hash_num_elements(&module_registry) + 2) * sizeof(char *));
 
 		module_names[0] = "internal";
-		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
-		while ((module = zend_hash_get_current_data_ptr_ex(&module_registry, &pos)) != NULL) {
+		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 			module_names[module->module_number] = (char *)module->name;
 			i++;
-			zend_hash_move_forward_ex(&module_registry, &pos);
-		}
+		} ZEND_HASH_FOREACH_END();
 		module_names[i] = "user";
 
-		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
-		while ((val = zend_hash_get_current_data_ptr_ex(EG(zend_constants), &pos)) != NULL) {
+		ZEND_HASH_FOREACH_PTR(EG(zend_constants), val) {
 			zval const_val;
 
 			if (!val->name) {
 				/* skip special constants */
-				goto next_constant;
+				continue;
 			}
 
 			if (val->module_number == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (val->module_number > i || val->module_number < 0) {
 				/* should not happen */
-				goto next_constant;
+				continue;
 			} else {
 				module_number = val->module_number;
 			}
@@ -1972,9 +1954,8 @@ ZEND_FUNCTION(get_defined_constants)
 			ZVAL_DUP_DEREF(&const_val, &val->value);
 
 			zend_hash_update(Z_ARRVAL(modules[module_number]), val->name, &const_val);
-next_constant:
-			zend_hash_move_forward_ex(EG(zend_constants), &pos);
-		}
+		} ZEND_HASH_FOREACH_END();
+
 		efree(module_names);
 		efree(modules);
 	} else {
@@ -2007,17 +1988,14 @@ static void debug_backtrace_get_args(zval *curpos, zval *arg_array TSRMLS_DC)
 void debug_print_backtrace_args(zval *arg_array TSRMLS_DC)
 {
 	zval *tmp;
-	HashPosition iterator;
 	int i = 0;
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arg_array), &iterator);
-	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL_P(arg_array), &iterator)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arg_array), tmp) {
 		if (i++) {
 			ZEND_PUTS(", ");
 		}
 		zend_print_flat_zval_r(tmp TSRMLS_CC);
-		zend_hash_move_forward_ex(Z_ARRVAL_P(arg_array), &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 
 /* {{{ proto void debug_print_backtrace([int options[, int limit]]) */
@@ -2240,7 +2218,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					break;
 				}				    
 				if (prev->op_array) {
-					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_COPY(prev->op_array->filename));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, STR_DUP(prev->op_array->filename, 0));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
 					break;
 				}
@@ -2399,8 +2378,8 @@ ZEND_FUNCTION(get_extension_funcs)
 	zend_string *lcname;
 	int extension_name_len, array;
 	zend_module_entry *module;
-	HashPosition iterator;
 	zend_function *zif;
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &extension_name, &extension_name_len) == FAILURE) {
 		return;
 	}
@@ -2416,7 +2395,6 @@ ZEND_FUNCTION(get_extension_funcs)
 		RETURN_FALSE;
 	}
 
-	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
 	if (module->functions) {
 		/* avoid BC break, if functions list is empty, will return an empty array */
 		array_init(return_value);
@@ -2424,17 +2402,18 @@ ZEND_FUNCTION(get_extension_funcs)
 	} else {
 		array = 0;
 	}
-	while ((zif = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) != NULL) {
+
+	ZEND_HASH_FOREACH_PTR(CG(function_table), zif) {
 		if (zif->common.type == ZEND_INTERNAL_FUNCTION
 			&& zif->internal_function.module == module) {
 			if (!array) {
 				array_init(return_value);
 				array = 1;
 			}
-			add_next_index_str(return_value, STR_COPY(zif->common.function_name));
+// TODO: we have to duplicate it, becaise it may be stored in opcache SHM ???
+			add_next_index_str(return_value, STR_DUP(zif->common.function_name, 0));
 		}
-		zend_hash_move_forward_ex(CG(function_table), &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (!array) {
 		RETURN_FALSE;

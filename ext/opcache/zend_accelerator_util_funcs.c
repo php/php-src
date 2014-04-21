@@ -409,7 +409,6 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 			q->key = NULL;
 		} else {
 			q->key = zend_clone_str(p->key TSRMLS_CC);
-			GC_FLAGS(q->key) = GC_FLAGS(p->key);
 		}
 
 		/* Copy data */

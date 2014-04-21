@@ -4281,11 +4281,8 @@ PHP_FUNCTION(getopt)
 		 * and a trailing NULL */
 		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
 
-		/* Reset the array indexes. */
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(args));
-
 		/* Iterate over the hash to construct the argv array. */
-		while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(args))) != NULL) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
 			zval arg, *arg_ptr = entry;
 
 			if (Z_TYPE_P(entry) != IS_STRING) {
@@ -4299,9 +4296,7 @@ PHP_FUNCTION(getopt)
 			if (arg_ptr != entry) {
 				zval_dtor(&arg);
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(args));
-		}
+		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
 		 * keep some getopt implementations happy. */
@@ -4327,11 +4322,8 @@ PHP_FUNCTION(getopt)
 
 		memset(opts, 0, count * sizeof(opt_struct));
 
-		/* Reset the array indexes. */
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p_longopts));
-
 		/* Iterate over the hash to construct the argv array. */
-		while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(p_longopts))) != NULL) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
 			zval arg, *arg_ptr = entry;
 
 			if (Z_TYPE_P(entry) != IS_STRING) {
@@ -4357,9 +4349,7 @@ PHP_FUNCTION(getopt)
 			if (arg_ptr != entry) {
 				zval_dtor(&arg);
 			}
-
-			zend_hash_move_forward(Z_ARRVAL_P(p_longopts));
-		}
+		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
 		orig_opts = opts;
@@ -4877,13 +4867,10 @@ PHP_FUNCTION(call_user_method_array)
 	num_elems = zend_hash_num_elements(params_ar);
 	method_args = (zval *) safe_emalloc(sizeof(zval), num_elems, 0);
 
-	for (zend_hash_internal_pointer_reset(params_ar);
-		(zv = zend_hash_get_current_data(params_ar)) != NULL;
-		zend_hash_move_forward(params_ar)
-	) {
+	ZEND_HASH_FOREACH_VAL(params_ar, zv) {
 		ZVAL_COPY_VALUE(&method_args[element], zv);
 		element++;
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	if (call_user_function_ex(EG(function_table), object, callback, &retval, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS) {
 		if (Z_TYPE(retval) != IS_UNDEF) {

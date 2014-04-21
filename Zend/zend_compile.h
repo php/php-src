@@ -65,11 +65,6 @@ typedef struct _zend_compiler_context {
 	HashTable *labels;
 } zend_compiler_context;
 
-typedef struct _zend_literal {
-	zval       constant;
-	zend_uint  cache_slot;
-} zend_literal;
-
 typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
@@ -78,7 +73,6 @@ typedef union _znode_op {
 	zend_uint      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
-	zend_literal  *literal;
 	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
@@ -294,7 +288,7 @@ struct _zend_op_array {
 	zend_string *doc_comment;
 	zend_uint early_binding; /* the linked list of delayed declarations */
 
-	zend_literal *literals;
+	zval *literals;
 	int last_literal;
 
 	void **run_time_cache;
@@ -372,15 +366,23 @@ typedef struct _call_slot {
 	zend_bool          is_ctor_result_used;
 } call_slot;
 
+typedef enum _vm_frame_kind {
+	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
+	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
+	VM_FRAME_TOP_FUNCTION,		/* direct VM call to function from external C code */
+	VM_FRAME_TOP_CODE			/* direct VM call to "main" code from external C code */
+} vm_frame_kind;
+
 struct _zend_execute_data {
 	struct _zend_op *opline;
+	void **run_time_cache;
 	zend_function_state function_state;
 	zend_op_array *op_array;
 	zend_object *object;
 	zend_array *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval old_error_reporting;
-	zend_bool nested;
+	vm_frame_kind frame_kind;
 	zval *return_value;
 	// TODO: simplify call sequence and remove current_* and call_* ???
 	zend_class_entry *current_scope;

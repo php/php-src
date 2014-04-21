@@ -1086,7 +1086,7 @@ static int zend_merge_property(zval *value TSRMLS_DC, int num_args, va_list args
 		zval member;
 
 		ZVAL_STR(&member, STR_COPY(hash_key->key));
-		obj_ht->write_property(obj, &member, value, 0 TSRMLS_CC);
+		obj_ht->write_property(obj, &member, value, -1 TSRMLS_CC);
 		zval_ptr_dtor(&member);
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -1119,13 +1119,10 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 
 		if ((*scope)->parent) {
 			zend_class_entry *ce = *scope;
-			HashPosition pos;
 			zend_property_info *prop_info;
 
 			do {
-				for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-				     (prop_info = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL;
-				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 					if (is_static == ((prop_info->flags & ZEND_ACC_STATIC) != 0) &&
 					    offset == prop_info->offset) {
 						int ret;
@@ -1135,7 +1132,7 @@ static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS
 						*scope = old_scope;
 						return ret;
 					}
-				}				
+				} ZEND_HASH_FOREACH_END();
 				ce = ce->parent;
 			} while (ce);
 
@@ -1223,17 +1220,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
-		HashPosition pos;
 	    zval *prop, tmp;
     	zend_string *key;
 	    ulong num_key;
     	zend_property_info *property_info;
 
-		for (zend_hash_internal_pointer_reset_ex(properties, &pos);
-		     (prop = zend_hash_get_current_data_ex(properties, &pos)) != NULL &&
-	    	 zend_hash_get_current_key_ex(properties, &key, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-		     zend_hash_move_forward_ex(properties, &pos)) {
-
+    	ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, prop) {
 		    ZVAL_STR(&tmp, key);
 			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
 			if (property_info &&
@@ -1242,24 +1234,19 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 				ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
 				ZVAL_INDIRECT(prop, &object->properties_table[property_info->offset]);
 			}
-		}		
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */
 
 ZEND_API void object_properties_load(zend_object *object, HashTable *properties TSRMLS_DC) /* {{{ */
 {
-	HashPosition pos;
     zval *prop, tmp;
    	zend_string *key;
     ulong num_key;
    	zend_property_info *property_info;
 
-	for (zend_hash_internal_pointer_reset_ex(properties, &pos);
-	     (prop = zend_hash_get_current_data_ex(properties, &pos)) != NULL &&
-    	 zend_hash_get_current_key_ex(properties, &key, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
-	     zend_hash_move_forward_ex(properties, &pos)) {
-
+	ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, prop) {
 	    ZVAL_STR(&tmp, key);
 		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
 		if (property_info &&
@@ -1279,7 +1266,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 			prop = zend_hash_update(object->properties, key, prop);
 			zval_add_ref(prop);
 		}
-	}		
+	} ZEND_HASH_FOREACH_END();		
 }
 /* }}} */
 
@@ -1686,7 +1673,7 @@ ZEND_API int add_property_long_ex(zval *arg, const char *key, uint key_len, long
 
 	ZVAL_LONG(&tmp, n);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1700,7 +1687,7 @@ ZEND_API int add_property_bool_ex(zval *arg, const char *key, uint key_len, int 
 
 	ZVAL_BOOL(&tmp, b);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1714,7 +1701,7 @@ ZEND_API int add_property_null_ex(zval *arg, const char *key, uint key_len TSRML
 
 	ZVAL_NULL(&tmp);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1728,7 +1715,7 @@ ZEND_API int add_property_resource_ex(zval *arg, const char *key, uint key_len, 
 
 	ZVAL_RES(&tmp, r);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1742,7 +1729,7 @@ ZEND_API int add_property_double_ex(zval *arg, const char *key, uint key_len, do
 
 	ZVAL_DOUBLE(&tmp, d);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1756,7 +1743,7 @@ ZEND_API int add_property_string_ex(zval *arg, const char *key, uint key_len, co
 
 	ZVAL_STRING(&tmp, str);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1770,7 +1757,7 @@ ZEND_API int add_property_stringl_ex(zval *arg, const char *key, uint key_len, c
 
 	ZVAL_STRINGL(&tmp, str, length);
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, -1 TSRMLS_CC);
 	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
@@ -1782,7 +1769,7 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval
 	zval z_key;
 
 	ZVAL_STRINGL(&z_key, key, key_len);
-	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value, 0 TSRMLS_CC);
+	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, value, -1 TSRMLS_CC);
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
@@ -1892,7 +1879,6 @@ try_again:
 
 ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 {
-	HashPosition pos;
 	zend_module_entry *module;
 	int startup_count = 0;
 	int shutdown_count = 0;
@@ -1901,9 +1887,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 	int class_count = 0;
 
 	/* Collect extensions with request startup/shutdown handlers */
-	for (zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
-	     (module = zend_hash_get_current_data_ptr_ex(&module_registry, &pos)) != NULL;
-	     zend_hash_move_forward_ex(&module_registry, &pos)) {
+	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 		if (module->request_startup_func) {
 			startup_count++;
 		}
@@ -1913,7 +1897,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 		if (module->post_deactivate_func) {
 			post_deactivate_count++;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 	module_request_startup_handlers = (zend_module_entry**)malloc(
 	    sizeof(zend_module_entry*) *
 		(startup_count + 1 +
@@ -1926,9 +1910,7 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
 	startup_count = 0;
 	
-	for (zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
-	     (module = zend_hash_get_current_data_ptr_ex(&module_registry, &pos)) != NULL;
-	     zend_hash_move_forward_ex(&module_registry, &pos)) {
+	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 		if (module->request_startup_func) {
 			module_request_startup_handlers[startup_count++] = module;
 		}
@@ -1938,17 +1920,15 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 		if (module->post_deactivate_func) {
 			module_post_deactivate_handlers[--post_deactivate_count] = module;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	/* Collect internal classes with static members */
-	for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
-	     (ce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
-	     zend_hash_move_forward_ex(CG(class_table), &pos)) {
+	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
 		if (ce->type == ZEND_INTERNAL_CLASS &&
 		    ce->default_static_members_count > 0) {
 		    class_count++;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	class_cleanup_handlers = (zend_class_entry**)malloc(
 		sizeof(zend_class_entry*) *
@@ -1956,14 +1936,12 @@ ZEND_API void zend_collect_module_handlers(TSRMLS_D) /* {{{ */
 	class_cleanup_handlers[class_count] = NULL;
 
 	if (class_count) {
-		for (zend_hash_internal_pointer_reset_ex(CG(class_table), &pos);
-		     (ce = zend_hash_get_current_data_ptr_ex(CG(class_table), &pos)) != NULL;
-	    	 zend_hash_move_forward_ex(CG(class_table), &pos)) {
+		ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
 			if (ce->type == ZEND_INTERNAL_CLASS &&
 			    ce->default_static_members_count > 0) {
 			    class_cleanup_handlers[--class_count] = ce;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 }
 /* }}} */
@@ -3407,7 +3385,6 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
 {
-	HashPosition pos;
 	zval *arg, *params;
 
 	zend_fcall_info_args_clear(fci, !args);
@@ -3423,12 +3400,10 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 	fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 	fci->params = params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-	while ((arg = zend_hash_get_current_data_ex(Z_ARRVAL_P(args), &pos)) != NULL) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), arg) {
 		ZVAL_COPY(params, arg);
 		params++;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
 }
@@ -3737,7 +3712,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name->val);
 	}
 	ZVAL_STRINGL(&property, name, name_length);
-	Z_OBJ_HT_P(object)->write_property(object, &property, value, 0 TSRMLS_CC);
+	Z_OBJ_HT_P(object)->write_property(object, &property, value, -1 TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3816,7 +3791,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = STR_INIT(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, 0, NULL TSRMLS_CC);
+	property = zend_std_get_static_property(scope, key, 0, -1 TSRMLS_CC);
 	EG(scope) = old_scope;
 	STR_FREE(key);
 	if (!property) {
@@ -3916,7 +3891,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, 0, &rv TSRMLS_CC);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, -1, &rv TSRMLS_CC);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3931,7 +3906,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = STR_INIT(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent, NULL TSRMLS_CC);
+	property = zend_std_get_static_property(scope, key, silent, -1 TSRMLS_CC);
 	EG(scope) = old_scope;
 	STR_FREE(key);
 
@@ -4026,6 +4001,8 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 	zend_function *func;
 	HashPosition iterator;
 	HashTable *function_table;
+	zend_string *name;
+	ulong idx;
 
 	if (f->common.type != ZEND_USER_FUNCTION ||
 	    *(f->op_array.refcount) < 2 ||
@@ -4035,13 +4012,9 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 	}
 
 	function_table = &ce->function_table;
-	zend_hash_internal_pointer_reset_ex(function_table, &iterator);
-	while ((func = zend_hash_get_current_data_ptr_ex(function_table, &iterator)) != NULL) {
+	ZEND_HASH_FOREACH_KEY_PTR(function_table, idx, name, func) {
 		if (func == f) {
-			zend_string *name;
-			ulong idx;
-
-			if (zend_hash_get_current_key_ex(function_table, &name, &idx, 0, &iterator) != HASH_KEY_IS_STRING) {
+			if (!name) {
 				return f->common.function_name;
 			}
 			if (name->len == f->common.function_name->len &&
@@ -4050,8 +4023,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 			}
 			return zend_find_alias_name(f->common.scope, name);
 		}
-		zend_hash_move_forward_ex(function_table, &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 	return f->common.function_name;
 }
 /* }}} */

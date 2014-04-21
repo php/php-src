@@ -118,6 +118,7 @@ struct _zval_struct {
 		zend_uint     var_flags;
 		zend_uint     next;                 /* hash collision chain */
 		zend_uint     str_offset;           /* string offset */
+		zend_uint     cache_slot;           /* literal cache slot */
 	} u2;
 };
 
@@ -236,6 +237,9 @@ static inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_NEXT(zval)				(zval).u2.next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
+
+#define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
+#define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))
 
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))

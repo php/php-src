@@ -1079,10 +1079,10 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zval *return_value, zend_bool nested TSRMLS_DC) /* {{{ */
+static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
 #if PHP_VERSION_ID >= 50500
-	return zend_create_execute_data_from_op_array(op_array, return_value, nested TSRMLS_CC);
+	return zend_create_execute_data_from_op_array(op_array, return_value, frame_kind TSRMLS_CC);
 #else
 
 #undef EX

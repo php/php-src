@@ -110,10 +110,10 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		}
 	}
 	/* copy arguments back, they might be changed by references */
-	if (param_count > 0) {
+	if (param_count > 0 && Z_ISREF(params[0]) && !Z_ISREF_P(arg1)) {
 		ZVAL_COPY_VALUE(arg1, &params[0]);
 	}
-	if (param_count > 1) {
+	if (param_count > 1 && Z_ISREF(params[1]) && !Z_ISREF_P(arg2)) {
 		ZVAL_COPY_VALUE(arg2, &params[1]);
 	}
 	if (!retval_ptr) {

@@ -86,6 +86,7 @@ ZEND_GET_MODULE(libxml)
 /* {{{ function prototypes */
 static PHP_MINIT_FUNCTION(libxml);
 static PHP_RINIT_FUNCTION(libxml);
+static PHP_RSHUTDOWN_FUNCTION(libxml);
 static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
 static int php_libxml_post_deactivate();
@@ -138,7 +139,7 @@ zend_module_entry libxml_module_entry = {
 	PHP_MINIT(libxml),       /* extension-wide startup function */
 	PHP_MSHUTDOWN(libxml),   /* extension-wide shutdown function */
 	PHP_RINIT(libxml),       /* per-request startup function */
-	NULL,                    /* per-request shutdown function */
+	PHP_RSHUTDOWN(libxml),   /* per-request shutdown function */
 	PHP_MINFO(libxml),       /* information function */
 	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(libxml), /* globals descriptor */
@@ -588,7 +589,7 @@ static xmlParserInputPtr _php_libxml_external_entity_loader(const char *URL,
 	if (context->memb == NULL) { \
 		add_assoc_null_ex(ctxzv, #memb, sizeof(#memb) - 1); \
 	} else { \
-		add_assoc_string_ex(ctxzv, #memb, sizeof(#memb - 1), \
+		add_assoc_string_ex(ctxzv, #memb, sizeof(#memb) - 1, \
 				(char *)context->memb); \
 	}
 	
@@ -862,6 +863,12 @@ static PHP_RINIT_FUNCTION(libxml)
 	return SUCCESS;
 }
 
+static PHP_RSHUTDOWN_FUNCTION(libxml)
+{
+	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
+
+	return SUCCESS;
+}
 
 static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
@@ -898,8 +905,6 @@ static int php_libxml_post_deactivate()
 	}
 	xmlResetLastError();
 	
-	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
-
 	return SUCCESS;
 }
 
@@ -1152,7 +1157,7 @@ PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC)
 		while (ce->parent != NULL) {
 			ce = ce->parent;
 		}
-		if ((export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name))  == SUCCESS) {
+		if ((export_hnd = zend_hash_find_ptr(&php_libxml_exports, ce->name))) {
 			node = export_hnd->export_func(object TSRMLS_CC);
 		}
 	}

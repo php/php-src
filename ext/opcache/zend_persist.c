@@ -179,7 +179,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	int has_jmp = 0;
 #endif
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	zend_literal *orig_literals = NULL;
+	zval *orig_literals = NULL;
 #endif
 	
 	if (op_array->type != ZEND_USER_FUNCTION) {
@@ -228,12 +228,12 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			ZEND_ASSERT(orig_literals != NULL);
 			op_array->literals = orig_literals;
 		} else {
-			zend_literal *p = zend_accel_memdup(op_array->literals, sizeof(zend_literal) * op_array->last_literal);
-			zend_literal *end = p + op_array->last_literal;
+			zval *p = zend_accel_memdup(op_array->literals, sizeof(zval) * op_array->last_literal);
+			zval *end = p + op_array->last_literal;
 			orig_literals = op_array->literals;
 			op_array->literals = p;
 			while (p < end) {
-				zend_persist_zval(&p->constant TSRMLS_CC);
+				zend_persist_zval(p TSRMLS_CC);
 				p++;
 			}
 			efree(orig_literals);

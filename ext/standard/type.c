@@ -387,14 +387,16 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		if (callable_name) {
-			ZVAL_DEREF(callable_name);
-		}
+		ZVAL_DEREF(callable_name);
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
-		name->len = strlen(name->val);
-		ZVAL_STR(callable_name, name);
+		if (UNEXPECTED(name->len) != strlen(name->val)) {
+			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
+			STR_RELEASE(name);
+		} else {
+			ZVAL_STR(callable_name, name);
+		}
 	} else {
 		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
 	}
