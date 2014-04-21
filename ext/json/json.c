@@ -430,7 +430,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 				if (!zend_isinf(d) && !zend_isnan(d)) {
 					char num[NUM_BUF_SIZE];
 					int l;
-					php_gcvt(d, EG(precision), '.', 'e', &num);
+					php_gcvt(d, EG(precision), '.', 'e', &num[0]);
 					l = strlen(num);
 					if (strchr(num, '.') == NULL) {
 						num[l++] = '.';
@@ -643,7 +643,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 				double dbl = Z_DVAL_P(val);
 
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-					php_gcvt(dbl, EG(precision), '.', 'e', &num);
+					php_gcvt(dbl, EG(precision), '.', 'e', &num[0]);
 					len = strlen(num);
 					if (strchr(num, '.') == NULL) {
 						num[len++] = '.';
