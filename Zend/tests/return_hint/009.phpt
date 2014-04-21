@@ -17,6 +17,6 @@ $qux = new qux();
 var_dump($qux->foo());
 ?>
 --EXPECTF--
-Fatal error: Delcaration of qux::foo should be compatible with bar::foo() : foo, return type mismatch in %s on line %d
+Fatal error: Declaration of qux::foo should be compatible with bar::foo() : foo, return type mismatch in %s on line %d
 
 
