@@ -4396,6 +4396,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -5096,6 +5101,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -6125,6 +6135,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -6861,6 +6876,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -7607,6 +7627,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -9687,6 +9712,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -10389,6 +10419,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -11420,6 +11455,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -12013,6 +12053,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -12699,6 +12744,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -16623,6 +16673,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -18711,6 +18766,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -21183,6 +21243,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -22349,6 +22414,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -24475,6 +24545,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -25988,6 +26063,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -27300,6 +27380,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -28616,6 +28701,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -29044,6 +29134,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -30355,6 +30450,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -33869,6 +33969,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -35818,6 +35923,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -38150,6 +38260,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
 	}
 
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -39167,6 +39282,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
@@ -41151,6 +41271,11 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */

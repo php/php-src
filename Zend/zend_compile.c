@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "zend_constants.h"
+#include "zend_generators.h"
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
@@ -106,6 +107,8 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 	char *scope = NULL;
 	char *expected = NULL;
 	char *got = NULL;
+	char *ftype = (function->common.fn_flags & ZEND_ACC_GENERATOR) ? "generator" : "function";
+	char *rtype = (function->common.fn_flags & ZEND_ACC_GENERATOR) ? "yield"     : "return";
 	
 	if (function->common.scope) {
 		zend_spprintf(&scope, 0, "%s::%s", 
@@ -125,9 +128,9 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 	}
 	
 	if (message) {
-		zend_error(type, "the function %s was expected to return %s, %s", scope, expected, message);
+		zend_error(type, "the %s %s was expected to %s %s, %s", ftype, scope, rtype, expected, message);
 		efree(scope);
-		efree(expected);	
+		efree(expected);
 		return;
 	}
 
@@ -151,7 +154,7 @@ ZEND_API void zend_return_hint_error(int type, zend_function *function, zval *re
 		}
 	}
 
-	zend_error(type, "the function %s was expected to return %s and returned %s", scope, expected, got);
+	zend_error(type, "the %s %s was expected to %s %s and returned %s", ftype, scope, rtype, expected, got);
 
 	efree(scope);
 	efree(expected);
@@ -1920,18 +1923,9 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ */
-void zend_do_function_return_hint(znode *return_hint, zend_bool return_reference TSRMLS_DC) {			
+void zend_do_function_return_hint(znode *return_hint TSRMLS_DC) {			
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
-		
-		if (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
-			if (CG(active_class_entry)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "the function %s::%s returns by reference and declares a return type; the & must be placed immediately before the return type and not before the function name.", CG(active_class_entry)->name, CG(active_op_array)->function_name);
-			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "the function %s returns by reference and declares a return type; the & must be placed immediately before the return type and not before the function name.", CG(active_op_array)->function_name);
-			}
-			return;
-		}
 		
 		if (return_hint->op_type == IS_CONST) {
 			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
@@ -1945,9 +1939,6 @@ void zend_do_function_return_hint(znode *return_hint, zend_bool return_reference
 				CG(active_op_array)->return_hint.type = Z_TYPE(return_hint->u.constant);
 			}
 		}
-		
-		if (return_reference)
-			CG(active_op_array)->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
 } /* }}} */
 
@@ -2946,7 +2937,11 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 	}
 	
 	if (CG(active_op_array)->return_hint.used) {
-		zend_error_noreturn(E_COMPILE_ERROR, "The \"yield\" expression can not be used inside a function with a return type hint");
+		if (CG(active_op_array)->return_hint.type != IS_OBJECT) {
+			zend_error_noreturn(E_COMPILE_ERROR, 
+				"Generators may only yield objects, %s is not a valid type", 
+				zend_get_type_by_const(CG(active_op_array)->return_hint.type));
+		}
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;

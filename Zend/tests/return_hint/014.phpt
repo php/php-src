@@ -1,5 +1,5 @@
 --TEST--
-Basic return hints no yield
+Basic return hints yield non-object
 --FILE--
 <?php
 function foo() : array {
@@ -7,6 +7,7 @@ function foo() : array {
 }
 ?>
 --EXPECTF--
-Fatal error: The "yield" expression can not be used inside a function with a return type hint in %s on line %d
+Fatal error: Generators may only yield objects, array is not a valid type in /usr/src/php-src/Zend/tests/return_hint/014.php on line 3
+
 
 

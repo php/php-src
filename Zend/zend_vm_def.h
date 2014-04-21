@@ -3011,7 +3011,7 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
+	
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
 
@@ -5501,6 +5501,11 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
 		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+	
+	/* Validate return hint */
+	if (EX(op_array)->return_hint.used) {
+		zend_return_hint_check(execute_data, EG(This) TSRMLS_CC);
 	}
 
 	/* Destroy the previously yielded value */
