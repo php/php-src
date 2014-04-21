@@ -64,7 +64,7 @@ static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_D
 
 ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key);
 
-ZEND_API int zend_print_variable(zval *var);
+ZEND_API int zend_print_variable(zval *var TSRMLS_DC);
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);

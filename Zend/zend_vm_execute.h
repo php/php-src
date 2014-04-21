@@ -2337,7 +2337,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = opline->op1.zv;
 
-	zend_print_variable(z);
+	zend_print_variable(z TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3135,7 +3135,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 
 	}
@@ -7298,7 +7298,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	zend_print_variable(z);
+	zend_print_variable(z TSRMLS_CC);
 
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
@@ -8084,7 +8084,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 		zval_dtor(free_op1.var);
 	}
@@ -12195,7 +12195,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	zend_print_variable(z);
+	zend_print_variable(z TSRMLS_CC);
 
 	zval_ptr_dtor_nogc(free_op1.var);
 	CHECK_EXCEPTION();
@@ -13242,7 +13242,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 		zval_ptr_dtor_nogc(free_op1.var);
 	}
@@ -23011,7 +23011,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 
 	}
@@ -28752,7 +28752,7 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	z = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
-	zend_print_variable(z);
+	zend_print_variable(z TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -29632,7 +29632,7 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		if (Z_TYPE_P(ptr) == IS_LONG) {
 			EG(exit_status) = Z_LVAL_P(ptr);
 		} else {
-			zend_print_variable(ptr);
+			zend_print_variable(ptr TSRMLS_CC);
 		}
 
 	}

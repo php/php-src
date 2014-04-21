@@ -875,7 +875,7 @@ ZEND_API double zval_get_double(zval *op TSRMLS_DC) /* {{{ */
 			{
 				zval tmp;
 				ZVAL_DUP(&tmp, op);
-				convert_object_to_type(op, IS_DOUBLE, convert_to_double);
+				convert_object_to_type(&tmp, IS_DOUBLE, convert_to_double);
 
 				if (Z_TYPE(tmp) == IS_DOUBLE) {
 					return Z_DVAL(tmp);
@@ -901,7 +901,7 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 		case IS_STRING:
 			return STR_COPY(Z_STR_P(op));
 		case IS_BOOL:
-			if (Z_LVAL_P(op)) {
+			if (Z_BVAL_P(op)) {
 				return STR_INIT("1", 1, 0);
 			} else {
 				return STR_EMPTY_ALLOC();
@@ -932,17 +932,27 @@ ZEND_API zend_string *zval_get_string(zval *op TSRMLS_DC) /* {{{ */
 			return STR_INIT("Array", sizeof("Array")-1, 0);
 		case IS_OBJECT: {
 			zval tmp;
-			ZVAL_DUP(&tmp, op);
-			convert_object_to_type(op, IS_STRING, convert_to_string);
-
-			if (Z_TYPE(tmp) == IS_STRING) {
-				return Z_STR(tmp);
-			} else {
-				zend_error(E_NOTICE, "Object of class %s to string conversion", Z_OBJCE_P(op)->name->val);
-				zval_dtor(&tmp);
-				return STR_INIT("Object", sizeof("Object")-1, 0);
+			//???if (zend_std_cast_object_tostring(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
+			//???	return Z_STR(tmp);
+			//???}
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, IS_STRING TSRMLS_CC) == SUCCESS) {
+					return Z_STR(tmp);
+				}
+			} else if (Z_OBJ_HT_P(op)->get) {
+				zval *z = Z_OBJ_HT_P(op)->get(op, &tmp TSRMLS_CC);
+				if (Z_TYPE_P(z) != IS_OBJECT) {
+					zend_string *str = zval_get_string(z TSRMLS_CC);
+					zval_ptr_dtor(z);
+					return str;
+				}
+				zval_ptr_dtor(z);
 			}
+			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(op)->name->val);
+			return STR_EMPTY_ALLOC();
 		}
+		case IS_REFERENCE:
+			return zval_get_string(Z_REFVAL_P(op));
 		default:
 			//??? original code returns bool(0)
 			return STR_EMPTY_ALLOC();
@@ -1547,35 +1557,17 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 
 ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	int use_copy1 = 0, use_copy2 = 0;
-
-	if (Z_TYPE_P(op1) != IS_STRING) {
-		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-	}
-	if (Z_TYPE_P(op2) != IS_STRING) {
-		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
-	}
-
-	if (use_copy1) {
-		op1 = &op1_copy;
-	}
-	if (use_copy2) {
-		op2 = &op2_copy;
-	}
+	zend_string *str1 = zval_get_string(op1 TSRMLS_CC),
+				*str2 = zval_get_string(op2 TSRMLS_CC);
 
 	if (case_insensitive) {
-		ZVAL_LONG(result, zend_binary_zval_strcasecmp(op1, op2));
+		ZVAL_LONG(result, zend_binary_strcasecmp_l(str1->val, str1->len, str2->val, str1->len));
 	} else {
-		ZVAL_LONG(result, zend_binary_zval_strcmp(op1, op2));
+		ZVAL_LONG(result, zend_binary_strcmp(str1->val, str1->len, str2->val, str2->len));
 	}
 
-	if (use_copy1) {
-		zval_dtor(op1);
-	}
-	if (use_copy2) {
-		zval_dtor(op2);
-	}
+	STR_RELEASE(str1);
+	STR_RELEASE(str2);
 	return SUCCESS;
 }
 /* }}} */
@@ -1595,31 +1587,13 @@ ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSR
 #if HAVE_STRCOLL
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	int use_copy1 = 0, use_copy2 = 0;
+	zend_string *str1 = zval_get_string(op1 TSRMLS_CC),
+				*str2 = zval_get_string(op2 TSRMLS_CC);
 
-	if (Z_TYPE_P(op1) != IS_STRING) {
-		zend_make_printable_zval(op1, &op1_copy, &use_copy1);
-	}
-	if (Z_TYPE_P(op2) != IS_STRING) {
-		zend_make_printable_zval(op2, &op2_copy, &use_copy2);
-	}
+	ZVAL_LONG(result, strcoll(str1->val, str2->val));
 
-	if (use_copy1) {
-		op1 = &op1_copy;
-	}
-	if (use_copy2) {
-		op2 = &op2_copy;
-	}
-
-	ZVAL_LONG(result, strcoll(Z_STRVAL_P(op1), Z_STRVAL_P(op2)));
-
-	if (use_copy1) {
-		zval_dtor(op1);
-	}
-	if (use_copy2) {
-		zval_dtor(op2);
-	}
+	STR_RELEASE(str1);
+	STR_RELEASE(str2);
 	return SUCCESS;
 }
 /* }}} */

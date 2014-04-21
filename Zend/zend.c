@@ -309,34 +309,23 @@ again:
 }
 /* }}} */
 
-ZEND_API int zend_print_zval(zval *expr, int indent) /* {{{ */
+ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
-	return zend_print_zval_ex(zend_write, expr, indent);
+	return zend_print_zval_ex(zend_write, expr, indent TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent) /* {{{ */
+ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
-	zval expr_copy;
-	int use_copy;
-	int ret;
+	zend_string *str = zval_get_string(expr TSRMLS_CC);
+	int len = str->len;
 
-	zend_make_printable_zval(expr, &expr_copy, &use_copy);
-	if (use_copy) {
-		expr = &expr_copy;
+	if (len != 0) {
+		write_func(str->val, len);
 	}
-	if (Z_STRLEN_P(expr) == 0) { /* optimize away empty strings */
-		if (use_copy) {
-			zval_dtor(expr);
-		}
-		return 0;
-	}
-	write_func(Z_STRVAL_P(expr), Z_STRLEN_P(expr));
-	ret = Z_STRLEN_P(expr);
-	if (use_copy) {
-		zval_dtor(expr);
-	}
-	return ret;
+
+	STR_RELEASE(str);
+	return len;
 }
 /* }}} */
 
@@ -386,7 +375,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 			break;
 		}
 		default:
-			zend_print_variable(expr);
+			zend_print_variable(expr TSRMLS_CC);
 			break;
 	}
 }
@@ -447,7 +436,7 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				break;
 			}
 		default:
-			zend_print_zval_ex(write_func, expr, indent);
+			zend_print_zval_ex(write_func, expr, indent TSRMLS_CC);
 			break;
 	}
 }
