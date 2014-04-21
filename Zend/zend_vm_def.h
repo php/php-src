@@ -868,6 +868,14 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		fast_increment_function(var_ptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
@@ -897,7 +905,7 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
-		fast_increment_function(var_ptr);
+		increment_function(var_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -918,6 +926,14 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
 
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		fast_decrement_function(var_ptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
@@ -947,7 +963,7 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
-		fast_decrement_function(var_ptr);
+		decrement_function(var_ptr);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -967,6 +983,12 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		fast_increment_function(var_ptr);
+		ZEND_VM_NEXT_OPCODE();
+	}
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
@@ -999,7 +1021,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
-		fast_increment_function(var_ptr);
+		increment_function(var_ptr);
 	}
 
 	FREE_OP1_VAR_PTR();
@@ -1015,6 +1037,12 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	var_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_RW);
+
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
+		fast_decrement_function(var_ptr);
+		ZEND_VM_NEXT_OPCODE();
+	}
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_STR_OFFSET)) {
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
@@ -1047,7 +1075,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, val TSRMLS_CC);
 		zval_ptr_dtor(val);
 	} else {
-		fast_decrement_function(var_ptr);
+		decrement_function(var_ptr);
 	}
 
 	FREE_OP1_VAR_PTR();
