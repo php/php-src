@@ -4,11 +4,11 @@ Basic return hints return reference check
 <?php
 interface foo {}
 interface bar {
-	public function & foo(array &$in) : array;
+	public function foo(array &$in) : &array;
 }
 
 class qux implements bar {
-	public function & foo(array &$in) : array {
+	public function foo(array &$in) : &array {
 		return null;
 	}
 }

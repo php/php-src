@@ -1923,7 +1923,16 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 void zend_do_function_return_hint(znode *return_hint, zend_bool return_reference TSRMLS_DC) {			
 	if (return_hint->op_type != IS_UNUSED) {
 		CG(active_op_array)->return_hint.used = 1;
-
+		
+		if (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			if (CG(active_class_entry)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "the function %s::%s returns by reference and declares a return type; the & must be placed immediately before the return type and not before the function name.", CG(active_class_entry)->name, CG(active_op_array)->function_name);
+			} else {
+				zend_error_noreturn(E_COMPILE_ERROR, "the function %s returns by reference and declares a return type; the & must be placed immediately before the return type and not before the function name.", CG(active_op_array)->function_name);
+			}
+			return;
+		}
+		
 		if (return_hint->op_type == IS_CONST) {
 			if (Z_TYPE(return_hint->u.constant) == IS_STRING) {
 				zend_resolve_class_name(return_hint TSRMLS_CC);
