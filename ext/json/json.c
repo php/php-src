@@ -31,6 +31,14 @@
 #include "php_json.h"
 #include <zend_exceptions.h>
 
+/*
+ * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
+ *
+ * This is the same constant used on spprintf.c for arithmetic operations
+ */
+#define NUM_BUF_SIZE		2048
+
+
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
@@ -420,19 +428,16 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 				smart_str_append_long(buf, p);
 			} else if (type == IS_DOUBLE) {
 				if (!zend_isinf(d) && !zend_isnan(d)) {
-					char *tmp;
-					int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
-					if (strchr(tmp, '.') == NULL) {
-						char *ntmp = (char *)emalloc(l + 3);
-						memcpy(ntmp, tmp, len);
-						memcpy(ntmp + l, ".0", sizeof(".0"));
-						l += 2;
-						ntmp[l] = '\0';
-						efree(tmp);
-						tmp = ntmp;
+					char num[NUM_BUF_SIZE];
+					int l;
+					php_gcvt(d, EG(precision), '.', 'e', &num);
+					l = strlen(num);
+					if (strchr(num, '.') == NULL) {
+						num[l++] = '.';
+						num[l++] = '0';
+						num[l] = '\0';
 					}
-					smart_str_appendl(buf, tmp, l);
-					efree(tmp);
+					smart_str_appendl(buf, num, l);
 				} else {
 					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
 					smart_str_appendc(buf, '0');
@@ -633,23 +638,19 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 
 		case IS_DOUBLE:
 			{
-				char *d = NULL;
+				char num[NUM_BUF_SIZE];
 				int len;
 				double dbl = Z_DVAL_P(val);
 
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-					len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
-					if (strchr(d, '.') == NULL) {
-						char *nd = (char *)emalloc(len + 3);
-						memcpy(nd, d, len);
-						memcpy(nd + len, ".0", sizeof(".0"));
-						len += 2;
-						nd[len] = '\0';
-						efree(d);
-						d = nd;
+					php_gcvt(dbl, EG(precision), '.', 'e', &num);
+					len = strlen(num);
+					if (strchr(num, '.') == NULL) {
+						num[len++] = '.';
+						num[len++] = '0';
+						num[len] = '\0';
 					}
-					smart_str_appendl(buf, d, len);
-					efree(d);
+					smart_str_appendl(buf, num, len);
 				} else {
 					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
 					smart_str_appendc(buf, '0');
