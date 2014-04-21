@@ -2863,13 +2863,14 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	/* Not sure if a complete copy is what we want here */
-	ZVAL_COPY_VALUE(&exception, value);
-	if (!IS_OP1_TMP_FREE()) {
-		zval_opt_copy_ctor(&exception);
+	if (OP1_TYPE == IS_CONST) {
+		ZVAL_DUP(&exception, value);
+		value = &exception;
+	} else if (OP1_TYPE != IS_TMP_VAR) {
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
-	zend_throw_exception_object(&exception TSRMLS_CC);
+	zend_throw_exception_object(value TSRMLS_CC);
 	zend_exception_restore(TSRMLS_C);
 	FREE_OP1_IF_VAR();
 	HANDLE_EXCEPTION();

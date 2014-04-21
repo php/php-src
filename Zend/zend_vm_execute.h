@@ -2638,13 +2638,14 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	zend_exception_save(TSRMLS_C);
-	/* Not sure if a complete copy is what we want here */
-	ZVAL_COPY_VALUE(&exception, value);
-	if (!0) {
-		zval_opt_copy_ctor(&exception);
+	if (IS_CONST == IS_CONST) {
+		ZVAL_DUP(&exception, value);
+		value = &exception;
+	} else if (IS_CONST != IS_TMP_VAR) {
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
-	zend_throw_exception_object(&exception TSRMLS_CC);
+	zend_throw_exception_object(value TSRMLS_CC);
 	zend_exception_restore(TSRMLS_C);
 
 	HANDLE_EXCEPTION();
@@ -7585,13 +7586,14 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	/* Not sure if a complete copy is what we want here */
-	ZVAL_COPY_VALUE(&exception, value);
-	if (!1) {
-		zval_opt_copy_ctor(&exception);
+	if (IS_TMP_VAR == IS_CONST) {
+		ZVAL_DUP(&exception, value);
+		value = &exception;
+	} else if (IS_TMP_VAR != IS_TMP_VAR) {
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
-	zend_throw_exception_object(&exception TSRMLS_CC);
+	zend_throw_exception_object(value TSRMLS_CC);
 	zend_exception_restore(TSRMLS_C);
 
 	HANDLE_EXCEPTION();
@@ -12454,13 +12456,14 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	/* Not sure if a complete copy is what we want here */
-	ZVAL_COPY_VALUE(&exception, value);
-	if (!0) {
-		zval_opt_copy_ctor(&exception);
+	if (IS_VAR == IS_CONST) {
+		ZVAL_DUP(&exception, value);
+		value = &exception;
+	} else if (IS_VAR != IS_TMP_VAR) {
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
-	zend_throw_exception_object(&exception TSRMLS_CC);
+	zend_throw_exception_object(value TSRMLS_CC);
 	zend_exception_restore(TSRMLS_C);
 	zval_ptr_dtor_nogc(free_op1.var);
 	HANDLE_EXCEPTION();
@@ -28986,13 +28989,14 @@ static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	zend_exception_save(TSRMLS_C);
-	/* Not sure if a complete copy is what we want here */
-	ZVAL_COPY_VALUE(&exception, value);
-	if (!0) {
-		zval_opt_copy_ctor(&exception);
+	if (IS_CV == IS_CONST) {
+		ZVAL_DUP(&exception, value);
+		value = &exception;
+	} else if (IS_CV != IS_TMP_VAR) {
+		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	}
 
-	zend_throw_exception_object(&exception TSRMLS_CC);
+	zend_throw_exception_object(value TSRMLS_CC);
 	zend_exception_restore(TSRMLS_C);
 
 	HANDLE_EXCEPTION();
