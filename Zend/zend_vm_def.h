@@ -2992,7 +2992,6 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	top = zend_vm_stack_top_inc(TSRMLS_C);
-	ZVAL_COPY_VALUE(top, varptr);
 	if (Z_ISREF_P(varptr)) {
 		ZVAL_DUP(top, Z_REFVAL_P(varptr));
 		FREE_OP1();
@@ -3000,6 +2999,7 @@ ZEND_VM_HELPER(zend_send_by_var_helper, VAR|CV, ANY)
 		if (OP1_TYPE == IS_CV) {
 			if (Z_REFCOUNTED_P(varptr)) Z_ADDREF_P(varptr);
 		}
+		ZVAL_COPY_VALUE(top, varptr);
 	}
 
 	CHECK_EXCEPTION();
