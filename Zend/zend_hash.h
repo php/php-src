@@ -596,6 +596,10 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_val = _z;
 
+#define ZEND_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_ptr = Z_PTR_P(_z);
+
 #define ZEND_HASH_REVERSE_FOREACH_VAL_IND(ht, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
 	_val = _z;

@@ -245,6 +245,9 @@ void shutdown_destructors(TSRMLS_D) /* {{{ */
 
 void shutdown_executor(TSRMLS_D) /* {{{ */
 {
+	zend_function *func;
+	zend_class_entry *ce;
+
 	zend_try {
 
 /* Removed because this can not be safely done, e.g. in this situation:
@@ -303,11 +306,31 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		 * Note that only run-time accessed data need to be cleaned up, pre-defined data can
 		 * not contain objects and thus are not probelmatic */
 		if (EG(full_tables_cleanup)) {
-			zend_hash_apply(EG(function_table), zend_cleanup_function_data_full TSRMLS_CC);
-			zend_hash_apply(EG(class_table), zend_cleanup_class_data TSRMLS_CC);
+			ZEND_HASH_FOREACH_PTR(EG(function_table), func) {
+				if (func->type == ZEND_USER_FUNCTION) {
+					zend_cleanup_op_array_data((zend_op_array *) func);
+				}
+			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
+				if (ce->type == ZEND_USER_CLASS) {
+					zend_cleanup_user_class_data(ce TSRMLS_CC);
+				} else {
+					zend_cleanup_internal_class_data(ce TSRMLS_CC);
+				}
+			} ZEND_HASH_FOREACH_END();
 		} else {
-			zend_hash_reverse_apply(EG(function_table), zend_cleanup_function_data TSRMLS_CC);
-			zend_hash_reverse_apply(EG(class_table), zend_cleanup_user_class_data TSRMLS_CC);
+			ZEND_HASH_REVERSE_FOREACH_PTR(EG(function_table), func) {
+				if (func->type != ZEND_USER_FUNCTION) {
+					break;
+				}
+				zend_cleanup_op_array_data((zend_op_array *) func);
+			} ZEND_HASH_FOREACH_END();
+			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
+				if (ce->type != ZEND_USER_CLASS) {
+					break;
+				}
+				zend_cleanup_user_class_data(ce TSRMLS_CC);
+			} ZEND_HASH_FOREACH_END();
 			zend_cleanup_internal_classes(TSRMLS_C);
 		}
 	} zend_end_try();

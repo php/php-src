@@ -132,42 +132,26 @@ ZEND_API void zend_function_dtor(zval *zv)
 	pefree(function, function->type == ZEND_INTERNAL_FUNCTION);
 }
 
-static void zend_cleanup_op_array_data(zend_op_array *op_array)
+ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
 		zend_hash_clean(op_array->static_variables);
 	}
 }
 
-ZEND_API int zend_cleanup_function_data(zval *zv TSRMLS_DC)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		zend_cleanup_op_array_data((zend_op_array *) function);
-		return ZEND_HASH_APPLY_KEEP;
-	} else {
-		return ZEND_HASH_APPLY_STOP;
-	}
-}
-
-ZEND_API int zend_cleanup_function_data_full(zval *zv TSRMLS_DC)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_USER_FUNCTION) {
-		zend_cleanup_op_array_data((zend_op_array *) function);
-	}
-	return 0;
-}
-
-static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
+ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 {
 	/* Clean all parts that can contain run-time data */
 	/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
 	   not contain objects and thus are not probelmatic */
 	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-		zend_hash_apply(&ce->function_table, zend_cleanup_function_data_full TSRMLS_CC);
+		zend_function *func;
+
+		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+			if (func->type == ZEND_USER_FUNCTION) {
+				zend_cleanup_op_array_data((zend_op_array *) func);
+			}
+		} ZEND_HASH_FOREACH_END();
 	}
 	if (ce->static_members_table) {
 		int i;
@@ -185,7 +169,7 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 	}
 }
 
-static inline void cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
+ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
 		int i;
@@ -200,35 +184,6 @@ static inline void cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
 		ce->static_members_table = NULL;
 #endif
 	}
-}
-
-ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC)
-{
-	cleanup_internal_class_data(ce TSRMLS_CC);
-}
-
-ZEND_API int zend_cleanup_user_class_data(zval *zv TSRMLS_DC)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-
-	if (ce->type == ZEND_USER_CLASS) {
-		cleanup_user_class_data(ce TSRMLS_CC);
-		return ZEND_HASH_APPLY_KEEP;
-	} else {
-		return ZEND_HASH_APPLY_STOP;
-	}
-}
-
-ZEND_API int zend_cleanup_class_data(zval *zv TSRMLS_DC)
-{
-	zend_class_entry *ce = Z_PTR_P(zv);
-
-	if (ce->type == ZEND_USER_CLASS) {
-		cleanup_user_class_data(ce TSRMLS_CC);
-	} else {
-		cleanup_internal_class_data(ce TSRMLS_CC);
-	}
-	return 0;
 }
 
 void _destroy_zend_class_traits_info(zend_class_entry *ce)
