@@ -1540,7 +1540,7 @@ ZEND_VM_HANDLER(97, ZEND_FETCH_OBJ_UNSET, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container, *property, *retval_ptr;
+	zval *container, *property;
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_UNSET);
@@ -3128,11 +3128,10 @@ ZEND_VM_C_LABEL(send_again):
 			HashTable *ht = Z_ARRVAL_P(args);
 			zval *arg;
 			zend_string *name;
-			zend_ulong index;
 
 			ZEND_VM_STACK_GROW_IF_NEEDED(zend_hash_num_elements(ht));
 
-			ZEND_HASH_FOREACH_KEY_VAL(ht, index, name, arg) {
+			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (name) {
 					zend_error(E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
 					FREE_OP1();

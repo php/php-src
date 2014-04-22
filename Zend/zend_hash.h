@@ -569,14 +569,28 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 	ZEND_HASH_FOREACH(ht, 0); \
 	_ptr = Z_PTR_P(_z);
 
+#define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key;
+		
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
 	_key = _p->key;
 		
+#define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_val = _z;
+
 #define ZEND_HASH_FOREACH_KEY_VAL(ht, _h, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
+	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
+	ZEND_HASH_FOREACH(ht, 1); \
 	_key = _p->key; \
 	_val = _z;
 
@@ -585,6 +599,11 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 	_h = _p->h; \
 	_key = _p->key; \
 	_val = _z;
+
+#define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_key = _p->key; \
+	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \

@@ -329,8 +329,6 @@ static void list_destructors_dtor(zval *zv)
 
 int zend_init_rsrc_list_dtors(void)
 {
-	int retval;
-
 	zend_hash_init(&list_destructors, 64, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
 	return SUCCESS;

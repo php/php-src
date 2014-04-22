@@ -382,10 +382,10 @@ static inline zval *_get_zval_ptr(int op_type, const znode_op *node, const zend_
 			return NULL;
 			break;
 		case IS_CV:
+		default:
 			should_free->var = NULL;
 			return _get_zval_ptr_cv(execute_data, node->var, type TSRMLS_CC);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
 }
@@ -412,10 +412,10 @@ static inline zval *_get_zval_ptr_deref(int op_type, const znode_op *node, const
 			return NULL;
 			break;
 		case IS_CV:
+		default:
 			should_free->var = NULL;
 			return _get_zval_ptr_cv_deref(execute_data, node->var, type TSRMLS_CC);
 			break;
-		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
 }
@@ -438,8 +438,6 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(zend_uint var, const zend_
 
 static inline zval *_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	zval *ret;
-
 	if (op_type == IS_CV) {
 		should_free->var = NULL;
 		return _get_zval_ptr_cv(execute_data, node->var, type TSRMLS_CC);

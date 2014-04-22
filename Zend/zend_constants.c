@@ -309,7 +309,6 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 	const char *colon;
 	zend_class_entry *ce = NULL;
 	zend_string *class_name;
-	zval *ret_constant;
 
 	/* Skip leading \\ */
 	if (name[0] == '\\') {
@@ -317,13 +316,13 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		name_len -= 1;
 	}
 
-
 	if ((colon = zend_memrchr(name, ':', name_len)) &&
 	    colon > name && (*(colon - 1) == ':')) {
 		int class_name_len = colon - name - 1;
 		int const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = STR_INIT(colon + 1, const_name_len, 0);
 		zend_string *lcname;
+		zval *ret_constant = NULL;
 
 		class_name = STR_INIT(name, class_name_len, 0);
 		lcname = STR_ALLOC(class_name_len, 0);
@@ -381,7 +380,11 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 		}
 		STR_FREE(class_name);
 		STR_FREE(constant_name);
-		goto finish;
+		if (retval) {
+			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
+			ZVAL_DUP(result, ret_constant);
+		}
+		return retval;
 	}
 
 	/* non-class constant */
@@ -425,14 +428,7 @@ ZEND_API int zend_get_constant_ex(const char *name, uint name_len, zval *result,
 			name_len = const_name_len;
 			return zend_get_constant(name, name_len, result TSRMLS_CC);
 		}
-		retval = 0;
-finish:
-		if (retval) {
-			zval_update_constant_ex(ret_constant, (void*)1, ce TSRMLS_CC);
-			ZVAL_DUP(result, ret_constant);
-		}
-
-		return retval;
+		return 0;
 	}
 
 	return zend_get_constant(name, name_len, result TSRMLS_CC);

@@ -1222,10 +1222,9 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 	if (object->ce->default_properties_count) {
 	    zval *prop, tmp;
     	zend_string *key;
-	    ulong num_key;
     	zend_property_info *property_info;
 
-    	ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, prop) {
+    	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 		    ZVAL_STR(&tmp, key);
 			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
 			if (property_info &&
@@ -1243,10 +1242,9 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 {
     zval *prop, tmp;
    	zend_string *key;
-    ulong num_key;
    	zend_property_info *property_info;
 
-	ZEND_HASH_FOREACH_KEY_VAL(properties, num_key, key, prop) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 	    ZVAL_STR(&tmp, key);
 		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
 		if (property_info &&
@@ -4000,10 +3998,8 @@ ZEND_API zend_string* zend_find_alias_name(zend_class_entry *ce, zend_string *na
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f) /* {{{ */
 {
 	zend_function *func;
-	HashPosition iterator;
 	HashTable *function_table;
 	zend_string *name;
-	ulong idx;
 
 	if (f->common.type != ZEND_USER_FUNCTION ||
 	    *(f->op_array.refcount) < 2 ||
@@ -4013,7 +4009,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 	}
 
 	function_table = &ce->function_table;
-	ZEND_HASH_FOREACH_KEY_PTR(function_table, idx, name, func) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(function_table, name, func) {
 		if (func == f) {
 			if (!name) {
 				return f->common.function_name;

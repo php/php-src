@@ -326,12 +326,12 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret TSRMLS_DC) /* {{
 static void spl_ptr_llist_copy(spl_ptr_llist *from, spl_ptr_llist *to TSRMLS_DC) /* {{{ */
 {
 	spl_ptr_llist_element *current = from->head, *next;
-	spl_ptr_llist_ctor_func ctor = from->ctor;
+//???	spl_ptr_llist_ctor_func ctor = from->ctor;
 
 	while (current) {
 		next = current->next;
 
-		/*!! FIXME
+		/*??? FIXME
 		if (ctor) {
 			ctor(current TSRMLS_CC);
 		}

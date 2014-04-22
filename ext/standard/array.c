@@ -2633,6 +2633,8 @@ PHP_FUNCTION(array_column)
 {
 	zval *zcolumn = NULL, *zkey = NULL, *data;
 	HashTable *arr_hash;
+	zval *zcolval = NULL, *zkeyval = NULL;
+	HashTable *ht;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "hz!|z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
 		return;
@@ -2645,9 +2647,6 @@ PHP_FUNCTION(array_column)
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_VAL(arr_hash, data) {
-		zval *zcolval, *zkeyval = NULL;
-		HashTable *ht;
-
 		if (Z_TYPE_P(data) != IS_ARRAY) {
 			/* Skip elemens which are not sub-arrays */
 			continue;
@@ -4506,7 +4505,7 @@ PHP_FUNCTION(array_key_exists)
    Split array into chunks */
 PHP_FUNCTION(array_chunk)
 {
-	int argc = ZEND_NUM_ARGS(), key_type, num_in;
+	int argc = ZEND_NUM_ARGS(), num_in;
 	long size, current = 0;
 	zend_string *str_key;
 	ulong num_key;
