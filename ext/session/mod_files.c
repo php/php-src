@@ -464,7 +464,7 @@ PS_CREATE_SID_FUNC(files)
 	PS_FILES_DATA;
 
 	do {
-		sid = php_session_create_id(&data TSRMLS_C);
+		sid = php_session_create_id((void**)&data TSRMLS_C);
 		/* Check collision */
 		if (data && ps_files_key_exists(data, sid? sid->val : NULL TSRMLS_CC) == SUCCESS) {
 			if (sid) {

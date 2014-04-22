@@ -692,7 +692,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 		endp = tmpstr + value_length;
 		n = 1;
 		p1 = tmpstr;
-		while ((p2 = php_memnstr(p1, ",", 1, endp)) != NULL) {
+		while ((p2 = (char*)php_memnstr(p1, ",", 1, endp)) != NULL) {
 			p1 = p2 + 1;
 			n++;
 		}
@@ -705,7 +705,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 			bauto = 0;
 			p1 = tmpstr;
 			do {
-				p2 = p = php_memnstr(p1, ",", 1, endp);
+				p2 = p = (char*)php_memnstr(p1, ",", 1, endp);
 				if (p == NULL) {
 					p = endp;
 				}
