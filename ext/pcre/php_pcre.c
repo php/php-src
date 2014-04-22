@@ -1008,7 +1008,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 					*match,				/* The current match */
 					*piece,				/* The current piece of subject */
 					*replace_end=NULL,	/* End of replacement string */
-					*eval_result,		/* Result of eval or custom function */
+					*eval_result=NULL,	/* Result of eval or custom function */
 					 walk_last;			/* Last walked character */
 	int				 rc,
 					 result_len; 		/* Length of result */

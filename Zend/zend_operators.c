@@ -1807,7 +1807,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 }
 /* }}} */
 
-static int hash_zval_identical_function(const zval *z1, const zval *z2) /* {{{ */
+static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 {
 	zval result;
 	TSRMLS_FETCH();
@@ -2406,7 +2406,7 @@ string_cmp:
 }
 /* }}} */
 
-static int hash_zval_compare_function(const zval *z1, const zval *z2 TSRMLS_DC) /* {{{ */
+static int hash_zval_compare_function(zval *z1, zval *z2 TSRMLS_DC) /* {{{ */
 {
 	zval result;
 

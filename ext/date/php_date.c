@@ -2503,7 +2503,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	timelib_error_container *err = NULL;
 	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
 	char *new_abbr = NULL;
-	timelib_sll     new_offset;
+	timelib_sll new_offset = 0;
 	
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
@@ -4016,7 +4016,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, zend_uin
 void date_interval_write_property(zval *object, zval *member, zval *value, zend_uint cache_slot TSRMLS_DC)
 {
 	php_interval_obj *obj;
-	zval tmp_member, tmp_value;
+	zval tmp_member;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
 		tmp_member = *member;

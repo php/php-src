@@ -276,12 +276,12 @@ ZEND_API void zend_object_proxy_set(zval *property, zval *value TSRMLS_DC)
 	}
 }
 
-ZEND_API zval* zend_object_proxy_get(zval *property TSRMLS_DC)
+ZEND_API zval* zend_object_proxy_get(zval *property, zval *rv TSRMLS_DC)
 {
 	zend_proxy_object *probj = (zend_proxy_object*)Z_OBJ_P(property);
 
 	if (Z_OBJ_HT(probj->object) && Z_OBJ_HT(probj->object)->read_property) {
-		return Z_OBJ_HT(probj->object)->read_property(&probj->object, &probj->property, BP_VAR_R, -1, NULL TSRMLS_CC);
+		return Z_OBJ_HT(probj->object)->read_property(&probj->object, &probj->property, BP_VAR_R, -1, rv TSRMLS_CC);
 	} else {
 		zend_error(E_WARNING, "Cannot read property of object - no read handler defined");
 	}

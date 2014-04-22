@@ -530,9 +530,7 @@ PHP_FUNCTION(stream_bucket_new)
 PHP_FUNCTION(stream_get_filters)
 {
 	zend_string *filter_name;
-	int key_flags;
 	HashTable *filters_hash;
-	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -543,8 +541,8 @@ PHP_FUNCTION(stream_get_filters)
 	filters_hash = php_get_stream_filters_hash();
 
 	if (filters_hash) {
-		ZEND_HASH_FOREACH_VAL(filters_hash, key_flags) {
-			if (key_flags == HASH_KEY_IS_STRING) {
+		ZEND_HASH_FOREACH_STR_KEY(filters_hash, filter_name) {
+			if (filter_name) {
 				add_next_index_str(return_value, STR_COPY(filter_name));
 			}
 		} ZEND_HASH_FOREACH_END();

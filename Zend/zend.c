@@ -133,7 +133,6 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 {
 	zval *tmp;
 	zend_string *string_key;
-	HashPosition iterator;
 	ulong num_key;
 	int i;
 
@@ -193,7 +192,6 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zval *tmp;
 	zend_string *string_key;
-	HashPosition iterator;
 	ulong num_key;
 	int i = 0;
 
@@ -1029,7 +1027,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zval params[5];
 	zval retval;
 	const char *error_filename;
-	uint error_lineno;
+	uint error_lineno = 0;
 	zval orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;

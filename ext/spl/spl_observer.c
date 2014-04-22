@@ -200,7 +200,7 @@ spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *int
 	zend_string *hash = spl_object_storage_get_hash(intern, this, obj TSRMLS_CC);
 
 	if (!hash) {
-		return;
+		return NULL;
 	}
 
 	pelement = spl_object_storage_get(intern, hash TSRMLS_CC);
@@ -419,7 +419,7 @@ static int spl_object_storage_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {
 		return 1;
 	}
 
-	return zend_hash_compare(&(Z_SPLOBJSTORAGE_P(o1))->storage, &(Z_SPLOBJSTORAGE_P(o2))->storage, spl_object_storage_compare_info, 0 TSRMLS_CC);
+	return zend_hash_compare(&(Z_SPLOBJSTORAGE_P(o1))->storage, &(Z_SPLOBJSTORAGE_P(o2))->storage, (compare_func_t)spl_object_storage_compare_info, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -799,7 +799,6 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	zval entry, pmembers, pcount, inf;
 	spl_SplObjectStorageElement *element;
 	long count;
-	HashPosition pos;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;

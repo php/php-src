@@ -478,7 +478,7 @@ static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
 		error_copy.int1 = 0;
 		error_copy.int2 = 0;
 		error_copy.ctxt = NULL;
-		error_copy.message = xmlStrdup(msg);
+		error_copy.message = (char*)xmlStrdup((xmlChar*)msg);
 		error_copy.file = NULL;
 		error_copy.str1 = NULL;
 		error_copy.str2 = NULL;

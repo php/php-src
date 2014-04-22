@@ -98,12 +98,15 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 		return;                                                                                             \
 	}
 
-#define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
-	intern = Z_REFLECTION_P(getThis());                                                      \
+#define GET_REFLECTION_OBJECT()	                                                                   			\
+	intern = Z_REFLECTION_P(getThis());                                                      				\
 	if (intern == NULL || intern->ptr == NULL) {                                                            \
 		RETURN_ON_EXCEPTION                                                                                 \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
 	}                                                                                                       \
+
+#define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
+	GET_REFLECTION_OBJECT()																					\
 	target = intern->ptr;                                                                                   \
 
 /* Class constants */
@@ -1679,13 +1682,12 @@ ZEND_METHOD(reflection_function, isClosure)
 ZEND_METHOD(reflection_function, getClosureThis)
 {
 	reflection_object *intern;
-	zend_function *fptr;
 	zval* closure_this;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	GET_REFLECTION_OBJECT_PTR(fptr);
+	GET_REFLECTION_OBJECT();
 	if (!ZVAL_IS_UNDEF(&intern->obj)) {
 		closure_this = zend_get_closure_this_ptr(&intern->obj TSRMLS_CC);
 		if (!ZVAL_IS_UNDEF(closure_this)) {
@@ -1700,13 +1702,12 @@ ZEND_METHOD(reflection_function, getClosureThis)
 ZEND_METHOD(reflection_function, getClosureScopeClass)
 {
 	reflection_object *intern;
-	zend_function *fptr;
 	const zend_function *closure_func;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	GET_REFLECTION_OBJECT_PTR(fptr);
+	GET_REFLECTION_OBJECT();
 	if (!ZVAL_IS_UNDEF(&intern->obj)) {
 		closure_func = zend_get_closure_method_def(&intern->obj TSRMLS_CC);
 		if (closure_func && closure_func->common.scope) {

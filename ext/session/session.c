@@ -848,7 +848,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 
 	ZVAL_NULL(&session_vars);
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC);
+	php_var_unserialize(&session_vars, (const unsigned char**)&val, endptr, &var_hash TSRMLS_CC);
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	if (!ZVAL_IS_UNDEF(&PS(http_session_vars))) {
 		zval_ptr_dtor(&PS(http_session_vars));

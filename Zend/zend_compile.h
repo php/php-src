@@ -447,44 +447,44 @@ int zend_get_zendleng(TSRMLS_D);
 
 
 /* parser-driven code generators */
-void zend_do_binary_op(zend_uchar op, znode *result, const znode *op1, const znode *op2 TSRMLS_DC);
-void zend_do_unary_op(zend_uchar op, znode *result, const znode *op1 TSRMLS_DC);
-void zend_do_binary_assign_op(zend_uchar op, znode *result, const znode *op1, const znode *op2 TSRMLS_DC);
+void zend_do_binary_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC);
+void zend_do_unary_op(zend_uchar op, znode *result, znode *op1 TSRMLS_DC);
+void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC);
-void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRMLS_DC);
+void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC);
 void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC);
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar op TSRMLS_DC);
 void zend_do_indirect_references(znode *result, const znode *num_references, znode *variable TSRMLS_DC);
-void zend_do_fetch_static_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC);
+void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
 void zend_do_fetch_global_variable(znode *varname, const znode *static_assignment, int fetch_type TSRMLS_DC);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
-void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS_DC);
-void fetch_string_offset(znode *result, const znode *parent, const znode *offset TSRMLS_DC);
+void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);
+void fetch_string_offset(znode *result, znode *parent, znode *offset TSRMLS_DC);
 void zend_do_fetch_static_member(znode *result, znode *class_znode TSRMLS_DC);
-void zend_do_print(znode *result, const znode *arg TSRMLS_DC);
-void zend_do_echo(const znode *arg TSRMLS_DC);
+void zend_do_print(znode *result, znode *arg TSRMLS_DC);
+void zend_do_echo(znode *arg TSRMLS_DC);
 typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
 typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
-void zend_do_while_cond(const znode *expr, znode *close_bracket_token TSRMLS_DC);
+void zend_do_while_cond(znode *expr, znode *close_bracket_token TSRMLS_DC);
 void zend_do_while_end(const znode *while_token, const znode *close_bracket_token TSRMLS_DC);
 void zend_do_do_while_begin(TSRMLS_D);
-void zend_do_do_while_end(const znode *do_token, const znode *expr_open_bracket, const znode *expr TSRMLS_DC);
+void zend_do_do_while_end(const znode *do_token, const znode *expr_open_bracket, znode *expr TSRMLS_DC);
 
 
-void zend_do_if_cond(const znode *cond, znode *closing_bracket_token TSRMLS_DC);
+void zend_do_if_cond(znode *cond, znode *closing_bracket_token TSRMLS_DC);
 void zend_do_if_after_statement(const znode *closing_bracket_token, unsigned char initialize TSRMLS_DC);
 void zend_do_if_end(TSRMLS_D);
 
-void zend_do_for_cond(const znode *expr, znode *second_semicolon_token TSRMLS_DC);
+void zend_do_for_cond(znode *expr, znode *second_semicolon_token TSRMLS_DC);
 void zend_do_for_before_statement(const znode *cond_start, const znode *second_semicolon_token TSRMLS_DC);
 void zend_do_for_end(const znode *second_semicolon_token TSRMLS_DC);
 
-void zend_do_pre_incdec(znode *result, const znode *op1, zend_uchar op TSRMLS_DC);
-void zend_do_post_incdec(znode *result, const znode *op1, zend_uchar op TSRMLS_DC);
+void zend_do_pre_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
+void zend_do_post_incdec(znode *result, znode *op1, zend_uchar op TSRMLS_DC);
 
 void zend_do_begin_variable_parse(TSRMLS_D);
 void zend_do_end_variable_parse(znode *variable, int type, int arg_offset TSRMLS_DC);
@@ -493,23 +493,23 @@ void zend_check_writable_variable(const znode *variable);
 
 void zend_do_free(znode *op1 TSRMLS_DC);
 
-void zend_do_add_string(znode *result, const znode *op1, znode *op2 TSRMLS_DC);
-void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRMLS_DC);
+void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
+void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
+void zend_do_receive_param(zend_uchar op, znode *varname, znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
-void zend_do_clone(znode *result, const znode *expr TSRMLS_DC);
+void zend_do_clone(znode *result, znode *expr TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name, int prefix_len TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_class_member TSRMLS_DC);
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
-void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC);
+void zend_do_yield(znode *result, znode *value, znode *key, zend_bool is_variable TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
 void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
@@ -521,7 +521,7 @@ void zend_do_bind_catch(znode *try_token, znode *catch_token TSRMLS_DC);
 void zend_do_end_catch(znode *catch_token TSRMLS_DC);
 void zend_do_finally(znode *finally_token TSRMLS_DC);
 void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC);
-void zend_do_throw(const znode *expr TSRMLS_DC);
+void zend_do_throw(znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
@@ -548,24 +548,24 @@ void zend_do_unpack_params(znode *params, int offset TSRMLS_DC);
 
 
 void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC);
-void zend_do_boolean_or_end(znode *result, const znode *expr1, const znode *expr2, znode *op_token TSRMLS_DC);
+void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, const znode *op_token TSRMLS_DC);
 void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC);
-void zend_do_boolean_and_end(znode *result, const znode *expr1, const znode *expr2, const znode *op_token TSRMLS_DC);
+void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, const znode *op_token TSRMLS_DC);
 
-void zend_do_brk_cont(zend_uchar op, const znode *expr TSRMLS_DC);
+void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC);
 
 void zend_do_switch_cond(const znode *cond TSRMLS_DC);
 void zend_do_switch_end(const znode *case_list TSRMLS_DC);
-void zend_do_case_before_statement(const znode *case_list, znode *case_token, const znode *case_expr TSRMLS_DC);
+void zend_do_case_before_statement(const znode *case_list, znode *case_token, znode *case_expr TSRMLS_DC);
 void zend_do_case_after_statement(znode *result, const znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(const znode *case_list, znode *default_token TSRMLS_DC);
 
 void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
-void zend_do_declare_property(znode *var_name, const znode *value, zend_uint access_type TSRMLS_DC);
-void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_DC);
+void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_type TSRMLS_DC);
+void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC);
 
-void zend_do_fetch_property(znode *result, znode *object, const znode *property TSRMLS_DC);
+void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS_DC);
 
 void zend_do_halt_compiler_register(TSRMLS_D);
 
@@ -578,11 +578,11 @@ void zend_do_end_new_object(znode *result, const znode *new_token, const znode *
 
 void zend_do_fetch_constant(znode *result, znode *constant_container, znode *constant_name, int mode, zend_bool check_namespace TSRMLS_DC);
 
-void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC);
+void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC);
 
-void zend_do_init_array(znode *result, const znode *expr, const znode *offset, zend_bool is_ref TSRMLS_DC);
-void zend_do_add_array_element(znode *result, const znode *expr, const znode *offset, zend_bool is_ref TSRMLS_DC);
-void zend_do_add_static_array_element(znode *result, znode *offset, const znode *expr TSRMLS_DC);
+void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC);
+void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC);
+void zend_do_add_static_array_element(znode *result, znode *offset, znode *expr TSRMLS_DC);
 void zend_do_list_init(TSRMLS_D);
 void zend_do_list_end(znode *result, znode *expr TSRMLS_DC);
 void zend_do_add_list_element(const znode *element TSRMLS_DC);
@@ -594,13 +594,13 @@ void zend_init_list(void *result, void *item TSRMLS_DC);
 void zend_add_to_list(void *result, void *item TSRMLS_DC);
 
 
-void zend_do_cast(znode *result, const znode *expr, int type TSRMLS_DC);
-void zend_do_include_or_eval(int type, znode *result, const znode *op1 TSRMLS_DC);
+void zend_do_cast(znode *result, znode *expr, int type TSRMLS_DC);
+void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC);
 
-void zend_do_unset(const znode *variable TSRMLS_DC);
+void zend_do_unset(znode *variable TSRMLS_DC);
 void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC);
 
-void zend_do_instanceof(znode *result, const znode *expr, const znode *class_znode, int type TSRMLS_DC);
+void zend_do_instanceof(znode *result, znode *expr, znode *class_znode, int type TSRMLS_DC);
 
 void zend_do_foreach_begin(znode *foreach_token, znode *open_brackets_token, znode *array, znode *as_token, int variable TSRMLS_DC);
 void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token, const znode *as_token, znode *value, znode *key TSRMLS_DC);
@@ -610,17 +610,17 @@ void zend_do_declare_begin(TSRMLS_D);
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
 void zend_do_declare_end(const znode *declare_token TSRMLS_DC);
 
-void zend_do_exit(znode *result, const znode *message TSRMLS_DC);
+void zend_do_exit(znode *result, znode *message TSRMLS_DC);
 
 void zend_do_begin_silence(znode *strudel_token TSRMLS_DC);
-void zend_do_end_silence(const znode *strudel_token TSRMLS_DC);
+void zend_do_end_silence(znode *strudel_token TSRMLS_DC);
 
-void zend_do_jmp_set(const znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC);
-void zend_do_jmp_set_else(znode *result, const znode *false_value, const znode *jmp_token, const znode *colon_token TSRMLS_DC);
+void zend_do_jmp_set(znode *value, znode *jmp_token, znode *colon_token TSRMLS_DC);
+void zend_do_jmp_set_else(znode *result, znode *false_value, const znode *jmp_token, znode *colon_token TSRMLS_DC);
 
-void zend_do_begin_qm_op(const znode *cond, znode *qm_token TSRMLS_DC);
-void zend_do_qm_true(const znode *true_value, znode *qm_token, znode *colon_token TSRMLS_DC);
-void zend_do_qm_false(znode *result, const znode *false_value, const znode *qm_token, const znode *colon_token TSRMLS_DC);
+void zend_do_begin_qm_op(znode *cond, znode *qm_token TSRMLS_DC);
+void zend_do_qm_true(znode *true_value, znode *qm_token, znode *colon_token TSRMLS_DC);
+void zend_do_qm_false(znode *result, znode *false_value, znode *qm_token, const znode *colon_token TSRMLS_DC);
 
 void zend_do_extended_info(TSRMLS_D);
 void zend_do_extended_fcall_begin(TSRMLS_D);
@@ -632,7 +632,7 @@ void zend_do_abstract_method(const znode *function_name, znode *modifiers, const
 
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC);
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
-void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_DC);
+void zend_do_begin_namespace(znode *name, zend_bool with_brackets TSRMLS_DC);
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
@@ -645,7 +645,7 @@ void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
 
 void zend_do_label(znode *label TSRMLS_DC);
-void zend_do_goto(const znode *label TSRMLS_DC);
+void zend_do_goto(znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
 void zend_release_labels(int temporary TSRMLS_DC);
 
@@ -712,7 +712,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
 
-int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
+int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 
 /* BEGIN: OPCODES */
 

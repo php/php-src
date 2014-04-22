@@ -619,13 +619,10 @@ ZEND_FUNCTION(each)
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
-	switch (zend_hash_get_current_key(target_hash, &key, &num_key, 0)) {
-		case HASH_KEY_IS_STRING:
-			inserted_pointer = add_get_index_str(return_value, 0, STR_COPY(key));
-			break;
-		case HASH_KEY_IS_LONG:
-			inserted_pointer = add_get_index_long(return_value, 0, num_key);
-			break;
+	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
+		inserted_pointer = add_get_index_str(return_value, 0, STR_COPY(key));
+	} else {
+		inserted_pointer = add_get_index_long(return_value, 0, num_key);
 	}
 	zend_hash_str_update(Z_ARRVAL_P(return_value), "key", sizeof("key")-1, inserted_pointer);
 	if (Z_REFCOUNTED_P(inserted_pointer)) Z_ADDREF_P(inserted_pointer);
@@ -902,9 +899,8 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
 	zend_string *key;
-	ulong num_index;
 
-	ZEND_HASH_FOREACH_KEY_PTR(&ce->properties_info, num_index, key, prop_info) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->properties_info, key, prop_info) {
 		if (((prop_info->flags & ZEND_ACC_SHADOW) &&
 		     prop_info->ce != EG(scope)) ||
 		    ((prop_info->flags & ZEND_ACC_PROTECTED) &&
@@ -975,7 +971,6 @@ ZEND_FUNCTION(get_object_vars)
 	zend_string *key;
 	const char *prop_name, *class_name;
 	uint prop_len;
-	ulong num_index;
 	zend_object *zobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
@@ -996,7 +991,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_KEY_VAL_IND(properties, num_index, key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
 		if (key) {
 			if (zend_check_property_access(zobj, key TSRMLS_CC) == SUCCESS) {
 				/* Not separating references */
@@ -1030,7 +1025,6 @@ ZEND_FUNCTION(get_class_methods)
 	zend_class_entry *ce = NULL;
 	zend_function *mptr;
 	zend_string *key;
-	ulong num_index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &klass) == FAILURE) {
 		return;
@@ -1052,7 +1046,7 @@ ZEND_FUNCTION(get_class_methods)
 
 	array_init(return_value);
 
-	ZEND_HASH_FOREACH_KEY_PTR(&ce->function_table, num_index, key, mptr) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
 
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC) 
 		 || (EG(scope) &&
@@ -1422,14 +1416,13 @@ ZEND_FUNCTION(crash)
 ZEND_FUNCTION(get_included_files)
 {
 	zend_string *entry;
-	ulong num_idx;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
-	ZEND_HASH_FOREACH_KEY(&EG(included_files), num_idx, entry) {
+	ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), entry) {
 		if (entry) {
 			add_next_index_str(return_value, STR_COPY(entry));
 		}
