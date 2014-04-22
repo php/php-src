@@ -2552,7 +2552,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			if (IS_CONST != IS_TMP_VAR) {
 				zval_opt_copy_ctor(EX(return_value));
 			}
-
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
@@ -7494,7 +7493,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (IS_TMP_VAR != IS_TMP_VAR) {
 				zval_opt_copy_ctor(EX(return_value));
 			}
-
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
@@ -12385,7 +12383,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (IS_VAR != IS_TMP_VAR) {
 				zval_opt_copy_ctor(EX(return_value));
 			}
-			zval_ptr_dtor_nogc(free_op1.var);
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 			zval_ptr_dtor_nogc(free_op1.var);
@@ -12560,7 +12557,7 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *varptr;
+	zval *varptr, *top;
 
 	SAVE_OPLINE();
 	varptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -12569,33 +12566,24 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
+	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (IS_VAR == IS_VAR && UNEXPECTED(varptr == &EG(error_zval))) {
-		zend_vm_stack_push(&EG(uninitialized_zval) TSRMLS_CC);
+		ZVAL_NEW_REF(top, &EG(uninitialized_zval));
 		ZEND_VM_NEXT_OPCODE();
-	}
-
-	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
-	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
-			return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
 	}
 
 	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+		ZVAL_COPY_VALUE(top, varptr);
 	} else if (IS_VAR == IS_VAR &&
-		EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
-		zval tmp;
-		ZVAL_COPY_VALUE(&tmp, varptr);
-		varptr = &tmp;
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
+		UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		ZVAL_COPY_VALUE(top, varptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(top);
 	} else {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 		Z_ADDREF_P(varptr);
+		ZVAL_COPY_VALUE(top, varptr);
 	}
-
-	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	ZEND_VM_NEXT_OPCODE();
@@ -29036,7 +29024,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			if (IS_CV != IS_TMP_VAR) {
 				zval_opt_copy_ctor(EX(return_value));
 			}
-
 		} else if (Z_ISREF_P(retval_ptr)) {
 			ZVAL_DUP(EX(return_value), Z_REFVAL_P(retval_ptr));
 
@@ -29210,7 +29197,7 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
-	zval *varptr;
+	zval *varptr, *top;
 
 	SAVE_OPLINE();
 	varptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
@@ -29219,33 +29206,24 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
+	top = zend_vm_stack_top_inc(TSRMLS_C);
 	if (IS_CV == IS_VAR && UNEXPECTED(varptr == &EG(error_zval))) {
-		zend_vm_stack_push(&EG(uninitialized_zval) TSRMLS_CC);
+		ZVAL_NEW_REF(top, &EG(uninitialized_zval));
 		ZEND_VM_NEXT_OPCODE();
-	}
-
-	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
-	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
-		int arg_num = opline->op2.num + EX(call)->num_additional_args;
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, arg_num)) {
-			return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
 	}
 
 	if (Z_ISREF_P(varptr)) {
 		Z_ADDREF_P(varptr);
+		ZVAL_COPY_VALUE(top, varptr);
 	} else if (IS_CV == IS_VAR &&
-		EXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
-		zval tmp;
-		ZVAL_COPY_VALUE(&tmp, varptr);
-		varptr = &tmp;
-		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
+		UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+		ZVAL_COPY_VALUE(top, varptr);
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(top);
 	} else {
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(varptr);
 		Z_ADDREF_P(varptr);
+		ZVAL_COPY_VALUE(top, varptr);
 	}
-
-	zend_vm_stack_push(varptr TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }
