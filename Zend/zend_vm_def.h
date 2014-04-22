@@ -3648,16 +3648,17 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && is_ref) {
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		FREE_OP1_VAR_PTR();
 	} else {
 		expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		if (IS_OP1_TMP_FREE()) { /* temporary variable */
@@ -3678,6 +3679,7 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 	if (OP2_TYPE != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		zend_string *str;
 		ulong hval;
 
 ZEND_VM_C_LABEL(add_again):
@@ -3692,14 +3694,16 @@ ZEND_VM_C_LABEL(num_index):
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (OP2_TYPE != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index));
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, ZEND_VM_C_GOTO(num_index));
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+ZEND_VM_C_LABEL(str_index):				
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				ZEND_VM_C_GOTO(str_index);
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				ZEND_VM_C_GOTO(add_again);
@@ -3714,27 +3718,29 @@ ZEND_VM_C_LABEL(num_index):
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && is_ref) {
-		FREE_OP1_VAR_PTR();
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (OP1_TYPE != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (OP1_TYPE != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 

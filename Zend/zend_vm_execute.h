@@ -3923,16 +3923,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
+	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -3953,6 +3954,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -3967,14 +3969,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CONST != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -3989,27 +3993,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CONST != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CONST != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -4767,16 +4773,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
+	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -4797,6 +4804,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -4811,14 +4819,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_TMP_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -4833,27 +4843,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CONST != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CONST != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -5570,16 +5582,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
+	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -5600,6 +5613,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -5614,14 +5628,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -5636,27 +5652,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CONST != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CONST != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -6215,16 +6233,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
+	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -6245,6 +6264,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -6259,14 +6279,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_UNUSED != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -6281,27 +6303,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CONST != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CONST != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -7093,16 +7117,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
+	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_CONST == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = opline->op1.zv;
 		if (0) { /* temporary variable */
@@ -7123,6 +7148,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -7137,14 +7163,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CV != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -7159,27 +7187,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CONST == IS_VAR || IS_CONST == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CONST != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CONST != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -8877,16 +8907,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
+	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -8907,6 +8938,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -8921,14 +8953,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CONST != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -8943,27 +8977,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_TMP_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_TMP_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -9685,16 +9721,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
+	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -9715,6 +9752,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -9729,14 +9767,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_TMP_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -9751,27 +9791,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_TMP_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_TMP_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -10488,16 +10530,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
+	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -10518,6 +10561,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -10532,14 +10576,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -10554,27 +10600,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_TMP_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_TMP_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -11019,16 +11067,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
+	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -11049,6 +11098,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -11063,14 +11113,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_UNUSED != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -11085,27 +11137,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_TMP_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_TMP_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -11824,16 +11878,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
+	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = NULL;
 		if (IS_TMP_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (1) { /* temporary variable */
@@ -11854,6 +11909,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -11868,14 +11924,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CV != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -11890,27 +11948,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_TMP_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_TMP_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -15158,16 +15218,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
+	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	} else {
 		expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -15188,6 +15249,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -15202,14 +15264,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CONST != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -15224,27 +15288,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -17241,16 +17307,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
+	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	} else {
 		expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -17271,6 +17338,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -17285,14 +17353,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_TMP_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -17307,27 +17377,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -19385,16 +19457,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
+	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	} else {
 		expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -19415,6 +19488,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -19429,14 +19503,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -19451,27 +19527,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -20782,16 +20860,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
+	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	} else {
 		expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -20812,6 +20891,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -20826,14 +20906,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_UNUSED != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -20848,27 +20930,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -22682,16 +22766,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
+	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (IS_VAR == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
 	} else {
 		expr_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -22712,6 +22797,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -22726,14 +22812,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CV != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -22748,27 +22836,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_VAR == IS_VAR || IS_VAR == IS_CV) && is_ref) {
-		if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_VAR != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_VAR != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -24173,18 +24263,23 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_UNUSED != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_UNUSED != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -25424,18 +25519,23 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_UNUSED != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_UNUSED != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -26677,18 +26777,23 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_UNUSED != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_UNUSED != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -27440,18 +27545,23 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_UNUSED != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_UNUSED != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -28429,18 +28539,23 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_UNUSED != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_UNUSED != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -31557,16 +31672,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
+	if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -31587,6 +31703,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -31601,14 +31718,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CONST != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -31623,27 +31742,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CV != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CV != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -33523,16 +33644,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
+	if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -33553,6 +33675,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -33567,14 +33690,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_TMP_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -33589,27 +33714,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CV != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CV != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -35549,16 +35676,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
+	if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -35579,6 +35707,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -35593,14 +35722,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_VAR != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -35615,27 +35746,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CV != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CV != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -36830,16 +36963,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
+	if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -36860,6 +36994,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -36874,14 +37009,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_UNUSED != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -36896,27 +37033,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CV != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CV != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 
@@ -38594,16 +38733,17 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 	USE_OPLINE
 
 	zval *expr_ptr, new_expr;
-	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
+	if ((IS_CV == IS_VAR || IS_CV == IS_CV) &&
+	    (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, opline->op1.var TSRMLS_CC);
 		if (IS_CV == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
 		}
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(expr_ptr);
 		Z_ADDREF_P(expr_ptr);
+
 	} else {
 		expr_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 		if (0) { /* temporary variable */
@@ -38624,6 +38764,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
+		zend_string *str;
 		ulong hval;
 
 add_again:
@@ -38638,14 +38779,16 @@ num_index:
 				zend_hash_index_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), hval, expr_ptr);
 				break;
 			case IS_STRING:
+				str = Z_STR_P(offset);
 				if (IS_CV != IS_CONST) {
-					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
+					ZEND_HANDLE_NUMERIC_EX(str->val, str->len+1, hval, goto num_index);
 				}
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), Z_STR_P(offset), expr_ptr);
+str_index:
+				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
 			case IS_NULL:
-				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), STR_EMPTY_ALLOC(), expr_ptr);
-				break;
+				str = STR_EMPTY_ALLOC();
+				goto str_index;
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -38660,27 +38803,29 @@ num_index:
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((IS_CV == IS_VAR || IS_CV == IS_CV) && is_ref) {
-
-	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zval *array;
+	zend_uint size;
 	USE_OPLINE
 
-	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
-	zend_hash_init(
-		Z_ARRVAL_P(EX_VAR(opline->result.var)),
-		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
-	);
+	array = EX_VAR(opline->result.var);
+	if (IS_CV != IS_UNUSED) {
+		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
+	} else {
+		size = 0;
+	}
+	ZVAL_NEW_ARR(array);
+	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
 
 	if (IS_CV != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
-		if (opline->extended_value & (1 << 1)) {
-			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
+			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
 	}
 

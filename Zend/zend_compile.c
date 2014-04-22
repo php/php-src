@@ -5856,15 +5856,15 @@ void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_
 	opline->extended_value = is_ref; /* extval = size << 2 | not_packed << 1 | is_ref */
 
 	if (expr) {
-		opline->extended_value += 1 << 2; /* increment size */
+		opline->extended_value += 1 << ZEND_ARRAY_SIZE_SHIFT; /* increment size */
 		SET_NODE(opline->op1, expr);
 		if (offset) {
 			SET_NODE(opline->op2, offset);
 			if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
 				ulong index;
 				int numeric = 0;
-				opline->extended_value |= 1 << 1; /* string key -> not packed */
 
+				opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 				ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
 				if (numeric) {
 					zval_dtor(&CONSTANT(opline->op2.constant));
@@ -5885,7 +5885,7 @@ void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_b
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	zend_op *init_opline = &CG(active_op_array)->opcodes[result->u.op.opline_num];
-	init_opline->extended_value += 1 << 2; /* increment size */
+	init_opline->extended_value += 1 << ZEND_ARRAY_SIZE_SHIFT; /* increment size */
 
 	opline->opcode = ZEND_ADD_ARRAY_ELEMENT;
 	COPY_NODE(opline->result, init_opline->result);
@@ -5895,8 +5895,8 @@ void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_b
 		if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
 			ulong index;
 			int numeric = 0;
-			init_opline->extended_value |= 1 << 1; /* string key -> not packed */
 
+			init_opline->extended_value |= ZEND_ARRAY_NOT_PACKED;
 			ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRLEN(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
 			if (numeric) {
 				zval_dtor(&CONSTANT(opline->op2.constant));
