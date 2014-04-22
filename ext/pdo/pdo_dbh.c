@@ -210,7 +210,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!s!a!", &data_source, &data_source_len,
 				&username, &usernamelen, &password, &passwordlen, &options)) {
-		ZVAL_NULL(object);
+		Z_OBJ_P(object) = NULL;
 		return;
 	}
 
@@ -224,8 +224,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name");
-			zval_dtor(object);
-			ZVAL_NULL(object);
+			Z_OBJ_P(object) = NULL;
 			return;
 		}
 
@@ -234,7 +233,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via INI: %s)", alt_dsn);
-			ZVAL_NULL(object);
+			Z_OBJ_P(object) = NULL;
 			return;
 		}
 	}
@@ -244,13 +243,13 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn) TSRMLS_CC);
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source URI");
-			ZVAL_NULL(object);
+			Z_OBJ_P(object) = NULL;
 			return;
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "invalid data source name (via URI)");
-			ZVAL_NULL(object);
+			Z_OBJ_P(object) = NULL;
 			return;
 		}
 	}
@@ -261,7 +260,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "could not find driver");
-		ZVAL_NULL(object);
+		Z_OBJ_P(object) = NULL;
 		return;
 	}
 	
@@ -413,7 +412,7 @@ options:
 
 	/* the connection failed; things will tidy up in free_storage */
 	/* XXX raise exception */
-	ZVAL_NULL(object);
+	Z_OBJ_P(object) = NULL;
 }
 /* }}} */
 
@@ -483,8 +482,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 		fcc.object = Z_OBJ_P(object);
 
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			zval_dtor(object);
-			ZVAL_NULL(object);
+			Z_OBJ_P(object) = NULL;
 			object = NULL; /* marks failure */
 		} else if (!ZVAL_IS_UNDEF(&retval)) {
 			zval_ptr_dtor(&retval);
@@ -1569,7 +1567,6 @@ zend_object *pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	dbh->refcount = 1;
 	dbh->def_stmt_ce = pdo_dbstmt_ce;
 	
-	zend_objects_store_put(&dbh->std TSRMLS_CC);
 	dbh->std.handlers = &pdo_dbh_object_handlers;
 	
 	return &dbh->std;
