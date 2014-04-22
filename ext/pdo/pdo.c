@@ -76,11 +76,11 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC)
 #if can_handle_soft_dependency_on_SPL && defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 	if (!root) {
 		if (!spl_ce_RuntimeException) {
-			zend_class_entry **pce;
+			zend_class_entry *pce;
 
-			if (zend_hash_find(CG(class_table), "runtimeexception", sizeof("RuntimeException"), (void **) &pce) == SUCCESS) {
-				spl_ce_RuntimeException = *pce;
-				return *pce;
+			if ((pce = zend_hash_str_find_ptr(CG(class_table), "runtimeexception", sizeof("RuntimeException") - 1))) {
+				spl_ce_RuntimeException = pce;
+				return pce;
 			}
 		} else {
 			return spl_ce_RuntimeException;
@@ -100,8 +100,7 @@ zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
  Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
-	HashPosition pos;
-	pdo_driver_t **pdriver;
+	pdo_driver_t *pdriver;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -109,11 +108,9 @@ PHP_FUNCTION(pdo_drivers)
 	
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
-		add_next_index_stringl(return_value, (char*)(*pdriver)->driver_name, (*pdriver)->driver_name_len);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
-	}
+	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -185,31 +182,26 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver)
 			driver->driver_name, driver->api_version, PDO_DRIVER_API);
 		return FAILURE;
 	}
-	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		zend_error(E_ERROR, "You MUST load PDO before loading any PDO drivers");
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_add(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len,
-			(void**)&driver, sizeof(pdo_driver_t *), NULL);
+	return zend_hash_str_add_mem(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void**)&driver, sizeof(pdo_driver_t *)) != NULL;
 }
 
 PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver)
 {
-	if (!zend_hash_exists(&module_registry, "pdo", sizeof("pdo"))) {
+	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		return;
 	}
 
-	zend_hash_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
+	zend_hash_str_del(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len);
 }
 
 pdo_driver_t *pdo_find_driver(const char *name, int namelen)
 {
-	pdo_driver_t **driver = NULL;
-	
-	zend_hash_find(&pdo_driver_hash, (char*)name, namelen, (void**)&driver);
-
-	return driver ? *driver : NULL;
+	return zend_hash_str_find_ptr(&pdo_driver_hash, (char*)name, namelen);
 }
 
 PDO_API int php_pdo_parse_data_source(const char *data_source,
@@ -395,22 +387,19 @@ PHP_MSHUTDOWN_FUNCTION(pdo)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo)
 {
-	HashPosition pos;
 	char *drivers = NULL, *ldrivers = estrdup("");
-	pdo_driver_t **pdriver;
+	pdo_driver_t *pdriver;
 	
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO support", "enabled");
 
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
-		spprintf(&drivers, 0, "%s, %s", ldrivers, (*pdriver)->driver_name);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
+	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
+		spprintf(&drivers, 0, "%s, %s", ldrivers, pdriver->driver_name);
 		efree(ldrivers);
 		ldrivers = drivers;
-	}
+	} ZEND_HASH_FOREACH_END();
 	
-	php_info_print_table_row(2, "PDO drivers", drivers ? drivers+2 : "");
+	php_info_print_table_row(2, "PDO drivers", drivers ? drivers + 2 : "");
 
 	if (drivers) {
 		efree(drivers);
