@@ -266,7 +266,15 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
 
-	if (cache_slot != -1 && (property_info = CACHED_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce)) != NULL) {
+	if (cache_slot != -1 && ce == CACHED_PTR_EX(EG(active_op_array), cache_slot)) {
+		property_info = CACHED_PTR_EX(EG(active_op_array), cache_slot + 1);
+		if (!property_info) {
+			EG(std_property_info).flags = ZEND_ACC_PUBLIC;
+			EG(std_property_info).name = member;
+			EG(std_property_info).ce = ce;
+			EG(std_property_info).offset = -1;
+			property_info = &EG(std_property_info);
+		}
 		return property_info;
 	}
 
@@ -331,6 +339,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 			}
 		}
 	} else {
+		if (cache_slot != -1) {
+			CACHE_POLYMORPHIC_PTR_EX(EG(active_op_array), cache_slot, ce, NULL);
+		}
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 		EG(std_property_info).name = member;
 		EG(std_property_info).ce = ce;
