@@ -397,16 +397,15 @@ static PHP_METHOD(PDO, dbh_constructor)
 options:
 		if (options) {
 			zval *attr_value;
-			zend_string *str_key;
 			ulong long_key;
+			zend_string *str_key = NULL;
 			
-			zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
-			while ((attr_value = zend_hash_get_current_data(Z_ARRVAL_P(options))) != NULL
-				&& HASH_KEY_IS_LONG == zend_hash_get_current_key(Z_ARRVAL_P(options), &str_key, &long_key, 0)) {
-				
+			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), long_key, str_key, attr_value) {
+				if (str_key) {
+					continue;
+				}
 				pdo_dbh_attribute_set(dbh, long_key, attr_value TSRMLS_CC);
-				zend_hash_move_forward(Z_ARRVAL_P(options));
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		return;
@@ -1204,7 +1203,6 @@ static PHP_METHOD(PDO, __sleep)
    Return array of available PDO drivers */
 static PHP_METHOD(PDO, getAvailableDrivers)
 {
-	HashPosition pos;
 	pdo_driver_t *pdriver;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1213,11 +1211,9 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 	
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while ((pdriver = zend_hash_get_current_data_ptr_ex(&pdo_driver_hash, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

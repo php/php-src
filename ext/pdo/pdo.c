@@ -100,7 +100,6 @@ zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
  Return array of available PDO drivers */
 PHP_FUNCTION(pdo_drivers)
 {
-	HashPosition pos;
 	pdo_driver_t *pdriver;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -109,11 +108,9 @@ PHP_FUNCTION(pdo_drivers)
 	
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while ((pdriver = zend_hash_get_current_data_ptr_ex(&pdo_driver_hash, &pos)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -390,20 +387,17 @@ PHP_MSHUTDOWN_FUNCTION(pdo)
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(pdo)
 {
-	HashPosition pos;
 	char *drivers = NULL, *ldrivers = estrdup("");
 	pdo_driver_t *pdriver;
 	
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO support", "enabled");
 
-	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while ((pdriver = zend_hash_get_current_data_ptr_ex(&pdo_driver_hash, &pos))) {
+	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
 		spprintf(&drivers, 0, "%s, %s", ldrivers, pdriver->driver_name);
-		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
 		efree(ldrivers);
 		ldrivers = drivers;
-	}
+	} ZEND_HASH_FOREACH_END();
 	
 	php_info_print_table_row(2, "PDO drivers", drivers ? drivers + 2 : "");
 
