@@ -42,10 +42,19 @@ phar_path_check_result phar_path_check(char **s, int *len, const char **error)
 loop:
 /*!re2c
 END = "\x00";
-MB2 = ([\xC0-\xDF][\x80-\xBF]);
-MB3 = ([\xE0-\xEF][\x80-\xBF]{2});
-MB4 = ([\xF0-\xF7][\x80-\xBF]{3});
-ILL = [\x01-\x19\x80-\xFF];
+UTF8T   = [\x80-\xBF] ;
+UTF8_1  = [\x1A-\x7F] ;
+UTF8_2  = [\xC2-\xDF] UTF8T ;
+UTF8_3A = "\xE0" [\xA0-\xBF] UTF8T ;
+UTF8_3B = [\xE1-\xEC] UTF8T{2} ;
+UTF8_3C = "\xED" [\x80-\x9F] UTF8T ;
+UTF8_3D = [\xEE-\xEF] UTF8T{2} ;
+UTF8_3  = UTF8_3A | UTF8_3B | UTF8_3C | UTF8_3D ;
+UTF8_4A = "\xF0"[\x90-\xBF] UTF8T{2} ;
+UTF8_4B = [\xF1-\xF3] UTF8T{3} ;
+UTF8_4C = "\xF4" [\x80-\x8F] UTF8T{2} ;
+UTF8_4  = UTF8_4A | UTF8_4B | UTF8_4C ;
+UTF8    = UTF8_1 | UTF8_2 | UTF8_3 | UTF8_4 ;
 EOS = "/" | END;
 ANY = .;
 "//" 	{
@@ -76,18 +85,8 @@ ANY = .;
 			*error = NULL;
 			return pcr_use_query;
 		}
-MB2 {
+UTF8 {
 			goto loop;
-	}
-MB3 {
-			goto loop;
-	}
-MB4 {
-			goto loop;
-	}
-ILL {
-			*error ="illegal character";
-			return pcr_err_illegal_char;
 		}
 END {
 			if (**s == '/') {
@@ -103,7 +102,8 @@ END {
 			return pcr_is_ok;
 		}
 ANY {
-			goto loop;
+			*error ="illegal character";
+			return pcr_err_illegal_char;
 		}
 */
 }
