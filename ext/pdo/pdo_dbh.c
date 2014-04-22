@@ -445,7 +445,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 
 	ZVAL_STRINGL(&query_string, stmt->query_string, stmt->query_stringlen);
 	ZVAL_STRINGL(&z_key, "queryString", sizeof("queryString") - 1);
-	std_object_handlers.write_property(object, &z_key, &query_string, NULL TSRMLS_CC);
+	std_object_handlers.write_property(object, &z_key, &query_string, -1 TSRMLS_CC);
 	zval_ptr_dtor(&query_string);
 
 	if (dbstmt_ce->constructor) {
@@ -1346,7 +1346,7 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 	return 1;
 }
 
-static union _zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zend_literal *key TSRMLS_DC)
+static union _zend_function *dbh_method_get(zend_object **object, zend_string *method_name, const zval *key TSRMLS_DC)
 {
 	zend_function *fbc = NULL;
 	pdo_dbh_t *dbh = php_pdo_dbh_fetch_object(*object);

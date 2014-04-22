@@ -26,6 +26,7 @@
 /* forward declarations */
 typedef struct _pdo_dbh_t 	pdo_dbh_t;
 typedef struct _pdo_stmt_t	pdo_stmt_t;
+typedef struct _pdo_row_t	pdo_row_t;
 struct pdo_bound_param_data;
 
 #ifdef PHP_WIN32
@@ -535,10 +536,10 @@ struct pdo_bound_param_data {
 
 	long max_value_len;	/* as a hint for pre-allocation */
 	
-	zval *parameter;				/* the variable itself */
+	zval parameter;				/* the variable itself */
 	enum pdo_param_type param_type; /* desired or suggested type */
 
-	zval *driver_params;			/* optional parameter(s) for the driver */
+	zval driver_params;			/* optional parameter(s) for the driver */
 	void *driver_data;
 
 	pdo_stmt_t *stmt;	/* for convenience in dtor */
@@ -606,20 +607,20 @@ struct _pdo_stmt_t {
 		int column;
 		struct {
 			zend_class_entry *ce;	
-			zval *ctor_args;            /* freed */
-			zval *retval_ptr; 
+			zval ctor_args;            /* freed */
+			zval retval; 
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
 		} cls;
 		struct {
-			zval *function;
-			zval *fetch_args;           /* freed */
-			zval *object;
+			zval function;
+			zval fetch_args;           /* freed */
+			zval object;
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval **values;              /* freed */
+			zval *values;              /* freed */
 		} func;
-		zval *into;
+		zval into;
 	} fetch;
 
 	/* used by the query parser for driver specific
@@ -639,6 +640,11 @@ static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 }
 
 #define Z_PDO_STMT_P(zv) php_pdo_stmt_fetch_object(Z_OBJ_P((zv)))
+
+struct _pdo_row_t {
+	zend_object std;
+	pdo_stmt_t *stmt;
+};
 
 /* call this in MINIT to register your PDO driver */
 PDO_API int php_pdo_register_driver(pdo_driver_t *driver);
