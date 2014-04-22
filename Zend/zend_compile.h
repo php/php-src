@@ -818,11 +818,11 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_SEND_PREFER_REF 2
 
 #define CHECK_ARG_SEND_TYPE(zf, arg_num, m) \
-	((zf)->common.arg_info && \
-	(arg_num <= (zf)->common.num_args \
+	(EXPECTED((zf)->common.arg_info != NULL) && \
+	(EXPECTED(arg_num <= (zf)->common.num_args) \
 		? ((zf)->common.arg_info[arg_num-1].pass_by_reference & (m)) \
-		: ((zf)->common.fn_flags & ZEND_ACC_VARIADIC) \
-			? ((zf)->common.arg_info[(zf)->common.num_args-1].pass_by_reference & (m)) : 0))
+		: (UNEXPECTED((zf)->common.fn_flags & ZEND_ACC_VARIADIC) != 0) && \
+		   ((zf)->common.arg_info[(zf)->common.num_args-1].pass_by_reference & (m))))
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
 	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF)
