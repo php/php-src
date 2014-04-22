@@ -5845,13 +5845,18 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC) /* {{{ */
 
 void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC) /* {{{ */
 {
+	int op_num = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	result->u.op.opline_num = op_num;
 
 	opline->opcode = ZEND_INIT_ARRAY;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_TMP_VAR;
-	GET_NODE(result, opline->result);
+	opline->extended_value = is_ref; /* extval = size << 1 | is_ref */
+
 	if (expr) {
+		opline->extended_value += 1 << 1;
 		SET_NODE(opline->op1, expr);
 		if (offset) {
 			SET_NODE(opline->op2, offset);
@@ -5872,16 +5877,17 @@ void zend_do_init_array(znode *result, znode *expr, znode *offset, zend_bool is_
 		SET_UNUSED(opline->op1);
 		SET_UNUSED(opline->op2);
 	}
-	opline->extended_value = is_ref;
 }
 /* }}} */
 
 void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_bool is_ref TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *init_opline = &CG(active_op_array)->opcodes[result->u.op.opline_num];
+	init_opline->extended_value += 1 << 1; /* extval = size << 1 | is_first_ref */
 
 	opline->opcode = ZEND_ADD_ARRAY_ELEMENT;
-	SET_NODE(opline->result, result);
+	COPY_NODE(opline->result, init_opline->result);
 	SET_NODE(opline->op1, expr);
 	if (offset) {
 		SET_NODE(opline->op2, offset);
@@ -5899,6 +5905,13 @@ void zend_do_add_array_element(znode *result, znode *expr, znode *offset, zend_b
 		SET_UNUSED(opline->op2);
 	}
 	opline->extended_value = is_ref;
+}
+/* }}} */
+
+void zend_do_end_array(znode *result, const znode *array_node TSRMLS_DC) /* {{{ */
+{
+	zend_op *init_opline = &CG(active_op_array)->opcodes[array_node->u.op.opline_num];
+	GET_NODE(result, init_opline->result);
 }
 /* }}} */
 

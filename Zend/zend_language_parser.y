@@ -1208,8 +1208,8 @@ assignment_list_element:
 
 
 array_pair_list:
-		/* empty */ { zend_do_init_array(&$$, NULL, NULL, 0 TSRMLS_CC); }
-	|	non_empty_array_pair_list possible_comma	{ $$ = $1; }
+		/* empty */ { zend_do_init_array(&$$, NULL, NULL, 0 TSRMLS_CC); zend_do_end_array(&$$, &$$ TSRMLS_CC); }
+	|	non_empty_array_pair_list possible_comma	{ zend_do_end_array(&$$, &$1 TSRMLS_DC); }
 ;
 
 non_empty_array_pair_list:

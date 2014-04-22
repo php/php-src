@@ -3648,9 +3648,10 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMP|VAR|UNUS
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *expr_ptr, new_expr;
+	zend_bool is_ref = opline->extended_value & 1;
 
 	SAVE_OPLINE();
-	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && opline->extended_value) {
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && is_ref) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (OP1_TYPE == IS_VAR && UNEXPECTED(Z_TYPE_P(expr_ptr) == IS_STR_OFFSET)) {
 			zend_error_noreturn(E_ERROR, "Cannot create references to/from string offsets");
@@ -3713,7 +3714,7 @@ ZEND_VM_C_LABEL(num_index):
 	} else {
 		zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr);
 	}
-	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && opline->extended_value) {
+	if ((OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) && is_ref) {
 		FREE_OP1_VAR_PTR();
 	}
 	CHECK_EXCEPTION();
@@ -3724,7 +3725,7 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|UNUS
 {
 	USE_OPLINE
 
-	array_init(EX_VAR(opline->result.var));
+	array_init_size(EX_VAR(opline->result.var), opline->extended_value >> 1);
 	if (OP1_TYPE == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
 #if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
