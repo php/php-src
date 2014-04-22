@@ -3725,7 +3725,19 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|UNUS
 {
 	USE_OPLINE
 
-	array_init_size(EX_VAR(opline->result.var), opline->extended_value >> 1);
+	ZVAL_NEW_ARR(EX_VAR(opline->result.var));
+	zend_hash_init(
+		Z_ARRVAL_P(EX_VAR(opline->result.var)),
+		opline->extended_value >> 2, NULL, ZVAL_PTR_DTOR, 0
+	);
+
+	if (OP1_TYPE != IS_UNUSED) {
+		/* Explicitly initialize array as not-packed if flag is set */
+		if (opline->extended_value & (1 << 1)) {
+			zend_hash_real_init(Z_ARRVAL_P(EX_VAR(opline->result.var)), 0);
+		}
+	}
+
 	if (OP1_TYPE == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
 #if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
