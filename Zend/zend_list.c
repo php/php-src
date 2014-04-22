@@ -203,18 +203,15 @@ void plist_entry_destructor(zval *zv)
 
 int zend_init_rsrc_list(TSRMLS_D)
 {
-	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0)==SUCCESS) {
-		EG(regular_list).nNextFreeElement = 1;	/* we don't want resource id 0 */
-		return SUCCESS;
-	} else {
-		return FAILURE;
-	}
+	zend_hash_init(&EG(regular_list), 8, NULL, list_entry_destructor, 0);
+	return SUCCESS;
 }
 
 
 int zend_init_rsrc_plist(TSRMLS_D)
 {
-	return zend_hash_init_ex(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1, 0);
+	zend_hash_init_ex(&EG(persistent_list), 8, NULL, plist_entry_destructor, 1, 0);
+	return SUCCESS;
 }
 
 
@@ -334,10 +331,9 @@ int zend_init_rsrc_list_dtors(void)
 {
 	int retval;
 
-	retval = zend_hash_init(&list_destructors, 50, NULL, list_destructors_dtor, 1);
+	zend_hash_init(&list_destructors, 64, NULL, list_destructors_dtor, 1);
 	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
-
-	return retval;
+	return SUCCESS;
 }
 
 

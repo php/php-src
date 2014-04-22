@@ -215,7 +215,7 @@ PHPDBG_INFO(literal) /* {{{ */
 			if (Z_TYPE(ops->literals[literal]) != IS_NULL) {
 				phpdbg_write("|-------- C%u -------> [", literal);
 				zend_print_zval(
-					&ops->literals[literal], 0);
+					&ops->literals[literal], 0 TSRMLS_CC);
 				phpdbg_write("]");
 				phpdbg_writeln(EMPTY);
 			}

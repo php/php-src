@@ -99,9 +99,7 @@ ZEND_API int zend_ini_startup(TSRMLS_D) /* {{{ */
 	EG(ini_directives) = registered_zend_ini_directives;
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
-	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, _free_ptr, 1, 0) == FAILURE) {
-		return FAILURE;
-	}
+	zend_hash_init_ex(registered_zend_ini_directives, 128, NULL, _free_ptr, 1, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -140,9 +138,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 	EG(modified_ini_directives) = NULL;
 	EG(error_reporting_ini_entry) = NULL;
 	EG(ini_directives) = (HashTable *) malloc(sizeof(HashTable));
-	if (zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, NULL, 1, 0) == FAILURE) {
-		return FAILURE;
-	}
+	zend_hash_init_ex(EG(ini_directives), registered_zend_ini_directives->nNumOfElements, NULL, NULL, 1, 0);
 	zend_hash_copy(EG(ini_directives), registered_zend_ini_directives, NULL);
 	return SUCCESS;
 }

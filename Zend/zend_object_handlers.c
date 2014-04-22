@@ -75,7 +75,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		zend_class_entry *ce = zobj->ce;
 
 		ALLOC_HASHTABLE(zobj->properties);
-		zend_hash_init(zobj->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_init(zobj->properties, 8, NULL, ZVAL_PTR_DTOR, 0);
 		if (ce->default_properties_count) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
@@ -399,7 +399,7 @@ static long *zend_get_property_guard(zend_object *zobj, zend_property_info *prop
 	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
-		zend_hash_init(zobj->guards, 0, NULL, NULL, 0);
+		zend_hash_init(zobj->guards, 8, NULL, NULL, 0);
 	} else if ((guard = zend_hash_find(zobj->guards, property_info->name)) != NULL) {
 		if (str) {
 			STR_RELEASE(str);
@@ -479,11 +479,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, zend_uint cac
 			} else {
 				retval = &EG(uninitialized_zval);
 			}
-//???			if (EXPECTED(retval != object)) {
 			zval_ptr_dtor(&tmp_object);
-//???			} else {
-//???				Z_DELREF_P(object);
-//???			}
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {

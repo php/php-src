@@ -1247,6 +1247,8 @@ static const struct jit_auto_global_info
 #endif
 };
 
+static zend_string *jit_auto_globals_str[4];
+
 static int zend_accel_get_auto_globals(TSRMLS_D)
 {
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
@@ -1254,7 +1256,7 @@ static int zend_accel_get_auto_globals(TSRMLS_D)
 	int mask = 0;
 
 	for (i = 0; i < ag_size ; i++) {
-		if (zend_hash_str_exists(&EG(symbol_table).ht, jit_auto_globals_info[i].name, jit_auto_globals_info[i].len)) {
+		if (zend_hash_exists(&EG(symbol_table).ht, jit_auto_globals_str[i])) {
 			mask |= n;
 		}
 		n += n;
@@ -1265,7 +1267,7 @@ static int zend_accel_get_auto_globals(TSRMLS_D)
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 static int zend_accel_get_auto_globals_no_jit(TSRMLS_D)
 {
-	if (zend_hash_str_exists(&EG(symbol_table).ht, jit_auto_globals_info[3].name, jit_auto_globals_info[3].len)) {
+	if (zend_hash_exists(&EG(symbol_table).ht, jit_auto_globals_str[3])) {
 		return 8;
 	}
 	return 0;
@@ -1276,16 +1278,23 @@ static void zend_accel_set_auto_globals(int mask TSRMLS_DC)
 {
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
 	int n = 1;
-	zend_string *str;
 
 	for (i = 0; i < ag_size ; i++) {
 		if (mask & n) {
-//???
-			str = STR_INIT(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 0);
-			zend_is_auto_global(str TSRMLS_CC);
-			STR_RELEASE(str);
+			zend_is_auto_global(jit_auto_globals_str[i] TSRMLS_CC);
 		}
 		n += n;
+	}
+}
+
+static void zend_accel_init_auto_globals(TSRMLS_D)
+{
+	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
+
+	for (i = 0; i < ag_size ; i++) {
+		jit_auto_globals_str[i] = STR_INIT(jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, 1);
+		STR_HASH_VAL(jit_auto_globals_str[i]);
+		jit_auto_globals_str[i] = accel_new_interned_string(jit_auto_globals_str[i] TSRMLS_CC);
 	}
 }
 
@@ -2342,7 +2351,7 @@ static void zend_accel_fast_shutdown(TSRMLS_D)
 			} zend_end_try();
 			EG(symbol_table).ht.pDestructor = old_destructor;
 		}
-		zend_hash_init(&EG(symbol_table).ht, 0, NULL, NULL, 0);
+		zend_hash_init(&EG(symbol_table).ht, 8, NULL, NULL, 0);
 		old_destructor = EG(function_table)->pDestructor;
 		EG(function_table)->pDestructor = NULL;
 		zend_hash_reverse_apply(EG(function_table), (apply_func_t) accel_clean_non_persistent_function TSRMLS_CC);
@@ -2623,6 +2632,9 @@ static int accel_startup(zend_extension *extension)
 	}
 
 	/* from this point further, shared memory is supposed to be OK */
+
+	/* Init auto-global strings */
+	zend_accel_init_auto_globals(TSRMLS_C);
 
 	/* Override compiler */
 	accelerator_orig_compile_file = zend_compile_file;

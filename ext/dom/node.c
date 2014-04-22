@@ -343,7 +343,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
 			{
-				zend_string *str = zval_get_string(newval TSRMLS_CC);
+				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, str->val, str->len + 1);
 				STR_RELEASE(str);
 				break;
@@ -720,7 +720,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					nsnode = xmlDocGetRootElement(nodep->doc);
 				}
 			}
-			str = zval_get_string(newval TSRMLS_CC);
+			str = zval_get_string(newval);
 			prefix = str->val;
 			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
 				strURI = (char *) nodep->ns->href;

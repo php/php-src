@@ -102,9 +102,7 @@ int zend_startup_constants(TSRMLS_D)
 {
 	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 
-	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
-		return FAILURE;
-	}
+	zend_hash_init(EG(zend_constants), 128, NULL, ZEND_CONSTANT_DTOR, 1);
 	return SUCCESS;
 }
 

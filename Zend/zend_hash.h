@@ -60,8 +60,8 @@ typedef uint HashPosition;
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
-ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
-ZEND_API int _zend_hash_init_ex(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
+ZEND_API void _zend_hash_init(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
+ZEND_API void _zend_hash_init_ex(HashTable *ht, uint nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
 ZEND_API void zend_hash_destroy(HashTable *ht);
 ZEND_API void zend_hash_clean(HashTable *ht);
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)						_zend_hash_init((ht), (nSize), (pDestructor), (persistent) ZEND_FILE_LINE_CC)
@@ -207,7 +207,7 @@ void zend_hash_display(const HashTable *ht);
 END_EXTERN_C()
 
 #define ZEND_INIT_SYMTABLE(ht)								\
-	ZEND_INIT_SYMTABLE_EX(ht, 2, 0)
+	ZEND_INIT_SYMTABLE_EX(ht, 8, 0)
 
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
@@ -418,12 +418,12 @@ static inline void *zend_hash_add_mem(HashTable *ht, zend_string *key, void *pDa
 {
 	void *p, *r;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	if ((r = zend_hash_add_ptr(ht, key, p))) {
 		return r;
 	}
-	pefree(p, ht->flags & HASH_FLAG_PERSISTENT);
+	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
@@ -431,12 +431,12 @@ static inline void *zend_hash_str_add_mem(HashTable *ht, const char *str, int le
 {
 	void *p, *r;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	if ((r = zend_hash_str_add_ptr(ht, str, len, p))) {
 		return r;
 	}
-	pefree(p, ht->flags & HASH_FLAG_PERSISTENT);
+	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
@@ -444,7 +444,7 @@ static inline void *zend_hash_update_mem(HashTable *ht, zend_string *key, void *
 {
 	void *p;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_update_ptr(ht, key, p);
 }
@@ -453,7 +453,7 @@ static inline void *zend_hash_str_update_mem(HashTable *ht, const char *str, int
 {
 	void *p;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_str_update_ptr(ht, str, len, p);
 }
@@ -480,7 +480,7 @@ static inline void *zend_hash_index_update_mem(HashTable *ht, ulong h, void *pDa
 {
 	void *p;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_index_update_ptr(ht, h, p);
 }
@@ -489,12 +489,12 @@ static inline void *zend_hash_next_index_insert_mem(HashTable *ht, void *pData, 
 {
 	void *p, *r;
 
-	p = pemalloc(size, ht->flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
 	memcpy(p, pData, size);
 	if ((r = zend_hash_next_index_insert_ptr(ht, p))) {
 		return r;
 	}
-	pefree(p, ht->flags & HASH_FLAG_PERSISTENT);
+	pefree(p, ht->u.flags & HASH_FLAG_PERSISTENT);
 	return NULL;
 }
 
@@ -595,6 +595,10 @@ static inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht, HashPositio
 #define ZEND_HASH_REVERSE_FOREACH_VAL(ht, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
 	_val = _z;
+
+#define ZEND_HASH_REVERSE_FOREACH_PTR(ht, _ptr) \
+	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
+	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_VAL_IND(ht, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \

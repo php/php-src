@@ -60,9 +60,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				EG(error_reporting) = er;
-//???				PZ_SET_REFCOUNT_P(&result, 1);
-//???				PZ_UNSET_ISREF_P(&result);
-
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				MAKE_NOP(opline);
@@ -134,9 +131,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				EG(error_reporting) = er;
-//???				PZ_SET_REFCOUNT_P(&result, 1);
-//???				PZ_UNSET_ISREF_P(&result);
-
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				MAKE_NOP(opline);
 

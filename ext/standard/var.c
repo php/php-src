@@ -148,9 +148,9 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (++myht->nApplyCount > 1) {
+			if (++myht->u.v.nApplyCount > 1) {
 				PUTS("*RECURSION*\n");
-				--myht->nApplyCount;
+				--myht->u.v.nApplyCount;
 				return;
 			}
 			php_printf("%sarray(%d) {\n", COMMON, zend_hash_num_elements(myht));
@@ -159,9 +159,9 @@ again:
 			goto head_done;
 		case IS_OBJECT:
 			myht = Z_OBJDEBUG_P(struc, is_temp);
-			if (myht && ++myht->nApplyCount > 1) {
+			if (myht && ++myht->u.v.nApplyCount > 1) {
 				PUTS("*RECURSION*\n");
-				--myht->nApplyCount;
+				--myht->u.v.nApplyCount;
 				return;
 			}
 
@@ -176,7 +176,7 @@ again:
 	head_done:
 			if (myht) {
 				zend_hash_apply_with_arguments(myht TSRMLS_CC, (apply_func_args_t) php_element_dump_func, 1, level);
-				--myht->nApplyCount;
+				--myht->u.v.nApplyCount;
 				if (is_temp) {
 					zend_hash_destroy(myht);
 					efree(myht);
@@ -323,7 +323,7 @@ again:
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
-		if (myht->nApplyCount > 1) {
+		if (myht->u.v.nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
@@ -332,7 +332,7 @@ again:
 		goto head_done;
 	case IS_OBJECT:
 		myht = Z_OBJDEBUG_P(struc, is_temp);
-		if (myht && myht->nApplyCount > 1) {
+		if (myht && myht->u.v.nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
@@ -522,7 +522,7 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (myht->nApplyCount > 0){
+			if (myht->u.v.nApplyCount > 0){
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
 				return;
@@ -543,7 +543,7 @@ again:
 
 		case IS_OBJECT:
 			myht = Z_OBJPROP_P(struc);
-			if(myht && myht->nApplyCount > 0){
+			if(myht && myht->u.v.nApplyCount > 0){
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
 				return;
@@ -961,16 +961,16 @@ again:
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
 					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
-						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->nApplyCount > 1)
+						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->u.v.nApplyCount > 1)
 					) {
 						smart_str_appendl(buf, "N;", 2);
 					} else {
 						if (Z_TYPE_P(data) == IS_ARRAY) {
-							Z_ARRVAL_P(data)->nApplyCount++;
+							Z_ARRVAL_P(data)->u.v.nApplyCount++;
 						}
 						php_var_serialize_intern(buf, data, var_hash TSRMLS_CC);
 						if (Z_TYPE_P(data) == IS_ARRAY) {
-							Z_ARRVAL_P(data)->nApplyCount--;
+							Z_ARRVAL_P(data)->u.v.nApplyCount--;
 						}
 					}
 				} ZEND_HASH_FOREACH_END();

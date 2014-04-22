@@ -338,7 +338,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		return FAILURE;
 	}
 
-	str = zval_get_string(newval TSRMLS_CC);
+	str = zval_get_string(newval);
 
 	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
 
@@ -436,7 +436,7 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->version );
 	}
 
-	str = zval_get_string(newval TSRMLS_CC);
+	str = zval_get_string(newval);
 
 	docp->version = xmlStrdup((const xmlChar *) str->val);
 
@@ -664,7 +664,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *) docp->URL);
 	}
 
-	str = zval_get_string(newval TSRMLS_CC);
+	str = zval_get_string(newval);
 
 	docp->URL = xmlStrdup((const xmlChar *) str->val);
 

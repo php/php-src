@@ -522,7 +522,7 @@ PHP_FUNCTION(dom_xpath_register_php_functions)
 		intern = Z_XPATHOBJ_P(id);
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(array_value));
 		while ((entry = zend_hash_get_current_data(Z_ARRVAL_P(array_value)))) {
-			zend_string *str = zval_get_string(entry TSRMLS_CC);
+			zend_string *str = zval_get_string(entry);
 			ZVAL_LONG(&new_string,1);
 			zend_hash_update(intern->registered_phpfunctions, str, &new_string);
 			zend_hash_move_forward(Z_ARRVAL_P(array_value));

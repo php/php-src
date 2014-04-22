@@ -79,7 +79,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 		return;
 	}
-	if (ht->flags & HASH_FLAG_PACKED) {
+	if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nTableSize);
 		ht->arHash = (zend_uint*)&uninitialized_bucket;
 	} else {

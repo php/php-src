@@ -328,7 +328,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 		ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(props) + 1, 0);
 	}
 
-	if (intern->debug_info->nApplyCount == 0) {
+	if (intern->debug_info->u.v.nApplyCount == 0) {
 		zend_hash_copy(intern->debug_info, props, (copy_ctor_func_t)zval_add_ref);
 
 		array_init(&storage);

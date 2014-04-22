@@ -559,24 +559,14 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 
 			switch (format[inpos]) {
 				case 's': {
-					zval *var, var_copy;
-					int use_copy;
-
-					zend_make_printable_zval(&tmp, &var_copy, &use_copy);
-					if (use_copy) {
-						var = &var_copy;
-					} else {
-						var = &tmp;
-					}
+					zend_string *str = zval_get_string(&tmp);
 					php_sprintf_appendstring(&result, &outpos,
-											 Z_STRVAL_P(var),
+											 str->val,
 											 width, precision, padding,
 											 alignment,
-											 Z_STRLEN_P(var),
+											 str->len,
 											 0, expprec, 0);
-					if (use_copy) {
-						zval_dtor(&var_copy);
-					}
+					STR_RELEASE(str);
 					break;
 				}
 

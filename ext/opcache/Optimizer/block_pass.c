@@ -1038,9 +1038,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			er = EG(error_reporting);
 			EG(error_reporting) = 0;
 			if (binary_op(&result, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline) TSRMLS_CC) == SUCCESS) {
-//???				PZ_SET_REFCOUNT_P(&result, 1);
-//???				PZ_UNSET_ISREF_P(&result);
-
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				opline->opcode = ZEND_QM_ASSIGN;
@@ -1068,8 +1065,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				convert_to_boolean(&result);
 				ZVAL_NULL(&ZEND_OP1_LITERAL(opline));
 			}
-//???			PZ_SET_REFCOUNT_P(&result, 1);
-//???			PZ_UNSET_ISREF_P(&result);
 			opline->opcode = ZEND_QM_ASSIGN;
 			update_op1_const(op_array, opline, &result TSRMLS_CC);
 		} else if ((opline->opcode == ZEND_RETURN || opline->opcode == ZEND_EXIT) &&
@@ -1654,11 +1649,6 @@ next_target:
 				char *same_t=NULL;
 				zend_code_block *target_block;
 				int var_num = op_array->last_var + op_array->T;
-//???				if (op_array->T >= (zend_uint)op_array->last_var) {
-//???					var_num = op_array->T;
-//???				} else {
-//???					var_num = op_array->last_var;
-//???				}
 		
 				if (var_num <= 0) {
    					return;

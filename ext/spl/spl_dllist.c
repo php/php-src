@@ -514,7 +514,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		zend_hash_init(intern->debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	if (intern->debug_info->nApplyCount == 0) {
+	if (intern->debug_info->u.v.nApplyCount == 0) {
 
 		if (!intern->std.properties) {
 			rebuild_object_properties(&intern->std);

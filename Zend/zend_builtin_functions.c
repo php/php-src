@@ -662,14 +662,13 @@ ZEND_FUNCTION(error_reporting)
    Define a new constant */
 ZEND_FUNCTION(define)
 {
-	char *name;
-	int name_len;
+	zend_string *name;
 	zval *val, val_free;
 	zend_bool non_cs = 0;
 	int case_sensitive = CONST_CS;
 	zend_constant c;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|b", &name, &name_len, &val, &non_cs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|b", &name, &val, &non_cs) == FAILURE) {
 		return;
 	}
 
@@ -678,7 +677,7 @@ ZEND_FUNCTION(define)
 	}
 
 	/* class constant, check if there is name and make sure class is valid & exists */
-	if (zend_memnstr(name, "::", sizeof("::") - 1, name + name_len)) {
+	if (zend_memnstr(name->val, "::", sizeof("::") - 1, name->val + name->len)) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
 		RETURN_FALSE;
 	}
@@ -718,10 +717,7 @@ repeat:
 	ZVAL_DUP(&c.value, val);
 	zval_ptr_dtor(&val_free);
 	c.flags = case_sensitive; /* non persistent */
-	c.name = STR_INIT(name, name_len, 1);
-	if(c.name == NULL) {
-		RETURN_FALSE;
-	}
+	c.name = STR_COPY(name);
 	c.module_number = PHP_USER_CONSTANT;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
